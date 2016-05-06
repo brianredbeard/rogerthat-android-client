@@ -1,0 +1,1 @@
+ALTER TABLE friend ADD COLUMN organization_type INTEGER DEFAULT 0;

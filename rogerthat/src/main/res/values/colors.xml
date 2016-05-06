@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="mc_background">#E6E6E6</color>
+    <color name="mc_blue">#ff003058</color>
+    <color name="mc_blue2">#ff005094</color>
+    <color name="mc_green">#ff99cc33</color>
+    <color name="mc_red_divider">#ff0000</color>
+    <color name="mc_divider">#EEEEEE</color>
+    <color name="mc_yellow">#FFEE00</color>
+    <color name="mc_timestamp_blue">#00CEE0</color>
+    <color name="mc_link">#3399cc</color>
+    <color name="mc_secure_browser">#20B020</color>
+    <color name="mc_black">#000000</color>
+    <color name="mc_divider_green">#86C500</color>
+    <color name="mc_divider_gray">#FF999999</color>
+    <color name="mc_page_light">#646464</color>
+    <color name="mc_page_dark">#FFFFFF</color>
+    <color name="mc_highlight_light">#66FFFFFF</color>
+    <color name="mc_highlight_dark">#33000000</color>
+    <color name="mc_gray_11">#BBBBBB</color>
+    <color name="mc_highlight_background">#FFFFFFFF</color>
+    <color name="mc_about_blue">#3E3E3D</color>
+    <color name="mc_white">#FFFFFF</color>
+    <color name="mc_white_transparent">#88FFFFFF</color>
+    <color name="mc_homescreen_background">#FFFFFF</color>
+    <color name="mc_homescreen_text">#3E3E3D</color>
+    <color name="mc_homescreen_divider">#3E3E3D</color>
+
+    <color name="mc_primary_color">#84b03f</color>
+    <color name="mc_secondary_color">#697b36</color>
+
+    <color name="mc_priority_high_text">#FFFFFF</color>
+    <color name="mc_priority_high_background">#77CEDE</color>
+    <color name="mc_priority_urgent_text">#FFFFFF</color>
+    <color name="mc_priority_urgent_background">#FF8481</color>
+</resources>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    tools:ignore="UselessParent" 
+    android:layout_marginBottom="10dp"
+    android:paddingBottom="5dp">
+
+    <!-- We need this double RelativeLayout to make sure the padding works on android 1.5 as well -->
+
+    <RelativeLayout
+        android:id="@+id/attachment_frame"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/message_background" >
+
+        <ImageView
+            android:id="@+id/attachment_image"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentTop="true"
+            android:layout_marginRight="5dp"
+            android:padding="5dp" >
+        </ImageView>
+
+	      <TextView
+	          android:id="@+id/attachment_text"
+	          android:layout_width="fill_parent"
+	          android:layout_height="wrap_content"
+	          android:layout_centerInParent="true"
+	          android:padding="5dp"
+	          android:layout_toRightOf="@id/attachment_image"
+	          android:ellipsize="end"
+	          android:singleLine="false"
+	          android:textColor="@android:color/primary_text_light"
+	          android:textSize="16sp" >
+	      </TextView>
+    </RelativeLayout>
+
+</RelativeLayout>

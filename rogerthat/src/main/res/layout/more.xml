@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+    
+    <include android:id="@+id/nav_bar" layout="@layout/navigation_bar" />
+
+    <com.mobicage.rogerthat.util.ui.FSListView
+        android:id="@+id/more_options_list"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/nav_bar"
+        android:cacheColorHint="#00000000"
+        android:divider="@drawable/divider"
+        android:dividerHeight="1px"
+        android:fastScrollEnabled="true" >
+    </com.mobicage.rogerthat.util.ui.FSListView>
+
+</RelativeLayout>

@@ -1,0 +1,34 @@
+diff --git a/client/android/asmack_stripped/src/org/jivesoftware/smack/ConnectionConfiguration.java b/client/android/asmack_stripped/src/org/jivesoftware/smack/ConnectionConfiguration.java
+index 6489904..a5414ad 100644
+--- a/client/android/asmack_stripped/src/org/jivesoftware/smack/ConnectionConfiguration.java
++++ b/client/android/asmack_stripped/src/org/jivesoftware/smack/ConnectionConfiguration.java
+@@ -23,6 +23,7 @@ package org.jivesoftware.smack;
+ import org.jivesoftware.smack.proxy.ProxyInfo;
+ import org.jivesoftware.smack.util.DNSUtil;
+ 
++import java.security.KeyStore;
+ import javax.net.SocketFactory;
+ import org.apache.harmony.javax.security.auth.callback.CallbackHandler;
+ import java.io.File;
+@@ -193,7 +194,7 @@ public class ConnectionConfiguration implements Cloneable {
+         buffer.append(File.separator).append("cacerts");
+         truststorePath = buffer.toString();
+         // Set the default store type
+-        truststoreType = "jks";
++        truststoreType = KeyStore.getDefaultType();
+         // Set the default password of the cacert file that is "changeit"
+         truststorePassword = "changeit";
+         keystorePath = System.getProperty("javax.net.ssl.keyStore");
+diff --git a/client/android/asmack_stripped/src/org/jivesoftware/smack/XMPPConnection.java b/client/android/asmack_stripped/src/org/jivesoftware/smack/XMPPConnection.java
+index 0d78ada..0622583 100644
+--- a/client/android/asmack_stripped/src/org/jivesoftware/smack/XMPPConnection.java
++++ b/client/android/asmack_stripped/src/org/jivesoftware/smack/XMPPConnection.java
+@@ -814,7 +814,7 @@ public class XMPPConnection extends Connection {
+                     pcb = null;
+                 }
+             }
+-            KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
++            KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+             try {
+                 if(pcb == null) {
+                     kmf.init(ks,null);

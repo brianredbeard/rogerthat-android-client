@@ -1,0 +1,1 @@
+ALTER TABLE beacon_discovery ADD COLUMN tag TEXT;

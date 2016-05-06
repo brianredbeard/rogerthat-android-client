@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    tools:ignore="UselessParent" >
+
+    <!-- We need this double RelativeLayout to make sure the padding works on android 1.5 as well -->
+
+    <RelativeLayout
+        android:id="@+id/frame"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp" >
+
+        <CheckBox
+            android:id="@+id/message_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_marginRight="5dp"
+            android:checked="false"
+            android:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/avatar"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentTop="true"
+            android:layout_marginRight="5dp"
+            android:layout_toRightOf="@id/message_checkbox"
+            android:background="@drawable/avatar_background_black"
+            android:padding="1dp" >
+        </ImageView>
+
+        <RelativeLayout
+            android:id="@+id/top"
+            android:layout_width="fill_parent"
+            android:layout_height="20dp"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@id/avatar"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/timestamp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerInParent="true"
+                android:layout_marginLeft="5dp"
+                android:textColor="@android:color/secondary_text_light"
+                android:textSize="12sp" >
+            </TextView>
+
+            <TextView
+                android:id="@+id/recipients"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerInParent="true"
+                android:layout_toLeftOf="@id/timestamp"
+                android:textSize="14sp"
+                android:ellipsize="end"
+                android:singleLine="true" >
+            </TextView>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="30dp"
+            android:layout_below="@id/top"
+            android:layout_toRightOf="@id/avatar" >
+            
+            <LinearLayout
+                android:id="@+id/message_details"
+                android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_alignParentRight="true"
+		        android:layout_centerInParent="true"
+		        android:orientation="horizontal">
+	
+	            <TextView
+	                android:id="@+id/message_count"
+	                android:layout_width="wrap_content"
+	                android:layout_height="wrap_content"
+	                android:layout_marginRight="3dp"
+	                android:layout_marginTop="5dp"
+	                android:background="@drawable/reply_count"
+	                android:paddingLeft="4dp"
+	                android:paddingRight="4dp"
+	                android:singleLine="true"
+	                android:textColor="@android:color/white"
+	                android:textSize="14sp" >
+	            </TextView>
+	            
+	            <ImageView
+	                android:id="@+id/status_icon"
+	                android:layout_width="16dp"
+	                android:layout_height="19dp"
+	                android:layout_marginTop="5dp" >
+	            </ImageView>
+            </LinearLayout>
+
+
+            <TextView
+                android:id="@+id/message"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_marginRight="3dp"
+                android:layout_marginTop="5dp"
+                android:layout_toLeftOf="@id/message_details"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:textColor="@android:color/primary_text_light"
+                android:textSize="18sp" >
+            </TextView>
+        </RelativeLayout>
+    </RelativeLayout>
+
+</RelativeLayout>

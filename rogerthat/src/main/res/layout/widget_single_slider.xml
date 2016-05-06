@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.mobicage.rogerthat.plugins.messaging.widgets.SingleSliderWidget 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/slider_text"
+        android:gravity="center_horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textSize="20dp">
+    </TextView>
+
+    <SeekBar
+        android:id="@+id/seek_bar"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dip"
+        android:layout_weight="1">
+    </SeekBar>
+
+</com.mobicage.rogerthat.plugins.messaging.widgets.SingleSliderWidget>

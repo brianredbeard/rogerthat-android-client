@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    tools:ignore="UselessParent" >
+
+    <!-- We need this double RelativeLayout to make sure the padding works on android 1.5 as well -->
+
+    <RelativeLayout
+        android:id="@+id/frame"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp" >
+
+        <CheckBox
+            android:id="@+id/invite_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_marginRight="5dp"
+            android:checked="true"
+            android:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/avatar"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentTop="true"
+            android:layout_marginRight="10dp"
+            android:layout_toRightOf="@id/invite_checkbox"
+            android:background="@drawable/avatar_background_black"
+            android:padding="1dp" >
+        </ImageView>
+
+            <TextView
+                android:id="@+id/friend_name"
+                android:layout_width="fill_parent"
+                android:layout_height="50dp"
+                android:gravity="center|left"
+                android:layout_toRightOf="@id/avatar"
+                android:textSize="15sp"
+                android:ellipsize="end"
+                android:singleLine="true" >
+            </TextView>
+    </RelativeLayout>
+
+</RelativeLayout>

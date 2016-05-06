@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<style
+		name="RogerThatParagraph">
+		<item
+			name="android:layout_height">wrap_content</item>
+		<item
+			name="android:layout_width">fill_parent</item>
+		<item
+			name="android:textSize">16dp</item>
+		<item
+			name="android:paddingLeft">3dp</item>
+		<item
+			name="android:paddingRight">3dp</item>
+	</style>
+	<style
+		name="RogerThatThickDivider">
+		<item
+			name="android:layout_height">3dp</item>
+		<item
+			name="android:layout_width">fill_parent</item>
+		<item
+			name="android:background">@color/mc_divider_green</item>
+	</style>
+	<style
+        name="RogerThatNavigationBarDivider">
+        <item
+            name="android:layout_height">3dp</item>
+        <item
+            name="android:layout_width">fill_parent</item>
+        <item
+            name="android:background">@color/mc_homescreen_divider</item>
+    </style>
+	<style
+		name="RogerThatSectionHeader">
+		<item
+			name="android:layout_width">fill_parent</item>
+		<item
+			name="android:layout_height">wrap_content</item>
+		<item
+			name="android:background">#116895</item>
+		<item
+			name="android:fadingEdge">vertical</item>
+		<item
+			name="android:gravity">center_horizontal</item>
+	</style>
+	<style
+		name="RogerThatActionButton">
+		<item
+			name="android:textSize">20dp</item>
+	</style>
+	<style
+		name="RogerThatTitle">
+		<item
+			name="android:textSize">20dp</item>
+		<item
+			name="android:padding">5dp</item>
+		<item
+			name="android:textColor">@android:color/primary_text_dark</item>
+
+	</style>
+	<style
+		name="FullHeightDialog"
+		parent="android:style/Theme.Dialog">
+		<item
+			name="android:windowNoTitle">true</item>
+	</style>
+
+</resources>

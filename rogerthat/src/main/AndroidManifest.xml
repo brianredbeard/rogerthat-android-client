@@ -1,0 +1,343 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.mobicage.rogerth.at"
+    android:configChanges="orientation"
+    android:versionCode="2087"
+    android:versionName="1.0.2087.A">
+
+    <!-- BEGIN GCM -->
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <permission android:name="com.mobicage.rogerth.at.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="com.mobicage.rogerth.at.permission.C2D_MESSAGE" />
+    <!-- END GCM -->
+
+    <!-- BEGIN supports-screens -->
+    <!-- END supports-screens -->
+
+    <!-- Never broadcast internal intents without this permission -->
+    <permission android:name="com.mobicage.rogerth.at.permission.internal_intent"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="com.mobicage.rogerth.at.permission.internal_intent" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera.front"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera.autofocus"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.screen.portrait"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.telephony"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.location"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.location.gps"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.location.network"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.bluetooth_le"
+        android:required="false" />
+
+    <application
+        android:name="com.mobicage.rogerthat.App"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:allowBackup="false"
+        android:theme="@android:style/Theme.Light.NoTitleBar" >
+        <uses-library android:name="com.google.android.maps" />
+
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
+
+        <meta-data android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
+        <activity
+            android:name="com.facebook.LoginActivity"
+            android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.MainActivity"
+            android:configChanges="keyboardHidden"
+            android:screenOrientation="portrait"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@android:style/Theme.Light.NoTitleBar" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity-alias
+            android:name="com.mobicage.rogerthat.MainActivityAlias"
+            android:enabled="true"
+            android:exported="true"
+            android:targetActivity="com.mobicage.rogerthat.MainActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="rogerthat" />
+                <data android:scheme="mdp-rogerthat" android:host="x-callback-url" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity
+            android:name="com.mobicage.rogerthat.ContentBrandingMainActivity"
+            android:configChanges="keyboardHidden"
+            android:screenOrientation="landscape"
+            android:label="@string/app_name"
+            android:theme="@android:style/Theme.Light.NoTitleBar" >
+        </activity>
+
+        <activity
+            android:name="com.google.zxing.client.android.CaptureActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+            android:windowSoftInputMode="stateAlwaysHidden" >
+        </activity>
+
+        <activity android:name="com.soundcloud.android.crop.CropImageActivity" >
+        </activity>
+        <activity android:name="com.soundcloud.android.crop.MonitoredActivity" >
+        </activity>
+        <activity android:name="com.mobicage.rogerthat.plugins.messaging.ChatInfoActivity" android:theme="@android:style/Theme.NoTitleBar">
+        </activity>
+
+        <activity
+            android:name="com.mobicage.rogerthat.registration.RegistrationActivity2"
+            android:configChanges="keyboardHidden|orientation"
+            android:label="@string/app_name"
+            android:theme="@android:style/Theme.Light.NoTitleBar" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.registration.ContentBrandingRegistrationActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.Light.NoTitleBar" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.registration.YSAAARegistrationActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Light.NoTitleBar" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.HomeActivity"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.NoTitleBar" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.plugins.messaging.FriendsThreadActivity"
+            android:windowSoftInputMode="adjustResize|stateHidden" >
+        </activity>
+        <activity android:name="com.mobicage.rogerthat.plugins.messaging.MessagingActivity" >
+        </activity>
+        <activity android:name="com.mobicage.rogerthat.plugins.messaging.ServiceThreadActivity" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.AddFriendsActivity"
+            android:configChanges="orientation" >
+        </activity>
+        <activity android:name="com.mobicage.rogerthat.UserFriendsActivity" >
+        </activity>
+        <activity android:name="com.mobicage.rogerthat.ServiceFriendsActivity" >
+        </activity>
+        <activity android:name="com.mobicage.rogerthat.FriendCategoryActivity" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.plugins.friends.RecommendServiceActivity"
+            android:configChanges="orientation" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.plugins.friends.ServiceSearchActivity"
+            android:configChanges="orientation"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.plugins.friends.FriendSearchActivity"
+            android:configChanges="orientation"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.plugins.friends.ActionScreenActivity"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.plugins.friends.ContentBrandingActionScreenActivity"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.GetLocationActivity"
+            android:theme="@android:style/Theme.Light.NoTitleBar" >
+        </activity>
+        <activity android:name="com.mobicage.rogerthat.SettingsActivity" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.plugins.scan.ScanTabActivity"
+            android:configChanges="orientation" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.plugins.scan.ProfileActivity"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.plugins.scan.ProcessScanActivity"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Light.NoTitleBar" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.plugins.scan.InviteFriendActivity"
+            android:theme="@android:style/Theme.Light.NoTitleBar" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.plugins.scan.ServiceActionActivity"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Light.NoTitleBar" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.ServiceDetailActivity"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Light.NoTitleBar" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.UserDetailActivity"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Light.NoTitleBar" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.FriendDetailOrInviteActivity"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Light.NoTitleBar" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.plugins.messaging.ServiceMessageDetailActivity"
+            android:configChanges="orientation"
+            android:theme="@android:style/Theme.Light.NoTitleBar" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.plugins.messaging.AttachmentViewerActivity"
+            android:configChanges="orientation"
+            android:theme="@android:style/Theme.Light.NoTitleBar" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.FriendLocationActivity"
+            android:theme="@android:style/Theme.Light.NoTitleBar" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.FriendsLocationActivity"
+            android:theme="@android:style/Theme.Light.NoTitleBar" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.AboutActivity"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Light.NoTitleBar" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.SendMessageWizardActivity"
+            android:configChanges="orientation"
+            android:theme="@style/FullHeightDialog"
+            android:windowSoftInputMode="adjustResize" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.widget.SendCannedMessageActivity"
+            android:theme="@style/FullHeightDialog"
+            android:windowSoftInputMode="adjustResize" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.widget.CannedMessageSummaryActivity"
+            android:theme="@style/FullHeightDialog"
+            android:windowSoftInputMode="adjustResize" >
+        </activity>
+        <activity android:name="com.mobicage.rogerthat.plugins.history.HistoryListActivity" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.GroupDetailActivity"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity android:name="com.mobicage.rogerthat.plugins.trackme.MapDetailActivity" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.registration.DetectedBeaconActivity"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.MoreActivity"
+            android:screenOrientation="portrait" >
+        </activity>
+
+        <receiver
+            android:name="com.mobicage.rogerthat.widget.RogerthatWidgetProvider"
+            android:exported="false"
+            android:label="@string/widget_name" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/rogerthat_widget_provider" />
+        </receiver>
+
+        <receiver
+            android:name="com.mobicage.rogerthat.GCMReveiver"
+            android:permission="com.google.android.c2dm.permission.SEND" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <category android:name="com.mobicage.rogerth.at" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name="com.mobicage.rogerthat.MainBroadcastReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <service android:name="com.mobicage.rogerthat.MainService" />
+        <service android:name="com.mobicage.rogerthat.registration.RegistrationService" />
+        <service
+            android:name="org.altbeacon.beacon.service.BeaconService"
+            android:exported="false" />
+        <service
+            android:name="org.altbeacon.beacon.BeaconIntentProcessor"
+            android:exported="false" />
+
+    </application>
+
+</manifest>

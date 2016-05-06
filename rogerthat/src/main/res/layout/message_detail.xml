@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <RelativeLayout
+        android:id="@+id/broadcast_spam_control"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical"
+        android:visibility="gone" >
+
+        <View
+            android:id="@+id/broadcast_spam_control_border"
+            android:layout_height="3dp"
+            android:layout_width="fill_parent" />
+
+        <LinearLayout
+            android:id="@+id/broadcast_spam_control_settings_container"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:background="@android:color/transparent"
+            android:gravity="center_horizontal"
+            android:orientation="vertical" >
+
+            <TextView
+	            android:id="@+id/broadcast_spam_control_icon"
+	            android:layout_width="40dp"
+	            android:layout_height="40dp"
+	            android:layout_marginTop="10dp"
+	            android:background="@android:color/transparent"
+	            android:scaleType="fitCenter"
+	            android:textSize="35sp" />
+
+            <TextView
+                android:id="@+id/broadcast_spam_control_settings_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="2dp"
+                android:gravity="center_horizontal"
+                android:textColor="@android:color/primary_text_light"
+                android:textSize="12.5sp"
+                android:textStyle="bold" >
+            </TextView>
+        </LinearLayout>
+
+        <View
+            android:id="@+id/broadcast_spam_control_divider"
+            android:layout_width="3dp"
+            android:layout_height="72dp"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/broadcast_spam_control_settings_container" />
+
+        <LinearLayout
+            android:id="@+id/broadcast_spam_control_text_container"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_toLeftOf="@+id/broadcast_spam_control_divider"
+            android:gravity="center_vertical"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/broadcast_spam_control_text"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:layout_margin="5dp"
+                android:textColor="@android:color/primary_text_light"
+                android:textSize="15sp" >
+            </TextView>
+        </LinearLayout>
+    </RelativeLayout>
+
+    <FrameLayout
+        android:id="@+id/message_details"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_above="@+id/broadcast_spam_control"
+        android:background="@color/mc_background" >
+
+        <ScrollView
+            android:id="@+id/message_scroll_view"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" >
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/previous_messages_in_thread_title"
+                    style="@style/RogerThatSectionHeader"
+                    android:text="@string/previous_in_thread" >
+                </TextView>
+
+                <LinearLayout
+                    android:id="@+id/previous_messages_in_thread"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" >
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/message_section_title"
+                    style="@style/RogerThatSectionHeader"
+                    android:text="@string/message" >
+                </TextView>
+
+                <RelativeLayout
+                    android:id="@+id/message_header"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content" >
+
+                    <ImageView
+                        android:id="@+id/avatar"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_margin="5dp" >
+                    </ImageView>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_margin="5dp"
+                        android:layout_toRightOf="@id/avatar"
+                        android:orientation="vertical" >
+
+                        <TextView
+                            android:id="@+id/sender"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@android:color/primary_text_light"
+                            android:textSize="20dp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/timestamp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@android:color/primary_text_light" >
+                        </TextView>
+                    </LinearLayout>
+                </RelativeLayout>
+
+                <TextView
+                    android:id="@+id/message"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:background="@drawable/message_background"
+                    android:padding="5dp"
+                    android:textColor="@android:color/primary_text_light"
+                    android:textSize="20dp" >
+                </TextView>
+
+                <WebView
+                    android:id="@+id/webview"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp" >
+                </WebView>
+    
+                <LinearLayout
+                    android:id="@+id/attachment_layout"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="5dp"
+                    android:visibility="gone" >
+                </LinearLayout>
+                
+                <LinearLayout
+                    android:id="@+id/widget_layout"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="5dp"
+                    android:visibility="gone" >
+                </LinearLayout>
+
+                <HorizontalScrollView
+                    android:id="@+id/button_scroller"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp" >
+
+                    <TableLayout
+                        android:id="@+id/buttons"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" >
+                    </TableLayout>
+                </HorizontalScrollView>
+
+                <thirdparty.nishantnair.FlowLayout
+                    android:id="@+id/member_summary"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp" >
+                </thirdparty.nishantnair.FlowLayout>
+
+                <TextView
+                    android:id="@+id/member_details_title"
+                    style="@style/RogerThatSectionHeader"
+                    android:text="@string/member_details"
+                    android:textColor="@android:color/secondary_text_dark" >
+                </TextView>
+
+                <LinearLayout
+                    android:id="@+id/members"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:orientation="vertical" >
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/next_messages_in_thread_title"
+                    style="@style/RogerThatSectionHeader"
+                    android:text="@string/next_in_thread" >
+                </TextView>
+
+                <LinearLayout
+                    android:id="@+id/next_messages_in_thread"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" >
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
+    </FrameLayout>
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="37dp"
+        android:background="@drawable/title_background"
+        android:layout_above="@+id/message_details"
+        android:visibility="gone" >
+
+        <ImageButton
+            android:id="@+id/expand"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:src="@drawable/view_entire_message_thread" >
+        </ImageButton>
+
+        <ImageView
+            android:id="@+id/status_image"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_alignParentTop="true"
+            android:layout_toLeftOf="@id/expand" >
+        </ImageView>
+
+        <TextView
+            android:id="@+id/show_magic_message_header"
+            style="@style/RogerThatTitle"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_alignParentTop="true"
+            android:layout_toLeftOf="@id/status_image" >
+        </TextView>
+    </RelativeLayout>
+
+</RelativeLayout>

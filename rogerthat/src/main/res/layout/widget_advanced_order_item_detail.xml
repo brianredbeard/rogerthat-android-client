@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:paddingTop="10dp"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:background="@color/mc_white"
+    android:orientation="vertical" >
+    
+    <TextView
+        android:id="@+id/name"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:ellipsize="end" 
+        android:textStyle="bold"
+        android:maxLines="1"
+        android:textSize="20sp" />
+    
+    <TextView
+        android:id="@+id/price"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:ellipsize="end" 
+        android:maxLines="1"
+        android:layout_below="@id/name"
+        android:textSize="17sp" />
+    
+    <TextView
+        android:id="@+id/description"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:background="@android:color/transparent"
+        android:layout_below="@id/price"
+        android:textSize="17sp" />
+    
+    <com.mobicage.rogerthat.widget.Resizable16by9ImageView
+        android:id="@+id/image"
+        android:layout_marginTop="10dp"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/description"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:paddingTop="0dp"
+        android:visibility="gone" />
+
+    <LinearLayout       
+        android:id="@+id/value_container"         
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/image"
+        android:layout_marginTop="10dp">     
+        
+        <TextView
+	        android:id="@+id/value_min"
+	        android:layout_width="50dp"
+	        android:layout_height="50dp"
+	        android:layout_gravity="center_vertical"
+	        android:layout_marginRight="10dp"
+	        android:background="@android:color/transparent"
+	        android:gravity="center"
+	        android:scaleType="fitCenter"
+	        android:textSize="35sp" />
+        
+        <TextView
+	        android:id="@+id/value"
+	        android:layout_width="0dp"
+	        android:layout_weight="1"
+	        android:layout_height="50dp"
+	        android:gravity="center"
+	        android:background="@android:color/transparent"
+	        android:textSize="20sp" />
+        
+        <TextView
+            android:id="@+id/value_plus"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="10dp"
+            android:background="@android:color/transparent"
+            android:gravity="center"
+            android:scaleType="fitCenter"
+            android:textSize="35sp" />
+
+    </LinearLayout>
+    
+    <View
+        android:id="@+id/divider_line"
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="10dp"
+        android:background="@color/mc_divider_gray"
+        android:layout_below="@id/value_container" />
+    
+    <Button
+        android:id="@+id/dismiss"
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:textSize="20sp"
+        android:background="@android:color/transparent"
+        android:textColor="@color/mc_about_blue"
+        android:layout_below="@id/divider_line"
+        android:text="@string/ok" />
+    
+</RelativeLayout>

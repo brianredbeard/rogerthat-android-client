@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<integer name="magic_message_newmessage">104</integer>
+	<integer name="enter_pin">106</integer>
+    <integer name="fb_scan_finished">110</integer>
+    <integer name="ab_scan_finished">112</integer>
+    <integer name="photo_upload_finished">114</integer>
+    <integer name="photo_upload_pending">116</integer>
+    <integer name="transfer_complete_continue">118</integer>
+    <integer name="forwarding_logs">120</integer>
+</resources>

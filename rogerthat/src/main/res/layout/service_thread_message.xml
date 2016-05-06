@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/frame"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:padding="5dp" >
+
+    <RelativeLayout
+        android:id="@+id/svc_detail"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+
+        <ImageView
+            android:id="@+id/avatar"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentLeft="true"
+            android:layout_marginRight="5dp"
+            android:background="@drawable/avatar_background_black"
+            android:padding="1dp" >
+        </ImageView>
+
+        <TextView
+            android:id="@+id/recipients"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="@id/avatar"
+            android:layout_toRightOf="@id/avatar"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textColor="@android:color/primary_text_light"
+            android:textSize="16dp" >
+        </TextView>
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/timestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/svc_detail"
+        android:textColor="@android:color/secondary_text_light"
+        android:textSize="12dp" >
+    </TextView>
+
+    <TextView
+        android:id="@+id/message"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/svc_detail"
+        android:layout_toLeftOf="@id/timestamp"
+        android:ellipsize="end"
+        android:maxLines="3"
+        android:textColor="@android:color/primary_text_light"
+        android:textSize="20dp" >
+    </TextView>
+
+    <TextView
+        android:id="@+id/my_status"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/message"
+        android:layout_marginRight="5dp"
+        android:textColor="@android:color/secondary_text_light"
+        android:textSize="16dp"
+        android:textStyle="italic" >
+    </TextView>
+
+</RelativeLayout>

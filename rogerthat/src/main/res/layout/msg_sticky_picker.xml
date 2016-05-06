@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/update_msg_sticky"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <View
+        style="@style/RogerThatThickDivider"
+        android:layout_marginBottom="10dp" >
+    </View>
+
+    <RadioGroup
+        android:id="@+id/sticky_group"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <RadioButton
+            android:id="@+id/sticky_disabled"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/disabled" />
+        
+        <RadioButton
+            android:id="@+id/sticky_enabled"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/enabled" />
+        
+    </RadioGroup>
+
+     <Button
+         android:id="@+id/ok"
+         android:layout_width="fill_parent"
+         android:layout_height="wrap_content"
+         android:layout_marginTop="10dp"
+         android:text="@string/ok" >
+     </Button>
+
+</LinearLayout>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/mc_homescreen_background"
+    android:orientation="vertical" >
+    
+    <ImageView
+        android:id="@+id/rogerthat_logo"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="100dp"
+        android:layout_marginBottom="20dp"
+        android:adjustViewBounds="true"
+        android:src="@drawable/registration_logo" />
+       
+    <TextView
+        android:id="@+id/status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="20dp"
+        android:textColor="#000"
+        android:textSize="18sp" />
+    
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:indeterminate="false"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:progress="50"
+        android:progressDrawable="@drawable/greenprogress" />
+    
+    <Button
+         android:id="@+id/retry_button"
+         android:layout_width="fill_parent"
+         android:layout_height="wrap_content"
+         android:layout_gravity="center_horizontal"
+         android:layout_margin="20dp"
+         android:textColor="@android:color/primary_text_light"
+         android:textSize="18sp"
+         android:textStyle="bold"
+         android:text="@string/retry"
+         android:visibility="gone" />
+ 
+</LinearLayout>

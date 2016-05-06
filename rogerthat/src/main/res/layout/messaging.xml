@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/mc_background"
+    android:orientation="vertical" >
+    
+    <include android:id="@+id/nav_bar" layout="@layout/navigation_bar" />
+
+    <LinearLayout
+        android:id="@+id/delete_messages"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        android:visibility="gone" >
+
+        <Button
+            android:id="@+id/delete_done_button"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/delete" />
+
+        <Button
+            android:id="@+id/delete_cancel_button"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/cancel" />
+    </LinearLayout>
+
+    <com.mobicage.rogerthat.util.ui.FSListView
+        android:id="@+id/message_list"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_above="@id/delete_messages"
+        android:layout_below="@id/nav_bar"
+        android:cacheColorHint="#00000000"
+        android:divider="@drawable/divider"
+        android:dividerHeight="1px"
+        android:fastScrollEnabled="true" >
+    </com.mobicage.rogerthat.util.ui.FSListView>
+
+</RelativeLayout>

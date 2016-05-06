@@ -1,0 +1,91 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/friend_detail_layout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/activity_background"
+    android:scrollbarStyle="insideOverlay" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="5dp" >
+
+        <include layout="@layout/friend_detail_header" />
+
+        <LinearLayout
+            android:id="@+id/service_area"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_marginTop="5dp"
+            android:orientation="vertical" >
+
+            <RelativeLayout
+                android:id="@+id/poke_area"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp" >
+
+                <Button
+                    android:id="@+id/poke_button"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="20sp" >
+                </Button>
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/description"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:textSize="16dp" >
+            </TextView>
+
+            <WebView
+                android:id="@+id/webview"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:visibility="gone" >
+            </WebView>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/friend_area"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="15dp"
+            android:orientation="vertical" >
+
+            <CheckBox
+                android:id="@+id/share_location"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16dp" >
+            </CheckBox>
+
+            <Button
+                android:id="@+id/retrieve_friend_location_button"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp" >
+            </Button>
+
+            <com.mobicage.rogerthat.widget.ResizableImageView
+                android:id="@+id/qrcode"
+                android:layout_marginTop="15dp"
+		        android:layout_width="fill_parent"
+		        android:layout_height="wrap_content"
+		        android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:paddingTop="0dp" />
+        </LinearLayout>
+    </LinearLayout>
+
+</ScrollView>

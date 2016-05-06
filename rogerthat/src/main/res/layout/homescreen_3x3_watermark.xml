@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/activity"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/mc_homescreen_background"
+    android:orientation="vertical"
+    android:gravity="center_vertical" >
+    
+    <com.mobicage.rogerthat.widget.SpacerView
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        app:nexus10Height="50" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="12.5" />
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="75"
+            android:adjustViewBounds="true"
+            android:src="@drawable/homescreen_header"
+            android:visibility="invisible" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="12.5" />
+    </LinearLayout>
+    
+    <com.mobicage.rogerthat.widget.SpacerView
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        app:nexus10Height="100" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+	    <View
+	        android:layout_width="0dp"
+	        android:layout_height="0dp"
+	        android:layout_weight="12.5" />
+
+	    <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="75"
+            android:adjustViewBounds="true" >
+
+		    <ImageView
+		        android:id="@+id/homescreen_watermark_container"
+		        android:src="@drawable/homescreen_watermark"
+		        android:layout_width="fill_parent"
+		        android:layout_height="wrap_content"
+		        android:weightSum="1.0"
+		        android:adjustViewBounds="true"
+		        android:layout_gravity="center" />
+
+	    </RelativeLayout>
+
+	    <View
+	        android:layout_width="0dp"
+	        android:layout_height="0dp"
+	        android:layout_weight="12.5" />
+
+    </LinearLayout>
+    
+    
+    <com.mobicage.rogerthat.widget.SpacerView
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        app:nexus10Height="100" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="20" />
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="60"
+            android:adjustViewBounds="true"
+            android:src="@drawable/homescreen_footer"
+            android:visibility="invisible"  />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="20" />
+    </LinearLayout>
+
+    <com.mobicage.rogerthat.widget.SpacerView
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        app:nexus10Height="50" />
+
+</LinearLayout>

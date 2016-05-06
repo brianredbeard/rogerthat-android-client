@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ScrollLayout">
+        <attr name="labelerClass" format="string"/>
+        <attr name="labelerFormat" format="string"/>
+        <attr name="childWidth" format="dimension"/>
+        <attr name="childHeight" format="dimension"/>
+    </declare-styleable>
+    <declare-styleable name="SpacerView">
+        <attr name="nexus10Height" format="integer"/>
+    </declare-styleable>
+    <declare-styleable name="HomeScreenMenuLabel">
+        <attr name="nexus10TextSize" format="integer"/>
+    </declare-styleable>
+    <declare-styleable name="HomeScreenBadge">
+        <attr name="nexus10LayoutPadding" format="integer"/>
+        <attr name="nexus10LayoutWidth" format="integer"/>
+        <attr name="nexus10BadgeTextSize" format="integer"/>
+    </declare-styleable>
+    
+    <declare-styleable name="ButtonBarContainerTheme">
+        <attr name="metaButtonBarStyle" format="reference" />
+        <attr name="metaButtonBarButtonStyle" format="reference" />
+    </declare-styleable>
+</resources>

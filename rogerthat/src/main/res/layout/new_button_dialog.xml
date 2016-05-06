@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:orientation="vertical"
+	android:padding="5dp" xmlns:tools="http://schemas.android.com/tools">
+
+	<TextView
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:text="@string/button_text"></TextView>
+	<EditText
+		android:id="@+id/button_caption"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:singleLine="true"
+		android:inputType="textCapSentences"
+		android:imeOptions="actionNext"></EditText>
+	<TextView
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:text="@string/button_action"></TextView>
+	<RadioGroup
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal">
+		<RadioButton
+			android:id="@+id/action_tel"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/action_tel" />
+		<RadioButton
+			android:id="@+id/action_geo"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/action_geo" />
+		<RadioButton
+			android:id="@+id/action_www"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/action_www" />
+	</RadioGroup>
+	<RelativeLayout
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal">
+
+		<Button
+		    android:id="@+id/action_help_button"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:layout_alignParentRight="true"
+		    android:layout_alignParentTop="true"
+		    android:singleLine="true"
+		    tools:ignore="HardcodedText"
+		    android:text="…" >
+</Button>
+		<EditText
+			android:id="@+id/button_action"
+			android:layout_alignParentLeft="true"
+			android:layout_alignParentTop="true"
+			android:layout_toLeftOf="@id/action_help_button"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:singleLine="true"
+			android:imeOptions="actionDone"
+			android:inputType="textUri"
+			tools:ignore="HardcodedText"
+			android:text="tel://"></EditText>
+	</RelativeLayout>
+</LinearLayout>

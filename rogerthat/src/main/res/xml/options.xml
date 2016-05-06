@@ -1,0 +1,39 @@
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:key="general_settings">
+
+    <PreferenceCategory
+        android:title="@string/settings">
+        <CheckBoxPreference
+            android:key="tracking"
+            android:title="@string/tracking_title"
+            android:summary="@string/tracking_summary" />
+        <CheckBoxPreference
+            android:key="stream_only_important"
+            android:title="@string/stream_title"
+            android:summary="@string/stream_summary"
+            android:defaultValue="true" />
+        <CheckBoxPreference
+            android:key="upload_photo_wifi"
+            android:title="@string/upload_photo_title"
+            android:summary="@string/upload_photo_summary"
+            android:defaultValue="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/sounds">
+
+        <Preference
+            android:key="alarm_sound"
+            android:title="@string/alarm_sound" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_category_info">
+        <Preference
+            android:key="my_profile"
+            android:title="@string/profile"></Preference>
+    </PreferenceCategory>
+
+</PreferenceScreen> 

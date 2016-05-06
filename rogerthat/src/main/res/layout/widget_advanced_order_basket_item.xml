@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/transparent"
+    android:gravity="center_vertical"
+    android:orientation="vertical" >
+    
+    <LinearLayout      
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">  
+        
+        <LinearLayout 
+            android:id="@+id/text_container"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+		    <TextView
+		        android:id="@+id/name"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_marginTop="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="5dp"
+                android:layout_marginBottom="10dp"
+		        android:ellipsize="end" 
+		        android:maxLines="1"
+		        android:background="@android:color/transparent"
+		        android:textSize="17sp" />
+		    
+		    <TextView
+		        android:id="@+id/price"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_marginTop="10dp"
+	            android:layout_marginLeft="5dp"
+	            android:layout_marginRight="10dp"
+	            android:layout_marginBottom="10dp"
+		        android:ellipsize="end" 
+		        android:maxLines="1"
+		        android:background="@android:color/transparent"
+		        android:textSize="15sp" />
+	    
+	    </LinearLayout>
+	    
+        <TextView
+	        android:id="@+id/count"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_marginTop="10dp"
+	        android:layout_marginLeft="5dp"
+	        android:layout_marginRight="10dp"
+	        android:layout_marginBottom="10dp"
+	        android:ellipsize="end" 
+	        android:maxLines="1"
+	        android:paddingTop="3dp"
+	        android:paddingBottom="3dp"
+	        android:paddingLeft="6dp"
+	        android:paddingRight="6dp"
+	        android:textColor="@android:color/white"
+	        android:background="@drawable/widget_advanced_order_count_gray"
+	        android:textSize="13sp"
+	        android:visibility="gone" />
+	    
+    </LinearLayout>
+    
+    <LinearLayout          
+        android:id="@+id/details"      
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp"
+        android:visibility="gone">     
+        
+        <TextView
+            android:id="@+id/value_min"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginRight="10dp"
+            android:background="@android:color/transparent"
+            android:gravity="center"
+            android:scaleType="fitCenter"
+            android:textSize="35sp" />
+        
+        <TextView
+            android:id="@+id/value"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="50dp"
+            android:layout_marginRight="10dp"
+            android:gravity="center"
+            android:background="@android:color/transparent"
+            android:textSize="20sp" />
+        
+        <TextView
+            android:id="@+id/value_plus"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="10dp"
+            android:background="@android:color/transparent"
+            android:gravity="center"
+            android:scaleType="fitCenter"
+            android:textSize="35sp" />
+
+    </LinearLayout>
+    
+</LinearLayout>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:id="@+id/avatar"
+        android:layout_alignParentLeft="true"
+        android:layout_width="54dp"
+        android:layout_height="57dp"></RelativeLayout>
+
+    <LinearLayout
+        android:layout_alignParentRight="true"
+        android:layout_toRightOf="@id/avatar"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginRight="5dp">
+
+        <TextView
+            android:id="@+id/receiver"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:textColor="@android:color/primary_text_dark"
+            android:textSize="20dp"></TextView>
+        <TextView
+            android:id="@+id/received_timestamp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/primary_text_dark"
+            android:layout_gravity="right"></TextView>
+        <TextView
+            android:id="@+id/acked_timestamp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/primary_text_dark"
+            android:layout_gravity="right"></TextView>
+    </LinearLayout>
+
+
+</RelativeLayout>

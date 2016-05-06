@@ -1,0 +1,1 @@
+-- dummy script to delete message attachments in postUpdate

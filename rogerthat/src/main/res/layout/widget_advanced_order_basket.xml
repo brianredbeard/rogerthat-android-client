@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/mc_white"
+    android:orientation="vertical" >
+    
+    <TextView
+        android:id="@+id/name"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:background="@android:color/transparent"
+        android:text="@string/shopping_basket"
+        android:textColor="@android:color/black"
+        android:textSize="20sp"/>
+    
+    <ListView
+        android:id="@+id/list_view"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:divider="@color/mc_divider_gray"
+        android:layout_below="@id/name"
+        android:dividerHeight="1dip" />
+    
+    <View
+        android:id="@+id/divider_line"
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="10dp"
+        android:background="@color/mc_divider_gray"
+        android:layout_below="@id/list_view" />
+
+    <LinearLayout          
+        android:id="@+id/button_container"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/divider_line">     
+        
+        <Button
+            android:id="@+id/submit"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:textSize="20sp"
+            android:background="@android:color/transparent"
+            android:layout_gravity="center_vertical"
+            android:textColor="@color/mc_about_blue" />
+        
+        <View
+	        android:layout_width="1dp"
+	        android:layout_height="fill_parent"
+	        android:background="@color/mc_divider_gray" />
+        
+        <Button
+            android:id="@+id/dismiss"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:textSize="20sp"
+            android:background="@android:color/transparent"
+            android:layout_gravity="center_vertical"
+            android:textColor="@color/mc_about_blue"
+            android:text="@string/continue_shopping" />
+
+    </LinearLayout>
+    
+</RelativeLayout>

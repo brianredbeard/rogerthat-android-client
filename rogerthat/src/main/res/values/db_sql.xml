@@ -1,0 +1,442 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- backlog statements used by android and not yet ios-->
+    <string name="sql_backlog_remove_previous_unsent_calls">DELETE FROM Backlog WHERE calltype = ? AND last_resend_timestamp = 0 AND function = ?</string>
+    <string name="sql_backlog_count">SELECT COUNT(*), calltype FROM Backlog GROUP BY calltype</string>
+
+    <!--  backlog statements copied from ios -->
+    <string name="sql_backlog_insert">INSERT INTO Backlog (callid, calltype, timestamp, callbody, has_priority, last_resend_timestamp, retention_timeout, response_handler, function, wifi_only) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)</string>
+    <string name="sql_backlog_batch">SELECT callid, calltype, callbody, timestamp FROM Backlog WHERE last_resend_timestamp &lt; ? AND has_priority >= 0 AND calltype=0 ORDER BY has_priority DESC, last_resend_timestamp</string>
+    <string name="sql_backlog_batch_wifi_only">SELECT callid, calltype, callbody, timestamp FROM Backlog WHERE wifi_only=0 AND last_resend_timestamp &lt; ? AND has_priority >= 0 AND calltype=0 ORDER BY has_priority DESC, last_resend_timestamp</string>
+    <string name="sql_backlog_get_body">SELECT callbody FROM Backlog WHERE callid = ?</string>
+    <string name="sql_backlog_update_last_resend">UPDATE Backlog SET last_resend_timestamp = ? WHERE callid = ?</string>
+    <string name="sql_backlog_update_retention_timeout">UPDATE Backlog SET retention_timeout = ?, has_priority = -1 WHERE callid = ?</string>
+    <string name="sql_backlog_run_retention">DELETE FROM Backlog WHERE has_priority = -1 AND retention_timeout &lt; ?</string>
+    <string name="sql_backlog_exists">SELECT count(*) FROM (SELECT \"x\" FROM Backlog WHERE last_resend_timestamp &lt; ? AND has_priority >= 0 LIMIT 1)</string>
+    <string name="sql_backlog_has_body">SELECT count(*) FROM Backlog WHERE callid = ? and callbody is not null</string>
+    <string name="sql_backlog_update_body">UPDATE Backlog SET callbody = ? WHERE callid = ?</string>
+    <string name="sql_backlog_delete_item">DELETE FROM Backlog WHERE callid = ?</string>
+    <string name="sql_backlog_get_response_handler">SELECT response_handler FROM Backlog WHERE callid = ?</string>
+    <string name="sql_backlog_delete_all">DELETE FROM Backlog;</string>
+    <string name="sql_backlog_singlecall_body">SELECT callid, callbody FROM Backlog WHERE calltype=0 AND function = ?</string>
+    <string name="sql_backlog_item_exist">SELECT count(*) FROM Backlog WHERE callid = ?</string>
+    
+    <!-- friend -->
+    <string name="sql_user_friend_list_cursor"   >SELECT rowid as _id, email, name, share_location, shares_location, avatar, existence, \"type\", description, description_branding, poke_description, qualified_identifier, organization_type, callbacks, flags, profile_data, content_branding_hash FROM friend WHERE existence = 0 and \"type\" = 1 ORDER BY name COLLATE NOCASE</string>
+    <string name="sql_service_friend_list_cursor">
+        SELECT f.rowid as _id, f.email, f.name, f.share_location, f.shares_location, f.avatar, f.existence, f.type, f.description, f.description_branding, f.poke_description, f.qualified_identifier, f.organization_type, f.callbacks, f.flags, f.profile_data, f.content_branding_hash,
+            IFNULL(c.id, f.email) AS cat_id, ifnull(c.name, f.name) AS cat_name, c.avatar, count(f.email) 
+        FROM friend f LEFT OUTER JOIN friend_category c ON c.id = f.category_id 
+        WHERE (f.existence = 0 OR f.existence = 4) AND f.type = 2 
+        GROUP BY cat_id 
+        ORDER BY cat_name COLLATE NOCASE
+    </string> 
+    <string name="sql_friends_by_category_cursor">SELECT rowid as _id, email, name, share_location, shares_location, avatar, existence, \"type\", description, description_branding, poke_description, qualified_identifier, organization_type, callbacks, flags, profile_data, content_branding_hash FROM friend WHERE category_id=? AND (existence = 0 OR existence = 4) ORDER BY name COLLATE NOCASE</string>
+    <string name="sql_friend_get_existing_by_email"       >SELECT rowid as _id, email, name, share_location, shares_location, avatar, existence, \"type\", description, description_branding, poke_description, qualified_identifier, organization_type, callbacks, flags, profile_data, content_branding_hash FROM friend WHERE email=? AND (existence = 0 OR existence = 4)</string>
+    <string name="sql_friend_get_by_email"       >SELECT rowid as _id, email, name, share_location, shares_location, avatar, existence, \"type\", description, description_branding, poke_description, qualified_identifier, organization_type, callbacks, flags, profile_data, content_branding_hash FROM friend WHERE email=?</string>
+    <string name="sql_friend_get_type_by_email">SELECT \"type\" FROM friend WHERE email = ?</string>
+    <string name="sql_friend_insert">INSERT OR REPLACE INTO friend(email, name, avatar_id, share_location, shares_location, existence, \"type\", email_hash, description, description_branding, poke_description, menu_branding, main_phone_number, share, generation, share_image_url, share_description, share_caption, share_link_url, qualified_identifier, about_label, messages_label, call_label, share_label, call_confirmation, user_data, app_data, category_id, broadcast_flow_hash, organization_type, callbacks, flags, versions, profile_data, content_branding_hash) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)</string>
+    <string name="sql_friend_get_menu_details">SELECT f.main_phone_number, f.menu_branding, f.name, f.share, max(z), f.generation, f.share_image_url, f.share_description, f.share_caption, f.share_link_url, f.about_label, f.messages_label, f.call_label, f.share_label, f.call_confirmation FROM friend f LEFT OUTER JOIN service_menu_item smi ON f.email = smi.friend WHERE email = ?</string>
+    <string name="sql_friend_update_avatar">UPDATE friend SET avatar = ? WHERE email = ?</string>
+    <string name="sql_friend_get_avatar_id">SELECT avatar_id FROM friend WHERE email = ?</string>
+    <string name="sql_friend_update">UPDATE friend SET name = ?, avatar_id = ?, share_location = ?, shares_location = ?, \"type\" = ?, description = ?, description_branding = ?, poke_description = ?, menu_branding = ?, main_phone_number = ?, share = ?, generation = ?, share_image_url = ?, share_description = ?, share_caption = ?, share_link_url = ?, qualified_identifier = ?, about_label = ?, messages_label = ?, call_label = ?, share_label = ?, call_confirmation = ?, user_data = ?, app_data = ?, category_id = ?, broadcast_flow_hash = ?, organization_type = ?, callbacks = ?, flags = ?, versions = ?, profile_data = ?, content_branding_hash = ? WHERE email = ?</string>
+    <string name="sql_friend_update_info">UPDATE friend SET name=?, avatar_id=?, avatar=?, \"type\"=?, description=?, description_branding=?, qualified_identifier=?, profile_data=? WHERE email = ?</string>
+    <string name="sql_friend_count">SELECT count(*) FROM friend WHERE existence = 0</string>
+    <string name="sql_friend_count_friends_sharing_location">SELECT COUNT(*) FROM friend WHERE existence = 0 AND shares_location = 1</string>
+    <string name="sql_friend_delete">DELETE FROM friend WHERE email = ?</string>
+    <string name="sql_friend_clear_all_service_menu">DELETE FROM service_menu_item</string>
+    <string name="sql_friend_delete_service_menu">DELETE FROM service_menu_item WHERE friend = ?</string>
+    <string name="sql_friend_insert_service_menu">INSERT INTO service_menu_item (friend, x, y, z, label, icon_hash, screen_branding, static_flow_hash, hashed_tag, requires_wifi, run_in_background) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)</string>
+
+    <string name="sql_friend_check_menu_icon_available">SELECT count(*) FROM service_menu_icon WHERE icon_hash = ?</string>
+    <string name="sql_friend_insert_menu_icon">INSERT OR REPLACE INTO service_menu_icon (icon_hash, icon) values (?, ?)</string>
+    <string name="sql_friend_menu_icon_usage">SELECT smi.icon_hash, count(smii.icon_hash) FROM service_menu_icon smi LEFT OUTER JOIN service_menu_item smii ON smi.icon_hash = smii.icon_hash GROUP BY smi.icon_hash </string>
+    <string name="sql_friend_get_menu">SELECT x, y, label, icon, screen_branding, static_flow_hash, hashed_tag, requires_wifi, run_in_background FROM service_menu_icon smi INNER JOIN service_menu_item smii ON smi.icon_hash = smii.icon_hash WHERE friend = ? AND z = ?</string>
+    <string name="sql_friend_delete_menu_icon">DELETE FROM service_menu_icon WHERE icon_hash = ?</string>
+
+    <string name="sql_friend_static_flow_get">SELECT static_flow FROM service_static_flow WHERE static_flow_hash = ?</string>
+    <string name="sql_friend_static_flow_check_available">SELECT count(*) FROM service_static_flow WHERE static_flow_hash = ?</string>
+    <string name="sql_friend_static_flow_insert">INSERT OR REPLACE INTO service_static_flow (static_flow_hash, static_flow) values (?, ?)</string>
+    <string name="sql_friend_static_flow_usage">
+        SELECT ssf.static_flow_hash, count(smii.static_flow_hash), count(mfr.static_flow_hash) FROM service_static_flow ssf
+        LEFT OUTER JOIN service_menu_item smii ON smii.static_flow_hash = ssf.static_flow_hash
+        LEFT OUTER JOIN message_flow_run mfr ON mfr.static_flow_hash = ssf.static_flow_hash
+        GROUP BY ssf.static_flow_hash
+    </string>
+    <string name="sql_friend_static_flow_delete">DELETE FROM service_static_flow WHERE static_flow_hash = ?</string>
+
+    <string name="sql_friend_category_insert">INSERT OR REPLACE INTO friend_category (id, name, avatar) VALUES (?,?,?)</string>
+    <string name="sql_friend_category_exists">SELECT count(*) FROM friend_category WHERE id = ?</string>
+
+    <string name="sql_friend_update_share_location">UPDATE friend SET share_location = ? WHERE email = ?</string>
+    <string name="sql_friend_get_avatar_by_email">SELECT avatar FROM friend WHERE email = ?</string>
+    <string name="sql_friend_get_name_by_email">SELECT name FROM friend WHERE email = ?</string>
+    <string name="sql_friend_is_friend">SELECT count(*) FROM friend WHERE existence = 0 AND email = ?</string>
+    <string name="sql_friend_get_email_by_email_hash">SELECT email FROM friend WHERE existence = 0 and email_hash = ?</string>
+    <string name="sql_friend_update_existence">UPDATE friend SET existence = ? WHERE email = ?</string>
+    <string name="sql_friend_update_existence_and_clear_version">UPDATE friend SET existence = ?, versions = \'\' WHERE email = ?</string>
+    <string name="sql_friend_get_existence">SELECT existence FROM friend WHERE email = ?</string>
+    <string name="sql_friend_get_emails">SELECT email from friend WHERE existence = 0</string>
+    <string name="sql_friend_get_emails_by_type">SELECT email FROM friend WHERE type = ?</string>
+
+    <string name="sql_friend_data_get">SELECT user_data, app_data FROM friend WHERE email = ?</string>
+    <string name="sql_friend_set_user_data">UPDATE friend SET user_data=? WHERE email=?</string>
+    <string name="sql_friend_set_app_data">UPDATE friend SET app_data=? WHERE email=?</string>
+    <string name="sql_friend_set_data">UPDATE friend SET user_data=?, app_data=? WHERE email=?</string>
+    
+    <string name="sql_friend_get_broadcast_flow_for_mfr">SELECT smi.x, smi.y, smi.z, smi.static_flow_hash, smi.hashed_tag, f.generation, smi.label FROM service_menu_item smi INNER JOIN friend f ON f.email=smi.friend WHERE smi.static_flow_hash=f.broadcast_flow_hash AND f.email=?</string>
+    
+    <string name="sql_friend_get_versions">SELECT versions FROM friend WHERE email=?</string>
+
+    <!-- friend_set -->
+    <string name="sql_friendset_version_get">SELECT version FROM friend_set_version</string>
+    <string name="sql_friendset_version_set">UPDATE friend_set_version SET version = ?</string>
+    <string name="sql_friendset_insert_into">INSERT OR REPLACE INTO friend_set (email) VALUES (?)</string>
+    <string name="sql_friendset_delete_from">DELETE FROM friend_set WHERE email = ?</string>
+    <string name="sql_friendset_contains">SELECT COUNT(*) FROM friend_set WHERE email = ?</string>
+    <string name="sql_friendset_get">SELECT email FROM friend_set</string>
+    
+    <!-- friend invitation secrets -->
+    <string name="sql_friend_invitation_secret_insert">INSERT OR REPLACE INTO friend_invitation_secrets(secret) VALUES (?)</string>
+    <string name="sql_friend_invitation_secret_get">SELECT secret FROM friend_invitation_secrets LIMIT 1</string>
+    <string name="sql_friend_invitation_secret_delete">DELETE FROM friend_invitation_secrets WHERE secret = ?</string>
+    <string name="sql_friend_invitation_secret_count">SELECT count(*) FROM friend_invitation_secrets</string>
+
+    <string name="sql_friend_pending_invitation_list">SELECT invitee FROM pending_invitation</string>
+    <string name="sql_friend_pending_invitation_insert">INSERT OR REPLACE INTO pending_invitation(invitee) VALUES (?)</string>
+    <string name="sql_friend_pending_invitation_remove">DELETE FROM pending_invitation WHERE invitee = ?</string>
+
+    <!-- service api calls -->
+    <string name="sql_service_api_call_insert">INSERT OR REPLACE INTO service_api_calls (service, item, method, tag, status) VALUES (?,?,?,?,?)</string>
+    <string name="sql_service_api_call_get_by_id">SELECT service, item, method, tag FROM service_api_calls WHERE id=?</string>
+    <string name="sql_service_api_call_set_result">UPDATE service_api_calls SET result=?, error=?, status=? WHERE id=?</string>
+    <string name="sql_service_api_call_get_results">SELECT id, method, result, error, tag FROM service_api_calls WHERE status=1 AND service=? AND item=?</string>
+    <string name="sql_service_api_call_remove">DELETE FROM service_api_calls WHERE id=?</string>
+
+    <!-- messaging -->
+    <string name="sql_message_insert">INSERT INTO message (\"key\", parent_key, sender, message, timeout, \"timestamp\", flags, needs_my_answer, branding, sortid, dirty, recipients, recipients_status, alert_flags, day, form, dismiss_button_ui_flags, last_thread_message, thread_show_in_list, broadcast_type, thread_avatar_hash, thread_background_color, thread_text_color, priority, default_priority, default_sticky) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)</string>
+    <string name="sql_message_get_parent_sortid">SELECT sortid FROM message WHERE \"key\" = ?</string>
+    <string name="sql_message_get_highest_sortid">SELECT MAX(sortid) FROM message</string>
+    <string name="sql_message_max_timestamp_by_sortid">SELECT MAX(timestamp) FROM message WHERE sortid = ?</string>
+    <string name="sql_message_set_thread_as_read">
+UPDATE message SET dirty = 0 WHERE \"key\" = ? or parent_key = ?
+    </string>
+    <string name="sql_message_update_sortid_for_thread">
+UPDATE message
+SET sortid = ?,
+    last_thread_message = (
+        SELECT m2.key
+        FROM message m2
+        WHERE m2.sortid = message.sortid
+        AND m2.timestamp = (
+            SELECT max(m3.timestamp)
+            FROM message m3
+            WHERE m3.sortid = message.sortid AND m3.existence = 1
+            )
+        ),
+    reply_count = (SELECT count(*) FROM message m1 WHERE m1.sortid = ? AND m1.existence = 1)
+WHERE sortid = ?
+    </string>
+    <string name="sql_message_insert_button">INSERT INTO button (message, id, caption, \"action\", \"index\", ui_flags) VALUES (?,?,?,?,?,?)</string>
+    <string name="sql_message_insert_member_status">INSERT INTO member_status (message, member, received_timestamp, acked_timestamp, button, status) VALUES (?,?,?,?,?,?)</string>
+    <string name="sql_message_update_member_status">
+UPDATE member_status
+SET received_timestamp =
+        CASE
+            WHEN received_timestamp = 0 THEN ?
+            WHEN received_timestamp > ? AND ? > 0 THEN ?
+            ELSE received_timestamp
+        END,
+    acked_timestamp = ?,
+    button = ?,
+    custom_reply = ?,
+    status = ? | status
+WHERE
+    message = ? AND member = ?
+    </string>
+    <string name="sql_message_get_count">SELECT count(*) FROM message</string>
+    <string name="sql_message_get_last_inbox_open_time">SELECT \"last_inbox_open_time\" FROM current_unprocessed_message_index</string>
+    <string name="sql_message_set_last_inbox_open_time">UPDATE current_unprocessed_message_index SET \"last_inbox_open_time\" = ?</string>
+    <string name="sql_message_set_message_processed">UPDATE message SET needs_my_answer = 0 WHERE \"key\" = ?</string>
+    <string name="sql_message_get_needs_answer">SELECT needs_my_answer FROM message WHERE \"key\" = ?</string>
+    <string name="sql_message_get_unprocessed_message_after_timestamp_keys">SELECT key FROM message WHERE show_in_message_list = 1 AND existence = 1 AND thread_dirty = 1 AND \"timestamp\" > ?</string>
+    <string name="sql_message_get_unprocessed_message_count_for_sender">SELECT count(*) FROM message WHERE show_in_message_list > 0  AND existence = 1 AND thread_dirty = 1 AND sender = ?</string>
+    <string name="sql_message_get_message_by_key">SELECT \"key\", parent_key, sender, message, \"timestamp\", flags, branding, alert_flags, needs_my_answer, reply_count, dirty, recipients_status, recipients, form, thread_dirty, thread_needs_my_answer, dismiss_button_ui_flags, last_thread_message, thread_show_in_list, broadcast_type, thread_avatar_hash, thread_background_color, thread_text_color, priority, default_priority, default_sticky FROM message WHERE \"key\" = ?</string>
+    <string name="sql_message_get_message_by_unprocessed_message_index" >SELECT \"key\", parent_key, sender, message, \"timestamp\", flags, branding, alert_flags, priority, default_priority, default_sticky FROM message WHERE needs_my_answer = 1 AND show_in_message_list = 1 AND existence = 1 ORDER BY thread_dirty DESC, \"timestamp\" DESC LIMIT ?, 1</string>
+    <string name="sql_message_get_message_buttons">SELECT id, caption, action, ui_flags FROM button WHERE message = ? ORDER BY \"index\"</string>
+    <string name="sql_message_get_message_members_statusses">SELECT member, received_timestamp, acked_timestamp, button, custom_reply, status FROM member_status WHERE message = ? </string>
+    <string name="sql_message_get_message_members">SELECT member FROM member_status WHERE message = ? </string>
+    <string name="sql_message_get_message_sender">SELECT sender FROM message WHERE \"key\" = ? </string>
+    <string name="sql_message_replace_tmp_key_message">UPDATE message SET \"key\" = ?, \"timestamp\" = ? WHERE \"key\" = ?</string>
+    <string name="sql_message_replace_tmp_key_last_thread_message">UPDATE message SET last_thread_message = ? WHERE last_thread_message = ?</string>
+    <string name="sql_message_replace_tmp_key_button">UPDATE button SET message = ? WHERE message = ?</string>
+    <string name="sql_message_replace_tmp_key_member">UPDATE member_status SET message = ? WHERE message = ?</string>
+    <string name="sql_message_replace_tmp_key_attachment">UPDATE message_attachment SET message = ? WHERE message = ?</string>
+    <string name="sql_message_set_message_dirty">UPDATE message SET dirty = ?, last_updated_on = ? WHERE \"key\" = ?</string>
+    <string name="sql_message_get_dirty_keys">SELECT key FROM message WHERE needs_my_answer = 0 AND show_in_message_list = 1 AND dirty = 1 AND last_updated_on > ? AND existence = 1</string>
+    <string name="sql_message_get_thread_dirty_count">SELECT count(*) FROM message WHERE thread_dirty = 1 AND show_in_message_list = 1 AND existence = 1</string>
+
+    <string name="sql_message_get_message_button_count">SELECT count(*) FROM button WHERE message = ?</string>
+    <string name="sql_message_update_my_member_status">UPDATE member_status SET acked_timestamp = ?, button = ?, custom_reply = ?, status = status | ? WHERE message = ? AND member = ?</string>
+    <string name="sql_message_update_flags">UPDATE message SET flags = flags | ? WHERE \"key\" = ?</string>
+    <string name="sql_message_get_flags">SELECT flags FROM message WHERE \"key\" = ?</string>
+    <string name="sql_message_cursor_query">
+SELECT m.\"key\", m.parent_key, m.sender, m.message, m.timestamp, m.dirty, m.recipients, m.flags, m.needs_my_answer, m.recipients_status, m.alert_flags, m.rowid as _id, m.sortid, 1 as mergeid, m.thread_dirty, m.last_thread_message, m.reply_count, m.thread_needs_my_answer, m.thread_show_in_list, m.thread_avatar_hash, m.thread_background_color, m.thread_text_color, f.priority, m.default_priority, m.default_sticky, f.unread_count
+FROM
+        (SELECT ifnull(parent_key,key) as fkey, key, parent_key, sender, message, timestamp, dirty, recipients, flags, needs_my_answer, recipients_status, alert_flags, rowid as _id, sortid, 1 as mergeid, thread_dirty, last_thread_message, reply_count, thread_needs_my_answer, thread_show_in_list, thread_avatar_hash, thread_background_color, thread_text_color, default_priority, default_sticky FROM message WHERE show_in_message_list = 1 AND existence = 1) m
+    LEFT OUTER JOIN
+        (SELECT ifnull(parent_key,key) as fkey, max(priority) as priority, COUNT(dirty) as unread_count FROM message WHERE dirty = 1 AND existence = 1 GROUP BY fkey) f
+    ON m.fkey = f.fkey
+ORDER BY m.thread_dirty DESC, m.\"timestamp\" DESC;
+    </string>
+    <string name="sql_message_thread_list">
+SELECT parent_key, \"key\", sender, flags
+FROM message
+WHERE show_in_message_list = 1 AND existence = 1
+ORDER BY thread_dirty DESC, \"timestamp\" DESC
+    </string>
+    <string name="sql_message_thread_list_filter_member">
+SELECT DISTINCT m1.parent_key, m1.\"key\", m1.sender, m1.flags
+FROM message m1 INNER JOIN member_status ms1 ON m1.key = ms1.message
+WHERE (m1.show_in_message_list > 0) AND existence = 1 AND (ms1.member = ? or m1.sender = ?)
+ORDER BY m1.thread_dirty DESC, m1.\"timestamp\" DESC
+</string>
+    <string name="sql_message_get_thread_message_by_key">
+SELECT m1.\"key\", m1.parent_key, m1.sender, m1.message, m1.timestamp, m1.dirty, m1.recipients, m1.flags, m1.needs_my_answer, m1.recipients_status, m1.alert_flags, rowid as _id, m1.sortid, 1 as mergeid, m1.thread_dirty, m1.last_thread_message, m1.reply_count
+FROM message m1
+WHERE m1.\"key\" = ?
+    </string>
+    <string name="sql_message_cursor_query_indexor">
+       SELECT day, count(*)
+       FROM message
+       WHERE show_in_message_list = 1 AND existence = 1
+       GROUP BY day
+       ORDER BY day DESC
+    </string>   
+    <string name="sql_message_cursor_query_filter_member">
+SELECT DISTINCT m1.\"key\", m1.parent_key, m1.sender, m1.message, m1.timestamp, m1.dirty, m1.recipients, m1.flags, m1.needs_my_answer, m1.recipients_status, m1.alert_flags, m1.rowid as _id, m1.sortid, 1 as mergeid, m1.thread_dirty, m1.last_thread_message, m1.reply_count, m1.thread_needs_my_answer, m1.thread_show_in_list, m1.thread_avatar_hash, m1.thread_background_color, m1.thread_text_color, m1.priority, m1.default_priority, m1.default_sticky, 0
+FROM message m1
+    LEFT JOIN member_status ms1 ON m1.\"key\" = ms1.message
+    LEFT JOIN message m2 ON m1.parent_key = m2.\"key\"
+WHERE (m1.show_in_message_list > 0) AND m1.existence = 1 AND (ms1.member = ? or m1.sender = ? or m2.sender = ?)
+ORDER BY m1.thread_dirty DESC, m1.\"timestamp\" DESC
+</string>
+    <string name="sql_message_cursor_full_thread">
+SELECT \"key\", parent_key, sender, message, \"timestamp\", flags, branding, alert_flags, priority, default_priority, default_sticky, needs_my_answer, reply_count, dirty, recipients_status, recipients, form, rowid as "_id", thread_needs_my_answer
+FROM message
+WHERE \"key\" = ? AND flags &amp; 512 != 512 AND existence = 1
+UNION
+SELECT \"key\", parent_key, sender, message, \"timestamp\", flags, branding, alert_flags, priority, default_priority, default_sticky, needs_my_answer, reply_count, dirty, recipients_status, recipients, form, rowid as "_id", thread_needs_my_answer
+FROM message
+WHERE parent_key = ? AND existence = 1
+ORDER BY \"timestamp\" ASC
+    </string>
+    <string name="sql_message_cursor_need_my_answer_message_from_thread">
+SELECT \"key\", parent_key
+FROM message
+WHERE \"key\" = ? AND needs_my_answer = 1
+UNION
+SELECT \"key\", parent_key
+FROM message
+WHERE parent_key = ? AND needs_my_answer = 1
+    </string>
+    <string name="sql_message_select_children">SELECT \"key\" FROM message WHERE parent_key = ? ORDER BY \"timestamp\" ASC</string>
+    <string name="sql_message_cursor_full_service_thread">
+SELECT \"key\", parent_key, sender, message, timestamp, dirty, recipients, flags, needs_my_answer, recipients_status, alert_flags, rowid as _id, sortid, 1 as mergeid, thread_dirty, last_thread_message, reply_count, form, dismiss_button_ui_flags, thread_needs_my_answer, priority, default_priority, default_sticky
+FROM message
+WHERE \"key\" = ? AND existence = 1
+UNION
+SELECT \"key\", parent_key, sender, message, timestamp, dirty, recipients, flags, needs_my_answer, recipients_status, alert_flags, rowid as _id, sortid, 1 as mergeid, thread_dirty, last_thread_message, reply_count, form, dismiss_button_ui_flags, thread_needs_my_answer, priority, default_priority, default_sticky
+FROM message
+WHERE parent_key = ? AND existence = 1
+ORDER BY \"timestamp\" ASC
+    </string>
+    <string name="sql_message_cursor_full_thread_my_member_status">
+SELECT m1.sender, ms1.member, ms1.status, m1.\"timestamp\"
+FROM message m1 LEFT OUTER JOIN member_status ms1 ON m1.\"key\" = ms1.message
+WHERE m1.\"key\" = ? AND (ms1.member = ? OR ms1.member IS NULL)
+UNION
+SELECT m2.sender, ms2.member, ms2.status, m2.\"timestamp\"
+FROM message m2 LEFT OUTER JOIN member_status ms2 ON m2.\"key\" = ms2.message
+WHERE m2.parent_key = ? AND (ms2.member = ? OR ms2.member IS NULL)
+ORDER BY \"timestamp\" ASC
+    </string>
+    <string name="sql_message_cursor_full_thread_to_be_acked_messages">
+SELECT m1.\"key\", ms1.status
+FROM message m1 INNER JOIN member_status ms1 ON m1.\"key\" = ms1.message
+WHERE m1.\"key\" = ? AND ms1.member = ? AND ms1.status IN (0, 1)
+UNION
+SELECT m2.\"key\", ms2.status
+FROM message m2 INNER JOIN member_status ms2 ON m2.\"key\" = ms2.message
+WHERE m2.parent_key = ? AND ms2.member = ? AND ms2.status IN (0, 1)
+    </string>
+    <string name="sql_message_cursor_query_filter_member_indexor">
+SELECT m1.day, count(*) FROM message m1
+    LEFT JOIN member_status ms ON m1.\"key\" = ms.message
+    LEFT JOIN message m2 ON m1.parent_key = m2.\"key\"
+WHERE m1.show_in_message_list > 0 AND m1.existence = 1 AND (ms.member = ? OR m1.sender = ? OR m2.sender = ?)
+GROUP BY m1.day ORDER BY m1.day DESC
+    </string>
+    <string name="sql_message_get_bread_crumbs">SELECT m1.\"key\", m1.parent_key, m1.sender, m1.message, m1.timestamp FROM message m1 INNER JOIN message m2 ON m1.sortid = m2.sortid WHERE m2.\"key\" = ? ORDER BY m1.\"timestamp\" ASC</string>
+    <string name="sql_message_set_member_summary">UPDATE message SET recipients_status = ? WHERE \"key\" = ?</string>
+    <string name="sql_message_get_alert_flags_of_open_messages">SELECT alert_flags FROM message WHERE needs_my_answer = 1 AND timestamp > ? AND existence = 1</string>
+    <string name="sql_message_update_form">UPDATE message SET form = ? WHERE \"key\" = ?</string>
+    <string name="sql_message_get_least_member_statusses">
+SELECT m.sender as "sender", ms.member as "member", ms.status as "status", m.flags as "flags"
+FROM member_status ms INNER JOIN (
+    SELECT m1.\"key\" as "thread_key", m1.sender as "sender", m1.flags as "flags"
+    FROM message m1
+    WHERE m1.\"key\" = ?
+    UNION
+    SELECT m2.\"key\" as "thread_key", m2.sender as "sender", m2.flags as "flags"
+    FROM message m2
+    WHERE m2.parent_key = ?) m ON ms.message = m.thread_key</string>
+    <string name="sql_message_update_thread_existence">UPDATE message SET existence = ? WHERE \"key\" = ? OR parent_key = ?</string>
+    <string name="sql_message_get_existence">SELECT existence FROM message WHERE \"key\" = ?</string>
+    <string name="sql_message_update_thread_show_in_list">UPDATE message SET thread_show_in_list = ? WHERE \"key\" = ? OR parent_key = ?</string>
+    <string name="sql_message_get_thread_show_in_list">SELECT thread_show_in_list FROM message WHERE \"key\" = ?</string>
+
+    <string name="sql_message_requested_conversation_insert">INSERT INTO requested_conversation (thread_key) VALUES (?)</string>
+    <string name="sql_message_requested_conversation_delete">DELETE FROM requested_conversation WHERE thread_key = ?</string>
+    <string name="sql_message_requested_conversation_count">SELECT COUNT(*) FROM requested_conversation WHERE thread_key = ?</string>
+
+    <string name="sql_message_insert_attachment">INSERT INTO message_attachment (message, content_type, download_url, size, name) VALUES (?,?,?,?,?)</string>
+    <string name="sql_message_get_attachments">SELECT content_type, download_url, size, name FROM message_attachment WHERE message=?</string>
+
+    <string name="sql_message_recalculate_show_in_list">UPDATE message SET needs_my_answer=needs_my_answer</string>
+
+    <string name="sql_thread_avatar_insert">INSERT OR REPLACE INTO thread_avatar (avatar_hash, avatar) VALUES (?, ?)</string>
+    <string name="sql_thread_avatar_get">SELECT avatar FROM thread_avatar WHERE avatar_hash = ?</string>
+    <string name="sql_thread_avatar_count">SELECT COUNT(*) FROM thread_avatar WHERE avatar_hash = ?</string>
+    <string name="sql_message_message_get">SELECT message FROM message WHERE \"key\" = ?</string>
+    
+    <!-- message flows -->
+    <string name="sql_mf_run_save">INSERT OR REPLACE INTO message_flow_run (parent_message_key, state, static_flow_hash) VALUES (?, ?, ?)</string>
+    <string name="sql_mf_run_get">SELECT state, static_flow_hash FROM message_flow_run WHERE parent_message_key = ?</string>
+    <string name="sql_mf_run_delete">DELETE FROM message_flow_run WHERE parent_message_key = ?</string>
+
+    <!-- my identity -->
+    <string name="sql_update_identity">UPDATE my_identity SET email=?, name=?, qualified_identifier=?, avatar_id=?, birthdate=?, gender=?, profile_data=?</string>
+    <string name="sql_update_identity_short_url">UPDATE my_identity SET short_link = ?</string>
+    <string name="sql_update_identity_avatar">UPDATE my_identity SET avatar = ?</string>
+    <string name="sql_update_identity_qr_code">UPDATE my_identity SET qr_code = ?, short_link = ?</string>
+    <string name="sql_get_identity">SELECT email, name, avatar, qr_code, short_link, qualified_identifier, avatar_id, birthdate, gender, profile_data FROM my_identity</string>
+
+
+    <!-- activity -->
+    <string name="sql_activity_insert">INSERT INTO activity (timestamp, \"type\", reference, parameters, friend_reference) VALUES (?,?,?,?,?)</string>
+    <string name="sql_activity_count_read">SELECT COUNT(*) FROM activity WHERE id &lt;= ?</string>
+    <string name="sql_activity_count_unread">SELECT COUNT(*) FROM activity WHERE id &gt; ?</string>
+    <string name="sql_activity_get_last_unread_activity">SELECT id FROM last_read_activity_id</string>
+    <string name="sql_activity_update_last_unread_activity">UPDATE last_read_activity_id SET id = (SELECT MAX(id) FROM activity)</string>
+    <string name="sql_activity_select_ids">SELECT id FROM activity ORDER BY timestamp DESC, id DESC LIMIT ?</string>
+    <string name="sql_activity_update_reference_key">UPDATE activity SET reference = ? WHERE reference = ?</string>
+    <string name="sql_activity_cursor_important_only_query">SELECT timestamp, \"type\", reference, parameters, friend_reference, rowid AS _id FROM activity WHERE \"type\" &lt; 100 OR \"type\" &gt;= 200 ORDER BY timestamp DESC LIMIT 400</string>
+    <string name="sql_activity_cursor_full_query">SELECT timestamp, \"type\", reference, parameters, friend_reference, rowid AS _id FROM activity ORDER BY timestamp DESC LIMIT 400</string>
+    <string name="sql_activity_delete_for_message">DELETE FROM activity WHERE reference IN (SELECT key FROM message WHERE key=? OR parent_key=?)</string>
+    
+    <!-- location -->
+    <string name="sql_insert_beacon_discovery">INSERT INTO beacon_discovery(uuid, name, timestamp) VALUES (?, ?, ?)</string>
+    <string name="sql_get_beacon_discovery">SELECT uuid, name, timestamp, friend_email FROM beacon_discovery WHERE uuid = ? AND name = ?</string>
+    <string name="sql_update_beacon_discovery">UPDATE beacon_discovery SET friend_email = ?, tag = ? WHERE uuid = ? AND name = ?</string>
+    <string name="sql_select_beacon_discovery_by_email">SELECT uuid, name FROM beacon_discovery WHERE friend_email = ?</string>
+    <string name="sql_delete_beacon_discovery_by_email">DELETE FROM beacon_discovery WHERE friend_email = ?</string>
+    <string name="sql_delete_beacon_discovery_by_uuid_and_name">DELETE FROM beacon_discovery WHERE uuid = ? AND name = ?</string>
+    <string name="sql_get_friend_connected_on_beacon_discovery">SELECT bd.friend_email, bd.tag, f.callbacks FROM beacon_discovery as bd INNER JOIN friend as f ON bd.friend_email=f.email WHERE bd.uuid = ? AND bd.name = ? AND (f.existence = 0 OR f.existence = 4)</string>
+    
+    <!-- js embedding -->
+    <string name="sql_get_js_embedding">SELECT name, hash, status FROM js_embedding</string>
+    <string name="sql_insert_js_embedding">INSERT OR REPLACE INTO js_embedding(name, hash, status) values (?, ?, ?)</string>
+    <string name="sql_delete_js_embedding">DELETE FROM js_embedding WHERE name = ?</string>  
+    
+    <!-- group -->
+    <string name="sql_get_group">SELECT rg.id, rg.name, rg.avatar, rg.avatar_hash, rgm.email FROM recipients_group rg LEFT OUTER JOIN recipients_group_member rgm ON rg.id = rgm.group_id LEFT OUTER JOIN friend f ON rgm.email = f.email WHERE rg.id = ? ORDER BY f.name COLLATE NOCASE</string>
+    <string name="sql_get_groups">SELECT id, name, avatar, avatar_hash FROM recipients_group ORDER BY name COLLATE NOCASE</string>
+    <string name="sql_group_list_cursor">SELECT rowid as _id, id, name, avatar, avatar_hash FROM recipients_group ORDER BY name COLLATE NOCASE</string>
+    <string name="sql_group_member_list_group">SELECT rgm.rowid as _id, rg.id, rg.name, rg.avatar, rg.avatar_hash, rgm.email FROM recipients_group rg LEFT OUTER JOIN recipients_group_member rgm ON rg.id = rgm.group_id INNER JOIN friend f ON rgm.email = f.email WHERE rg.id = ? ORDER BY f.name COLLATE NOCASE</string>
+    <string name="sql_insert_group">INSERT INTO recipients_group(id, name, avatar, avatar_hash) VALUES (?, ?, ?, ?)</string>
+    <string name="sql_update_group">UPDATE recipients_group SET name = ?, avatar = ?, avatar_hash = ? WHERE id = ?</string>
+    <string name="sql_delete_group">DELETE FROM recipients_group WHERE id = ?</string>
+    <string name="sql_delete_group_members">DELETE FROM recipients_group_member WHERE group_id = ?</string>
+    <string name="sql_insert_group_avatar">UPDATE recipients_group SET avatar = ? WHERE avatar_hash = ?</string>
+    <string name="sql_insert_group_avatar_hash">UPDATE recipients_group SET avatar_hash = ? WHERE id = ?</string>
+    <string name="sql_clear_group">DELETE FROM recipients_group</string>
+    <string name="sql_clear_empty_group">
+    DELETE FROM recipients_group WHERE id in (
+        SELECT id FROM
+	    (
+	        SELECT rg.id, count(rgm.group_id) as "cnt"
+	        FROM recipients_group rg LEFT OUTER JOIN recipients_group_member rgm ON rg.id = rgm.group_id
+	        GROUP BY rg.id
+	    )
+	    WHERE cnt = 0
+	)
+    </string>
+    <string name="sql_insert_group_member">INSERT OR REPLACE INTO recipients_group_member(group_id, email) VALUES (?, ?)</string>
+    <string name="sql_delete_group_member">DELETE FROM recipients_group_member WHERE group_id = ? AND email = ?</string>
+    <string name="sql_clear_group_member">DELETE FROM recipients_group_member</string>
+    <string name="sql_clear_group_member_by_email">DELETE FROM recipients_group_member WHERE email = ?</string>
+    
+    <!-- beacon region -->
+    <string name="sql_clear_beacon_regions">DELETE FROM beacon_region</string>
+    <string name="sql_get_beacon_regions">SELECT uuid, major, minor FROM beacon_region</string>
+    <string name="sql_insert_beacon_region">INSERT INTO beacon_region(uuid, major, minor) VALUES (?, ?, ?)</string>
+
+    <string name="sql_services_get_organization_type">SELECT f.rowid as _id, f.email, f.name, f.share_location, f.shares_location, f.avatar, f.existence, f.type, f.description, f.description_branding, f.poke_description, f.qualified_identifier, f.organization_type, f.callbacks, f.flags, f.profile_data, f.content_branding_hash, IFNULL(c.id, f.email) AS cat_id, ifnull(c.name, f.name) AS cat_name, c.avatar, count(f.email) FROM friend f LEFT OUTER JOIN friend_category c ON c.id = f.category_id WHERE (f.existence = 0 OR f.existence = 4) AND f.type = 2 AND organization_type=? GROUP BY cat_id ORDER BY cat_name COLLATE NOCASE</string>
+    <string name="sql_services_count_grouped_by_organization_type">SELECT organization_type, COUNT(*) FROM friend WHERE (existence = 0 OR existence = 4) AND type = 2 GROUP BY organization_type</string>
+    <string name="sql_services_count_by_organization_type">SELECT COUNT(*) FROM (SELECT IFNULL(category_id, email) AS category FROM friend WHERE type=2 AND (existence = 0 OR existence = 4) AND organization_type=? GROUP BY category)</string>
+
+    <!-- iOS-only queries -->
+    <string name="sql_friend_count_by_type">SELECT COUNT(*) FROM friend WHERE (existence = 0 OR existence = 4) AND \"type\" = ?</string>
+    <string name="sql_friend_update_email_hash">UPDATE friend SET email_hash = ? WHERE email = ?</string>
+    <string name="sql_friend_get_by_email_ios"     >SELECT email, name, share_location, shares_location, avatar, existence, \"type\", description, description_branding, poke_description, qualified_identifier, organization_type, callbacks, flags, profile_data, content_branding_hash FROM friend WHERE email = ?</string>
+    <string name="sql_friend_get_by_email_hash"    >SELECT email, name, share_location, shares_location, avatar, existence, \"type\", description, description_branding, poke_description, qualified_identifier, organization_type, callbacks, flags, profile_data, content_branding_hash FROM friend WHERE email_hash = ?</string>
+    <string name="sql_friend_get_by_index"         >SELECT email, name, share_location, shares_location, avatar, existence, \"type\", description, description_branding, poke_description, qualified_identifier, organization_type, callbacks, flags, profile_data, content_branding_hash FROM friend WHERE existence = 0 ORDER BY name COLLATE NOCASE LIMIT ?, 1</string>
+    <string name="sql_friend_get_by_type_and_index">SELECT email, name, share_location, shares_location, avatar, existence, \"type\", description, description_branding, poke_description, qualified_identifier, organization_type, callbacks, flags, profile_data, content_branding_hash FROM friend WHERE (existence = 0 OR existence = 4) AND \"type\" = ? ORDER BY name COLLATE NOCASE LIMIT ?, 1</string>
+    <string name="sql_friend_get_names">SELECT name FROM friend WHERE type = 1 and existence = 0 ORDER BY name COLLATE NOCASE;</string>
+
+    <string name="sql_services_count">SELECT COUNT(*) FROM (SELECT IFNULL(category_id, email) AS cat_id FROM friend WHERE type=2 AND (existence = 0 OR existence = 4) GROUP BY cat_id)</string>
+    <string name="sql_services_get_by_index">SELECT f.email, f.name, f.share_location, f.shares_location, f.avatar, f.existence, f.type, f.description, f.description_branding, f.poke_description, f.qualified_identifier, f.organization_type, f.callbacks, f.flags, f.profile_data, f.content_branding_hash, IFNULL(c.id, f.email) AS cat_id, ifnull(c.name, f.name) AS cat_name, c.avatar, count(f.email) FROM friend f LEFT OUTER JOIN friend_category c ON c.id = f.category_id WHERE (f.existence = 0 OR f.existence = 4) AND f.type = 2 GROUP BY cat_id ORDER BY cat_name COLLATE NOCASE LIMIT ?, 1</string>
+    <string name="sql_friend_count_by_category">SELECT COUNT(*) FROM friend WHERE (existence = 0 OR existence = 4) AND category_id=?</string>
+    <string name="sql_friend_get_by_category_and_index">SELECT email, name, share_location, shares_location, avatar, existence, \"type\", description, description_branding, poke_description, qualified_identifier, organization_type, callbacks, flags, profile_data, content_branding_hash FROM friend WHERE category_id=? AND (existence = 0 OR existence = 4) ORDER BY name COLLATE NOCASE LIMIT ?, 1</string>
+    <string name="sql_services_get_by_index_and_organization_type">SELECT f.email, f.name, f.share_location, f.shares_location, f.avatar, f.existence, f.type, f.description, f.description_branding, f.poke_description, f.qualified_identifier, f.organization_type, f.callbacks, f.flags, f.profile_data, f.content_branding_hash, IFNULL(c.id, f.email) AS cat_id, IFNULL(c.name, f.name) AS cat_name, c.avatar, count(f.email) FROM friend f LEFT OUTER JOIN friend_category c ON c.id = f.category_id WHERE (f.existence = 0 OR f.existence = 4) AND f.type = 2 AND organization_type=? GROUP BY cat_id ORDER BY cat_name COLLATE NOCASE LIMIT ?, 1</string>
+
+    <string name="sql_friend_get_full_menu">SELECT x, y, z, label, icon, screen_branding, static_flow_hash, hashed_tag, requires_wifi, run_in_background FROM service_menu_icon smi INNER JOIN service_menu_item smii ON smi.icon_hash = smii.icon_hash WHERE friend = ?</string>
+
+    <string name="sql_message_get_visible_count">SELECT count(*) FROM message WHERE show_in_message_list = 1 AND existence = 1</string>
+    <string name="sql_message_get_message_by_pkey_and_index"        >SELECT \"key\", parent_key, sender, message, timestamp, dirty, recipients, flags, needs_my_answer, reply_count, recipients_status, alert_flags, form, dismiss_button_ui_flags, thread_avatar_hash, thread_background_color, thread_text_color, priority, default_priority, default_sticky FROM message WHERE parent_key = ? or \"key\" = ? ORDER BY \"timestamp\" ASC LIMIT ?, 1</string>
+    <string name="sql_message_get_visible_message_by_pkey_and_index">SELECT \"key\", parent_key, sender, message, timestamp, dirty, recipients, flags, needs_my_answer, reply_count, recipients_status, alert_flags, form, dismiss_button_ui_flags, thread_avatar_hash, thread_background_color, thread_text_color, priority, default_priority, default_sticky FROM message WHERE show_in_message_list = 1 AND existence = 1 AND parent_key = ? or \"key\" = ? ORDER BY \"timestamp\" ASC LIMIT ?, 1</string>
+    <string name="sql_message_is_dirty">SELECT dirty FROM message WHERE \"key\" = ?</string>
+    <string name="sql_message_get_first_dirty_message">SELECT \"key\", parent_key, sender, message, \"timestamp\", flags, branding, needs_my_answer, reply_count, dirty FROM message WHERE needs_my_answer = 0 AND dirty = 1 AND existence = 1 ORDER BY timestamp DESC, ROWID ASC LIMIT 1</string>
+    <string name="sql_message_get_replies">SELECT \"key\" FROM message WHERE parent_key = ?</string>
+    <string name="sql_message_get_threads_by_member">
+SELECT DISTINCT m1.parent_key, m1.\"key\", m1.reply_count, m1.recipients, m1.thread_show_in_list, m1.flags
+FROM message m1
+    LEFT JOIN member_status ms ON m1.\"key\" = ms.message
+    LEFT JOIN message m2 ON m1.parent_key = m2.\"key\"
+WHERE (m1.show_in_message_list > 0) AND m1.existence = 1 AND (ms.member = ? OR m1.sender = ? OR m2.sender = ?)
+ORDER BY m1.thread_dirty DESC, m1.timestamp DESC
+    </string>
+    <string name="sql_message_get_threads">
+SELECT m.parent_key, m.\"key\", m.reply_count, m.recipients, m.thread_show_in_list, m.flags, f.priority, m.default_priority, m.default_sticky, f.unread_count
+FROM
+        (SELECT ifnull(parent_key,key) as fkey, parent_key, \"key\", reply_count, recipients, thread_show_in_list, flags, dirty, thread_dirty, timestamp, default_priority, default_sticky FROM message WHERE show_in_message_list = 1 AND existence = 1) m
+    LEFT OUTER JOIN
+        (SELECT ifnull(parent_key,key) as fkey, max(priority) as priority, COUNT(dirty) as unread_count FROM message WHERE dirty = 1 AND existence = 1 GROUP BY fkey) f
+    ON m.fkey = f.fkey
+ORDER BY m.thread_dirty DESC, m.\"timestamp\" DESC;
+    </string>
+    <string name="sql_message_get_thread_by_key">SELECT reply_count, recipients, last_thread_message, thread_show_in_list, flags, priority FROM message WHERE \"key\" = ? AND existence = 1</string>
+
+    <string name="sql_message_set_message_dirty_ios">UPDATE message SET dirty = ? WHERE \"key\" = ?</string>
+    <string name="sql_message_get_dirty_count_ios">SELECT count(*) FROM message WHERE needs_my_answer = 0 AND dirty = 1 AND existence = 1</string>
+
+    <string name="sql_get_identity_qr_code">SELECT qr_code FROM my_identity</string>
+
+    <string name="sql_activity_get_by_index">SELECT id, timestamp, \"type\", reference, parameters, friend_reference FROM activity ORDER BY id DESC LIMIT ?, 1</string>
+    <string name="sql_activity_get_by_id">SELECT timestamp, \"type\", reference, parameters, friend_reference FROM activity WHERE id = ?</string>
+    
+    <string name="sql_configprovider_insert">INSERT OR REPLACE INTO ConfigurationProvider(category, valuetype, key, value) values (?, ?, ?, ?)</string>
+    <string name="sql_configprovider_get">SELECT value FROM ConfigurationProvider WHERE category=? AND valuetype=? AND key=?</string>
+    <string name="sql_configprovider_delete">DELETE FROM ConfigurationProvider WHERE category=? AND valuetype=? AND key=?</string>
+</resources>

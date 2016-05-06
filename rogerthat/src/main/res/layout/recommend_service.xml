@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:id="@+id/tab_view"
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:background="@android:color/white"
+        android:baselineAligned="false" >
+
+        <RelativeLayout
+            android:id="@+id/rogerthat_layout"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1" >
+
+            <View
+                android:id="@+id/rogerthat_indicator"
+                android:layout_width="fill_parent"
+                android:layout_height="5dp"
+                android:layout_alignParentBottom="true"
+                android:background="@color/mc_blue2" />
+
+            <ImageView
+                android:id="@+id/rogerthat_img"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_above="@id/rogerthat_indicator"
+                android:layout_margin="5dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_launcher" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/contacts_layout"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1" >
+
+            <View
+                android:id="@+id/contacts_indicator"
+                android:layout_width="fill_parent"
+                android:layout_height="5dp"
+                android:layout_alignParentBottom="true"
+                android:background="@color/mc_blue2"
+                android:visibility="invisible" />
+
+            <ImageView
+                android:id="@+id/contacts_img"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_above="@id/contacts_indicator"
+                android:layout_margin="5dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/contacts_icon" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/mail_layout"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1" >
+
+            <View
+                android:id="@+id/mail_indicator"
+                android:layout_width="fill_parent"
+                android:layout_height="5dp"
+                android:layout_alignParentBottom="true"
+                android:background="@color/mc_blue2"
+                android:visibility="invisible" />
+
+            <ImageView
+                android:id="@+id/mail_img"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_above="@id/mail_indicator"
+                android:layout_margin="5dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/mail_icon" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/facebook_layout"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1" >
+
+            <View
+                android:id="@+id/facebook_indicator"
+                android:layout_width="fill_parent"
+                android:layout_height="5dp"
+                android:layout_alignParentBottom="true"
+                android:background="@color/mc_blue2"
+                android:visibility="invisible" />
+
+            <ImageView
+                android:id="@+id/facebook_img"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_above="@id/facebook_indicator"
+                android:layout_margin="5dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/f" />
+        </RelativeLayout>
+    </LinearLayout>
+
+    <com.mobicage.rogerthat.util.ui.SafeViewFlipper
+        android:id="@+id/view_flipper"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:background="@color/mc_background"
+        android:inAnimation="@android:anim/fade_in"
+        android:outAnimation="@android:anim/fade_out" >
+
+        <LinearLayout
+            android:id="@+id/recommend_to_friends"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/recommend_to_friends_title"
+                style="?android:attr/listSeparatorTextViewStyle"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="2dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:paddingTop="2dp"
+                android:textSize="16dp" />
+
+            <ListView
+                android:id="@+id/recommend_to_friends_listview"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:fastScrollEnabled="true" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/recommend_to_contacts"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/recommend_to_contacts_title"
+                style="?android:attr/listSeparatorTextViewStyle"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="2dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:paddingTop="2dp"
+                android:textSize="16dp" />
+
+            <ListView
+                android:id="@+id/recommend_to_contacts_listview"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:cacheColorHint="#00000000"
+                android:fastScrollEnabled="true" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/recommend_to_email"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:orientation="vertical"
+            android:padding="10dp" >
+
+            <TextView
+                android:id="@+id/recommend_email_description"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="50dp"
+                android:gravity="center"
+                android:text="@string/recommend_email_description"
+                android:textSize="16sp" />
+
+            <AutoCompleteTextView
+                android:id="@+id/recommend_email_text_field"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/email"
+                android:imeOptions="actionDone"
+                android:inputType="textEmailAddress"
+                android:textColor="@android:color/primary_text_light"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/recommend_email_button"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="50dp"
+                android:text="@string/recommend_service" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/recommend_on_fb"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:orientation="vertical"
+            android:padding="10dp" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="50dp"
+                android:gravity="center"
+                android:text="@string/recommend_on_fb_description"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/recommend_on_fb_button"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/recommend_on_fb" />
+        </LinearLayout>
+    </com.mobicage.rogerthat.util.ui.SafeViewFlipper>
+
+</LinearLayout>

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+    <include android:id="@+id/nav_bar" layout="@layout/navigation_bar" />
+
+    <LinearLayout
+        android:id="@+id/tab_view"
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:background="@android:color/white"
+        android:baselineAligned="false" >
+
+        <RelativeLayout
+            android:id="@+id/contacts_layout"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1" >
+
+            <View
+                android:id="@+id/contacts_indicator"
+                android:layout_width="fill_parent"
+                android:layout_height="5dp"
+                android:layout_alignParentBottom="true"
+                android:background="@color/mc_blue2" />
+
+            <ImageView
+                android:id="@+id/contacts_img"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_above="@id/contacts_indicator"
+                android:layout_margin="5dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/contacts_icon" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/facebook_layout"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1" >
+
+            <View
+                android:id="@+id/facebook_indicator"
+                android:layout_width="fill_parent"
+                android:layout_height="5dp"
+                android:layout_alignParentBottom="true"
+                android:background="@color/mc_blue2"
+                android:visibility="invisible" />
+
+            <ImageView
+                android:id="@+id/facebook_img"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_above="@id/facebook_indicator"
+                android:layout_margin="5dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/f" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/qr_scan_layout"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1" >
+
+            <View
+                android:id="@+id/qr_scan_indicator"
+                android:layout_width="fill_parent"
+                android:layout_height="5dp"
+                android:layout_alignParentBottom="true"
+                android:background="@color/mc_blue2"
+                android:visibility="invisible" />
+
+            <ImageView
+                android:id="@+id/qr_scan_img"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_above="@id/qr_scan_indicator"
+                android:layout_margin="5dp"
+                android:scaleType="fitCenter" 
+                android:src="@drawable/qr_icon" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/mail_layout"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1" >
+
+            <View
+                android:id="@+id/mail_indicator"
+                android:layout_width="fill_parent"
+                android:layout_height="5dp"
+                android:layout_alignParentBottom="true"
+                android:background="@color/mc_blue2"
+                android:visibility="invisible" />
+
+            <ImageView
+                android:id="@+id/mail_img"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_above="@id/mail_indicator"
+                android:layout_margin="5dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/mail_icon" />
+        </RelativeLayout>
+    </LinearLayout>
+
+    <com.mobicage.rogerthat.util.ui.SafeViewFlipper
+        android:id="@+id/view_flipper"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:background="@color/mc_background"
+        android:inAnimation="@android:anim/fade_in"
+        android:outAnimation="@android:anim/fade_out" >
+
+        <include layout="@layout/add_friends_via_contacts" />
+
+        <include layout="@layout/add_friends_via_facebook" />
+
+        <include layout="@layout/add_friends_via_qr_scan" />
+
+        <LinearLayout
+            android:id="@+id/add_via_email"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:orientation="vertical"
+            android:padding="10dp" >
+
+            <TextView
+                android:id="@+id/add_via_email_description"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="50dp"
+                android:gravity="center"
+                android:text="@string/add_via_email_description"
+                android:textSize="16sp" />
+
+            <AutoCompleteTextView
+                android:id="@+id/add_via_email_text_field"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/email"
+                android:imeOptions="actionDone"
+                android:inputType="textEmailAddress"
+                android:textColor="@android:color/primary_text_light"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/add_via_email_button"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="50dp" />
+        </LinearLayout>
+    </com.mobicage.rogerthat.util.ui.SafeViewFlipper>
+
+</LinearLayout>

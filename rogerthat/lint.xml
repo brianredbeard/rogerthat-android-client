@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lint>
+    <issue id="ContentDescription" severity="ignore" />
+    <issue id="MissingTranslation" severity="warning">
+        <ignore path="res/values/db_sql.xml" />
+    </issue>
+    <issue id="UnusedResources">
+        <ignore path="res/values/db_sql.xml" />
+    </issue>
+</lint>

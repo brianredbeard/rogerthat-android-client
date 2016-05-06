@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.mobicage.rogerthat.plugins.messaging.widgets.MyDigiPassWidget xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+
+    <Button
+        android:id="@+id/authenticate_btn"
+        android:layout_width="fill_parent"
+        android:layout_height="88dp"
+        android:drawableLeft="@drawable/mdp_icon"
+        android:text="@string/authenticate" />
+
+    <ImageView
+        android:id="@+id/image_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="5dp"
+        android:visibility="gone" />
+
+    <ListView
+        android:id="@+id/list_view"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:background="@drawable/gray_border"
+        android:divider="@color/mc_divider_gray"
+        android:dividerHeight="1dip"
+        android:visibility="gone" />
+
+</com.mobicage.rogerthat.plugins.messaging.widgets.MyDigiPassWidget>

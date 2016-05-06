@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    tools:ignore="UselessParent" >
+    
+    <include android:id="@+id/nav_bar" layout="@layout/navigation_bar" />
+
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none" >
+
+        <LinearLayout
+            android:id="@+id/profile_layout"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/mc_highlight_background"
+            android:orientation="vertical"
+            android:padding="5dp" >
+
+            <include layout="@layout/friend_detail_header" />
+
+            <LinearLayout
+                android:id="@+id/update_profile_avatar"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal"
+                android:visibility="gone" >
+
+                <ImageView
+                    android:id="@+id/update_profile_avatar_img"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:background="@drawable/avatar_background_black"
+                    android:padding="1dp" >
+                </ImageView>
+
+                <Button
+                    android:id="@+id/update_avatar"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/get_new_avatar" />
+            </LinearLayout>
+            
+            <RelativeLayout
+                android:id="@+id/update_profile_name"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:padding="5dp"
+                android:orientation="horizontal"
+                android:visibility="gone" >
+
+                <TextView
+                    android:id="@+id/update_profile_name_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerInParent="true"
+                    android:text="@string/name"
+                    android:textSize="16sp" />
+                
+                <ImageView
+                    android:id="@+id/update_profile_name_edit"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/ic_menu_edit">
+                </ImageView>
+
+                <EditText
+                    android:id="@+id/update_profile_name_value"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:background="@null"
+                    android:layout_toLeftOf="@+id/update_profile_name_edit"
+                    android:layout_toRightOf="@+id/update_profile_name_text"
+                    android:layout_centerInParent="true"
+                    android:inputType="text"
+                    android:singleLine="true" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/profile_birthdate"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:padding="5dp"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:id="@+id/profile_birthdate_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerInParent="true"
+                    android:text="@string/birthdate"
+                    android:textSize="16sp"/>
+
+                <ImageView
+                    android:id="@+id/profile_birthdate_edit"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/ic_menu_edit"
+                    android:visibility="gone" >
+                </ImageView>
+
+                <TextView
+                    android:id="@+id/profile_birthdate_text"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_marginLeft="10dp"
+                    android:layout_toLeftOf="@+id/profile_birthdate_edit"
+                    android:layout_toRightOf="@+id/profile_birthdate_name"
+                    android:textStyle="bold"
+                    android:singleLine="true"
+                    android:textSize="16sp" />
+            </RelativeLayout>
+            
+            <RelativeLayout
+                android:id="@+id/profile_gender"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:padding="5dp"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:id="@+id/profile_gender_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerInParent="true"
+                    android:text="@string/gender"
+                    android:textSize="16sp" />
+
+                <ImageView
+                    android:id="@+id/profile_gender_edit"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/ic_menu_edit"
+                    android:visibility="gone" >
+                </ImageView>
+
+                <TextView
+                    android:id="@+id/profile_gender_text"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_marginLeft="10dp"
+                    android:layout_toLeftOf="@+id/profile_gender_edit"
+                    android:layout_toRightOf="@+id/profile_gender_name"
+                    android:textStyle="bold"
+                    android:singleLine="true"
+                    android:textSize="16sp" />
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_gravity="bottom"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal" >
+
+                <Button
+                    android:id="@+id/complete_profile_skip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/skip"
+                    android:visibility="gone" >
+                </Button>
+
+                <Button
+                    android:id="@+id/update_profile"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/edit_profile" >
+                </Button>
+            </LinearLayout>
+            
+            <LinearLayout 
+                android:id="@+id/profile_data"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:orientation="vertical"
+                android:visibility="gone" >
+
+            </LinearLayout>
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_marginTop="10dp" >
+
+                <ImageView
+                    android:id="@+id/qrcode"
+                    android:layout_width="348dp"
+                    android:layout_height="343dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentTop="true"
+                    android:adjustViewBounds="true" />
+            </RelativeLayout>
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>
