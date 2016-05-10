@@ -16,6 +16,7 @@
     <string name="action_tel">tel</string>
     <string name="action_www">www</string>
     <string name="actions">Actions</string>
+    <string name="activate">Activate</string>
     <string name="activating">Activating…</string>
     <string name="activity_answer_reverted">Answer reverted.</string>
     <string name="activity_answer_reverted_to">Answer reverted to: %1$s.</string>
@@ -48,6 +49,7 @@
     <string name="alarm_sound_custom">Custom sound</string>
     <string name="alarm_sound_default">Default sound</string>
     <string name="all_friends">All friends</string>
+    <string name="allow">Allow</string>
     <string name="already_friend">You are already friends with %1$s.</string>
     <string name="ask_a_question">Ask a question</string>
     <string name="associations">Associations</string>
@@ -312,7 +314,11 @@
     <string name="register_first">Complete the registration now</string>
     <string name="registration_activating_account">Activating your %1$s account…</string>
     <string name="registration_agree_tos">Agree and continue</string>
+    <string name="registration_btn_agree_tos">Agree &amp; continue</string>
+    <string name="registration_city_app_sign_up">Fill in your e-mail below and start enjoying the wonderfull local town of %1$s.</string>
+    <string name="registration_email">E-mail</string>
     <string name="registration_email_not_valid">Enter a valid e-mail address</string>
+    <string name="registration_enter_code">Enter code</string>
     <string name="registration_enter_email_hint">Enter your e-mail address</string>
     <string name="registration_enter_email_hint_enterprise">Enter company e-mail address</string>
     <string name="registration_enter_pin">Enter activation code to complete registration</string>
@@ -332,14 +338,16 @@
     <string name="registration_no_attempts_left">You entered a wrong activation code three times.\n\nPlease restart your registration.</string>
     <string name="registration_option_email">Option 2:\nLog in using your e-mail address.</string>
     <string name="registration_option_fb">Option 1:\nLog in using your Facebook account.</string>
-    <string name="registration_pin_was_mailed">Your activation code was mailed to&lt;br /&gt;&lt;b&gt;%1$s&lt;/b&gt;&lt;br /&gt;&lt;br /&gt; You might need to check your Spam or Junk mail folders.</string>
-    <string name="registration_pin_was_mailed_no_html">Your activation code was mailed to %1$s at %2$s\nYou might need to check your Spam or Junk mail folders.</string>
+    <string name="registration_pin_was_mailed">To verify your e-mail we sent an activation code to %1$s \n\n You might need to check your Spam or Junk mail folders.</string>
+    <string name="registration_pin_was_mailed_no_html">Your activation code was mailed to %1$s at %2$s\nYou might need to check your spam or junk mail folders.</string>
     <string name="registration_request_new_pin">Request new activation code</string>
     <string name="registration_screen_install_zxing">%1$s uses the ZXing barcode scanner for automating a number of tasks.\n\nDo you want to install the ZXing barcode scanner now?</string>
     <string name="registration_screen_instructions_check_network_not_available">No network available. Check your network settings and retry when network connectivity is restored.</string>
     <string name="registration_send_code">Send activation code</string>
     <string name="registration_sending_email">Mailing your activation code\nto %1$s.</string>
     <string name="registration_sending_pin_error">An error occurred while verifying your activation code. Please try again.</string>
+    <string name="registration_sing_up_email">Sign up with e-mail</string>
+    <string name="registration_sing_up_facebook">Sign up with Facebook</string>
     <string name="registration_success">Registration complete.\n\nIf you received a 2-step %1$s invitation, open it and proceed with step 2.\n\nIf you received a QR code, press Scan.\n\nOtherwise press Continue.</string>
     <string name="registration_success_title">Congratulations</string>
     <string name="registration_success_without_invitation">You successfully registered %1$s.</string>
@@ -347,7 +355,9 @@
     <string name="registration_tos">Terms and conditions</string>
     <string name="registration_use_email">Use e-mail</string>
     <string name="registration_use_fb">Use Facebook</string>
+    <string name="registration_verify_email">Use Facebook</string>
     <string name="registration_welcome">Welcome to %1$s!</string>
+    <string name="registration_welcome_text">Welcome to the %1$s App. Your app to connect with your service providers and share them with friends.\n\nBefore you can start you need to register. Tap the “Agree &amp; Continue” button to proceed.</string>
     <string name="remove_canned_button">Do you want to remove button \"%1$s\" from the list?</string>
     <string name="remove_friend">Unfriend</string>
     <string name="remove_service">Disconnect service</string>

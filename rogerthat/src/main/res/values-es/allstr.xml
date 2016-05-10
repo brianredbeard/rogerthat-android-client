@@ -332,7 +332,7 @@
     <string name="registration_no_attempts_left">Se ha introducido un código de activación erróneo en tres intentos.\n\nPor favor, reinicie su proceso de registro.</string>
     <string name="registration_option_email">Opción 2:\nRegístrese usando correo electrónico.</string>
     <string name="registration_option_fb">Opción 1:\nRegístrese usando Facebook.</string>
-    <string name="registration_pin_was_mailed">Su código de activación se ha enviado a&lt;br /&gt;&lt;b&gt;%1$s&lt;/b&gt;&lt;br /&gt;&lt;br /&gt; No olvide comprobar sus carpetas de correo basura y spam.</string>
+    <string name="registration_pin_was_mailed">Su código de activación se ha enviado a %1$s\n\nNo olvide comprobar sus carpetas de correo basura y spam.</string>
     <string name="registration_pin_was_mailed_no_html">Su código de activación se ha enviado a %1$s en %2$s\nNo olvide comprobar sus carpetas de correo basura y spam.</string>
     <string name="registration_request_new_pin">Solicite un nuevo código de activación</string>
     <string name="registration_screen_install_zxing">%1$s utiliza el lector de código de barras ZXing para la automatización de una serie de tareas.\n\n¿Desea instalar el lector de código de barras ZXing ahora?</string>

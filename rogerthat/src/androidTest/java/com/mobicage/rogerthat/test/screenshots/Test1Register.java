@@ -73,7 +73,7 @@ public class Test1Register {
         // Fill in email field
         onView(withId(R.id.registration_enter_email))
                 .perform(typeText("apple.review@rogerth.at"));
-        onView(withId(R.id.registration_continue_email))
+        onView(withId(R.id.login_via_email))
                 .perform(click());
 /*
         TODO: this suddenly stopped working

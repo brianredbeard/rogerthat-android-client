@@ -313,7 +313,7 @@
     <string name="registration_no_attempts_left">Ati introdus codul de activare gresit de trei ori. \n\nVa rugam sa reporniti inregistrarea.</string>
     <string name="registration_option_email">Optiunea 2:\nTe poti loga cu ajutorul adresei de e-mail.</string>
     <string name="registration_option_fb">Optiunea 1:\nTe poti loga cu ajutorul contului de facebook.</string>
-    <string name="registration_pin_was_mailed">Codul de activare a fost trimis prin posta la&lt;br /&gt;&lt;b&gt;%1$s&lt;/b&gt;&lt;br /&gt;&lt;br /&gt; S-ar putea sa fie nevoie sa verifica-ti dosarele Spam sau e-mail Junk.</string>
+    <string name="registration_pin_was_mailed">Codul de activare a fost trimis prin posta la %1$s\n\nS-ar putea sa fie nevoie sa verifica-ti dosarele Spam sau e-mail Junk.</string>
     <string name="registration_pin_was_mailed_no_html">Codul de activare a fost trimis la %1$s at %2$s\nS-ar putea sa fie nevoie sa verifica-ti dosarele Spam sau e-mail Junk.</string>
     <string name="registration_request_new_pin">Solicita un nou cod de activare</string>
     <string name="registration_screen_install_zxing">%1$s foloseste scanner de coduri de bare ZXing pentru automatizarea unui numar de sarcini. \n\nNu doriti sa instalati scanerul de coduri de bare ZXing acum?</string>
