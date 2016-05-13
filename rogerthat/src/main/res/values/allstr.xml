@@ -56,6 +56,7 @@
     <string name="attachment_name_video">&lt;Video&gt;</string>
     <string name="authenticate">Authenticate</string>
     <string name="authenticate_first">You need to authenticate before you can continue.</string>
+    <string name="authenticate_via_your_oauth_account">Authenticate using your \'%1$s\' account.</string>
     <string name="back">Back</string>
     <string name="birthdate">Day of birth</string>
     <string name="broadcast_subscribed_to">You received this message because you are subscribed to: %1$s.</string>

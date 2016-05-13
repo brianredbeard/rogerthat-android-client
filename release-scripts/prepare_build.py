@@ -170,6 +170,7 @@ def startmove():
                    lambda m: '<%s android:name="%s.%s"' % (m.group(1), NEW_PACKAGE_NAME, m.group(2)),
                    s)
         s = re.sub('mdp-rogerthat', 'mdp-%s' % APP_ID, s)
+        s = re.sub('oauth-rogerthat', 'oauth-%s' % APP_ID, s)
 
         f.seek(0)
         f.write(s)
@@ -476,6 +477,15 @@ def convert_config():
 
 
     speech_to_text = bool_str(doc["APP_CONSTANTS"].get("SPEECH_TO_TEXT", False))
+    registration_type = long(doc['APP_CONSTANTS'].get('REGISTRATION_TYPE', 1))
+    if registration_type == 1:
+        registration_type = 'REGISTRATION_TYPE_DEFAULT'
+        registration_type_oauth_domain = 'dummy'
+    elif registration_type == 2:
+        registration_type = 'REGISTRATION_TYPE_OAUTH'
+        registration_type_oauth_domain = doc['APP_CONSTANTS']['REGISTRATION_TYPE_OAUTH_DOMAIN']
+    else:
+        raise Exception('Invalid registration type %d' % registration_type)
 
     output = u'''%(LICENSE)s
 
@@ -489,9 +499,15 @@ public class AppConstants {
     static final int APP_TYPE_ENTERPRISE = 2;
     static final int APP_TYPE_CONTENT_BRANDING = 3;
     static final int APP_TYPE_YSAAA = 4;
-
     static int getAppType() {
         return %(app_type)s;
+    };
+
+    public static final int REGISTRATION_TYPE_DEFAULT = 1;
+    public static final int REGISTRATION_TYPE_OAUTH = 2;
+    public static final String REGISTRATION_TYPE_OAUTH_DOMAIN = "%(registration_type_oauth_domain)s";
+    public static int getRegistrationType() {
+        return %(registration_type)s;
     };
 
     // Customized by App flavor
@@ -552,7 +568,9 @@ public class AppConstants {
            about_facebook=about_facebook,
            about_facebook_url=about_facebook_url,
            speech_to_text=speech_to_text,
-           app_service_guid=app_service_guid)
+           app_service_guid=app_service_guid,
+           registration_type=registration_type,
+           registration_type_oauth_domain=registration_type_oauth_domain)
 
     path = os.path.join(SRC_JAVA_DIR, "com", "mobicage", "rpc", "config")
     if not os.path.exists(path):

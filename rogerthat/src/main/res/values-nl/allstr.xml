@@ -56,6 +56,7 @@
     <string name="attachment_name_video">&lt;Video&gt;</string>
     <string name="authenticate">Authenticeren</string>
     <string name="authenticate_first">Gelieve te authenticeren vooraleer verder te gaan.</string>
+    <string name="authenticate_via_your_oauth_account">Authenticeren met behulp van uw \'%1$s\' account</string>
     <string name="back">Terug</string>
     <string name="birthdate">Geboortedatum</string>
     <string name="broadcast_subscribed_to">Je ontvangt dit bericht omdat je bent ingeschreven op: %1$s.</string>

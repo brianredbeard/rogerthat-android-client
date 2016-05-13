@@ -281,11 +281,82 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="fill_parent"
             android:orientation="vertical" >
 
             <com.mobicage.rogerthat.util.ui.ScaleImageView
                 android:id="@+id/full_width_rogerthat_logo3"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:adjustViewBounds="true"
+                android:scaleType="fitStart"
+                android:src="@drawable/registration_logo"
+                android:visibility="gone" />
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:padding="10dp" >
+
+                <ImageView
+                    android:id="@+id/rogerthat_logo3"
+                    android:layout_alignParentTop="true"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="30dp"
+                    android:layout_marginTop="20dp"
+                    android:adjustViewBounds="true"
+                    android:src="@drawable/registration_logo" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_below="@id/rogerthat_logo3"
+                    android:layout_above="@+id/login_via_oauth"
+                    android:layout_gravity="center"
+                    android:orientation="vertical" >
+
+                    <TextView
+                        android:id="@+id/oauth_icon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:layout_gravity="center_horizontal"
+                        android:text="@string/fa_lock"
+                        android:textColor="@color/mc_primary_color"
+                        android:textSize="75sp" />
+
+                    <TextView
+                        android:id="@+id/oauth_text"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:gravity="center_horizontal"
+                        android:text="_Authenticate using your 'dummy' account._"
+                        android:textColor="@color/mc_homescreen_text"
+                        android:textSize="18sp" />
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/login_via_oauth"
+                    android:layout_alignParentBottom="true"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
+                    android:text="@string/authenticate"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </RelativeLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <com.mobicage.rogerthat.util.ui.ScaleImageView
+                android:id="@+id/full_width_rogerthat_logo4"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
@@ -302,7 +373,7 @@
                 android:padding="10dp" >
 
                 <ImageView
-                    android:id="@+id/rogerthat_logo3"
+                    android:id="@+id/rogerthat_logo4"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
@@ -366,7 +437,7 @@
             android:orientation="vertical" >
 
             <com.mobicage.rogerthat.util.ui.ScaleImageView
-                android:id="@+id/full_width_rogerthat_logo4"
+                android:id="@+id/full_width_rogerthat_logo5"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
@@ -383,7 +454,7 @@
                 android:padding="10dp" >
 
                 <ImageView
-                    android:id="@+id/rogerthat_logo4"
+                    android:id="@+id/rogerthat_logo5"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"

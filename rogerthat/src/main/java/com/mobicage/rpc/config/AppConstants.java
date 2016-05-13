@@ -26,9 +26,15 @@ public class AppConstants {
     static final int APP_TYPE_ENTERPRISE = 2;
     static final int APP_TYPE_CONTENT_BRANDING = 3;
     static final int APP_TYPE_YSAAA = 4;
-
     static int getAppType() {
         return APP_TYPE_ROGERTHAT;
+    };
+
+    public static final int REGISTRATION_TYPE_DEFAULT = 1;
+    public static final int REGISTRATION_TYPE_OAUTH = 2;
+    public static final String REGISTRATION_TYPE_OAUTH_DOMAIN = "dummy";
+    public static int getRegistrationType() {
+        return REGISTRATION_TYPE_OAUTH;
     };
 
     // Customized by App flavor
