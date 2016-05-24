@@ -23,5 +23,6 @@ release-scripts/.pydevproject
 CustomCloudConstants.java
 .gradle
 /.idea/workspace.xml
+/.idea/runConfigurations.xml
 /.idea/libraries
 build

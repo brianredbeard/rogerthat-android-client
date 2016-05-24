@@ -198,6 +198,8 @@ def convert_config():
     mainScreenContainsFriends = False
     mainScreenContainsProfile = False
 
+    add_translations(doc)
+
     ##### HOMESCREEN #############################################
     if doc["HOMESCREEN"].get("style") != HOME_SCREEN_STYLE_TABS:
 
@@ -604,6 +606,38 @@ public class AppConstants {
         app_utils.create_trusstore(APP_ID, os.path.join(ANDROID_SRC_DIR, "main", "assets", "truststore.bks"))
 
 
+def encode_translation(s):
+    return s.replace("\n", "\\n") \
+            .replace("'", "\\'") \
+            .replace('\r', '') \
+            .replace('"', '\\"') \
+            .replace("&", "&amp;") \
+            .replace("<", "&lt;") \
+            .replace(">", "&gt;")
+
+
+def add_translations(doc):
+    translations = doc.get('TRANSLATIONS')
+    if not translations:
+        return
+
+    for language, entries in translations.iteritems():
+        values_dir = 'values'
+        if language != 'en':
+            values_dir += '-' + language
+        all_str_xml = os.path.join(SRC_RES_DIR, values_dir, 'allstr.xml')
+        added_lines = list()
+        for entry in entries:
+            added_lines.append('    <string name="%s">%s</string>' % (entry['name'],
+                                                                      encode_translation(entry['value'])))
+        if added_lines:
+            added_lines.insert(0, '    <!-- Extra translations added via build.yaml -->')
+            with open(all_str_xml, 'rb+') as all_str_f:
+                s = all_str_f.read()
+                all_str_f.seek(0)
+                all_str_f.write(s.replace('</resources>', '%s\n</resources>' % '\n'.join(added_lines)))
+
+
 def generate_custom_cloud_constants(doc):
     ##### CLOUD CONSTANTS ###################################
     params = dict(LICENSE=LICENSE)
@@ -701,15 +735,15 @@ if __name__ == "__main__":
         localized_path = os.path.join(src_dir_images_0, 'localized')
         if os.path.exists(localized_path):
             for dir_name in os.listdir(localized_path):
-                dir = localized_path + os.sep + dir_name
-                for file_name in os.listdir(dir):
+                d = os.path.join(localized_path, dir_name)
+                for file_name in os.listdir(d):
                     if dir_name == 'en':
-                        shutil.copyfile(os.path.join(dir, file_name), os.path.join(to_dir_images_0, file_name))
+                        shutil.copyfile(os.path.join(d, file_name), os.path.join(to_dir_images_0, file_name))
                     else:
                         target_dir = os.path.realpath(os.path.join(SRC_RES_DIR, 'drawable-' + dir_name))
                         if not os.path.exists(target_dir):
                             os.mkdir(target_dir)
-                        shutil.copyfile(os.path.join(dir, file_name), os.path.join(target_dir, file_name))
+                        shutil.copyfile(os.path.join(d, file_name), os.path.join(target_dir, file_name))
 
     src_dir_images_1 = os.path.join(APP_DIR, 'images', 'android')
     to_dir_images_1 = os.path.join(SRC_RES_DIR, 'drawable')

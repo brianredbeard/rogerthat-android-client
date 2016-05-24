@@ -31,6 +31,7 @@ def main():
             pass
         else:
             raise
+
     with open(os.path.join(CURRENT_PATH, '.bootstrap_data','CustomCloudConstants.java.start'), 'r') as start_file:
         with open(os.path.join(CURRENT_PATH, 'rogerthat','src','main','java','com','mobicage','rpc','config','CustomCloudConstants.java'), 'w') as cloud_constants:
             file_contents = start_file.read()
@@ -38,7 +39,10 @@ def main():
                 file_contents = file_contents.replace('dummy_dashboard_email', app_config['APP_CONSTANTS']['DASHBOARD_EMAIL'])
                 file_contents = file_contents.replace('dummy_email_encryption_key', app_config['APP_CONSTANTS']['EMAIL_HASH_ENCRYPTION_KEY'])
             cloud_constants.write(file_contents)
-    shutil.copy2(os.path.join(CURRENT_PATH, '.bootstrap_data', 'secrets.xml'), os.path.join(CURRENT_PATH, 'rogerthat', 'src', 'main', 'res', 'values', 'secrets.xml'))
+
+    secrets_dest = os.path.join(CURRENT_PATH, 'rogerthat', 'src', 'main', 'res', 'values', 'secrets.xml')
+    if not os.path.exists(secrets_dest):
+        shutil.copy2(os.path.join(CURRENT_PATH, '.bootstrap_data', 'secrets.xml'), secrets_dest)
 
 if __name__ == "__main__":
     main()
