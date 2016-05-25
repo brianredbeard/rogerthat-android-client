@@ -408,9 +408,12 @@ def convert_config():
         home_activity = "R.layout.homescreen_2x3"
     elif home_screen_style == HOME_SCREEN_STYLE_3X3:
         show_nav_header = "true"
-        home_activity = "R.layout.homescreen_3x3"
+        if doc['HOMESCREEN'].get('show_qr_code', doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_CITYPAPP):
+            home_activity = "R.layout.homescreen_3x3_with_qr_code"
+        else:
+            home_activity = "R.layout.homescreen_3x3"
 
-    homescreen_qrcode_header = doc["HOMESCREEN"].get("QRCODE_HEADER", "loyalty_card_description");
+    homescreen_qrcode_header = doc["HOMESCREEN"].get("qrcode_header", "loyalty_card_description");
 
     friends_enabled = bool_str(doc["APP_CONSTANTS"].get("FRIENDS_ENABLED", True))
     friends_caption = doc["APP_CONSTANTS"].get("FRIENDS_CAPTION", None)
