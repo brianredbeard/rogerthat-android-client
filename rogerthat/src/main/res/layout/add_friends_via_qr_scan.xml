@@ -25,6 +25,7 @@
     <ImageView
         android:id="@+id/my_qr"
         android:layout_width="300dp"
+        android:layout_gravity="center_horizontal"
         android:layout_height="fill_parent" />
 
 </LinearLayout>

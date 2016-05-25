@@ -62,7 +62,6 @@ import com.mobicage.rogerthat.plugins.messaging.mfr.MessageFlowRun;
 import com.mobicage.rogerthat.plugins.scan.ProcessScanActivity;
 import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
 import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
-import com.mobicage.rogerthat.plugins.system.SystemPlugin;
 import com.mobicage.rogerthat.util.RegexPatterns;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
@@ -152,22 +151,11 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity {
         if (CloudConstants.isCityApp()) {
             setContentView(R.layout.homescreen_3x3_with_qr_code);
 
+            // footer is already included in 3x3_with_qr_code
+            findViewById(R.id.master).findViewById(R.id.homescreen_footer).setVisibility(View.INVISIBLE);
+
             mPager = (VerticalViewPager) findViewById(R.id.view_pager);
             mPager.setAdapter(new HomeActivityPagerAdapter());
-
-            FrameLayout mainLayer = (FrameLayout) findViewById(R.id.master);
-            inflater.inflate(R.layout.homescreen_3x3_watermark, mainLayer, true);
-            inflater.inflate(R.layout.homescreen_3x3_holder, mainLayer, true);
-
-            if (AppConstants.SHOW_HOMESCREEN_FOOTER) {
-                // footer is already included in 3x3_with_qr_code
-                mainLayer.findViewById(R.id.homescreen_footer).setVisibility(View.INVISIBLE);
-            } else {
-                for (int id : new int[] { R.id.homescreen_footer, R.id.homescreen_footer_layer,
-                    R.id.invisible_homescreen_footer }) {
-                    findViewById(id).setVisibility(View.GONE);
-                }
-            }
 
             findViewById(R.id.back_btn).setOnClickListener(new SafeViewOnClickListener() {
                 @Override
@@ -179,19 +167,31 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity {
             setContentView(AppConstants.HOME_ACTIVITY_LAYOUT);
         }
 
+        if (AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.homescreen_3x3) {
+            FrameLayout mainLayer = (FrameLayout) findViewById(R.id.master);
+            inflater.inflate(R.layout.homescreen_3x3_watermark, mainLayer, true);
+            inflater.inflate(R.layout.homescreen_3x3_holder, mainLayer, true);
+        }
+
+        if (!AppConstants.SHOW_HOMESCREEN_FOOTER) {
+            for (int id : new int[] { R.id.homescreen_footer, R.id.homescreen_footer_layer,
+                R.id.invisible_homescreen_footer }) {
+                findViewById(id).setVisibility(View.GONE);
+            }
+
+            final View secondSpacerView = findViewById(R.id.second_spacerview);
+            if (secondSpacerView != null) {
+                secondSpacerView.setVisibility(View.VISIBLE);
+            }
+        }
+
         if (AppConstants.FULL_WIDTH_HEADERS) {
             findViewById(R.id.homescreen_header_container).setVisibility(View.GONE);
             findViewById(R.id.homescreen_header_spacer_view).setVisibility(View.GONE);
             findViewById(R.id.full_width_homescreen_header).setVisibility(View.VISIBLE);
         }
 
-        if (!AppConstants.SHOW_HOMESCREEN_FOOTER) {
-            findViewById(R.id.homescreen_footer).setVisibility(View.GONE);
-            final View secondSpacerView = findViewById(R.id.second_spacerview);
-            if (secondSpacerView != null) {
-                secondSpacerView.setVisibility(View.VISIBLE);
-            }
-        }
+
     }
 
     private void loadServiceCount() {
