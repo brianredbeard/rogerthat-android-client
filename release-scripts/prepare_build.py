@@ -410,7 +410,7 @@ def convert_config():
         show_nav_header = "true"
         home_activity = "R.layout.homescreen_3x3"
 
-    homescreen_qrcode_header = bool_str(doc["HOMESCREEN"].get("QRCODE_HEADER", "R.string.loyalty_card_description"));
+    homescreen_qrcode_header = doc["HOMESCREEN"].get("QRCODE_HEADER", "R.string.loyalty_card_description");
 
     friends_enabled = bool_str(doc["APP_CONSTANTS"].get("FRIENDS_ENABLED", True))
     friends_caption = doc["APP_CONSTANTS"].get("FRIENDS_CAPTION", None)
