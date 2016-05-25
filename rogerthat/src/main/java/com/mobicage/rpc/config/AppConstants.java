@@ -34,7 +34,7 @@ public class AppConstants {
     public static final int REGISTRATION_TYPE_OAUTH = 2;
     public static final String REGISTRATION_TYPE_OAUTH_DOMAIN = "dummy";
     public static int getRegistrationType() {
-        return REGISTRATION_TYPE_OAUTH;
+        return REGISTRATION_TYPE_DEFAULT;
     };
 
     // Customized by App flavor
