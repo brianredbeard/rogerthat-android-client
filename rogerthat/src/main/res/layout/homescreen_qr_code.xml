@@ -84,11 +84,11 @@
             <!-- Button width is set to at least 20% of the screen -->
 
             <Button
-                android:id="@+id/back_btn"
+                android:id="@+id/scan_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
-                android:text="@string/back" />
+                android:text="@string/scan" />
 
             <View
                 android:layout_width="0dp"

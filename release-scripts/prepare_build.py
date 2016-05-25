@@ -410,6 +410,8 @@ def convert_config():
         show_nav_header = "true"
         home_activity = "R.layout.homescreen_3x3"
 
+    homescreen_qrcode_header = bool_str(doc["HOMESCREEN"].get("QRCODE_HEADER", "R.string.loyalty_card_description"));
+
     friends_enabled = bool_str(doc["APP_CONSTANTS"].get("FRIENDS_ENABLED", True))
     friends_caption = doc["APP_CONSTANTS"].get("FRIENDS_CAPTION", None)
     if friends_caption is None:
@@ -515,6 +517,7 @@ public class AppConstants {
     // Customized by App flavor
     public static final String APP_ID = "%(app_id)s";
     public static final int HOME_ACTIVITY_LAYOUT = %(home_activity)s;
+    public static final int HOMESCREEN_QRCODE_HEADER = %(homescreen_qrcode_header)s;
     public static final boolean SHOW_HOMESCREEN_FOOTER = %(show_homescreen_footer)s;
     public static final boolean SHOW_NAV_HEADER = %(show_nav_header)s;
     public static final String FACEBOOK_APP_ID = %(fb_app_id)s;
@@ -548,6 +551,7 @@ public class AppConstants {
            app_type=app_type,
            app_id=APP_ID,
            home_activity=home_activity,
+           homescreen_qrcode_header=homescreen_qrcode_header,
            show_homescreen_footer=show_homescreen_footer,
            show_nav_header=show_nav_header,
            fb_app_id=fb_app_id,

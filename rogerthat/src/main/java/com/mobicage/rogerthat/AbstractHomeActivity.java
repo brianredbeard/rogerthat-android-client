@@ -157,10 +157,10 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity {
             mPager = (VerticalViewPager) findViewById(R.id.view_pager);
             mPager.setAdapter(new HomeActivityPagerAdapter());
 
-            findViewById(R.id.back_btn).setOnClickListener(new SafeViewOnClickListener() {
+            findViewById(R.id.scan_btn).setOnClickListener(new SafeViewOnClickListener() {
                 @Override
                 public void safeOnClick(View v) {
-                    mPager.setCurrentItem(0, true);
+                    goToScanActivity();
                 }
             });
         } else {
@@ -215,7 +215,7 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity {
     private void loadQR() {
         if (CloudConstants.isCityApp()) {
             final TextView loyaltyText = (TextView) findViewById(R.id.loyalty_text);
-            loyaltyText.setText(getString(R.string.loyalty_card_description, getString(R.string.app_name)));
+            loyaltyText.setText(getString(AppConstants.HOMESCREEN_QRCODE_HEADER, getString(R.string.app_name)));
             final ImageView imageView = (ImageView) findViewById(R.id.qrcode);
             final Bitmap qrBitmap = mService.getIdentityStore().getIdentity().getQRBitmap();
             if (qrBitmap != null) {
@@ -598,11 +598,19 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity {
 
     @Override
     public boolean onKeyDown(final int keyCode, final KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK && CloudConstants.isCityApp() && mPager.getCurrentItem() == 1) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && mPager != null && mPager.getCurrentItem() == 1) {
             mPager.setCurrentItem(0, true);
             return true;
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    protected void onPause() {
+        if (mPager != null && mPager.getCurrentItem() == 1) {
+            mPager.setCurrentItem(0, true);
+        }
+        super.onPause();
     }
 
 }
