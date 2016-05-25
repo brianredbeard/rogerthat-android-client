@@ -148,29 +148,28 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity {
         super.onCreate(savedInstanceState);
         LayoutInflater inflater = getLayoutInflater();
 
-        if (CloudConstants.isCityApp()) {
-            setContentView(R.layout.homescreen_3x3_with_qr_code);
+        setContentView(AppConstants.HOME_ACTIVITY_LAYOUT);
 
+        if (AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.homescreen_3x3_with_qr_code ||
+                AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.homescreen_3x3) {
+            FrameLayout mainLayer = (FrameLayout) findViewById(R.id.master);
+            inflater.inflate(R.layout.homescreen_3x3_watermark, mainLayer, true);
+            inflater.inflate(R.layout.homescreen_3x3_holder, mainLayer, true);
+        }
+
+        if (AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.homescreen_3x3_with_qr_code) {
             // footer is already included in 3x3_with_qr_code
             findViewById(R.id.master).findViewById(R.id.homescreen_footer).setVisibility(View.INVISIBLE);
 
             mPager = (VerticalViewPager) findViewById(R.id.view_pager);
             mPager.setAdapter(new HomeActivityPagerAdapter());
 
-            findViewById(R.id.back_btn).setOnClickListener(new SafeViewOnClickListener() {
+            findViewById(R.id.scan_btn).setOnClickListener(new SafeViewOnClickListener() {
                 @Override
                 public void safeOnClick(View v) {
-                    mPager.setCurrentItem(0, true);
+                    goToScanActivity();
                 }
             });
-        } else {
-            setContentView(AppConstants.HOME_ACTIVITY_LAYOUT);
-        }
-
-        if (AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.homescreen_3x3) {
-            FrameLayout mainLayer = (FrameLayout) findViewById(R.id.master);
-            inflater.inflate(R.layout.homescreen_3x3_watermark, mainLayer, true);
-            inflater.inflate(R.layout.homescreen_3x3_holder, mainLayer, true);
         }
 
         if (!AppConstants.SHOW_HOMESCREEN_FOOTER) {
@@ -190,8 +189,6 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity {
             findViewById(R.id.homescreen_header_spacer_view).setVisibility(View.GONE);
             findViewById(R.id.full_width_homescreen_header).setVisibility(View.VISIBLE);
         }
-
-
     }
 
     private void loadServiceCount() {
@@ -213,10 +210,10 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity {
     }
 
     private void loadQR() {
-        if (CloudConstants.isCityApp()) {
-            final TextView loyaltyText = (TextView) findViewById(R.id.loyalty_text);
-            loyaltyText.setText(getString(R.string.loyalty_card_description, getString(R.string.app_name)));
-            final ImageView imageView = (ImageView) findViewById(R.id.qrcode);
+        final ImageView imageView = (ImageView) findViewById(R.id.qrcode);
+        if (imageView != null) {
+            final TextView headerTextView = (TextView) findViewById(R.id.loyalty_text);
+            headerTextView.setText(getString(AppConstants.HOMESCREEN_QRCODE_HEADER, getString(R.string.app_name)));
             final Bitmap qrBitmap = mService.getIdentityStore().getIdentity().getQRBitmap();
             if (qrBitmap != null) {
                 imageView.setImageBitmap(ImageHelper.getRoundedCornerBitmap(qrBitmap,
@@ -598,11 +595,19 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity {
 
     @Override
     public boolean onKeyDown(final int keyCode, final KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK && CloudConstants.isCityApp() && mPager.getCurrentItem() == 1) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && mPager != null && mPager.getCurrentItem() == 1) {
             mPager.setCurrentItem(0, true);
             return true;
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    protected void onPause() {
+        if (mPager != null && mPager.getCurrentItem() == 1) {
+            mPager.setCurrentItem(0, true);
+        }
+        super.onPause();
     }
 
 }

@@ -408,7 +408,12 @@ def convert_config():
         home_activity = "R.layout.homescreen_2x3"
     elif home_screen_style == HOME_SCREEN_STYLE_3X3:
         show_nav_header = "true"
-        home_activity = "R.layout.homescreen_3x3"
+        if doc['HOMESCREEN'].get('show_qr_code', doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_CITYPAPP):
+            home_activity = "R.layout.homescreen_3x3_with_qr_code"
+        else:
+            home_activity = "R.layout.homescreen_3x3"
+
+    homescreen_qrcode_header = doc["HOMESCREEN"].get("qrcode_header", "loyalty_card_description");
 
     friends_enabled = bool_str(doc["APP_CONSTANTS"].get("FRIENDS_ENABLED", True))
     friends_caption = doc["APP_CONSTANTS"].get("FRIENDS_CAPTION", None)
@@ -515,6 +520,7 @@ public class AppConstants {
     // Customized by App flavor
     public static final String APP_ID = "%(app_id)s";
     public static final int HOME_ACTIVITY_LAYOUT = %(home_activity)s;
+    public static final int HOMESCREEN_QRCODE_HEADER = R.string.%(homescreen_qrcode_header)s;
     public static final boolean SHOW_HOMESCREEN_FOOTER = %(show_homescreen_footer)s;
     public static final boolean SHOW_NAV_HEADER = %(show_nav_header)s;
     public static final String FACEBOOK_APP_ID = %(fb_app_id)s;
@@ -548,6 +554,7 @@ public class AppConstants {
            app_type=app_type,
            app_id=APP_ID,
            home_activity=home_activity,
+           homescreen_qrcode_header=homescreen_qrcode_header,
            show_homescreen_footer=show_homescreen_footer,
            show_nav_header=show_nav_header,
            fb_app_id=fb_app_id,

@@ -34,12 +34,13 @@ public class AppConstants {
     public static final int REGISTRATION_TYPE_OAUTH = 2;
     public static final String REGISTRATION_TYPE_OAUTH_DOMAIN = "dummy";
     public static int getRegistrationType() {
-        return REGISTRATION_TYPE_OAUTH;
+        return REGISTRATION_TYPE_DEFAULT;
     };
 
     // Customized by App flavor
     public static final String APP_ID = "rogerthat";
     public static final int HOME_ACTIVITY_LAYOUT = R.layout.homescreen;
+    public static final int HOMESCREEN_QRCODE_HEADER = R.string.loyalty_card_description;
     public static final boolean SHOW_HOMESCREEN_FOOTER = false;
     public static final boolean SHOW_NAV_HEADER = false;
     public static final String FACEBOOK_APP_ID = "188033791211994";
