@@ -108,8 +108,8 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity {
     public final static String INTENT_VALUE_SHOW_FRIENDS = "showFriends";
     public final static String INTENT_VALUE_SHOW_SCANTAB = "showScanTab";
     public final static String INTENT_KEY_MESSAGE = "messageKey";
-    protected Intent mNotYetProcessedIntent = null;
 
+    protected Intent mNotYetProcessedIntent = null;
     protected FriendsPlugin mFriendsPlugin;
     protected FriendStore mFriendStore;
     protected MessagingPlugin mMessagingPlugin;
@@ -121,26 +121,9 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity {
 
     protected SparseIntArray mServiceCountByOrganizationType = new SparseIntArray();
 
-    abstract ItemDef[] getItemDefs();
-
     private VerticalViewPager mPager;
 
-    private class HomeActivityPagerAdapter extends PagerAdapter {
-        @Override
-        public Object instantiateItem(ViewGroup container, int position) {
-            return mPager.getChildAt(position);
-        }
-
-        @Override
-        public int getCount() {
-            return 2;
-        }
-
-        @Override
-        public boolean isViewFromObject(View arg0, Object arg1) {
-            return arg0 == arg1;
-        }
-    }
+    abstract ItemDef[] getItemDefs();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,11 +141,26 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity {
         }
 
         if (AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.homescreen_3x3_with_qr_code) {
-            // footer is already included in 3x3_with_qr_code
-            findViewById(R.id.master).findViewById(R.id.homescreen_footer).setVisibility(View.INVISIBLE);
+            ((TextView) findViewById(R.id.loyalty_text)).setTextColor(getResources().getColor(R.color
+                    .mc_homescreen_background));
 
             mPager = (VerticalViewPager) findViewById(R.id.view_pager);
-            mPager.setAdapter(new HomeActivityPagerAdapter());
+            mPager.setAdapter(new PagerAdapter() {
+                @Override
+                public Object instantiateItem(ViewGroup container, int position) {
+                    return mPager.getChildAt(position);
+                }
+
+                @Override
+                public int getCount() {
+                    return 2;
+                }
+
+                @Override
+                public boolean isViewFromObject(View arg0, Object arg1) {
+                    return arg0 == arg1;
+                }
+            });
 
             findViewById(R.id.scan_btn).setOnClickListener(new SafeViewOnClickListener() {
                 @Override
@@ -173,8 +171,7 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity {
         }
 
         if (!AppConstants.SHOW_HOMESCREEN_FOOTER) {
-            for (int id : new int[] { R.id.homescreen_footer, R.id.homescreen_footer_layer,
-                R.id.invisible_homescreen_footer }) {
+            for (int id : new int[]{R.id.homescreen_footer, R.id.invisible_homescreen_footer}) {
                 findViewById(id).setVisibility(View.GONE);
             }
 
@@ -238,7 +235,7 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity {
             if (unprocessed > 9)
                 mBadgeMessages.setText("9+");
             else
-                mBadgeMessages.setText("" + unprocessed);
+                mBadgeMessages.setText(Long.toString(unprocessed));
             mBadgeMessages.setVisibility(View.VISIBLE);
         } else {
             mBadgeMessages.setVisibility(View.GONE);
@@ -488,7 +485,8 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity {
         T.UI();
         if (RegexPatterns.OPEN_HOME_URL.matcher(url).matches())
             return;
-        else if (RegexPatterns.FRIEND_INVITE_URL.matcher(url).matches()
+
+        if (RegexPatterns.FRIEND_INVITE_URL.matcher(url).matches()
             || RegexPatterns.SERVICE_INTERACT_URL.matcher(url).matches()) {
             final Intent launchIntent = new Intent(this, ProcessScanActivity.class);
             launchIntent.putExtra(ProcessScanActivity.URL, url);
@@ -593,20 +591,22 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity {
         return mService;
     }
 
-    @Override
-    public boolean onKeyDown(final int keyCode, final KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK && mPager != null && mPager.getCurrentItem() == 1) {
+    private boolean resetPager() {
+        if (mPager != null && mPager.getCurrentItem() == 1) {
             mPager.setCurrentItem(0, true);
             return true;
         }
-        return super.onKeyDown(keyCode, event);
+        return false;
+    }
+
+    @Override
+    public boolean onKeyDown(final int keyCode, final KeyEvent event) {
+        return keyCode == KeyEvent.KEYCODE_BACK && resetPager() || super.onKeyDown(keyCode, event);
     }
 
     @Override
     protected void onPause() {
-        if (mPager != null && mPager.getCurrentItem() == 1) {
-            mPager.setCurrentItem(0, true);
-        }
+        resetPager();
         super.onPause();
     }
 

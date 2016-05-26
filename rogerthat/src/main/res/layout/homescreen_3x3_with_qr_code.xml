@@ -14,12 +14,4 @@
         <include layout="@layout/homescreen_qr_code" />
     </fr.castorflex.android.verticalviewpager.VerticalViewPager>
 
-    <com.mobicage.rogerthat.util.ui.ScaleImageView
-        android:id="@+id/homescreen_footer_layer"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center_horizontal"
-        android:adjustViewBounds="true"
-        android:src="@drawable/homescreen_footer" />
-
 </FrameLayout>

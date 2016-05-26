@@ -68,7 +68,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.net.Uri;
@@ -1236,8 +1235,8 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
             @Override
             public void pageDisplayed(Button back, Button next, ViewFlipper switcher) {
                 mEnterEmailAutoCompleteTextView.setThreshold(1000); // Prevent popping up automatically
-                if (Build.VERSION.SDK_INT < 18 || !supportsBeacons() || mService.isPermitted(Manifest.permission
-                        .ACCESS_COARSE_LOCATION)) {
+                if (!AppConstants.REGISTRATION_ASKS_LOCATION_PERMISSION || Build.VERSION.SDK_INT < 18 ||
+                        !supportsBeacons() || mService.isPermitted(Manifest.permission.ACCESS_COARSE_LOCATION)) {
                     mWiz.proceedToNextPage(); // Skip the iBeacon usage step
                 }
             }
