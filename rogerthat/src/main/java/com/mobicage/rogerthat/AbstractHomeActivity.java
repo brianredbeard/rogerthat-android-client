@@ -141,8 +141,10 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity {
         }
 
         if (AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.homescreen_3x3_with_qr_code) {
-            ((TextView) findViewById(R.id.loyalty_text)).setTextColor(getResources().getColor(R.color
-                    .mc_homescreen_background));
+            if (AppConstants.SHOW_HOMESCREEN_FOOTER) {
+                ((TextView) findViewById(R.id.loyalty_text)).setTextColor(getResources().getColor(R.color
+                        .mc_homescreen_background));
+            }
 
             mPager = (VerticalViewPager) findViewById(R.id.view_pager);
             mPager.setAdapter(new PagerAdapter() {
