@@ -53,6 +53,7 @@ public class AppConstants {
     public static final boolean SHOW_PROFILE_IN_MORE = true;
     public static final boolean FULL_WIDTH_HEADERS = false;
 
+    public static final boolean REGISTRATION_ASKS_LOCATION_PERMISSION = true;
     public static final int[] SEARCH_SERVICES_IF_NONE_CONNECTED = new int[] { -1 };
 
     public static final String[] PROFILE_DATA_FIELDS = new String[] {};

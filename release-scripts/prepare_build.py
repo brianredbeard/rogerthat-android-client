@@ -112,14 +112,15 @@ def generate_resource_images(source_file_name, size, height_width_ratio):
         app_utils.resize_image(source_file_name, os.path.join(SRC_RES_DIR, drawable_folder_name, resource_name), width, height)
 
 
-
 def bool_str(b):
     return "true" if b else "false"
+
 
 def quoted_str_or_null(s):
     return ('"%s"' % s) if s else "null"
 
-def startmove():
+
+def rename_package():
     NEW_PACKAGE_NAME = "com.mobicage.rogerthat.%s" % APP_ID.replace("-", ".")
 
     rogerthat_build_gradle = os.path.join(ANDROID_SRC_DIR, '..', 'build.gradle')
@@ -189,6 +190,23 @@ def startmove():
                 s = s.replace(OLD_PACKAGE_NAME, NEW_PACKAGE_NAME)
                 with open(fpath, "w") as f:
                     f.write(s)
+
+
+def create_notification_icon(android_icon_filename, android_notification_icon_filename):
+    img = Image.open(android_icon_filename)
+    img = img.convert("RGBA")
+    datas = img.getdata()
+
+    new_data = list()
+    for item in datas:
+        if (item[0] == 255 and item[1] == 255 and item[2] == 255) or item[3] == 0:
+            new_data.append((255, 255, 255, 0))
+        else:
+            new_data.append((255, 255, 255, 255))
+
+    img.putdata(new_data)
+    img.save(android_notification_icon_filename, "PNG")
+
 
 def convert_config():
     path = os.path.join(SRC_JAVA_DIR, "com", "mobicage", "rogerthat")
@@ -368,7 +386,7 @@ def convert_config():
     elif doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_CITYPAPP:
         app_type = "APP_TYPE_CITYAPP"
         show_nav_header = "true"
-        home_activity = "R.layout.homescreen_3x3"
+        home_activity = "R.layout.homescreen_3x3_with_qr_code"
         show_profile_in_more = bool_str(not mainScreenContainsProfile)
         search_services_if_none_connected = ",".join(map(str, doc['APP_CONSTANTS'].get('SEARCH_SERVICES_IF_NONE_CONNECTED', [])))
 
@@ -413,7 +431,7 @@ def convert_config():
         else:
             home_activity = "R.layout.homescreen_3x3"
 
-    homescreen_qrcode_header = doc["HOMESCREEN"].get("qrcode_header", "loyalty_card_description");
+    homescreen_qrcode_header_text = doc["HOMESCREEN"].get("qrcode_header", "loyalty_card_description");
 
     friends_enabled = bool_str(doc["APP_CONSTANTS"].get("FRIENDS_ENABLED", True))
     friends_caption = doc["APP_CONSTANTS"].get("FRIENDS_CAPTION", None)
@@ -494,6 +512,8 @@ def convert_config():
     else:
         raise Exception('Invalid registration type %d' % registration_type)
 
+    registration_asks_location_permission = bool_str(doc['APP_CONSTANTS'].get('REGISTRATION_ASKS_LOCATION_PERMISSION', True))
+
     output = u'''%(LICENSE)s
 
 package com.mobicage.rpc.config;
@@ -520,7 +540,7 @@ public class AppConstants {
     // Customized by App flavor
     public static final String APP_ID = "%(app_id)s";
     public static final int HOME_ACTIVITY_LAYOUT = %(home_activity)s;
-    public static final int HOMESCREEN_QRCODE_HEADER = R.string.%(homescreen_qrcode_header)s;
+    public static final int HOMESCREEN_QRCODE_HEADER = R.string.%(homescreen_qrcode_header_text)s;
     public static final boolean SHOW_HOMESCREEN_FOOTER = %(show_homescreen_footer)s;
     public static final boolean SHOW_NAV_HEADER = %(show_nav_header)s;
     public static final String FACEBOOK_APP_ID = %(fb_app_id)s;
@@ -533,6 +553,7 @@ public class AppConstants {
     public static final boolean SHOW_PROFILE_IN_MORE = %(show_profile_in_more)s;
     public static final boolean FULL_WIDTH_HEADERS = %(full_width_headers)s;
 
+    public static final boolean REGISTRATION_ASKS_LOCATION_PERMISSION = %(registration_asks_location_permission)s;
     public static final int[] SEARCH_SERVICES_IF_NONE_CONNECTED = new int[] {%(search_services_if_none_connected)s};
 
     public static final String[] PROFILE_DATA_FIELDS = new String[] { %(profile_data_fields)s };
@@ -554,7 +575,7 @@ public class AppConstants {
            app_type=app_type,
            app_id=APP_ID,
            home_activity=home_activity,
-           homescreen_qrcode_header=homescreen_qrcode_header,
+           homescreen_qrcode_header_text=homescreen_qrcode_header_text,
            show_homescreen_footer=show_homescreen_footer,
            show_nav_header=show_nav_header,
            fb_app_id=fb_app_id,
@@ -579,7 +600,8 @@ public class AppConstants {
            speech_to_text=speech_to_text,
            app_service_guid=app_service_guid,
            registration_type=registration_type,
-           registration_type_oauth_domain=registration_type_oauth_domain)
+           registration_type_oauth_domain=registration_type_oauth_domain,
+           registration_asks_location_permission=registration_asks_location_permission)
 
     path = os.path.join(SRC_JAVA_DIR, "com", "mobicage", "rpc", "config")
     if not os.path.exists(path):
@@ -613,6 +635,13 @@ public class AppConstants {
         app_utils.create_trusstore(APP_ID, os.path.join(ANDROID_SRC_DIR, "main", "assets", "truststore.bks"))
 
 
+    ##### HOMESCREEN QR AREA BACKGROUND ####################
+
+    if show_homescreen_footer:
+        app_utils.create_background(os.path.join(APP_DIR, "build", "homescreen_footer.png"),
+                                    os.path.join(SRC_RES_DIR, "drawable", "homescreen_qr_area_background.png"))
+
+
 def encode_translation(s):
     return s.replace("\n", "\\n") \
             .replace("'", "\\'") \
@@ -632,14 +661,14 @@ def add_translations(doc):
         values_dir = 'values'
         if language != 'en':
             values_dir += '-' + language
-        all_str_xml = os.path.join(SRC_RES_DIR, values_dir, 'allstr.xml')
+        xml_path = os.path.join(SRC_RES_DIR, values_dir, 'allstr.xml')
         added_lines = list()
         for entry in entries:
             added_lines.append('    <string name="%s">%s</string>' % (entry['name'],
                                                                       encode_translation(entry['value'])))
         if added_lines:
             added_lines.insert(0, '    <!-- Extra translations added via build.yaml -->')
-            with open(all_str_xml, 'rb+') as all_str_f:
+            with open(xml_path, 'rb+') as all_str_f:
                 s = all_str_f.read()
                 all_str_f.seek(0)
                 all_str_f.write(s.replace('</resources>', '%s\n</resources>' % '\n'.join(added_lines)))
@@ -679,6 +708,7 @@ class CustomCloudConstants {
     final static boolean XMPP_MUST_VALIDATE_SSL_CERTIFICATE = true;
     final static boolean XMPP_DEBUG = false;
     final static boolean DEBUG_LOGGING = false;
+
     final static String REGISTRATION_MAIN_SIGNATURE = %(REGISTRATION_MAIN_SIGNATURE)s;
     final static String REGISTRATION_EMAIL_SIGNATURE = %(REGISTRATION_EMAIL_SIGNATURE)s;
     final static String REGISTRATION_PIN_SIGNATURE = %(REGISTRATION_PIN_SIGNATURE)s;
@@ -773,14 +803,13 @@ if __name__ == "__main__":
     tmp_file_name = tmp_file.name
     tmp_file.close()
 
-    app_utils.create_android_notification_icon(android_icon, tmp_file_name)
+    create_notification_icon(android_icon, tmp_file_name)
     for screen_type, icon_size in NOTIFICATION_ICON_SIZES.iteritems():
         im = Image.open(tmp_file_name)
         im.thumbnail((icon_size, icon_size), Image.ANTIALIAS)
         im.save(os.path.join(SRC_RES_DIR, screen_type, 'notification_icon.png'), "PNG")
 
     os.remove(tmp_file_name)
-
 
     with open(os.path.join(APP_DIR, "build.yaml"), 'r') as f:
         doc = yaml.load(f)
@@ -805,7 +834,7 @@ if __name__ == "__main__":
             resize_more_icon(os.path.join(APP_DIR, "build", "%s.png" % filename_in_app), filename_in_app)
 
         convert_config()
-        startmove()
+        rename_package()
     else:
         print "app_id was rogerthat, no prepare needed"
     generate_custom_cloud_constants(doc)
