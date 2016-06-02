@@ -64,10 +64,16 @@ public class ServiceActionActivity extends FriendDetailActivity {
         return false;
     }
 
+
     @Override
     protected int getMenu() {
         // Menu not visible
         return 0;
+    }
+
+    @Override
+    protected int getHeaderVisibility() {
+        return View.VISIBLE;
     }
 
     @Override

@@ -39,13 +39,17 @@ import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
+import android.support.design.widget.NavigationView;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -60,8 +64,9 @@ import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.Pausable;
 import com.mobicage.rogerthat.util.ui.UIUtils;
+import com.mobicage.rogerthat.widget.CustomDrawerLayout;
 
-public abstract class ServiceBoundActivity extends Activity implements Pausable, ServiceBound {
+public abstract class ServiceBoundActivity extends AppCompatActivity implements Pausable, ServiceBound {
 
     public static final long MAX_TRANSMIT = 10 * 1000;
 
@@ -94,6 +99,7 @@ public abstract class ServiceBoundActivity extends Activity implements Pausable,
     private boolean mWasPaused = false;
     private Map<Integer, SafeRunnable[]> mPermissionRequests = new HashMap<Integer, SafeRunnable[]>();
 
+    protected CustomDrawerLayout drawer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,6 +122,7 @@ public abstract class ServiceBoundActivity extends Activity implements Pausable,
             }
         });
         mConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
     }
 
     @Override
@@ -176,14 +183,14 @@ public abstract class ServiceBoundActivity extends Activity implements Pausable,
 
     protected void showActionScheduledDialog() {
         new AlertDialog.Builder(ServiceBoundActivity.this).setMessage(R.string.action_scheduled)
-            .setPositiveButton(R.string.rogerthat, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                    if (mTransmitTimeoutRunnable != null)
-                        mTransmitTimeoutRunnable.run();
-                }
-            }).create().show();
+                .setPositiveButton(R.string.rogerthat, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        if (mTransmitTimeoutRunnable != null)
+                            mTransmitTimeoutRunnable.run();
+                    }
+                }).create().show();
     }
 
     protected boolean checkConnectivity() {
@@ -305,6 +312,7 @@ public abstract class ServiceBoundActivity extends Activity implements Pausable,
         T.UI();
         return mWasPaused;
     }
+
     @Override
     public void queue(SafeRunnable runnable) {
         T.UI();
@@ -390,6 +398,10 @@ public abstract class ServiceBoundActivity extends Activity implements Pausable,
 
     protected boolean showFABMenu() {
         return false;
+    }
+
+    protected void hideFABMenu() {
+        mFAB.setVisibility(View.GONE);
     }
 
     @Override

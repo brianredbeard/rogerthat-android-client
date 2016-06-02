@@ -33,7 +33,7 @@ public class AppConstants {
 
     // Customized by App flavor
     public static final String APP_ID = "rogerthat";
-    public static final int HOME_ACTIVITY_LAYOUT = R.layout.homescreen;
+    public static final int HOME_ACTIVITY_LAYOUT = R.layout.homescreen_news;
     public static final boolean SHOW_HOMESCREEN_FOOTER = false;
     public static final boolean SHOW_NAV_HEADER = false;
     public static final String FACEBOOK_APP_ID = "188033791211994";

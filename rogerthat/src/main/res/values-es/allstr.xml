@@ -81,7 +81,7 @@
     <string name="configure_new_canned_message">Crear un borrador de mensaje</string>
     <string name="confirm_remove_friend">¿Está seguro que desea desvincular a %1$s?</string>
     <string name="confirm_remove_service">¿Está seguro que desea desvincularse del servicio %1$s?</string>
-    <string name="connect_service_now">Ahora está conectado</string>
+    <string name="connect_service_now">Sígueme</string>
     <string name="contacts">Contactos</string>
     <string name="contacts_found_1">1 contacto en %1$s</string>
     <string name="contacts_found_more">%1$d contactos en %2$s</string>

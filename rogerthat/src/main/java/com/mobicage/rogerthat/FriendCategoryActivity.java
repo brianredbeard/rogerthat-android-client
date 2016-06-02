@@ -77,7 +77,7 @@ public class FriendCategoryActivity extends ServiceFriendsActivity {
     }
 
     @Override
-    protected void onHeaderTapped() {
+    protected void startSearching() {
         // Do nothing
     }
 

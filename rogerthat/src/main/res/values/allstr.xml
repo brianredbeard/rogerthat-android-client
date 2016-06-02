@@ -254,6 +254,8 @@
     <string name="n_updated_messages">%1$d updated messages.</string>
     <string name="name">Name</string>
     <string name="name_required">Name is required</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="need_camera_permission">You need to grant access to the camera in order to continue.</string>
     <string name="need_camera_permission_title">Camera access denied</string>
     <string name="need_location_permission">You need to grant access to your location in order to continue.</string>
@@ -267,6 +269,11 @@
     <string name="no_camera_available_title">No camera available</string>
     <string name="no_contacts_with_email_found">Could not find phone contacts having an e-mail address.</string>
     <string name="no_friends_found">You do not yet have %1$s contacts.</string>
+    <string name="no_services_found">You don\'t follow any service yet in %1$s. Click the magnifying glass to search for services in your neighbourhood.</string>
+    <string name="no_merchants_found">You don\'t follow any merchant yet in %1$s. Click the magnifying glass to search for services in your neighbourhood.</string>
+    <string name="no_associations_found">You don\'t follow any association yet in %1$s. Click the magnifying glass to search for services in your neighbourhood.</string>
+    <string name="no_community_services_found">You don\'t follow any community service yet in %1$s. Click the magnifying glass to search for services in your neighbourhood.</string>
+    <string name="no_care_found">You don\'t follow any care yet in %1$s. Click the magnifying glass to search for services in your neighbourhood.</string>
     <string name="no_friends_locations_found">No friend locations retrieved.</string>
     <string name="no_gps_location_fetched_summary">You need to get your current location before you can continue.</string>
     <string name="no_gps_location_fetched_title">Location not yet retrieved</string>

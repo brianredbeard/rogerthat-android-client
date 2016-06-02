@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group
+        android:id="@+id/group_01"
+        android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/nav_menu_01"
+            android:icon="@drawable/ic_letter"
+            android:title="Messages" />
+    </group>
+
+    <group
+        android:id="@+id/group_02"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_menu_02"
+            android:icon="@drawable/ic_house"
+            android:title="Services" />
+    </group>
+
+    <group
+        android:id="@+id/group_03"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_menu_03"
+            android:icon="@drawable/ic_people"
+            android:title="Friends" />
+    </group>
+
+    <group
+        android:id="@+id/group_04"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_menu_04"
+            android:icon="@drawable/ic_scan"
+            android:title="Scan" />
+    </group>
+
+    <group
+        android:id="@+id/group_05"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_menu_05"
+            android:icon="@drawable/ic_person"
+            android:title="Profile" />
+    </group>
+
+    <group
+        android:id="@+id/group_06"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_menu_06"
+            android:icon="@drawable/ic_scan"
+            android:title="Settings" />
+    </group>
+
+    <group
+        android:id="@+id/group_07"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_menu_07"
+            android:icon="@drawable/ic_scan"
+            android:title="Stream" />
+    </group>
+
+</menu>

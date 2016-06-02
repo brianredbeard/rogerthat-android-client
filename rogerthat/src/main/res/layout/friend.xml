@@ -15,7 +15,6 @@
             android:layout_height="45dp"
             android:layout_alignParentLeft="true"
 			android:layout_alignParentTop="true"
-            android:background="@drawable/avatar_background_black"
             android:padding="1dp"
             android:scaleType="fitCenter" />
         

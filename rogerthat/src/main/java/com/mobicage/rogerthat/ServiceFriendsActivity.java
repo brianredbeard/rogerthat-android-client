@@ -18,23 +18,22 @@
 
 package com.mobicage.rogerthat;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendStore;
 import com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity;
 import com.mobicage.rogerthat.plugins.friends.ServiceSearchActivity;
-import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
+import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.config.AppConstants;
@@ -50,18 +49,39 @@ public class ServiceFriendsActivity extends FriendsActivity {
         super.onCreate(savedInstanceState);
 
         Intent intent = getIntent();
+        TextView noServicesTextView = (TextView) findViewById(R.id.no_services_text);
         mOrganizationType = intent.getIntExtra(ORGANIZATION_TYPE, FriendStore.SERVICE_ORGANIZATION_TYPE_UNSPECIFIED);
+        int noServicesStringId;
         if (mOrganizationType == FriendStore.SERVICE_ORGANIZATION_TYPE_NON_PROFIT) {
             mOrganizationTypeStringId = R.string.associations;
+            noServicesStringId = R.string.no_associations_found;
         } else if (mOrganizationType == FriendStore.SERVICE_ORGANIZATION_TYPE_PROFIT) {
             mOrganizationTypeStringId = R.string.merchants;
+            noServicesStringId = R.string.no_merchants_found;
         } else if (mOrganizationType == FriendStore.SERVICE_ORGANIZATION_TYPE_CITY) {
             mOrganizationTypeStringId = R.string.community_service;
+            noServicesStringId = R.string.no_community_services_found;
         } else if (mOrganizationType == FriendStore.SERVICE_ORGANIZATION_TYPE_EMERGENCY) {
             mOrganizationTypeStringId = R.string.care;
+            noServicesStringId = R.string.no_care_found;
         } else {
             mOrganizationTypeStringId = R.string.tab_services;
+            noServicesStringId = R.string.no_services_found;
         }
+        noServicesTextView.setText(getString(noServicesStringId, getString(R.string.app_name)));
+
+
+        //Change Fonts.
+        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
+
+        ImageButton magnifyingGlass = (ImageButton) findViewById(R.id.ic_magnifying_glass);
+
+        magnifyingGlass.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startSearching();
+            }
+        });
     }
 
     @Override
@@ -116,7 +136,7 @@ public class ServiceFriendsActivity extends FriendsActivity {
     @Override
     protected void loadCursorAndSetAdaptar() {
         super.loadCursorAndSetAdaptar();
-        if (((FriendListAdapter) mListAdapter).getCount() == 0) {
+        if (mListAdapter.getCount() == 0) {
             boolean found = false;
             for (int i = 0; i < AppConstants.SEARCH_SERVICES_IF_NONE_CONNECTED.length; i++) {
                 if (AppConstants.SEARCH_SERVICES_IF_NONE_CONNECTED[i] == mOrganizationType) {
@@ -125,29 +145,9 @@ public class ServiceFriendsActivity extends FriendsActivity {
                 }
             }
             if (found) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(ServiceFriendsActivity.this);
-                builder.setCancelable(true);
-
-                builder.setTitle(mOrganizationTypeStringId);
-                builder.setMessage(getString(R.string.search_services_if_none_connected_message,
-                    getString(mOrganizationTypeStringId)));
-                builder.setNegativeButton(R.string.no, new SafeDialogInterfaceOnClickListener() {
-                    @Override
-                    public void safeOnClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-                builder.setPositiveButton(R.string.yes, new SafeDialogInterfaceOnClickListener() {
-                    @Override
-                    public void safeOnClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        final Intent serviceSearch = new Intent(ServiceFriendsActivity.this,
-                            ServiceSearchActivity.class);
-                        serviceSearch.putExtra(ServiceSearchActivity.ORGANIZATION_TYPE, mOrganizationType);
-                        startActivity(serviceSearch);
-                    }
-                });
-                builder.create().show();
+                // TODO: (Donato) Show the magnifying glass
+                findViewById(R.id.no_services).setVisibility(View.VISIBLE);
+                findViewById(R.id.friend_list).setVisibility(View.GONE);
             }
         }
     }
@@ -158,7 +158,7 @@ public class ServiceFriendsActivity extends FriendsActivity {
 
         if (position == 0) {
             // tapped header cell
-            onHeaderTapped();
+            startSearching();
             return;
         }
 
@@ -181,7 +181,7 @@ public class ServiceFriendsActivity extends FriendsActivity {
         }
     }
 
-    protected void onHeaderTapped() {
+    protected void startSearching() {
         final Intent serviceSearch = new Intent(this, ServiceSearchActivity.class);
         serviceSearch.putExtra(ServiceSearchActivity.ORGANIZATION_TYPE, mOrganizationType);
         startActivity(serviceSearch);
@@ -206,9 +206,9 @@ public class ServiceFriendsActivity extends FriendsActivity {
         T.UI();
 
         switch (item.getItemId()) {
-        case R.id.help:
-            showHelp();
-            return true;
+            case R.id.help:
+                showHelp();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
