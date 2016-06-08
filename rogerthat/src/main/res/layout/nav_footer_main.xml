@@ -12,42 +12,38 @@
     android:weightSum="4">
 
     <ImageButton
-        android:id="@+id/ic_footer_01"
+        android:id="@+id/nav_newspaper"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:background="@null"
-        android:contentDescription="NewsPaper"
         android:onClick="onOptionNavigationViewToolbarSelected"
         android:src="@drawable/ic_menu_newspaper" />
 
     <ImageButton
-        android:id="@+id/ic_footer_02"
+        android:id="@+id/nav_shopping_basket"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:background="@null"
-        android:contentDescription="Shopping Basket"
         android:onClick="onOptionNavigationViewToolbarSelected"
         android:src="@drawable/ic_menu_shopping_basket" />
 
     <ImageButton
-        android:id="@+id/ic_footer_03"
+        android:id="@+id/nav_calendar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:background="@null"
-        android:contentDescription="Calendar"
         android:onClick="onOptionNavigationViewToolbarSelected"
         android:src="@drawable/ic_menu_calendar" />
 
     <ImageButton
-        android:id="@+id/ic_footer_04"
+        android:id="@+id/nav_credit_card"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:background="@null"
-        android:contentDescription="CreditCard"
         android:onClick="onOptionNavigationViewToolbarSelected"
         android:src="@drawable/ic_menu_credit_card" />
 

@@ -1,37 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.mobicage.rogerthat.widget.CustomDrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/drawer_layout"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    tools:openDrawer="start">
+    android:orientation="vertical">
 
-    <include
-        layout="@layout/app_bar_main"
+    <TextView
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:text="Hola mundo" />
 
-        <android.support.design.widget.NavigationView
-            android:id="@+id/nav_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="start"
-            android:fitsSystemWindows="true"
-            android:paddingBottom="@dimen/design_navigation_separator_vertical_padding"
-            android:background="@color/mc_background_color"
-            app:headerLayout="@layout/homescreen_news_header"
-            app:itemIconTint="@null"
-            android:nestedScrollingEnabled="true"
-            app:menu="@menu/homescreen_news_drawer">
-
-            <include
-                layout="@layout/homescreen_news_footer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom" />
-
-        </android.support.design.widget.NavigationView>
-
-</com.mobicage.rogerthat.widget.CustomDrawerLayout>
+</LinearLayout>

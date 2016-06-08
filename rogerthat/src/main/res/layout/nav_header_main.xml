@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/mc_background_color"
+    android:background="#EBEBEB"
     android:orientation="vertical">
 
     <ImageButton
@@ -11,10 +11,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:layout_marginTop="36dp"
-        android:tint="@color/mc_primary_color"
+        android:layout_marginTop="26dp"
         android:background="@null"
-        android:contentDescription="hamburger_icon"
         android:onClick="onOptionNavigationViewToolbarSelected"
         android:src="@drawable/ic_menu_hamburger" />
 
@@ -26,10 +24,9 @@
         android:layout_centerHorizontal="true"
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:contentDescription="header"
         android:adjustViewBounds="true"
         android:scaleType="fitCenter"
-        android:src="@drawable/registration_logo" />
+        android:src="@drawable/rogerthat" />
 
     <View
         android:id="@+id/divider"
