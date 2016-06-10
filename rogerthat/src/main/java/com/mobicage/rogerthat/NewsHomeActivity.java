@@ -32,6 +32,8 @@ public class NewsHomeActivity extends ServiceBoundActivityNavigationView impleme
         super.onCreate(savedInstanceState);
         setContentView(R.layout.homescreen_news);
 
+        openNavigationView();
+
         btnTest = (Button) findViewById(R.id.btn_test);
         btnTest.setOnClickListener(this);
     }

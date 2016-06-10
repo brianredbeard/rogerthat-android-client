@@ -17,6 +17,10 @@
 
         <!-- Changes color of the separator in the navigation view -->
         <item name="android:listDivider">@drawable/divider_gradient</item>
+
+        <!--Change de color of the NavigationDrawer Icon in the Toolbar.-->
+        <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
+
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -24,10 +28,16 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="ActionBarStyle" parent="Widget.AppCompat.ActionBar">
-        <item name="titleTextStyle">@color/mc_black</item>
-        <item name="background">@color/mc_background_color</item>
+    <style name="DrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">
+    <!--<item name="drawableSize">40dp</item>-->
+    <!--<item name="spinBars">true</item>-->
+    <item name="color">@color/mc_green</item>
     </style>
+
+    <!--<style name="ActionBarStyle" parent="Widget.AppCompat.ActionBar">-->
+        <!--<item name="titleTextStyle">@color/mc_black</item>-->
+        <!--<item name="background">@color/mc_background_color</item>-->
+    <!--</style>-->
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 

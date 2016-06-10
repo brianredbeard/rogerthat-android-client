@@ -52,6 +52,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SectionIndexer;
 import android.widget.TextView;
+import android.support.design.widget.NavigationView;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.HomeActivity;
@@ -98,31 +99,26 @@ public class MessagingActivity extends ServiceBoundCursorListActivityNavigationV
         for (int i = 0; i < menu.size(); i++) {
             MenuItem item = menu.getItem(i);
             switch (item.getItemId()) {
-            case R.id.new_message:
-                if (!mEditing)
-                    item.setVisible(AppConstants.FRIENDS_ENABLED);
-                else
-                    item.setVisible(false);
-                break;
-            case R.id.select_all:
-            case R.id.deselect_all:
-                item.setVisible(mEditing);
-                break;
-            case R.id.delete_messages:
-                item.setEnabled(((CursorAdapter) getListAdapter()).getCursor().getCount() > 0);
-                //$FALL-THROUGH$
-            default:
-                item.setVisible(!mEditing);
-                break;
+                case R.id.new_message:
+                    if (!mEditing)
+                        item.setVisible(AppConstants.FRIENDS_ENABLED);
+                    else
+                        item.setVisible(false);
+                    break;
+                case R.id.select_all:
+                case R.id.deselect_all:
+                    item.setVisible(mEditing);
+                    break;
+                case R.id.delete_messages:
+                    item.setEnabled(((CursorAdapter) getListAdapter()).getCursor().getCount() > 0);
+                    //$FALL-THROUGH$
+                default:
+                    item.setVisible(!mEditing);
+                    break;
             }
         }
 
         return super.onPrepareOptionsMenu(menu);
-    }
-
-    @Override
-    protected boolean showFABMenu() {
-        return true;
     }
 
     @Override
@@ -137,33 +133,33 @@ public class MessagingActivity extends ServiceBoundCursorListActivityNavigationV
     public boolean onOptionsItemSelected(MenuItem item) {
         T.UI();
         switch (item.getItemId()) {
-        case R.id.new_message:
-            showSendMessageWizardActivity();
-            return true;
-        case R.id.delete_messages:
-            setEditing(true);
-            return true;
-        case R.id.select_all:
-            mToBeDeleted.clear();
-            Cursor c = ((CursorAdapter) getListAdapter()).getCursor();
-            if (!c.moveToFirst()) {
-                L.e("Could not move cursor to first position");
-                return false;
-            }
-            do {
-                String key = MessageStore.getKeyFromMessageCursor(c);
-                String parentKey = MessageStore.getParentKeyFromMessageCursor(c);
-                long flags = MessageStore.getFlagsFromMessageCursor(c);
-                if (!SystemUtils.isFlagEnabled(flags, MessagingPlugin.FLAG_NOT_REMOVABLE))
-                    mToBeDeleted.add(parentKey == null ? key : parentKey);
-            } while (c.moveToNext());
+            case R.id.new_message:
+                showSendMessageWizardActivity();
+                return true;
+            case R.id.delete_messages:
+                setEditing(true);
+                return true;
+            case R.id.select_all:
+                mToBeDeleted.clear();
+                Cursor c = ((CursorAdapter) getListAdapter()).getCursor();
+                if (!c.moveToFirst()) {
+                    L.e("Could not move cursor to first position");
+                    return false;
+                }
+                do {
+                    String key = MessageStore.getKeyFromMessageCursor(c);
+                    String parentKey = MessageStore.getParentKeyFromMessageCursor(c);
+                    long flags = MessageStore.getFlagsFromMessageCursor(c);
+                    if (!SystemUtils.isFlagEnabled(flags, MessagingPlugin.FLAG_NOT_REMOVABLE))
+                        mToBeDeleted.add(parentKey == null ? key : parentKey);
+                } while (c.moveToNext());
 
-            ((CursorAdapter) getListAdapter()).notifyDataSetChanged();
-            return true;
-        case R.id.deselect_all:
-            mToBeDeleted.clear();
-            ((CursorAdapter) getListAdapter()).notifyDataSetChanged();
-            return true;
+                ((CursorAdapter) getListAdapter()).notifyDataSetChanged();
+                return true;
+            case R.id.deselect_all:
+                mToBeDeleted.clear();
+                ((CursorAdapter) getListAdapter()).notifyDataSetChanged();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -209,6 +205,8 @@ public class MessagingActivity extends ServiceBoundCursorListActivityNavigationV
         super.onCreate(savedInstanceState);
         mResources = getResources();
 
+        // todo color messages in drawer
+
         Intent intent = getIntent();
         if (intent != null) {
             Bundle extras = intent.getExtras();
@@ -239,14 +237,14 @@ public class MessagingActivity extends ServiceBoundCursorListActivityNavigationV
 
     @Override
     protected String[] getAllReceivingIntents() {
-        return new String[] { MessagingPlugin.NEW_MESSAGE_RECEIVED_INTENT,
-            MessagingPlugin.MESSAGE_MEMBER_STATUS_UPDATE_RECEIVED_INTENT, MessagingPlugin.MESSAGE_DIRTY_CLEANED_INTENT,
-            MessagingPlugin.MESSAGE_KEY_UPDATED_INTENT, MessagingPlugin.MESSAGE_LOCKED_INTENT,
-            MessagingPlugin.MESSAGE_PROCESSED_INTENT, MessagingPlugin.MESSAGE_FAILURE,
-            MessagingPlugin.MESSAGE_THREAD_VISIBILITY_CHANGED_INTENT, MessagingPlugin.THREAD_DELETED_INTENT,
-            MessagingPlugin.THREAD_RECOVERED_INTENT, MessagingPlugin.THREAD_MODIFIED_INTENT,
-            FriendsPlugin.FRIEND_AVATAR_CHANGED_INTENT, IdentityStore.IDENTITY_CHANGED_INTENT,
-            FriendsPlugin.FRIENDS_LIST_REFRESHED };
+        return new String[]{MessagingPlugin.NEW_MESSAGE_RECEIVED_INTENT,
+                MessagingPlugin.MESSAGE_MEMBER_STATUS_UPDATE_RECEIVED_INTENT, MessagingPlugin.MESSAGE_DIRTY_CLEANED_INTENT,
+                MessagingPlugin.MESSAGE_KEY_UPDATED_INTENT, MessagingPlugin.MESSAGE_LOCKED_INTENT,
+                MessagingPlugin.MESSAGE_PROCESSED_INTENT, MessagingPlugin.MESSAGE_FAILURE,
+                MessagingPlugin.MESSAGE_THREAD_VISIBILITY_CHANGED_INTENT, MessagingPlugin.THREAD_DELETED_INTENT,
+                MessagingPlugin.THREAD_RECOVERED_INTENT, MessagingPlugin.THREAD_MODIFIED_INTENT,
+                FriendsPlugin.FRIEND_AVATAR_CHANGED_INTENT, IdentityStore.IDENTITY_CHANGED_INTENT,
+                FriendsPlugin.FRIENDS_LIST_REFRESHED};
     }
 
     @Override
@@ -271,7 +269,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivityNavigationV
         startManagingCursor(mCursorSet.indexer);
 
         final MessageListAdapter messageListAdapter = new MessageListAdapter(this, mCursorSet, mMessagingPlugin.getStore(),
-            mFriendsPlugin);
+                mFriendsPlugin);
         setListAdapter(messageListAdapter);
 
         final IntentFilter filter = new IntentFilter();
@@ -349,7 +347,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivityNavigationV
     private void showSendMessageWizardActivity() {
         long currentTime = System.currentTimeMillis();
         if (getLastTimeClicked() != 0
-            && (currentTime < (getLastTimeClicked() + ServiceBoundActivity.DOUBLE_CLICK_TIMESPAN))) {
+                && (currentTime < (getLastTimeClicked() + ServiceBoundActivity.DOUBLE_CLICK_TIMESPAN))) {
             L.d("ignoring click on send message");
             return;
         }
@@ -529,12 +527,12 @@ public class MessagingActivity extends ServiceBoundCursorListActivityNavigationV
 
             final Bitmap threadAvatar;
             if (message.thread_avatar_hash != null
-                && (threadAvatar = mMessagingPlugin.getStore().getThreadAvatar(message.thread_avatar_hash)) != null) {
+                    && (threadAvatar = mMessagingPlugin.getStore().getThreadAvatar(message.thread_avatar_hash)) != null) {
                 avatarView.setImageBitmap(threadAvatar);
             } else if (dynamicChat) {
                 avatarView.setImageResource(R.drawable.group_60);
             } else if (FriendsPlugin.SYSTEM_FRIEND.equals(message.sender)
-                || mFriendsPlugin.getStore().getFriendType(message.sender) == FriendsPlugin.FRIEND_TYPE_SERVICE) {
+                    || mFriendsPlugin.getStore().getFriendType(message.sender) == FriendsPlugin.FRIEND_TYPE_SERVICE) {
                 avatarView.setImageBitmap(mFriendsPlugin.getAvatarBitmap(message.sender));
 
             } else if (message.members.length == 2) {
@@ -567,7 +565,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivityNavigationV
             } else if (message.parent_key != null && dynamicChat) {
                 try {
                     JSONObject json = (JSONObject) JSONValue.parse(mMessagingPlugin.getStore().getMessageMessage(
-                        message.parent_key));
+                            message.parent_key));
                     recipients = (String) json.get("t");
                     messageText = message.message;
                 } catch (Throwable t) {
@@ -615,9 +613,9 @@ public class MessagingActivity extends ServiceBoundCursorListActivityNavigationV
                 tmpThreadBackgroundColor = mResources.getColor(R.color.mc_priority_urgent_background);
             }
             final int threadTextColor = message.thread_text_color != null ? Color.parseColor("#"
-                + message.thread_text_color) : tmpThreadTextColor;
+                    + message.thread_text_color) : tmpThreadTextColor;
             final int threadBackgroundColor = message.thread_background_color != null ? Color.parseColor("#"
-                + message.thread_background_color) : tmpThreadBackgroundColor;
+                    + message.thread_background_color) : tmpThreadBackgroundColor;
             final TextView recipientsView = holder.recipientsView;
             recipientsView.setText(recipients);
 
@@ -676,16 +674,16 @@ public class MessagingActivity extends ServiceBoundCursorListActivityNavigationV
             final TextView timestamp = holder.timestampView;
             if (timestamp != null) {
                 long startRunnableIn = TimeUtils.startRunnableToUpdateTimeIn(MessagingActivity.this,
-                    message.timestamp * 1000);
+                        message.timestamp * 1000);
                 if (startRunnableIn > 0) {
                     SafeRunnable sr = new SafeRunnable() {
 
                         @Override
                         protected void safeRun() throws Exception {
                             timestamp.setText(TimeUtils.getHumanTime(MessagingActivity.this, message.timestamp * 1000,
-                                true));
+                                    true));
                             long startRunnableIn = TimeUtils.startRunnableToUpdateTimeIn(MessagingActivity.this,
-                                message.timestamp * 1000);
+                                    message.timestamp * 1000);
                             if (startRunnableIn > 0) {
                                 mService.postDelayedOnUIHandler(this, startRunnableIn);
                             } else {
@@ -749,8 +747,8 @@ public class MessagingActivity extends ServiceBoundCursorListActivityNavigationV
             });
             holder.checkBox.setChecked(mToBeDeleted != null && mToBeDeleted.contains(message.getThreadKey()));
             holder.checkBox.setVisibility(mEditing
-                && !SystemUtils.isFlagEnabled(message.flags, MessagingPlugin.FLAG_NOT_REMOVABLE) ? View.VISIBLE
-                : View.GONE);
+                    && !SystemUtils.isFlagEnabled(message.flags, MessagingPlugin.FLAG_NOT_REMOVABLE) ? View.VISIBLE
+                    : View.GONE);
         }
 
         private void setStatusIcon(ViewInfoHolder holder, boolean dynamicChat) {
@@ -770,7 +768,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivityNavigationV
                 } else if (message.recipients_status == MessageMemberStatusSummaryEncoding.ERROR) {
                     holder.statusView.setImageResource(R.drawable.status_red);
                 } else if (message.alert_flags >= AlertManager.ALERT_FLAG_RING_5
-                    && !mMessagingPlugin.isMessageAckedByMe(message)) {
+                        && !mMessagingPlugin.isMessageAckedByMe(message)) {
                     holder.statusView.setImageResource(R.drawable.status_ringing);
                 } else if (message.numAcked() != 0) {
                     holder.statusView.setImageResource(R.drawable.status_blue);

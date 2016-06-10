@@ -309,11 +309,6 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
     protected abstract int getMenu();
 
     @Override
-    protected boolean showFABMenu() {
-        return true;
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         T.UI();
 

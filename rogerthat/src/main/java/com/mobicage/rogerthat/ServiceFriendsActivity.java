@@ -187,12 +187,7 @@ public class ServiceFriendsActivity extends FriendsActivity {
         startActivity(serviceSearch);
     }
 
-    @Override
-    protected boolean showFABMenu() {
-        return true;
-    }
-
-    @Override
+     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         T.UI();
         super.onCreateOptionsMenu(menu);

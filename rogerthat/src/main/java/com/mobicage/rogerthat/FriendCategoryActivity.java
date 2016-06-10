@@ -86,9 +86,4 @@ public class FriendCategoryActivity extends ServiceFriendsActivity {
         // Don't show a menu
         return false;
     }
-
-    @Override
-    protected boolean showFABMenu() {
-        return false;
-    }
 }

@@ -73,7 +73,6 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
     protected volatile MainService mService;
     protected boolean mServiceIsBound = false; // Owned by UI thread
     private boolean mPaused = false; // Owned by UI thread
-    private FloatingActionButton mFAB;
     final private Queue<SafeRunnable> mWorkQueue = new LinkedList<SafeRunnable>();
 
     private final BroadcastReceiver closeActivityListener = new SafeBroadcastReceiver() {
@@ -363,47 +362,6 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         return mLastTimeClicked;
     }
 
-    protected View wrapViewWithFab(View view) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH || !showFABMenu())
-            return view;
-
-        FrameLayout frameLayout = new FrameLayout(this);
-        frameLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
-        frameLayout.addView(view);
-
-        mFAB = new FloatingActionButton(this);
-        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
-        layoutParams.gravity = getFabGravity();
-        int m = UIUtils.convertDipToPixels(this, 16);
-        layoutParams.setMargins(m, m, m, m);
-        mFAB.setLayoutParams(layoutParams);
-        mFAB.setImageResource(R.drawable.ic_menu);
-        mFAB.setColorNormalResId(R.color.mc_homescreen_background);
-        mFAB.setColorPressedResId(R.color.mc_homescreen_background);
-        mFAB.setColorRipple(R.color.mc_homescreen_background);
-        mFAB.setOnClickListener(new SafeViewOnClickListener() {
-            @Override
-            public void safeOnClick(View v) {
-                openOptionsMenu();
-            }
-        });
-        mFAB.setVisibility(View.VISIBLE);
-        frameLayout.addView(mFAB);
-        return frameLayout;
-    }
-
-    protected int getFabGravity() {
-        return Gravity.BOTTOM | Gravity.RIGHT;
-    }
-
-    protected boolean showFABMenu() {
-        return false;
-    }
-
-    protected void hideFABMenu() {
-        mFAB.setVisibility(View.GONE);
-    }
-
     @Override
     public void setContentView(int layoutResID) {
         setContentView(getLayoutInflater().inflate(layoutResID, null));
@@ -411,12 +369,12 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
 
     @Override
     public void setContentView(View view) {
-        super.setContentView(wrapViewWithFab(view));
+        super.setContentView(view);
     }
 
     @Override
     public void setContentView(View view, ViewGroup.LayoutParams params) {
-        super.setContentView(wrapViewWithFab(view), params);
+        super.setContentView(view, params);
     }
 
     public boolean askPermissionIfNeeded(final String permission, final int requestCode, final SafeRunnable onGranted,

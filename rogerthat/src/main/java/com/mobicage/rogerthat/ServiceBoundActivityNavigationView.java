@@ -2,24 +2,26 @@ package com.mobicage.rogerthat;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.plugins.friends.FriendStore;
 import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
+import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
 
 public abstract class ServiceBoundActivityNavigationView extends ServiceBoundActivity
         implements android.support.design.widget.NavigationView.OnNavigationItemSelectedListener {
 
     ImageButton ib_hamburger, ib_newspaper, ib_shopping_basket, ib_calendar, ib_credit_car;
+    private DrawerLayout drawer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,17 +39,14 @@ public abstract class ServiceBoundActivityNavigationView extends ServiceBoundAct
         View child = getLayoutInflater().inflate(layoutResID, null);
         item.addView(child);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        // Open navigation drawer automatically when the app start.
-        drawer.openDrawer(GravityCompat.START);
-
-        android.support.design.widget.NavigationView navigationView = (android.support.design.widget.NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         //Change color of the icons.
@@ -59,6 +58,11 @@ public abstract class ServiceBoundActivityNavigationView extends ServiceBoundAct
         ib_shopping_basket = (ImageButton) findViewById(R.id.nav_shopping_basket);
         ib_calendar = (ImageButton) findViewById(R.id.nav_calendar);
         ib_credit_car = (ImageButton) findViewById(R.id.nav_credit_card);
+    }
+
+    // Open navigation drawer automatically when the app start.
+    public void openNavigationView() {
+        drawer.openDrawer(GravityCompat.START);
     }
 
     public void onOptionNavigationViewToolbarSelected(View v) {
@@ -129,22 +133,27 @@ public abstract class ServiceBoundActivityNavigationView extends ServiceBoundAct
                 startActivity(intent);
                 break;
             case R.id.nav_report_card:
-//                intent = new Intent(NavigationView.this, ReportCard.class);
-//                startActivity(intent);
                 break;
             case R.id.nav_agenda:
                 break;
             case R.id.nav_community_services:
-//                intent = new Intent(NavigationView.this, CommunityServices.class);
-//                startActivity(intent);
+                intent = new Intent(this, ServiceFriendsActivity.class);
+                intent.putExtra(ServiceFriendsActivity.ORGANIZATION_TYPE, FriendStore.SERVICE_ORGANIZATION_TYPE_CITY);
+                startActivity(intent);
                 break;
             case R.id.nav_merchants:
-//                intent = new Intent(NavigationView.this, Merchants.class);
-//                startActivity(intent);
+                intent = new Intent(this, ServiceFriendsActivity.class);
+                intent.putExtra(ServiceFriendsActivity.ORGANIZATION_TYPE, FriendStore.SERVICE_ORGANIZATION_TYPE_PROFIT);
+                startActivity(intent);
                 break;
             case R.id.nav_associations:
+                intent = new Intent(this, ServiceFriendsActivity.class);
+                intent.putExtra(ServiceFriendsActivity.ORGANIZATION_TYPE, FriendStore.SERVICE_ORGANIZATION_TYPE_NON_PROFIT);
+                startActivity(intent);
                 break;
             case R.id.nav_scan:
+                Intent launchIntent = new Intent(this, ScanTabActivity.class);
+                startActivity(launchIntent);
                 break;
         }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

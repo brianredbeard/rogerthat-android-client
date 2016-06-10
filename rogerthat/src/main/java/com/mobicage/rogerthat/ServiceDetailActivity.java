@@ -87,7 +87,6 @@ public class ServiceDetailActivity extends FriendDetailActivity {
     @Override
     protected int getPokeVisibility() {
         if (mExistence == Friend.NOT_FOUND || mExistence == Friend.INVITE_PENDING) {
-            hideFABMenu();
             return View.VISIBLE;
         }
 

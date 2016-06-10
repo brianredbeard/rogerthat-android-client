@@ -20,10 +20,9 @@
         android:layout_gravity="start"
         android:background="@color/mc_background_color"
         android:fitsSystemWindows="true"
-        android:paddingBottom="@dimen/design_navigation_separator_vertical_padding"
         app:headerLayout="@layout/nav_header_main"
-        app:itemBackground="@color/mc_background_color"
         app:itemIconTint="@null"
+        app:itemTextColor="@color/mc_black"
         app:menu="@menu/navigation_drawer">
 
         <include

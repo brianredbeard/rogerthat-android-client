@@ -2,6 +2,7 @@ package com.mobicage.rogerthat;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -10,15 +11,17 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.plugins.friends.FriendStore;
 import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
+import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
 
 public abstract class ServiceBoundCursorListActivityNavigationView extends ServiceBoundCursorListActivity
         implements android.support.design.widget.NavigationView.OnNavigationItemSelectedListener {
 
     ImageButton ib_hamburger, ib_newspaper, ib_shopping_basket, ib_calendar, ib_credit_car;
+    private NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,11 +46,26 @@ public abstract class ServiceBoundCursorListActivityNavigationView extends Servi
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        // Open navigation drawer automatically when the app start.
-        drawer.openDrawer(GravityCompat.START);
-
-        android.support.design.widget.NavigationView navigationView = (android.support.design.widget.NavigationView) findViewById(R.id.nav_view);
+//        final List<MenuItem> items = new ArrayList<>();
+//        Menu menu;
+//
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+//        menu = navigationView.getMenu();
+//
+//        for (int i = 0; i < menu.size(); i++) {
+//            items.add(menu.getItem(i));
+//        }
+//
+//        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+//            @Override
+//            public boolean onNavigationItemSelected(final MenuItem menuItem) {
+//                // update highlighted item in the navigation menu
+//                menuItem.setChecked(true);
+//                int position = items.indexOf(menuItem);
+//                return true;
+//            }
+//        });
 
         //Change color of the icons.
         navigationView.setItemIconTintList(null);
@@ -128,22 +146,27 @@ public abstract class ServiceBoundCursorListActivityNavigationView extends Servi
                 startActivity(intent);
                 break;
             case R.id.nav_report_card:
-//                intent = new Intent(NavigationView.this, ReportCard.class);
-//                startActivity(intent);
                 break;
             case R.id.nav_agenda:
                 break;
             case R.id.nav_community_services:
-//                intent = new Intent(NavigationView.this, CommunityServices.class);
-//                startActivity(intent);
+                intent = new Intent(this, ServiceFriendsActivity.class);
+                intent.putExtra(ServiceFriendsActivity.ORGANIZATION_TYPE, FriendStore.SERVICE_ORGANIZATION_TYPE_CITY);
+                startActivity(intent);
                 break;
             case R.id.nav_merchants:
-//                intent = new Intent(NavigationView.this, Merchants.class);
-//                startActivity(intent);
+                intent = new Intent(this, ServiceFriendsActivity.class);
+                intent.putExtra(ServiceFriendsActivity.ORGANIZATION_TYPE, FriendStore.SERVICE_ORGANIZATION_TYPE_PROFIT);
+                startActivity(intent);
                 break;
             case R.id.nav_associations:
+                intent = new Intent(this, ServiceFriendsActivity.class);
+                intent.putExtra(ServiceFriendsActivity.ORGANIZATION_TYPE, FriendStore.SERVICE_ORGANIZATION_TYPE_NON_PROFIT);
+                startActivity(intent);
                 break;
             case R.id.nav_scan:
+                Intent launchIntent = new Intent(this, ScanTabActivity.class);
+                startActivity(launchIntent);
                 break;
         }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

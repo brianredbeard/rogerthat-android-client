@@ -216,11 +216,6 @@ public class HomeActivity extends ServiceBoundTabActivity {
     }
 
     @Override
-    protected boolean showFABMenu() {
-        return false;
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         T.UI();
         super.onCreateOptionsMenu(menu);
