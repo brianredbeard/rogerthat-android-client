@@ -89,6 +89,7 @@ import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessageStore;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.plugins.messaging.SendMessageResponseHandler;
+import com.mobicage.rogerthat.plugins.messaging.ServiceMessageDetailActivity;
 import com.mobicage.rogerthat.util.IOUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeAsyncTask;
@@ -2268,11 +2269,19 @@ public class SendMessageWizardActivity extends ServiceBoundActivity {
     }
 
     private void askCameraPermission(final SafeRunnable continueRunnable) {
-        boolean wasDenied = askPermissionIfNeeded(Manifest.permission.CAMERA, PERMISSION_REQUEST_CAMERA,
-                continueRunnable, continueRunnable);
-        if (!wasDenied) {
-            continueRunnable.run();
-        }
+        final SafeRunnable runnableCheckStorage = new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                if (askPermissionIfNeeded(Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        PERMISSION_REQUEST_CAMERA, continueRunnable, null))
+                    return;
+                continueRunnable.run();
+            }
+        };
+        if (askPermissionIfNeeded(Manifest.permission.CAMERA, PERMISSION_REQUEST_CAMERA,
+                runnableCheckStorage, null))
+            return;
+        runnableCheckStorage.run();
     }
 
     private void getNewPicture() {
@@ -2357,7 +2366,7 @@ public class SendMessageWizardActivity extends ServiceBoundActivity {
     }
 
     private File getImagesFolder() throws IOException {
-        File imagesFolder = new File(IOUtils.getFilesDirectory(this), "images");
+        File imagesFolder = new File(IOUtils.getExternalFilesDirectory(this), "images");
         if (!imagesFolder.exists() && !imagesFolder.mkdirs()) {
             throw new IOException(getString(R.string.unable_to_create_images_directory, getString(R.string.app_name)));
         }

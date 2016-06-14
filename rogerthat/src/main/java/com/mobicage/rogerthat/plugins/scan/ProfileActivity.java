@@ -26,6 +26,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -62,6 +63,7 @@ import com.mobicage.rogerthat.util.IOUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
+import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
@@ -91,6 +93,8 @@ public class ProfileActivity extends ServiceBoundActivity {
 
     private boolean mShownAfterRegistration;
     public final static String INTENT_KEY_COMPLETE_PROFILE = "completeProfile";
+
+    private final int PERMISSION_REQUEST_CAMERA = 1;
 
     private void updateProfileForEdit() {
         final Button updateBtn = (Button) findViewById(R.id.update_profile);
@@ -206,7 +210,7 @@ public class ProfileActivity extends ServiceBoundActivity {
             OnClickListener newAvatarListener = new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    getNewAvatar();
+                    getNewAvatar(true);
                     UIUtils.hideKeyboard(getApplicationContext(), newProfileName);
                 }
             };
@@ -263,7 +267,30 @@ public class ProfileActivity extends ServiceBoundActivity {
         }
     }
 
-    private void getNewAvatar() {
+    private void getNewAvatar(boolean checkPermission) {
+        if (checkPermission) {
+            final SafeRunnable continueRunnable = new SafeRunnable() {
+                @Override
+                protected void safeRun() throws Exception {
+                    getNewAvatar(false);
+                }
+            };
+
+            final SafeRunnable runnableCheckStorage = new SafeRunnable() {
+                @Override
+                protected void safeRun() throws Exception {
+                    if (askPermissionIfNeeded(Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                            PERMISSION_REQUEST_CAMERA, continueRunnable, null))
+                        return;
+                    continueRunnable.run();
+                }
+            };
+            if (askPermissionIfNeeded(Manifest.permission.CAMERA, PERMISSION_REQUEST_CAMERA,
+                    runnableCheckStorage, null))
+                return;
+            runnableCheckStorage.run();
+            return;
+        }
         mPhotoSelecting = true;
         File image;
         try {
@@ -572,7 +599,7 @@ public class ProfileActivity extends ServiceBoundActivity {
     }
 
     private File getImagesFolder() throws IOException {
-        File imagesFolder = new File(IOUtils.getFilesDirectory(this), "images");
+        File imagesFolder = new File(IOUtils.getExternalFilesDirectory(this), "images");
         if (!imagesFolder.exists() && !imagesFolder.mkdirs()) {
             throw new IOException(getString(R.string.unable_to_create_images_directory, getString(R.string.app_name)));
         }
