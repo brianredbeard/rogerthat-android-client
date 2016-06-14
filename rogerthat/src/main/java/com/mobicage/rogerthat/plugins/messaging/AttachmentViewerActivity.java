@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -38,6 +40,7 @@ import org.apache.http.client.params.HttpClientParams;
 import org.json.simple.JSONValue;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -432,9 +435,13 @@ public class AttachmentViewerActivity extends ServiceBoundActivity {
 
             mWebview.setWebViewClient(new WebViewClient() {
 
+                @TargetApi(Build.VERSION_CODES.HONEYCOMB)
                 @Override
                 public WebResourceResponse shouldInterceptRequest (WebView view, String url) {
                     if (fileOnDisk.equals(url)) {
+                        return null;
+                    }
+                    if (url.startsWith("file:///android_asset/")) {
                         return null;
                     }
                     L.d("404: Expected: '" + fileOnDisk + "'\n Received: '" + url+"'");
