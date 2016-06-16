@@ -622,7 +622,9 @@ public class AppConstants {
 
     colors = dict(mc_homescreen_background='homescreen_background',
                   mc_homescreen_text='homescreen_text',
-                  mc_homescreen_divider='homescreen_divider')
+                  mc_homescreen_divider='homescreen_divider',
+                  mc_primary_color='primary_color',
+                  mc_secondary_color='secondary_color')
     with open(os.path.join(path, "colors.xml"), 'r+') as f:
         s = f.read()
         for mc_color_name, color_name in colors.iteritems():
