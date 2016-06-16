@@ -18,8 +18,10 @@
 package com.mobicage.rogerthat.plugins.friends;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -647,6 +649,9 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 if (urlPath.getAbsolutePath().startsWith(mBrandingResult.dir.getAbsolutePath())) {
                     return null;
                 }
+                if (url.startsWith("file:///android_asset/")) {
+                    return null;
+                }
                 L.d("404: Webview tries to load outside its sandbox.");
                 return new WebResourceResponse("text/plain", "UTF-8", null);
             }
@@ -1060,7 +1065,11 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                     settings.setAllowUniversalAccessFromFileURLs(true);
                 }
-                mBranding.loadUrl("file:///android_asset/pdfjs/web/viewer.html?file=" + fileOnDisk);
+                try {
+                    mBranding.loadUrl("file:///android_asset/pdfjs/web/viewer.html?file=" + URLEncoder.encode(fileOnDisk, "UTF-8"));
+                } catch (UnsupportedEncodingException uee) {
+                    L.bug(uee);
+                }
             } else {
                 mIsHtmlContent = true;
                 mBranding.loadUrl(fileOnDisk);

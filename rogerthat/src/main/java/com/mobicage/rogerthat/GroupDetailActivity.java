@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -62,6 +63,7 @@ import com.mobicage.rogerthat.plugins.friends.Group;
 import com.mobicage.rogerthat.util.IOUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
+import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
@@ -92,6 +94,8 @@ public class GroupDetailActivity extends ServiceBoundActivity {
     private LinearLayout mLinearLayout;
     private Cursor mCursorFriends = null;
     private Cursor mCursorGroups = null;
+
+    private final int PERMISSION_REQUEST_CAMERA = 1;
 
     private void updateGroupForEdit() {
         T.UI();
@@ -132,7 +136,7 @@ public class GroupDetailActivity extends ServiceBoundActivity {
             OnClickListener newAvatarListener = new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    getNewAvatar();
+                    getNewAvatar(true);
                     UIUtils.hideKeyboard(getApplicationContext(), newGroupName);
                 }
             };
@@ -183,8 +187,31 @@ public class GroupDetailActivity extends ServiceBoundActivity {
         }
     }
 
-    private void getNewAvatar() {
+    private void getNewAvatar(boolean checkPermission) {
         T.UI();
+        if (checkPermission) {
+            final SafeRunnable continueRunnable = new SafeRunnable() {
+                @Override
+                protected void safeRun() throws Exception {
+                    getNewAvatar(false);
+                }
+            };
+
+            final SafeRunnable runnableCheckStorage = new SafeRunnable() {
+                @Override
+                protected void safeRun() throws Exception {
+                    if (askPermissionIfNeeded(Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                            PERMISSION_REQUEST_CAMERA, continueRunnable, null))
+                        return;
+                    continueRunnable.run();
+                }
+            };
+            if (askPermissionIfNeeded(Manifest.permission.CAMERA, PERMISSION_REQUEST_CAMERA,
+                    runnableCheckStorage, null))
+                return;
+            runnableCheckStorage.run();
+            return;
+        }
         File image;
         try {
             image = getTmpUploadPhotoLocation();
@@ -504,7 +531,7 @@ public class GroupDetailActivity extends ServiceBoundActivity {
 
     private File getImagesFolder() throws IOException {
         T.UI();
-        File imagesFolder = new File(IOUtils.getFilesDirectory(this), "images");
+        File imagesFolder = new File(IOUtils.getExternalFilesDirectory(this), "images");
         if (!imagesFolder.exists() && !imagesFolder.mkdirs()) {
             throw new IOException(getString(R.string.unable_to_create_images_directory, getString(R.string.app_name)));
         }

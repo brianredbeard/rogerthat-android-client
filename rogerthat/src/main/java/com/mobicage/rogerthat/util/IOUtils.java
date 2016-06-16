@@ -45,9 +45,13 @@ public class IOUtils {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             return context.getFilesDir();
         } else {
-            return new File(Environment.getExternalStorageDirectory(),
-                    context.getString(R.string.app_name) + "-app");
+            return getExternalFilesDirectory(context);
         }
+    }
+
+    public static File getExternalFilesDirectory(Context context) {
+        return new File(Environment.getExternalStorageDirectory(),
+                context.getString(R.string.app_name) + "-app");
     }
 
     public static boolean shouldCheckExternalStorageAvailable() {

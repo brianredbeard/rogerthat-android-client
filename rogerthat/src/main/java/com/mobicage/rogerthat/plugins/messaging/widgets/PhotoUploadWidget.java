@@ -121,16 +121,31 @@ public class PhotoUploadWidget extends Widget {
             @Override
             public void onClick(final View v) {
                 if (TRUE.equals(mWidgetMap.get("camera"))) {
-                    SafeRunnable runnable = new SafeRunnable() {
+
+                    final SafeRunnable runnableContinue = new SafeRunnable() {
                         @Override
                         protected void safeRun() throws Exception {
                             getPicture();
                         }
                     };
 
+                    final SafeRunnable runnableCheckStorage = new SafeRunnable() {
+                        @Override
+                        protected void safeRun() throws Exception {
+                            if (mActivity.askPermissionIfNeeded(Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                    ServiceMessageDetailActivity.PERMISSION_REQUEST_PHOTO_UPLOAD_WIDGET, runnableContinue, null))
+                                return;
+                            getPicture();
+                        }
+                    };
+
                     if (mActivity.askPermissionIfNeeded(Manifest.permission.CAMERA,
-                            ServiceMessageDetailActivity.PERMISSION_REQUEST_PHOTO_UPLOAD_WIDGET, runnable, runnable))
-                        return; // permission popup is shown
+                            ServiceMessageDetailActivity.PERMISSION_REQUEST_PHOTO_UPLOAD_WIDGET, runnableCheckStorage, null))
+                        return;
+
+                    if (mActivity.askPermissionIfNeeded(Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                            ServiceMessageDetailActivity.PERMISSION_REQUEST_PHOTO_UPLOAD_WIDGET, runnableContinue, null))
+                        return;
                 }
 
                 getPicture();
@@ -516,7 +531,7 @@ public class PhotoUploadWidget extends Widget {
 
     private File getTmpUploadPhotoLocation() throws IOException {
         Context c = getContext();
-        File imagesFolder = new File(IOUtils.getFilesDirectory(mActivity), "images");
+        File imagesFolder = new File(IOUtils.getExternalFilesDirectory(mActivity), "images");
         if (!imagesFolder.exists() && !imagesFolder.mkdirs()) {
             throw new IOException(c.getString(R.string.unable_to_create_images_directory,
                 c.getString(R.string.app_name)));

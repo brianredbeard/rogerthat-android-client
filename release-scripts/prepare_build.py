@@ -199,14 +199,18 @@ def create_notification_icon(android_icon_filename, android_notification_icon_fi
 
     new_data = list()
     for item in datas:
-        if (item[0] == 255 and item[1] == 255 and item[2] == 255) or item[3] == 0:
+        if item[3] == 0: # Transparent remains transparent
             new_data.append((255, 255, 255, 0))
+            continue
+        gray_factor = item[0]*0.2126 + item[1]*0.7152 + item[2]*0.0722
+        if gray_factor > 240 : # Almost white
+            new_data.append((255, 255, 255, 0)) # Make transparent
         else:
-            new_data.append((255, 255, 255, 255))
+            new_data.append((255, 255, 255, int(255 - gray_factor))) # Make white
 
     img.putdata(new_data)
     img.save(android_notification_icon_filename, "PNG")
-
+    
 
 def convert_config():
     path = os.path.join(SRC_JAVA_DIR, "com", "mobicage", "rogerthat")
