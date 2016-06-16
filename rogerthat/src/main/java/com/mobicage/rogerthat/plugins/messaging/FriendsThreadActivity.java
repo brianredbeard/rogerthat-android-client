@@ -275,11 +275,6 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
     }
 
     @Override
-    protected boolean showFABMenu() {
-        return true;
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         T.UI();
         super.onCreateOptionsMenu(menu);

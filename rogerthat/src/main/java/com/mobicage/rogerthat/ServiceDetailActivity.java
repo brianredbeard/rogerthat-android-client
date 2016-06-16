@@ -44,6 +44,11 @@ public class ServiceDetailActivity extends FriendDetailActivity {
     private Friend mFriend;
 
     @Override
+    protected int getHeaderVisibility() {
+        return View.GONE;
+    }
+
+    @Override
     protected int getServiceAreaVisibility() {
         return View.VISIBLE;
     }
@@ -81,8 +86,9 @@ public class ServiceDetailActivity extends FriendDetailActivity {
 
     @Override
     protected int getPokeVisibility() {
-        if (mExistence == Friend.NOT_FOUND || mExistence == Friend.INVITE_PENDING)
+        if (mExistence == Friend.NOT_FOUND || mExistence == Friend.INVITE_PENDING) {
             return View.VISIBLE;
+        }
 
         return View.GONE;
     }
@@ -102,7 +108,7 @@ public class ServiceDetailActivity extends FriendDetailActivity {
                 service.avatarId = 0;
                 service.description = item.description;
                 service.descriptionBranding = TextUtils.isEmptyOrWhitespace(item.description_branding) ? null
-                    : item.description_branding;
+                        : item.description_branding;
                 service.email = item.email;
                 service.existenceStatus = mExistence;
                 service.name = item.name;

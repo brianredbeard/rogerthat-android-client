@@ -77,18 +77,13 @@ public class FriendCategoryActivity extends ServiceFriendsActivity {
     }
 
     @Override
-    protected void onHeaderTapped() {
+    protected void startSearching() {
         // Do nothing
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Don't show a menu
-        return false;
-    }
-
-    @Override
-    protected boolean showFABMenu() {
         return false;
     }
 }

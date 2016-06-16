@@ -78,6 +78,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
@@ -123,6 +124,7 @@ import com.mobicage.rogerthat.util.GoogleServicesUtils;
 import com.mobicage.rogerthat.util.GoogleServicesUtils.GCMRegistrationIdFoundCallback;
 import com.mobicage.rogerthat.util.RegexPatterns;
 import com.mobicage.rogerthat.util.Security;
+import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeAsyncTask;
@@ -131,6 +133,7 @@ import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.Pausable;
+import com.mobicage.rogerthat.util.ui.SafeViewFlipper;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rogerthat.util.ui.Wizard;
 import com.mobicage.rpc.Credentials;
@@ -139,6 +142,7 @@ import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.rpc.newxmpp.XMPPConfigurationFactory;
 import com.mobicage.to.beacon.BeaconRegionTO;
 import com.mobicage.to.location.BeaconDiscoveredRequestTO;
+
 
 public class RegistrationActivity2 extends ServiceBoundActivity {
 
@@ -159,10 +163,10 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
     private static final int START_OAUTH_REQUEST_CODE = 1;
 
     private static final int[] NORMAL_WIDTH_ROGERTHAT_LOGOS = new int[] { R.id.rogerthat_logo, R.id.rogerthat_logo1,
-            R.id.rogerthat_logo2, R.id.rogerthat_logo3, R.id.rogerthat_logo4, R.id.rogerthat_logo5 };
+            R.id.rogerthat_logo2, R.id.rogerthat_logo3, R.id.rogerthat_logo4};
     private static final int[] FULL_WIDTH_ROGERTHAT_LOGOS = new int[] { R.id.full_width_rogerthat_logo,
             R.id.full_width_rogerthat_logo1, R.id.full_width_rogerthat_logo2, R.id.full_width_rogerthat_logo3, R.id
-            .full_width_rogerthat_logo4, R.id.full_width_rogerthat_logo5 };
+            .full_width_rogerthat_logo4};
 
     private Intent mNotYetProcessedIntent = null;
 
@@ -210,6 +214,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         T.UI();
         createWorkerThread();
         mUIHandler = new Handler();
@@ -230,6 +235,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
         // If the app relies on GCM the user should not be able to register.
         if (CloudConstants.USE_GCM_KICK_CHANNEL)
             GoogleServicesUtils.checkPlayServices(this);
+
     }
 
     @Override
@@ -239,7 +245,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
         // If the app relies on GCM the user should not be able to register.
         if (CloudConstants.USE_GCM_KICK_CHANNEL)
             GoogleServicesUtils.checkPlayServices(this);
-    };
+    }
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -283,7 +289,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                 mService.getConfigurationProvider().updateConfigurationNow(RegistrationWizard2.CONFIGKEY, cfg);
 
             } else if (RegexPatterns.FRIEND_INVITE_URL.matcher(url).matches()
-                || RegexPatterns.SERVICE_INTERACT_URL.matcher(url).matches()) {
+                    || RegexPatterns.SERVICE_INTERACT_URL.matcher(url).matches()) {
                 popupRegisterFirst(uri);
 
                 Configuration cfg = mService.getConfigurationProvider().getConfiguration(RegistrationWizard2.CONFIGKEY);
@@ -337,6 +343,9 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
 
         setContentView(R.layout.registration2);
 
+        //Apply Fonts
+        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
+
         final Typeface faTypeFace = Typeface.createFromAsset(getAssets(), "FontAwesome.ttf");
         final int[] visibleLogos;
         final int[] goneLogos;
@@ -367,29 +376,36 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
         }
 
         TextView rogerthatWelcomeTextView = (TextView) findViewById(R.id.rogerthat_welcome);
+
         TextView tosTextView = (TextView) findViewById(R.id.registration_tos);
+        Typeface FONT_THIN_ITALIC = Typeface.createFromAsset(getAssets(), "fonts/lato_light_italic.ttf");
+        tosTextView.setTypeface(FONT_THIN_ITALIC);
+        tosTextView.setTextColor(ContextCompat.getColor(RegistrationActivity2.this, R.color.mc_words_color));
+
         Button agreeBtn = (Button) findViewById(R.id.registration_agree_tos);
 
-        TextView registrationNeedEmail = (TextView) findViewById(R.id.registration_need_email);
+        TextView tvRegistration = (TextView) findViewById(R.id.registration);
+        tvRegistration.setText(getString(R.string.registration_city_app_sign_up,
+                getString(R.string.app_name)));
+
         mEnterEmailAutoCompleteTextView = (AutoCompleteTextView) findViewById(R.id.registration_enter_email);
 
         if (CloudConstants.isEnterpriseApp()) {
             rogerthatWelcomeTextView.setText(getString(R.string.rogerthat_welcome_enterprise,
-                getString(R.string.app_name)));
+                    getString(R.string.app_name)));
             tosTextView.setVisibility(View.GONE);
             agreeBtn.setText(R.string.start_registration);
-            registrationNeedEmail.setText(R.string.registration_need_your_email_enterprise);
             mEnterEmailAutoCompleteTextView.setHint(R.string.registration_enter_email_hint_enterprise);
         } else {
-            rogerthatWelcomeTextView.setText(getString(R.string.rogerthat_welcome, getString(R.string.app_name)));
+            rogerthatWelcomeTextView.setText(getString(R.string.registration_welcome_text,
+                    getString(R.string.app_name)));
 
             tosTextView.setText(Html.fromHtml("<a href=\"" + CloudConstants.TERMS_OF_SERVICE_URL + "\">"
-                + tosTextView.getText() + "</a>"));
+                    + tosTextView.getText() + "</a>"));
             tosTextView.setMovementMethod(LinkMovementMethod.getInstance());
 
-            agreeBtn.setText(R.string.registration_agree_tos);
+            agreeBtn.setText(R.string.registration_btn_agree_tos);
 
-            registrationNeedEmail.setText(R.string.registration_need_your_email);
             mEnterEmailAutoCompleteTextView.setHint(R.string.registration_enter_email_hint);
         }
 
@@ -399,6 +415,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
             public void safeOnClick(View v) {
                 sendRegistrationStep(RegistrationWizard2.REGISTRATION_STEP_AGREED_TOS);
                 mWiz.proceedToNextPage();
+
             }
         });
 
@@ -413,10 +430,8 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
         };
 
         findViewById(R.id.login_via_email).setOnClickListener(emailLoginListener);
-        findViewById(R.id.email_login).setOnClickListener(emailLoginListener);
 
         Button facebookButton = (Button) findViewById(R.id.login_via_fb);
-        ImageView facebookImage = (ImageView) findViewById(R.id.fb_login);
 
         View.OnClickListener facebookLoginListener = new View.OnClickListener() {
             @Override
@@ -430,46 +445,49 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                 sendRegistrationStep(RegistrationWizard2.REGISTRATION_STEP_FACEBOOK_LOGIN);
 
                 FacebookUtils.ensureOpenSession(
-                    RegistrationActivity2.this,
-                    AppConstants.PROFILE_SHOW_GENDER_AND_BIRTHDATE ? Arrays.asList("email", "user_friends",
-                        "user_birthday") : Arrays.asList("email", "user_friends"), PermissionType.READ,
-                    new Session.StatusCallback() {
-                        @Override
-                        public void call(Session session, SessionState state, Exception exception) {
-                            if (session != Session.getActiveSession()) {
-                                session.removeCallback(this);
-                                return;
-                            }
+                        RegistrationActivity2.this,
+                        AppConstants.PROFILE_SHOW_GENDER_AND_BIRTHDATE ? Arrays.asList("email", "user_friends",
+                                "user_birthday") : Arrays.asList("email", "user_friends"), PermissionType.READ,
+                        new Session.StatusCallback() {
+                            @Override
+                            public void call(Session session, SessionState state, Exception exception) {
+                                if (session != Session.getActiveSession()) {
+                                    session.removeCallback(this);
+                                    return;
+                                }
 
-                            if (exception != null) {
-                                session.removeCallback(this);
-                                if (!(exception instanceof FacebookOperationCanceledException)) {
-                                    L.bug("Facebook SDK error during registration", exception);
-                                    AlertDialog.Builder builder = new AlertDialog.Builder(RegistrationActivity2.this);
-                                    builder.setMessage(R.string.error_please_try_again);
-                                    builder.setPositiveButton(R.string.rogerthat, null);
-                                    AlertDialog dialog = builder.create();
-                                    dialog.show();
-                                }
-                            } else if (session.isOpened()) {
-                                session.removeCallback(this);
-                                if (session.getPermissions().contains("email")) {
-                                    registerWithAccessToken(session.getAccessToken());
-                                } else {
-                                    AlertDialog.Builder builder = new AlertDialog.Builder(RegistrationActivity2.this);
-                                    builder.setMessage(R.string.facebook_registration_email_missing);
-                                    builder.setPositiveButton(R.string.rogerthat, null);
-                                    AlertDialog dialog = builder.create();
-                                    dialog.show();
+                                if (exception != null) {
+                                    session.removeCallback(this);
+                                    if (!(exception instanceof FacebookOperationCanceledException)) {
+                                        L.bug("Facebook SDK error during registration", exception);
+                                        AlertDialog.Builder builder = new AlertDialog.Builder(RegistrationActivity2
+                                                .this);
+                                        builder.setMessage(R.string.error_please_try_again);
+                                        builder.setPositiveButton(R.string.rogerthat, null);
+                                        AlertDialog dialog = builder.create();
+                                        dialog.show();
+                                    }
+                                } else if (session.isOpened()) {
+                                    session.removeCallback(this);
+                                    if (session.getPermissions().contains("email")) {
+                                        registerWithAccessToken(session.getAccessToken());
+                                    } else {
+                                        AlertDialog.Builder builder = new AlertDialog.Builder(RegistrationActivity2
+                                                .this);
+                                        builder.setMessage(R.string.facebook_registration_email_missing);
+                                        builder.setPositiveButton(R.string.rogerthat, null);
+                                        AlertDialog dialog = builder.create();
+                                        dialog.show();
+                                    }
                                 }
                             }
-                        }
-                    }, false);
-            };
+                        }, false);
+            }
+
+            ;
         };
 
         facebookButton.setOnClickListener(facebookLoginListener);
-        facebookImage.setOnClickListener(facebookLoginListener);
 
         initOauthStep(faTypeFace);
 
@@ -524,9 +542,8 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
         setFinishHandler();
         addAgreeTOSHandler();
         addIBeaconUsageHandler();
-        addChooseLoginMethodHandler();
         addOauthMethodHandler();
-        addEnterEmailHandler();
+        addChooseLoginMethodHandler();
         addEnterPinHandler();
         mWiz.run();
         mWiz.setDeviceId(Installation.id(this));
@@ -561,7 +578,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
         findViewById(R.id.registration_beacon_usage_continue).setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
-                ActivityCompat.requestPermissions(RegistrationActivity2.this, new String[] {Manifest.permission
+                ActivityCompat.requestPermissions(RegistrationActivity2.this, new String[]{Manifest.permission
                         .ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_COARSE_LOCATION);
             }
         });
@@ -1007,7 +1024,8 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_GO
-                    || (event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)) {
+                        || (event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent
+                        .ACTION_DOWN)) {
                     requestPin();
                     return true;
                 }
@@ -1195,7 +1213,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
 
     private void handleEnterEmail() {
         T.UI();
-        final Button continueButton = (Button) findViewById(R.id.registration_continue_email);
+        final Button continueButton = (Button) findViewById(R.id.login_via_email);
         continueButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View button) {
@@ -1323,35 +1341,6 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
         });
     }
 
-    private void addEnterEmailHandler() {
-        mWiz.addPageHandler(new Wizard.PageHandler() {
-
-            @Override
-            public void pageDisplayed(Button back, Button next, ViewFlipper switcher) {
-                mEnterEmailAutoCompleteTextView.setThreshold(1);
-                mEnterEmailAutoCompleteTextView.requestFocus();
-                UIUtils.showKeyboard(RegistrationActivity2.this);
-            }
-
-            @Override
-            public String getTitle() {
-                return null;
-            }
-
-            @Override
-            public boolean beforeNextClicked(Button back, Button next, ViewFlipper switcher) {
-                return false;
-            }
-
-            @Override
-            public boolean beforeBackClicked(Button back, Button next, ViewFlipper switcher) {
-                if (AppConstants.FACEBOOK_APP_ID == null || !AppConstants.FACEBOOK_REGISTRATION)
-                    return false;
-                return true;
-            }
-        });
-    }
-
     private void addEnterPinHandler() {
         mWiz.addPageHandler(new Wizard.PageHandler() {
             @Override
@@ -1366,8 +1355,8 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                     f = "%s";
                 }
                 final TextView tv = (TextView) findViewById(R.id.registration_pin_was_mailed);
-                tv.setText(Html.fromHtml(getString(R.string.registration_pin_was_mailed,
-                        String.format(f, mWiz.getEmail()))));
+                tv.setText(getString(R.string.registration_pin_was_mailed,
+                        mWiz.getEmail()));
             }
 
             @Override
@@ -1382,7 +1371,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
 
             @Override
             public boolean beforeBackClicked(Button back, Button next, ViewFlipper switcher) {
-                return false;
+                return true;
             }
         });
     }
@@ -1477,7 +1466,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
     }
 
     private void tryConnect(final ProgressDialog pd, final int attempt, final String statusMessage,
-        final RegistrationInfo info) {
+                            final RegistrationInfo info) {
         T.UI();
         final Pausable pausable = this;
 
@@ -1485,7 +1474,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
             pd.dismiss();
 
             new AlertDialog.Builder(RegistrationActivity2.this).setMessage(getString(R.string.registration_error))
-                .setCancelable(true).setPositiveButton(R.string.try_again, null).create().show();
+                    .setCancelable(true).setPositiveButton(R.string.try_again, null).create().show();
             mWiz.reInit();
             mWiz.goBackToPrevious();
             return;
@@ -1514,8 +1503,8 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                     if (CloudConstants.USE_XMPP_KICK_CHANNEL) {
 
                         final ConnectionConfiguration xmppConfig = new XMPPConfigurationFactory(cp,
-                            mService.getNetworkConnectivityManager(), null)
-                            .getSafeXmppConnectionConfiguration(xmppServiceName);
+                                mService.getNetworkConnectivityManager(), null)
+                                .getSafeXmppConnectionConfiguration(xmppServiceName);
                         final XMPPConnection xmppCon = new XMPPConnection(xmppConfig);
 
                         xmppCon.setLogger(new Logger() {
@@ -1541,7 +1530,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                     }
 
                     postFinishRegistration(info.mCredentials.getUsername(), info.mCredentials.getPassword(),
-                        invitorCode, invitorSecret);
+                            invitorCode, invitorSecret);
 
                     mUIHandler.post(new SafeRunnable(pausable) {
 
@@ -1597,7 +1586,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
 
     @SuppressWarnings("unchecked")
     private void postFinishRegistration(final String username, final String password, final String invitorCode,
-        final String invitorSecret) throws ClientProtocolException, IOException {
+                                        final String invitorSecret) throws ClientProtocolException, IOException {
         T.REGISTRATION();
         final String mobileInfo = getMobileInfo();
         HttpClient httpClient = HTTPUtil.getHttpClient();
@@ -1644,7 +1633,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
         }
 
         final Map<String, Object> responseMap = (Map<String, Object>) JSONValue.parse(new InputStreamReader(httpEntity
-            .getContent()));
+                .getContent()));
         if (responseMap == null) {
             throw new IOException("HTTP request responseMap was null");
         }
@@ -1732,8 +1721,9 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                                 boolean stringSet = false;
                                 if (entity != null) {
                                     @SuppressWarnings("unchecked")
-                                    final Map<String, Object> responseMap = (Map<String, Object>) org.json.simple.JSONValue
-                                        .parse(new InputStreamReader(entity.getContent()));
+                                    final Map<String, Object> responseMap = (Map<String, Object>) org.json.simple
+                                            .JSONValue
+                                            .parse(new InputStreamReader(entity.getContent()));
 
                                     if (responseMap != null) {
                                         String result = (String) responseMap.get("result");
@@ -1771,7 +1761,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (mWiz.getPosition() == 2) {
+            if (mWiz.getPosition() == 3) {
                 mWiz.goBack();
                 return true;
             }
@@ -1885,7 +1875,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
         mBeaconManager = BeaconManager.getInstanceForApplication(mService);
         if (!mBeaconManager.isAnyConsumerBound()) {
             mBeaconManager.getBeaconParsers().add(
-                new BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25"));
+                    new BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25"));
         }
 
         try {
@@ -1913,7 +1903,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
 
                 try {
                     mBeaconManager.startMonitoringBeaconsInRegion(new Region(regionId, BeaconRegion.getId1(br),
-                        BeaconRegion.getId2(br), BeaconRegion.getId3(br)));
+                            BeaconRegion.getId2(br), BeaconRegion.getId3(br)));
                 } catch (RemoteException e) {
                     L.e(e);
                 }

@@ -333,7 +333,7 @@
     <string name="registration_no_attempts_left">Vous avez entré trois fois un code d\'activation faux.\n\nRecommencez l\'inscription s\'il-vous-plaît.</string>
     <string name="registration_option_email">Option 2:\nUtiliser votre addresse e-mail.</string>
     <string name="registration_option_fb">Option 1:\nUtiliser votre compte Facebook.</string>
-    <string name="registration_pin_was_mailed">Votre code d\'activation a été envoyé à &lt;br /&gt;&lt;b&gt;%1$s&lt;/b&gt;&lt;br /&gt;&lt;br /&gt; Peut-être que l\'e-mail se trouve dans vos spam ou courriers indésirables.</string>
+    <string name="registration_pin_was_mailed">Votre code d\'activation a été envoyé à %1$s\n\nPeut-être que l\'e-mail se trouve dans vos spam ou courriers indésirables.</string>
     <string name="registration_pin_was_mailed_no_html">Votre code d\'activation est envoyé à %1$s à %2$s.\nPeut-être que l\'e-mail se trouve dans vos spams ou courriers indésirables.</string>
     <string name="registration_request_new_pin">Demander le nouveau code d\'activation</string>
     <string name="registration_screen_install_zxing">%1$s utilise le scanneur ZXing pour automatiser certaines tâches.\n\nVoulez-vous installer l\'application ZXing?</string>

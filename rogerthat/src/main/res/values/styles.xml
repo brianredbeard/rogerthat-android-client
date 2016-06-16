@@ -1,9 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <style name="Scroller">
         <item name="android:layout_width">fill_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:background">@drawable/ds_slider_back</item>
         <item name="android:layout_margin">3dp</item>
     </style>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+
+        <!-- Changes color of the separator in the navigation view -->
+        <item name="android:listDivider">@drawable/divider_gradient</item>
+
+        <!--Change de color of the NavigationDrawer Icon in the Toolbar.-->
+        <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
+
+    </style>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="DrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">
+    <!--<item name="drawableSize">40dp</item>-->
+    <!--<item name="spinBars">true</item>-->
+    <item name="color">@color/mc_green</item>
+    </style>
+
+    <!--<style name="ActionBarStyle" parent="Widget.AppCompat.ActionBar">-->
+        <!--<item name="titleTextStyle">@color/mc_black</item>-->
+        <!--<item name="background">@color/mc_background_color</item>-->
+    <!--</style>-->
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

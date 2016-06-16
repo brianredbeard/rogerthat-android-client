@@ -82,7 +82,7 @@
     <string name="configure_new_canned_message">Crear un borrador de mensaje</string>
     <string name="confirm_remove_friend">¿Está seguro que desea desvincular a %1$s?</string>
     <string name="confirm_remove_service">¿Está seguro que desea desvincularse del servicio %1$s?</string>
-    <string name="connect_service_now">Ahora está conectado</string>
+    <string name="connect_service_now">Sígueme</string>
     <string name="contacts">Contactos</string>
     <string name="contacts_found_1">1 contacto en %1$s</string>
     <string name="contacts_found_more">%1$d contactos en %2$s</string>
@@ -333,7 +333,7 @@
     <string name="registration_no_attempts_left">Se ha introducido un código de activación erróneo en tres intentos.\n\nPor favor, reinicie su proceso de registro.</string>
     <string name="registration_option_email">Opción 2:\nRegístrese usando correo electrónico.</string>
     <string name="registration_option_fb">Opción 1:\nRegístrese usando Facebook.</string>
-    <string name="registration_pin_was_mailed">Su código de activación se ha enviado a&lt;br /&gt;&lt;b&gt;%1$s&lt;/b&gt;&lt;br /&gt;&lt;br /&gt; No olvide comprobar sus carpetas de correo basura y spam.</string>
+    <string name="registration_pin_was_mailed">Su código de activación se ha enviado a %1$s\n\nNo olvide comprobar sus carpetas de correo basura y spam.</string>
     <string name="registration_pin_was_mailed_no_html">Su código de activación se ha enviado a %1$s en %2$s\nNo olvide comprobar sus carpetas de correo basura y spam.</string>
     <string name="registration_request_new_pin">Solicite un nuevo código de activación</string>
     <string name="registration_screen_install_zxing">%1$s utiliza el lector de código de barras ZXing para la automatización de una serie de tareas.\n\n¿Desea instalar el lector de código de barras ZXing ahora?</string>

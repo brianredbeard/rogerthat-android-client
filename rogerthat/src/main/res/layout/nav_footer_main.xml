@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/footer_gradient"
+    android:gravity="bottom"
+    android:orientation="horizontal"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:weightSum="4">
+
+    <ImageButton
+        android:id="@+id/nav_newspaper"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:background="@null"
+        android:onClick="onOptionNavigationViewToolbarSelected"
+        android:src="@drawable/ic_menu_newspaper" />
+
+    <ImageButton
+        android:id="@+id/nav_shopping_basket"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:background="@null"
+        android:onClick="onOptionNavigationViewToolbarSelected"
+        android:src="@drawable/ic_menu_shopping_basket" />
+
+    <ImageButton
+        android:id="@+id/nav_calendar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:background="@null"
+        android:onClick="onOptionNavigationViewToolbarSelected"
+        android:src="@drawable/ic_menu_calendar" />
+
+    <ImageButton
+        android:id="@+id/nav_credit_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:background="@null"
+        android:onClick="onOptionNavigationViewToolbarSelected"
+        android:src="@drawable/ic_menu_credit_card" />
+
+</LinearLayout>

@@ -38,6 +38,7 @@ import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.HomeActivity;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.ServiceBoundActivity;
+import com.mobicage.rogerthat.ServiceBoundActivityNavigationView;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
@@ -49,7 +50,7 @@ import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.AppConstants;
 
-public class ScanTabActivity extends ServiceBoundActivity {
+public class ScanTabActivity extends ServiceBoundActivityNavigationView {
 
     public static final int ZXING_SCAN_RESULT = 666;
     public static final int MARKET_INSTALL_RESULT = 667;

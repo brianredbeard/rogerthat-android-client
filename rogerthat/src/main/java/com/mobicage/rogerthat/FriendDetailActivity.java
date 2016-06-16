@@ -99,6 +99,7 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
     private View mFriendArea;
     private ViewGroup mServiceArea;
     private View mPokeArea;
+    private View mHeader;
 
     protected String mContextMatch;
 
@@ -113,6 +114,7 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
         mServiceArea = (ViewGroup) findViewById(R.id.service_area);
         mPokeArea = findViewById(R.id.poke_area);
         mFriendArea = findViewById(R.id.friend_area);
+        mHeader = findViewById(R.id.friend_detail_header);
     }
 
     @Override
@@ -307,11 +309,6 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
     protected abstract int getMenu();
 
     @Override
-    protected boolean showFABMenu() {
-        return true;
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         T.UI();
 
@@ -381,6 +378,8 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    protected abstract int getHeaderVisibility();
 
     protected abstract int getFriendAreaVisibility();
 
@@ -532,6 +531,7 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
         mServiceArea.setVisibility(getServiceAreaVisibility());
         mPokeArea.setVisibility(getPokeVisibility());
         mFriendArea.setVisibility(getFriendAreaVisibility());
+        mHeader.setVisibility(getHeaderVisibility());
 
         final ImageView image = (ImageView) findViewById(R.id.friend_avatar);
         if (friend.avatar == null) {
@@ -551,7 +551,7 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
         emailView.setTextColor(nameView.getTextColors());
 
         if (friend.existenceStatus == Friend.NOT_FOUND || friend.existenceStatus == Friend.INVITE_PENDING) {
-            final Button pokeBtn = (Button) mServiceArea.findViewById(R.id.poke_button);
+            final Button pokeBtn = (Button) findViewById(R.id.poke_button);
             pokeBtn.setText(R.string.connect_service_now);
             pokeBtn.setOnClickListener(new SafeViewOnClickListener() {
                 @Override

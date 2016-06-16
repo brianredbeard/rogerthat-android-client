@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.mobicage.rogerthat.util.ui.ScaleImageView
+        android:id="@+id/full_width_rogerthat_logo1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:scaleType="fitStart"
+        android:src="@drawable/registration_logo"
+        android:visibility="gone" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="20dp">
+
+        <ImageView
+            android:id="@+id/rogerthat_logo1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:padding="50dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/registration_logo" />
+
+        <TextView
+            android:id="@+id/ibeacon_usage_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/rogerthat_logo1"
+            android:layout_centerHorizontal="true"
+            android:gravity="center_horizontal"
+            android:text="@string/fa_compass"
+            android:textColor="@color/mc_primary_color"
+            android:textSize="75sp" />
+
+        <TextView
+            android:id="@+id/ibeacon_usage_augment_experience"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/ibeacon_usage_icon"
+            android:layout_centerHorizontal="true"
+            android:gravity="center_horizontal"
+            android:text="@string/ibeacon_usage_augment_experience"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/ibeacon_usage_used_for"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/ibeacon_usage_augment_experience"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="20dp"
+            android:gravity="center_horizontal"
+            android:text="@string/ibeacon_usage_used_for"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/ibeacon_usage_discover_services_automatically"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/ibeacon_usage_used_for"
+            android:layout_centerHorizontal="true"
+            android:gravity="center_horizontal"
+            android:text="@string/ibeacon_usage_discover_services_automatically"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/ibeacon_usage_not_used_for"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/ibeacon_usage_discover_services_automatically"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="20dp"
+            android:gravity="center_horizontal"
+            android:text="@string/ibeacon_usage_not_used_for"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/ibeacon_usage_store"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/ibeacon_usage_not_used_for"
+            android:layout_centerHorizontal="true"
+            android:gravity="center_horizontal"
+            android:text="@string/ibeacon_usage_store"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/ibeacon_usage_track_location_without_concent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/ibeacon_usage_store"
+            android:layout_centerHorizontal="true"
+            android:gravity="center_horizontal"
+            android:text="@string/ibeacon_usage_track_location_without_concent"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/registration_beacon_usage_continue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/green_gradient"
+            android:minHeight="50dp"
+            android:paddingLeft="10dp"
+            android:text="@string/allow"
+            android:textColor="@color/mc_white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+    </RelativeLayout>
+</LinearLayout>

@@ -153,6 +153,9 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
             }
 
         });
+
+        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
+
         pages = (LinearLayout) findViewById(R.id.pages);
         Resources resources = getResources();
         darkSchemeTextColor = resources.getColor(android.R.color.primary_text_dark);

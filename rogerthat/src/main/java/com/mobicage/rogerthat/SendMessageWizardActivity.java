@@ -243,16 +243,6 @@ public class SendMessageWizardActivity extends ServiceBoundActivity {
     }
 
     @Override
-    protected int getFabGravity() {
-        return Gravity.TOP | Gravity.RIGHT;
-    }
-
-    @Override
-    protected boolean showFABMenu() {
-        return true;
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         T.UI();
         super.onCreateOptionsMenu(menu);

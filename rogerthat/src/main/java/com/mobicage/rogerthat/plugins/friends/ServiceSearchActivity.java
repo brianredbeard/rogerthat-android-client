@@ -33,9 +33,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.LinearGradient;
+import android.graphics.Shader;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -87,9 +88,9 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
 
     private static final int PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 1;
 
-    private static final String[] UPDATE_VIEW_INTENTS = new String[] { FriendsPlugin.FRIENDS_LIST_REFRESHED,
-        FriendsPlugin.FRIEND_ADDED_INTENT, FriendsPlugin.FRIEND_MARKED_FOR_REMOVAL_INTENT,
-        FriendsPlugin.FRIEND_REMOVED_INTENT };
+    private static final String[] UPDATE_VIEW_INTENTS = new String[]{FriendsPlugin.FRIENDS_LIST_REFRESHED,
+            FriendsPlugin.FRIEND_ADDED_INTENT, FriendsPlugin.FRIEND_MARKED_FOR_REMOVAL_INTENT,
+            FriendsPlugin.FRIEND_REMOVED_INTENT};
 
     private FriendsPlugin mFriendsPlugin;
     private BroadcastReceiver mBroadcastReceiver;
@@ -124,7 +125,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_SEARCH
-                    || (event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)) {
+                        || (event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)) {
                     if (!TextUtils.isEmptyOrWhitespace(mSearchString)) {
                         UIUtils.hideKeyboard(ServiceSearchActivity.this, v);
                         launchFindServiceCall();
@@ -182,7 +183,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
         if (mService.isPermitted(Manifest.permission.ACCESS_FINE_LOCATION)) {
             launchFindServiceCall();
         } else {
-            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST_ACCESS_FINE_LOCATION);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST_ACCESS_FINE_LOCATION);
         }
     }
 
@@ -228,7 +229,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
                         intent.putExtra(ServiceDetailActivity.EXISTENCE, existence);
                     }
                     intent
-                        .putExtra(ServiceDetailActivity.FIND_SERVICE_RESULT, JSONValue.toJSONString(item.toJSONMap()));
+                            .putExtra(ServiceDetailActivity.FIND_SERVICE_RESULT, JSONValue.toJSONString(item.toJSONMap()));
                     startActivity(intent);
                 }
             }
@@ -274,12 +275,12 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
                         } catch (IncompleteMessageException e) {
                             L.bug(e);
                             showSearchFailedDialog();
-                            return new String[] { action };
+                            return new String[]{action};
                         }
 
                         if (!TextUtils.isEmptyOrWhitespace(mResponseTO.error_string)) {
                             UIUtils.showAlertDialog(ServiceSearchActivity.this, null, mResponseTO.error_string);
-                            return new String[] { action };
+                            return new String[]{action};
                         }
 
                         for (FindServiceCategoryTO category : mResponseTO.matches) {
@@ -291,7 +292,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
                             } else {
                                 // Add Label
                                 LinearLayout label = (LinearLayout) getLayoutInflater().inflate(
-                                    R.layout.search_category, null);
+                                        R.layout.search_category, null);
                                 final boolean selected = mSearchCategoryLabels.getChildCount() == 0;
                                 final TextView labelTextView = setCatorySelected(label, selected);
                                 labelTextView.setText(category.category);
@@ -305,7 +306,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
 
                                 // Add ListView
                                 ListView results = (ListView) getLayoutInflater().inflate(
-                                    R.layout.search_category_results, null);
+                                        R.layout.search_category_results, null);
                                 mSearchCategoryViewFlipper.addView(results);
                                 SearchInfo si = new SearchInfo();
                                 ServiceSearchAdapter adapter = new ServiceSearchAdapter(category.items, si);
@@ -322,13 +323,13 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
                             }
                         }
 
-                        return new String[] { action };
+                        return new String[]{action};
                     }
                 } else if (FriendsPlugin.SERVICE_SEARCH_FAILED_INTENT.equals(action)) {
                     if (mSearchString.equals(intent.getStringExtra(SEARCH_STRING))) {
                         mProgressDialog.dismiss();
                         showSearchFailedDialog();
-                        return new String[] { action };
+                        return new String[]{action};
                     }
                 } else {
                     L.d(ServiceSearchActivity.class.getName() + " received " + action + " intent");
@@ -499,29 +500,38 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
             // Set status icon
             v.findViewById(R.id.friend_existence_layout).setVisibility(View.VISIBLE);
             ProgressBar spinnerView = (ProgressBar) v.findViewById(R.id.friend_spinner);
-            ImageView statusView = (ImageView) v.findViewById(R.id.friend_existence);
+            TextView statusView = (TextView) v.findViewById(R.id.friend_existence);
+
+            Typeface fa = Typeface.createFromAsset(getAssets(), "FontAwesome.ttf");
+            statusView.setTypeface(fa);
 
             switch (existence) {
-            case Friend.ACTIVE:
-                spinnerView.setVisibility(View.GONE);
-                statusView.setVisibility(View.VISIBLE);
-                statusView.setImageResource(R.drawable.ic_bullet_key_permission);
-                break;
-            case Friend.DELETED:
-            case Friend.DELETION_PENDING:
-            case Friend.NOT_FOUND:
-                spinnerView.setVisibility(View.GONE);
-                statusView.setVisibility(View.VISIBLE);
-                statusView.setImageResource(R.drawable.ic_btn_arrow_right_unselected);
-                break;
-            case Friend.INVITE_PENDING:
-                spinnerView.setVisibility(View.VISIBLE);
-                statusView.setVisibility(View.GONE);
-                break;
-            default:
-                spinnerView.setVisibility(View.GONE);
-                statusView.setVisibility(View.GONE);
-                break;
+                case Friend.ACTIVE:
+                    spinnerView.setVisibility(View.GONE);
+                    statusView.setVisibility(View.VISIBLE);
+                    statusView.setText(R.string.fa_check);
+                    statusView.setTextSize(18);
+                    statusView.setBackgroundResource(R.drawable.grey_gradient);
+
+                    break;
+                case Friend.DELETED:
+                case Friend.DELETION_PENDING:
+                case Friend.NOT_FOUND:
+                    spinnerView.setVisibility(View.GONE);
+                    statusView.setVisibility(View.VISIBLE);
+                    statusView.setText(R.string.fa_plus);
+                    statusView.setTextSize(20);
+                    statusView.setBackgroundResource(R.drawable.green_gradient);
+
+                    break;
+                case Friend.INVITE_PENDING:
+                    spinnerView.setVisibility(View.VISIBLE);
+                    statusView.setVisibility(View.GONE);
+                    break;
+                default:
+                    spinnerView.setVisibility(View.GONE);
+                    statusView.setVisibility(View.GONE);
+                    break;
             }
             return v;
 

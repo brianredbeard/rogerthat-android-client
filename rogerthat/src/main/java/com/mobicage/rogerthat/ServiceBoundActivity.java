@@ -39,13 +39,17 @@ import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
+import android.support.design.widget.NavigationView;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -60,15 +64,15 @@ import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.Pausable;
 import com.mobicage.rogerthat.util.ui.UIUtils;
+import com.mobicage.rogerthat.widget.CustomDrawerLayout;
 
-public abstract class ServiceBoundActivity extends Activity implements Pausable, ServiceBound {
+public abstract class ServiceBoundActivity extends AppCompatActivity implements Pausable, ServiceBound {
 
     public static final long MAX_TRANSMIT = 10 * 1000;
 
     protected volatile MainService mService;
     protected boolean mServiceIsBound = false; // Owned by UI thread
     private boolean mPaused = false; // Owned by UI thread
-    private FloatingActionButton mFAB;
     final private Queue<SafeRunnable> mWorkQueue = new LinkedList<SafeRunnable>();
 
     private final BroadcastReceiver closeActivityListener = new SafeBroadcastReceiver() {
@@ -94,6 +98,7 @@ public abstract class ServiceBoundActivity extends Activity implements Pausable,
     private boolean mWasPaused = false;
     private Map<Integer, SafeRunnable[]> mPermissionRequests = new HashMap<Integer, SafeRunnable[]>();
 
+    protected CustomDrawerLayout drawer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,6 +121,7 @@ public abstract class ServiceBoundActivity extends Activity implements Pausable,
             }
         });
         mConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
     }
 
     @Override
@@ -176,14 +182,14 @@ public abstract class ServiceBoundActivity extends Activity implements Pausable,
 
     protected void showActionScheduledDialog() {
         new AlertDialog.Builder(ServiceBoundActivity.this).setMessage(R.string.action_scheduled)
-            .setPositiveButton(R.string.rogerthat, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                    if (mTransmitTimeoutRunnable != null)
-                        mTransmitTimeoutRunnable.run();
-                }
-            }).create().show();
+                .setPositiveButton(R.string.rogerthat, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        if (mTransmitTimeoutRunnable != null)
+                            mTransmitTimeoutRunnable.run();
+                    }
+                }).create().show();
     }
 
     protected boolean checkConnectivity() {
@@ -305,6 +311,7 @@ public abstract class ServiceBoundActivity extends Activity implements Pausable,
         T.UI();
         return mWasPaused;
     }
+
     @Override
     public void queue(SafeRunnable runnable) {
         T.UI();
@@ -355,43 +362,6 @@ public abstract class ServiceBoundActivity extends Activity implements Pausable,
         return mLastTimeClicked;
     }
 
-    protected View wrapViewWithFab(View view) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH || !showFABMenu())
-            return view;
-
-        FrameLayout frameLayout = new FrameLayout(this);
-        frameLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
-        frameLayout.addView(view);
-
-        mFAB = new FloatingActionButton(this);
-        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
-        layoutParams.gravity = getFabGravity();
-        int m = UIUtils.convertDipToPixels(this, 16);
-        layoutParams.setMargins(m, m, m, m);
-        mFAB.setLayoutParams(layoutParams);
-        mFAB.setImageResource(R.drawable.ic_menu);
-        mFAB.setColorNormalResId(R.color.mc_homescreen_background);
-        mFAB.setColorPressedResId(R.color.mc_homescreen_background);
-        mFAB.setColorRipple(R.color.mc_homescreen_background);
-        mFAB.setOnClickListener(new SafeViewOnClickListener() {
-            @Override
-            public void safeOnClick(View v) {
-                openOptionsMenu();
-            }
-        });
-        mFAB.setVisibility(View.VISIBLE);
-        frameLayout.addView(mFAB);
-        return frameLayout;
-    }
-
-    protected int getFabGravity() {
-        return Gravity.BOTTOM | Gravity.RIGHT;
-    }
-
-    protected boolean showFABMenu() {
-        return false;
-    }
-
     @Override
     public void setContentView(int layoutResID) {
         setContentView(getLayoutInflater().inflate(layoutResID, null));
@@ -399,12 +369,12 @@ public abstract class ServiceBoundActivity extends Activity implements Pausable,
 
     @Override
     public void setContentView(View view) {
-        super.setContentView(wrapViewWithFab(view));
+        super.setContentView(view);
     }
 
     @Override
     public void setContentView(View view, ViewGroup.LayoutParams params) {
-        super.setContentView(wrapViewWithFab(view), params);
+        super.setContentView(view, params);
     }
 
     public boolean askPermissionIfNeeded(final String permission, final int requestCode, final SafeRunnable onGranted,

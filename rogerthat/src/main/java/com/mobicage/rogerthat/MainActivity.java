@@ -559,7 +559,13 @@ public class MainActivity extends ServiceBoundActivity {
     private void launchHomeActivityAndFinish(final Uri qrUri, final int flags) {
         T.UI();
 
-        final Intent homeActivityIntent = new Intent(this, HomeActivity.class);
+        final Intent homeActivityIntent;
+        if (AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.homescreen_news) {
+            homeActivityIntent  = new Intent(this, NewsHomeActivity.class);
+        } else {
+            homeActivityIntent  = new Intent(this, HomeActivity.class);
+        }
+
         homeActivityIntent.setFlags(flags);
         homeActivityIntent.setData(qrUri);
 

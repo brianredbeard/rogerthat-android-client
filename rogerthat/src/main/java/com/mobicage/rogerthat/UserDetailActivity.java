@@ -35,6 +35,11 @@ public class UserDetailActivity extends FriendDetailActivity {
     }
 
     @Override
+    protected int getHeaderVisibility() {
+        return View.VISIBLE;
+    }
+
+    @Override
     protected int getPassportVisibility() {
         return View.VISIBLE;
     }
