@@ -141,19 +141,4 @@ public abstract class ServiceBoundTabActivity extends TabActivity implements Ser
 
     protected abstract void onServiceUnbound();
 
-    @Override
-    public void setContentView(int layoutResID) {
-        setContentView(getLayoutInflater().inflate(layoutResID, null));
-    }
-
-    @Override
-    public void setContentView(View view) {
-        super.setContentView(view);
-    }
-
-    @Override
-    public void setContentView(View view, ViewGroup.LayoutParams params) {
-        super.setContentView(view, params);
-    }
-
 }

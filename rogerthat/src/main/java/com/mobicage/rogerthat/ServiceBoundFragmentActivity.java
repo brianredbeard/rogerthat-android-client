@@ -343,19 +343,4 @@ public abstract class ServiceBoundFragmentActivity extends FragmentActivity impl
         return mLastTimeClicked;
     }
 
-    @Override
-    public void setContentView(int layoutResID) {
-        setContentView(getLayoutInflater().inflate(layoutResID, null));
-    }
-
-    @Override
-    public void setContentView(View view) {
-        super.setContentView(view);
-    }
-
-    @Override
-    public void setContentView(View view, ViewGroup.LayoutParams params) {
-        super.setContentView(view, params);
-    }
-
 }

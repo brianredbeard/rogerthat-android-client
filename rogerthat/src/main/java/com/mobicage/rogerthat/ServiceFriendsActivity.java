@@ -63,12 +63,13 @@ public class ServiceFriendsActivity extends FriendsActivity {
             noServicesStringId = R.string.no_community_services_found;
         } else if (mOrganizationType == FriendStore.SERVICE_ORGANIZATION_TYPE_EMERGENCY) {
             mOrganizationTypeStringId = R.string.care;
-            noServicesStringId = R.string.no_care_found;
+            noServicesStringId = R.string.no_care_institutions_found;
         } else {
             mOrganizationTypeStringId = R.string.tab_services;
             noServicesStringId = R.string.no_services_found;
         }
-        noServicesTextView.setText(getString(noServicesStringId, getString(R.string.app_name)));
+        noServicesTextView.setText(getString(noServicesStringId, getString(R.string.app_name)) + " " + getString(R
+                .string.click_magnifying_glass_to_search_services));
 
 
         //Change Fonts.

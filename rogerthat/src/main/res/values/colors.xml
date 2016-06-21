@@ -36,8 +36,8 @@
     <color name="mc_priority_urgent_text">#FFFFFF</color>
     <color name="mc_priority_urgent_background">#FF8481</color>
 
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorPrimary">#84B53F</color>
+    <color name="colorPrimaryDark">#006536</color>
+    <color name="colorAccent">#84B53F</color>
 
 </resources>

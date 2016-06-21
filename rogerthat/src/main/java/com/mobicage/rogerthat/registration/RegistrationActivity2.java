@@ -235,7 +235,6 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
         // If the app relies on GCM the user should not be able to register.
         if (CloudConstants.USE_GCM_KICK_CHANNEL)
             GoogleServicesUtils.checkPlayServices(this);
-
     }
 
     @Override
@@ -375,27 +374,23 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
             rc.setBackgroundColor(resources.getColor(R.color.mc_homescreen_background));
         }
 
-        TextView rogerthatWelcomeTextView = (TextView) findViewById(R.id.rogerthat_welcome);
-
         TextView tosTextView = (TextView) findViewById(R.id.registration_tos);
-        Typeface FONT_THIN_ITALIC = Typeface.createFromAsset(getAssets(), "fonts/lato_light_italic.ttf");
-        tosTextView.setTypeface(FONT_THIN_ITALIC);
+        tosTextView.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/lato_light_italic.ttf"));
         tosTextView.setTextColor(ContextCompat.getColor(RegistrationActivity2.this, R.color.mc_words_color));
 
-        Button agreeBtn = (Button) findViewById(R.id.registration_agree_tos);
-
-        TextView tvRegistration = (TextView) findViewById(R.id.registration);
-        tvRegistration.setText(getString(R.string.registration_city_app_sign_up,
-                getString(R.string.app_name)));
+        TextView signupTextView = (TextView) findViewById(R.id.registration);
+        signupTextView.setText(getString(CloudConstants.isCityApp() ? R.string.registration_city_app_sign_up : R
+                .string.registration_sign_up, getString(R.string.app_name)));
 
         mEnterEmailAutoCompleteTextView = (AutoCompleteTextView) findViewById(R.id.registration_enter_email);
 
+        Button agreeBtn = (Button) findViewById(R.id.registration_agree_tos);
+        TextView rogerthatWelcomeTextView = (TextView) findViewById(R.id.rogerthat_welcome);
         if (CloudConstants.isEnterpriseApp()) {
             rogerthatWelcomeTextView.setText(getString(R.string.rogerthat_welcome_enterprise,
                     getString(R.string.app_name)));
             tosTextView.setVisibility(View.GONE);
             agreeBtn.setText(R.string.start_registration);
-            mEnterEmailAutoCompleteTextView.setHint(R.string.registration_enter_email_hint_enterprise);
         } else {
             rogerthatWelcomeTextView.setText(getString(R.string.registration_welcome_text,
                     getString(R.string.app_name)));
@@ -405,8 +400,6 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
             tosTextView.setMovementMethod(LinkMovementMethod.getInstance());
 
             agreeBtn.setText(R.string.registration_btn_agree_tos);
-
-            mEnterEmailAutoCompleteTextView.setHint(R.string.registration_enter_email_hint);
         }
 
         agreeBtn.getBackground().setColorFilter(Message.GREEN_BUTTON_COLOR, PorterDuff.Mode.MULTIPLY);
@@ -415,7 +408,6 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
             public void safeOnClick(View v) {
                 sendRegistrationStep(RegistrationWizard2.REGISTRATION_STEP_AGREED_TOS);
                 mWiz.proceedToNextPage();
-
             }
         });
 
@@ -1348,15 +1340,8 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                 mEnterPinEditText.setText("");
                 mEnterEmailAutoCompleteTextView.setThreshold(1000); // Prevent popping up automatically
 
-                final String f;
-                if (CloudConstants.isRogerthatApp()) {
-                    f = "<font color=\"#39c\">%s</font>";
-                } else {
-                    f = "%s";
-                }
-                final TextView tv = (TextView) findViewById(R.id.registration_pin_was_mailed);
-                tv.setText(getString(R.string.registration_pin_was_mailed,
-                        mWiz.getEmail()));
+                ((TextView) findViewById(R.id.registration_pin_was_mailed)).setText(getString(R.string
+                        .registration_activation_code_was_mailed, mWiz.getEmail()));
             }
 
             @Override

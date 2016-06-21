@@ -14,55 +14,60 @@
         android:src="@drawable/registration_logo"
         android:visibility="gone"/>
 
-    <LinearLayout
-        android:id="@+id/registration_pin"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:orientation="vertical"
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:padding="10dp">
 
         <ImageView
             android:id="@+id/rogerthat_logo4"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="20dp"
-            android:layout_marginTop="20dp"
+            android:layout_alignParentTop="true"
+            android:layout_marginBottom="30dp"
             android:adjustViewBounds="true"
+            android:padding="50dp"
+            android:layout_marginTop="20dp"
             android:src="@drawable/registration_logo"/>
 
-        <TextView
-            android:id="@+id/registration_pin_was_mailed"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:textColor="@color/mc_homescreen_text"
-            android:textSize="18sp">
-        </TextView>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/login_via_oauth"
+            android:layout_below="@id/rogerthat_logo4"
+            android:layout_gravity="center"
+            android:orientation="vertical">
 
-        <EditText
-            android:id="@+id/registration_enter_pin"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:digits="0123456789"
-            android:gravity="center"
-            android:hint="@string/registration_enter_pin_hint"
-            android:imeOptions="actionDone"
-            android:inputType="text|number"
-            android:maxLength="4"
-            android:textSize="30sp">
-        </EditText>
+            <TextView
+                android:id="@+id/oauth_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center"
+                android:text="@string/fa_lock"
+                android:textColor="@color/mc_primary_color"
+                android:textSize="75sp"/>
+
+            <TextView
+                android:id="@+id/oauth_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="center_horizontal"
+                android:text="_Authenticate using your 'dummy' account._"
+                android:textColor="@color/mc_homescreen_text"
+                android:textSize="18sp"/>
+        </LinearLayout>
 
         <Button
-            android:id="@+id/registration_request_new_pin"
-            android:layout_width="fill_parent"
+            android:id="@+id/login_via_oauth"
+            android:layout_width="match_parent"
+            android:layout_alignParentBottom="true"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="@string/registration_request_new_pin"
+            android:layout_marginTop="30dp"
+            android:text="@string/authenticate"
             android:textSize="18sp"
-            android:textStyle="bold">
-        </Button>
-    </LinearLayout>
+            android:textStyle="bold"/>
+    </RelativeLayout>
 
 </LinearLayout>
