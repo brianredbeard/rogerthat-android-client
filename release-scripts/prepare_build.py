@@ -16,20 +16,25 @@
 #
 # @@license_version:1.1@@
 
+from StringIO import StringIO
+from contextlib import closing
 import os
 import pprint
 import re
 import shutil
 import sys
 import tempfile
-import yaml
-from PIL import Image
 from xml.dom import minidom
+
+from PIL import Image
+import yaml
+
+import app_utils
+
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 APPS_REPO_DIR = os.path.join(CURRENT_DIR, "..", "..", "apps", 'res')
 sys.path.append(os.path.join(CURRENT_DIR, "..", "..", "rogerthat-build", 'src'))
-import app_utils
 
 ANDROID_SRC_DIR = os.path.join(CURRENT_DIR, '..', 'rogerthat', 'src')
 SRC_JAVA_DIR = os.path.join(ANDROID_SRC_DIR, 'main', 'java')
@@ -199,18 +204,65 @@ def create_notification_icon(android_icon_filename, android_notification_icon_fi
 
     new_data = list()
     for item in datas:
-        if item[3] == 0: # Transparent remains transparent
+        if item[3] == 0:  # Transparent remains transparent
             new_data.append((255, 255, 255, 0))
             continue
-        gray_factor = item[0]*0.2126 + item[1]*0.7152 + item[2]*0.0722
-        if gray_factor > 240 : # Almost white
-            new_data.append((255, 255, 255, 0)) # Make transparent
+        gray_factor = item[0] * 0.2126 + item[1] * 0.7152 + item[2] * 0.0722
+        if gray_factor > 240 :  # Almost white
+            new_data.append((255, 255, 255, 0))  # Make transparent
         else:
-            new_data.append((255, 255, 255, int(255 - gray_factor))) # Make white
+            new_data.append((255, 255, 255, int(255 - gray_factor)))  # Make white
 
     img.putdata(new_data)
     img.save(android_notification_icon_filename, "PNG")
-    
+
+
+def get_translation_strings():
+    strings_map = dict()
+    with open(os.path.join(SRC_RES_DIR, "values", "allstr.xml"), 'r+') as f:
+        s = f.read()
+        for i in re.findall('<string name="(.*)</string', s):
+            v = i.split('">')
+            strings_map[v[1]] = v[0]
+    return strings_map
+
+
+def generate_navigation_menu(strings_map):
+    with open(os.path.join(SRC_RES_DIR, 'menu', 'navigation_menu'), 'w+') as f:
+        f.write('<?xml version="1.0" encoding="utf-8"?>\n')
+        f.write('<menu xmlns:android="http://schemas.android.com/apk/res/android">\n')
+        items = doc['HOMESCREEN']['items']
+        for i, item in enumerate():
+            f.write("""
+<group
+    android:checkableBehavior="single">
+    <item
+        android:id="@+id/navigation_item_%(i)s"
+        android:icon="@drawable/menu_%(i)s"
+        android:title="@string/%(title)s" />""" % dict(i=i, title=strings_map[item.text]))
+            if i == len(items) - 1:
+                f.write("""
+    <!-- Adding 2 spacer items such that the footer view doesn't overlap the last item(s) -->
+    <item
+        android:checkable="false"
+        android:enabled="false"
+        android:orderInCategory="200"
+        android:title="" />
+    <item
+        android:checkable="false"
+        android:enabled="false"
+        android:orderInCategory="200"
+        android:title="" />""")
+            f.write("""
+</group>""")
+
+        f.write('</menu>')
+
+# TODO:
+#
+#     </group>
+
+
 
 def convert_config():
     path = os.path.join(SRC_JAVA_DIR, "com", "mobicage", "rogerthat")
@@ -245,13 +297,7 @@ def convert_config():
     ''' % dict(LICENSE=LICENSE)
 
 
-        strings_map = dict()
-
-        with open(os.path.join(SRC_RES_DIR, "values", "allstr.xml"), 'r+') as f:
-            s = f.read()
-            for i in re.findall('<string name="(.*)</string', s):
-                v = i.split('">')
-                strings_map[v[1]] = v[0]
+        strings_map = get_translation_strings()
 
         for item in doc["HOMESCREEN"].get("items", []):
             icon_file_name = "menu_%sx%s.png" % (item["position"][0], item["position"][1])

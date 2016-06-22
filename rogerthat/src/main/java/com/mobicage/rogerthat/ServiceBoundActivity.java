@@ -362,6 +362,21 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         return mLastTimeClicked;
     }
 
+    @Override
+    public void setContentView(int layoutResID) {
+        setContentView(getLayoutInflater().inflate(layoutResID, null));
+    }
+
+    @Override
+    public void setContentView(View view) {
+        super.setContentView(view);
+    }
+
+    @Override
+    public void setContentView(View view, ViewGroup.LayoutParams params) {
+        super.setContentView(view, params);
+    }
+
     public boolean askPermissionIfNeeded(final String permission, final int requestCode, final SafeRunnable onGranted,
                                          final SafeRunnable onDenied) {
         final boolean granted = mService.isPermitted(permission);

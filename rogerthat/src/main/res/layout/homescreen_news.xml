@@ -30,6 +30,6 @@
         android:layout_height="wrap_content"
         android:text="TEST" />
 
-    <!--<include layout="@layout/activity_navigation_view" />-->
+    <!--<include layout="@layout/navigation_view" />-->
 
 </LinearLayout>

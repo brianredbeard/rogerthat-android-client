@@ -2,6 +2,33 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <group
+        android:id="@+id/group7"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_scan"
+            android:icon="@drawable/ic_scan"
+            android:title="Scannen"/>
+    </group>
+
+    <group
+        android:id="@+id/group8"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_8"
+            android:icon="@drawable/ic_scan"
+            android:title="Scannen"/>
+    </group>
+
+    <group
+        android:id="@+id/group9"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav9"
+            android:icon="@drawable/ic_scan"
+            android:title="Scannen"/>
+    </group>
+
+    <group
         android:id="@+id/group1"
         android:checkableBehavior="single">
 
@@ -57,12 +84,23 @@
     </group>
 
     <group
-        android:id="@+id/group7"
+        android:id="@+id/group10"
         android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_scan"
+            android:id="@+id/nav10"
             android:icon="@drawable/ic_scan"
-            android:title="Scannen" />
+            android:title="Scannen"/>
+        <!-- Adding 2 spacer items such that the footer view doesn't overlap the last item(s) -->
+        <item
+            android:checkable="false"
+            android:enabled="false"
+            android:orderInCategory="200"
+            android:title=""/>
+        <item
+            android:checkable="false"
+            android:enabled="false"
+            android:orderInCategory="200"
+            android:title=""/>
     </group>
 
 </menu>

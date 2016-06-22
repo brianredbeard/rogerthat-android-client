@@ -10,7 +10,6 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:textSize="20dp"
-		android:textColor="@android:color/primary_text_dark_nodisable"
 		android:singleLine="false"
 		android:paddingLeft="5dp"
 		android:paddingRight="5dp"
@@ -21,7 +20,6 @@
 		android:id="@+id/checkBox"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:textColor="@android:color/primary_text_dark_nodisable"
 		android:text="@string/activity_do_not_show_this_again">
 	</CheckBox>
 	

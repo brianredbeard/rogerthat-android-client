@@ -30,7 +30,7 @@ public abstract class ServiceBoundActivityNavigationView extends ServiceBoundAct
 
     @Override
     public void setContentView(int layoutResID) {
-        super.setContentView(R.layout.activity_navigation_view);
+        super.setContentView(R.layout.navigation_view);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);

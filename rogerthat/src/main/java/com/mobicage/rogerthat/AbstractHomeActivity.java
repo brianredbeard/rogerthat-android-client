@@ -84,11 +84,11 @@ import fr.castorflex.android.verticalviewpager.VerticalViewPager;
  */
 public abstract class AbstractHomeActivity extends ServiceBoundActivity {
 
-    protected static class ItemDef {
-        private int iconId;
-        private int labelId;
-        private int labelTextId;
-        private SafeViewOnClickListener clickListener;
+    public static class ItemDef {
+        public int iconId;
+        public int labelId;
+        public int labelTextId;
+        public SafeViewOnClickListener clickListener;
 
         public ItemDef(int iconId, int labelId, int labelTextId, SafeViewOnClickListener clickListener) {
             super();

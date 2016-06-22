@@ -20,13 +20,13 @@
         android:layout_gravity="start"
         android:background="@color/mc_background_color"
         android:fitsSystemWindows="true"
-        app:headerLayout="@layout/nav_header_main"
+        app:headerLayout="@layout/navigation_header"
         app:itemIconTint="@null"
         app:itemTextColor="@color/mc_black"
-        app:menu="@menu/navigation_drawer">
+        app:menu="@menu/navigation_menu">
 
         <include
-            layout="@layout/nav_footer_main"
+            layout="@layout/navigation_footer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom" />

@@ -138,4 +138,18 @@ public abstract class ServiceBoundListActivity extends ListActivity implements S
 
     protected abstract void onServiceUnbound();
 
+    @Override
+    public void setContentView(int layoutResID) {
+        setContentView(getLayoutInflater().inflate(layoutResID, null));
+    }
+
+    @Override
+    public void setContentView(View view) {
+        super.setContentView(view);
+    }
+
+    @Override
+    public void setContentView(View view, ViewGroup.LayoutParams params) {
+        super.setContentView(view, params);
+    }
 }

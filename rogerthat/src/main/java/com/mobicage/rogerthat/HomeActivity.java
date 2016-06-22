@@ -21,11 +21,21 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.database.DataSetObserver;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Adapter;
+import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.TabHost;
+import android.widget.TextView;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.FriendSearchActivity;
@@ -40,6 +50,8 @@ import com.mobicage.rogerthat.util.RegexPatterns;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.config.AppConstants;
+
+import java.util.ArrayList;
 
 public class HomeActivity extends ServiceBoundTabActivity {
 
@@ -82,7 +94,6 @@ public class HomeActivity extends ServiceBoundTabActivity {
     }
 
     private void initUI() {
-
         setContentView(AppConstants.HOME_ACTIVITY_LAYOUT);
 
         Resources res = getResources(); // Resource object to get Drawables
