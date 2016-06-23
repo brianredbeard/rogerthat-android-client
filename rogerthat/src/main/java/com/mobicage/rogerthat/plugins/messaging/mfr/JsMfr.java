@@ -241,9 +241,10 @@ public class JsMfr {
             state.put("service", info.get("service"));
             state.put("system", info.get("system"));
         } else if (!state.containsKey("user")) {
-            state.put("user", null);
-            state.put("service", null);
-            state.put("system", null);
+            Map<String, Object> empty = new HashMap<String, Object>();
+            state.put("user", empty);
+            state.put("service", empty);
+            state.put("system", empty);
         }
 
         final JSONObject ui = (JSONObject) JSONValue.parse(JSONValue.toJSONString(userInput));
