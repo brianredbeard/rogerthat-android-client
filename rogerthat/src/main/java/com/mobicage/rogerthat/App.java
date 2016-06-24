@@ -38,6 +38,8 @@ import org.json.simple.JSONObject;
 import android.app.Application;
 import android.content.Context;
 
+import com.facebook.FacebookSdk;
+import com.facebook.appevents.AppEventsLogger;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeAsyncTask;
@@ -57,6 +59,11 @@ public class App extends Application implements Thread.UncaughtExceptionHandler 
         super.onCreate();
         Thread.setDefaultUncaughtExceptionHandler(this);
         sContext = this;
+
+        // Initialize the SDK before executing any other operations,
+        FacebookSdk.sdkInitialize(getApplicationContext());
+        AppEventsLogger.activateApp(this);
+
         // Simply constructing this class and holding a reference to it in your custom Application class enables auto
         // battery saving of about 60%
         if (android.os.Build.VERSION.SDK_INT >= 18) {

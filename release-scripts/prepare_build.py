@@ -173,6 +173,12 @@ def rename_package():
         s = re.sub('mdp-rogerthat', 'mdp-%s' % APP_ID, s)
         s = re.sub('oauth-rogerthat', 'oauth-%s' % APP_ID, s)
 
+        facebook_app_id = doc["APP_CONSTANTS"]["FACEBOOK_APP_ID"]
+        if facebook_app_id:
+            s = re.sub('android:authorities="com.facebook.app.FacebookContentProvider.+"',
+                       'android:authorities="com.facebook.app.FacebookContentProvider%s"' % facebook_app_id,
+                       s)
+
         f.seek(0)
         f.write(s)
         f.truncate()
@@ -199,18 +205,18 @@ def create_notification_icon(android_icon_filename, android_notification_icon_fi
 
     new_data = list()
     for item in datas:
-        if item[3] == 0: # Transparent remains transparent
+        if item[3] == 0:  # Transparent remains transparent
             new_data.append((255, 255, 255, 0))
             continue
-        gray_factor = item[0]*0.2126 + item[1]*0.7152 + item[2]*0.0722
-        if gray_factor > 240 : # Almost white
-            new_data.append((255, 255, 255, 0)) # Make transparent
+        gray_factor = item[0] * 0.2126 + item[1] * 0.7152 + item[2] * 0.0722
+        if gray_factor > 240 :  # Almost white
+            new_data.append((255, 255, 255, 0))  # Make transparent
         else:
-            new_data.append((255, 255, 255, int(255 - gray_factor))) # Make white
+            new_data.append((255, 255, 255, int(255 - gray_factor)))  # Make white
 
     img.putdata(new_data)
     img.save(android_notification_icon_filename, "PNG")
-    
+
 
 def convert_config():
     path = os.path.join(SRC_JAVA_DIR, "com", "mobicage", "rogerthat")

@@ -50,6 +50,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.facebook.CallbackManager;
 import com.melnykov.fab.FloatingActionButton;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.util.logging.L;
@@ -93,6 +94,8 @@ public abstract class ServiceBoundActivity extends Activity implements Pausable,
 
     private boolean mWasPaused = false;
     private Map<Integer, SafeRunnable[]> mPermissionRequests = new HashMap<Integer, SafeRunnable[]>();
+
+    private CallbackManager mFBCallbackMgr;
 
 
     @Override
@@ -433,5 +436,18 @@ public abstract class ServiceBoundActivity extends Activity implements Pausable,
         if (runnable != null) {
             runnable.run();
         }
+    }
+
+    public CallbackManager getFacebookCallbackManager() {
+        if (mFBCallbackMgr == null) {
+            mFBCallbackMgr = CallbackManager.Factory.create();
+        }
+        return mFBCallbackMgr;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        mFBCallbackMgr.onActivityResult(requestCode, resultCode, data);
     }
 }

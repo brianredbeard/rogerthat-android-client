@@ -100,9 +100,10 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.ViewFlipper;
 
-import com.facebook.FacebookOperationCanceledException;
-import com.facebook.Session;
-import com.facebook.SessionState;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.login.LoginResult;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.Installation;
 import com.mobicage.rogerthat.MainActivity;
@@ -167,14 +168,12 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
     private Intent mNotYetProcessedIntent = null;
 
     private HandlerThread mWorkerThread;
-    private Looper mWorkerLooper;
     private Handler mWorkerHandler;
     private Handler mUIHandler;
     private RegistrationWizard2 mWiz;
     private AutoCompleteTextView mEnterEmailAutoCompleteTextView;
     private EditText mEnterPinEditText;
     private List<Account> mAccounts;
-    private AccountManager mAccountManager;
     private HttpClient mHttpClient;
 
     private boolean mAgeAndGenderSet = true;
@@ -429,43 +428,44 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
 
                 sendRegistrationStep(RegistrationWizard2.REGISTRATION_STEP_FACEBOOK_LOGIN);
 
-                FacebookUtils.ensureOpenSession(
-                    RegistrationActivity2.this,
-                    AppConstants.PROFILE_SHOW_GENDER_AND_BIRTHDATE ? Arrays.asList("email", "user_friends",
-                        "user_birthday") : Arrays.asList("email", "user_friends"), PermissionType.READ,
-                    new Session.StatusCallback() {
-                        @Override
-                        public void call(Session session, SessionState state, Exception exception) {
-                            if (session != Session.getActiveSession()) {
-                                session.removeCallback(this);
-                                return;
-                            }
-
-                            if (exception != null) {
-                                session.removeCallback(this);
-                                if (!(exception instanceof FacebookOperationCanceledException)) {
-                                    L.bug("Facebook SDK error during registration", exception);
-                                    AlertDialog.Builder builder = new AlertDialog.Builder(RegistrationActivity2.this);
-                                    builder.setMessage(R.string.error_please_try_again);
-                                    builder.setPositiveButton(R.string.rogerthat, null);
-                                    AlertDialog dialog = builder.create();
-                                    dialog.show();
-                                }
-                            } else if (session.isOpened()) {
-                                session.removeCallback(this);
-                                if (session.getPermissions().contains("email")) {
-                                    registerWithAccessToken(session.getAccessToken());
-                                } else {
-                                    AlertDialog.Builder builder = new AlertDialog.Builder(RegistrationActivity2.this);
-                                    builder.setMessage(R.string.facebook_registration_email_missing);
-                                    builder.setPositiveButton(R.string.rogerthat, null);
-                                    AlertDialog dialog = builder.create();
-                                    dialog.show();
-                                }
-                            }
+                final FacebookCallback<LoginResult> fbCallback = new FacebookCallback<LoginResult>() {
+                    @Override
+                    public void onSuccess(LoginResult loginResult) {
+                        if (loginResult.getAccessToken().getPermissions().contains("email")) {
+                            registerWithAccessToken(loginResult.getAccessToken().getToken());
+                        } else {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(RegistrationActivity2.this);
+                            builder.setMessage(R.string.facebook_registration_email_missing);
+                            builder.setPositiveButton(R.string.rogerthat, null);
+                            AlertDialog dialog = builder.create();
+                            dialog.show();
                         }
-                    }, false);
-            };
+                    }
+
+                    @Override
+                    public void onCancel() {
+                    }
+
+                    @Override
+                    public void onError(FacebookException error) {
+                        L.bug("Facebook SDK error during registration", error);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(RegistrationActivity2.this);
+                        builder.setMessage(R.string.error_please_try_again);
+                        builder.setPositiveButton(R.string.rogerthat, null);
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+                    }
+                };
+
+                List<String> permissions;
+                if (AppConstants.PROFILE_SHOW_GENDER_AND_BIRTHDATE) {
+                    permissions = Arrays.asList("email", "user_friends", "user_birthday");
+                } else {
+                    permissions = Arrays.asList("email", "user_friends");
+                }
+                FacebookUtils.ensureOpenSession(RegistrationActivity2.this, permissions, PermissionType.READ,
+                        fbCallback, false);
+            }
         };
 
         facebookButton.setOnClickListener(facebookLoginListener);
@@ -978,8 +978,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
         T.UI();
         final boolean getAccountsPermissionWasGranted = mService.isPermitted(Manifest.permission.GET_ACCOUNTS);
         if (getAccountsPermissionWasGranted) {
-            mAccountManager = new AccountManager(this);
-            mAccounts = mAccountManager.getAccounts();
+            mAccounts = new AccountManager(this).getAccounts();
             List<String> emails = new ArrayList<String>();
             for (Account account : mAccounts) {
                 if (RegexPatterns.EMAIL.matcher(account.name).matches() && !emails.contains(account.name))
@@ -1026,18 +1025,11 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                 if (data.getBooleanExtra(OauthActivity.SUCCESS, false)) {
                     registerWithOauthCode(data.getStringExtra(OauthActivity.RESULT));
                 } else {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(RegistrationActivity2.this);
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(RegistrationActivity2.this);
                     builder.setMessage(data.getStringExtra(OauthActivity.RESULT));
                     builder.setPositiveButton(R.string.rogerthat, null);
-                    AlertDialog dialog = builder.create();
-                    dialog.show();
-                    return;
+                    builder.create().show();
                 }
-            }
-        } else {
-            final Session session = Session.getActiveSession();
-            if (session != null) {
-                session.onActivityResult(this, requestCode, resultCode, data);
             }
         }
     }
@@ -1448,8 +1440,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
         T.UI();
         mWorkerThread = new HandlerThread("rogerthat_registration_worker");
         mWorkerThread.start();
-        mWorkerLooper = mWorkerThread.getLooper();
-        mWorkerHandler = new Handler(mWorkerLooper);
+        mWorkerHandler = new Handler(mWorkerThread.getLooper());
         mWorkerHandler.post(new SafeRunnable() {
             @Override
             public void safeRun() {
