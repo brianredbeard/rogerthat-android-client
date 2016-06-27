@@ -134,6 +134,16 @@ public final class FacebookUtils {
         GraphRequest request = GraphRequest.newMeRequest(fbAccessToken, new GraphRequest.GraphJSONObjectCallback() {
             @Override
             public void onCompleted(JSONObject jsonObject, GraphResponse response) {
+                if (response.getError() != null) {
+                    L.w("Could not update profile from FB: " + response.getError().getErrorMessage());
+                    return;
+                }
+
+                if (jsonObject == null) {
+                    L.w("No JSON object return for /me graph request.");
+                    return;
+                }
+
                 try {
                     String newName = jsonObject.has("name") ? jsonObject.getString("name") : null;
                     L.d("FacebookUtils updateProfile: " + newName);

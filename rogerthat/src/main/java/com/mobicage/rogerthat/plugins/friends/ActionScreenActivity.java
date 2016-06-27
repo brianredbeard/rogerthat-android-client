@@ -930,7 +930,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
 
                             @Override
                             public void onCompleted(GraphResponse response) {
-                                if (response == null) {
+                                if (response == null || response.getJSONObject() == null) {
                                     L.w("Graph response is NULL");
                                     Map<String, Object> error = new HashMap<>();
                                     error.put("type", FACEBOOK_TYPE_ERROR);

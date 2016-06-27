@@ -451,6 +451,7 @@ public class RecommendServiceActivity extends ServiceBoundActivity {
 
                         @Override
                         public void onError(FacebookException error) {
+                            L.w(error.getMessage());
                             showFacebookErrorPopup();
                         }
                     });
