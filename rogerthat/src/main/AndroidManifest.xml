@@ -1,8 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.mobicage.rogerth.at"
     android:configChanges="orientation"
-    android:versionCode="2172"
-    android:versionName="1.0.2172.A">
+    android:versionCode="2201"
+    android:versionName="1.0.2201.A">
 
     <!-- BEGIN GCM -->
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
