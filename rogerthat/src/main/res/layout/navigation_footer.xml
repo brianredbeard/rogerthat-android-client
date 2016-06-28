@@ -8,39 +8,39 @@
               android:padding="@dimen/activity_vertical_margin">
 
     <ImageButton
-        android:id="@+id/nav_newspaper"
+        android:id="@+id/menu_toolbar_0"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:background="@null"
         android:onClick="onOptionNavigationViewToolbarSelected"
-        android:src="@drawable/ic_menu_newspaper" />
+        android:src="@drawable/menu_toolbar_0"/>
 
     <ImageButton
-        android:id="@+id/nav_shopping_basket"
+        android:id="@+id/menu_toolbar_1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:background="@null"
         android:onClick="onOptionNavigationViewToolbarSelected"
-        android:src="@drawable/ic_menu_shopping_basket" />
+        android:src="@drawable/menu_toolbar_1"/>
 
     <ImageButton
-        android:id="@+id/nav_calendar"
+        android:id="@+id/menu_toolbar_2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:background="@null"
         android:onClick="onOptionNavigationViewToolbarSelected"
-        android:src="@drawable/ic_menu_calendar" />
+        android:src="@drawable/menu_toolbar_2"/>
 
     <ImageButton
-        android:id="@+id/nav_credit_card"
+        android:id="@+id/menu_toolbar_3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:background="@null"
         android:onClick="onOptionNavigationViewToolbarSelected"
-        android:src="@drawable/ic_menu_credit_card" />
+        android:src="@drawable/menu_toolbar_3"/>
 
 </LinearLayout>

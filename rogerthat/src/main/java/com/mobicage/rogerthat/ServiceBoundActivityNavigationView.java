@@ -17,11 +17,8 @@ import com.mobicage.rogerthat.plugins.friends.FriendStore;
 import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
 import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
 
-public abstract class ServiceBoundActivityNavigationView extends ServiceBoundActivity
-        implements android.support.design.widget.NavigationView.OnNavigationItemSelectedListener {
-
-    ImageButton ib_hamburger, ib_newspaper, ib_shopping_basket, ib_calendar, ib_credit_car;
-    private DrawerLayout drawer;
+public abstract class ServiceBoundActivityNavigationView extends ServiceBoundActivity implements NavigationView
+        .OnNavigationItemSelectedListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,57 +36,31 @@ public abstract class ServiceBoundActivityNavigationView extends ServiceBoundAct
         View child = getLayoutInflater().inflate(layoutResID, null);
         item.addView(child);
 
-        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        final DrawerLayout drawer = getDrawer();
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string
+                .navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
-        //Change color of the icons.
         navigationView.setItemIconTintList(null);
-
-        //Change font
-        ib_hamburger = (ImageButton) findViewById(R.id.nav_hamburger);
-        ib_newspaper = (ImageButton) findViewById(R.id.nav_newspaper);
-        ib_shopping_basket = (ImageButton) findViewById(R.id.nav_shopping_basket);
-        ib_calendar = (ImageButton) findViewById(R.id.nav_calendar);
-        ib_credit_car = (ImageButton) findViewById(R.id.nav_credit_card);
     }
 
-    // Open navigation drawer automatically when the app start.
+    public DrawerLayout getDrawer() {
+        return (DrawerLayout) findViewById(R.id.drawer_layout);
+    }
+
     public void openNavigationView() {
-        drawer.openDrawer(GravityCompat.START);
+        getDrawer().openDrawer(GravityCompat.START);
+    }
+
+    public void closeNavigationView() {
+        getDrawer().closeDrawer(GravityCompat.START);
     }
 
     public void onOptionNavigationViewToolbarSelected(View v) {
-        Intent intent;
-        switch (v.getId()) {
-            // Hide the navigation view
-            case R.id.nav_hamburger:
-                DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-                drawer.closeDrawer(GravityCompat.START);
-                break;
-            //Launch Newspaper Activity
-            case R.id.nav_newspaper:
-                intent = new Intent(this, MessagingActivity.class);
-                startActivity(intent);
-                break;
-            //Launch Shopping Basket Activity
-            case R.id.nav_shopping_basket:
-//                intent = new Intent(NavigationView.this, TermsAndConditions.class);
-//                startActivity(intent);
-                break;
-            //Launch Calendar Activity
-            case R.id.nav_calendar:
-                break;
-            //Launch Credit Card Activity
-            case R.id.nav_credit_card:
-                break;
-        }
+        // TODO: Implementation
     }
 
     @Override
@@ -126,6 +97,8 @@ public abstract class ServiceBoundActivityNavigationView extends ServiceBoundAct
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
+        // TODO: Generic implementation
+        /*
         Intent intent;
         switch (item.getItemId()) {
             case R.id.nav_messages:
@@ -158,6 +131,7 @@ public abstract class ServiceBoundActivityNavigationView extends ServiceBoundAct
         }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
+        */
         return true;
     }
 }

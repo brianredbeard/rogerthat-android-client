@@ -230,42 +230,39 @@ def get_translation_strings():
     return strings_map
 
 
-def generate_navigation_menu(strings_map):
-    with open(os.path.join(SRC_RES_DIR, 'menu', 'navigation_menu'), 'w+') as f:
+def generate_navigation_menu(doc, strings_map):
+    with open(os.path.join(SRC_RES_DIR, 'menu', 'navigation_menu.xml'), 'w+') as f:
         f.write('<?xml version="1.0" encoding="utf-8"?>\n')
         f.write('<menu xmlns:android="http://schemas.android.com/apk/res/android">\n')
         items = doc['HOMESCREEN']['items']
-        for i, item in enumerate():
+        for i, item in enumerate(items):
             f.write("""
-<group
-    android:checkableBehavior="single">
-    <item
-        android:id="@+id/navigation_item_%(i)s"
-        android:icon="@drawable/menu_%(i)s"
-        android:title="@string/%(title)s" />""" % dict(i=i, title=strings_map[item.text]))
+    <group
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/navigation_item_%(i)s"
+            android:icon="@drawable/menu_%(i)s"
+            android:title="@string/%(title)s"/>""" % dict(i=i, title=strings_map[item['text']]))
             if i == len(items) - 1:
                 f.write("""
-    <!-- Adding 2 spacer items such that the footer view doesn't overlap the last item(s) -->
-    <item
-        android:checkable="false"
-        android:enabled="false"
-        android:orderInCategory="200"
-        android:title="" />
-    <item
-        android:checkable="false"
-        android:enabled="false"
-        android:orderInCategory="200"
-        android:title="" />""")
+        <!-- Adding 2 spacer items such that the footer view doesn't overlap the last item(s) -->
+        <item
+            android:checkable="false"
+            android:enabled="false"
+            android:orderInCategory="200"
+            android:title=""/>
+        <item
+            android:checkable="false"
+            android:enabled="false"
+            android:orderInCategory="200"
+            android:title=""/>""")
             f.write("""
-</group>""")
+    </group>""")
 
-        f.write('</menu>')
-
-# TODO:
-#
-#     </group>
+        f.write('\n</menu>')
 
 
+# This function is not executed in case the app is Rogerthat
 def convert_config():
     path = os.path.join(SRC_JAVA_DIR, "com", "mobicage", "rogerthat")
     if not os.path.exists(path):
@@ -300,6 +297,8 @@ def convert_config():
 
 
         strings_map = get_translation_strings()
+
+        generate_navigation_menu(doc, strings_map)
 
         for item in doc["HOMESCREEN"].get("items", []):
             icon_file_name = "menu_%sx%s.png" % (item["position"][0], item["position"][1])
