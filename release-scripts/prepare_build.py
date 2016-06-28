@@ -16,8 +16,6 @@
 #
 # @@license_version:1.1@@
 
-from StringIO import StringIO
-from contextlib import closing
 import os
 import pprint
 import re
@@ -29,12 +27,11 @@ from xml.dom import minidom
 from PIL import Image
 import yaml
 
-import app_utils
-
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 APPS_REPO_DIR = os.path.join(CURRENT_DIR, "..", "..", "apps", 'res')
 sys.path.append(os.path.join(CURRENT_DIR, "..", "..", "rogerthat-build", 'src'))
+import app_utils
 
 ANDROID_SRC_DIR = os.path.join(CURRENT_DIR, '..', 'rogerthat', 'src')
 SRC_JAVA_DIR = os.path.join(ANDROID_SRC_DIR, 'main', 'java')
@@ -178,6 +175,12 @@ def rename_package():
         s = re.sub('mdp-rogerthat', 'mdp-%s' % APP_ID, s)
         s = re.sub('oauth-rogerthat', 'oauth-%s' % APP_ID, s)
 
+        facebook_app_id = doc["APP_CONSTANTS"]["FACEBOOK_APP_ID"]
+        if facebook_app_id:
+            s = re.sub('android:authorities="com.facebook.app.FacebookContentProvider.+"',
+                       'android:authorities="com.facebook.app.FacebookContentProvider%s"' % facebook_app_id,
+                       s)
+
         f.seek(0)
         f.write(s)
         f.truncate()
@@ -261,7 +264,6 @@ def generate_navigation_menu(strings_map):
 # TODO:
 #
 #     </group>
-
 
 
 def convert_config():

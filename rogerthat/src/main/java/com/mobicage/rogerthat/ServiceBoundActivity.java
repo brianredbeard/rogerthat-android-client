@@ -43,28 +43,23 @@ import android.support.design.widget.NavigationView;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.melnykov.fab.FloatingActionButton;
+import com.facebook.CallbackManager;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
-import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.Pausable;
 import com.mobicage.rogerthat.util.ui.UIUtils;
-import com.mobicage.rogerthat.widget.CustomDrawerLayout;
 
 public abstract class ServiceBoundActivity extends AppCompatActivity implements Pausable, ServiceBound {
 
@@ -96,9 +91,9 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
     public static final long DOUBLE_CLICK_TIMESPAN = 1000;
 
     private boolean mWasPaused = false;
-    private Map<Integer, SafeRunnable[]> mPermissionRequests = new HashMap<Integer, SafeRunnable[]>();
+    private Map<Integer, SafeRunnable[]> mPermissionRequests = new HashMap<>();
 
-    protected CustomDrawerLayout drawer;
+    private CallbackManager mFBCallbackMgr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -403,5 +398,18 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         if (runnable != null) {
             runnable.run();
         }
+    }
+
+    public CallbackManager getFacebookCallbackManager() {
+        if (mFBCallbackMgr == null) {
+            mFBCallbackMgr = CallbackManager.Factory.create();
+        }
+        return mFBCallbackMgr;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        mFBCallbackMgr.onActivityResult(requestCode, resultCode, data);
     }
 }

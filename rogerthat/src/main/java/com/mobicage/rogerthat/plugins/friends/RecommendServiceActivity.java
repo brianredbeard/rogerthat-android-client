@@ -20,7 +20,9 @@ package com.mobicage.rogerthat.plugins.friends;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -55,19 +57,15 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.ViewFlipper;
 
+import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
-import com.facebook.FacebookOperationCanceledException;
-import com.facebook.Session;
-import com.facebook.SessionState;
-import com.facebook.UiLifecycleHelper;
-import com.facebook.widget.FacebookDialog;
-import com.facebook.widget.WebDialog;
+import com.facebook.share.Sharer;
+import com.facebook.share.model.ShareLinkContent;
+import com.facebook.share.widget.ShareDialog;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.ContactListHelper;
 import com.mobicage.rogerthat.MyIdentity;
 import com.mobicage.rogerthat.ServiceBoundActivity;
-import com.mobicage.rogerthat.util.FacebookUtils;
-import com.mobicage.rogerthat.util.FacebookUtils.PermissionType;
 import com.mobicage.rogerthat.util.RegexPatterns;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
@@ -107,10 +105,8 @@ public class RecommendServiceActivity extends ServiceBoundActivity {
     private ViewFlipper mViewFlipper;
     private GestureDetector mGestureScanner;
     private BroadcastReceiver mBroadcastReceiver;
-    private String mShareLinkUrl;
+    private Uri mShareLink;
     private String mShareCaption;
-
-    private UiLifecycleHelper mUiHelper;
 
     private Cursor mCursorEmails = null;
     private Cursor mCursorFriends = null;
@@ -173,19 +169,14 @@ public class RecommendServiceActivity extends ServiceBoundActivity {
         Builder b = shareLinkUrl.buildUpon();
         b.appendQueryParameter("from", "phone");
         b.appendQueryParameter("target", "fbwall");
-        b.build();
-        mShareLinkUrl = b.toString();
+        mShareLink = b.build();
 
         mShareImageUrl = intent.getStringExtra(SHARE_IMAGE_URL);
-
-        mUiHelper = new UiLifecycleHelper(this, null);
-        mUiHelper.onCreate(savedInstanceState);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mUiHelper.onResume();
 
         if (getWasPaused() && mCursorEmails != null) {
             startManagingCursor(mCursorEmails);
@@ -196,27 +187,14 @@ public class RecommendServiceActivity extends ServiceBoundActivity {
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        mUiHelper.onSaveInstanceState(outState);
-    }
-
-    @Override
     public void onPause() {
         super.onPause();
-        mUiHelper.onPause();
         if (mCursorEmails != null) {
             stopManagingCursor(mCursorEmails);
         }
         if (mCursorFriends != null) {
             stopManagingCursor(mCursorFriends);
         }
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mUiHelper.onDestroy();
     }
 
     @Override
@@ -425,29 +403,6 @@ public class RecommendServiceActivity extends ServiceBoundActivity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        final Session session = Session.getActiveSession();
-        if (session != null) {
-            session.onActivityResult(this, requestCode, resultCode, data);
-        }
-
-        mUiHelper.onActivityResult(requestCode, resultCode, data, new FacebookDialog.Callback() {
-            @Override
-            public void onError(FacebookDialog.PendingCall pendingCall, Exception error, Bundle data) {
-                if (!(error instanceof FacebookOperationCanceledException)) {
-                    showFacebookErrorPopup();
-                    L.bug("Error while recommending " + mServiceEmail + " on facebook wall.\nParams = " + data, error);
-                }
-            }
-
-            @Override
-            public void onComplete(FacebookDialog.PendingCall pendingCall, Bundle data) {
-            }
-        });
-    }
-
-    @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         T.UI();
         if (requestCode == MY_PERMISSION_REQUEST_READ_CONTACTS) {
@@ -459,71 +414,47 @@ public class RecommendServiceActivity extends ServiceBoundActivity {
 
     private void configureFacebookView() {
         if (AppConstants.FACEBOOK_APP_ID != null) {
-            ((Button) findViewById(R.id.recommend_on_fb_button)).setOnClickListener(new SafeViewOnClickListener() {
+            findViewById(R.id.recommend_on_fb_button).setOnClickListener(new SafeViewOnClickListener() {
                 @Override
                 public void safeOnClick(View v) {
-
                     if (!mService.getNetworkConnectivityManager().isConnected()) {
                         UIUtils.showNoNetworkDialog(RecommendServiceActivity.this);
                         return;
                     }
-                    FacebookUtils.ensureOpenSession(RecommendServiceActivity.this,
-                        Arrays.asList("email", "user_friends"), PermissionType.READ, new Session.StatusCallback() {
-                            @Override
-                            public void call(Session session, SessionState state, Exception exception) {
-                                if (session != Session.getActiveSession()) {
-                                    session.removeCallback(this);
-                                    return;
-                                }
-                                session.removeCallback(this);
-                                if (exception == null && session.isOpened()) {
 
-                                    L.d("Posting to facebook:\n- FACEBOOK_APP_ID: " + CloudConstants.FACEBOOK_APP_ID
-                                        + "\n- Picture: " + mShareImageUrl + "\n- Catption: " + mShareCaption
-                                        + "\n- Description: " + mShareDescription + "\n- Link :" + mShareLinkUrl);
+                    final ShareLinkContent.Builder contentBuilder = new ShareLinkContent.Builder();
+                    contentBuilder.setContentUrl(mShareLink);
+                    contentBuilder.setImageUrl(Uri.parse(mShareImageUrl));
+                    contentBuilder.setContentTitle(mShareCaption);
+                    contentBuilder.setContentDescription(mShareDescription);
+                    final ShareLinkContent content = contentBuilder.build();
 
-                                    if (FacebookDialog.canPresentShareDialog(getApplicationContext(),
-                                        FacebookDialog.ShareDialogFeature.SHARE_DIALOG)) {
-                                        L.d("Share via FacebookDialog");
+                    if (CloudConstants.DEBUG_LOGGING) {
+                        Map<String, String> params = new HashMap<>();
+                        params.put("content.contentDescription", content.getContentDescription());
+                        params.put("content.contentTitle", content.getContentTitle());
+                        params.put("content.contentURL", content.getContentUrl().toString());
+                        params.put("content.imageURL", content.getImageUrl().toString());
+                        L.d(params.toString());
+                    }
 
-                                        FacebookDialog shareDialog = new FacebookDialog.ShareDialogBuilder(
-                                            RecommendServiceActivity.this).setLink(mShareLinkUrl)
-                                            .setPicture(mShareImageUrl).setCaption(mShareCaption)
-                                            .setDescription(mShareDescription).build();
-                                        mUiHelper.trackPendingDialogCall(shareDialog.present());
-                                    } else {
-                                        L.d("Share via WebDialog");
+                    final ShareDialog shareDialog = new ShareDialog(RecommendServiceActivity.this);
+                    shareDialog.show(content, ShareDialog.Mode.AUTOMATIC);
+                    shareDialog.registerCallback(getFacebookCallbackManager(), new FacebookCallback<Sharer.Result>() {
+                        @Override
+                        public void onSuccess(Sharer.Result result) {
+                        }
 
-                                        final Bundle params = new Bundle();
-                                        params.putString("app_id", CloudConstants.FACEBOOK_APP_ID);
-                                        params.putString("picture", mShareImageUrl);
-                                        params.putString("caption", mShareCaption);
-                                        params.putString("description", mShareDescription);
-                                        params.putString("link", mShareLinkUrl);
+                        @Override
+                        public void onCancel() {
+                        }
 
-                                        L.d("Posting to facebook: " + params);
-
-                                        new WebDialog.FeedDialogBuilder(RecommendServiceActivity.this, session, params)
-                                            .setOnCompleteListener(new WebDialog.OnCompleteListener() {
-                                                @Override
-                                                public void onComplete(Bundle values, FacebookException error) {
-                                                    if (error != null
-                                                        && !(error instanceof FacebookOperationCanceledException)) {
-                                                        showFacebookErrorPopup();
-                                                        L.bug("Error while recommending " + mServiceEmail
-                                                            + " on facebook wall.\nParams = " + params, error);
-                                                    }
-                                                }
-
-                                            }).build().show();
-                                    }
-                                } else {
-                                    if (exception != null && !(exception instanceof FacebookOperationCanceledException)) {
-                                        showFacebookErrorPopup();
-                                    }
-                                }
-                            }
-                        }, true);
+                        @Override
+                        public void onError(FacebookException error) {
+                            L.w(error.getMessage());
+                            showFacebookErrorPopup();
+                        }
+                    });
                 }
             });
         }

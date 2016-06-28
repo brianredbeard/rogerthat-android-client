@@ -69,17 +69,16 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.facebook.AccessToken;
+import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
-import com.facebook.FacebookOperationCanceledException;
-import com.facebook.FacebookRequestError;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
-import com.facebook.Request;
-import com.facebook.Response;
-import com.facebook.Session;
-import com.facebook.SessionState;
-import com.facebook.model.GraphObject;
-import com.facebook.model.GraphUser;
-import com.facebook.widget.WebDialog;
+import com.facebook.login.LoginResult;
+import com.facebook.share.Sharer;
+import com.facebook.share.model.ShareLinkContent;
+import com.facebook.share.widget.ShareDialog;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.plugins.history.HistoryItem;
@@ -125,7 +124,6 @@ public class ActionScreenActivity extends ServiceBoundActivity {
 
     private static final Map<String, Object> FACEBOOK_MAP_CANCEL = new HashMap<String, Object>();
 
-    private static final int CHECKIN_REQUEST_CODE = 111;
     private boolean mIsHtmlContent = true;
     private boolean mInfoSet = false;
     private boolean mApiResultHandlerSet = false;
@@ -791,133 +789,57 @@ public class ActionScreenActivity extends ServiceBoundActivity {
     }
 
     private void facebookLogin(final String requestId, final String permissionsStr) {
+        if (!mService.getNetworkConnectivityManager().isConnected()) {
+            Map<String, Object> error = new HashMap<String, Object>();
+            error.put("type", FACEBOOK_TYPE_ERROR);
+            error.put("exception", getString(R.string.registration_screen_instructions_check_network_not_available));
+            deliverFacebookResult(requestId, null, error);
+            return;
+        }
+
         L.d("Authorizing with facebook with permissions: " + permissionsStr);
         final List<String> permissions = Arrays.asList(permissionsStr.split(","));
 
-        final Session.StatusCallback statusCallback = new Session.StatusCallback() {
+        FacebookUtils.ensureOpenSession(this, permissions, PermissionType.READ, new FacebookCallback<LoginResult>() {
             @Override
-            public void call(final Session session, final SessionState state, final Exception exception) {
-                if (session != Session.getActiveSession()) {
-                    session.removeCallback(this);
-                    return;
-                }
+            public void onSuccess(LoginResult loginResult) {
+                GraphRequest.newMeRequest(AccessToken.getCurrentAccessToken(), new GraphRequest
+                        .GraphJSONObjectCallback() {
 
-                if (exception != null) {
-                    session.removeCallback(this);
-                    if (exception instanceof FacebookOperationCanceledException) {
-                        deliverFacebookResult(requestId, null, FACEBOOK_MAP_CANCEL);
-                        L.d("user pressed cancel show other window to get user info");
-                    } else {
-                        Map<String, Object> error = new HashMap<String, Object>();
-                        error.put("type", FACEBOOK_TYPE_ERROR);
-                        error.put("exception", exception.toString());
-                        L.d(exception.toString());
-                        deliverFacebookResult(requestId, null, error);
-                    }
-
-                } else if (session.isOpened()) {
-                    session.removeCallback(this);
-                    Request.newMeRequest(session, new Request.GraphUserCallback() {
-                        // callback after Graph API response with user object
-                        @Override
-                        public void onCompleted(GraphUser user, Response response) {
-                            if (response.getError() != null) {
-                                L.e("Failed to execute fb request to /me\nResponse: " + response);
-                                Map<String, Object> error = new HashMap<String, Object>();
-                                error.put("type", FACEBOOK_TYPE_ERROR);
-                                error.put("exception",
-                                    "Failed to execute fb request to /me\nResponse: " + response.toString());
-                                deliverFacebookResult(requestId, null, error);
-                                return;
-                            }
-                            deliverFacebookResult(requestId, user.asMap(), null);
+                    @Override
+                    public void onCompleted(JSONObject object, GraphResponse response) {
+                        if (response.getError() == null) {
+                            deliverFacebookResult(requestId, (Map<String, Object>) JSONValue.parse(object.toString()),
+                                    null);
+                        } else {
+                            L.e("Failed to execute fb request to /me\nResponse: " + response);
+                            Map<String, Object> error = new HashMap<>();
+                            error.put("type", FACEBOOK_TYPE_ERROR);
+                            error.put("exception", "Failed to execute fb request to /me\nResponse: " + response
+                                    .toString());
+                            deliverFacebookResult(requestId, null, error);
                         }
-                    }).executeAsync();
                 }
+                }).executeAsync();
             }
-        };
 
-        if (!mService.getNetworkConnectivityManager().isConnected()) {
-            Map<String, Object> error = new HashMap<String, Object>();
-            error.put("type", FACEBOOK_TYPE_ERROR);
-            error.put("exception", getString(R.string.registration_screen_instructions_check_network_not_available));
-            deliverFacebookResult(requestId, null, error);
-            return;
-        }
+            @Override
+            public void onCancel() {
+                deliverFacebookResult(requestId, null, FACEBOOK_MAP_CANCEL);
+            }
 
-        FacebookUtils.ensureOpenSession(this, permissions, PermissionType.READ, statusCallback, true);
+            @Override
+            public void onError(FacebookException exception) {
+                Map<String, Object> error = new HashMap<>();
+                error.put("type", FACEBOOK_TYPE_ERROR);
+                error.put("exception", exception.toString());
+                L.d(exception.toString());
+                deliverFacebookResult(requestId, null, error);
+            }
+        }, true);
     }
 
     private void facebookPost(final String requestId, final String postParamsStr) {
-        L.d("Posting on facebook with post params: " + postParamsStr);
-
-        final Session.StatusCallback statusCallback = new Session.StatusCallback() {
-            @Override
-            public void call(final Session session, final SessionState state, final Exception exception) {
-                if (session != Session.getActiveSession()) {
-                    session.removeCallback(this);
-                    return;
-                }
-
-                if (exception != null) {
-                    session.removeCallback(this);
-                    if (exception instanceof FacebookOperationCanceledException) {
-                        deliverFacebookResult(requestId, null, FACEBOOK_MAP_CANCEL);
-                        L.d("User pressed cancel. Show other window to get user info.");
-                    } else {
-                        Map<String, Object> error = new HashMap<String, Object>();
-                        error.put("type", FACEBOOK_TYPE_ERROR);
-                        error.put("exception", exception.toString());
-                        L.d(exception.toString());
-                        deliverFacebookResult(requestId, null, error);
-                    }
-
-                } else if (session.isOpened()) {
-                    session.removeCallback(this);
-                    @SuppressWarnings("unchecked")
-                    final Map<String, Object> postParams = (Map<String, Object>) JSONValue.parse(postParamsStr);
-                    L.d("Share via WebDialog");
-
-                    Bundle bundle = new Bundle();
-                    for (Map.Entry<String, Object> entry : postParams.entrySet()) {
-                        if (entry.getValue() instanceof String)
-                            bundle.putString(entry.getKey(), (String) entry.getValue());
-                    }
-                    bundle.putString("app_id", CloudConstants.FACEBOOK_APP_ID);
-                    L.d("Bundle: " + bundle);
-
-                    new WebDialog.FeedDialogBuilder(ActionScreenActivity.this, session, bundle)
-                        .setOnCompleteListener(new WebDialog.OnCompleteListener() {
-                            @Override
-                            public void onComplete(Bundle values, FacebookException ex) {
-                                if (ex != null) {
-                                    if (!(ex instanceof FacebookOperationCanceledException)) {
-                                        L.e("Failed to post on fb wall", ex);
-                                        Map<String, Object> error = new HashMap<String, Object>();
-                                        error.put("type", FACEBOOK_TYPE_ERROR);
-                                        error.put("exception", ex.toString());
-                                        deliverFacebookResult(requestId, null, error);
-                                    } else {
-                                        deliverFacebookResult(requestId, null, FACEBOOK_MAP_CANCEL);
-                                    }
-                                    return;
-                                }
-                                final String postId = values.getString("post_id");
-                                if (postId == null) {
-                                    deliverFacebookResult(requestId, null, FACEBOOK_MAP_CANCEL);
-                                    return;
-                                }
-
-                                final Map<String, Object> result = new HashMap<String, Object>();
-                                result.put("postId", postId);
-                                deliverFacebookResult(requestId, result, null);
-                            }
-
-                        }).build().show();
-                }
-            }
-        };
-
         if (!mService.getNetworkConnectivityManager().isConnected()) {
             Map<String, Object> error = new HashMap<String, Object>();
             error.put("type", FACEBOOK_TYPE_ERROR);
@@ -926,83 +848,131 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             return;
         }
 
-        FacebookUtils.ensureOpenSession(this, Arrays.asList("email", "user_friends"), PermissionType.READ,
-            statusCallback, true);
+        L.d("Posting on facebook with post params: " + postParamsStr);
+        final Map<String, Object> postParams = (Map<String, Object>) JSONValue.parse(postParamsStr);
+        final String link = (String) postParams.get("link");
+        final String picture = (String) postParams.get("picture");
+
+        final ShareLinkContent.Builder contentBuilder = new ShareLinkContent.Builder();
+        contentBuilder.setContentUrl(link == null ? null : Uri.parse(link));
+        contentBuilder.setImageUrl(picture == null ? null : Uri.parse(picture));
+        contentBuilder.setContentTitle((String) postParams.get("caption"));
+        contentBuilder.setContentDescription((String) postParams.get("description"));
+        final ShareLinkContent content = contentBuilder.build();
+
+        if (CloudConstants.DEBUG_LOGGING) {
+            Map<String, String> params = new HashMap<>();
+            params.put("content.contentDescription", content.getContentDescription());
+            params.put("content.contentTitle", content.getContentTitle());
+            params.put("content.contentURL", content.getContentUrl().toString());
+            params.put("content.imageURL", content.getImageUrl().toString());
+            L.d(params.toString());
+        }
+
+        final ShareDialog shareDialog = new ShareDialog(this);
+        shareDialog.show(content, ShareDialog.Mode.AUTOMATIC);
+        shareDialog.registerCallback(getFacebookCallbackManager(), new FacebookCallback<Sharer.Result>() {
+            @Override
+            public void onSuccess(Sharer.Result result) {
+                if (result.getPostId() == null) {
+                    onCancel();
+                    return;
+                }
+
+                final Map<String, Object> resultMap = new HashMap<>();
+                resultMap.put("postId", result.getPostId());
+                deliverFacebookResult(requestId, resultMap, null);
+            }
+
+            @Override
+            public void onCancel() {
+                deliverFacebookResult(requestId, null, FACEBOOK_MAP_CANCEL);
+            }
+
+            @Override
+            public void onError(FacebookException exception) {
+                Map<String, Object> error = new HashMap<String, Object>();
+                error.put("type", FACEBOOK_TYPE_ERROR);
+                error.put("exception", exception.toString());
+                L.d(exception.toString());
+                deliverFacebookResult(requestId, null, error);
+            }
+        });
     }
 
     private void facebookTicker(final String requestId, final String type, final String postParamsStr) {
-        L.d("Ticker on facebook with post params: " + postParamsStr);
-
-        final Session.StatusCallback statusCallback = new Session.StatusCallback() {
-            @Override
-            public void call(final Session session, final SessionState state, final Exception exception) {
-                if (session != Session.getActiveSession()) {
-                    session.removeCallback(this);
-                    return;
-                }
-                if (exception != null) {
-                    session.removeCallback(this);
-                    if (exception instanceof FacebookOperationCanceledException) {
-                        deliverFacebookResult(requestId, null, FACEBOOK_MAP_CANCEL);
-                        L.d("user pressed cancel show other window to get user info");
-                    } else {
-                        Map<String, Object> error = new HashMap<String, Object>();
-                        error.put("type", FACEBOOK_TYPE_ERROR);
-                        error.put("exception", exception.toString());
-                        L.d(exception.toString());
-                        deliverFacebookResult(requestId, null, error);
-                    }
-
-                } else if (session.isOpened()) {
-                    session.removeCallback(this);
-
-                    Bundle bundle = new Bundle();
-                    @SuppressWarnings("unchecked")
-                    final Map<String, Object> postParams = (Map<String, Object>) JSONValue.parse(postParamsStr);
-                    for (Map.Entry<String, Object> entry : postParams.entrySet()) {
-                        if (entry.getValue() instanceof String)
-                            bundle.putString(entry.getKey(), (String) entry.getValue());
-                    }
-                    L.d("Ticker type: " + type + "\nBundle: " + bundle);
-                    Request request = new Request(Session.getActiveSession(), type, bundle, HttpMethod.POST,
-                        new Request.Callback() {
-                            @Override
-                            public void onCompleted(Response response) {
-                                try {
-                                    GraphObject graphObject = response.getGraphObject();
-                                    if (graphObject == null) {
-                                        L.w("Graph response is NULL");
-                                        Map<String, Object> error = new HashMap<String, Object>();
-                                        error.put("type", FACEBOOK_TYPE_ERROR);
-                                        error.put("exception", "Graph response is NULL");
-                                        deliverFacebookResult(requestId, null, error);
-                                        return;
-                                    }
-                                    JSONObject jsonObject = graphObject.getInnerJSONObject();
-
-                                    final Map<String, Object> result = new HashMap<String, Object>();
-                                    result.put("postId", jsonObject.getString("id"));
-                                    deliverFacebookResult(requestId, result, null);
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        });
-                    request.executeAsync();
-                }
-            }
-        };
-
         if (!mService.getNetworkConnectivityManager().isConnected()) {
-            Map<String, Object> error = new HashMap<String, Object>();
+            Map<String, Object> error = new HashMap<>();
             error.put("type", FACEBOOK_TYPE_ERROR);
             error.put("exception", getString(R.string.registration_screen_instructions_check_network_not_available));
             deliverFacebookResult(requestId, null, error);
             return;
         }
 
-        FacebookUtils.ensureOpenSession(this, FacebookUtils.PUBLISH_PERMISSIONS, PermissionType.PUBLISH,
-            statusCallback, true);
+        L.d("Ticker on facebook with post params: " + postParamsStr);
+
+        FacebookUtils.ensureOpenSession(this, FacebookUtils.PUBLISH_PERMISSIONS, PermissionType.PUBLISH, new
+                FacebookCallback<LoginResult>() {
+                    @Override
+                    public void onSuccess(LoginResult loginResult) {
+                        Bundle bundle = new Bundle();
+                        @SuppressWarnings("unchecked")
+                        final Map<String, Object> postParams = (Map<String, Object>) JSONValue.parse(postParamsStr);
+                        for (Map.Entry<String, Object> entry : postParams.entrySet()) {
+                            if (entry.getValue() instanceof String) {
+                                bundle.putString(entry.getKey(), (String) entry.getValue());
+                            }
+                        }
+                        L.d("Ticker type: " + type + "\nBundle: " + bundle);
+
+                        new GraphRequest(AccessToken.getCurrentAccessToken(), type, bundle, HttpMethod.POST, new
+                                GraphRequest.Callback() {
+
+                            @Override
+                            public void onCompleted(GraphResponse response) {
+                                if (response == null || response.getJSONObject() == null) {
+                                    L.w("Graph response is NULL");
+                                    Map<String, Object> error = new HashMap<>();
+                                    error.put("type", FACEBOOK_TYPE_ERROR);
+                                    error.put("exception", "Graph response is NULL");
+                                    deliverFacebookResult(requestId, null, error);
+                                    return;
+                                }
+
+                                final JSONObject jsonObject = response.getJSONObject();
+                                if (jsonObject.has("postId")) {
+                                    try {
+                                        final Map<String, Object> result = new HashMap<>();
+                                        result.put("postId", jsonObject.getString("id"));
+                                        deliverFacebookResult(requestId, result, null);
+                                    } catch (JSONException e) {
+                                        L.bug(e);
+                                        Map<String, Object> error = new HashMap<>();
+                                        error.put("type", FACEBOOK_TYPE_ERROR);
+                                        error.put("exception", "Unexpected JSONException occurred");
+                                        deliverFacebookResult(requestId, null, error);
+                                    }
+                                } else {
+                                    deliverFacebookResult(requestId, null, FACEBOOK_MAP_CANCEL);
+                                }
+                            }
+                                }).executeAsync();
+                    }
+
+                    @Override
+                    public void onCancel() {
+                        deliverFacebookResult(requestId, null, FACEBOOK_MAP_CANCEL);
+                    }
+
+                    @Override
+                    public void onError(FacebookException exception) {
+                        Map<String, Object> error = new HashMap<>();
+                        error.put("type", FACEBOOK_TYPE_ERROR);
+                        error.put("exception", exception.toString());
+                        L.d(exception.toString());
+                        deliverFacebookResult(requestId, null, error);
+                    }
+                }, true);
     }
 
     private void poke(String tag) {
@@ -1320,69 +1290,6 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         }
 
     };
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        final Session session = Session.getActiveSession();
-        if (session != null) {
-            session.onActivityResult(this, requestCode, resultCode, data);
-        }
-
-        if (requestCode == CHECKIN_REQUEST_CODE && data != null) {
-            Bundle bundle = new Bundle();
-            @SuppressWarnings("unchecked")
-            final Map<String, Object> postParams = (Map<String, Object>) JSONValue.parse(data
-                .getStringExtra("postParamsStr"));
-            for (Map.Entry<String, Object> entry : postParams.entrySet()) {
-                if (entry.getValue() instanceof String)
-                    bundle.putString(entry.getKey(), (String) entry.getValue());
-            }
-
-            String[] tags = data.getStringArrayExtra("tags");
-            if (tags.length > 0) {
-                StringBuilder nameBuilder = new StringBuilder();
-
-                for (String n : tags) {
-                    nameBuilder.append(n + ",");
-                }
-                nameBuilder.deleteCharAt(nameBuilder.length() - 1);
-                bundle.putString("tags", nameBuilder.toString());
-            }
-            L.d("Bundle: " + bundle);
-            final String requestId = data.getStringExtra("requestId");
-            Request request = new Request(Session.getActiveSession(), POST_ACTION_PATH_FEED, bundle, HttpMethod.POST,
-                new Request.Callback() {
-                    @Override
-                    public void onCompleted(Response response) {
-                        try {
-                            FacebookRequestError fbError = response.getError();
-                            if (fbError != null) {
-                                L.w("Failed to check in: " + fbError);
-                                Map<String, Object> error = new HashMap<String, Object>();
-                                error.put("type", FACEBOOK_TYPE_ERROR);
-                                error.put("exception", fbError.getErrorMessage());
-                                deliverFacebookResult(requestId, null, error);
-                            }
-                            GraphObject graphObject = response.getGraphObject();
-                            if (graphObject == null) {
-                                deliverFacebookResult(requestId, null, FACEBOOK_MAP_CANCEL);
-                                return;
-                            }
-                            JSONObject jsonObject = graphObject.getInnerJSONObject();
-
-                            final Map<String, Object> result = new HashMap<String, Object>();
-                            result.put("postId", jsonObject.getString("id"));
-                            deliverFacebookResult(requestId, result, null);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-            request.executeAsync();
-        }
-    }
 
     @Override
     public boolean onKeyDown(final int keyCode, final KeyEvent event) {

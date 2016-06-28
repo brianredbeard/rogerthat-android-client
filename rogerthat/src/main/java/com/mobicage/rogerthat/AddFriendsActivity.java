@@ -45,7 +45,6 @@ import android.net.Uri;
 import android.net.Uri.Builder;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -65,12 +64,14 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.ViewFlipper;
 
+import com.facebook.AccessToken;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
-import com.facebook.Session;
-import com.facebook.SessionState;
-import com.facebook.UiLifecycleHelper;
-import com.facebook.widget.FacebookDialog;
-import com.facebook.widget.WebDialog;
+import com.facebook.login.LoginResult;
+import com.facebook.share.Sharer;
+import com.facebook.share.model.ShareLinkContent;
+import com.facebook.share.widget.ShareDialog;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.config.Configuration;
 import com.mobicage.rogerthat.plugins.friends.Contact;
@@ -130,7 +131,7 @@ public class AddFriendsActivity extends ServiceBoundActivity {
     private boolean mFbPageConfigured = false;
     private final Map<String, Bitmap> mFbAvatars = new HashMap<String, Bitmap>();
 
-    private UiLifecycleHelper mUiHelper;
+    private CallbackManager mFBCallbackMgr;
 
     private Cursor mCursorEmail;
     private Cursor mPhoneCursor;
@@ -196,9 +197,6 @@ public class AddFriendsActivity extends ServiceBoundActivity {
 
         ((TextView) findViewById(R.id.add_via_facebook_description)).setText(getString(
             R.string.add_via_facebook_description, getString(R.string.app_name)));
-
-        mUiHelper = new UiLifecycleHelper(this, null);
-        mUiHelper.onCreate(savedInstanceState);
     }
 
     @Override
@@ -297,7 +295,6 @@ public class AddFriendsActivity extends ServiceBoundActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        mUiHelper.onResume();
 
         if (getWasPaused() && mCursorEmail != null) {
             startManagingCursor(mCursorEmail);
@@ -310,13 +307,11 @@ public class AddFriendsActivity extends ServiceBoundActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        mUiHelper.onSaveInstanceState(outState);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        mUiHelper.onPause();
         if (mCursorEmail != null) {
             stopManagingCursor(mCursorEmail);
         }
@@ -328,7 +323,6 @@ public class AddFriendsActivity extends ServiceBoundActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mUiHelper.onDestroy();
     }
 
     @Override
@@ -569,27 +563,6 @@ public class AddFriendsActivity extends ServiceBoundActivity {
         list.setAdapter(adapter);
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        final Session session = Session.getActiveSession();
-        if (session != null) {
-            session.onActivityResult(this, requestCode, resultCode, data);
-        }
-
-        mUiHelper.onActivityResult(requestCode, resultCode, data, new FacebookDialog.Callback() {
-            @Override
-            public void onError(FacebookDialog.PendingCall pendingCall, Exception error, Bundle data) {
-                findRogerthatUsersViaFacebook();
-            }
-
-            @Override
-            public void onComplete(FacebookDialog.PendingCall pendingCall, Bundle data) {
-                findRogerthatUsersViaFacebook();
-            }
-        });
-    }
-
     private void configureFacebookView() {
         T.UI();
         if (!mFbPageConfigured) {
@@ -617,7 +590,7 @@ public class AddFriendsActivity extends ServiceBoundActivity {
 
     private void findRogerthatUsersViaFacebook() {
         T.UI();
-        if (mFriendsPlugin.findRogerthatUsersViaFacebook(Session.getActiveSession().getAccessToken())) {
+        if (mFriendsPlugin.findRogerthatUsersViaFacebook(AccessToken.getCurrentAccessToken().getToken())) {
             displayFacebookPage(1, null);
         } else {
             displayFacebookPage(3, getString(R.string.error_find_from_facebook, getString(R.string.app_name)));
@@ -651,63 +624,50 @@ public class AddFriendsActivity extends ServiceBoundActivity {
     }
 
     private void postOnWall() {
-        FacebookUtils.ensureOpenSession(this, Arrays.asList("email", "user_friends"), PermissionType.READ,
-                new Session.StatusCallback() {
-                    @Override
-                    public void call(Session session, SessionState state, Exception exception) {
-                        if (session != Session.getActiveSession()) {
-                            session.removeCallback(this);
-                            return;
-                        }
+        String myEmailHash = new String(getMyIdentity().getEmailHash());
+        String picture = CloudConstants.HTTPS_BASE_URL + "/invite?code=" + myEmailHash;
+        Uri identityUri = Uri.parse(getMyIdentity().getShortLink());
+        Builder b = identityUri.buildUpon();
+        b.appendQueryParameter("target", "fbwall");
+        b.appendQueryParameter("from", "phone");
+        Uri link = b.build();
+        String caption = getString(R.string.fb_wall_post_caption, getString(R.string.app_name));
+        String description = getString(R.string.fb_wall_post_description, getString(R.string.app_name));
 
-                        session.removeCallback(this);
-                        if (exception == null && session.isOpened()) {
-                            String myEmailHash = new String(getMyIdentity().getEmailHash());
-                            String picture = CloudConstants.HTTPS_BASE_URL + "/invite?code=" + myEmailHash;
-                            Uri identityUri = Uri.parse(getMyIdentity().getShortLink());
-                            Builder b = identityUri.buildUpon();
-                            b.appendQueryParameter("target", "fbwall");
-                            b.appendQueryParameter("from", "phone");
-                            b.build();
-                            String link = b.toString();
-                            String caption = getString(R.string.fb_wall_post_caption, getString(R.string.app_name));
-                            String description = getString(R.string.fb_wall_post_description, getString(R.string.app_name));
+        final ShareLinkContent.Builder contentBuilder = new ShareLinkContent.Builder();
+        contentBuilder.setContentUrl(link);
+        contentBuilder.setImageUrl(Uri.parse(picture));
+        contentBuilder.setContentTitle(caption);
+        contentBuilder.setContentDescription(description);
+        final ShareLinkContent content = contentBuilder.build();
 
-                            L.d("Posting to facebook:\n- FACEBOOK_APP_ID: " + CloudConstants.FACEBOOK_APP_ID
-                                    + "\n- Picture: " + picture + "\n- Catption: " + caption + "\n- Description: "
-                                    + description + "\n- Link :" + link);
+        if (CloudConstants.DEBUG_LOGGING) {
+            Map<String, String> params = new HashMap<>();
+            params.put("content.contentDescription", content.getContentDescription());
+            params.put("content.contentTitle", content.getContentTitle());
+            params.put("content.contentURL", content.getContentUrl().toString());
+            params.put("content.imageURL", content.getImageUrl().toString());
+            L.d(params.toString());
+        }
 
-                            if (FacebookDialog.canPresentShareDialog(getApplicationContext(),
-                                    FacebookDialog.ShareDialogFeature.SHARE_DIALOG)) {
-                                L.d("Share via FacebookDialog");
+        final ShareDialog shareDialog = new ShareDialog(AddFriendsActivity.this);
+        shareDialog.show(content, ShareDialog.Mode.AUTOMATIC);
+        shareDialog.registerCallback(getFacebookCallbackManager(), new FacebookCallback<Sharer.Result>() {
+            @Override
+            public void onSuccess(Sharer.Result result) {
+                findRogerthatUsersViaFacebook();
+            }
 
-                                FacebookDialog shareDialog = new FacebookDialog.ShareDialogBuilder(AddFriendsActivity.this)
-                                        .setLink(link).setPicture(picture).setCaption(caption).setDescription(description)
-                                        .build();
+            @Override
+            public void onCancel() {
+                findRogerthatUsersViaFacebook();
+            }
 
-                                mUiHelper.trackPendingDialogCall(shareDialog.present());
-                            } else {
-                                L.d("Share via WebDialog");
-
-                                Bundle params = new Bundle();
-                                params.putString("app_id", CloudConstants.FACEBOOK_APP_ID);
-                                params.putString("picture", picture);
-                                params.putString("link", link);
-                                params.putString("caption", caption);
-                                params.putString("description", description);
-
-                                new WebDialog.FeedDialogBuilder(AddFriendsActivity.this, session, params)
-                                        .setOnCompleteListener(new WebDialog.OnCompleteListener() {
-                                            @Override
-                                            public void onComplete(Bundle values, FacebookException error) {
-                                                findRogerthatUsersViaFacebook();
-                                            }
-
-                                        }).build().show();
-                            }
-                        }
-                    }
-                }, true);
+            @Override
+            public void onError(FacebookException error) {
+                findRogerthatUsersViaFacebook();
+            }
+        });
     }
 
     private void displayFacebookPage(final int child, final Object context) {
@@ -716,32 +676,35 @@ public class AddFriendsActivity extends ServiceBoundActivity {
             @Override
             public void safeOnClick(final View v) {
                 FacebookUtils.ensureOpenSession(AddFriendsActivity.this, Arrays.asList("email", "user_friends"),
-                    PermissionType.READ, new Session.StatusCallback() {
-                        @Override
-                        public void call(Session session, SessionState state, Exception exception) {
-                            if (session != Session.getActiveSession()) {
-                                session.removeCallback(this);
-                                return;
-                            }
-
-                            if (exception == null && session.isOpened()) {
-                                session.removeCallback(this);
-                                if (session.getPermissions().contains("email")) {
-                                    if (getMyIdentity().getShortLink() != null && mCfg.get(FB_POST_ON_WALL, true)) {
-                                        askToPostOnWall();
-                                    } else {
-                                        findRogerthatUsersViaFacebook();
-                                    }
+                        PermissionType.READ, new FacebookCallback<LoginResult>() {
+                            @Override
+                            public void onSuccess(LoginResult loginResult) {
+                                if (getMyIdentity().getShortLink() != null && mCfg.get(FB_POST_ON_WALL, true)) {
+                                    askToPostOnWall();
+                                } else {
+                                    findRogerthatUsersViaFacebook();
                                 }
                             }
-                        }
-                    }, true);
+
+                            @Override
+                            public void onCancel() {
+                            }
+
+                            @Override
+                            public void onError(FacebookException error) {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(AddFriendsActivity.this);
+                                builder.setCancelable(true);
+                                builder.setMessage(R.string.error_recommend_on_fb);
+                                builder.setPositiveButton(R.string.rogerthat, null);
+                                builder.create().show();
+                            }
+                        }, true);
             }
         };
 
         switch (child) {
         case 0:
-            ((Button) findViewById(R.id.add_via_facebook_button)).setOnClickListener(btnOnclickListener);
+            findViewById(R.id.add_via_facebook_button).setOnClickListener(btnOnclickListener);
             break;
 
         case 1: // Static page with only text and spinner
@@ -751,7 +714,7 @@ public class AddFriendsActivity extends ServiceBoundActivity {
             break;
         case 3:
             ((TextView) findViewById(R.id.add_via_facebook_error)).setText((String) context);
-            ((Button) findViewById(R.id.add_via_facebook_try_again)).setOnClickListener(btnOnclickListener);
+            findViewById(R.id.add_via_facebook_try_again).setOnClickListener(btnOnclickListener);
             break;
         default:
             break;

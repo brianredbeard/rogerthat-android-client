@@ -69,14 +69,14 @@
     <string name="caption_call">Appelez %1$s maintenant</string>
     <string name="caption_required">Le bouton de texte est nécessaire.</string>
     <string name="card_number">Carte Nº</string>
-    <string name="care">Soins</string>
+    <string name="care">Professionels de santé</string>
     <string name="change_picture">Changer l\'image</string>
     <string name="check_in">Enregistrer</string>
     <string name="check_in_at">Voulez-vous enregistrer à %1$s?</string>
     <string name="check_in_title">Enregistrer?</string>
     <string name="chip_number">Puce Nº</string>
     <string name="colleagues">Collègues</string>
-    <string name="community_service">Services Publics</string>
+    <string name="community_service">Ma ville</string>
     <string name="complete_your_profile">Complétez votre profil</string>
     <string name="compose_short">Nouveau message</string>
     <string name="configure_new_canned_message">Créer un nouveau message standard</string>
@@ -167,7 +167,7 @@
     <string name="get_picture">Obtenez une image</string>
     <string name="getuserinfo_failure">Erreur pour retrouver l\'information scannée.</string>
     <string name="go_to_app_settings">Ouvrir les autorisations</string>
-    <string name="government_service">Services Publics</string>
+    <string name="government_service">Ma ville</string>
     <string name="gps_coordinates_assisitant">Assistant du GPS</string>
     <string name="gps_is_not_enabled">Le GPS n\'est pas activé sur votre appareil. Voulez-vous changer la configuration?</string>
     <string name="groups">Groupes</string>
@@ -232,7 +232,7 @@
     <string name="member_message_history">Historique de %1$s</string>
     <string name="members">Membres</string>
     <string name="members_are_required">Des membres sont requis</string>
-    <string name="merchants">Marchands</string>
+    <string name="merchants">Commerçants</string>
     <string name="message">Un message</string>
     <string name="message_confirm">Prière de confirmer</string>
     <string name="message_delete_confirm">Confirmer la suppression</string>
@@ -356,7 +356,7 @@
     <string name="repair">Réparation</string>
     <string name="replied_at">Répondu %1$s à %2$s.</string>
     <string name="reply">Répondre</string>
-    <string name="report_card">Alertez-nous</string>
+    <string name="report_card">J\'alerte ma mairie</string>
     <string name="request_location_of">Demander la position de %1$s</string>
     <string name="retrieving_information">Récupération d\'informations venant du serveur…</string>
     <string name="retry">Réessayez</string>
