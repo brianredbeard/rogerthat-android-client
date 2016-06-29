@@ -448,6 +448,8 @@ public abstract class ServiceBoundActivity extends Activity implements Pausable,
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        mFBCallbackMgr.onActivityResult(requestCode, resultCode, data);
+        if (mFBCallbackMgr != null ) {
+            mFBCallbackMgr.onActivityResult(requestCode, resultCode, data);
+        }
     }
 }
