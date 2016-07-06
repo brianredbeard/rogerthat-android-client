@@ -65,7 +65,6 @@ import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
 import com.mobicage.rogerthat.util.ui.UIUtils;
-import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.to.friends.FriendTO;
 import com.mobicage.to.service.StartServiceActionRequestTO;
@@ -514,7 +513,7 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
             mTopArea.setBackgroundColor(br.color);
         }
 
-        int r = br.scheme == ColorScheme.light ? android.R.color.primary_text_light : android.R.color.primary_text_dark;
+        int r = br.scheme == ColorScheme.LIGHT ? android.R.color.primary_text_light : android.R.color.primary_text_dark;
         ((TextView) findViewById(R.id.friend_name)).setTextColor(getResources().getColor(r));
         ((TextView) findViewById(R.id.email)).setTextColor(getResources().getColor(r));
 

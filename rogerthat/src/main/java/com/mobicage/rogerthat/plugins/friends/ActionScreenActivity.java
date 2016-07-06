@@ -36,7 +36,9 @@ import org.json.simple.JSONValue;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.support.v4.content.ContextCompat;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -114,8 +116,6 @@ public class ActionScreenActivity extends ServiceBoundActivity {
     public static final String ITEM_COORDS = "item_coords";
     public static final String CONTEXT_MATCH = "context";
     public static final String RUN_IN_BACKGROUND = "run_in_background";
-
-    private static final String POST_ACTION_PATH_FEED = "me/feed";
 
     private static final String POKE = "poke://";
 
@@ -1058,6 +1058,17 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 mWakeLock.release();
             }
 
+            switch (mBrandingResult.orientation) {
+                case LANDSCAPE:
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                    break;
+                case PORTRAIT:
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                    break;
+                case DYNAMIC:
+                default:
+                    break;
+            }
         } catch (BrandingFailureException e) {
             UIUtils.showLongToast(this, getString(R.string.failed_to_show_action_screen));
             finish();
@@ -1290,6 +1301,34 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         }
 
     };
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        L.i(getClass() + ": onConfigurationChanged");
+
+        if (mBrandingResult != null) {
+            L.d("New orientation: " + newConfig.orientation);
+            switch (mBrandingResult.orientation) {
+                case LANDSCAPE:
+                    if (newConfig.orientation != Configuration.ORIENTATION_LANDSCAPE) {
+                        L.d("Changing to SCREEN_ORIENTATION_LANDSCAPE");
+                        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                    }
+                    break;
+                case PORTRAIT:
+                    if (newConfig.orientation != Configuration.ORIENTATION_PORTRAIT) {
+                        L.d("Changing to SCREEN_ORIENTATION_PORTRAIT");
+                        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                    }
+                    break;
+                case DYNAMIC:
+                default:
+                    break;
+            }
+        }
+
+        super.onConfigurationChanged(newConfig);
+    }
 
     @Override
     public boolean onKeyDown(final int keyCode, final KeyEvent event) {

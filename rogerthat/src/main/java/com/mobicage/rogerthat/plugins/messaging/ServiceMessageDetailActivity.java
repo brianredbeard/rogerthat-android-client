@@ -41,7 +41,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -50,8 +49,6 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -366,7 +363,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity {
                         messageHeader.setVisibility(View.GONE);
                         MarginLayoutParams mlp = (MarginLayoutParams) web.getLayoutParams();
                         mlp.setMargins(0, 0, 0, mlp.bottomMargin);
-                    } else if (br.scheme == ColorScheme.dark) {
+                    } else if (br.scheme == ColorScheme.DARK) {
                         senderView.setTextColor(darkSchemeTextColor);
                         timestampView.setTextColor(darkSchemeTextColor);
                     }
@@ -470,7 +467,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity {
                 repliedView.setText(R.string.not_yet_replied);
                 showMember = !ms.member.equals(mCurrentMessage.sender);
             }
-            if (br != null && br.scheme == ColorScheme.dark) {
+            if (br != null && br.scheme == ColorScheme.DARK) {
                 receiverView.setTextColor(darkSchemeTextColor);
                 receivedView.setTextColor(darkSchemeTextColor);
                 repliedView.setTextColor(darkSchemeTextColor);
@@ -700,7 +697,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity {
             int ligthAlpha = 180;
             int darkAlpha = 70;
             int alpha = ligthAlpha;
-            if (br != null && br.scheme == ColorScheme.dark) {
+            if (br != null && br.scheme == ColorScheme.DARK) {
                 broadcastSpamControlIcon.setTextColor(getResources().getColor(android.R.color.black));
                 broadcastSpamControlBorder.setBackgroundColor(darkSchemeTextColor);
                 broadcastSpamControlDivider.setBackgroundColor(darkSchemeTextColor);

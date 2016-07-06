@@ -484,7 +484,7 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
                         branding.setBackgroundColor(br.color);
                         activity.setBackgroundColor(br.color);
                     }
-                    if (br.scheme == ColorScheme.dark) {
+                    if (br.scheme == ColorScheme.DARK) {
                         for (Cell cell : usedCells) {
                             cell.label.setTextColor(darkSchemeTextColor);
                             cell.label.setShadowLayer(2, 1, 1, Color.BLACK);

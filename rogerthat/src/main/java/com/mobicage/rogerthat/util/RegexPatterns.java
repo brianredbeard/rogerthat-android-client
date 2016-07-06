@@ -54,8 +54,12 @@ public class RegexPatterns {
         Pattern.CASE_INSENSITIVE);
 
     public static final Pattern BRANDING_COLOR_SCHEME = Pattern.compile(
-        "<\\s*meta\\s+property\\s*=\\s*\"rt:style:color-scheme\"\\s+content\\s*=\\s*\"(dark|light)\"\\s*/>",
-        Pattern.CASE_INSENSITIVE);
+            "<\\s*meta\\s+property\\s*=\\s*\"rt:style:color-scheme\"\\s+content\\s*=\\s*\"(dark|light)\"\\s*/>",
+            Pattern.CASE_INSENSITIVE);
+
+    public static final Pattern BRANDING_ORIENTATION = Pattern.compile
+            ("<\\s*meta\\s+property\\s*=\\s*\"rt:style:orientation\"\\s+content\\s*=\\s*\"" +
+                    "(portrait|landscape|dynamic)\"\\s*/>", Pattern.CASE_INSENSITIVE);
 
     public static final Pattern BRANDING_SHOW_HEADER = Pattern.compile(
         "<\\s*meta\\s+property\\s*=\\s*\"rt:style:show-header\"\\s+content\\s*=\\s*\"(true|false)\"\\s*/>",

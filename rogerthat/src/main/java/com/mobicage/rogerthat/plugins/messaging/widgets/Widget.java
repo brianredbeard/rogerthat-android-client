@@ -78,12 +78,12 @@ public abstract class Widget extends LinearLayout {
 
     public Widget(Context context, AttributeSet attrs) {
         super(context, attrs);
-        setColorScheme(BrandingMgr.ColorScheme.light);
+        setColorScheme(BrandingMgr.ColorScheme.LIGHT);
     }
 
     public Widget(Context context) {
         super(context);
-        setColorScheme(BrandingMgr.ColorScheme.light);
+        setColorScheme(BrandingMgr.ColorScheme.LIGHT);
     }
 
     public Map<String, Object> getWidgetMap() {
@@ -93,7 +93,7 @@ public abstract class Widget extends LinearLayout {
 
     public void setColorScheme(BrandingMgr.ColorScheme colorScheme) {
         int colorId = android.R.color.primary_text_light;
-        if (colorScheme == BrandingMgr.ColorScheme.dark)
+        if (colorScheme == BrandingMgr.ColorScheme.DARK)
             colorId = android.R.color.primary_text_dark;
 
         mTextColor = getResources().getColor(colorId);
