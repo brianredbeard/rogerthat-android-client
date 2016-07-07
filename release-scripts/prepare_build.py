@@ -173,11 +173,16 @@ def rename_package():
         s = re.sub('mdp-rogerthat', 'mdp-%s' % APP_ID, s)
         s = re.sub('oauth-rogerthat', 'oauth-%s' % APP_ID, s)
 
-        facebook_app_id = doc["APP_CONSTANTS"]["FACEBOOK_APP_ID"]
+        facebook_app_id = doc["APP_CONSTANTS"].get("FACEBOOK_APP_ID")
         if facebook_app_id:
             s = re.sub('android:authorities="com.facebook.app.FacebookContentProvider.+"',
                        'android:authorities="com.facebook.app.FacebookContentProvider%s"' % facebook_app_id,
                        s)
+        else:
+            # remove FacebookProvider
+            splitted = s.split('<!-- BEGIN FB -->')
+            if len(splitted) != 1:
+                s = splitted[0].strip() + splitted[1].split('<!-- END FB -->')[1]
 
         f.seek(0)
         f.write(s)

@@ -347,10 +347,12 @@
             android:name="org.altbeacon.beacon.BeaconIntentProcessor"
             android:exported="false" />
 
+        <!-- BEGIN FB -->
         <provider
             android:name="com.facebook.FacebookContentProvider"
             android:authorities="com.facebook.app.FacebookContentProvider188033791211994"
             android:exported="true"/>
+        <!-- END FB -->
 
     </application>
 
