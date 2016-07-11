@@ -64,6 +64,7 @@ public class PriorityMap {
         sPrioritySet.add("com.mobicage.api.messaging.submitAdvancedOrderForm");
         sPrioritySet.add("com.mobicage.api.messaging.submitAutoCompleteForm");
         sPrioritySet.add("com.mobicage.api.messaging.submitDateSelectForm");
+        sPrioritySet.add("com.mobicage.api.messaging.submitFriendSelectForm");
         sPrioritySet.add("com.mobicage.api.messaging.submitGPSLocationForm");
         sPrioritySet.add("com.mobicage.api.messaging.submitMultiSelectForm");
         sPrioritySet.add("com.mobicage.api.messaging.submitMyDigiPassForm");

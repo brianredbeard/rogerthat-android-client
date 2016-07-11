@@ -40,6 +40,7 @@ public abstract class Widget extends LinearLayout {
     public static final String TYPE_TEXT_LINE = "text_line";
     public static final String TYPE_TEXT_BLOCK = "text_block";
     public static final String TYPE_AUTO_COMPLETE = "auto_complete";
+    public static final String TYPE_FRIEND_SELECT = "friend_select";
     public static final String TYPE_SINGLE_SELECT = "single_select";
     public static final String TYPE_MULTI_SELECT = "multi_select";
     public static final String TYPE_DATE_SELECT = "date_select";
@@ -54,10 +55,11 @@ public abstract class Widget extends LinearLayout {
     public final static Map<String, Integer> RESOURCES;
 
     static {
-        RESOURCES = new HashMap<String, Integer>();
+        RESOURCES = new HashMap<>();
         RESOURCES.put(TYPE_TEXT_LINE, R.layout.widget_text_line);
         RESOURCES.put(TYPE_TEXT_BLOCK, R.layout.widget_text_block);
         RESOURCES.put(TYPE_AUTO_COMPLETE, R.layout.widget_auto_complete);
+        RESOURCES.put(TYPE_FRIEND_SELECT, R.layout.widget_friend_select);
         RESOURCES.put(TYPE_SINGLE_SELECT, R.layout.widget_single_select);
         RESOURCES.put(TYPE_MULTI_SELECT, R.layout.widget_multi_select);
         RESOURCES.put(TYPE_DATE_SELECT, R.layout.widget_date_select);
@@ -130,6 +132,9 @@ public abstract class Widget extends LinearLayout {
 
         if (TYPE_AUTO_COMPLETE.equals(formType))
             return AutoCompleteWidget.valueString(context, widget);
+
+        if (TYPE_FRIEND_SELECT.equals(formType))
+            return FriendSelectWidget.valueString(context, widget);
 
         if (TYPE_SINGLE_SELECT.equals(formType))
             return SingleSelectWidget.valueString(context, widget);

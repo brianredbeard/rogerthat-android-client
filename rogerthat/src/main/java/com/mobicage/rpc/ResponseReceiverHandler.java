@@ -374,6 +374,15 @@ public class ResponseReceiverHandler {
                 resp.setResult(Parser.ComMobicageToMessagingFormsSubmitDateSelectFormResponseTO(rpcr.result));
             ((IResponseHandler<com.mobicage.to.messaging.forms.SubmitDateSelectFormResponseTO>) responseHandler).handle(resp);
         }
+        if ("com.mobicage.api.messaging.submitFriendSelectForm".equals(function)) {
+            final Response<com.mobicage.to.messaging.forms.SubmitFriendSelectFormResponseTO> resp = new Response<com.mobicage.to.messaging.forms.SubmitFriendSelectFormResponseTO>();
+            resp.setError(rpcr.error);
+            resp.setSuccess(rpcr.success);
+            resp.setCallId(rpcr.callId);
+            if (rpcr.success)
+                resp.setResult(Parser.ComMobicageToMessagingFormsSubmitFriendSelectFormResponseTO(rpcr.result));
+            ((IResponseHandler<com.mobicage.to.messaging.forms.SubmitFriendSelectFormResponseTO>) responseHandler).handle(resp);
+        }
         if ("com.mobicage.api.messaging.submitGPSLocationForm".equals(function)) {
             final Response<com.mobicage.to.messaging.forms.SubmitGPSLocationFormResponseTO> resp = new Response<com.mobicage.to.messaging.forms.SubmitGPSLocationFormResponseTO>();
             resp.setError(rpcr.error);

@@ -32,6 +32,8 @@ public interface IClientRpc {
 
     com.mobicage.to.messaging.forms.NewDateSelectFormResponseTO newDateSelectForm(com.mobicage.to.messaging.forms.NewDateSelectFormRequestTO request) throws java.lang.Exception;
 
+    com.mobicage.to.messaging.forms.NewFriendSelectFormResponseTO newFriendSelectForm(com.mobicage.to.messaging.forms.NewFriendSelectFormRequestTO request) throws java.lang.Exception;
+
     com.mobicage.to.messaging.forms.NewGPSLocationFormResponseTO newGPSLocationForm(com.mobicage.to.messaging.forms.NewGPSLocationFormRequestTO request) throws java.lang.Exception;
 
     com.mobicage.to.messaging.NewMessageResponseTO newMessage(com.mobicage.to.messaging.NewMessageRequestTO request) throws java.lang.Exception;
@@ -61,6 +63,8 @@ public interface IClientRpc {
     com.mobicage.to.messaging.forms.UpdateAutoCompleteFormResponseTO updateAutoCompleteForm(com.mobicage.to.messaging.forms.UpdateAutoCompleteFormRequestTO request) throws java.lang.Exception;
 
     com.mobicage.to.messaging.forms.UpdateDateSelectFormResponseTO updateDateSelectForm(com.mobicage.to.messaging.forms.UpdateDateSelectFormRequestTO request) throws java.lang.Exception;
+
+    com.mobicage.to.messaging.forms.UpdateFriendSelectFormResponseTO updateFriendSelectForm(com.mobicage.to.messaging.forms.UpdateFriendSelectFormRequestTO request) throws java.lang.Exception;
 
     com.mobicage.to.messaging.forms.UpdateGPSLocationFormResponseTO updateGPSLocationForm(com.mobicage.to.messaging.forms.UpdateGPSLocationFormRequestTO request) throws java.lang.Exception;
 

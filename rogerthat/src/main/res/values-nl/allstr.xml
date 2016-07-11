@@ -461,4 +461,6 @@
     <string name="yes">Ja</string>
     <string name="you_are_here">Je bent hier</string>
     <string name="your_location_displayed_friend_have_contacted_for_their_location">Locatie is opgevraagd van je vrienden die hun locatie delen.</string>
+
+    <string name="friend_selection_is_required">Gelieve minstens één vriend te selecteren.</string>
 </resources>

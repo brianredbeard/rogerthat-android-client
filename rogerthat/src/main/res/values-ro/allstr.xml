@@ -435,4 +435,6 @@
     <string name="yes">Da</string>
     <string name="you_are_here">Esti aici</string>
     <string name="your_location_displayed_friend_have_contacted_for_their_location">Locatia ta a fost afisata. Prietenii tai (care impartasesc locatia lor cu tine) au fost contactate pentru a va trimite locatia lor.</string>
+
+    <string name="friend_selection_is_required">Vă rugăm să selectați cel puțin un prieten.</string>
 </resources>

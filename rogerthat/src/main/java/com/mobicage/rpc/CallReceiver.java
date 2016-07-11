@@ -73,6 +73,9 @@ public class CallReceiver {
         if ("com.mobicage.capi.messaging.newDateSelectForm".equals(function)) {
             return comMobicageCapiMessagingIClientRpc.newDateSelectForm(Parser.ComMobicageToMessagingFormsNewDateSelectFormRequestTO(call.arguments.get("request")));
         }
+        if ("com.mobicage.capi.messaging.newFriendSelectForm".equals(function)) {
+            return comMobicageCapiMessagingIClientRpc.newFriendSelectForm(Parser.ComMobicageToMessagingFormsNewFriendSelectFormRequestTO(call.arguments.get("request")));
+        }
         if ("com.mobicage.capi.messaging.newGPSLocationForm".equals(function)) {
             return comMobicageCapiMessagingIClientRpc.newGPSLocationForm(Parser.ComMobicageToMessagingFormsNewGPSLocationFormRequestTO(call.arguments.get("request")));
         }
@@ -117,6 +120,9 @@ public class CallReceiver {
         }
         if ("com.mobicage.capi.messaging.updateDateSelectForm".equals(function)) {
             return comMobicageCapiMessagingIClientRpc.updateDateSelectForm(Parser.ComMobicageToMessagingFormsUpdateDateSelectFormRequestTO(call.arguments.get("request")));
+        }
+        if ("com.mobicage.capi.messaging.updateFriendSelectForm".equals(function)) {
+            return comMobicageCapiMessagingIClientRpc.updateFriendSelectForm(Parser.ComMobicageToMessagingFormsUpdateFriendSelectFormRequestTO(call.arguments.get("request")));
         }
         if ("com.mobicage.capi.messaging.updateGPSLocationForm".equals(function)) {
             return comMobicageCapiMessagingIClientRpc.updateGPSLocationForm(Parser.ComMobicageToMessagingFormsUpdateGPSLocationFormRequestTO(call.arguments.get("request")));

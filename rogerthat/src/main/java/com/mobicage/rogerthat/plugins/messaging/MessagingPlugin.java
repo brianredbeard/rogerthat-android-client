@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -1291,10 +1292,7 @@ public class MessagingPlugin implements MobicagePlugin {
                 if (formResult != null) {
                     @SuppressWarnings("unchecked")
                     Map<String, Object> widget = (Map<String, Object>) message.form.get("widget");
-                    List<String> values = new ArrayList<String>(formResult.values.length);
-                    for (String value : formResult.values)
-                        values.add(value);
-                    widget.put("values", values);
+                    widget.put("values", Arrays.asList(formResult.values));
                 }
             }
         };

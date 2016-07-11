@@ -425,4 +425,6 @@
     <string name="yes">Sim</string>
     <string name="you_are_here">Você está aquí</string>
     <string name="your_location_displayed_friend_have_contacted_for_their_location">Sua localização está sendo exibida. Foi solicitado a seus amigos (que compartilham sua localização com você) que enviem a você a localização deles.</string>
+
+    <string name="friend_selection_is_required">Por favor, selecione pelo menos um amigo.</string>
 </resources>

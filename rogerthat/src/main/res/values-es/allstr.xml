@@ -461,4 +461,6 @@
     <string name="yes">Sí</string>
     <string name="you_are_here">Usted se encuentra aquí</string>
     <string name="your_location_displayed_friend_have_contacted_for_their_location">Su ubicación será mostrada. Se advertirá a los contactos que comparten su emplazamiento actual para que verifiquen su ubicación.</string>
+
+    <string name="friend_selection_is_required">Por favor, seleccione al menos un amigo.</string>
 </resources>

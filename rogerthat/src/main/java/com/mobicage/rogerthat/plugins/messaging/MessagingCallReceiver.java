@@ -41,6 +41,8 @@ import com.mobicage.to.messaging.forms.NewAutoCompleteFormRequestTO;
 import com.mobicage.to.messaging.forms.NewAutoCompleteFormResponseTO;
 import com.mobicage.to.messaging.forms.NewDateSelectFormRequestTO;
 import com.mobicage.to.messaging.forms.NewDateSelectFormResponseTO;
+import com.mobicage.to.messaging.forms.NewFriendSelectFormRequestTO;
+import com.mobicage.to.messaging.forms.NewFriendSelectFormResponseTO;
 import com.mobicage.to.messaging.forms.NewGPSLocationFormRequestTO;
 import com.mobicage.to.messaging.forms.NewGPSLocationFormResponseTO;
 import com.mobicage.to.messaging.forms.NewMultiSelectFormRequestTO;
@@ -65,6 +67,8 @@ import com.mobicage.to.messaging.forms.UpdateAutoCompleteFormRequestTO;
 import com.mobicage.to.messaging.forms.UpdateAutoCompleteFormResponseTO;
 import com.mobicage.to.messaging.forms.UpdateDateSelectFormRequestTO;
 import com.mobicage.to.messaging.forms.UpdateDateSelectFormResponseTO;
+import com.mobicage.to.messaging.forms.UpdateFriendSelectFormRequestTO;
+import com.mobicage.to.messaging.forms.UpdateFriendSelectFormResponseTO;
 import com.mobicage.to.messaging.forms.UpdateGPSLocationFormRequestTO;
 import com.mobicage.to.messaging.forms.UpdateGPSLocationFormResponseTO;
 import com.mobicage.to.messaging.forms.UpdateMultiSelectFormRequestTO;
@@ -158,6 +162,15 @@ public class MessagingCallReceiver implements com.mobicage.capi.messaging.IClien
         T.BIZZ();
         mPlugin.newMessage(Message.fromFormMessage(request.form_message.toJSONMap()), false, false);
         NewRangeSliderFormResponseTO response = new NewRangeSliderFormResponseTO();
+        response.received_timestamp = mMainService.currentTimeMillis() / 1000;
+        return response;
+    }
+
+    @Override
+    public NewFriendSelectFormResponseTO newFriendSelectForm(NewFriendSelectFormRequestTO request) throws Exception { 
+        T.BIZZ();
+        mPlugin.newMessage(Message.fromFormMessage(request.form_message.toJSONMap()), false, false);
+        NewFriendSelectFormResponseTO response = new NewFriendSelectFormResponseTO();
         response.received_timestamp = mMainService.currentTimeMillis() / 1000;
         return response;
     }
@@ -293,14 +306,27 @@ public class MessagingCallReceiver implements com.mobicage.capi.messaging.IClien
     }
 
     @Override
-    public UpdateSingleSelectFormResponseTO updateSingleSelectForm(UpdateSingleSelectFormRequestTO request)
-        throws Exception {
+    public UpdateFriendSelectFormResponseTO updateFriendSelectForm(UpdateFriendSelectFormRequestTO request)
+            throws Exception {
         T.BIZZ();
-        if (!mPlugin.getBrandingMgr().queueIfNeeded("com.mobicage.capi.messaging.updateSingleSelectForm", request,
-            request.message_key)) {
+        if (!mPlugin.getBrandingMgr().queueIfNeeded("com.mobicage.capi.messaging.updateFriendSelectForm", request,
+                request.message_key)) {
 
             mPlugin.updateForm(request.parent_message_key, request.message_key, request.result, request.button_id,
-                request.received_timestamp, request.acked_timestamp);
+                    request.received_timestamp, request.acked_timestamp);
+        }
+        return new UpdateFriendSelectFormResponseTO();
+    }
+
+    @Override
+    public UpdateSingleSelectFormResponseTO updateSingleSelectForm(UpdateSingleSelectFormRequestTO request)
+            throws Exception {
+        T.BIZZ();
+        if (!mPlugin.getBrandingMgr().queueIfNeeded("com.mobicage.capi.messaging.updateSingleSelectForm", request,
+                request.message_key)) {
+
+            mPlugin.updateForm(request.parent_message_key, request.message_key, request.result, request.button_id,
+                    request.received_timestamp, request.acked_timestamp);
         }
         return new UpdateSingleSelectFormResponseTO();
     }
