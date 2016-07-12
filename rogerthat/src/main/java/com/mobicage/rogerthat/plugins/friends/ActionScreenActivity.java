@@ -88,6 +88,7 @@ import com.mobicage.rogerthat.plugins.messaging.AttachmentViewerActivity;
 import com.mobicage.rogerthat.plugins.messaging.BrandingFailureException;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr.BrandingResult;
+import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.plugins.messaging.ServiceMessageDetailActivity;
 import com.mobicage.rogerthat.plugins.scan.GetUserInfoResponseHandler;
@@ -102,7 +103,6 @@ import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.system.TaggedWakeLock;
 import com.mobicage.rogerthat.util.ui.UIUtils;
-import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.rpc.newxmpp.XMPPKickChannel;
 import com.mobicage.to.friends.GetUserInfoRequestTO;
@@ -223,41 +223,11 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             } else if ("back/unregisterListener".equals(action)) {
                 mJavascriptBackBtnListener = false;
             } else if ("back/backPressedCallback".equals(action)) {
-                if (params == null) {
-                    L.w("Expected params != null");
-                    return;
-                }
-                if (mCurrentBackPressedId != null && mCurrentBackPressedId.equals(params.getString("requestId"))) {
-
-                    mCurrentBackPressedId = null;
-                    final boolean handled = "true".equalsIgnoreCase(params.getString("handled"));
-                    L.d("Javascript " + (handled ? "handled" : "did not handle") + " backPressed");
-                    if (!handled && !isFinishing()) {
-                        if (T.getThreadType() == T.UI) {
-                            finish();
-                        } else {
-                            mService.postAtFrontOfUIHandler(new SafeRunnable() {
-                                @Override
-                                protected void safeRun() throws Exception {
-                                    finish();
-                                }
-                            });
-                        }
-                    }
-                }
+                backPressedCallback(params);
             }
             // LOG
             else if ("log/".equals(action)) {
-                if (params == null) {
-                    L.w("Expected params != null");
-                    return;
-                }
-                final String e = params.getString("e");
-                if (e != null) {
-                    L.bug("ScreenBrandingException:\n- Exception logged by screenBranding of " + mServiceEmail
-                        + "\n- Service menu item name: " + mItemLabel + "\n- Service menu item coords: "
-                        + Arrays.toString(mItemCoords) + "\n" + e);
-                }
+                logError(params);
             }
             // API
             else if ("api/resultHandlerConfigured".equals(action)) {
@@ -266,179 +236,269 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             }
             // USER
             else if ("user/put".equals(action)) {
-                if (params == null) {
-                    L.w("Expected params != null");
-                    return;
-                }
-                mFriendsPlugin.putUserData(mServiceEmail, params.getString("u"));
+                putUserData(params);
             }
             // SERVICE
             else if ("service/getBeaconsInReach".equals(action)) {
-                if (params == null) {
-                    L.w("Expected params != null");
-                    return;
-                }
-                String requestId = params.getString("id");
-
-                TrackmePlugin trackmePlugin = mService.getPlugin(TrackmePlugin.class);
-                List<DiscoveredBeaconProximity> beaconsInReach = trackmePlugin.getBeaconsInReach(mServiceEmail);
-                Map<String, Object> result = new HashMap<String, Object>();
-                result.put("beacons", beaconsInReach);
-                deliverResult(requestId, result, null);
+                getBeaconsInReach(params);
             }
             // SYSTEM
             else if ("system/onBackendConnectivityChanged".equals(action)) {
-                if (params == null) {
-                    L.w("Expected params != null");
-                    return;
-                }
-                String requestId = params.getString("id");
-                Map<String, Object> result = new HashMap<String, Object>();
-                result.put("connected", mService.isBacklogConnected());
-                deliverResult(requestId, result, null);
-
-                if (!mIsListeningBacklogConnectivityChanged) {
-                    final IntentFilter intentFilter = new IntentFilter(XMPPKickChannel.INTENT_BACKLOG_CONNECTED);
-                    intentFilter.addAction(XMPPKickChannel.INTENT_BACKLOG_DISCONNECTED);
-                    registerReceiver(mBroadcastReceiverBacklog, intentFilter);
-                    mIsListeningBacklogConnectivityChanged = true;
-                }
+                onBackendConnectivityChanged(params);
             }
             // UTIL
             else if ("util/isConnectedToInternet".equals(action)) {
-                if (params == null) {
-                    L.w("Expected params != null");
-                    return;
-                }
-                String requestId = params.getString("id");
-                Map<String, Object> result = new HashMap<String, Object>();
-                boolean wifiConnected = mService.getNetworkConnectivityManager().isWifiConnected();
-                result.put("connectedToWifi", wifiConnected);
-                result.put("connected", wifiConnected
-                    || mService.getNetworkConnectivityManager().isMobileDataConnected());
-                deliverResult(requestId, result, null);
+                isConnectedToInternet(params);
             } else if ("util/playAudio".equals(action)) {
-                if (params == null) {
-                    L.w("Expected params != null");
-                    return;
-                }
-                String requestId = params.getString("id");
-                final String url = params.getString("url");
-                if (mSoundHandler == null) {
-                    Map<String, Object> error = new HashMap<String, Object>();
-                    error.put("exception", "playAudio is not supported in your app");
-                    deliverResult(requestId, null, error);
-                    return;
-                }
-
-                mSoundHandler.post(new SafeRunnable() {
-                    @Override
-                    protected void safeRun() throws Exception {
-                        if (mSoundMediaPlayer != null) {
-                            mSoundMediaPlayer.release();
-                        }
-                        mSoundMediaPlayer = new MediaPlayer();
-                        try {
-                            String fileOnDisk = "file://" + mBrandingResult.dir.getAbsolutePath() + "/" + url;
-                            mSoundMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                            mSoundMediaPlayer.setDataSource(fileOnDisk);
-                            mSoundMediaPlayer.setOnPreparedListener(new OnPreparedListener() {
-
-                                @Override
-                                public void onPrepared(MediaPlayer mp) {
-                                    mSoundMediaPlayer.start();
-                                }
-                            });
-                            mSoundMediaPlayer.prepare();
-                        } catch (Exception e) {
-                            L.i(e);
-                        }
-                    }
-                });
-                Map<String, Object> result = new HashMap<String, Object>();
-                deliverResult(requestId, result, null);
+                playAudio(params);
+            }
+            // MESSAGING
+            else if ("message/open".equals(action)) {
+                openMessage(params);
             }
             // CAMERA
             else if ("camera/startScanningQrCode".equals(action)) {
-                if (params == null) {
-                    L.w("Expected params != null");
-                    return;
-                }
-                String requestId = params.getString("id");
-                String cameraType = params.getString("camera_type");
-                if (mQRCodeScanner == null) {
-                    Map<String, Object> error = new HashMap<String, Object>();
-                    error.put("exception", "startScanningQrCode is not supported in your app");
-                    deliverResult(requestId, null, error);
-                    return;
-                }
+                startScanningQrCode(params);
+            } else if ("camera/stopScanningQrCode".equals(action)) {
+                stopScanningQrCode(params);
+            } else {
+                L.d("Invoke did not handle any function");
+            }
+        }
 
-                if (!QRCodeScanner.CAMERA_TYPES.contains(cameraType)) {
-                    Map<String, Object> error = new HashMap<String, Object>();
-                    error.put("exception", "Unsupported camera type");
-                    deliverResult(requestId, null, error);
-                    return;
-                }
+        private void putUserData(JSONObject params) throws JSONException {
+            if (params == null) {
+                L.w("Expected params != null");
+                return;
+            }
+            mFriendsPlugin.putUserData(mServiceEmail, params.getString("u"));
+        }
 
-                if (mQRCodeScanner.cameraManager.isOpen()) {
-                    Map<String, Object> error = new HashMap<String, Object>();
-                    error.put("exception", "Camera was already open");
-                    deliverResult(requestId, null, error);
-                    return;
-                }
+        private void getBeaconsInReach(JSONObject params) throws JSONException {
+            if (params == null) {
+                L.w("Expected params != null");
+                return;
+            }
+            String requestId = params.getString("id");
 
-                if (Camera.getNumberOfCameras() == 1) {
+            TrackmePlugin trackmePlugin = mService.getPlugin(TrackmePlugin.class);
+            List<DiscoveredBeaconProximity> beaconsInReach = trackmePlugin.getBeaconsInReach(mServiceEmail);
+            Map<String, Object> result = new HashMap<String, Object>();
+            result.put("beacons", beaconsInReach);
+            deliverResult(requestId, result, null);
+        }
+
+        private void onBackendConnectivityChanged(JSONObject params) throws JSONException {
+            if (params == null) {
+                L.w("Expected params != null");
+                return;
+            }
+            String requestId = params.getString("id");
+            Map<String, Object> result = new HashMap<String, Object>();
+            result.put("connected", mService.isBacklogConnected());
+            deliverResult(requestId, result, null);
+
+            if (!mIsListeningBacklogConnectivityChanged) {
+                final IntentFilter intentFilter = new IntentFilter(XMPPKickChannel.INTENT_BACKLOG_CONNECTED);
+                intentFilter.addAction(XMPPKickChannel.INTENT_BACKLOG_DISCONNECTED);
+                registerReceiver(mBroadcastReceiverBacklog, intentFilter);
+                mIsListeningBacklogConnectivityChanged = true;
+            }
+        }
+
+        private void isConnectedToInternet(JSONObject params) throws JSONException {
+            if (params == null) {
+                L.w("Expected params != null");
+                return;
+            }
+            String requestId = params.getString("id");
+            Map<String, Object> result = new HashMap<String, Object>();
+            boolean wifiConnected = mService.getNetworkConnectivityManager().isWifiConnected();
+            result.put("connectedToWifi", wifiConnected);
+            result.put("connected", wifiConnected
+                    || mService.getNetworkConnectivityManager().isMobileDataConnected());
+            deliverResult(requestId, result, null);
+        }
+
+        private void logError(JSONObject params) throws JSONException {
+            if (params == null) {
+                L.w("Expected params != null");
+                return;
+            }
+            final String e = params.getString("e");
+            if (e != null) {
+                L.bug("ScreenBrandingException:\n- Exception logged by screenBranding of " + mServiceEmail
+                        + "\n- Service menu item name: " + mItemLabel + "\n- Service menu item coords: "
+                        + Arrays.toString(mItemCoords) + "\n" + e);
+            }
+        }
+
+        private void backPressedCallback(JSONObject params) throws JSONException {
+            if (params == null) {
+                L.w("Expected params != null");
+                return;
+            }
+            if (mCurrentBackPressedId != null && mCurrentBackPressedId.equals(params.getString("requestId"))) {
+
+                mCurrentBackPressedId = null;
+                final boolean handled = "true".equalsIgnoreCase(params.getString("handled"));
+                L.d("Javascript " + (handled ? "handled" : "did not handle") + " backPressed");
+                if (!handled && !isFinishing()) {
+                    if (T.getThreadType() == T.UI) {
+                        finish();
+                    } else {
+                        mService.postAtFrontOfUIHandler(new SafeRunnable() {
+                            @Override
+                            protected void safeRun() throws Exception {
+                                finish();
+                            }
+                        });
+                    }
+                }
+            }
+        }
+
+        private void startScanningQrCode(JSONObject params) throws JSONException {
+            if (params == null) {
+                L.w("Expected params != null");
+                return;
+            }
+            String requestId = params.getString("id");
+            String cameraType = params.getString("camera_type");
+            if (mQRCodeScanner == null) {
+                Map<String, Object> error = new HashMap<String, Object>();
+                error.put("exception", "startScanningQrCode is not supported in your app");
+                deliverResult(requestId, null, error);
+                return;
+            }
+
+            if (!QRCodeScanner.CAMERA_TYPES.contains(cameraType)) {
+                Map<String, Object> error = new HashMap<String, Object>();
+                error.put("exception", "Unsupported camera type");
+                deliverResult(requestId, null, error);
+                return;
+            }
+
+            if (mQRCodeScanner.cameraManager.isOpen()) {
+                Map<String, Object> error = new HashMap<String, Object>();
+                error.put("exception", "Camera was already open");
+                deliverResult(requestId, null, error);
+                return;
+            }
+
+            if (Camera.getNumberOfCameras() == 1) {
+                mQRCodeScanner.currentCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
+            } else {
+                if (mQRCodeScanner.CAMERA_TYPE_BACK.equals(cameraType)) {
                     mQRCodeScanner.currentCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
                 } else {
-                    if (mQRCodeScanner.CAMERA_TYPE_BACK.equals(cameraType)) {
-                        mQRCodeScanner.currentCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
-                    } else {
-                        mQRCodeScanner.currentCameraId = Camera.CameraInfo.CAMERA_FACING_FRONT;
-                    }
+                    mQRCodeScanner.currentCameraId = Camera.CameraInfo.CAMERA_FACING_FRONT;
                 }
-
-                if (mQRCodeScanner.hasSurface == true
-                    && (mQRCodeScanner.surfaceHolder != null || mQRCodeScanner.surfaceTexture != null)) {
-                    if (mBranding.getVisibility() == View.VISIBLE) {
-                        if (T.getThreadType() == T.UI) {
-                            mQRCodeScanner.startScanningForQRCodes();
-                        } else {
-                            mService.postAtFrontOfUIHandler(new SafeRunnable() {
-                                @Override
-                                protected void safeRun() throws Exception {
-                                    mQRCodeScanner.startScanningForQRCodes();
-                                }
-                            });
-                        }
-                    }
-                }
-                deliverResult(requestId, null, null);
-            } else if ("camera/stopScanningQrCode".equals(action)) {
-                if (params == null) {
-                    L.w("Expected params != null");
-                    return;
-                }
-                String requestId = params.getString("id");
-                String cameraType = params.getString("camera_type");
-                if (mQRCodeScanner == null) {
-                    Map<String, Object> error = new HashMap<String, Object>();
-                    error.put("exception", "stopScanningQrCode is not supported in your app");
-                    deliverResult(requestId, null, error);
-                    return;
-                }
-
-                if (!QRCodeScanner.CAMERA_TYPES.contains(cameraType)) {
-                    Map<String, Object> error = new HashMap<String, Object>();
-                    error.put("exception", "Unsupported camera type");
-                    deliverResult(requestId, null, error);
-                    return;
-                }
-                mQRCodeScanner.stopScanningForQRCodes();
-                deliverResult(requestId, null, null);
-
-            } else {
-                L.d("Invoke did not handled any function");
             }
+
+            if (mQRCodeScanner.hasSurface == true
+                    && (mQRCodeScanner.surfaceHolder != null || mQRCodeScanner.surfaceTexture != null)) {
+                if (mBranding.getVisibility() == View.VISIBLE) {
+                    if (T.getThreadType() == T.UI) {
+                        mQRCodeScanner.startScanningForQRCodes();
+                    } else {
+                        mService.postAtFrontOfUIHandler(new SafeRunnable() {
+                            @Override
+                            protected void safeRun() throws Exception {
+                                mQRCodeScanner.startScanningForQRCodes();
+                            }
+                        });
+                    }
+                }
+            }
+            deliverResult(requestId, null, null);
+        }
+
+        private void stopScanningQrCode(JSONObject params) throws JSONException {
+            if (params == null) {
+                L.w("Expected params != null");
+                return;
+            }
+            String requestId = params.getString("id");
+            String cameraType = params.getString("camera_type");
+            if (mQRCodeScanner == null) {
+                Map<String, Object> error = new HashMap<String, Object>();
+                error.put("exception", "stopScanningQrCode is not supported in your app");
+                deliverResult(requestId, null, error);
+                return;
+            }
+
+            if (!QRCodeScanner.CAMERA_TYPES.contains(cameraType)) {
+                Map<String, Object> error = new HashMap<String, Object>();
+                error.put("exception", "Unsupported camera type");
+                deliverResult(requestId, null, error);
+                return;
+            }
+            mQRCodeScanner.stopScanningForQRCodes();
+            deliverResult(requestId, null, null);
+        }
+
+        private void playAudio(JSONObject params) throws JSONException {
+            if (params == null) {
+                L.w("Expected params != null");
+                return;
+            }
+            String requestId = params.getString("id");
+            final String url = params.getString("url");
+            if (mSoundHandler == null) {
+                Map<String, Object> error = new HashMap<String, Object>();
+                error.put("exception", "playAudio is not supported in your app");
+                deliverResult(requestId, null, error);
+                return;
+            }
+
+            mSoundHandler.post(new SafeRunnable() {
+                @Override
+                protected void safeRun() throws Exception {
+                    if (mSoundMediaPlayer != null) {
+                        mSoundMediaPlayer.release();
+                    }
+                    mSoundMediaPlayer = new MediaPlayer();
+                    try {
+                        String fileOnDisk = "file://" + mBrandingResult.dir.getAbsolutePath() + "/" + url;
+                        mSoundMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                        mSoundMediaPlayer.setDataSource(fileOnDisk);
+                        mSoundMediaPlayer.setOnPreparedListener(new OnPreparedListener() {
+
+                            @Override
+                            public void onPrepared(MediaPlayer mp) {
+                                mSoundMediaPlayer.start();
+                            }
+                        });
+                        mSoundMediaPlayer.prepare();
+                    } catch (Exception e) {
+                        L.i(e);
+                    }
+                }
+            });
+            Map<String, Object> result = new HashMap<String, Object>();
+            deliverResult(requestId, result, null);
+        }
+
+        private void openMessage(final JSONObject params) throws JSONException {
+            T.UI();
+            if (params == null) {
+                L.w("Expected params != null");
+                return;
+            }
+            final String requestId = params.getString("id");
+            final String messageKey = params.getString("message_key");
+
+            final Message message = mMessagingPlugin.getStore().getMessageByKey(messageKey, true);
+            Map<String, Object> error = null;
+            if (message == null) {
+                error = new HashMap<>();
+                error.put("type", "MessageNotFound");
+            } else {
+                mMessagingPlugin.showMessage(ActionScreenActivity.this, message, null);
+            }
+
+            deliverResult(requestId, null, error);
         }
     }
 
@@ -760,6 +820,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
     }
 
     private void deliverResult(String requestId, Map<String, Object> result, Map<String, Object> error) {
+        T.dontCare();
         executeJS(false, "if (typeof rogerthat !== 'undefined') rogerthat._setResult('%s', %s, %s)", requestId,
             JSONValue.toJSONString(result), JSONValue.toJSONString(error));
     }
