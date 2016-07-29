@@ -47,6 +47,7 @@ import org.mozilla.javascript.UniqueTag;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainService;
@@ -239,7 +240,10 @@ public class JsMfr {
             Map<String, Object> info = friendsPlugin.getRogerthatUserAndServiceInfo(serviceEmail, serviceFriend);
             state.put("user", info.get("user"));
             state.put("service", info.get("service"));
-            state.put("system", info.get("system"));
+
+            final Map<String, Object> system = (Map<String, Object>) info.get("system");
+            system.put("internet", getInternetInfoMap(mainService));
+            state.put("system", system);
         } else if (!state.containsKey("user")) {
             Map<String, Object> empty = new HashMap<String, Object>();
             state.put("user", empty);
@@ -383,8 +387,6 @@ public class JsMfr {
                 throw new JsMfrError(errName, errMessage, errStack);
             }
 
-        } catch (JsMfrError e) {
-            handleException(e, tag);
         } catch (Exception e) {
             handleException(e, tag);
         }
@@ -406,7 +408,10 @@ public class JsMfr {
             Map<String, Object> info = friendsPlugin.getRogerthatUserAndServiceInfo(serviceEmail, serviceFriend);
             rt.put("user", info.get("user"));
             rt.put("service", info.get("service"));
-            rt.put("system", info.get("system"));
+
+            final Map<String, Object> system = (Map<String, Object>) info.get("system");
+            system.put("internet", getInternetInfoMap(mainService));
+            rt.put("system", system);
         } else {
             rt.put("user", null);
             rt.put("service", null);
@@ -467,6 +472,17 @@ public class JsMfr {
         }
 
         return null;
+    }
+
+    @NonNull
+    private static Map<String, Object> getInternetInfoMap(MainService mainService) {
+        final boolean isWifiConnected = mainService.getNetworkConnectivityManager().isWifiConnected();
+        final boolean isConnected = isWifiConnected || mainService.getNetworkConnectivityManager()
+                .isConnected();
+        final Map<String, Object> internet = new HashMap<>();
+        internet.put("connected", isConnected);
+        internet.put("wifi", isWifiConnected);
+        return internet;
     }
 
     String processJavascriptFormResultValidationResult(final JSONObject result, final JsMfrWebviewTag tag) {
