@@ -240,15 +240,17 @@ public class JsMfr {
             Map<String, Object> info = friendsPlugin.getRogerthatUserAndServiceInfo(serviceEmail, serviceFriend);
             state.put("user", info.get("user"));
             state.put("service", info.get("service"));
-
-            final Map<String, Object> system = (Map<String, Object>) info.get("system");
-            system.put("internet", getInternetInfoMap(mainService));
-            state.put("system", system);
+            state.put("system", info.get("system"));
         } else if (!state.containsKey("user")) {
             Map<String, Object> empty = new HashMap<String, Object>();
             state.put("user", empty);
             state.put("service", empty);
             state.put("system", empty);
+        }
+
+        Map<String, Object> system = (Map<String, Object>) state.get("system");
+        if (system != null) {
+            system.put("internet", getInternetInfoMap(mainService));
         }
 
         final JSONObject ui = (JSONObject) JSONValue.parse(JSONValue.toJSONString(userInput));
