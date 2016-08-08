@@ -692,7 +692,11 @@ public class ActionScreenActivity extends ServiceBoundActivity {
 
             @Override
             public WebResourceResponse shouldInterceptRequest (WebView view, String url) {
-                L.i("Checking access to: '" + url + "'");
+                L.i("Intercepting request: " + url);
+                if (url.startsWith("data:")) {
+                    return null;
+                }
+
                 final URL parsedUrl;
                 try {
                      parsedUrl = new URL(url);
