@@ -50,6 +50,7 @@ public abstract class Widget extends LinearLayout {
     public static final String TYPE_GPS_LOCATION = "gps_location";
     public static final String TYPE_MYDIGIPASS = "mydigipass";
     public static final String TYPE_ADVANCED_ORDER = "advanced_order";
+    public static final String TYPE_SIGN= "sign";
     // Do not forget to update the valueString function when adding a form type
 
     public final static Map<String, Integer> RESOURCES;
@@ -69,6 +70,7 @@ public abstract class Widget extends LinearLayout {
         RESOURCES.put(TYPE_GPS_LOCATION, R.layout.widget_gps_location);
         RESOURCES.put(TYPE_MYDIGIPASS, R.layout.widget_mydigipass);
         RESOURCES.put(TYPE_ADVANCED_ORDER, R.layout.widget_advanced_order);
+        RESOURCES.put(TYPE_SIGN, R.layout.widget_sign);
     }
 
     protected Message mMessage;
@@ -86,11 +88,6 @@ public abstract class Widget extends LinearLayout {
     public Widget(Context context) {
         super(context);
         setColorScheme(BrandingMgr.ColorScheme.LIGHT);
-    }
-
-    public Map<String, Object> getWidgetMap() {
-        putValue();
-        return mWidgetMap;
     }
 
     public void setColorScheme(BrandingMgr.ColorScheme colorScheme) {
@@ -115,7 +112,7 @@ public abstract class Widget extends LinearLayout {
 
     public abstract void putValue();
 
-    public abstract IJSONable getFormResult();
+    public abstract IJSONable getWidgetResult();
 
     public boolean proceedWithSubmit(final String buttonId) {
         return true;

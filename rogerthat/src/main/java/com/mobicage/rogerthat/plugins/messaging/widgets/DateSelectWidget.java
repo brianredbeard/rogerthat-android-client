@@ -288,7 +288,7 @@ public class DateSelectWidget extends Widget {
     }
 
     @Override
-    public LongWidgetResultTO getFormResult() {
+    public LongWidgetResultTO getWidgetResult() {
         final LongWidgetResultTO result = new LongWidgetResultTO();
         result.value = (Long) mWidgetMap.get("date");
         return result;
@@ -303,7 +303,7 @@ public class DateSelectWidget extends Widget {
         request.parent_message_key = mMessage.parent_key;
         request.timestamp = timestamp;
         if (Message.POSITIVE.equals(buttonId)) {
-            request.result = getFormResult();
+            request.result = getWidgetResult();
         }
         if ((mMessage.flags & MessagingPlugin.FLAG_SENT_BY_JSMFR) == MessagingPlugin.FLAG_SENT_BY_JSMFR)
             mPlugin.answerJsMfrMessage(mMessage, request.toJSONMap(),

@@ -125,7 +125,7 @@ public abstract class ServiceBoundMapActivity extends MapActivity implements Pau
         doUnbindService();
     }
 
-    protected void showTransmitting(SafeRunnable onTimeout) {
+    public void showTransmitting(SafeRunnable onTimeout) {
         T.UI();
         mTransmitTimeoutRunnable = onTimeout;
         mTransmitStart = System.currentTimeMillis();
@@ -134,12 +134,12 @@ public abstract class ServiceBoundMapActivity extends MapActivity implements Pau
         mService.postDelayedOnUIHandler(mIncreaseProgress, 100);
     }
 
-    protected boolean isTransmitting() {
+    public boolean isTransmitting() {
         T.UI();
         return mTransmitProgressDialog.isShowing();
     }
 
-    protected void completeTransmit(final SafeRunnable afterComplete) {
+    public void completeTransmit(final SafeRunnable afterComplete) {
         T.UI();
         mTransmitProgressDialog.dismiss();
         mService.removeFromUIHandler(mIncreaseProgress);
@@ -172,7 +172,7 @@ public abstract class ServiceBoundMapActivity extends MapActivity implements Pau
         }
     };
 
-    protected void showActionScheduledDialog() {
+    public void showActionScheduledDialog() {
         new AlertDialog.Builder(ServiceBoundMapActivity.this).setMessage(R.string.action_scheduled)
             .setPositiveButton(R.string.rogerthat, new DialogInterface.OnClickListener() {
                 @Override
@@ -184,12 +184,12 @@ public abstract class ServiceBoundMapActivity extends MapActivity implements Pau
             }).create().show();
     }
 
-    protected boolean checkConnectivity() {
+    public boolean checkConnectivity() {
         NetworkInfo activeNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
     }
 
-    protected boolean checkConnectivityIsWifi() {
+    public boolean checkConnectivityIsWifi() {
         return mService.getNetworkConnectivityManager().isWifiConnected();
     }
 

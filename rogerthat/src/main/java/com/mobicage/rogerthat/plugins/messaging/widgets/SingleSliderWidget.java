@@ -105,7 +105,7 @@ public class SingleSliderWidget extends Widget implements SeekBar.OnSeekBarChang
     }
 
     @Override
-    public FloatWidgetResultTO getFormResult() {
+    public FloatWidgetResultTO getWidgetResult() {
         FloatWidgetResultTO r = new FloatWidgetResultTO();
         Number value = (Number) mWidgetMap.get("value");
         r.value = value.floatValue();
@@ -120,7 +120,7 @@ public class SingleSliderWidget extends Widget implements SeekBar.OnSeekBarChang
         request.parent_message_key = mMessage.parent_key;
         request.timestamp = timestamp;
         if (Message.POSITIVE.equals(buttonId)) {
-            request.result = getFormResult();
+            request.result = getWidgetResult();
         }
         if ((mMessage.flags & MessagingPlugin.FLAG_SENT_BY_JSMFR) == MessagingPlugin.FLAG_SENT_BY_JSMFR)
             mPlugin.answerJsMfrMessage(mMessage, request.toJSONMap(),

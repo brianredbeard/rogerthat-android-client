@@ -30,6 +30,7 @@ import android.widget.TextView;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.history.HistoryListActivity;
 import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
+import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
@@ -80,9 +81,10 @@ public class MoreActivity extends ServiceBoundActivity {
 
         public static final int FRIENDS_ACTIVITY = 0;
         public static final int PROFILE_ACTIVITY = 1;
-        public static final int SETTINGS_ACTIVITY = 2;
-        public static final int ABOUT_ACTIVITY = 3;
-        public static final int STREAM_ACTIVITY = 4;
+        public static final int SCAN_ACTIVITY = 2;
+        public static final int SETTINGS_ACTIVITY = 3;
+        public static final int ABOUT_ACTIVITY = 4;
+        public static final int STREAM_ACTIVITY = 5;
 
         public MoreListAdapter() {
         }
@@ -95,6 +97,9 @@ public class MoreActivity extends ServiceBoundActivity {
                 mNumRows -= 1;
 
             if (!AppConstants.SHOW_PROFILE_IN_MORE)
+                mNumRows -= 1;
+
+            if (!AppConstants.SHOW_SCAN_IN_MORE)
                 mNumRows -= 1;
 
             return mNumRows;
@@ -146,6 +151,9 @@ public class MoreActivity extends ServiceBoundActivity {
                 row += 1;
                 if (!AppConstants.SHOW_PROFILE_IN_MORE) {
                     row += 1;
+                    if (!AppConstants.SHOW_SCAN_IN_MORE) {
+                        row += 1;
+                    }
                 }
             }
         } else {
@@ -153,6 +161,9 @@ public class MoreActivity extends ServiceBoundActivity {
                 row += 1;
             }
             if (!AppConstants.SHOW_PROFILE_IN_MORE) {
+                row += 1;
+            }
+            if (!AppConstants.SHOW_SCAN_IN_MORE) {
                 row += 1;
             }
         }
@@ -231,6 +242,18 @@ public class MoreActivity extends ServiceBoundActivity {
                 @Override
                 public void onClick(View v) {
                     final Intent launchIntent = new Intent(MoreActivity.this, ProfileActivity.class);
+                    startActivity(launchIntent);
+                }
+            });
+
+        } else if (position == MoreListAdapter.SCAN_ACTIVITY) {
+            holder.itemAvatar.setImageResource(R.drawable.more_qrcode);
+            holder.itemName.setText(R.string.scan);
+
+            v.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    final Intent launchIntent = new Intent(MoreActivity.this, ScanTabActivity.class);
                     startActivity(launchIntent);
                 }
             });

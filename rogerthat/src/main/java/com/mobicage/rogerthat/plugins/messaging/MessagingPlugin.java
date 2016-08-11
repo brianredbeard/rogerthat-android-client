@@ -26,6 +26,7 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -354,10 +355,6 @@ public class MessagingPlugin implements MobicagePlugin {
         updateMessagesNotification(false, false, false);
     }
 
-    public void showMessage(Context context, Message message, String memberFilter) {
-        showMessage(context, message, false, memberFilter);
-    }
-
     private boolean isHumanThread(Message message, int friendType, FriendsPlugin friendsPlugin) {
         // I sent this msg or a human user sent this msg or a human started the
         // thread
@@ -376,7 +373,16 @@ public class MessagingPlugin implements MobicagePlugin {
         return false;
     }
 
+    public void showMessage(Context context, Message message, String memberFilter) {
+        showMessage(context, message, false, memberFilter);
+    }
+
     public void showMessage(Context context, Message message, boolean detail, String memberFilter) {
+        showMessage(context, message, detail, memberFilter, true);
+    }
+
+    public void showMessage(Context context, Message message, boolean detail, String memberFilter, boolean
+            jumpToServiceHomeScreenWhenFinished) {
         if (isTmpKey(message.key) && message.parent_key == null)
             UIUtils.showLongToast(context, context.getString(R.string.message_not_on_server));
         else {
@@ -402,6 +408,8 @@ public class MessagingPlugin implements MobicagePlugin {
                 if (detail || message.dirty || message.needsMyAnswer || message.replyCount == 1) {
                     final Intent intent = new Intent(context, ServiceMessageDetailActivity.class);
                     intent.putExtra("message", message.key);
+                    intent.putExtra(ServiceMessageDetailActivity.JUMP_TO_SERVICE_HOME_SCREEN,
+                            jumpToServiceHomeScreenWhenFinished);
                     intent.putExtra(MEMBER_FILTER, memberFilter);
                     context.startActivity(intent);
 
@@ -555,9 +563,14 @@ public class MessagingPlugin implements MobicagePlugin {
                 buttonAction = Intent.ACTION_VIEW;
                 buttonUrl = ANDROID_MAILTO_PREFIX + button.action.substring(Message.MC_MAILTO_PREFIX.length());
 
-            } else if (button.action.startsWith(Message.MC_CONFIRM_PREFIX)) {
-                buttonAction = Message.MC_CONFIRM_PREFIX;
-                buttonUrl = button.action.substring(Message.MC_CONFIRM_PREFIX.length());
+            } else {
+                for (final String prefix : new String[]{Message.MC_CONFIRM_PREFIX, Message.MC_SMI_PREFIX}) {
+                    if (button.action.startsWith(prefix)) {
+                        buttonAction = prefix;
+                        buttonUrl = button.action.substring(prefix.length());
+                        break;
+                    }
+                }
             }
         }
 
@@ -1876,15 +1889,13 @@ public class MessagingPlugin implements MobicagePlugin {
 
     private void transferQueueLoad() {
         T.BIZZ();
-        mTransferQueue = new ArrayList<String>();
+        mTransferQueue = new ArrayList<>();
         Configuration cfg = mConfigProvider.getConfiguration(TRANSFER_UPLOAD_CONFIGKEY);
 
         String serializedTransferQueue = cfg.get(TRANSFER_PHOTO_UPLOAD_CONFIGKEY, "");
         if (!"".equals(serializedTransferQueue)) {
             try {
-                for (String messageKey : serializedTransferQueue.split(";")) {
-                    mTransferQueue.add(messageKey);
-                }
+                Collections.addAll(mTransferQueue, serializedTransferQueue.split(";"));
             } catch (Exception e) {
                 L.bug(e);
             }
@@ -1942,9 +1953,7 @@ public class MessagingPlugin implements MobicagePlugin {
 
     public File attachmentTreadDir(String threadKey) throws IOException {
         File file = IOUtils.getFilesDirectory(mMainService);
-        createDirIfNotExists(file);
         file = new File(file, "attachments");
-        createDirIfNotExists(file);
         file = new File(file, threadKey);
         createDirIfNotExists(file);
         return file;
@@ -1967,10 +1976,15 @@ public class MessagingPlugin implements MobicagePlugin {
         return file.exists();
     }
 
+    public File attachmentFile(Message message, AttachmentTO attachment) throws IOException {
+        return new File(attachmentsDir(message.getThreadKey(), message.key), attachmentDownloadUrlHash(attachment
+                .download_url));
+    }
+
     private void createDirIfNotExists(File file) throws IOException {
         T.dontCare();
         if (!file.exists()) {
-            if (!file.mkdir())
+            if (!file.mkdirs())
                 throw new IOException(mMainService.getString(R.string.failed_to_create_directory,
                     file.getAbsolutePath()));
         }

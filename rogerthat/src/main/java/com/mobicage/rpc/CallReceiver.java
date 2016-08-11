@@ -94,6 +94,9 @@ public class CallReceiver {
         if ("com.mobicage.capi.messaging.newRangeSliderForm".equals(function)) {
             return comMobicageCapiMessagingIClientRpc.newRangeSliderForm(Parser.ComMobicageToMessagingFormsNewRangeSliderFormRequestTO(call.arguments.get("request")));
         }
+        if ("com.mobicage.capi.messaging.newSignForm".equals(function)) {
+            return comMobicageCapiMessagingIClientRpc.newSignForm(Parser.ComMobicageToMessagingFormsNewSignFormRequestTO(call.arguments.get("request")));
+        }
         if ("com.mobicage.capi.messaging.newSingleSelectForm".equals(function)) {
             return comMobicageCapiMessagingIClientRpc.newSingleSelectForm(Parser.ComMobicageToMessagingFormsNewSingleSelectFormRequestTO(call.arguments.get("request")));
         }
@@ -144,6 +147,9 @@ public class CallReceiver {
         }
         if ("com.mobicage.capi.messaging.updateRangeSliderForm".equals(function)) {
             return comMobicageCapiMessagingIClientRpc.updateRangeSliderForm(Parser.ComMobicageToMessagingFormsUpdateRangeSliderFormRequestTO(call.arguments.get("request")));
+        }
+        if ("com.mobicage.capi.messaging.updateSignForm".equals(function)) {
+            return comMobicageCapiMessagingIClientRpc.updateSignForm(Parser.ComMobicageToMessagingFormsUpdateSignFormRequestTO(call.arguments.get("request")));
         }
         if ("com.mobicage.capi.messaging.updateSingleSelectForm".equals(function)) {
             return comMobicageCapiMessagingIClientRpc.updateSingleSelectForm(Parser.ComMobicageToMessagingFormsUpdateSingleSelectFormRequestTO(call.arguments.get("request")));

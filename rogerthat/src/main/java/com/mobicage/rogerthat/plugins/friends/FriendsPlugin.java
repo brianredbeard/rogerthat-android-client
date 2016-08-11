@@ -67,7 +67,6 @@ import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.ResponseHandler;
-import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.to.friends.AckInvitationByInvitationSecretRequestTO;
 import com.mobicage.to.friends.AckInvitationByInvitationSecretResponseTO;
@@ -117,6 +116,8 @@ import com.mobicage.to.service.UpdateUserDataResponseTO;
 import com.mobicage.to.system.EditProfileRequestTO;
 import com.mobicage.to.system.EditProfileResponseTO;
 import com.mobicage.to.system.IdentityTO;
+import com.mobicage.to.system.SetSecureInfoRequestTO;
+import com.mobicage.to.system.SetSecureInfoResponseTO;
 import com.mobicage.to.system.SettingsTO;
 
 public class FriendsPlugin implements MobicagePlugin {
@@ -1264,10 +1265,6 @@ public class FriendsPlugin implements MobicagePlugin {
         }
     }
 
-    public FriendBroadcastInfo getFriendBroadcastFlowForMfr(String email) {
-        return mStore.getFriendBroadcastFlowForMfr(email);
-    }
-
     public boolean requestGroups() {
         T.dontCare();
         GetGroupsRequestTO request = new GetGroupsRequestTO();
@@ -1327,6 +1324,17 @@ public class FriendsPlugin implements MobicagePlugin {
         }
 
         return true;
+    }
+
+    public void setSecureInfo(final String publicKey) {
+        T.dontCare();
+        SetSecureInfoRequestTO request = new SetSecureInfoRequestTO();
+        request.public_key = publicKey;
+        try {
+            com.mobicage.api.system.Rpc.setSecureInfo(new ResponseHandler<SetSecureInfoResponseTO>(), request);
+        } catch (Exception e) {
+            L.bug("Failed to send SetSecureInfoRequestTO", e);
+        }
     }
 
     public Bitmap toFriendBitmap(byte[] bitmapBytes) {

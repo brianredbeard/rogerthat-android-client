@@ -20,16 +20,27 @@ package com.mobicage.rogerthat;
 
 import java.io.File;
 import java.io.FileReader;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.altbeacon.beacon.BeaconConsumer;
+import org.jivesoftware.smack.util.Base64;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -58,6 +69,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.SparseIntArray;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.config.Configuration;
@@ -72,6 +84,8 @@ import com.mobicage.rogerthat.plugins.trackme.TrackmePlugin;
 import com.mobicage.rogerthat.upgrade.Upgrader;
 import com.mobicage.rogerthat.util.CachedDownloader;
 import com.mobicage.rogerthat.util.GoogleServicesUtils;
+import com.mobicage.rogerthat.util.Security;
+import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.db.DatabaseManager;
 import com.mobicage.rogerthat.util.geo.GeoLocationProvider;
 import com.mobicage.rogerthat.util.logging.L;
@@ -85,13 +99,16 @@ import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.CallReceiver;
 import com.mobicage.rpc.Credentials;
 import com.mobicage.rpc.DefaultRpcHandler;
+import com.mobicage.rpc.IJSONable;
 import com.mobicage.rpc.IRequestSubmitter;
 import com.mobicage.rpc.IResponseHandler;
 import com.mobicage.rpc.PriorityMap;
 import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.rpc.Rpc;
+import com.mobicage.rpc.RpcCall;
 import com.mobicage.rpc.SDCardLogger;
 import com.mobicage.rpc.SaveSettingsResponseHandler;
+import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.rpc.http.HttpBacklog;
 import com.mobicage.rpc.http.HttpBacklogItem;
@@ -221,6 +238,12 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
     private boolean mMustWipePersistenceInOnDestroy = false; // UI thread
 
     private boolean mScreenIsOn = false;
+
+    private final List<SecurityItem> mQueue = Collections.synchronizedList(new ArrayList<SecurityItem>());
+    private PrivateKey mPrivateKey;
+    private PublicKey mPublicKey;
+    private boolean mEnterPinActivityActive = false;
+    private boolean mShouldClearPrivateKey = false;
 
     // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1075,7 +1098,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
 
     private void showUnregisterNotification() {
         T.UI();
-        UIUtils.showLongToast(this, getString(R.string.device_was_unregistered, getString(R.string.app_name)));
+        UIUtils.showLongToast(this, getString(R.string.device_was_unregistered));
     }
 
     private void setupSystemRPC() {
@@ -1186,6 +1209,72 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
 
     private void hideLogForwardNotification() {
         UIUtils.cancelNotification(MainService.this, R.integer.forwarding_logs);
+    }
+
+    public void processExceptionViaHTTP(Exception ex) {
+        if (CloudConstants.DEBUG_LOGGING) {
+            L.e("processExceptionViaHTTP", ex);
+        }
+
+        final JSONObject error = new JSONObject();
+        error.put("description", "processExceptionViaHTTP");
+        error.put("language", Locale.getDefault().getLanguage());
+        error.put("country", Locale.getDefault().getCountry());
+        error.put("platform", "1");
+        error.put("timestamp", "" + System.currentTimeMillis() / 1000);
+
+        try {
+            error.put("error_message", L.getStackTraceString(ex));
+        } catch (Throwable t) {
+            if (CloudConstants.DEBUG_LOGGING) {
+                L.e(t);
+            }
+            try {
+                error.put("error_message", "Failed to get stacktrace of exception: " + ex);
+            } catch (Throwable t2) { // too bad... just ignore
+                if (CloudConstants.DEBUG_LOGGING) {
+                    L.e(t2);
+                }
+            }
+        }
+
+        try {
+            error.put("device_id", Installation.id(this));
+        } catch (Throwable t) { // too bad... just ignore
+            if (CloudConstants.DEBUG_LOGGING) {
+                L.e(t);
+            }
+        }
+
+        try {
+            error.put("platform_version", "" + SystemUtils.getAndroidVersion());
+        } catch (Throwable t) { // too bad... just ignore
+            if (CloudConstants.DEBUG_LOGGING) {
+                L.e(t);
+            }
+        }
+
+        try {
+            error.put("mobicage_version", getVersion(this));
+        } catch (Throwable t) { // too bad... just ignore
+            if (CloudConstants.DEBUG_LOGGING) {
+                L.e(t);
+            }
+        }
+
+        new SafeAsyncTask<Object, Object, Object>() {
+            @Override
+            protected Object safeDoInBackground(Object... params) {
+                try {
+                    App.logErrorToServer(error);
+                } catch (Exception e) {
+                    L.e(e);
+                    return null;
+                }
+                return null;
+            }
+
+        }.execute();
     }
 
     private void processUncaughtExceptions(boolean isRegistered) {
@@ -1498,4 +1587,191 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         return granted;
     }
 
+    private static class SecurityItem {
+
+        public final String uid;
+        public final String message;
+        public final byte[] payload;
+        public final boolean forcePin;
+        public final SecurityCallback<byte[]> callback;
+        public boolean active;
+
+        public SecurityItem(String message, byte[] payload, boolean forcePin, boolean active, final SecurityCallback<byte[]> callback) {
+            this.uid = UUID.randomUUID().toString();
+            this.message = message;
+            this.payload = payload;
+            this.forcePin = forcePin;
+            this.active = active;
+            this.callback = callback;
+        }
+    }
+
+    public void onPinEntered(final String uid, final String pin) {
+        T.UI();
+        try {
+            mPrivateKey = Security.getPrivateKey(this, pin);
+            mEnterPinActivityActive = false;
+
+            postDelayedOnIOHandler(new SafeRunnable() {
+                @Override
+                protected void safeRun() throws Exception {
+                    if (mQueue.size()  == 0) {
+                        mPrivateKey = null;
+                    } else {
+                        mShouldClearPrivateKey = true;
+                    }
+                }
+            }, 1000 * AppConstants.SECURE_PIN_INTERVAL);
+
+        } catch (Exception e) {
+            mEnterPinActivityActive = false;
+            SecurityItem si = dequeueSecurityItem(uid);
+            si.callback.onError(new Exception("An unknown error occurred while loading private key"));
+            return;
+        }
+
+        SecurityItem si = dequeueSecurityItem(uid);
+        executeSign(si, true);
+    }
+
+    public void onPinCancelled(final String uid) {
+        T.UI();
+        mEnterPinActivityActive = false;
+        SecurityItem si = dequeueSecurityItem(uid);
+        si.callback.onError(new PinCancelledException("User cancelled pin input"));
+        clearQueue();
+    }
+
+    public static class PinCancelledException extends Exception {
+        public PinCancelledException(String message) {
+            super(message);
+        }
+    }
+
+    public interface SecurityCallback<T> {
+        void onSuccess(T result);
+
+        void onError(Exception e);
+    }
+
+    public void sign(final String message, final byte[] payload, final boolean forcePin, final SecurityCallback<byte[]> callback) {
+        T.UI();
+        queueSecurityItem(new SecurityItem(message, payload, forcePin, false, callback));
+    }
+
+    public boolean validate(final byte[] payload, final byte[] payloadSignature) {
+        T.UI();
+        try {
+            return validateSignature(payload, payloadSignature);
+        } catch (Exception e) {
+            L.d(e);
+            return false;
+        }
+    }
+
+    private void queueSecurityItem(SecurityItem si) {
+        T.UI();
+        if (mPrivateKey == null || si.forcePin) {
+            if (!mEnterPinActivityActive) {
+                mEnterPinActivityActive = true;
+                Intent intent = new Intent(this, EnterPinActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra(EnterPinActivity.RESULT_VIA_MAINSERVICE, true);
+                intent.putExtra(EnterPinActivity.UID, si.uid);
+                if (TextUtils.isEmptyOrWhitespace(si.message)) {
+                    intent.putExtra(EnterPinActivity.MESSAGE, getString(R.string.pin_required_continue));
+                } else {
+                    intent.putExtra(EnterPinActivity.MESSAGE, si.message);
+                }
+                startActivity(intent);
+                si.active = true;
+            }
+            mQueue.add(si);
+        } else {
+            executeSign(si, false);
+        }
+    }
+
+    private SecurityItem getNextSecurityItemToSign() {
+        T.UI();
+        for (SecurityItem item : mQueue) {
+            if (item.active == false) {
+                mQueue.remove(item);
+                return item;
+            }
+        }
+        return null;
+    }
+
+    private void executeSign(SecurityItem si, boolean fromQueue) {
+        T.UI();
+        try {
+            si.callback.onSuccess(signValue(si.payload));
+        } catch (Exception e) {
+            si.callback.onError(e);
+        }
+
+        if (fromQueue && !mEnterPinActivityActive) {
+            SecurityItem nextSi = getNextSecurityItemToSign();
+            if (nextSi != null) {
+                executeSign(nextSi, true);
+            } else if (mShouldClearPrivateKey){
+                mPrivateKey = null;
+            }
+        }
+    }
+
+    private void clearQueue() {
+        T.UI();
+        for (int i= mQueue.size() - 1; i >= 0; i--) {
+            SecurityItem item = mQueue.get(i);
+            if (item.active == false) {
+                if (mPrivateKey == null) {
+                    item.callback.onError(new Exception("User cancelled pin input"));
+                    mQueue.remove(item);
+                } else if (item.forcePin){
+                    item.callback.onError(new Exception("User cancelled pin input"));
+                    mQueue.remove(item);
+                }
+            }
+        }
+        if (mPrivateKey != null && mQueue.size() != 0) {
+            for (SecurityItem item : mQueue) {
+                if (item.active == false) {
+                    executeSign(item, true);
+                    break;
+                }
+            }
+        }
+    }
+
+    private SecurityItem dequeueSecurityItem(String uid) {
+        T.UI();
+        for (SecurityItem item : mQueue) {
+            if (item.uid.equals(uid)) {
+                mQueue.remove(item);
+                return item;
+            }
+        }
+        return null;
+    }
+
+    private byte[] signValue(byte[] payload) throws Exception {
+        T.UI();
+        Signature s = Signature.getInstance("SHA256withECDSA");
+        s.initSign(mPrivateKey);
+        s.update(payload);
+        return s.sign();
+    }
+
+    private boolean validateSignature( byte[] payload, byte[] payloadSignature) throws Exception {
+        T.UI();
+        if (mPublicKey == null) {
+            mPublicKey = Security.getPublicKey(this);
+        }
+        Signature s = Signature.getInstance("SHA256withECDSA");
+        s.initVerify(mPublicKey);
+        s.update(payload);
+        return s.verify(payloadSignature);
+    }
 }

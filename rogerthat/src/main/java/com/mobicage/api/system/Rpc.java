@@ -108,6 +108,17 @@ public class Rpc {
         com.mobicage.rpc.Rpc.call("com.mobicage.api.system.setMobilePhoneNumber", arguments, responseHandler);
     }
 
+    public static void setSecureInfo(com.mobicage.rpc.IResponseHandler<com.mobicage.to.system.SetSecureInfoResponseTO> responseHandler,
+            com.mobicage.to.system.SetSecureInfoRequestTO request) throws Exception {
+        java.util.Map<java.lang.String, java.lang.Object> arguments = new java.util.LinkedHashMap<java.lang.String, java.lang.Object>();
+        if (request == null) {
+            arguments.put("request", null);
+        } else {
+            arguments.put("request", request.toJSONMap());
+        }
+        com.mobicage.rpc.Rpc.call("com.mobicage.api.system.setSecureInfo", arguments, responseHandler);
+    }
+
     public static void unregisterMobile(com.mobicage.rpc.IResponseHandler<com.mobicage.to.system.UnregisterMobileResponseTO> responseHandler,
             com.mobicage.to.system.UnregisterMobileRequestTO request) throws Exception {
         java.util.Map<java.lang.String, java.lang.Object> arguments = new java.util.LinkedHashMap<java.lang.String, java.lang.Object>();

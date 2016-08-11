@@ -93,8 +93,6 @@ public class App extends Application implements Thread.UncaughtExceptionHandler 
         error.put("platform", "1");
         error.put("timestamp", "" + System.currentTimeMillis() / 1000);
 
-        error.put("description", "Uncaught exception");
-
         try {
             error.put("error_message", L.getStackTraceString(ex));
         } catch (Throwable t) {

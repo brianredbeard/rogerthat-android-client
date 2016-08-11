@@ -936,6 +936,19 @@ public class FriendStore implements Closeable {
         }
     }
 
+    private <T extends ServiceMenuItem> T readMenuItemFromCursor(T smi, Cursor curs, Integer page) {
+        int i = 0;
+        smi.coords = new long[]{curs.getInt(i++), curs.getInt(i++), page == null ? curs.getInt(i++) : page};
+        smi.label = curs.getString(i++);
+        smi.icon = curs.getBlob(i++);
+        smi.screenBranding = curs.getString(i++);
+        smi.staticFlowHash = curs.getString(i++);
+        smi.hashedTag = curs.getString(i++);
+        smi.requiresWifi = curs.getLong(i++) == 1;
+        smi.runInBackground = curs.getLong(i++) == 1;
+        return smi;
+    }
+
     private void populateMenuItems(String email, ServiceMenu menu, Integer page) {
         final Cursor curs;
         if (page == null) {
@@ -949,22 +962,28 @@ public class FriendStore implements Closeable {
                 return;
             }
             do {
-                final ServiceMenuItem smi = new ServiceMenuItem();
-                int i = 0;
-                smi.coords = new long[] { curs.getInt(i++), curs.getInt(i++), page == null ? curs.getInt(i++) : page };
-                smi.label = curs.getString(i++);
-                smi.icon = curs.getBlob(i++);
-                smi.screenBranding = curs.getString(i++);
-                smi.staticFlowHash = curs.getString(i++);
-                smi.hashedTag = curs.getString(i++);
-                smi.requiresWifi = curs.getLong(i++) == 1;
-                smi.runInBackground = curs.getLong(i++) == 1;
-                menu.itemList.add(smi);
+                menu.itemList.add(readMenuItemFromCursor(new ServiceMenuItem(), curs, page));
             } while (curs.moveToNext());
         } finally {
             curs.close();
         }
         menu.items = menu.itemList.toArray(new ServiceMenuItemTO[menu.itemList.size()]);
+    }
+
+    public ServiceMenuItemDetails getMenuItem(final String email, final String hashedTag) {
+        final Cursor curs = mDb.rawQuery(mMainService.getString(R.string.sql_friend_get_smi_by_tag), new
+                String[]{email, hashedTag});
+        try {
+            if (!curs.moveToFirst()) {
+                return null;
+            }
+
+            ServiceMenuItemDetails smi = readMenuItemFromCursor(new ServiceMenuItemDetails(), curs, null);
+            smi.menuGeneration = curs.getLong(10);
+            return smi;
+        } finally {
+            curs.close();
+        }
     }
 
     public ServiceMenu getMenu(String email, Integer page) {
@@ -1711,24 +1730,24 @@ public class FriendStore implements Closeable {
         mMainService.sendBroadcast(intent);
     }
 
-    public FriendBroadcastInfo getFriendBroadcastFlowForMfr(String email) {
-        final FriendBroadcastInfo fbi = new FriendBroadcastInfo();
-        final Cursor curz = mDb.rawQuery(mMainService.getString(R.string.sql_friend_get_broadcast_flow_for_mfr),
+    public ServiceMenuItemDetails getFriendBroadcastFlowForMfr(String email) {
+        final Cursor cursor = mDb.rawQuery(mMainService.getString(R.string.sql_friend_get_broadcast_flow_for_mfr),
             new String[] { email });
         try {
-            if (!curz.moveToFirst()) {
+            if (!cursor.moveToFirst()) {
                 return null;
             }
-            fbi.coords = new long[] { curz.getLong(0), curz.getLong(1), curz.getLong(2) };
-            fbi.staticFlowHash = curz.getString(3);
-            fbi.hashedTag = curz.getString(4);
-            fbi.generation = curz.getLong(5);
-            fbi.label = curz.getString(6);
+            final ServiceMenuItemDetails smi = new ServiceMenuItemDetails();
+            smi.coords = new long[]{cursor.getLong(0), cursor.getLong(1), cursor.getLong(2)};
+            smi.staticFlowHash = cursor.getString(3);
+            smi.hashedTag = cursor.getString(4);
+            smi.menuGeneration = cursor.getLong(5);
+            smi.label = cursor.getString(6);
+            return smi;
 
         } finally {
-            curz.close();
+            cursor.close();
         }
-        return fbi;
     }
 
     public long getFriendSetVersion() {

@@ -29,6 +29,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
+import org.jivesoftware.smack.util.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -81,7 +82,9 @@ import com.facebook.login.LoginResult;
 import com.facebook.share.Sharer;
 import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.widget.ShareDialog;
+import com.google.zxing.client.android.CaptureActivity;
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.plugins.history.HistoryItem;
 import com.mobicage.rogerthat.plugins.messaging.AttachmentViewerActivity;
@@ -93,16 +96,21 @@ import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.plugins.messaging.ServiceMessageDetailActivity;
 import com.mobicage.rogerthat.plugins.scan.GetUserInfoResponseHandler;
 import com.mobicage.rogerthat.plugins.scan.ProcessScanActivity;
+import com.mobicage.rogerthat.plugins.scan.ScanCommunication;
+import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
 import com.mobicage.rogerthat.plugins.trackme.DiscoveredBeaconProximity;
 import com.mobicage.rogerthat.plugins.trackme.TrackmePlugin;
 import com.mobicage.rogerthat.util.FacebookUtils;
 import com.mobicage.rogerthat.util.FacebookUtils.PermissionType;
+import com.mobicage.rogerthat.util.Security;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
+import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.system.TaggedWakeLock;
 import com.mobicage.rogerthat.util.ui.UIUtils;
+import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.rpc.newxmpp.XMPPKickChannel;
 import com.mobicage.to.friends.GetUserInfoRequestTO;
@@ -121,8 +129,9 @@ public class ActionScreenActivity extends ServiceBoundActivity {
 
     private static final String FACEBOOK_TYPE_CANCEL = "CANCEL";
     private static final String FACEBOOK_TYPE_ERROR = "ERROR";
-
     private static final Map<String, Object> FACEBOOK_MAP_CANCEL = new HashMap<String, Object>();
+
+    private final int PERMISSION_REQUEST_CAMERA = 1;
 
     private boolean mIsHtmlContent = true;
     private boolean mInfoSet = false;
@@ -154,6 +163,8 @@ public class ActionScreenActivity extends ServiceBoundActivity {
     private Handler mSoundHandler = null;
 
     private QRCodeScanner mQRCodeScanner = null;
+    private boolean mQRCodeScannerOpen = false;
+    private ScanCommunication mScanCommunication = null;
 
     private boolean mIsListeningBacklogConnectivityChanged = false;
     private int mLastBacklogStatus = 0;
@@ -261,12 +272,18 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 startScanningQrCode(params);
             } else if ("camera/stopScanningQrCode".equals(action)) {
                 stopScanningQrCode(params);
+            }
+            // SECURITY
+            else if ("security/sign".equals(action)) {
+                signPayload(params);
+            } else if ("security/verify".equals(action)) {
+                verifySignedPayload(params);
             } else {
                 L.d("Invoke did not handle any function");
             }
         }
 
-        private void putUserData(JSONObject params) throws JSONException {
+        private void putUserData(final JSONObject params) throws JSONException {
             if (params == null) {
                 L.w("Expected params != null");
                 return;
@@ -274,7 +291,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             mFriendsPlugin.putUserData(mServiceEmail, params.getString("u"));
         }
 
-        private void getBeaconsInReach(JSONObject params) throws JSONException {
+        private void getBeaconsInReach(final JSONObject params) throws JSONException {
             if (params == null) {
                 L.w("Expected params != null");
                 return;
@@ -288,7 +305,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             deliverResult(requestId, result, null);
         }
 
-        private void onBackendConnectivityChanged(JSONObject params) throws JSONException {
+        private void onBackendConnectivityChanged(final JSONObject params) throws JSONException {
             if (params == null) {
                 L.w("Expected params != null");
                 return;
@@ -306,7 +323,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             }
         }
 
-        private void isConnectedToInternet(JSONObject params) throws JSONException {
+        private void isConnectedToInternet(final JSONObject params) throws JSONException {
             if (params == null) {
                 L.w("Expected params != null");
                 return;
@@ -320,7 +337,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             deliverResult(requestId, result, null);
         }
 
-        private void logError(JSONObject params) throws JSONException {
+        private void logError(final JSONObject params) throws JSONException {
             if (params == null) {
                 L.w("Expected params != null");
                 return;
@@ -333,7 +350,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             }
         }
 
-        private void backPressedCallback(JSONObject params) throws JSONException {
+        private void backPressedCallback(final JSONObject params) throws JSONException {
             if (params == null) {
                 L.w("Expected params != null");
                 return;
@@ -358,24 +375,54 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             }
         }
 
-        private void startScanningQrCode(JSONObject params) throws JSONException {
+        private void startScanningQrCode(final JSONObject params) throws JSONException {
             if (params == null) {
                 L.w("Expected params != null");
                 return;
             }
-            String requestId = params.getString("id");
+            final String requestId = params.getString("id");
             String cameraType = params.getString("camera_type");
-            if (mQRCodeScanner == null) {
-                Map<String, Object> error = new HashMap<String, Object>();
-                error.put("exception", "startScanningQrCode is not supported in your app");
-                deliverResult(requestId, null, error);
-                return;
-            }
 
             if (!QRCodeScanner.CAMERA_TYPES.contains(cameraType)) {
                 Map<String, Object> error = new HashMap<String, Object>();
                 error.put("exception", "Unsupported camera type");
                 deliverResult(requestId, null, error);
+                return;
+            }
+
+            int cameraPermission = ContextCompat.checkSelfPermission(ActionScreenActivity.this, Manifest.permission.CAMERA);
+            if (cameraPermission != PackageManager.PERMISSION_GRANTED) {
+                final SafeRunnable continueRunnable = new SafeRunnable() {
+                    @Override
+                    protected void safeRun() throws Exception {
+                        startScanningQrCode(params);
+                    }
+                };
+                final SafeRunnable cancelRunnable = new SafeRunnable() {
+                    @Override
+                    protected void safeRun() throws Exception {
+                        Map<String, Object> error = new HashMap<String, Object>();
+                        error.put("exception", "Camera permission was not granted");
+                        deliverResult(requestId, null, error);
+                    }
+                };
+                if (askPermissionIfNeeded(Manifest.permission.CAMERA, PERMISSION_REQUEST_CAMERA,
+                        continueRunnable, cancelRunnable))
+                    return;
+            }
+
+            if (mQRCodeScanner == null) {
+                if (mQRCodeScannerOpen) {
+                    Map<String, Object> error = new HashMap<String, Object>();
+                    error.put("exception", "Camera was already open");
+                    deliverResult(requestId, null, error);
+                    return;
+                }
+                mQRCodeScannerOpen = true;
+                SystemUtils.showZXingActivity(ActionScreenActivity.this, ScanTabActivity.MARKET_INSTALL_RESULT,
+                        ScanTabActivity.ZXING_SCAN_RESULT);
+
+                deliverResult(requestId, null, null);
                 return;
             }
 
@@ -414,19 +461,13 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             deliverResult(requestId, null, null);
         }
 
-        private void stopScanningQrCode(JSONObject params) throws JSONException {
+        private void stopScanningQrCode(final JSONObject params) throws JSONException {
             if (params == null) {
                 L.w("Expected params != null");
                 return;
             }
             String requestId = params.getString("id");
             String cameraType = params.getString("camera_type");
-            if (mQRCodeScanner == null) {
-                Map<String, Object> error = new HashMap<String, Object>();
-                error.put("exception", "stopScanningQrCode is not supported in your app");
-                deliverResult(requestId, null, error);
-                return;
-            }
 
             if (!QRCodeScanner.CAMERA_TYPES.contains(cameraType)) {
                 Map<String, Object> error = new HashMap<String, Object>();
@@ -434,11 +475,19 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 deliverResult(requestId, null, error);
                 return;
             }
-            mQRCodeScanner.stopScanningForQRCodes();
+
+            if (mQRCodeScanner == null) {
+                mQRCodeScannerOpen = false;
+                Intent intent = new Intent(CaptureActivity.FINISH_INTENT);
+                sendBroadcast(intent);
+            } else {
+                mQRCodeScanner.stopScanningForQRCodes();
+            }
+
             deliverResult(requestId, null, null);
         }
 
-        private void playAudio(JSONObject params) throws JSONException {
+        private void playAudio(final JSONObject params) throws JSONException {
             if (params == null) {
                 L.w("Expected params != null");
                 return;
@@ -446,10 +495,10 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             String requestId = params.getString("id");
             final String url = params.getString("url");
             if (mSoundHandler == null) {
-                Map<String, Object> error = new HashMap<String, Object>();
-                error.put("exception", "playAudio is not supported in your app");
-                deliverResult(requestId, null, error);
-                return;
+                mSoundThread = new HandlerThread("rogerthat_actionscreenactivity_sound");
+                mSoundThread.start();
+                Looper looper = mSoundThread.getLooper();
+                mSoundHandler = new Handler(looper);
             }
 
             mSoundHandler.post(new SafeRunnable() {
@@ -495,10 +544,105 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 error = new HashMap<>();
                 error.put("type", "MessageNotFound");
             } else {
-                mMessagingPlugin.showMessage(ActionScreenActivity.this, message, null);
+                mMessagingPlugin.showMessage(ActionScreenActivity.this, message, false, null, false);
             }
 
             deliverResult(requestId, null, error);
+        }
+
+        private void signPayload(final JSONObject params) throws JSONException {
+            if (params == null) {
+                L.w("Expected params != null");
+                return;
+            }
+            final String requestId = params.getString("id");
+            if (!AppConstants.SECURE_APP) {
+                Map<String, Object> e = new HashMap<String, Object>();
+                e.put("exception", "Security is not enabled in your app.");
+                deliverResult(requestId, null, e);
+                return;
+            }
+            final String message = params.getString("message");
+            final String payload = params.getString("payload");
+            final boolean forcePin = params.getBoolean("force_pin");
+
+            mService.postAtFrontOfUIHandler(new SafeRunnable() {
+                @Override
+                protected void safeRun() throws Exception {
+                    try {
+                        final byte[] payloadData = payload.getBytes("utf8");
+
+                        MainService.SecurityCallback sc = new MainService.SecurityCallback() {
+                            @Override
+                            public void onSuccess(Object result) {
+                                try {
+                                    byte[] payloadSignature = (byte[]) result;
+                                    Map<String, Object> r = new HashMap<String, Object>();
+                                    r.put("payload", payload);
+                                    r.put("payload_signature", Base64.encodeBytes(payloadSignature));
+                                    deliverResult(requestId, r, null);
+                                } catch (Exception e) {
+                                    L.d("'security/sign' onSuccess exception", e);
+                                    Map<String, Object> error = new HashMap<String, Object>();
+                                    error.put("exception", "Payload signature not of correct format.");
+                                    deliverResult(requestId, null, error);
+                                }
+                            }
+
+                            @Override
+                            public void onError(Exception error) {
+                                L.d("'security/sign' onError", error);
+                                Map<String, Object> e = new HashMap<String, Object>();
+                                e.put("exception", error.getMessage());
+                                deliverResult(requestId, null, e);
+                            }
+                        };
+
+                        mService.sign(message, payloadData, forcePin, sc);
+
+                    }  catch (Exception e) {
+                        Map<String, Object> error = new HashMap<String, Object>();
+                        error.put("exception", "Payload not of correct format.");
+                        deliverResult(requestId, null, error);
+                    }
+                }
+            });
+        }
+
+        private void verifySignedPayload(final JSONObject params) throws JSONException {
+            if (params == null) {
+                L.w("Expected params != null");
+                return;
+            }
+            final String requestId = params.getString("id");
+            if (!AppConstants.SECURE_APP) {
+                Map<String, Object> e = new HashMap<String, Object>();
+                e.put("exception", "Security is not enabled in your app.");
+                deliverResult(requestId, null, e);
+                return;
+            }
+            final String payload = params.getString("payload");
+            final String payloadSignature = params.getString("payload_signature");
+
+            mService.postAtFrontOfUIHandler(new SafeRunnable() {
+                @Override
+                protected void safeRun() throws Exception {
+
+                    try {
+                        final byte[] payloadData = payload.getBytes("utf8");
+                        final byte[] payloadDataSignature = Base64.decode(payloadSignature);
+                        boolean valid = mService.validate(payloadData, payloadDataSignature);
+                        Map<String, Object> r = new HashMap<String, Object>();
+                        r.put("valid", valid);
+                        deliverResult(requestId, r, null);
+                    } catch (Exception e) {
+                        L.d("'security/verify' onSuccess exception", e);
+                        Map<String, Object> error = new HashMap<String, Object>();
+                        error.put("exception", "Payload not of correct format.");
+                        deliverResult(requestId, null, error);
+                    }
+                }
+            });
         }
     }
 
@@ -530,11 +674,6 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         brandingSettingsHttp.setCacheMode(WebSettings.LOAD_DEFAULT);
 
         if (CloudConstants.isContentBrandingApp()) {
-            mSoundThread = new HandlerThread("rogerthat_actionscreenactivity_sound");
-            mSoundThread.start();
-            Looper looper = mSoundThread.getLooper();
-            mSoundHandler = new Handler(looper);
-
             int cameraPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
             if (cameraPermission == PackageManager.PERMISSION_GRANTED) {
                 mQRCodeScanner = QRCodeScanner.getInstance(this);
@@ -1081,6 +1220,45 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         if (mQRCodeScanner != null) {
             mQRCodeScanner.mainService = mService;
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        if (resultCode == RESULT_OK) {
+            if (requestCode == ScanTabActivity.MARKET_INSTALL_RESULT) {
+                mQRCodeScannerOpen = false;
+                // No need to do anything
+            } else if (requestCode == ScanTabActivity.ZXING_SCAN_RESULT) {
+                mQRCodeScannerOpen = false;
+                final String rawScanResult = intent.getStringExtra("SCAN_RESULT");
+                if (rawScanResult != null) {
+                    L.i("Scanned QR code: " + rawScanResult);
+                    final Map<String, Object> result = new HashMap<String, Object>();
+                    if (rawScanResult.toLowerCase(Locale.US).startsWith("http://")
+                            || rawScanResult.toLowerCase(Locale.US).startsWith("https://")) {
+                        if (mScanCommunication == null) {
+                            mScanCommunication = new ScanCommunication(mService);
+                        }
+                        mScanCommunication.resolveUrl(rawScanResult);
+                        result.put("status", "resolving");
+
+                    } else {
+                        result.put("status", "resolved");
+                    }
+                    result.put("content", rawScanResult);
+                    executeJS(false, "if (typeof rogerthat !== 'undefined') rogerthat._qrCodeScanned(%s)",
+                            JSONValue.toJSONString(result));
+
+                } else {
+                    Map<String, Object> result = new HashMap<String, Object>();
+                    result.put("status", "error");
+                    result.put("content", "An unknown error has occurred");
+                    executeJS(false, "if (typeof rogerthat !== 'undefined') rogerthat._qrCodeScanned(%s)",
+                            JSONValue.toJSONString(result));
+                }
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, intent);
     }
 
     @SuppressWarnings("deprecation")

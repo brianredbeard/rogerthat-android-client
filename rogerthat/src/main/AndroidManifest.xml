@@ -309,6 +309,16 @@
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.NoTitleBar" >
         </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.SetupPinActivity"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.NoTitleBar" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.EnterPinActivity"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.NoTitleBar" >
+        </activity>
 
         <receiver
             android:name="com.mobicage.rogerthat.widget.RogerthatWidgetProvider"

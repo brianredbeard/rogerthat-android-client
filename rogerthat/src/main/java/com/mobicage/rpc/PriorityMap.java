@@ -70,6 +70,7 @@ public class PriorityMap {
         sPrioritySet.add("com.mobicage.api.messaging.submitMyDigiPassForm");
         sPrioritySet.add("com.mobicage.api.messaging.submitPhotoUploadForm");
         sPrioritySet.add("com.mobicage.api.messaging.submitRangeSliderForm");
+        sPrioritySet.add("com.mobicage.api.messaging.submitSignForm");
         sPrioritySet.add("com.mobicage.api.messaging.submitSingleSelectForm");
         sPrioritySet.add("com.mobicage.api.messaging.submitSingleSliderForm");
         sPrioritySet.add("com.mobicage.api.messaging.submitTextBlockForm");
@@ -98,6 +99,7 @@ public class PriorityMap {
         sPrioritySet.add("com.mobicage.api.system.logError");
         sPrioritySet.add("com.mobicage.api.system.saveSettings");
         sPrioritySet.add("com.mobicage.api.system.setMobilePhoneNumber");
+        sPrioritySet.add("com.mobicage.api.system.setSecureInfo");
         sPrioritySet.add("com.mobicage.api.system.unregisterMobile");
         sPrioritySet.add("com.mobicage.api.system.updateApplePushDeviceToken");
     }

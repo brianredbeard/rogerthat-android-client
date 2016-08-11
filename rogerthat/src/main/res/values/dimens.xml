@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="mc_title_text_size">20sp</dimen>
+    <!-- Pin Screen-->
+    <dimen name="pin_size">45dp</dimen>
+    <dimen name="pin_size_inner">10dp</dimen>
+    <dimen name="pin_button_size">45dp</dimen>
+    <dimen name="pin_button_text_size">20sp</dimen>
 </resources>

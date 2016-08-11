@@ -160,7 +160,7 @@ public class FriendSelectWidget extends Widget {
 
     @Override
     @SuppressWarnings("unchecked")
-    public UnicodeListWidgetResultTO getFormResult() {
+    public UnicodeListWidgetResultTO getWidgetResult() {
         UnicodeListWidgetResultTO result = new UnicodeListWidgetResultTO();
         final List<String> values = (List<String>) mWidgetMap.get("values");
         result.values = values.toArray(new String[values.size()]);
@@ -184,7 +184,7 @@ public class FriendSelectWidget extends Widget {
         request.parent_message_key = mMessage.parent_key;
         request.timestamp = timestamp;
         if (Message.POSITIVE.equals(buttonId)) {
-            request.result = getFormResult();
+            request.result = getWidgetResult();
         }
         if ((mMessage.flags & MessagingPlugin.FLAG_SENT_BY_JSMFR) == MessagingPlugin.FLAG_SENT_BY_JSMFR) {
             mPlugin.answerJsMfrMessage(mMessage, request.toJSONMap(),

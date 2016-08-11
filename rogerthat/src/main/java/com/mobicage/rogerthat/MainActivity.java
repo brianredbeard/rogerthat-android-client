@@ -18,11 +18,7 @@
 
 package com.mobicage.rogerthat;
 
-import java.util.List;
-import java.util.Map;
-
-import org.json.simple.JSONValue;
-
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -30,7 +26,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.webkit.WebView;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.config.Configuration;
@@ -50,6 +48,7 @@ import com.mobicage.rogerthat.registration.DetectedBeaconActivity;
 import com.mobicage.rogerthat.registration.RegistrationActivity2;
 import com.mobicage.rogerthat.registration.RegistrationWizard2;
 import com.mobicage.rogerthat.registration.YSAAARegistrationActivity;
+import com.mobicage.rogerthat.util.Security;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
@@ -61,6 +60,11 @@ import com.mobicage.rogerthat.widget.SendCannedMessageActivity;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.to.friends.ServiceMenuItemTO;
+
+import org.json.simple.JSONValue;
+
+import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends ServiceBoundActivity {
 
@@ -87,13 +91,16 @@ public class MainActivity extends ServiceBoundActivity {
     private ProgressDialog mDialog;
     private AlertDialog mRegistrationCompleteDialog = null;
 
+    private static final int START_SETUP_PIN_REQUEST_CODE = 100;
+    private Intent mBackupIntentAfterPin = null;
+
     private final SafeBroadcastReceiver mBroadcastReceiver = new SafeBroadcastReceiver() {
         @Override
         public String[] onSafeReceive(Context context, Intent intent) {
             T.UI();
             launchYSAAAActivityAndFinish();
             return new String[] { intent.getAction() };
-        };
+        }
     };
 
     @Override
@@ -101,12 +108,16 @@ public class MainActivity extends ServiceBoundActivity {
         super.onCreate(savedInstanceState);
         T.UI();
         setContentView(R.layout.blank);
+        //noinspection PointlessBooleanExpression
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && CloudConstants.DEBUG_LOGGING) {
+            WebView.setWebContentsDebuggingEnabled(true);
+        }
     }
 
     @Override
     protected void onServiceBound() {
         T.UI();
-        processIntent();
+        processIntent(getIntent());
 
         if (CloudConstants.isYSAAA()) {
             final String[] receivingIntents = new String[] { FriendsPlugin.FRIENDS_LIST_REFRESHED,
@@ -126,13 +137,12 @@ public class MainActivity extends ServiceBoundActivity {
         setIntent(intent);
         SystemUtils.logIntentFlags(getIntent());
         if (mService != null)
-            processIntent();
+            processIntent(getIntent());
     }
 
-    private void processIntent() {
+    private void processIntent(Intent intent) {
         boolean hasRegistered = mService.getRegisteredFromConfig();
 
-        final Intent intent = getIntent();
         final String intentAction = intent.getAction();
         L.d("MainActivity processIntent: " + intentAction);
         L.d("Extras:");
@@ -141,6 +151,19 @@ public class MainActivity extends ServiceBoundActivity {
             for (String key : bundle.keySet()) {
                 Object value = bundle.get(key);
                 L.d("- " + String.format("%s %s (%s)", key, value.toString(), value.getClass().getName()));
+            }
+        }
+
+        //noinspection PointlessBooleanExpression
+        if (hasRegistered && AppConstants.SECURE_APP) {
+            try {
+                if (!Security.isPinSet(mService)) {
+                    mBackupIntentAfterPin = intent;
+                    setupPin();
+                    return;
+                }
+            } catch (Exception e) {
+                mService.wipe(0);
             }
         }
 
@@ -353,6 +376,36 @@ public class MainActivity extends ServiceBoundActivity {
             mDialog.dismiss();
     }
 
+    private void setupPin() {
+        Intent setupPinIntent = new Intent(this, SetupPinActivity.class);
+        startActivityForResult(setupPinIntent, START_SETUP_PIN_REQUEST_CODE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == START_SETUP_PIN_REQUEST_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                Intent i = mBackupIntentAfterPin;
+                mBackupIntentAfterPin = null;
+                processIntent(i);
+            } else {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage(R.string.pin_required_continue);
+                builder.setPositiveButton(R.string.rogerthat, new SafeDialogInterfaceOnClickListener() {
+                    @Override
+                    public void safeOnClick(DialogInterface dialog, int which) {
+                        setupPin();
+                    }
+                });
+                AlertDialog dialog = builder.create();
+                dialog.setCancelable(false);
+                dialog.show();
+            }
+        }
+    }
+
     public static Friend getFriendForYSAAAWhenReady(MainService service) {
         L.i("launchMainActivityAndFinishIfAppReady");
         final FriendsPlugin friendsPlugin = service.getPlugin(FriendsPlugin.class);
@@ -395,9 +448,6 @@ public class MainActivity extends ServiceBoundActivity {
                         L.i("Action menu branding not available yet");
                         return null;
                     }
-                } else if (friend.actionMenu == null) {
-                    L.i("Action menu not available yet");
-                    return null;
                 }
 
                 boolean hasMenuIconsToDownload = false;
@@ -617,7 +667,7 @@ public class MainActivity extends ServiceBoundActivity {
         intent.putExtra(ProfileActivity.INTENT_KEY_COMPLETE_PROFILE, ageGenderSet);
         L.d("Starting ProfileActivity");
         startActivity(intent);
-    };
+    }
 
     private void startProcessScan(String caughtUrlDuringRegistration) {
         L.d("Starting ProcessScanActivity");

@@ -758,7 +758,7 @@ public class AdvancedOrderWidget extends Widget {
     }
 
     @Override
-    public AdvancedOrderWidgetResult getFormResult() {
+    public AdvancedOrderWidgetResult getWidgetResult() {
         return mResult;
     }
 
@@ -770,7 +770,7 @@ public class AdvancedOrderWidget extends Widget {
         request.parent_message_key = mMessage.parent_key;
         request.timestamp = timestamp;
         if (Message.POSITIVE.equals(buttonId)) {
-            request.result = getFormResult();
+            request.result = getWidgetResult();
             L.d("Submit Advanced Order " + mWidgetMap);
         }
         if ((mMessage.flags & MessagingPlugin.FLAG_SENT_BY_JSMFR) == MessagingPlugin.FLAG_SENT_BY_JSMFR)

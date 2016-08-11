@@ -196,6 +196,17 @@ public class Rpc {
         com.mobicage.rpc.Rpc.call("com.mobicage.api.messaging.submitRangeSliderForm", arguments, responseHandler);
     }
 
+    public static void submitSignForm(com.mobicage.rpc.IResponseHandler<com.mobicage.to.messaging.forms.SubmitSignFormResponseTO> responseHandler,
+            com.mobicage.to.messaging.forms.SubmitSignFormRequestTO request) throws Exception {
+        java.util.Map<java.lang.String, java.lang.Object> arguments = new java.util.LinkedHashMap<java.lang.String, java.lang.Object>();
+        if (request == null) {
+            arguments.put("request", null);
+        } else {
+            arguments.put("request", request.toJSONMap());
+        }
+        com.mobicage.rpc.Rpc.call("com.mobicage.api.messaging.submitSignForm", arguments, responseHandler);
+    }
+
     public static void submitSingleSelectForm(com.mobicage.rpc.IResponseHandler<com.mobicage.to.messaging.forms.SubmitSingleSelectFormResponseTO> responseHandler,
             com.mobicage.to.messaging.forms.SubmitSingleSelectFormRequestTO request) throws Exception {
         java.util.Map<java.lang.String, java.lang.Object> arguments = new java.util.LinkedHashMap<java.lang.String, java.lang.Object>();

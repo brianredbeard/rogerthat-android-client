@@ -100,7 +100,6 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.ViewFlipper;
 
-import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.login.LoginResult;
@@ -696,6 +695,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                     JSONObject account = (JSONObject) responseMap.get("account");
                     final String email = (String) responseMap.get("email");
                     mAgeAndGenderSet = (Boolean) responseMap.get("age_and_gender_set");
+
                     final RegistrationInfo info = new RegistrationInfo(email, new Credentials((String) account
                             .get("account"), (String) account.get("password")));
                     mUIHandler.post(new SafeRunnable() {
@@ -1419,7 +1419,13 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                     mgr.hideSoftInputFromWindow(mEnterPinEditText.getWindowToken(), 0);
                 }
 
-                Configuration cfg = mService.getConfigurationProvider().getConfiguration(RegistrationWizard2.CONFIGKEY);
+                ConfigurationProvider configProvider = mService.getConfigurationProvider();
+
+                if (AppConstants.SECURE_APP) {
+                    Security.setupKeyStore();
+                }
+
+                Configuration cfg = configProvider.getConfiguration(RegistrationWizard2.CONFIGKEY);
 
                 if (cfg != null && cfg.get(INVITOR_SECRET_CONFIGKEY, null) != null
                         && cfg.get(INVITOR_CODE_CONFIGKEY, null) != null) {

@@ -26,7 +26,10 @@ import java.util.Set;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -68,6 +71,8 @@ import com.mobicage.rogerth.at.R;
  * @author Sean Owen
  */
 public final class CaptureActivity extends Activity implements SurfaceHolder.Callback {
+
+    public static final String FINISH_INTENT = "finish_activity";
 
     private static final String TAG = CaptureActivity.class.getSimpleName();
 
@@ -115,6 +120,17 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
         return cameraManager;
     }
 
+    BroadcastReceiver broadcast_reciever = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context ctx, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(FINISH_INTENT)) {
+                finish();
+            }
+        }
+    };
+
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
@@ -126,6 +142,8 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
         hasSurface = false;
         inactivityTimer = new InactivityTimer(this);
         beepManager = new BeepManager(this);
+
+        registerReceiver(broadcast_reciever, new IntentFilter(FINISH_INTENT));
     }
 
     @Override

@@ -460,7 +460,24 @@
     <string name="x_min_ago">%1$s min ago</string>
     <string name="yes">Yes</string>
     <string name="you_are_here">You are here</string>
+    <string name="pin_setup_4_digit">To secure your app you need to enter a 4 digit pin code.</string>
+    <string name="pin_confirm">Please confirm your pin code.</string>
+    <string name="pin_did_not_match">Pin code did not match.</string>
+    <string name="pin_invalid">Invalid pin code.</string>
+    <string name="pin_required_continue">A pin is required to continue!</string>
+    <string name="try_again_in_seconds">Try again in %1$s sec.</string>
+    <string name="try_again_in_minutes">Try again in %1$s min.</string>
+    <string name="try_again_in_hours">Try again in %1$s hr.</string>
+    <string name="stop">Stop</string>
+    <string name="corr">Corr</string>
     <string name="your_location_displayed_friend_have_contacted_for_their_location">Your location is displayed. Your friends (which share their location with you) have been contacted to send you their location.</string>
 
     <string name="friend_selection_is_required">Please select at least one friend.</string>
+    <string name="signed">Signed</string>
+    <string name="sign">Sign</string>
+    <string name="sign_first">You need to sign before you can continue.</string>
+    <string name="feature_not_supported">This feature is not supported on your device.</string>
+    <string name="open_attachments_before_signing">Please review the attached documents before signing</string>
+    <string name="enter_pin_to_sign">Enter your security PIN code to sign the attached document(s).</string>
+    <string name="successfully_signed">Successfully signed the documents</string>
 </resources>

@@ -16,8 +16,26 @@
  * @@license_version:1.1@@
  */
 
-package com.mobicage.rogerthat.plugins.friends;
+package com.mobicage.to.messaging.forms;
 
-public class FriendBroadcastInfo extends ServiceMenuItem {
-    public long generation;
+import com.mobicage.rpc.IncompleteMessageException;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+public class UpdateSignFormResponseTO implements com.mobicage.rpc.IJSONable {
+
+
+    public UpdateSignFormResponseTO() {
+    }
+
+    public UpdateSignFormResponseTO(Map<String, Object> json) throws IncompleteMessageException {
+    }
+
+    @Override
+    public Map<String, Object> toJSONMap() {
+        Map<String, Object> obj = new LinkedHashMap<String, Object>();
+        return obj;
+    }
+
 }

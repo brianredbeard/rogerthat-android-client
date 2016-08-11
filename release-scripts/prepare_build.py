@@ -126,7 +126,6 @@ def rename_package():
     rogerthat_build_gradle = os.path.join(ANDROID_SRC_DIR, '..', 'build.gradle')
     with open(rogerthat_build_gradle, 'r+') as f:
         s = f.read()
-
         s = re.sub('applicationId ".*"', 'applicationId "%s"' % NEW_PACKAGE_NAME, s)
 
         f.seek(0)
@@ -230,6 +229,10 @@ def convert_config():
 
     mainScreenContainsFriends = False
     mainScreenContainsProfile = False
+    mainScreenContainsScan = False
+    mainScreenContainsServices = False
+
+    SERVICE_TYPES = ["services", "community_services", "merchants", "associations", "emergency_services"]
 
     add_translations(doc)
 
@@ -297,6 +300,10 @@ def convert_config():
                     mainScreenContainsFriends = True
                 elif item["click"] == "profile":
                     mainScreenContainsProfile = True
+                elif item["click"] == "scan":
+                    mainScreenContainsScan = True
+                elif item["click"] in SERVICE_TYPES:
+                    mainScreenContainsServices = True
             output += '''\n                    }
                 }
             ),
@@ -396,6 +403,8 @@ def convert_config():
         show_nav_header = "false"
         home_activity = "R.layout.homescreen"
         show_profile_in_more = "true"
+        show_scan_in_more = "false"
+        services_enabled = "true"
         search_services_if_none_connected = "-1"
 
     elif doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_CITYPAPP:
@@ -403,6 +412,8 @@ def convert_config():
         show_nav_header = "true"
         home_activity = "R.layout.homescreen_3x3_with_qr_code"
         show_profile_in_more = bool_str(not mainScreenContainsProfile)
+        show_scan_in_more = bool_str(not mainScreenContainsScan)
+        services_enabled = bool_str(mainScreenContainsServices)
         search_services_if_none_connected = ",".join(map(str, doc['APP_CONSTANTS'].get('SEARCH_SERVICES_IF_NONE_CONNECTED', [])))
 
     elif doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_ENTERPRISE:
@@ -410,6 +421,8 @@ def convert_config():
         show_nav_header = "true"
         home_activity = "R.layout.homescreen_2x3"
         show_profile_in_more = bool_str(not mainScreenContainsProfile)
+        show_scan_in_more = bool_str(not mainScreenContainsScan)
+        services_enabled = bool_str(mainScreenContainsServices)
         search_services_if_none_connected = ",".join(map(str, doc['APP_CONSTANTS'].get('SEARCH_SERVICES_IF_NONE_CONNECTED', [])))
 
     elif doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_CONTENT_BRANDING:
@@ -417,6 +430,8 @@ def convert_config():
         show_nav_header = "false"
         home_activity = "R.layout.homescreen"
         show_profile_in_more = "true"
+        show_scan_in_more = "true"
+        services_enabled = "true"
         search_services_if_none_connected = "-1"
 
         if not doc['CLOUD_CONSTANTS'].get("USE_XMPP_KICK_CHANNEL", False):
@@ -427,6 +442,8 @@ def convert_config():
         show_nav_header = "false"
         home_activity = "R.layout.homescreen"
         show_profile_in_more = "false"
+        show_scan_in_more = "false"
+        services_enabled = "true"
         search_services_if_none_connected = "-1"
 
     else:
@@ -517,6 +534,18 @@ def convert_config():
 
 
     speech_to_text = bool_str(doc["APP_CONSTANTS"].get("SPEECH_TO_TEXT", False))
+    secure_app = bool_str(doc["APP_CONSTANTS"].get("SECURE_APP", False))
+
+    if doc["APP_CONSTANTS"].get("SECURE_APP", False):
+        rogerthat_build_gradle = os.path.join(ANDROID_SRC_DIR, '..', 'build.gradle')
+        with open(rogerthat_build_gradle, 'r+') as f:
+            s = f.read()
+            s = re.sub('minSdkVersion \d+', 'minSdkVersion 23', s)
+
+            f.seek(0)
+            f.write(s)
+            f.truncate()
+
     registration_type = long(doc['APP_CONSTANTS'].get('REGISTRATION_TYPE', 1))
     if registration_type == 1:
         registration_type = 'REGISTRATION_TYPE_DEFAULT'
@@ -563,9 +592,11 @@ public class AppConstants {
     public static final String APP_EMAIL = %(app_email)s;
     public static final String APP_SERVICE_GUID = %(app_service_guid)s;
     public static final boolean FRIENDS_ENABLED = %(friends_enabled)s;
+    public static final boolean SERVICES_ENABLED = %(services_enabled)s;
     public static final FriendsCaption FRIENDS_CAPTION = %(friends_caption_enum)s;
     public static final boolean SHOW_FRIENDS_IN_MORE = %(show_friends_in_more)s;
     public static final boolean SHOW_PROFILE_IN_MORE = %(show_profile_in_more)s;
+    public static final boolean SHOW_SCAN_IN_MORE = %(show_scan_in_more)s;
     public static final boolean FULL_WIDTH_HEADERS = %(full_width_headers)s;
 
     public static final boolean REGISTRATION_ASKS_LOCATION_PERMISSION = %(registration_asks_location_permission)s;
@@ -585,6 +616,9 @@ public class AppConstants {
     public static final String ABOUT_FACEBOOK_URL = "%(about_facebook_url)s";
 
     public static final boolean SPEECH_TO_TEXT = %(speech_to_text)s;
+    public static final boolean SECURE_APP = %(secure_app)s;
+    public static final int SECURE_PIN_INTERVAL = 15 * 60;
+    public static final int SECURE_PIN_RETRY_INTERVAL = 5 * 60;
 }
 ''' % dict(LICENSE=LICENSE,
            app_type=app_type,
@@ -597,9 +631,11 @@ public class AppConstants {
            fb_registration=fb_registration,
            app_email=app_email,
            friends_enabled=friends_enabled,
+           services_enabled=services_enabled,
            friends_caption_enum=friends_caption_enum,
            show_friends_in_more=show_friends_in_more,
            show_profile_in_more=show_profile_in_more,
+           show_scan_in_more=show_scan_in_more,
            search_services_if_none_connected=search_services_if_none_connected,
            full_width_headers=full_width_headers,
            profile_data_fields=profile_data_fields,
@@ -613,6 +649,7 @@ public class AppConstants {
            about_facebook=about_facebook,
            about_facebook_url=about_facebook_url,
            speech_to_text=speech_to_text,
+           secure_app=secure_app,
            app_service_guid=app_service_guid,
            registration_type=registration_type,
            registration_type_oauth_domain=registration_type_oauth_domain,
@@ -843,7 +880,8 @@ if __name__ == "__main__":
                                            ('gear', 'fa-tachometer'),
                                            ('messenger', 'fa-users'),
                                            ('id', 'fa-user'),
-                                           ('info', 'fa-info')]:
+                                           ('info', 'fa-info'),
+                                           ('qrcode', 'fa-qrcode')]:
             app_utils.download_icon(icon_name, color, 512,
                                     os.path.join(APP_DIR, "build", "%s.png" % filename_in_app))
             resize_more_icon(os.path.join(APP_DIR, "build", "%s.png" % filename_in_app), filename_in_app)

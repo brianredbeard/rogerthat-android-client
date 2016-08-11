@@ -18,12 +18,10 @@
 package com.mobicage.rogerthat.plugins.friends;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.app.ActivityCompat;
@@ -57,24 +55,20 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import com.mobicage.api.services.Rpc;
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.EnterPinActivity;
 import com.mobicage.rogerthat.FriendDetailActivity;
 import com.mobicage.rogerthat.HomeActivity;
 import com.mobicage.rogerthat.MainActivity;
+import com.mobicage.rogerthat.OauthActivity;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.ServiceDetailActivity;
 import com.mobicage.rogerthat.plugins.messaging.BrandingFailureException;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr.BrandingResult;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr.ColorScheme;
-import com.mobicage.rogerthat.plugins.messaging.FriendsThreadActivity;
 import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
-import com.mobicage.rogerthat.plugins.messaging.ServiceMessageDetailActivity;
-import com.mobicage.rogerthat.plugins.messaging.mfr.EmptyStaticFlowException;
-import com.mobicage.rogerthat.plugins.messaging.mfr.JsMfr;
-import com.mobicage.rogerthat.plugins.messaging.mfr.MessageFlowRun;
 import com.mobicage.rogerthat.plugins.scan.ProcessScanActivity;
 import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
 import com.mobicage.rogerthat.util.TextUtils;
@@ -87,14 +81,11 @@ import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.Slider;
 import com.mobicage.rogerthat.util.ui.UIUtils;
-import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.to.friends.ServiceMenuItemTO;
-import com.mobicage.to.service.PressMenuIconRequestTO;
-import com.mobicage.to.service.PressMenuIconResponseTO;
 
-public class ServiceActionMenuActivity extends ServiceBoundActivity {
+public class ServiceActionMenuActivity extends ServiceBoundActivity implements MenuItemPressingActivity {
 
     public static final int MY_PERMISSIONS_REQUEST_CAMERA = 1;
     public static final String SERVICE_EMAIL = "email";
@@ -119,8 +110,8 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
     private int darkSchemeTextColor;
     private int lightSchemeTextColor;
     private GestureDetector mGestureScanner;
-    private String mContextMatch = "";
     private TextView badge;
+    private MenuItemPresser mMenuItemPresser;
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -292,7 +283,6 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
         filter.addAction(MessagingPlugin.THREAD_RECOVERED_INTENT);
         filter.addAction(BrandingMgr.SERVICE_BRANDING_AVAILABLE_INTENT);
         filter.addAction(BrandingMgr.GENERIC_BRANDING_AVAILABLE_INTENT);
-        filter.addAction(MessagingPlugin.MESSAGE_JSMFR_ERROR);
         registerReceiver(mBroadcastReceiver, filter);
 
         findViewById(R.id.navigation_bar_home_button).setOnClickListener(new SafeViewOnClickListener() {
@@ -315,88 +305,6 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
     private void populateScreen() {
         final FriendsPlugin friendsPlugin = mService.getPlugin(FriendsPlugin.class);
         populateScreen(friendsPlugin.getStore().getMenu(email, page));
-    }
-
-    private void pressMenuItem(final ServiceMenu menu, final MessagingPlugin messagingPlugin, final FriendStore store,
-        final ServiceMenuItem item) {
-        long currentTime = System.currentTimeMillis();
-        if (getLastTimeClicked() != 0
-            && (currentTime < (getLastTimeClicked() + ServiceBoundActivity.DOUBLE_CLICK_TIMESPAN))) {
-            L.d("ignoring click on smi [" + item.coords[0] + "," + item.coords[1] + "," + item.coords[2] + "]");
-            return;
-        }
-        setLastTimeClicked(currentTime);
-
-        if (item.requiresWifi && !checkConnectivityIsWifi()) {
-            UIUtils.showLongToast(mService, getString(R.string.failed_to_show_action_screen_no_wifi));
-            return;
-        }
-
-        mContextMatch = "MENU_" + UUID.randomUUID().toString();
-        PressMenuIconRequestTO request = new PressMenuIconRequestTO();
-        request.coords = item.coords;
-        request.service = email;
-        request.context = mContextMatch;
-        request.generation = menu.generation;
-        request.hashed_tag = item.hashedTag;
-        request.timestamp = System.currentTimeMillis() / 1000;
-        try {
-            if (item.staticFlowHash == null) {
-                Rpc.pressMenuItem(new ResponseHandler<PressMenuIconResponseTO>(), request);
-
-                if (item.screenBranding != null) {
-                    boolean brandingAvailable = false;
-                    try {
-                        brandingAvailable = messagingPlugin.getBrandingMgr().isBrandingAvailable(item.screenBranding);
-                    } catch (BrandingFailureException e) {
-                        // ignore
-                    }
-                    if (!brandingAvailable) {
-                        Friend friend = store.getExistingFriend(email);
-                        friend.actionMenu = menu;
-                        messagingPlugin.getBrandingMgr().queue(friend);
-                    }
-
-                    Intent intent = new Intent(ServiceActionMenuActivity.this, ActionScreenActivity.class);
-                    intent.putExtra(ActionScreenActivity.BRANDING_KEY, item.screenBranding);
-                    intent.putExtra(ActionScreenActivity.SERVICE_EMAIL, email);
-                    intent.putExtra(ActionScreenActivity.ITEM_TAG_HASH, item.hashedTag);
-                    intent.putExtra(ActionScreenActivity.ITEM_LABEL, item.label);
-                    intent.putExtra(ActionScreenActivity.ITEM_COORDS, item.coords);
-                    intent.putExtra(ActionScreenActivity.CONTEXT_MATCH, mContextMatch);
-                    intent.putExtra(ActionScreenActivity.RUN_IN_BACKGROUND, item.runInBackground);
-                    startActivity(intent);
-                } else {
-                    if (checkConnectivity())
-                        showTransmitting(null);
-                    else {
-                        showActionScheduledDialog();
-                    }
-                }
-            } else {
-                showTransmitting(null);
-                request.static_flow_hash = item.staticFlowHash;
-                Map<String, Object> userInput = new HashMap<String, Object>();
-                userInput.put("request", request.toJSONMap());
-                userInput.put("func", "com.mobicage.api.services.pressMenuItem");
-
-                MessageFlowRun mfr = new MessageFlowRun();
-                mfr.staticFlowHash = item.staticFlowHash;
-                try {
-                    JsMfr.executeMfr(mfr, userInput, mService, true);
-                } catch (EmptyStaticFlowException ex) {
-                    completeTransmit(null);
-                    AlertDialog.Builder builder = new AlertDialog.Builder(ServiceActionMenuActivity.this);
-                    builder.setMessage(ex.getMessage());
-                    builder.setPositiveButton(R.string.rogerthat, null);
-                    AlertDialog dialog = builder.create();
-                    dialog.show();
-                    return;
-                }
-            }
-        } catch (Exception e) {
-            L.bug(e);
-        }
     }
 
     private void populateScreen(final ServiceMenu menu) {
@@ -425,7 +333,10 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
             View.OnClickListener onClickListener = new SafeViewOnClickListener() {
                 @Override
                 public void safeOnClick(View v) {
-                    pressMenuItem(menu, messagingPlugin, store, item);
+                    if (mMenuItemPresser == null) {
+                        mMenuItemPresser = new MenuItemPresser(ServiceActionMenuActivity.this, email);
+                    }
+                    mMenuItemPresser.itemPressed(item, menu.generation, null);
                 }
             };
             ((View) cell.icon.getParent()).setOnClickListener(onClickListener);
@@ -609,29 +520,6 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
                         FriendsPlugin.FRIEND_MARKED_FOR_REMOVAL_INTENT };
                 }
             } else if (MessagingPlugin.NEW_MESSAGE_RECEIVED_INTENT.equals(action)) {
-                if (mContextMatch.equals(intent.getStringExtra("context")) && isTransmitting()) {
-                    mContextMatch = "";
-                    completeTransmit(new SafeRunnable() {
-                        @Override
-                        protected void safeRun() throws Exception {
-                            final String messageKey = intent.getStringExtra("message");
-                            long flags = intent.getLongExtra("flags", 0);
-                            final Intent i;
-                            if ((flags & MessagingPlugin.FLAG_DYNAMIC_CHAT) == MessagingPlugin.FLAG_DYNAMIC_CHAT) {
-                                i = new Intent(context, FriendsThreadActivity.class);
-                                final String parentKey = intent.getStringExtra("parent");
-                                i.putExtra(FriendsThreadActivity.PARENT_MESSAGE_KEY, parentKey == null ? messageKey
-                                    : parentKey);
-                                i.putExtra(FriendsThreadActivity.MESSAGE_FLAGS, flags);
-                            } else {
-                                i = new Intent(context, ServiceMessageDetailActivity.class);
-                                i.putExtra("message", messageKey);
-                            }
-                            startActivity(i);
-                        }
-                    });
-                    return new String[] { action };
-                }
                 if (mService != null)
                     handleBadge(mService.getPlugin(FriendsPlugin.class).getStore());
             } else if (MessagingPlugin.MESSAGE_PROCESSED_INTENT.equals(action)
@@ -645,17 +533,6 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
                 return new String[] { MessagingPlugin.MESSAGE_PROCESSED_INTENT, MessagingPlugin.MESSAGE_LOCKED_INTENT,
                     MessagingPlugin.MESSAGE_DIRTY_CLEANED_INTENT, MessagingPlugin.THREAD_DELETED_INTENT,
                     MessagingPlugin.THREAD_RECOVERED_INTENT };
-            } else if (MessagingPlugin.MESSAGE_JSMFR_ERROR.equals(action)) {
-                if (mContextMatch.equals(intent.getStringExtra("context")) && isTransmitting()) {
-                    mContextMatch = "";
-                    completeTransmit(new SafeRunnable() {
-                        @Override
-                        protected void safeRun() throws Exception {
-                            UIUtils.showAlertDialog(ServiceActionMenuActivity.this, null,
-                                R.string.error_please_try_again);
-                        }
-                    });
-                }
             }
             return null;
         }
@@ -846,6 +723,10 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
     @Override
     protected void onServiceUnbound() {
         unregisterReceiver(mBroadcastReceiver);
+        if (mMenuItemPresser != null) {
+            mMenuItemPresser.stop();
+            mMenuItemPresser = null;
+        }
     }
 
     @Override
