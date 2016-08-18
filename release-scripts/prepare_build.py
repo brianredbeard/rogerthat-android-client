@@ -488,50 +488,31 @@ def convert_config():
     profile_data_fields = ','.join(['"%s"' % s for s in profile_settings.get('DATA_FIELDS', [])])
     profile_show_gender_and_birthdate = bool_str(profile_settings.get('SHOW_GENDER_AND_BIRTHDATE', "true"))
 
-    about_website = doc.get("ABOUT_ACTIVITY", {}).get('website', None)
-    about_website_url = doc.get("ABOUT_ACTIVITY", {}).get('website_url', None)
-    about_email = doc.get("ABOUT_ACTIVITY", {}).get('email', None)
-    about_twitter = doc.get("ABOUT_ACTIVITY", {}).get('twitter', None)
-    about_twitter_url = doc.get("ABOUT_ACTIVITY", {}).get('twitter_url', None)
-    about_facebook = doc.get("ABOUT_ACTIVITY", {}).get('facebook', None)
-    about_facebook_url = doc.get("ABOUT_ACTIVITY", {}).get('facebook_url', None)
 
-    if not about_website:
-        if doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_CITYPAPP:
-            about_website = "www.onzestadapp.be"
-        else:
-            about_website = "www.rogerthat.net"
-    if not about_website_url:
-        if doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_CITYPAPP:
-            about_website_url = "http://www.onzestadapp.be"
-        else:
-            about_website_url = "http://www.rogerthat.net"
-    if not about_email:
-        if doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_CITYPAPP:
-            about_email = "info@onzestadapp.be"
-        else:
-            about_email = "info@mobicage.com"
-    if not about_twitter:
-        if doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_CITYPAPP:
-            about_twitter = "@onzestadapp"
-        else:
-            about_twitter = "@rogerthat"
-    if not about_twitter_url:
-        if doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_CITYPAPP:
-            about_twitter_url = "https://twitter.com/onzestadapp"
-        else:
-            about_twitter_url = "https://twitter.com/rogerthat"
-    if not about_facebook:
-        if doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_CITYPAPP:
-            about_facebook = "/onzestadapp"
-        else:
-            about_facebook = "/rogerthatplatform"
-    if not about_facebook_url:
-        if doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_CITYPAPP:
-            about_facebook_url = "https://www.facebook.com/onzestadapp"
-        else:
-            about_facebook_url = "https://www.facebook.com/rogerthatplatform"
+    if doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_CITYPAPP:
+        default_about_website = "www.onzestadapp.be"
+        default_about_website_url = "http://www.onzestadapp.be"
+        default_about_email = "info@onzestadapp.be"
+        default_about_twitter = "@onzestadapp"
+        default_about_twitter_url = "https://twitter.com/onzestadapp"
+        default_about_facebook = "/onzestadapp"
+        default_about_facebook_url = "https://www.facebook.com/onzestadapp"
+    else:
+        default_about_website = "www.rogerthat.net"
+        default_about_website_url = "http://www.rogerthat.net"
+        default_about_email = "info@mobicage.com"
+        default_about_twitter = "@rogerthat"
+        default_about_twitter_url = "https://twitter.com/rogerthat"
+        default_about_facebook = "/rogerthatplatform"
+        default_about_facebook_url = "https://www.facebook.com/rogerthatplatform"
 
+    about_website = doc.get("ABOUT_ACTIVITY", {}).get('website', default_about_website)
+    about_website_url = doc.get("ABOUT_ACTIVITY", {}).get('website_url', default_about_website_url)
+    about_email = doc.get("ABOUT_ACTIVITY", {}).get('email', default_about_email)
+    about_twitter = doc.get("ABOUT_ACTIVITY", {}).get('twitter', default_about_twitter)
+    about_twitter_url = doc.get("ABOUT_ACTIVITY", {}).get('twitter_url', default_about_twitter_url)
+    about_facebook = doc.get("ABOUT_ACTIVITY", {}).get('facebook', default_about_facebook)
+    about_facebook_url = doc.get("ABOUT_ACTIVITY", {}).get('facebook_url', default_about_facebook_url)
 
     speech_to_text = bool_str(doc["APP_CONSTANTS"].get("SPEECH_TO_TEXT", False))
     secure_app = bool_str(doc["APP_CONSTANTS"].get("SECURE_APP", False))
