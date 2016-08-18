@@ -1717,6 +1717,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
                 executeSign(nextSi, true);
             } else if (mShouldClearPrivateKey){
                 mPrivateKey = null;
+                mShouldClearPrivateKey = false;
             }
         }
     }
