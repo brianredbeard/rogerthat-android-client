@@ -516,6 +516,8 @@ def convert_config():
 
     speech_to_text = bool_str(doc["APP_CONSTANTS"].get("SPEECH_TO_TEXT", False))
     secure_app = bool_str(doc["APP_CONSTANTS"].get("SECURE_APP", False))
+    secure_pin_interval = str(doc["APP_CONSTANTS"].get("SECURE_PIN_INTERVAL", 900))
+    secure_pin_retry_interval = str(doc["APP_CONSTANTS"].get("SECURE_PIN_RETRY_INTERVAL", 300))
 
     if doc["APP_CONSTANTS"].get("SECURE_APP", False):
         rogerthat_build_gradle = os.path.join(ANDROID_SRC_DIR, '..', 'build.gradle')
@@ -598,8 +600,8 @@ public class AppConstants {
 
     public static final boolean SPEECH_TO_TEXT = %(speech_to_text)s;
     public static final boolean SECURE_APP = %(secure_app)s;
-    public static final int SECURE_PIN_INTERVAL = 15 * 60;
-    public static final int SECURE_PIN_RETRY_INTERVAL = 5 * 60;
+    public static final int SECURE_PIN_INTERVAL = %(secure_pin_interval)s;
+    public static final int SECURE_PIN_RETRY_INTERVAL = %(secure_pin_retry_interval)s;
 }
 ''' % dict(LICENSE=LICENSE,
            app_type=app_type,
@@ -631,6 +633,8 @@ public class AppConstants {
            about_facebook_url=about_facebook_url,
            speech_to_text=speech_to_text,
            secure_app=secure_app,
+           secure_pin_interval=secure_pin_interval,
+           secure_pin_retry_interval=secure_pin_retry_interval,
            app_service_guid=app_service_guid,
            registration_type=registration_type,
            registration_type_oauth_domain=registration_type_oauth_domain,

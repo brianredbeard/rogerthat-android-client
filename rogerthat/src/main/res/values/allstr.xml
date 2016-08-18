@@ -465,9 +465,9 @@
     <string name="pin_did_not_match">Pin code did not match.</string>
     <string name="pin_invalid">Invalid pin code.</string>
     <string name="pin_required_continue">A pin is required to continue!</string>
-    <string name="try_again_in_seconds">Try again in %1$s sec.</string>
-    <string name="try_again_in_minutes">Try again in %1$s min.</string>
-    <string name="try_again_in_hours">Try again in %1$s hr.</string>
+    <string name="try_again_in_seconds">Try again in %1$d sec.</string>
+    <string name="try_again_in_minutes">Try again in %1$d min.</string>
+    <string name="try_again_in_hours">Try again in %1$d hr.</string>
     <string name="stop">Stop</string>
     <string name="corr">Corr</string>
     <string name="your_location_displayed_friend_have_contacted_for_their_location">Your location is displayed. Your friends (which share their location with you) have been contacted to send you their location.</string>
