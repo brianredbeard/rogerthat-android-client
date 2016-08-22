@@ -43,6 +43,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import android.annotation.SuppressLint;
 
+import android.os.Build;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 
@@ -73,7 +74,9 @@ public class Security {
             113, -37, 27, -111 }; // IV used in 1.0.1013.A for AES encryption
 
     static {
-        java.security.Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
+        if (Build.VERSION.SDK_INT >= 23) {
+            java.security.Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
+        }
     }
 
     public static String sha256(String value) {

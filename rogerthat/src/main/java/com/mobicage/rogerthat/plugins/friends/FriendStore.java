@@ -1140,18 +1140,7 @@ public class FriendStore implements Closeable {
             if (!TextUtils.isEmptyOrWhitespace(item.staticFlowHash)) {
                 if (!isStaticFlowAvailable(item.staticFlowHash)) {
                     // Download static flow
-                    GetStaticFlowRequestTO request = new GetStaticFlowRequestTO();
-                    request.service = friend.email;
-                    request.coords = item.coords;
-                    request.staticFlowHash = item.staticFlowHash;
-                    GetStaticFlowResponseHandler rh = new GetStaticFlowResponseHandler();
-                    rh.setEmail(friend.email);
-                    rh.setStaticFlowHash(item.staticFlowHash);
-                    try {
-                        com.mobicage.api.services.Rpc.getStaticFlow(rh, request);
-                    } catch (Exception e) {
-                        L.bug(e);
-                    }
+                    mMainService.getPlugin(FriendsPlugin.class).requestStaticFlow(friend.email, item);
                 }
             }
         }

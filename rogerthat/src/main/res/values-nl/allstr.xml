@@ -153,6 +153,7 @@
     <string name="friend_map_marker">Localisatietijd: %1$s\nNauwkeurigheid: %2$dm</string>
     <string name="friend_remove_failed">Fout tijdens verzenden.</string>
     <string name="friend_request_share_location_invitation_sent">Aanvraag verzonden naar %1$s om locatie te delen met jou.</string>
+    <string name="friend_selection_is_required">Gelieve minstens één vriend te selecteren.</string>
     <string name="friend_share_location">Kan mijn locatie zien</string>
     <string name="friend_sms_invitation">Beste %1$s,\n\nIk nodig u uit om met mij te communiceren via %4$s.\n\nStap 1. Installeer de smartphone app:\n%2$s\n\nStap 2. Connecteer mij:\n%3$s</string>
     <string name="friend_sms_invitation_no_url">Beste %1$s\n\nIk nodig u uit om te communiceren met mij via %3$s. Dit is een cool communicatieplatform voor web en smartphone!\n\nInstalleer de %3$s app: %2$s</string>
@@ -333,7 +334,7 @@
     <string name="registration_no_attempts_left">U heeft drie keer een foute activatiecode ingevoerd.\n\nU moet de registratie herbeginnen.</string>
     <string name="registration_option_email">Optie 2:\nLog in met je e-mailadres.</string>
     <string name="registration_option_fb">Optie 1:\nLog in met je Facebook profiel.</string>
-    <string name="registration_pin_was_mailed">Vul de activatiecode in&lt;br /&gt;die verzonden is naar&lt;br /&gt;&lt;b&gt;%1$s&lt;/b&gt;.</string>
+    <string name="registration_pin_was_mailed">Jouw activatiecode werd verstuurd naar &lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; &lt;br /&gt;&lt;br /&gt; Het zou kunnen dat de mail beland is in je Spam of Ongewenste Email map.</string>
     <string name="registration_pin_was_mailed_no_html">Jouw activatiecode is verzonden naar %1$s om %2$s\nHet zou kunnen dat de mail beland is in je Spam of Ongewenste Email map.</string>
     <string name="registration_request_new_pin">Nieuwe activatiecode aanvragen</string>
     <string name="registration_screen_install_zxing">U heeft geen QR code scanner op uw systeem.\n\nWenst u er nu een te installeren?</string>
@@ -399,6 +400,7 @@
     <string name="show_location">Locatie tonen</string>
     <string name="show_message_header">%1$s boodschap</string>
     <string name="show_more">Meer tonen…</string>
+    <string name="sign">Tekenen</string>
     <string name="size_actual">Actueel</string>
     <string name="size_large">Groot</string>
     <string name="size_medium">Medium</string>
@@ -461,6 +463,4 @@
     <string name="yes">Ja</string>
     <string name="you_are_here">Je bent hier</string>
     <string name="your_location_displayed_friend_have_contacted_for_their_location">Locatie is opgevraagd van je vrienden die hun locatie delen.</string>
-
-    <string name="friend_selection_is_required">Gelieve minstens één vriend te selecteren.</string>
 </resources>
