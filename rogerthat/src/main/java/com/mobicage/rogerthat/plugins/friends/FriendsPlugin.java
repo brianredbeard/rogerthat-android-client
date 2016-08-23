@@ -89,6 +89,7 @@ import com.mobicage.to.friends.LogInvitationSecretSentRequestTO;
 import com.mobicage.to.friends.LogInvitationSecretSentResponseTO;
 import com.mobicage.to.friends.PutGroupRequestTO;
 import com.mobicage.to.friends.RequestShareLocationRequestTO;
+import com.mobicage.to.friends.ServiceMenuItemTO;
 import com.mobicage.to.friends.ShareLocationRequestTO;
 import com.mobicage.to.friends.UpdateFriendRequestTO;
 import com.mobicage.to.friends.UpdateFriendResponseTO;
@@ -101,6 +102,7 @@ import com.mobicage.to.location.GetFriendLocationResponseTO;
 import com.mobicage.to.location.GetFriendsLocationResponseTO;
 import com.mobicage.to.service.FindServiceRequestTO;
 import com.mobicage.to.service.GetServiceActionInfoRequestTO;
+import com.mobicage.to.service.GetStaticFlowRequestTO;
 import com.mobicage.to.service.PokeServiceRequestTO;
 import com.mobicage.to.service.PokeServiceResponseTO;
 import com.mobicage.to.service.ReceiveApiCallResultRequestTO;
@@ -1063,6 +1065,21 @@ public class FriendsPlugin implements MobicagePlugin {
 
     public boolean isStaticFlowAvailable(String staticFlowHash) {
         return mStore.isStaticFlowAvailable(staticFlowHash);
+    }
+
+    public void requestStaticFlow(String email, ServiceMenuItemTO item) {
+        GetStaticFlowRequestTO request = new GetStaticFlowRequestTO();
+        request.service = email;
+        request.coords = item.coords;
+        request.staticFlowHash = item.staticFlowHash;
+        GetStaticFlowResponseHandler rh = new GetStaticFlowResponseHandler();
+        rh.setEmail(email);
+        rh.setStaticFlowHash(item.staticFlowHash);
+        try {
+            com.mobicage.api.services.Rpc.getStaticFlow(rh, request);
+        } catch (Exception e) {
+            L.bug(e);
+        }
     }
 
     public boolean findRogerthatUsersViaAddressBook() {

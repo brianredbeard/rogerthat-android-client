@@ -189,6 +189,7 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
             builder.setMessage(ex.getMessage());
             builder.setPositiveButton(R.string.rogerthat, null);
             builder.create().show();
+            mService.getPlugin(FriendsPlugin.class).requestStaticFlow(request.service, item);
         }
     }
 

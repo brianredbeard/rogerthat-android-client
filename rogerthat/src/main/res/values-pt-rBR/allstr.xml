@@ -143,6 +143,7 @@
     <string name="friend_map_marker">Rastreada às: %1$s\nPrecisão: %2$dm</string>
     <string name="friend_remove_failed">Não foi possível enviar a ação \"desfazer amizade\" ao servidor.</string>
     <string name="friend_request_share_location_invitation_sent">Solicitação de compartilhamento de localização enviada para %1$s.</string>
+    <string name="friend_selection_is_required">Por favor, selecione pelo menos um amigo.</string>
     <string name="friend_share_location">Posso ver minha localização</string>
     <string name="friend_sms_invitation">Olá %1$s,\n\nGostaria de convidar você para estar em contato comigo através do %4$s.\n\nPasso 1. Instale o aplicativo %4$s:\n%2$s\n\nPasso 2. Conecte-se comigo:\n%3$s</string>
     <string name="friend_sms_invitation_no_url">Olá %1$s\n\nGostaria de convidar você para estar em contato comigo através do %3$s. %3$s É uma plataforma de mensagens muito legal para Web e smartphones.\n\nInstale o aplicativo %3$s: %2$s</string>
@@ -287,7 +288,6 @@
     <string name="registration_activating_account">Ativando sua conta %1$s…</string>
     <string name="registration_agree_tos">Concordar e continuar</string>
     <string name="registration_email_not_valid">Inserir endereço de e-mail válido</string>
-    <string name="registration_enter_email_hint">Inserir seu endereço de e-mail </string>
     <string name="registration_enter_email_hint_enterprise">Inserir endereço de e-mail da empresa</string>
     <string name="registration_enter_pin">Inserir código de ativação para completar o registro</string>
     <string name="registration_enter_pin_hint">Código de ativação</string>
@@ -306,7 +306,6 @@
     <string name="registration_no_attempts_left">Você inseriu um código de activação errado três vezes.\n\nReinicie seu registro.</string>
     <string name="registration_option_email">Opção 2:\nEntrar com seu endereço de e-mail.</string>
     <string name="registration_option_fb">Opção 1:\nEntrar com sua conta do Facebook.</string>
-    <string name="registration_pin_was_mailed">Seu código de ativação foi enviado para o e-mail&lt;br /&gt;&lt;b&gt;%1$s&lt;/b&gt;&lt;br /&gt;&lt;br /&gt; Verifique suas pastas Spam ou Lixo Eletrônico.</string>
     <string name="registration_pin_was_mailed_no_html">Seu código de ativação foi enviado para o e-mail %1$s às %2$s\nComprove suas pastas Spam ou Lixo Eletrônico.</string>
     <string name="registration_request_new_pin">Solicitar novo código de ativação</string>
     <string name="registration_screen_install_zxing">%1$s utiliza o leitor de código de barras ZXing para automatizar várias tarefas.\n\nDeseja instalar o leitor de código de barras ZXing agora?</string>
@@ -425,6 +424,4 @@
     <string name="yes">Sim</string>
     <string name="you_are_here">Você está aquí</string>
     <string name="your_location_displayed_friend_have_contacted_for_their_location">Sua localização está sendo exibida. Foi solicitado a seus amigos (que compartilham sua localização com você) que enviem a você a localização deles.</string>
-
-    <string name="friend_selection_is_required">Por favor, selecione pelo menos um amigo.</string>
 </resources>
