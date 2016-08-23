@@ -295,20 +295,7 @@ public class Security {
         FriendsPlugin friendsPlugin = mainService.getPlugin(FriendsPlugin.class);
         friendsPlugin.setSecureInfo(publicKeyString);
     }
-
-    public static void setSecureInfo(MainService mainService, final String publicKey, final String encryptedPin, final String encryptedPrivateKey) throws Exception {
-        byte[] decodedPin = deviceDecryptValue(Base64.decode(encryptedPin));
-        String pin = new String(decodedPin, "UTF8");
-        byte[] decodedPrivateKey = deviceDecryptValue(Base64.decode(encryptedPrivateKey));
-        saveSecureInfo(mainService, publicKey, pin, decodedPrivateKey);
-    }
-
-    private static void saveSecureInfo(MainService mainService, final String publicKey, final String pin, final byte[] privateKey) throws Exception {
-        ConfigurationProvider configProvider = mainService.getConfigurationProvider();
-        Configuration cfg = configProvider.getConfiguration(CONFIGKEY);
-        saveSecureInfo(configProvider, cfg, publicKey, pin, privateKey);
-    }
-
+    
     private static void saveSecureInfo(ConfigurationProvider configProvider, Configuration cfg, final String publicKey, final String pin, final byte[] privateKey) throws Exception {
         cfg.put(CONFIG_PIN, sha256(pin));
         cfg.put(CONFIG_PUBLIC_KEY, publicKey);

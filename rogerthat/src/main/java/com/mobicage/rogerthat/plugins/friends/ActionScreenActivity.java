@@ -579,7 +579,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                                     byte[] payloadSignature = (byte[]) result;
                                     Map<String, Object> r = new HashMap<String, Object>();
                                     r.put("payload", payload);
-                                    r.put("payload_signature", Base64.encodeBytes(payloadSignature));
+                                    r.put("payload_signature", Base64.encodeBytes(payloadSignature, Base64.DONT_BREAK_LINES));
                                     deliverResult(requestId, r, null);
                                 } catch (Exception e) {
                                     L.d("'security/sign' onSuccess exception", e);
