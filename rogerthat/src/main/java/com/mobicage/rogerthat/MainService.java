@@ -1727,10 +1727,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         for (int i= mQueue.size() - 1; i >= 0; i--) {
             SecurityItem item = mQueue.get(i);
             if (item.active == false) {
-                if (mPrivateKey == null) {
-                    item.callback.onError(new Exception("User cancelled pin input"));
-                    mQueue.remove(item);
-                } else if (item.forcePin){
+                if (mPrivateKey == null || item.forcePin){
                     item.callback.onError(new Exception("User cancelled pin input"));
                     mQueue.remove(item);
                 }

@@ -13,6 +13,7 @@ import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.util.IOUtils;
+import com.mobicage.rogerthat.util.Security;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
@@ -43,7 +44,6 @@ public class SignWidget extends Widget {
     private Button mSignBtn;
     private View mSignResultView;
     private List<String> mResult;
-    private MessageDigest mSha256Digester;
     private String mCaption;
 
     public SignWidget(Context context) {
@@ -56,11 +56,7 @@ public class SignWidget extends Widget {
 
     @Override
     public void initializeWidget() {
-        try {
-            mSha256Digester = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            mSha256Digester = null;
-        }
+
 
         mSignResultView = findViewById(R.id.sign_result);
         mSignBtn = (Button) findViewById(R.id.sign_btn);
@@ -148,11 +144,13 @@ public class SignWidget extends Widget {
 
     private byte[] getPayloadHash() {
         final String payloadStr = (String) mWidgetMap.get("payload");
-        return payloadStr == null ? null : sha256(Base64.decode(payloadStr));
+        return payloadStr == null ? null : Security.sha256Digest(Base64.decode(payloadStr));
     }
 
     private void sign() {
-        if (mSha256Digester == null) {
+        try {
+            MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
             UIUtils.showLongToast(mActivity, R.string.feature_not_supported);
             return;
         }
@@ -202,17 +200,16 @@ public class SignWidget extends Widget {
                 signatures[0] = (payloadHash == null || result == null) ? null : Base64.encodeBytes(result);
 
                 final List<byte[]> hashes = new ArrayList<>(mMessage.attachments.length + 2);
-                hashes.add(sha256(mMessage.message));
+                hashes.add(Security.sha256Digest(mMessage.message));
                 if (payloadHash != null) {
                     hashes.add(payloadHash);
                 }
 
                 if (mMessage.attachments.length != 0) {
                     for (AttachmentTO attachment : mMessage.attachments) {
-                        mSha256Digester.reset();
                         try {
                             final File attachmentFile = messagingPlugin.attachmentFile(mMessage, attachment);
-                            hashes.add(IOUtils.digest(mSha256Digester, attachmentFile));
+                            hashes.add(Security.sha256Digest(attachmentFile));
                         } catch (IOException e) {
                             UIUtils.showErrorPleaseRetryDialog(mActivity);
                             return;
@@ -226,7 +223,7 @@ public class SignWidget extends Widget {
                     }
                 }
 
-                final byte[] hash = sha256(hashes.toArray(new byte[hashes.size()][]));
+                final byte[] hash = Security.sha256Digest(hashes.toArray(new byte[hashes.size()][]));
                 L.i("Combined hash: " + TextUtils.toHex(hash));
                 mActivity.getMainService().sign(mCaption, hash, payloadHash == null, signMessageCallback);
             }
@@ -246,18 +243,5 @@ public class SignWidget extends Widget {
         } else {
             signPayloadCallback.onSuccess(null);
         }
-    }
-
-    private byte[] sha256(byte[]... data) {
-        T.UI();
-        mSha256Digester.reset();
-        for (byte[] bytes : data) {
-            mSha256Digester.update(bytes);
-        }
-        return mSha256Digester.digest();
-    }
-
-    private byte[] sha256(String data) {
-        return sha256(data.getBytes(StandardCharsets.UTF_8));
     }
 }
