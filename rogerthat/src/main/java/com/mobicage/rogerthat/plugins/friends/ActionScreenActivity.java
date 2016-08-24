@@ -570,7 +570,10 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 @Override
                 protected void safeRun() throws Exception {
                     try {
-                        final byte[] payloadData = payload.getBytes("utf8");
+                        final byte[] payloadData = Security.sha256Digest(payload);
+                        if (payloadData == null) {
+                            throw new Exception("payloadData was null");
+                        }
 
                         MainService.SecurityCallback sc = new MainService.SecurityCallback() {
                             @Override
@@ -629,7 +632,11 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 protected void safeRun() throws Exception {
 
                     try {
-                        final byte[] payloadData = payload.getBytes("utf8");
+                        final byte[] payloadData = Security.sha256Digest(payload);
+                        if (payloadData == null) {
+                            throw new Exception("payloadData was null");
+                        }
+
                         final byte[] payloadDataSignature = Base64.decode(payloadSignature);
                         boolean valid = mService.validate(payloadData, payloadDataSignature);
                         Map<String, Object> r = new HashMap<String, Object>();

@@ -17,10 +17,13 @@
  */
 package com.mobicage.rogerthat.util;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -80,17 +83,53 @@ public class Security {
     }
 
     public static String sha256(String value) {
+        byte[] data = sha256Digest(value);
+        return String.format("%0" + (data.length * 2) + "X", new BigInteger(1, data));
+    }
+
+    public static byte[] sha256Digest(String value) {
+        return sha256Digest(value.getBytes());
+    }
+
+    public static byte[] sha256Digest(byte[] value) {
         MessageDigest digest;
         try {
             digest = MessageDigest.getInstance("SHA-256");
         } catch (NoSuchAlgorithmException e1) {
             L.bug(e1);
-            return "";
+            return null;
         }
         digest.reset();
-        byte[] data = digest.digest(value.getBytes());
-        return String.format("%0" + (data.length * 2) + "X", new BigInteger(1, data));
+        return digest.digest(value);
     }
+
+    public static byte[] sha256Digest(byte[]... data) {
+        MessageDigest digest;
+        try {
+            digest = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e1) {
+            L.bug(e1);
+            return null;
+        }
+        digest.reset();
+        for (byte[] bytes : data) {
+            digest.update(bytes);
+        }
+        return digest.digest();
+    }
+
+    public static byte[] sha256Digest(File f) throws IOException {
+        MessageDigest digest;
+        try {
+            digest = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e1) {
+            L.bug(e1);
+            return null;
+        }
+        digest.reset();
+        return IOUtils.digest(digest, f);
+    }
+
 
     public static byte[] md5(String value) {
         MessageDigest digest;
