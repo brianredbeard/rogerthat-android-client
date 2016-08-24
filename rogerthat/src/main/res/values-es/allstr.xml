@@ -2,7 +2,7 @@
 <resources>
     <string name="__me_as_recipient">mi</string>
     <string name="__me_as_sender">yo</string>
-    <string name="about">Acerca de…</string>
+    <string name="about">Info</string>
     <string name="about_more_info">Para obtener más información acerca de la App de %1$s y otros productos basados en Rogerthat, por favor visite:</string>
     <string name="about_more_info_enterprise">La %1$s app está construido sobre la plataforma Rogerthat Enterprise. ¿Quieres saber qué Rogerthat Enterprise puede hacer por su empresa. Visita:</string>
     <string name="about_provided_by">Rogerthat, presentada con orgullo por</string>
@@ -43,13 +43,13 @@
     <string name="add_via_facebook_notification">Resultado de la búsqueda de contactos de Facebook mediante %1$s.</string>
     <string name="add_via_facebook_waiting">Usted recibirá una notificación cuando sus contactos de Facebook sean comprobados.</string>
     <string name="address">Dirección</string>
-    <string name="agenda">Agenda</string>
+    <string name="agenda">Eventos</string>
     <string name="alarm_sound">Tono de alarma</string>
     <string name="alarm_sound_custom">Personalizado</string>
     <string name="alarm_sound_default">Por defecto</string>
     <string name="all_friends">Todos los amigos</string>
     <string name="already_friend">Usted ya es amigo de %1$s.</string>
-    <string name="ask_a_question">Haz una pregunta</string>
+    <string name="ask_a_question">Contacto</string>
     <string name="associations">Asociaciones</string>
     <string name="attachment_can_not_be_displayed_in_your_version">El adjunto seleccionado no puede visualizarse en esta versión de la aplicación %1$s.</string>
     <string name="attachment_name_image">&lt;imagen&gt;</string>
@@ -107,8 +107,8 @@
     <string name="device_was_unregistered">El dispositivo ha sido desconectado.</string>
     <string name="dialog_request_location_sharing">%1$s no permite compartir su ubicación con usted.\n\n¿Desea enviar una solicitud para que habilite la compartición de su ubicación?</string>
     <string name="disabled">Discapacidad</string>
-    <string name="discover_services_long">Conectar a servicios %1$s</string>
-    <string name="discover_services_short">Buscar servicios</string>
+    <string name="discover_services_long">Pulsa aquí para añadir un nuevo servicio a %1$s</string>
+    <string name="discover_services_short">Añadir nuevo</string>
     <string name="dismissed_at">%1$s admitido.</string>
     <string name="dont_like">No me gusta</string>
     <string name="downloading">Descargando…</string>

@@ -69,7 +69,7 @@
     <string name="caption_call">Appelez %1$s maintenant</string>
     <string name="caption_required">Le bouton de texte est nécessaire.</string>
     <string name="card_number">Carte Nº</string>
-    <string name="care">Professionnels de santé</string>
+    <string name="care">Santé</string>
     <string name="change_picture">Changer l\'image</string>
     <string name="check_in">Enregistrer</string>
     <string name="check_in_at">Voulez-vous enregistrer à %1$s?</string>
@@ -225,7 +225,7 @@
     <string name="location_usage_used_for">%1$s utilise votre position pour:</string>
     <string name="locking">En train de verrouiller le message, prière d\'attendre…</string>
     <string name="logs_forwarded">Vos rapports sur %2$s sont transférés vers %1$s.</string>
-    <string name="loyalty_card_description">Votre carte de fidélité de l\'application %1$s\n\n\n\nScanner pour gagner des points de fidélité\n\nScanner pour se connecter avec des amis</string>
+    <string name="loyalty_card_description">Votre carte de fidélité de l\'application %1$s\n\nScanner pour gagner des points de fidélité\nScanner pour se connecter avec des amis</string>
     <string name="male">Homme</string>
     <string name="max_date_reached">Impossible de sélectionner plus tard.</string>
     <string name="maybe">Peut-être</string>
@@ -233,7 +233,7 @@
     <string name="member_message_history">Historique de %1$s</string>
     <string name="members">Membres</string>
     <string name="members_are_required">Des membres sont requis</string>
-    <string name="merchants">Commerçants</string>
+    <string name="merchants">Commerces</string>
     <string name="message">Un message</string>
     <string name="message_confirm">Prière de confirmer</string>
     <string name="message_delete_confirm">Confirmer la suppression</string>
