@@ -125,7 +125,7 @@ public class FriendSelectWidget extends Widget {
             findViewById(R.id.no_friends_layout).setVisibility(View.GONE);
             listView.setVisibility(View.VISIBLE);
 
-            if (friendCount == 1) {
+            if (friendCount == 1 && mSelectionRequired) {
                 if (!isRefresh) {
                     // pre-select the friend
                     try {
