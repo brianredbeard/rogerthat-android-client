@@ -1719,7 +1719,7 @@ public class FriendStore implements Closeable {
         mMainService.sendBroadcast(intent);
     }
 
-    public ServiceMenuItemDetails getFriendBroadcastFlowForMfr(String email) {
+    public ServiceMenuItemDetails getBroadcastServiceMenuItem(String email) {
         final Cursor cursor = mDb.rawQuery(mMainService.getString(R.string.sql_friend_get_broadcast_flow_for_mfr),
             new String[] { email });
         try {

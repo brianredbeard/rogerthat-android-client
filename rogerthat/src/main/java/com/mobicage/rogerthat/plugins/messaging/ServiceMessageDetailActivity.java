@@ -647,7 +647,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
             broadcastSpamControlIcon.setTypeface(mFontAwesomeTypeFace);
             broadcastSpamControlIcon.setText(R.string.fa_bell);
 
-            final ServiceMenuItemDetails smi = mFriendsPlugin.getStore().getFriendBroadcastFlowForMfr(mCurrentMessage
+            final ServiceMenuItemDetails smi = mFriendsPlugin.getStore().getBroadcastServiceMenuItem(mCurrentMessage
                     .sender);
             if (smi == null) {
                 L.bug("BroadcastData was null for: " + mCurrentMessage.sender);
@@ -669,9 +669,11 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
                     mMenuItemPresser.itemPressed(smi, smi.menuGeneration, new MenuItemPresser.ResultHandler() {
                         @Override
                         public void onSuccess() {
+                            overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_up);
                             finish();
                         }
                     });
+
                 }
 
             });
@@ -797,12 +799,12 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
 
     private void jumpToServiceHomeScreen(final ButtonTO button, final Bundle extras) {
         // detect if we come from a branding or message history
-        if (getIntent().getBooleanExtra(ServiceMessageDetailActivity.JUMP_TO_SERVICE_HOME_SCREEN, true)
+        if (AppConstants.SERVICES_ENABLED
+                && getIntent().getBooleanExtra(ServiceMessageDetailActivity.JUMP_TO_SERVICE_HOME_SCREEN, true)
                 && getIntent().getStringExtra(MessagingPlugin.MEMBER_FILTER) == null
                 && (button == null || getExpectNext(button) == 0)
                 && mFriendsPlugin.getStore().getFriendType(mCurrentMessage.sender) == FriendsPlugin.FRIEND_TYPE_SERVICE
-                && mFriendsPlugin.getStore().getExistence(mCurrentMessage.sender) == Friend.ACTIVE
-                && AppConstants.SERVICES_ENABLED) {
+                && mFriendsPlugin.getStore().getExistence(mCurrentMessage.sender) == Friend.ACTIVE) {
 
             L.d("Jumping to service home screen");
 
@@ -876,6 +878,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
                 public void onSuccess() {
                     // ack the message and finish without showing progress bar
                     buttonPressed(button, container, 0);
+                    overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_up);
                     finish();
                 }
 
@@ -889,12 +892,6 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
                 public void onTimeout() {
                     // Continue with the button press, just as if there was no smi://
                     buttonPressed(button, buttonAction, buttonUrl, container);
-                }
-
-                @Override
-                public void onActivityStarting() {
-                    ServiceMessageDetailActivity.this.overridePendingTransition(R.anim.slide_in_bottom, R.anim
-                            .slide_out_up);
                 }
             });
         } else {

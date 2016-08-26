@@ -26,6 +26,7 @@ import android.content.IntentFilter;
 
 import com.mobicage.api.services.Rpc;
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.AbstractHomeActivity;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.plugins.messaging.BrandingFailureException;
@@ -51,11 +52,6 @@ import java.util.UUID;
 public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> extends SafeBroadcastReceiver {
 
     public static class ResultHandler {
-        /**
-         * Called before starting the activity (Eg. if you want to override pending transition)
-         */
-        public void onActivityStarting() {
-        }
 
         /**
          * Called when the new activity is started
@@ -99,9 +95,6 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
         mActivity = activity;
         mService = mActivity.getMainService();
         mEmail = email;
-        final IntentFilter filter = new IntentFilter(MessagingPlugin.NEW_MESSAGE_RECEIVED_INTENT);
-        filter.addAction(MessagingPlugin.MESSAGE_JSMFR_ERROR);
-        mActivity.registerReceiver(this, filter);
     }
 
     public void itemPressed(final String tag, final ResultHandler resultHandler) {
@@ -123,6 +116,7 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
         if (mLastTimeClicked != 0 && (currentTime < (mLastTimeClicked + ServiceBoundActivity.DOUBLE_CLICK_TIMESPAN))) {
             L.d("ignoring click on smi [" + item.coords[0] + "," + item.coords[1] + "," + item.coords[2] + "]");
             mResultHandler.onCancel();
+            stop();
             return;
         }
         mLastTimeClicked = currentTime;
@@ -130,6 +124,7 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
         if (item.requiresWifi && !mActivity.checkConnectivityIsWifi()) {
             UIUtils.showLongToast(mService, mService.getString(R.string.failed_to_show_action_screen_no_wifi));
             mResultHandler.onCancel();
+            stop();
             return;
         }
 
@@ -141,21 +136,27 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
         request.generation = menuGeneration;
         request.hashed_tag = item.hashedTag;
         request.timestamp = System.currentTimeMillis() / 1000;
-        try {
-            if (item.staticFlowHash == null) {
-                Rpc.pressMenuItem(new ResponseHandler<PressMenuIconResponseTO>(), request);
 
-                if (item.screenBranding != null) {
-                    openBranding(item);
-                } else {
-                    poked();
-                }
-            } else {
-                startLocalFlow(item, request);
+        final IntentFilter filter = new IntentFilter(MessagingPlugin.NEW_MESSAGE_RECEIVED_INTENT);
+        filter.addAction(MessagingPlugin.MESSAGE_JSMFR_ERROR);
+        mActivity.registerReceiver(this, filter);
+
+        if (item.staticFlowHash == null) {
+            try {
+                Rpc.pressMenuItem(new ResponseHandler<PressMenuIconResponseTO>(), request);
+            } catch (Exception e) {
+                L.bug(e);
+                mResultHandler.onError();
+                stop();
             }
-        } catch (Exception e) {
-            L.bug(e);
-            mResultHandler.onError();
+        }
+
+        if (item.screenBranding != null) {
+            openBranding(item);
+        } else if (item.staticFlowHash != null) {
+            startLocalFlow(item, request);
+        } else {
+            poked();
         }
     }
 
@@ -165,6 +166,7 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
                 @Override
                 protected void safeRun() throws Exception {
                     mResultHandler.onTimeout();
+                    stop();
                 }
             });
         } else {
@@ -173,7 +175,13 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
     }
 
     private void startLocalFlow(ServiceMenuItemTO item, PressMenuIconRequestTO request) {
-        mActivity.showTransmitting(null);
+        mActivity.showTransmitting(new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                mResultHandler.onTimeout();
+                stop();
+            }
+        });
         request.static_flow_hash = item.staticFlowHash;
         Map<String, Object> userInput = new HashMap<>();
         userInput.put("request", request.toJSONMap());
@@ -194,7 +202,6 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
     }
 
     private void openBranding(ServiceMenuItemTO item) {
-        mResultHandler.onActivityStarting();
         final MessagingPlugin messagingPlugin = mService.getPlugin(MessagingPlugin.class);
 
         boolean brandingAvailable = false;
@@ -220,6 +227,7 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
         intent.putExtra(ActionScreenActivity.RUN_IN_BACKGROUND, item.runInBackground);
         mActivity.startActivity(intent);
         mResultHandler.onSuccess();
+        stop();
     }
 
     @Override
@@ -242,10 +250,14 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
                             i.putExtra(FriendsThreadActivity.MESSAGE_FLAGS, flags);
                         } else {
                             i = new Intent(context, ServiceMessageDetailActivity.class);
+                            if (mActivity instanceof AbstractHomeActivity) {
+                                i.putExtra(ServiceMessageDetailActivity.JUMP_TO_SERVICE_HOME_SCREEN, false);
+                            }
                             i.putExtra("message", messageKey);
                         }
                         mActivity.startActivity(i);
                         mResultHandler.onSuccess();
+                        stop();
                     }
                 });
                 return new String[]{action};
@@ -260,6 +272,7 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
                     }
                 });
                 mResultHandler.onError();
+                stop();
             }
         }
         return null;
