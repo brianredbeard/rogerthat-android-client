@@ -279,7 +279,11 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
     }
 
     public void stop() {
-        mActivity.unregisterReceiver(this);
+        try {
+            mActivity.unregisterReceiver(this);
+        } catch (IllegalArgumentException e) {
+            // receiver was not registered
+        }
     }
 
 }
