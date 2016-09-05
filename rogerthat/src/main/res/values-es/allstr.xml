@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="None">Servicios de localización desactivados</string>
-    <string name="None">Necesitas volver a servicios de localización para poder continuar.</string>
     <string name="__me_as_recipient">mi</string>
     <string name="__me_as_sender">yo</string>
     <string name="about">Info</string>
