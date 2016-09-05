@@ -597,6 +597,13 @@ public class AdvancedOrderWidget extends Widget {
                                 Bitmap bm = BitmapFactory.decodeFile(cachedFile.getAbsolutePath());
                                 imageView.setImageBitmap(bm);
                                 imageView.setVisibility(View.VISIBLE);
+
+                                mActivity.getMainService().postOnUIHandler(new SafeRunnable() {
+                                    @Override
+                                    protected void safeRun() throws Exception {
+                                        setDetailScrollViewHeight();
+                                    }
+                                });
                             }
                         }
                     }
@@ -758,7 +765,7 @@ public class AdvancedOrderWidget extends Widget {
     }
 
     @Override
-    public AdvancedOrderWidgetResult getFormResult() {
+    public AdvancedOrderWidgetResult getWidgetResult() {
         return mResult;
     }
 
@@ -770,7 +777,7 @@ public class AdvancedOrderWidget extends Widget {
         request.parent_message_key = mMessage.parent_key;
         request.timestamp = timestamp;
         if (Message.POSITIVE.equals(buttonId)) {
-            request.result = getFormResult();
+            request.result = getWidgetResult();
             L.d("Submit Advanced Order " + mWidgetMap);
         }
         if ((mMessage.flags & MessagingPlugin.FLAG_SENT_BY_JSMFR) == MessagingPlugin.FLAG_SENT_BY_JSMFR)
@@ -817,7 +824,7 @@ public class AdvancedOrderWidget extends Widget {
         if (mDetailDialog != null && mDetailDialog.isShowing())
             return;
         mCurrentItemDetail = position;
-        final View v = mLayoutInFlater.inflate(R.layout.widget_advanced_order_item_detail, this, false);
+        final View v = mLayoutInFlater.inflate(R.layout.widget_advanced_order_item_detail, this, false); // todo ruben
 
         mDetailDialog = new Dialog(mActivity);
         mDetailDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -910,6 +917,13 @@ public class AdvancedOrderWidget extends Widget {
             }
         }
 
+        mActivity.getMainService().postOnUIHandler(new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                setDetailScrollViewHeight();
+            }
+        });
+
         mDetailDialog.show();
     }
 
@@ -945,7 +959,7 @@ public class AdvancedOrderWidget extends Widget {
     private void showAdvancedOrderBasket() {
         if (mBasketDialog != null && mBasketDialog.isShowing())
             return;
-        final View v = mLayoutInFlater.inflate(R.layout.widget_advanced_order_basket, this, false);
+        final View v = mLayoutInFlater.inflate(R.layout.widget_advanced_order_basket, this, false); // todo ruben
         mBasketDialog = new Dialog(mActivity);
         mBasketDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         mBasketDialog.setContentView(v);
@@ -1003,5 +1017,40 @@ public class AdvancedOrderWidget extends Widget {
         buttonContainer.measure(0, 0);
         int buttonContainerHeight = buttonContainer.getMeasuredHeight();
         UIUtils.setListViewHeightBasedOnItems(listView, maxPopupHeight - nameLblHeight - buttonContainerHeight);
+    }
+
+    private void setDetailScrollViewHeight() {
+        final Point displaySize = UIUtils.getDisplaySize(mActivity);
+        final TextView nameLbl = (TextView) mDetailDialog.findViewById(R.id.name);
+        final TextView priceLbl = (TextView) mDetailDialog.findViewById(R.id.price);
+        final ScrollView scrollView = (ScrollView) mDetailDialog.findViewById(R.id.scroll_view);
+        final LinearLayout valueContainer = (LinearLayout) mDetailDialog.findViewById(R.id.value_container);
+        final Button dismissBtn = (Button) mDetailDialog.findViewById(R.id.dismiss);
+        int maxPopupHeight = (int) Math.floor(displaySize.y * 0.75);
+
+        int desiredWidth = MeasureSpec.makeMeasureSpec(nameLbl.getWidth(), MeasureSpec.AT_MOST);
+
+        nameLbl.measure(desiredWidth, 0);
+        int nameLblHeight = nameLbl.getMeasuredHeight();
+        int priceLblHeight = 0;
+        if (priceLbl.getVisibility() == View.VISIBLE) {
+            priceLbl.measure(desiredWidth,0);
+            priceLblHeight = priceLbl.getMeasuredHeight();
+        }
+        valueContainer.measure(desiredWidth,0);
+        int valueContainerHeight = valueContainer.getMeasuredHeight();
+        dismissBtn.measure(desiredWidth,0);
+        int dismissBtnHeight = dismissBtn.getMeasuredHeight();
+
+        int maxScrollViewHeight = maxPopupHeight - nameLblHeight - priceLblHeight - valueContainerHeight - dismissBtnHeight;
+
+        ViewGroup.LayoutParams params = scrollView.getLayoutParams();
+        scrollView.measure(desiredWidth,0);
+        params.height = scrollView.getMeasuredHeight();
+        if (maxScrollViewHeight > 0 && params.height > maxScrollViewHeight) {
+            params.height = maxScrollViewHeight;
+        }
+        scrollView.setLayoutParams(params);
+        scrollView.requestLayout();
     }
 }

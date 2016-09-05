@@ -22,4 +22,10 @@
 
     <!--Dimension of padding between each item on the navigation view -->
     <dimen name="design_navigation_separator_vertical_padding">0dp</dimen>
+
+    <!-- Pin Screen-->
+    <dimen name="pin_size">45dp</dimen>
+    <dimen name="pin_size_inner">10dp</dimen>
+    <dimen name="pin_button_size">45dp</dimen>
+    <dimen name="pin_button_text_size">20sp</dimen>
 </resources>

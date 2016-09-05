@@ -32,6 +32,8 @@ public interface IClientRpc {
 
     com.mobicage.to.messaging.forms.NewDateSelectFormResponseTO newDateSelectForm(com.mobicage.to.messaging.forms.NewDateSelectFormRequestTO request) throws java.lang.Exception;
 
+    com.mobicage.to.messaging.forms.NewFriendSelectFormResponseTO newFriendSelectForm(com.mobicage.to.messaging.forms.NewFriendSelectFormRequestTO request) throws java.lang.Exception;
+
     com.mobicage.to.messaging.forms.NewGPSLocationFormResponseTO newGPSLocationForm(com.mobicage.to.messaging.forms.NewGPSLocationFormRequestTO request) throws java.lang.Exception;
 
     com.mobicage.to.messaging.NewMessageResponseTO newMessage(com.mobicage.to.messaging.NewMessageRequestTO request) throws java.lang.Exception;
@@ -43,6 +45,8 @@ public interface IClientRpc {
     com.mobicage.to.messaging.forms.NewPhotoUploadFormResponseTO newPhotoUploadForm(com.mobicage.to.messaging.forms.NewPhotoUploadFormRequestTO request) throws java.lang.Exception;
 
     com.mobicage.to.messaging.forms.NewRangeSliderFormResponseTO newRangeSliderForm(com.mobicage.to.messaging.forms.NewRangeSliderFormRequestTO request) throws java.lang.Exception;
+
+    com.mobicage.to.messaging.forms.NewSignFormResponseTO newSignForm(com.mobicage.to.messaging.forms.NewSignFormRequestTO request) throws java.lang.Exception;
 
     com.mobicage.to.messaging.forms.NewSingleSelectFormResponseTO newSingleSelectForm(com.mobicage.to.messaging.forms.NewSingleSelectFormRequestTO request) throws java.lang.Exception;
 
@@ -62,6 +66,8 @@ public interface IClientRpc {
 
     com.mobicage.to.messaging.forms.UpdateDateSelectFormResponseTO updateDateSelectForm(com.mobicage.to.messaging.forms.UpdateDateSelectFormRequestTO request) throws java.lang.Exception;
 
+    com.mobicage.to.messaging.forms.UpdateFriendSelectFormResponseTO updateFriendSelectForm(com.mobicage.to.messaging.forms.UpdateFriendSelectFormRequestTO request) throws java.lang.Exception;
+
     com.mobicage.to.messaging.forms.UpdateGPSLocationFormResponseTO updateGPSLocationForm(com.mobicage.to.messaging.forms.UpdateGPSLocationFormRequestTO request) throws java.lang.Exception;
 
     com.mobicage.to.messaging.UpdateMessageResponseTO updateMessage(com.mobicage.to.messaging.UpdateMessageRequestTO request) throws java.lang.Exception;
@@ -75,6 +81,8 @@ public interface IClientRpc {
     com.mobicage.to.messaging.forms.UpdatePhotoUploadFormResponseTO updatePhotoUploadForm(com.mobicage.to.messaging.forms.UpdatePhotoUploadFormRequestTO request) throws java.lang.Exception;
 
     com.mobicage.to.messaging.forms.UpdateRangeSliderFormResponseTO updateRangeSliderForm(com.mobicage.to.messaging.forms.UpdateRangeSliderFormRequestTO request) throws java.lang.Exception;
+
+    com.mobicage.to.messaging.forms.UpdateSignFormResponseTO updateSignForm(com.mobicage.to.messaging.forms.UpdateSignFormRequestTO request) throws java.lang.Exception;
 
     com.mobicage.to.messaging.forms.UpdateSingleSelectFormResponseTO updateSingleSelectForm(com.mobicage.to.messaging.forms.UpdateSingleSelectFormRequestTO request) throws java.lang.Exception;
 

@@ -84,6 +84,7 @@ public class TextLineWidget extends Widget {
         mEditText.setHint((String) mWidgetMap.get("place_holder"));
         mEditText.setFilters(new InputFilter[] { new InputFilter.LengthFilter(((Long) mWidgetMap.get("max_chars"))
             .intValue()) });
+        mEditText.setInputType(KeyboardType.getInputType((String) mWidgetMap.get("keyboard_type")));
 
         ImageButton btnSpeak = (ImageButton) findViewById(R.id.btn_speak);
         if (AppConstants.SPEECH_TO_TEXT && isSpeechRecognitionActivityPresented(mActivity)) {
@@ -138,7 +139,7 @@ public class TextLineWidget extends Widget {
     }
 
     @Override
-    public UnicodeWidgetResultTO getFormResult() {
+    public UnicodeWidgetResultTO getWidgetResult() {
         UnicodeWidgetResultTO r = new UnicodeWidgetResultTO();
         r.value = (String) mWidgetMap.get("value");
         return r;
@@ -152,7 +153,7 @@ public class TextLineWidget extends Widget {
         request.parent_message_key = mMessage.parent_key;
         request.timestamp = timestamp;
         if (Message.POSITIVE.equals(buttonId)) {
-            request.result = getFormResult();
+            request.result = getWidgetResult();
         }
         if ((mMessage.flags & MessagingPlugin.FLAG_SENT_BY_JSMFR) == MessagingPlugin.FLAG_SENT_BY_JSMFR)
             mPlugin.answerJsMfrMessage(mMessage, request.toJSONMap(), "com.mobicage.api.messaging.submitTextLineForm",

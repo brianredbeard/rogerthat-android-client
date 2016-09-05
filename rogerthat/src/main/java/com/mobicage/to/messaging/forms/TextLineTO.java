@@ -25,6 +25,7 @@ import java.util.Map;
 
 public class TextLineTO implements com.mobicage.rpc.IJSONable {
 
+    public String keyboard_type;
     public long max_chars;
     public String place_holder;
     public String value;
@@ -33,6 +34,12 @@ public class TextLineTO implements com.mobicage.rpc.IJSONable {
     }
 
     public TextLineTO(Map<String, Object> json) throws IncompleteMessageException {
+        if (json.containsKey("keyboard_type")) {
+            Object val = json.get("keyboard_type");
+            this.keyboard_type = (String) val;
+        } else {
+            this.keyboard_type = "default";
+        }
         if (json.containsKey("max_chars")) {
             Object val = json.get("max_chars");
             this.max_chars = ((Long) val).longValue();
@@ -56,6 +63,7 @@ public class TextLineTO implements com.mobicage.rpc.IJSONable {
     @Override
     public Map<String, Object> toJSONMap() {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
+        obj.put("keyboard_type", this.keyboard_type);
         obj.put("max_chars", this.max_chars);
         obj.put("place_holder", this.place_holder);
         obj.put("value", this.value);

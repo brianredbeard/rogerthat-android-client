@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.mobicage.rogerthat.plugins.messaging.widgets.FriendSelectWidget
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="5dp"
+    android:orientation="vertical">
+
+    <ListView
+        android:id="@+id/list_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/gray_border"
+        android:divider="@color/mc_divider_gray"
+        android:dividerHeight="1dip"
+        android:isScrollContainer="false"/>
+
+    <LinearLayout
+        android:id="@+id/no_friends_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/no_friends_found"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/no_friends_found"/>
+
+        <Button
+            android:id="@+id/invite_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center"
+            android:text="@string/invite_friends_short"/>
+
+    </LinearLayout>
+
+
+</com.mobicage.rogerthat.plugins.messaging.widgets.FriendSelectWidget>

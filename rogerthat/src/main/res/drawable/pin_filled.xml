@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:top="0dp"
+        android:bottom="0dp"
+        android:left="0dp"
+        android:right="0dp">
+        <shape
+            android:shape="oval"
+            android:dither="true"
+            xmlns:android="http://schemas.android.com/apk/res/android">
+            <stroke
+                android:color="@color/mc_pin_gray_light"
+                android:width="1dp" />
+            <size
+                android:height="@dimen/pin_size"
+                android:width="@dimen/pin_size" />
+        </shape>
+    </item>
+    <item
+        android:top="@dimen/pin_size_inner"
+        android:bottom="@dimen/pin_size_inner"
+        android:left="@dimen/pin_size_inner"
+        android:right="@dimen/pin_size_inner">
+        <shape
+            android:shape="oval"
+            android:dither="true"
+            xmlns:android="http://schemas.android.com/apk/res/android">
+            <solid android:color="@color/mc_pin_gray" />
+        </shape>
+    </item>
+</layer-list>

@@ -275,7 +275,7 @@ public class MyDigiPassWidget extends Widget implements OnMDPAuthenticationListe
     }
 
     @Override
-    public MyDigiPassWidgetResult getFormResult() {
+    public MyDigiPassWidgetResult getWidgetResult() {
         return mResult;
     }
 

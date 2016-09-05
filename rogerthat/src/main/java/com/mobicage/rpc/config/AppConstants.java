@@ -48,9 +48,11 @@ public class AppConstants {
     public static final String APP_EMAIL = null;
     public static final String APP_SERVICE_GUID = null;
     public static final boolean FRIENDS_ENABLED = true;
+    public static final boolean SERVICES_ENABLED = true;
     public static final FriendsCaption FRIENDS_CAPTION = FriendsCaption.FRIENDS;
     public static final boolean SHOW_FRIENDS_IN_MORE = false;
     public static final boolean SHOW_PROFILE_IN_MORE = true;
+    public static final boolean SHOW_SCAN_IN_MORE = false;
     public static final boolean FULL_WIDTH_HEADERS = false;
 
     public static final boolean REGISTRATION_ASKS_LOCATION_PERMISSION = true;
@@ -70,4 +72,7 @@ public class AppConstants {
     public static final String ABOUT_FACEBOOK_URL = "https://www.facebook.com/rogerthatplatform";
 
     public static final boolean SPEECH_TO_TEXT = false;
+    public static final boolean SECURE_APP = false;
+    public static final int SECURE_PIN_INTERVAL = 15 * 60;
+    public static final int SECURE_PIN_RETRY_INTERVAL = 5 * 60;
 }

@@ -101,6 +101,7 @@ import com.mobicage.rpc.Credentials;
 import com.mobicage.rpc.IJSONable;
 import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.rpc.RpcCall;
+import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.to.friends.FriendTO;
 import com.mobicage.to.friends.ServiceMenuItemTO;
@@ -328,7 +329,11 @@ public class BrandingMgr implements Pickleable, Closeable {
     }
 
     public enum ColorScheme {
-        light, dark
+        LIGHT, DARK
+    }
+
+    public enum Orientation {
+        PORTRAIT, LANDSCAPE, DYNAMIC
     }
 
     public static class Dimension {
@@ -352,12 +357,14 @@ public class BrandingMgr implements Pickleable, Closeable {
         public final Dimension dimension1;
         public final Dimension dimension2;
         public final String contentType;
+        public final Orientation orientation;
         public final boolean wakelockEnabeld;
         public final List<String> externalUrlPatterns;
 
         public BrandingResult(File dir, File file, File watermark, Integer color, Integer menuItemColor,
-            ColorScheme scheme, boolean showHeader, Dimension dimension1, Dimension dimension2, String contentType,
-            boolean wakelockEnabled, List<String> externalUrlPatterns) {
+                              ColorScheme scheme, boolean showHeader, Dimension dimension1, Dimension dimension2,
+                              String contentType, Orientation orientation, boolean wakelockEnabled, List<String>
+                                      externalUrlPatterns) {
             this.dir = dir;
             this.file = file;
             this.watermark = watermark;
@@ -368,6 +375,7 @@ public class BrandingMgr implements Pickleable, Closeable {
             this.dimension1 = dimension1;
             this.dimension2 = dimension2;
             this.contentType = contentType;
+            this.orientation = orientation;
             this.wakelockEnabeld = wakelockEnabled;
             this.externalUrlPatterns = externalUrlPatterns;
         }
@@ -1005,7 +1013,9 @@ public class BrandingMgr implements Pickleable, Closeable {
             File watermarkFile = null;
             Integer backgroundColor = null;
             Integer menuItemColor = null;
-            ColorScheme scheme = ColorScheme.light;
+            ColorScheme scheme = ColorScheme.LIGHT;
+            Orientation orientation = CloudConstants.isContentBrandingApp() ? Orientation.LANDSCAPE : Orientation
+                    .PORTRAIT;
             boolean showHeader = true;
             String contentType = null;
             boolean wakelockEnabled = false;
@@ -1137,7 +1147,21 @@ public class BrandingMgr implements Pickleable, Closeable {
                 matcher = RegexPatterns.BRANDING_COLOR_SCHEME.matcher(brandingHtml);
                 if (matcher.find()) {
                     String schemeStr = matcher.group(1);
-                    scheme = "dark".equalsIgnoreCase(schemeStr) ? ColorScheme.dark : ColorScheme.light;
+                    scheme = "dark".equalsIgnoreCase(schemeStr) ? ColorScheme.DARK : ColorScheme.LIGHT;
+                }
+
+                matcher = RegexPatterns.BRANDING_ORIENTATION.matcher(brandingHtml);
+                if (matcher.find()) {
+                    String orientationStr = matcher.group(1);
+                    if ("dynamic".equalsIgnoreCase(orientationStr)) {
+                        orientation = Orientation.DYNAMIC;
+                    } else if ("landscape".equalsIgnoreCase(orientationStr)) {
+                        orientation = Orientation.LANDSCAPE;
+                    } else if ("portrait".equalsIgnoreCase(orientationStr)) {
+                        orientation = Orientation.PORTRAIT;
+                    } else {
+                        L.w("Unknown orientation: " + orientationStr + ". Using default orientation " + orientation);
+                    }
                 }
 
                 matcher = RegexPatterns.BRANDING_SHOW_HEADER.matcher(brandingHtml);
@@ -1196,7 +1220,8 @@ public class BrandingMgr implements Pickleable, Closeable {
                     brandingFile = new File(tmpBrandingDir, "embed.pdf");
                 }
                 return new BrandingResult(tmpBrandingDir, brandingFile, watermarkFile, backgroundColor, menuItemColor,
-                    scheme, showHeader, dimension1, dimension2, contentType, wakelockEnabled, externalUrlPatterns);
+                        scheme, showHeader, dimension1, dimension2, contentType, orientation, wakelockEnabled,
+                        externalUrlPatterns);
             } finally {
                 brandingBos.close();
             }

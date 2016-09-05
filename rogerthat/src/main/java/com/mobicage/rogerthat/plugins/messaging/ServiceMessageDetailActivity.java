@@ -20,13 +20,11 @@ package com.mobicage.rogerthat.plugins.messaging;
 import java.io.File;
 import java.io.IOException;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeSet;
-import java.util.UUID;
 
 import org.json.JSONObject;
 import org.json.simple.JSONValue;
@@ -41,7 +39,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -50,8 +47,6 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -83,14 +78,13 @@ import com.mobicage.rogerthat.IdentityStore;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.ServiceBoundMapActivity;
 import com.mobicage.rogerthat.plugins.friends.Friend;
-import com.mobicage.rogerthat.plugins.friends.FriendBroadcastInfo;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
+import com.mobicage.rogerthat.plugins.friends.MenuItemPresser;
+import com.mobicage.rogerthat.plugins.friends.MenuItemPressingActivity;
 import com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity;
+import com.mobicage.rogerthat.plugins.friends.ServiceMenuItemDetails;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr.BrandingResult;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr.ColorScheme;
-import com.mobicage.rogerthat.plugins.messaging.mfr.EmptyStaticFlowException;
-import com.mobicage.rogerthat.plugins.messaging.mfr.JsMfr;
-import com.mobicage.rogerthat.plugins.messaging.mfr.MessageFlowRun;
 import com.mobicage.rogerthat.plugins.messaging.widgets.Widget;
 import com.mobicage.rogerthat.util.IOUtils;
 import com.mobicage.rogerthat.util.TextUtils;
@@ -104,18 +98,19 @@ import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.time.TimeUtils;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.IJSONable;
+import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.to.messaging.AttachmentTO;
 import com.mobicage.to.messaging.ButtonTO;
 import com.mobicage.to.messaging.MemberStatusTO;
-import com.mobicage.to.service.PressMenuIconRequestTO;
 
-public class ServiceMessageDetailActivity extends ServiceBoundMapActivity {
+public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implements MenuItemPressingActivity {
 
     private final static String HINT_BROADCAST = "com.mobicage.rogerthat.plugins.messaging.ServiceMessageDetailActivity.HINT_BROADCAST";
 
     public final static String BUTTON_INFO = "buttonInfo";
 
     public final static String STARTED_FROM_SERVICE_MENU = "STARTED_FROM_SERVICE_MENU";
+    public static final String JUMP_TO_SERVICE_HOME_SCREEN = "JUMP_TO_SERVICE_HOME_SCREEN";
 
     private final static int[] DETAIL_SECTIONS = new int[] { R.id.previous_messages_in_thread_title,
         R.id.previous_messages_in_thread, R.id.message_section_title, R.id.member_details_title, R.id.members,
@@ -134,10 +129,12 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity {
     public static final int PERMISSION_REQUEST_GPS_LCOATION_WIDGET = 2;
     public static final int PERMISSION_REQUEST_PHOTO_UPLOAD_WIDGET = 3;
 
+
     // UI Thread owns these
     private FriendsPlugin mFriendsPlugin;
     private MessagingPlugin mMessagingPlugin;
     private MessageStore mStore;
+    private MenuItemPresser mMenuItemPresser;
     private Message mCurrentMessage;
     private int mDisplayWidth;
     private BroadcastReceiver mBroadcastReceiver;
@@ -273,6 +270,11 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity {
         if (mBroadcastReceiver != null)
             unregisterReceiver(mBroadcastReceiver);
 
+        if (mMenuItemPresser != null) {
+            mMenuItemPresser.stop();
+            mMenuItemPresser = null;
+        }
+
         if (mCurrentMessage.form != null) {
             LinearLayout widgetLayout = (LinearLayout) findViewById(R.id.widget_layout);
             Widget widget = (Widget) widgetLayout.getChildAt(0);
@@ -366,7 +368,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity {
                         messageHeader.setVisibility(View.GONE);
                         MarginLayoutParams mlp = (MarginLayoutParams) web.getLayoutParams();
                         mlp.setMargins(0, 0, 0, mlp.bottomMargin);
-                    } else if (br.scheme == ColorScheme.dark) {
+                    } else if (br.scheme == ColorScheme.DARK) {
                         senderView.setTextColor(darkSchemeTextColor);
                         timestampView.setTextColor(darkSchemeTextColor);
                     }
@@ -470,7 +472,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity {
                 repliedView.setText(R.string.not_yet_replied);
                 showMember = !ms.member.equals(mCurrentMessage.sender);
             }
-            if (br != null && br.scheme == ColorScheme.dark) {
+            if (br != null && br.scheme == ColorScheme.DARK) {
                 receiverView.setTextColor(darkSchemeTextColor);
                 receivedView.setTextColor(darkSchemeTextColor);
                 repliedView.setTextColor(darkSchemeTextColor);
@@ -645,8 +647,9 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity {
             broadcastSpamControlIcon.setTypeface(mFontAwesomeTypeFace);
             broadcastSpamControlIcon.setText(R.string.fa_bell);
 
-            final FriendBroadcastInfo fbi = mFriendsPlugin.getFriendBroadcastFlowForMfr(mCurrentMessage.sender);
-            if (fbi == null) {
+            final ServiceMenuItemDetails smi = mFriendsPlugin.getStore().getBroadcastServiceMenuItem(mCurrentMessage
+                    .sender);
+            if (smi == null) {
                 L.bug("BroadcastData was null for: " + mCurrentMessage.sender);
                 collapseDetails(DETAIL_SECTIONS);
                 return;
@@ -658,35 +661,19 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity {
                 @Override
                 public void safeOnClick(View v) {
                     L.d("goto broadcast settings");
-
-                    PressMenuIconRequestTO request = new PressMenuIconRequestTO();
-                    request.coords = fbi.coords;
-                    request.static_flow_hash = fbi.staticFlowHash;
-                    request.hashed_tag = fbi.hashedTag;
-                    request.generation = fbi.generation;
-                    request.service = mCurrentMessage.sender;
-                    mContext = "MENU_" + UUID.randomUUID().toString();
-                    request.context = mContext;
-                    request.timestamp = System.currentTimeMillis() / 1000;
-
-                    showTransmitting(null);
-                    Map<String, Object> userInput = new HashMap<String, Object>();
-                    userInput.put("request", request.toJSONMap());
-                    userInput.put("func", "com.mobicage.api.services.pressMenuItem");
-
-                    MessageFlowRun mfr = new MessageFlowRun();
-                    mfr.staticFlowHash = fbi.staticFlowHash;
-                    try {
-                        JsMfr.executeMfr(mfr, userInput, mService, true);
-                    } catch (EmptyStaticFlowException ex) {
-                        completeTransmit(null);
-                        AlertDialog.Builder builder = new AlertDialog.Builder(ServiceMessageDetailActivity.this);
-                        builder.setMessage(ex.getMessage());
-                        builder.setPositiveButton(R.string.rogerthat, null);
-                        AlertDialog dialog = builder.create();
-                        dialog.show();
-                        return;
+                    if (mMenuItemPresser == null) {
+                        //noinspection unchecked,unchecked
+                        mMenuItemPresser = new MenuItemPresser(ServiceMessageDetailActivity.this, mCurrentMessage
+                                .sender);
                     }
+                    mMenuItemPresser.itemPressed(smi, smi.menuGeneration, new MenuItemPresser.ResultHandler() {
+                        @Override
+                        public void onSuccess() {
+                            overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_up);
+                            finish();
+                        }
+                    });
+
                 }
 
             });
@@ -696,11 +683,11 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity {
 
             broadcastSpamControlText
                 .setText(getString(R.string.broadcast_subscribed_to, mCurrentMessage.broadcast_type));
-            broadcastSpamControlSettingsText.setText(fbi.label);
+            broadcastSpamControlSettingsText.setText(smi.label);
             int ligthAlpha = 180;
             int darkAlpha = 70;
             int alpha = ligthAlpha;
-            if (br != null && br.scheme == ColorScheme.dark) {
+            if (br != null && br.scheme == ColorScheme.DARK) {
                 broadcastSpamControlIcon.setTextColor(getResources().getColor(android.R.color.black));
                 broadcastSpamControlBorder.setBackgroundColor(darkSchemeTextColor);
                 broadcastSpamControlDivider.setBackgroundColor(darkSchemeTextColor);
@@ -811,11 +798,13 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity {
     }
 
     private void jumpToServiceHomeScreen(final ButtonTO button, final Bundle extras) {
-        // detect if we come from message history
-        if (getIntent().getStringExtra(MessagingPlugin.MEMBER_FILTER) == null
-            && (button == null || getExpectNext(button) == 0)
-            && mFriendsPlugin.getStore().getFriendType(mCurrentMessage.sender) == FriendsPlugin.FRIEND_TYPE_SERVICE
-            && mFriendsPlugin.getStore().getExistence(mCurrentMessage.sender) == Friend.ACTIVE) {
+        // detect if we come from a branding or message history
+        if (AppConstants.SERVICES_ENABLED
+                && getIntent().getBooleanExtra(ServiceMessageDetailActivity.JUMP_TO_SERVICE_HOME_SCREEN, true)
+                && getIntent().getStringExtra(MessagingPlugin.MEMBER_FILTER) == null
+                && (button == null || getExpectNext(button) == 0)
+                && mFriendsPlugin.getStore().getFriendType(mCurrentMessage.sender) == FriendsPlugin.FRIEND_TYPE_SERVICE
+                && mFriendsPlugin.getStore().getExistence(mCurrentMessage.sender) == Friend.ACTIVE) {
 
             L.d("Jumping to service home screen");
 
@@ -879,17 +868,47 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity {
 
         if (shouldAskConfirmation && Message.MC_CONFIRM_PREFIX.equals(buttonAction)) {
             askConfirmation(button, buttonUrl, container);
-        } else {
-            if (!buttonPressed(button, container))
-                return;
-
-            if (!mTransfering)
-                jumpToServiceHomeScreen(button, null);
-
-            if (buttonAction != null && !Message.MC_CONFIRM_PREFIX.equals(buttonAction)) {
-                final Intent intent = new Intent(buttonAction, Uri.parse(buttonUrl));
-                startActivity(intent);
+        } else if (Message.MC_SMI_PREFIX.equals(buttonAction)) {
+            if (mMenuItemPresser == null) {
+                mMenuItemPresser = new MenuItemPresser(this, mCurrentMessage.sender);
             }
+
+            mMenuItemPresser.itemPressed(buttonUrl, new MenuItemPresser.ResultHandler() {
+                @Override
+                public void onSuccess() {
+                    // ack the message and finish without showing progress bar
+                    buttonPressed(button, container, 0);
+                    overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_up);
+                    finish();
+                }
+
+                @Override
+                public void onError() {
+                    L.e("SMI with hash " + buttonUrl + " not found!"); // XXX: log error to message.sender
+                    onTimeout();
+                }
+
+                @Override
+                public void onTimeout() {
+                    // Continue with the button press, just as if there was no smi://
+                    buttonPressed(button, buttonAction, buttonUrl, container);
+                }
+            });
+        } else {
+            buttonPressed(button, buttonAction, buttonUrl, container);
+        }
+    }
+
+    private void buttonPressed(ButtonTO button, String buttonAction, String buttonUrl, LinearLayout container) {
+        if (!buttonPressed(button, container))
+            return;
+
+        if (!mTransfering)
+            jumpToServiceHomeScreen(button, null);
+
+        if (buttonAction != null && !Message.MC_CONFIRM_PREFIX.equals(buttonAction)) {
+            final Intent intent = new Intent(buttonAction, Uri.parse(buttonUrl));
+            startActivity(intent);
         }
     }
 
@@ -916,8 +935,10 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity {
     }
 
     private boolean buttonPressed(final ButtonTO button, final LinearLayout container) {
-        long expectNext = getExpectNext(button);
+        return buttonPressed(button, container, getExpectNext(button));
+    }
 
+    private boolean buttonPressed(final ButtonTO button, final LinearLayout container, final long expectNext) {
         boolean submitted = true;
         if (mCurrentMessage.form == null) {
             ackMessage(button, expectNext, container);
@@ -963,7 +984,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity {
 
         if (Message.POSITIVE.equals(button.id)) {
             try {
-                final IJSONable formResult = widget.getFormResult();
+                final IJSONable formResult = widget.getWidgetResult();
                 if (formResult != null) {
                     String validationError = mMessagingPlugin.validateFormResult(mCurrentMessage, formResult);
                     if (validationError != null) {
@@ -1239,10 +1260,12 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity {
                     return UPDATE_VIEW_INTENT_ACTIONS;
                 }
                 if (MessagingPlugin.NEW_MESSAGE_RECEIVED_INTENT.equals(action)) {
-                    String trasferFailedMessage = "DASHBOARD_" + mCurrentMessage.key;
-                    if (mTransfering && trasferFailedMessage.equals(intent.getStringExtra("context"))) {
+                    String transferFailedContext = "DASHBOARD_" + mCurrentMessage.key;
+                    if (mTransfering && transferFailedContext.equals(intent.getStringExtra("context"))) {
                         final Intent i = new Intent(context, ServiceMessageDetailActivity.class);
                         i.putExtra("message", intent.getStringExtra("message"));
+                        i.putExtra(JUMP_TO_SERVICE_HOME_SCREEN, getIntent().getBooleanExtra(JUMP_TO_SERVICE_HOME_SCREEN, true));
+                        i.putExtra(MessagingPlugin.MEMBER_FILTER, getIntent().getStringExtra(MessagingPlugin.MEMBER_FILTER));
                         startActivity(i);
                         overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_up);
                         dismissTransferingDialog();
@@ -1250,27 +1273,24 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity {
                         return new String[] { action };
                     }
 
-                    if (mContext != null && mContext.equals(intent.getStringExtra("context"))) {
-                        L.d("Showing broadcast flow");
-                    } else {
+                    if (mExpectNextTimer == null) // Not interested in NEW_MESSAGE_RECEIVED_INTENTS at this moment
+                        return new String[]{action};
 
-                        if (mExpectNextTimer == null) // Not interested in NEW_MESSAGE_RECEIVED_INTENTS at this moment
-                            return new String[] { action };
-
-                        // We are expecting a reply on this thread!
-                        String pKey = mCurrentMessage.getThreadKey();
-                        if (!pKey.equals(intent.getStringExtra("parent"))) {
-                            L.d("New message is from another thread");
-                            return null; // New message is from another thread
-                        }
-
-                        // We received the reply!
-                        mExpectNextTimer.cancel();
-                        mExpectNextTimer = null;
+                    // We are expecting a reply on this thread!
+                    String pKey = mCurrentMessage.getThreadKey();
+                    if (!pKey.equals(intent.getStringExtra("parent"))) {
+                        L.d("New message is from another thread");
+                        return null; // New message is from another thread
                     }
+
+                    // We received the reply!
+                    mExpectNextTimer.cancel();
+                    mExpectNextTimer = null;
 
                     final Intent i = new Intent(context, ServiceMessageDetailActivity.class);
                     i.putExtra("message", intent.getStringExtra("message"));
+                    i.putExtra(JUMP_TO_SERVICE_HOME_SCREEN, getIntent().getBooleanExtra(JUMP_TO_SERVICE_HOME_SCREEN, true));
+                    i.putExtra(MessagingPlugin.MEMBER_FILTER, getIntent().getStringExtra(MessagingPlugin.MEMBER_FILTER));
                     startActivity(i);
 
                     overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_up);

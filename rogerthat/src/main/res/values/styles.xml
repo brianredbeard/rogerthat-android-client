@@ -42,4 +42,36 @@
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="PinButton" parent="Base.Widget.AppCompat.Button">
+        <item name="android:background">@drawable/selector_button</item>
+        <item name="android:textSize">@dimen/pin_button_text_size</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/mc_white</item>
+    </style>
+
+    <style name="PinButtonRed" parent="Base.Widget.AppCompat.Button">
+        <item name="android:background">@drawable/selector_button_red</item>
+        <item name="android:textSize">@dimen/pin_button_text_size</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/mc_white</item>
+    </style>
+
+    <style name="PinButtonYellow" parent="Base.Widget.AppCompat.Button">
+        <item name="android:background">@drawable/selector_button_yellow</item>
+        <item name="android:textSize">@dimen/pin_button_text_size</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/mc_white</item>
+    </style>
+
+    <style name="PinButtonGreen" parent="Base.Widget.AppCompat.Button">
+        <item name="android:background">@drawable/selector_button_green</item>
+        <item name="android:textSize">@dimen/pin_button_text_size</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/mc_white</item>
+    </style>
+
+    <style name="PinEntry">
+        <item name="android:src">@drawable/selector_pin_entry</item>
+    </style>
 </resources>

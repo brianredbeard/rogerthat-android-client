@@ -89,6 +89,7 @@
     <string name="contacts_found_none">Geen contacten gevonden die %1$s gebruiken.</string>
     <string name="continue_">Verder</string>
     <string name="continue_shopping">Verder winkelen</string>
+    <string name="corr">Corr</string>
     <string name="create_button_title">Maak nieuwe antwoordknop</string>
     <string name="create_group">Groep aanmaken</string>
     <string name="create_groups_long">Organiseer vrienden in groepen en verstuur boodschappen sneller</string>
@@ -119,6 +120,7 @@
     <string name="enabled">Ingeschakeld</string>
     <string name="enabled_summary">Achtergrond modus</string>
     <string name="enabled_title">Achtergrond</string>
+    <string name="enter_pin_to_sign">Gelieve uw pincode in te geven om de bijgevoegde document(en) te ondertekenen.</string>
     <string name="enter_search_query">Geef een zoekopdracht in</string>
     <string name="error_find_from_addressbook">Adresboek kon niet gescand worden. Probeer het later opnieuw.</string>
     <string name="error_find_from_facebook">Facebook vrienden konden niet gevonden worden. Probeer het later opnieuw.</string>
@@ -139,6 +141,7 @@
     <string name="fb_friends_found_none">Geen Facebook vrienden gevonden die %1$s gebruiken.</string>
     <string name="fb_wall_post_caption">Kom er bij op %1$s!</string>
     <string name="fb_wall_post_description">Beste vrienden, scan mijn %1$s id om met mij te koppelen via %1$s.</string>
+    <string name="feature_not_supported">Deze functie wordt niet ondersteund op uw apparaat.</string>
     <string name="female">Vrouw</string>
     <string name="file_downloaded">Bestand gedownload</string>
     <string name="find_colleagues">Collega\'s zoeken</string>
@@ -153,6 +156,7 @@
     <string name="friend_map_marker">Localisatietijd: %1$s\nNauwkeurigheid: %2$dm</string>
     <string name="friend_remove_failed">Fout tijdens verzenden.</string>
     <string name="friend_request_share_location_invitation_sent">Aanvraag verzonden naar %1$s om locatie te delen met jou.</string>
+    <string name="friend_selection_is_required">Gelieve minstens één vriend te selecteren.</string>
     <string name="friend_share_location">Kan mijn locatie zien</string>
     <string name="friend_sms_invitation">Beste %1$s,\n\nIk nodig u uit om met mij te communiceren via %4$s.\n\nStap 1. Installeer de smartphone app:\n%2$s\n\nStap 2. Connecteer mij:\n%3$s</string>
     <string name="friend_sms_invitation_no_url">Beste %1$s\n\nIk nodig u uit om te communiceren met mij via %3$s. Dit is een cool communicatieplatform voor web en smartphone!\n\nInstalleer de %3$s app: %2$s</string>
@@ -286,11 +290,17 @@
     <string name="not_yet_replied">Nog niet beantwoord</string>
     <string name="ok">OK</string>
     <string name="one_updated_message">1 aangepast bericht.</string>
+    <string name="open_attachments_before_signing">Lees de bijgevoegde documenten voor u deze ondertekend</string>
     <string name="opening_camera">Camera starten…</string>
     <string name="order">Bestellen</string>
     <string name="osa_loyalty_welcome_message">Welkom op de Onze Stad App terminal. Deze app is de perfecte aanvulling bij uw aanwezigheid in de stad app om zo uw klanten nog meer te bieden. Wij helpen u het getrouwheidssysteem klaar te zetten voor gebruik. Begin met uw QR-code te scannen om zo uw terminal te activeren.</string>
     <string name="phone">Telefoon</string>
     <string name="photo">Foto</string>
+    <string name="pin_confirm">Bevestig uw pincode.</string>
+    <string name="pin_did_not_match">Pincode komt niet overeen.</string>
+    <string name="pin_invalid">Ongeldige pincode.</string>
+    <string name="pin_required_continue">Een pincode is vereist om door te gaan!</string>
+    <string name="pin_setup_4_digit">Gelieve een 4-cijferige pincode in te voeren om uw app te beveiligen.</string>
     <string name="post">Plaatsen</string>
     <string name="previousButton">Terug</string>
     <string name="previous_in_thread">Oudere berichten in deze conversatie</string>
@@ -333,7 +343,7 @@
     <string name="registration_no_attempts_left">U heeft drie keer een foute activatiecode ingevoerd.\n\nU moet de registratie herbeginnen.</string>
     <string name="registration_option_email">Optie 2:\nLog in met je e-mailadres.</string>
     <string name="registration_option_fb">Optie 1:\nLog in met je Facebook profiel.</string>
-    <string name="registration_pin_was_mailed">Vul de activatiecode in die verzonden is naar %1$s\n\nU nodig heeft om uw spam of ongewenste e-mailmappen controleren.</string>
+    <string name="registration_pin_was_mailed">Jouw activatiecode werd verstuurd naar &lt;br /&gt; &lt;b&gt;%1$s&lt;/b&gt; &lt;br /&gt;&lt;br /&gt; Het zou kunnen dat de mail beland is in je Spam of Ongewenste Email map.</string>
     <string name="registration_pin_was_mailed_no_html">Jouw activatiecode is verzonden naar %1$s om %2$s\nHet zou kunnen dat de mail beland is in je Spam of Ongewenste Email map.</string>
     <string name="registration_request_new_pin">Nieuwe activatiecode aanvragen</string>
     <string name="registration_screen_install_zxing">U heeft geen QR code scanner op uw systeem.\n\nWenst u er nu een te installeren?</string>
@@ -399,6 +409,9 @@
     <string name="show_location">Locatie tonen</string>
     <string name="show_message_header">%1$s boodschap</string>
     <string name="show_more">Meer tonen…</string>
+    <string name="sign">Tekenen</string>
+    <string name="sign_first">Gelieve te ondertekenen voordat u doorgaat.</string>
+    <string name="signed">Ondertekend</string>
     <string name="size_actual">Actueel</string>
     <string name="size_large">Groot</string>
     <string name="size_medium">Medium</string>
@@ -409,10 +422,12 @@
     <string name="specials">Aanbieding</string>
     <string name="start_registration">Start registratie</string>
     <string name="sticky">Sticky</string>
+    <string name="stop">Stop</string>
     <string name="stream_summary">Enkel belangrijkste gegevens</string>
     <string name="stream_title">Activiteiten log</string>
     <string name="successful_scan">Scan resultaat</string>
     <string name="successfully_sent_message">Bericht verzonden.</string>
+    <string name="successfully_signed">Documenten succesvol ondertekend</string>
     <string name="tab_friends">Vrienden</string>
     <string name="tab_messaging">Berichten</string>
     <string name="tab_services">Diensten</string>
@@ -437,6 +452,9 @@
     <string name="transfer_uploading_notification">Verzending bezig</string>
     <string name="transmitting">Verzenden…</string>
     <string name="try_again">Opnieuw proberen</string>
+    <string name="try_again_in_hours">Probeer opnieuw in %1$d hr.</string>
+    <string name="try_again_in_minutes">Probeer opnieuw in %1$d min.</string>
+    <string name="try_again_in_seconds">Probeer opnieuw in %1$d sec.</string>
     <string name="unable_to_create_attachment_directory">Kon de bijlage niet opslaan. Zorg dat er vrije ruimte is op uw SD card.</string>
     <string name="unable_to_create_images_directory">Kon de %1$s images map niet aanmaken.</string>
     <string name="unable_to_read_write_sd_card">Er is een fout opgetreden. Zorg dat er vrije ruimte is op uw SD card.</string>

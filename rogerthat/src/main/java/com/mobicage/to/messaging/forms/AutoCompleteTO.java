@@ -26,6 +26,7 @@ import java.util.Map;
 public class AutoCompleteTO implements com.mobicage.rpc.IJSONable {
 
     public String[] choices;
+    public String keyboard_type;
     public long max_chars;
     public String place_holder;
     public String[] suggestions;
@@ -47,6 +48,12 @@ public class AutoCompleteTO implements com.mobicage.rpc.IJSONable {
             }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.forms.AutoCompleteTO object is missing field 'choices'");
+        }
+        if (json.containsKey("keyboard_type")) {
+            Object val = json.get("keyboard_type");
+            this.keyboard_type = (String) val;
+        } else {
+            this.keyboard_type = "default";
         }
         if (json.containsKey("max_chars")) {
             Object val = json.get("max_chars");
@@ -94,6 +101,7 @@ public class AutoCompleteTO implements com.mobicage.rpc.IJSONable {
             }
             obj.put("choices", arr);
         }
+        obj.put("keyboard_type", this.keyboard_type);
         obj.put("max_chars", this.max_chars);
         obj.put("place_holder", this.place_holder);
         if (this.suggestions == null) {

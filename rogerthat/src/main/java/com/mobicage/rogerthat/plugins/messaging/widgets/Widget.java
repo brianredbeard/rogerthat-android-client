@@ -40,6 +40,7 @@ public abstract class Widget extends LinearLayout {
     public static final String TYPE_TEXT_LINE = "text_line";
     public static final String TYPE_TEXT_BLOCK = "text_block";
     public static final String TYPE_AUTO_COMPLETE = "auto_complete";
+    public static final String TYPE_FRIEND_SELECT = "friend_select";
     public static final String TYPE_SINGLE_SELECT = "single_select";
     public static final String TYPE_MULTI_SELECT = "multi_select";
     public static final String TYPE_DATE_SELECT = "date_select";
@@ -49,15 +50,17 @@ public abstract class Widget extends LinearLayout {
     public static final String TYPE_GPS_LOCATION = "gps_location";
     public static final String TYPE_MYDIGIPASS = "mydigipass";
     public static final String TYPE_ADVANCED_ORDER = "advanced_order";
+    public static final String TYPE_SIGN= "sign";
     // Do not forget to update the valueString function when adding a form type
 
     public final static Map<String, Integer> RESOURCES;
 
     static {
-        RESOURCES = new HashMap<String, Integer>();
+        RESOURCES = new HashMap<>();
         RESOURCES.put(TYPE_TEXT_LINE, R.layout.widget_text_line);
         RESOURCES.put(TYPE_TEXT_BLOCK, R.layout.widget_text_block);
         RESOURCES.put(TYPE_AUTO_COMPLETE, R.layout.widget_auto_complete);
+        RESOURCES.put(TYPE_FRIEND_SELECT, R.layout.widget_friend_select);
         RESOURCES.put(TYPE_SINGLE_SELECT, R.layout.widget_single_select);
         RESOURCES.put(TYPE_MULTI_SELECT, R.layout.widget_multi_select);
         RESOURCES.put(TYPE_DATE_SELECT, R.layout.widget_date_select);
@@ -67,6 +70,7 @@ public abstract class Widget extends LinearLayout {
         RESOURCES.put(TYPE_GPS_LOCATION, R.layout.widget_gps_location);
         RESOURCES.put(TYPE_MYDIGIPASS, R.layout.widget_mydigipass);
         RESOURCES.put(TYPE_ADVANCED_ORDER, R.layout.widget_advanced_order);
+        RESOURCES.put(TYPE_SIGN, R.layout.widget_sign);
     }
 
     protected Message mMessage;
@@ -78,22 +82,17 @@ public abstract class Widget extends LinearLayout {
 
     public Widget(Context context, AttributeSet attrs) {
         super(context, attrs);
-        setColorScheme(BrandingMgr.ColorScheme.light);
+        setColorScheme(BrandingMgr.ColorScheme.LIGHT);
     }
 
     public Widget(Context context) {
         super(context);
-        setColorScheme(BrandingMgr.ColorScheme.light);
-    }
-
-    public Map<String, Object> getWidgetMap() {
-        putValue();
-        return mWidgetMap;
+        setColorScheme(BrandingMgr.ColorScheme.LIGHT);
     }
 
     public void setColorScheme(BrandingMgr.ColorScheme colorScheme) {
         int colorId = android.R.color.primary_text_light;
-        if (colorScheme == BrandingMgr.ColorScheme.dark)
+        if (colorScheme == BrandingMgr.ColorScheme.DARK)
             colorId = android.R.color.primary_text_dark;
 
         mTextColor = getResources().getColor(colorId);
@@ -113,7 +112,7 @@ public abstract class Widget extends LinearLayout {
 
     public abstract void putValue();
 
-    public abstract IJSONable getFormResult();
+    public abstract IJSONable getWidgetResult();
 
     public boolean proceedWithSubmit(final String buttonId) {
         return true;
@@ -130,6 +129,9 @@ public abstract class Widget extends LinearLayout {
 
         if (TYPE_AUTO_COMPLETE.equals(formType))
             return AutoCompleteWidget.valueString(context, widget);
+
+        if (TYPE_FRIEND_SELECT.equals(formType))
+            return FriendSelectWidget.valueString(context, widget);
 
         if (TYPE_SINGLE_SELECT.equals(formType))
             return SingleSelectWidget.valueString(context, widget);

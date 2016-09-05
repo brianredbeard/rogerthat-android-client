@@ -91,6 +91,7 @@
     <string name="contacts_found_none">No contacts found on %1$s.</string>
     <string name="continue_">Continue</string>
     <string name="continue_shopping">Continue shopping</string>
+    <string name="corr">Corr</string>
     <string name="create_button_title">Define response button</string>
     <string name="create_group">Create group</string>
     <string name="create_groups_long">Arrange your friends in groups and send messages faster</string>
@@ -121,6 +122,7 @@
     <string name="enabled">Enabled</string>
     <string name="enabled_summary">Run in background</string>
     <string name="enabled_title">Background Service</string>
+    <string name="enter_pin_to_sign">Enter your security PIN code to sign the attached document(s).</string>
     <string name="enter_search_query">Enter a search text</string>
     <string name="error_find_from_addressbook">Address book scan failed. Please try again later.</string>
     <string name="error_find_from_facebook">Failed to find Facebook friends using %1$s. Please try again later.</string>
@@ -141,6 +143,7 @@
     <string name="fb_friends_found_none">No Facebook friends found on %1$s.</string>
     <string name="fb_wall_post_caption">Join me on %1$s!</string>
     <string name="fb_wall_post_description">Dear friends, scan this %1$s id to connect with me.</string>
+    <string name="feature_not_supported">This feature is not supported on your device.</string>
     <string name="female">Female</string>
     <string name="file_downloaded">File downloaded</string>
     <string name="find_colleagues">Find colleagues</string>
@@ -155,6 +158,7 @@
     <string name="friend_map_marker">Tracked at: %1$s\nAccuracy: %2$dm</string>
     <string name="friend_remove_failed">Could not send unfriend action to server.</string>
     <string name="friend_request_share_location_invitation_sent">A location sharing request has been sent to %1$s.</string>
+    <string name="friend_selection_is_required">Please select at least one friend.</string>
     <string name="friend_share_location">Can see my location</string>
     <string name="friend_sms_invitation">Hi %1$s,\n\nI invite you to communicate with me using %4$s.\n\nStep 1. install %4$s app:\n%2$s\n\nStep 2. connect with me:\n%3$s</string>
     <string name="friend_sms_invitation_no_url">Hi %1$s\n\nI invite you to communicate with me using %3$s. %3$s is a cool messaging platform for web and smartphone.\n\nInstall %3$s app: %2$s</string>
@@ -296,11 +300,17 @@
     <string name="not_yet_replied">Not yet replied</string>
     <string name="ok">OK</string>
     <string name="one_updated_message">1 updated message.</string>
+    <string name="open_attachments_before_signing">Please review the attached documents before signing</string>
     <string name="opening_camera">Opening camera…</string>
     <string name="order">Order</string>
     <string name="osa_loyalty_welcome_message">Welcome to the Our City App terminal. This app is the perfect complement to your presence in the city app in order to serve your customers even more. We help you to get the loyalty terminal ready for use. Start by scanning your QR code in order to activate your terminal.</string>
     <string name="phone">Phone</string>
     <string name="photo">Photo</string>
+    <string name="pin_confirm">Please confirm your pin code.</string>
+    <string name="pin_did_not_match">Pin code did not match.</string>
+    <string name="pin_invalid">Invalid pin code.</string>
+    <string name="pin_required_continue">A pin is required to continue!</string>
+    <string name="pin_setup_4_digit">To secure your app you need to enter a 4 digit pin code.</string>
     <string name="post">Post</string>
     <string name="previousButton">Back</string>
     <string name="previous_in_thread">Previous messages in this conversation</string>
@@ -410,6 +420,9 @@
     <string name="show_location">Show location</string>
     <string name="show_message_header">%1$s message</string>
     <string name="show_more">Show more…</string>
+    <string name="sign">Sign</string>
+    <string name="sign_first">You need to sign before you can continue.</string>
+    <string name="signed">Signed</string>
     <string name="size_actual">Actual</string>
     <string name="size_large">Large</string>
     <string name="size_medium">Medium</string>
@@ -420,10 +433,12 @@
     <string name="specials">Specials</string>
     <string name="start_registration">Start registration</string>
     <string name="sticky">Sticky</string>
+    <string name="stop">Stop</string>
     <string name="stream_summary">Show important items only</string>
     <string name="stream_title">Activity stream</string>
     <string name="successful_scan">Scan result</string>
     <string name="successfully_sent_message">Message successfully sent.</string>
+    <string name="successfully_signed">Successfully signed the documents</string>
     <string name="tab_friends">Friends</string>
     <string name="tab_messaging">Messages</string>
     <string name="tab_services">Services</string>
@@ -448,6 +463,9 @@
     <string name="transfer_uploading_notification">Transfer uploading</string>
     <string name="transmitting">Transmitting, please wait…</string>
     <string name="try_again">Try again</string>
+    <string name="try_again_in_hours">Try again in %1$d hr.</string>
+    <string name="try_again_in_minutes">Try again in %1$d min.</string>
+    <string name="try_again_in_seconds">Try again in %1$d sec.</string>
     <string name="unable_to_create_attachment_directory">Could not create attachment directory. Check the availability of your SD card.</string>
     <string name="unable_to_create_images_directory">Could not create %1$s images directory.</string>
     <string name="unable_to_read_write_sd_card">An error occurred. Check the availability of your SD card.</string>

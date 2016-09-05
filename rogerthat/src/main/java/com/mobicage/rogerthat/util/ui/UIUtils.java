@@ -298,6 +298,10 @@ public class UIUtils {
         return sActivities.get(sActivities.size() - 1);
     }
 
+    public static AlertDialog showAlertDialog(Context ctx, final int titleResource, final int messageResource) {
+        return UIUtils.showAlertDialog(ctx, ctx.getString(titleResource), ctx.getString(messageResource));
+    }
+
     public static AlertDialog showAlertDialog(Context ctx, final String title, final int messageResource) {
         return UIUtils.showAlertDialog(ctx, title, ctx.getString(messageResource));
     }

@@ -80,7 +80,7 @@ public class SingleSelectWidget extends AbstractSelectWidget {
     }
 
     @Override
-    public UnicodeWidgetResultTO getFormResult() {
+    public UnicodeWidgetResultTO getWidgetResult() {
         UnicodeWidgetResultTO r = new UnicodeWidgetResultTO();
         r.value = (String) mWidgetMap.get("value");
         return r;
@@ -94,7 +94,7 @@ public class SingleSelectWidget extends AbstractSelectWidget {
         request.parent_message_key = mMessage.parent_key;
         request.timestamp = timestamp;
         if (Message.POSITIVE.equals(buttonId)) {
-            request.result = getFormResult();
+            request.result = getWidgetResult();
         }
         if ((mMessage.flags & MessagingPlugin.FLAG_SENT_BY_JSMFR) == MessagingPlugin.FLAG_SENT_BY_JSMFR)
             mPlugin.answerJsMfrMessage(mMessage, request.toJSONMap(),

@@ -7,7 +7,7 @@
     <string name="about_more_info_enterprise">L\'app %1$s est construite sur la plate-forme d\'entreprise Rogerthat. Vous voulez savoir ce que Rogerthat Enterprise peut faire pour vous? Visite :</string>
     <string name="about_provided_by">Rogerthat est fièrement présenté par</string>
     <string name="about_provided_by_enterprise">L\'app %1$s est construite sur</string>
-    <string name="about_text">Rogerthat est un produit de la société Mobicage SA.\n\nCommentaires, aide et messagerie à</string>
+    <string name="about_text">Rogerthat est un produit de la société Mobicage SA.\n\n\n\nCommentaires, aide et messagerie à</string>
     <string name="about_version">Version 1.%1$d.%2$d.A</string>
     <string name="about_version_debug">Version 1.%1$d.%2$d.AD (debug)</string>
     <string name="action_geo">geo</string>
@@ -34,7 +34,7 @@
     <string name="activity_updated_friend">Ami mis à jour.</string>
     <string name="add">Ajouter</string>
     <string name="add_recipients">Ajoutez au moins un destinataire</string>
-    <string name="add_to_my_services">Ajouter à cette application</string>
+    <string name="add_to_my_services">Ajouter cette application</string>
     <string name="add_via_contacts_description">Trouver des contacts qui utilisent %1$s</string>
     <string name="add_via_contacts_notification">Résultats reçus de la recherche des contacts qui utilisent %1$s.</string>
     <string name="add_via_contacts_waiting">Vous recevrez une notification dès que vos contacts seront scannés.</string>
@@ -69,7 +69,7 @@
     <string name="caption_call">Appelez %1$s maintenant</string>
     <string name="caption_required">Le bouton de texte est nécessaire.</string>
     <string name="card_number">Carte Nº</string>
-    <string name="care">Professionels de santé</string>
+    <string name="care">Santé</string>
     <string name="change_picture">Changer l\'image</string>
     <string name="check_in">Enregistrer</string>
     <string name="check_in_at">Voulez-vous enregistrer à %1$s?</string>
@@ -153,6 +153,7 @@
     <string name="friend_map_marker">Localisé à: %1$s\nPrécision: %2$dm</string>
     <string name="friend_remove_failed">Impossible d\'envoyer cette action au serveur.</string>
     <string name="friend_request_share_location_invitation_sent">Une demande de partage de position est envoyée à %1$s.</string>
+    <string name="friend_selection_is_required">S\'il vous plaît sélectionner au moins un ami.</string>
     <string name="friend_share_location">Je partage ma position</string>
     <string name="friend_sms_invitation">Bonjour %1$s,\n\nJe vous invite afin de communiquer ensemble en utilisant %4$s\n\n1. Installez l\'application %4$s:\n%2$s\n\n2. Ajoutez moi:\n%3$s</string>
     <string name="friend_sms_invitation_no_url">Bonjour %1$s,\n\nJe vous invite afin de communiquer ensemble en utilisant %3$s.\n\nInstallation %3$s app:\n%2$s</string>
@@ -232,7 +233,7 @@
     <string name="member_message_history">Historique de %1$s</string>
     <string name="members">Membres</string>
     <string name="members_are_required">Des membres sont requis</string>
-    <string name="merchants">Commerçants</string>
+    <string name="merchants">Commerces</string>
     <string name="message">Un message</string>
     <string name="message_confirm">Prière de confirmer</string>
     <string name="message_delete_confirm">Confirmer la suppression</string>
@@ -314,7 +315,7 @@
     <string name="registration_activating_account">Activation de votre compte %1$s…</string>
     <string name="registration_agree_tos">Accepter l\'accord et continuer</string>
     <string name="registration_email_not_valid">Écrivez une adresse e-mail valide</string>
-    <string name="registration_enter_email_hint">Entrer l\'adresse e-mail</string>
+    <string name="registration_enter_email_hint">Saisissez votre adresse e-mail</string>
     <string name="registration_enter_email_hint_enterprise">Entrer l\'adresse e-mail pour vos services</string>
     <string name="registration_enter_pin">Saisissez votre code d\'activation pour compléter l\'inscription</string>
     <string name="registration_enter_pin_hint">Code d\'activation</string>
@@ -324,7 +325,7 @@
     <string name="registration_fb_wont_post">Nous ne publierons rien sur votre Mur sans votre permission.</string>
     <string name="registration_finalizing">Finalisation de l\'inscription…</string>
     <string name="registration_finish">Finaliser l\'inscription</string>
-    <string name="registration_incorrect_pin">Nous avons envoyé votre code d\'activation à %1$s\n\nVérifiez votre boîte e-mail. N\'oubliez pas de regarder dans votre dossier Spam ou Courrier indésirable.\n\nNous ne demandons pas le code PIN de votre mobile.</string>
+    <string name="registration_incorrect_pin">Nous avons envoyé votre code d\'activation à %1$s\n\n\n\nVérifiez votre boîte e-mail. N\'oubliez pas de regarder dans votre dossier Spam ou Courrier indésirable.\n\n\n\nNous ne demandons pas le code PIN de votre mobile.</string>
     <string name="registration_incorrect_pin_dialog_title">Code d\'activation faux</string>
     <string name="registration_invalid_pin">Le code d\'activation doit contenir 4 chiffres.</string>
     <string name="registration_multiple_choice_messaging">Messagerie à choix multiples\navec des amis et organizations</string>
@@ -333,7 +334,7 @@
     <string name="registration_no_attempts_left">Vous avez entré trois fois un code d\'activation faux.\n\nRecommencez l\'inscription s\'il-vous-plaît.</string>
     <string name="registration_option_email">Option 2:\nUtiliser votre addresse e-mail.</string>
     <string name="registration_option_fb">Option 1:\nUtiliser votre compte Facebook.</string>
-    <string name="registration_pin_was_mailed">Votre code d\'activation a été envoyé à %1$s\n\nPeut-être que l\'e-mail se trouve dans vos spam ou courriers indésirables.</string>
+    <string name="registration_pin_was_mailed">Votre code d\'activation a été envoyé par e-mail à&lt;br /&gt;&lt;b&gt;%1$s&lt;/b&gt;&lt;br /&gt;&lt;br /&gt; Vérifiez éventuellement votre répertoire Spam ou Courrier indésirable.</string>
     <string name="registration_pin_was_mailed_no_html">Votre code d\'activation est envoyé à %1$s à %2$s.\nPeut-être que l\'e-mail se trouve dans vos spams ou courriers indésirables.</string>
     <string name="registration_request_new_pin">Demander le nouveau code d\'activation</string>
     <string name="registration_screen_install_zxing">%1$s utilise le scanneur ZXing pour automatiser certaines tâches.\n\nVoulez-vous installer l\'application ZXing?</string>
@@ -399,6 +400,7 @@
     <string name="show_location">Montrer la position</string>
     <string name="show_message_header">Message %1$s</string>
     <string name="show_more">Montrer plus…</string>
+    <string name="sign">Signer</string>
     <string name="size_actual">Actuel</string>
     <string name="size_large">Grande</string>
     <string name="size_medium">Medium</string>

@@ -131,8 +131,6 @@ public class AddFriendsActivity extends ServiceBoundActivity {
     private boolean mFbPageConfigured = false;
     private final Map<String, Bitmap> mFbAvatars = new HashMap<String, Bitmap>();
 
-    private CallbackManager mFBCallbackMgr;
-
     private Cursor mCursorEmail;
     private Cursor mPhoneCursor;
 

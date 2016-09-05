@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.mobicage.rogerthat.plugins.messaging.widgets.SignWidget
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="5dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/sign_result"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/gray_border"
+        android:divider="@color/mc_divider_gray"
+        android:dividerHeight="1dip"
+        android:drawableLeft="@drawable/checkmark"
+        android:gravity="center"
+        android:minHeight="44dp"
+        android:text="@string/successfully_signed"
+        android:visibility="gone"/>
+
+    <Button
+        android:id="@+id/sign_btn"
+        android:layout_width="match_parent"
+        android:layout_height="88dp"
+        android:drawableLeft="@drawable/sign"
+        android:text="@string/sign"/>
+
+</com.mobicage.rogerthat.plugins.messaging.widgets.SignWidget>

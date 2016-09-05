@@ -464,7 +464,7 @@ public class PhotoUploadWidget extends Widget {
     }
 
     @Override
-    public UnicodeWidgetResultTO getFormResult() {
+    public UnicodeWidgetResultTO getWidgetResult() {
         return null;
     }
 

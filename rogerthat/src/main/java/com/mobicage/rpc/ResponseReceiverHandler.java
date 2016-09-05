@@ -374,6 +374,15 @@ public class ResponseReceiverHandler {
                 resp.setResult(Parser.ComMobicageToMessagingFormsSubmitDateSelectFormResponseTO(rpcr.result));
             ((IResponseHandler<com.mobicage.to.messaging.forms.SubmitDateSelectFormResponseTO>) responseHandler).handle(resp);
         }
+        if ("com.mobicage.api.messaging.submitFriendSelectForm".equals(function)) {
+            final Response<com.mobicage.to.messaging.forms.SubmitFriendSelectFormResponseTO> resp = new Response<com.mobicage.to.messaging.forms.SubmitFriendSelectFormResponseTO>();
+            resp.setError(rpcr.error);
+            resp.setSuccess(rpcr.success);
+            resp.setCallId(rpcr.callId);
+            if (rpcr.success)
+                resp.setResult(Parser.ComMobicageToMessagingFormsSubmitFriendSelectFormResponseTO(rpcr.result));
+            ((IResponseHandler<com.mobicage.to.messaging.forms.SubmitFriendSelectFormResponseTO>) responseHandler).handle(resp);
+        }
         if ("com.mobicage.api.messaging.submitGPSLocationForm".equals(function)) {
             final Response<com.mobicage.to.messaging.forms.SubmitGPSLocationFormResponseTO> resp = new Response<com.mobicage.to.messaging.forms.SubmitGPSLocationFormResponseTO>();
             resp.setError(rpcr.error);
@@ -418,6 +427,15 @@ public class ResponseReceiverHandler {
             if (rpcr.success)
                 resp.setResult(Parser.ComMobicageToMessagingFormsSubmitRangeSliderFormResponseTO(rpcr.result));
             ((IResponseHandler<com.mobicage.to.messaging.forms.SubmitRangeSliderFormResponseTO>) responseHandler).handle(resp);
+        }
+        if ("com.mobicage.api.messaging.submitSignForm".equals(function)) {
+            final Response<com.mobicage.to.messaging.forms.SubmitSignFormResponseTO> resp = new Response<com.mobicage.to.messaging.forms.SubmitSignFormResponseTO>();
+            resp.setError(rpcr.error);
+            resp.setSuccess(rpcr.success);
+            resp.setCallId(rpcr.callId);
+            if (rpcr.success)
+                resp.setResult(Parser.ComMobicageToMessagingFormsSubmitSignFormResponseTO(rpcr.result));
+            ((IResponseHandler<com.mobicage.to.messaging.forms.SubmitSignFormResponseTO>) responseHandler).handle(resp);
         }
         if ("com.mobicage.api.messaging.submitSingleSelectForm".equals(function)) {
             final Response<com.mobicage.to.messaging.forms.SubmitSingleSelectFormResponseTO> resp = new Response<com.mobicage.to.messaging.forms.SubmitSingleSelectFormResponseTO>();
@@ -670,6 +688,15 @@ public class ResponseReceiverHandler {
             if (rpcr.success)
                 resp.setResult(Parser.ComMobicageToSystemSetMobilePhoneNumberResponseTO(rpcr.result));
             ((IResponseHandler<com.mobicage.to.system.SetMobilePhoneNumberResponseTO>) responseHandler).handle(resp);
+        }
+        if ("com.mobicage.api.system.setSecureInfo".equals(function)) {
+            final Response<com.mobicage.to.system.SetSecureInfoResponseTO> resp = new Response<com.mobicage.to.system.SetSecureInfoResponseTO>();
+            resp.setError(rpcr.error);
+            resp.setSuccess(rpcr.success);
+            resp.setCallId(rpcr.callId);
+            if (rpcr.success)
+                resp.setResult(Parser.ComMobicageToSystemSetSecureInfoResponseTO(rpcr.result));
+            ((IResponseHandler<com.mobicage.to.system.SetSecureInfoResponseTO>) responseHandler).handle(resp);
         }
         if ("com.mobicage.api.system.unregisterMobile".equals(function)) {
             final Response<com.mobicage.to.system.UnregisterMobileResponseTO> resp = new Response<com.mobicage.to.system.UnregisterMobileResponseTO>();

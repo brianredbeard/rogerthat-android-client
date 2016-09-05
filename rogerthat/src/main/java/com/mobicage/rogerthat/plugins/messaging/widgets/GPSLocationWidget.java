@@ -404,7 +404,7 @@ public class GPSLocationWidget extends Widget {
     }
 
     @Override
-    public LocationWidgetResultTO getFormResult() {
+    public LocationWidgetResultTO getWidgetResult() {
         return mLocationResult;
     }
 

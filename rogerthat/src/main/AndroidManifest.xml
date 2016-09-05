@@ -1,8 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.mobicage.rogerth.at"
-    android:configChanges="orientation"
-    android:versionCode="2201"
-    android:versionName="1.0.2201.A">
+          package="com.mobicage.rogerth.at"
+          android:configChanges="orientation|screenSize"
+          android:versionCode="2397"
+          android:versionName="1.0.2397.A">
 
     <!-- BEGIN GCM -->
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
@@ -126,7 +126,7 @@
 
         <activity
             android:name="com.google.zxing.client.android.CaptureActivity"
-            android:configChanges="orientation|keyboardHidden"
+            android:configChanges="orientation|screenSize|keyboardHidden"
             android:screenOrientation="landscape"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateAlwaysHidden" >
@@ -177,7 +177,7 @@
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.AddFriendsActivity"
-            android:configChanges="orientation" >
+            android:configChanges="orientation|screenSize">
         </activity>
         <activity android:name="com.mobicage.rogerthat.UserFriendsActivity" >
         </activity>
@@ -191,25 +191,25 @@
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.friends.RecommendServiceActivity"
-            android:configChanges="orientation" >
+            android:configChanges="orientation|screenSize">
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.friends.ServiceSearchActivity"
-            android:configChanges="orientation"
+            android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.friends.FriendSearchActivity"
-            android:configChanges="orientation"
+            android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.friends.ActionScreenActivity"
-            android:screenOrientation="portrait" >
+            android:configChanges="orientation|screenSize">
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.friends.ContentBrandingActionScreenActivity"
-            android:screenOrientation="landscape" >
+            android:configChanges="orientation|screenSize">
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.GetLocationActivity"
@@ -219,7 +219,7 @@
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.scan.ScanTabActivity"
-            android:configChanges="orientation" >
+            android:configChanges="orientation|screenSize">
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.scan.ProfileActivity"
@@ -256,13 +256,13 @@
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.messaging.ServiceMessageDetailActivity"
-            android:configChanges="orientation"
+            android:configChanges="orientation|screenSize"
             android:theme="@style/AppTheme.NoActionBar" >
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.messaging.AttachmentViewerActivity"
-            android:configChanges="orientation"
-            android:theme="@style/AppTheme.NoActionBar" >
+            android:configChanges="orientation|screenSize"
+            android:theme="@android:style/Theme.Light.NoTitleBar" >
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.FriendLocationActivity"
@@ -279,7 +279,7 @@
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.SendMessageWizardActivity"
-            android:configChanges="orientation"
+            android:configChanges="orientation|screenSize"
             android:theme="@style/FullHeightDialog"
             android:windowSoftInputMode="adjustResize" >
         </activity>
@@ -311,6 +311,16 @@
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.OauthActivity"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.NoTitleBar" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.SetupPinActivity"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.NoTitleBar" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.EnterPinActivity"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.NoTitleBar" >
         </activity>
@@ -353,10 +363,12 @@
             android:name="org.altbeacon.beacon.BeaconIntentProcessor"
             android:exported="false" />
 
+        <!-- BEGIN FB -->
         <provider
             android:name="com.facebook.FacebookContentProvider"
             android:authorities="com.facebook.app.FacebookContentProvider188033791211994"
             android:exported="true"/>
+        <!-- END FB -->
 
     </application>
 

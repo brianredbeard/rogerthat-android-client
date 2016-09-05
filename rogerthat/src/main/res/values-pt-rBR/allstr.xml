@@ -143,6 +143,7 @@
     <string name="friend_map_marker">Rastreada às: %1$s\nPrecisão: %2$dm</string>
     <string name="friend_remove_failed">Não foi possível enviar a ação \"desfazer amizade\" ao servidor.</string>
     <string name="friend_request_share_location_invitation_sent">Solicitação de compartilhamento de localização enviada para %1$s.</string>
+    <string name="friend_selection_is_required">Por favor, selecione pelo menos um amigo.</string>
     <string name="friend_share_location">Posso ver minha localização</string>
     <string name="friend_sms_invitation">Olá %1$s,\n\nGostaria de convidar você para estar em contato comigo através do %4$s.\n\nPasso 1. Instale o aplicativo %4$s:\n%2$s\n\nPasso 2. Conecte-se comigo:\n%3$s</string>
     <string name="friend_sms_invitation_no_url">Olá %1$s\n\nGostaria de convidar você para estar em contato comigo através do %3$s. %3$s É uma plataforma de mensagens muito legal para Web e smartphones.\n\nInstale o aplicativo %3$s: %2$s</string>
@@ -287,7 +288,6 @@
     <string name="registration_activating_account">Ativando sua conta %1$s…</string>
     <string name="registration_agree_tos">Concordar e continuar</string>
     <string name="registration_email_not_valid">Inserir endereço de e-mail válido</string>
-    <string name="registration_enter_email_hint">Inserir seu endereço de e-mail </string>
     <string name="registration_enter_email_hint_enterprise">Inserir endereço de e-mail da empresa</string>
     <string name="registration_enter_pin">Inserir código de ativação para completar o registro</string>
     <string name="registration_enter_pin_hint">Código de ativação</string>

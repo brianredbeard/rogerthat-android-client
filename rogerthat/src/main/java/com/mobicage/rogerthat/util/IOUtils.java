@@ -29,6 +29,7 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -36,6 +37,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -148,6 +150,19 @@ public class IOUtils {
             sb.append(line);
         }
         return sb.toString();
+    }
+
+    public static byte[] digest(final MessageDigest digest, final File f) throws IOException {
+        FileInputStream fis = new FileInputStream(f);
+
+        byte[] dataBytes = new byte[1024];
+
+        int read;
+        while ((read = fis.read(dataBytes)) != -1) {
+            digest.update(dataBytes, 0, read);
+        }
+
+        return digest.digest();
     }
 
 }

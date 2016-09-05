@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    android:configChanges="orientation">
+    android:configChanges="orientation|screenSize">
 
     <!-- UI TEST PERMISSIONS-->
     <!-- Allows unlocking your device and activating its screen so UI tests can succeed -->

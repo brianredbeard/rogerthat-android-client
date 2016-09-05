@@ -1126,6 +1126,27 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.FriendSelectFormMessageTO ComMobicageToMessagingFormsFriendSelectFormMessageTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.FriendSelectFormMessageTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.FriendSelectFormTO ComMobicageToMessagingFormsFriendSelectFormTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.FriendSelectFormTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.FriendSelectTO ComMobicageToMessagingFormsFriendSelectTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.FriendSelectTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
     public static com.mobicage.to.messaging.forms.GPSLocationFormMessageTO ComMobicageToMessagingFormsGPSLocationFormMessageTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;
@@ -1252,6 +1273,20 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.NewFriendSelectFormRequestTO ComMobicageToMessagingFormsNewFriendSelectFormRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.NewFriendSelectFormRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.NewFriendSelectFormResponseTO ComMobicageToMessagingFormsNewFriendSelectFormResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.NewFriendSelectFormResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
     public static com.mobicage.to.messaging.forms.NewGPSLocationFormRequestTO ComMobicageToMessagingFormsNewGPSLocationFormRequestTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;
@@ -1319,6 +1354,20 @@ public class Parser {
         if (value == null)
             return null;
         return new com.mobicage.to.messaging.forms.NewRangeSliderFormResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.NewSignFormRequestTO ComMobicageToMessagingFormsNewSignFormRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.NewSignFormRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.NewSignFormResponseTO ComMobicageToMessagingFormsNewSignFormResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.NewSignFormResponseTO((Map<String, Object>) value);
     }
 
     @SuppressWarnings("unchecked")
@@ -1420,6 +1469,27 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.SignFormMessageTO ComMobicageToMessagingFormsSignFormMessageTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.SignFormMessageTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.SignFormTO ComMobicageToMessagingFormsSignFormTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.SignFormTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.SignTO ComMobicageToMessagingFormsSignTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.SignTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
     public static com.mobicage.to.messaging.forms.SingleSelectFormMessageTO ComMobicageToMessagingFormsSingleSelectFormMessageTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;
@@ -1504,6 +1574,20 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.SubmitFriendSelectFormRequestTO ComMobicageToMessagingFormsSubmitFriendSelectFormRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.SubmitFriendSelectFormRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.SubmitFriendSelectFormResponseTO ComMobicageToMessagingFormsSubmitFriendSelectFormResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.SubmitFriendSelectFormResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
     public static com.mobicage.to.messaging.forms.SubmitGPSLocationFormRequestTO ComMobicageToMessagingFormsSubmitGPSLocationFormRequestTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;
@@ -1571,6 +1655,20 @@ public class Parser {
         if (value == null)
             return null;
         return new com.mobicage.to.messaging.forms.SubmitRangeSliderFormResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.SubmitSignFormRequestTO ComMobicageToMessagingFormsSubmitSignFormRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.SubmitSignFormRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.SubmitSignFormResponseTO ComMobicageToMessagingFormsSubmitSignFormResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.SubmitSignFormResponseTO((Map<String, Object>) value);
     }
 
     @SuppressWarnings("unchecked")
@@ -1728,6 +1826,20 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.UpdateFriendSelectFormRequestTO ComMobicageToMessagingFormsUpdateFriendSelectFormRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.UpdateFriendSelectFormRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.UpdateFriendSelectFormResponseTO ComMobicageToMessagingFormsUpdateFriendSelectFormResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.UpdateFriendSelectFormResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
     public static com.mobicage.to.messaging.forms.UpdateGPSLocationFormRequestTO ComMobicageToMessagingFormsUpdateGPSLocationFormRequestTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;
@@ -1795,6 +1907,20 @@ public class Parser {
         if (value == null)
             return null;
         return new com.mobicage.to.messaging.forms.UpdateRangeSliderFormResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.UpdateSignFormRequestTO ComMobicageToMessagingFormsUpdateSignFormRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.UpdateSignFormRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.UpdateSignFormResponseTO ComMobicageToMessagingFormsUpdateSignFormResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.UpdateSignFormResponseTO((Map<String, Object>) value);
     }
 
     @SuppressWarnings("unchecked")
@@ -2229,6 +2355,20 @@ public class Parser {
         if (value == null)
             return null;
         return new com.mobicage.to.system.SetMobilePhoneNumberResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.system.SetSecureInfoRequestTO ComMobicageToSystemSetSecureInfoRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.system.SetSecureInfoRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.system.SetSecureInfoResponseTO ComMobicageToSystemSetSecureInfoResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.system.SetSecureInfoResponseTO((Map<String, Object>) value);
     }
 
     @SuppressWarnings("unchecked")

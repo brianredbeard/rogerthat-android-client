@@ -130,6 +130,17 @@ public class Rpc {
         com.mobicage.rpc.Rpc.call("com.mobicage.api.messaging.submitDateSelectForm", arguments, responseHandler);
     }
 
+    public static void submitFriendSelectForm(com.mobicage.rpc.IResponseHandler<com.mobicage.to.messaging.forms.SubmitFriendSelectFormResponseTO> responseHandler,
+            com.mobicage.to.messaging.forms.SubmitFriendSelectFormRequestTO request) throws Exception {
+        java.util.Map<java.lang.String, java.lang.Object> arguments = new java.util.LinkedHashMap<java.lang.String, java.lang.Object>();
+        if (request == null) {
+            arguments.put("request", null);
+        } else {
+            arguments.put("request", request.toJSONMap());
+        }
+        com.mobicage.rpc.Rpc.call("com.mobicage.api.messaging.submitFriendSelectForm", arguments, responseHandler);
+    }
+
     public static void submitGPSLocationForm(com.mobicage.rpc.IResponseHandler<com.mobicage.to.messaging.forms.SubmitGPSLocationFormResponseTO> responseHandler,
             com.mobicage.to.messaging.forms.SubmitGPSLocationFormRequestTO request) throws Exception {
         java.util.Map<java.lang.String, java.lang.Object> arguments = new java.util.LinkedHashMap<java.lang.String, java.lang.Object>();
@@ -183,6 +194,17 @@ public class Rpc {
             arguments.put("request", request.toJSONMap());
         }
         com.mobicage.rpc.Rpc.call("com.mobicage.api.messaging.submitRangeSliderForm", arguments, responseHandler);
+    }
+
+    public static void submitSignForm(com.mobicage.rpc.IResponseHandler<com.mobicage.to.messaging.forms.SubmitSignFormResponseTO> responseHandler,
+            com.mobicage.to.messaging.forms.SubmitSignFormRequestTO request) throws Exception {
+        java.util.Map<java.lang.String, java.lang.Object> arguments = new java.util.LinkedHashMap<java.lang.String, java.lang.Object>();
+        if (request == null) {
+            arguments.put("request", null);
+        } else {
+            arguments.put("request", request.toJSONMap());
+        }
+        com.mobicage.rpc.Rpc.call("com.mobicage.api.messaging.submitSignForm", arguments, responseHandler);
     }
 
     public static void submitSingleSelectForm(com.mobicage.rpc.IResponseHandler<com.mobicage.to.messaging.forms.SubmitSingleSelectFormResponseTO> responseHandler,

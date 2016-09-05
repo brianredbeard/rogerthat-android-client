@@ -297,7 +297,7 @@ public class MessageStore implements Closeable {
 
     @SuppressWarnings("unchecked")
     public Message getCurrentMessage(Cursor cursor, final int query) {
-        T.UI();
+        T.dontCare();
         final Message message = new Message();
         // Don't forget to update MessagingActivity.onOptionsItemSelected if the order of key and parent_key is changed
         message.key = getKeyFromMessageCursor(cursor);
@@ -944,12 +944,19 @@ public class MessageStore implements Closeable {
     }
 
     public Message getMessageByKey(String key) {
+        return getMessageByKey(key, false);
+    }
+
+
+    public Message getMessageByKey(String key, boolean ignoreNotFound) {
         T.dontCare();
         final Cursor curs = mDb.rawQuery(mMainService.getString(R.string.sql_message_get_thread_message_by_key),
             new String[] { key });
         try {
             if (!curs.moveToFirst()) {
-                L.bug("Cannot find message with key " + key);
+                if (!ignoreNotFound) {
+                    L.bug("Cannot find message with key " + key);
+                }
                 return null;
             }
             return getCurrentMessage(curs, R.string.sql_message_get_thread_message_by_key);

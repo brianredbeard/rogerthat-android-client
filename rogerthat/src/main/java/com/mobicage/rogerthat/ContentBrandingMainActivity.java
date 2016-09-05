@@ -47,7 +47,6 @@ import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.T;
-import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
 
 public class ContentBrandingMainActivity extends ServiceBoundActivity {
@@ -59,7 +58,7 @@ public class ContentBrandingMainActivity extends ServiceBoundActivity {
         @Override
         public String[] onSafeReceive(Context context, Intent intent) {
             T.UI();
-            launchOsaSlideshowActivityAndFinish();
+            launchContentBrandingActivityAndFinish();
             return new String[] { intent.getAction() };
         };
     };
@@ -68,8 +67,8 @@ public class ContentBrandingMainActivity extends ServiceBoundActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         T.UI();
-        if (CloudConstants.isContentBrandingApp()) {
-            L.bug("OsaLoyaltyMainActivity should only be used by APP_TYPE_CONTENT_BRANDING");
+        if (!CloudConstants.isContentBrandingApp()) {
+            L.bug(getClass().getName() + " should only be used by APP_TYPE_CONTENT_BRANDING");
         }
         setContentView(R.layout.registration_for_content_branding);
         mUIHandler = new Handler();
@@ -111,7 +110,7 @@ public class ContentBrandingMainActivity extends ServiceBoundActivity {
             filter.addAction(action);
         registerReceiver(mBroadcastReceiver, filter);
 
-        launchOsaSlideshowActivityAndFinish();
+        launchContentBrandingActivityAndFinish();
     }
 
     @Override
@@ -120,7 +119,7 @@ public class ContentBrandingMainActivity extends ServiceBoundActivity {
         unregisterReceiver(mBroadcastReceiver);
     }
 
-    private void launchOsaSlideshowActivityAndFinish() {
+    private void launchContentBrandingActivityAndFinish() {
         T.UI();
         final FriendsPlugin friendsPlugin = mService.getPlugin(FriendsPlugin.class);
         final FriendStore friendStore = friendsPlugin.getStore();
@@ -192,7 +191,7 @@ public class ContentBrandingMainActivity extends ServiceBoundActivity {
             startActivity(intent);
             finish();
         } else {
-            L.bug("OSA Loyalty user has more than 1 friend");
+            L.bug("Content branding user has more than 1 friend");
         }
     }
 }
