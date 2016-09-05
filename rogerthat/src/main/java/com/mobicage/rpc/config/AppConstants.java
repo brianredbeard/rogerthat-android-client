@@ -57,23 +57,12 @@ public class AppConstants {
     public static final boolean SHOW_SCAN_IN_MORE = false;
     public static final boolean FULL_WIDTH_HEADERS = false;
 
+    private static final String[] NAVIGATION_ITEMS = new String[] {"messages", "services", "friends", "scan", "profile", "settings"};
     public static final String getActivityNameForOrder(int order) {
-        // todo ruben from yaml
-        if (order == 0) {
-            return "messages";
-        } else if (order == 1) {
-            return "services";
-        } else if (order == 2) {
-            return "friends";
-        } else if (order == 3) {
-            return "scan";
-        } else if (order == 4) {
-            return "profile";
-        } else if (order == 5) {
-            return "settings";
-        } else {
+        if (NAVIGATION_ITEMS.length <= order) {
             return null;
         }
+        return NAVIGATION_ITEMS[order];
     }
 
     public static final boolean REGISTRATION_ASKS_LOCATION_PERMISSION = true;

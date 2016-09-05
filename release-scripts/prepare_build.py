@@ -235,16 +235,18 @@ def get_translation_strings():
 
 
 def generate_navigation_menu(doc, strings_map):
+    navigation_items = []
     with open(os.path.join(SRC_RES_DIR, 'menu', 'navigation_menu.xml'), 'w+') as f:
         f.write('<?xml version="1.0" encoding="utf-8"?>\n')
         f.write('<menu xmlns:android="http://schemas.android.com/apk/res/android">\n')
         items = doc['HOMESCREEN']['items']
         for i, item in enumerate(items):
+            navigation_items.append(item["click"])
             f.write("""
     <group
         android:checkableBehavior="single">
         <item
-            android:id="@+id/navigation_item_%(i)s"
+            android:orderInCategory="%(i)s"
             android:icon="@drawable/menu_%(i)s"
             android:title="@string/%(title)s"/>""" % dict(i=i, title=strings_map[item['text']]))
             if i == len(items) - 1:
@@ -264,6 +266,7 @@ def generate_navigation_menu(doc, strings_map):
     </group>""")
 
         f.write('\n</menu>')
+    return navigation_items
 
 
 # This function is not executed in case the app is Rogerthat
@@ -306,7 +309,7 @@ def convert_config():
 
         strings_map = get_translation_strings()
 
-        generate_navigation_menu(doc, strings_map)
+        navigation_items = generate_navigation_menu(doc, strings_map)
 
         for item in doc["HOMESCREEN"].get("items", []):
             icon_file_name = "menu_%sx%s.png" % (item["position"][0], item["position"][1])
@@ -623,6 +626,14 @@ public class AppConstants {
     public static final boolean SHOW_SCAN_IN_MORE = %(show_scan_in_more)s;
     public static final boolean FULL_WIDTH_HEADERS = %(full_width_headers)s;
 
+    private static final String[] NAVIGATION_ITEMS = new String[] { %(navigation_items)s };
+    public static final String getActivityNameForOrder(int order) {
+        if (NAVIGATION_ITEMS.length <= order) {
+            return null;
+        }
+        return NAVIGATION_ITEMS[order];
+    }
+
     public static final boolean REGISTRATION_ASKS_LOCATION_PERMISSION = %(registration_asks_location_permission)s;
     public static final int[] SEARCH_SERVICES_IF_NONE_CONNECTED = new int[] {%(search_services_if_none_connected)s};
 
@@ -662,6 +673,7 @@ public class AppConstants {
            show_scan_in_more=show_scan_in_more,
            search_services_if_none_connected=search_services_if_none_connected,
            full_width_headers=full_width_headers,
+           navigation_items=','.join(navigation_items),
            profile_data_fields=profile_data_fields,
            profile_show_gender_and_birthdate=profile_show_gender_and_birthdate,
            messages_show_reply_vs_unread_count=messages_show_reply_vs_unread_count,

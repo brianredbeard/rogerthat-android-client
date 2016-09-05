@@ -68,6 +68,7 @@ import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.Pausable;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.AppConstants;
+import com.mobicage.rpc.config.CloudConstants;
 
 public abstract class ServiceBoundActivity extends AppCompatActivity implements Pausable, ServiceBound, NavigationView.OnNavigationItemSelectedListener {
 
@@ -388,6 +389,11 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setItemIconTintList(null);
+
+        if (!CloudConstants.isCityApp()) {
+            LinearLayout navigationFooter = (LinearLayout) findViewById(R.id.nav_view_footer);
+            navigationFooter.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -470,11 +476,14 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
     public boolean onNavigationItemSelected(MenuItem item) {
         String activityName = AppConstants.getActivityNameForOrder(item.getOrder());
         ActivityUtils.goToActivity(this, activityName);
+        closeNavigationView();
         return true;
     }
 
 
     public void onOptionNavigationViewToolbarSelected(View v) {
-        ActivityUtils.goToActivity(this, (String) v.getTag());
+        String activityName = (String) v.getTag();
+        ActivityUtils.goToActivity(this, activityName);
+        closeNavigationView();
     }
 }
