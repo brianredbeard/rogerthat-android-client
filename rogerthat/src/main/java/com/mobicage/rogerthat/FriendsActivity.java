@@ -33,7 +33,7 @@ import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 
-public abstract class FriendsActivity extends ServiceBoundCursorListActivityNavigationView {
+public abstract class FriendsActivity extends ServiceBoundCursorListActivity {
 
     protected FriendsPlugin mFriendsPlugin;
 

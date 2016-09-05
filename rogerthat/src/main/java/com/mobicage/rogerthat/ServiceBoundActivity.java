@@ -43,16 +43,23 @@ import android.support.design.widget.NavigationView;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.facebook.CallbackManager;
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
@@ -60,8 +67,9 @@ import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.Pausable;
 import com.mobicage.rogerthat.util.ui.UIUtils;
+import com.mobicage.rpc.config.AppConstants;
 
-public abstract class ServiceBoundActivity extends AppCompatActivity implements Pausable, ServiceBound {
+public abstract class ServiceBoundActivity extends AppCompatActivity implements Pausable, ServiceBound, NavigationView.OnNavigationItemSelectedListener {
 
     public static final long MAX_TRANSMIT = 10 * 1000;
 
@@ -323,6 +331,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
     }
 
     public void setNavigationBarVisible(boolean isVisible) {
+        // todo ruben
         final RelativeLayout navBar = (RelativeLayout) findViewById(R.id.nav_bar);
         if (navBar == null) {
             L.d("navBar not found in current activity");
@@ -332,6 +341,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
     }
 
     public void setNavigationBarTitle(String title) {
+        // todo ruben
         final TextView navBarTitle = (TextView) findViewById(R.id.navigation_bar_title);
         if (navBarTitle == null) {
             L.d("navBarTitle not found in current activity");
@@ -341,6 +351,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
     }
 
     public void setNavigationBarTitle(int resid) {
+        // todo ruben
         final TextView navBarTitle = (TextView) findViewById(R.id.navigation_bar_title);
         if (navBarTitle == null) {
             L.d("navBarTitle not found in current activity");
@@ -359,7 +370,24 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
 
     @Override
     public void setContentView(int layoutResID) {
-        setContentView(getLayoutInflater().inflate(layoutResID, null));
+        setContentView(getLayoutInflater().inflate(R.layout.navigation_view, null));
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        LinearLayout item = (LinearLayout) findViewById(R.id.linear_layout);
+        View child = getLayoutInflater().inflate(layoutResID, null);
+        item.addView(child);
+
+        final DrawerLayout drawer = getDrawer();
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string
+                .navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        navigationView.setItemIconTintList(null);
     }
 
     @Override
@@ -413,5 +441,40 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         if (mFBCallbackMgr != null ) {
             mFBCallbackMgr.onActivityResult(requestCode, resultCode, data);
         }
+    }
+
+
+    public DrawerLayout getDrawer() {
+        return (DrawerLayout) findViewById(R.id.drawer_layout);
+    }
+
+    public void openNavigationView() {
+        getDrawer().openDrawer(GravityCompat.START);
+    }
+
+    public void closeNavigationView() {
+        getDrawer().closeDrawer(GravityCompat.START);
+    }
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        String activityName = AppConstants.getActivityNameForOrder(item.getOrder());
+        ActivityUtils.goToActivity(this, activityName);
+        return true;
+    }
+
+
+    public void onOptionNavigationViewToolbarSelected(View v) {
+        ActivityUtils.goToActivity(this, (String) v.getTag());
     }
 }

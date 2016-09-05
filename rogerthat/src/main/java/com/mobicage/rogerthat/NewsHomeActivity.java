@@ -23,16 +23,15 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 
-public class NewsHomeActivity extends ServiceBoundActivityNavigationView {
+public class NewsHomeActivity extends ServiceBoundActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.homescreen_news);
-
-        openNavigationView();
 
         Button testBtn = (Button) findViewById(R.id.btn_test);
         testBtn.setOnClickListener(new SafeViewOnClickListener() {
@@ -51,5 +50,15 @@ public class NewsHomeActivity extends ServiceBoundActivityNavigationView {
     @Override
     protected void onServiceUnbound() {
 
+    }
+
+    @Override
+    public void onOptionNavigationViewToolbarSelected(View v) {
+        String tag = (String)v.getTag();
+        if (tag.equals("news")) {
+            closeNavigationView();
+            return;
+        }
+        super.onOptionNavigationViewToolbarSelected(v);
     }
 }

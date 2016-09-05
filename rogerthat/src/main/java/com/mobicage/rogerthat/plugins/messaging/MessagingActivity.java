@@ -61,7 +61,6 @@ import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.SendMessageWizardActivity;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.ServiceBoundCursorListActivity;
-import com.mobicage.rogerthat.ServiceBoundCursorListActivityNavigationView;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.messaging.MessageStore.CursorSet;
 import com.mobicage.rogerthat.util.TextUtils;
@@ -77,7 +76,7 @@ import com.mobicage.to.messaging.AttachmentTO;
 import com.mobicage.to.messaging.ButtonTO;
 import com.mobicage.to.messaging.MemberStatusTO;
 
-public class MessagingActivity extends ServiceBoundCursorListActivityNavigationView {
+public class MessagingActivity extends ServiceBoundCursorListActivity {
 
     private static final long sGMTOffsetMillis = TimeUtils.getGMTOffsetMillis();
 

@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.database.Cursor;
 
 import com.mobicage.rogerthat.MoreActivity;
+import com.mobicage.rogerthat.NewsHomeActivity;
 import com.mobicage.rogerthat.ServiceFriendsActivity;
 import com.mobicage.rogerthat.SettingsActivity;
 import com.mobicage.rogerthat.UserFriendsActivity;
@@ -38,7 +39,9 @@ public class ActivityUtils {
 
     public static void goToActivity(Context context, String activityName) {
         // todo ruben implement collapse
-        if ("messages".equals(activityName)) {
+        if ("news".equals(activityName)) {
+            goToNewsActivity(context);
+        } else if ("messages".equals(activityName)) {
             goToMessagingActivity(context);
         } else if ("scan".equals(activityName)) {
             goToScanActivity(context);
@@ -65,6 +68,11 @@ public class ActivityUtils {
         } else {
             L.bug("unknown goToActivity: " + activityName);
         }
+    }
+
+    public static void goToNewsActivity(Context context) {
+        Intent i = new Intent(context, NewsHomeActivity.class);
+        context.startActivity(i);
     }
 
     public static void goToMessagingActivity(Context context) {
