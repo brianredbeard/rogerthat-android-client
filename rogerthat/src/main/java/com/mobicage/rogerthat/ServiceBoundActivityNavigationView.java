@@ -1,12 +1,14 @@
 package com.mobicage.rogerthat;
 
 import android.content.Intent;
+import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
@@ -16,6 +18,8 @@ import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.FriendStore;
 import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
 import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
+import com.mobicage.rogerthat.util.ActivityUtils;
+import com.mobicage.rpc.config.AppConstants;
 
 public abstract class ServiceBoundActivityNavigationView extends ServiceBoundActivity implements NavigationView
         .OnNavigationItemSelectedListener {
@@ -94,44 +98,10 @@ public abstract class ServiceBoundActivityNavigationView extends ServiceBoundAct
 //        return super.onOptionsItemSelected(item);
 //    }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // TODO: Generic implementation
-        /*
-        Intent intent;
-        switch (item.getItemId()) {
-            case R.id.nav_messages:
-                intent = new Intent(this, MessagingActivity.class);
-                startActivity(intent);
-                break;
-            case R.id.nav_report_card:
-                break;
-            case R.id.nav_agenda:
-                break;
-            case R.id.nav_community_services:
-                intent = new Intent(this, ServiceFriendsActivity.class);
-                intent.putExtra(ServiceFriendsActivity.ORGANIZATION_TYPE, FriendStore.SERVICE_ORGANIZATION_TYPE_CITY);
-                startActivity(intent);
-                break;
-            case R.id.nav_merchants:
-                intent = new Intent(this, ServiceFriendsActivity.class);
-                intent.putExtra(ServiceFriendsActivity.ORGANIZATION_TYPE, FriendStore.SERVICE_ORGANIZATION_TYPE_PROFIT);
-                startActivity(intent);
-                break;
-            case R.id.nav_associations:
-                intent = new Intent(this, ServiceFriendsActivity.class);
-                intent.putExtra(ServiceFriendsActivity.ORGANIZATION_TYPE, FriendStore.SERVICE_ORGANIZATION_TYPE_NON_PROFIT);
-                startActivity(intent);
-                break;
-            case R.id.nav_scan:
-                Intent launchIntent = new Intent(this, ScanTabActivity.class);
-                startActivity(launchIntent);
-                break;
-        }
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        */
+        String activityName = AppConstants.getActivityNameForOrder(item.getOrder());
+        ActivityUtils.goToActivity(this, activityName);
         return true;
     }
 }

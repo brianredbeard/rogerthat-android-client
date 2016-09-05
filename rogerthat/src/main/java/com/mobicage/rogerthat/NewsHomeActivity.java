@@ -23,9 +23,9 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 
-public class NewsHomeActivity extends ServiceBoundActivityNavigationView implements View.OnClickListener {
-    private Button btnTest;
+public class NewsHomeActivity extends ServiceBoundActivityNavigationView {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,8 +34,13 @@ public class NewsHomeActivity extends ServiceBoundActivityNavigationView impleme
 
         openNavigationView();
 
-        btnTest = (Button) findViewById(R.id.btn_test);
-        btnTest.setOnClickListener(this);
+        Button testBtn = (Button) findViewById(R.id.btn_test);
+        testBtn.setOnClickListener(new SafeViewOnClickListener() {
+            @Override
+            public void safeOnClick(View v) {
+                Toast.makeText(NewsHomeActivity.this, "This is a TEST", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
@@ -47,10 +52,4 @@ public class NewsHomeActivity extends ServiceBoundActivityNavigationView impleme
     protected void onServiceUnbound() {
 
     }
-
-    @Override
-    public void onClick(View v) {
-        Toast.makeText(this, "This is a TEST", Toast.LENGTH_SHORT).show();
-    }
-
 }

@@ -1,45 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <group
         android:checkableBehavior="single">
         <item
-            android:id="@+id/navigation_item_0"
+            android:orderInCategory="0"
             android:icon="@drawable/menu_0"
             android:title="@string/tab_messaging"/>
     </group>
     <group
         android:checkableBehavior="single">
         <item
-            android:id="@+id/navigation_item_1"
+            android:orderInCategory="1"
             android:icon="@drawable/menu_1"
             android:title="@string/tab_services"/>
     </group>
     <group
         android:checkableBehavior="single">
         <item
-            android:id="@+id/navigation_item_2"
+            android:orderInCategory="2"
             android:icon="@drawable/menu_2"
             android:title="@string/tab_friends"/>
     </group>
     <group
         android:checkableBehavior="single">
         <item
-            android:id="@+id/navigation_item_3"
+            android:orderInCategory="3"
             android:icon="@drawable/menu_3"
             android:title="@string/scan"/>
     </group>
     <group
         android:checkableBehavior="single">
         <item
-            android:id="@+id/navigation_item_4"
+            android:orderInCategory="4"
             android:icon="@drawable/menu_4"
             android:title="@string/profile"/>
     </group>
     <group
         android:checkableBehavior="single">
         <item
-            android:id="@+id/navigation_item_5"
+            android:orderInCategory="5"
             android:icon="@drawable/menu_5"
             android:title="@string/settings"/>
         <!-- Adding 2 spacer items such that the footer view doesn't overlap the last item(s) -->

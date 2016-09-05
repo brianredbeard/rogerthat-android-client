@@ -19,6 +19,8 @@
 package com.mobicage.rpc.config;
 
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.plugins.friends.FriendStore;
+import com.mobicage.rogerthat.util.logging.L;
 
 public class AppConstants {
     static final int APP_TYPE_ROGERTHAT = 0;
@@ -39,7 +41,7 @@ public class AppConstants {
 
     // Customized by App flavor
     public static final String APP_ID = "rogerthat";
-    public static final int HOME_ACTIVITY_LAYOUT = R.layout.homescreen;
+    public static final int HOME_ACTIVITY_LAYOUT = R.layout.homescreen_news;
     public static final int HOMESCREEN_QRCODE_HEADER = R.string.loyalty_card_description;
     public static final boolean SHOW_HOMESCREEN_FOOTER = false;
     public static final boolean SHOW_NAV_HEADER = false;
@@ -54,6 +56,25 @@ public class AppConstants {
     public static final boolean SHOW_PROFILE_IN_MORE = true;
     public static final boolean SHOW_SCAN_IN_MORE = false;
     public static final boolean FULL_WIDTH_HEADERS = false;
+
+    public static final String getActivityNameForOrder(int order) {
+        // todo ruben from yaml
+        if (order == 0) {
+            return "messages";
+        } else if (order == 1) {
+            return "services";
+        } else if (order == 2) {
+            return "friends";
+        } else if (order == 3) {
+            return "scan";
+        } else if (order == 4) {
+            return "profile";
+        } else if (order == 5) {
+            return "settings";
+        } else {
+            return null;
+        }
+    }
 
     public static final boolean REGISTRATION_ASKS_LOCATION_PERMISSION = true;
     public static final int[] SEARCH_SERVICES_IF_NONE_CONNECTED = new int[] { -1 };

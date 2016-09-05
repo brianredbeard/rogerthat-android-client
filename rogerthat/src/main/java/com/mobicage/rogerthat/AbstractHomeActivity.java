@@ -52,6 +52,7 @@ import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.plugins.scan.ProcessScanActivity;
 import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
 import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
+import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.RegexPatterns;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
@@ -153,7 +154,7 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity implemen
             findViewById(R.id.scan_btn).setOnClickListener(new SafeViewOnClickListener() {
                 @Override
                 public void safeOnClick(View v) {
-                    goToScanActivity();
+                    ActivityUtils.goToScanActivity(AbstractHomeActivity.this);
                 }
             });
         }
@@ -240,16 +241,6 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity implemen
         }
     }
 
-    protected void goToMessagingActivity() {
-        Intent i = new Intent(this, MessagingActivity.class);
-        startActivity(i);
-    }
-
-    protected void goToUserFriendsActivity() {
-        Intent launchIntent = new Intent(this, UserFriendsActivity.class);
-        startActivity(launchIntent);
-    }
-
     protected void goToServicesActivity(int organizationType, boolean collapse) {
         if (collapse) {
             int serviceCount = 0;
@@ -274,29 +265,7 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity implemen
             }
         }
 
-        final Intent launchIntent = new Intent(this, ServiceFriendsActivity.class);
-        launchIntent.putExtra(ServiceFriendsActivity.ORGANIZATION_TYPE, organizationType);
-        startActivity(launchIntent);
-    }
-
-    protected void goToScanActivity() {
-        Intent launchIntent = new Intent(this, ScanTabActivity.class);
-        startActivity(launchIntent);
-    }
-
-    protected void goToMoreActivity() {
-        final Intent launchIntent = new Intent(this, MoreActivity.class);
-        startActivity(launchIntent);
-    }
-
-    protected void goToProfileActivity() {
-        final Intent launchIntent = new Intent(this, ProfileActivity.class);
-        startActivity(launchIntent);
-    }
-
-    protected void goToFriendSearchActivity() {
-        final Intent serviceSearch = new Intent(this, FriendSearchActivity.class);
-        startActivity(serviceSearch);
+        ActivityUtils.goToServicesActivity(this, organizationType);
     }
 
     protected void simulateMenuItemPress(String serviceEmail, long[] serviceCoords) {
@@ -330,19 +299,19 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity implemen
 
     protected void goToActivity(String activityName, boolean collapse) {
         if ("messages".equals(activityName)) {
-            goToMessagingActivity();
+            ActivityUtils.goToMessagingActivity(this);
         } else if ("scan".equals(activityName)) {
-            goToScanActivity();
+            ActivityUtils.goToScanActivity(this);
         } else if ("services".equals(activityName)) {
             goToServicesActivity(FriendStore.SERVICE_ORGANIZATION_TYPE_UNSPECIFIED, collapse);
         } else if ("friends".equals(activityName)) {
-            goToUserFriendsActivity();
+            ActivityUtils.goToUserFriendsActivity(this);
         } else if ("directory".equals(activityName)) {
-            goToFriendSearchActivity();
+            ActivityUtils.goToFriendSearchActivity(this);
         } else if ("profile".equals(activityName)) {
-            goToProfileActivity();
+            ActivityUtils.goToProfileActivity(this);
         } else if ("more".equals(activityName)) {
-            goToMoreActivity();
+            ActivityUtils.goToMoreActivity(this);
         } else if ("community_services".equals(activityName)) {
             goToServicesActivity(FriendStore.SERVICE_ORGANIZATION_TYPE_CITY, collapse);
         } else if ("merchants".equals(activityName)) {
@@ -361,7 +330,7 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity implemen
         if (intent.getBooleanExtra(INTENT_PROCESSED, false))
             return;
         if (url != null) {
-            goToMessagingActivity();
+            ActivityUtils.goToMessagingActivity(this);
             processUrl(url);
         } else if (intent.hasExtra(INTENT_KEY_LAUNCHINFO)) {
             String value = intent.getStringExtra(INTENT_KEY_LAUNCHINFO);
@@ -369,14 +338,14 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity implemen
                 // goToUserFriendsActivity();
 
             } else if (INTENT_VALUE_SHOW_MESSAGES.equals(value)) {
-                goToMessagingActivity();
+                ActivityUtils.goToMessagingActivity(this);
 
             } else if (INTENT_VALUE_SHOW_NEW_MESSAGES.equals(value)) {
                 if (intent.hasExtra(INTENT_KEY_MESSAGE)) {
                     String messageKey = intent.getStringExtra(INTENT_KEY_MESSAGE);
                     goToMessageDetail(messageKey);
                 } else {
-                    goToMessagingActivity();
+                    ActivityUtils.goToMessagingActivity(this);
                 }
 
             } else if (INTENT_VALUE_SHOW_UPDATED_MESSAGES.equals(value)) {
@@ -384,11 +353,11 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity implemen
                     String messageKey = intent.getStringExtra(INTENT_KEY_MESSAGE);
                     goToMessageDetail(messageKey);
                 } else {
-                    goToMessagingActivity();
+                    ActivityUtils.goToMessagingActivity(this);
                 }
 
             } else if (INTENT_VALUE_SHOW_SCANTAB.equals(value)) {
-                goToScanActivity();
+                ActivityUtils.goToScanActivity(this);
             } else {
                 L.bug("Unexpected (key, value) for HomeActivity intent: (" + INTENT_KEY_LAUNCHINFO + ", " + value + ")");
             }
