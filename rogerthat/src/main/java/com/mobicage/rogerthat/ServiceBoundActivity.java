@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
@@ -38,7 +37,6 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Build;
 import android.support.design.widget.NavigationView;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -474,14 +472,14 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        String activityName = AppConstants.getActivityNameForOrder(item.getOrder());
-        ActivityUtils.goToActivity(this, activityName);
+        ActivityUtils.simulateMenuPressOnItem(this, AppConstants.APP_EMAIL, item.getOrder());
         closeNavigationView();
         return true;
     }
 
 
     public void onOptionNavigationViewToolbarSelected(View v) {
+        // todo ruben
         String activityName = (String) v.getTag();
         ActivityUtils.goToActivity(this, activityName);
         closeNavigationView();

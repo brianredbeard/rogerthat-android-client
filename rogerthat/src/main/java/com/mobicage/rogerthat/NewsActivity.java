@@ -23,21 +23,20 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.mobicage.rogerth.at.R;
-import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 
-public class NewsHomeActivity extends ServiceBoundActivity {
+public class NewsActivity extends ServiceBoundActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.homescreen_news);
+        setContentView(R.layout.news);
 
         Button testBtn = (Button) findViewById(R.id.btn_test);
         testBtn.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
-                Toast.makeText(NewsHomeActivity.this, "This is a TEST", Toast.LENGTH_SHORT).show();
+                Toast.makeText(NewsActivity.this, "This is a TEST", Toast.LENGTH_SHORT).show();
             }
         });
     }

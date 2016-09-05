@@ -20,22 +20,41 @@ package com.mobicage.rogerthat.util;
 
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 
 import com.mobicage.rogerthat.MoreActivity;
-import com.mobicage.rogerthat.NewsHomeActivity;
+import com.mobicage.rogerthat.NewsActivity;
 import com.mobicage.rogerthat.ServiceFriendsActivity;
 import com.mobicage.rogerthat.SettingsActivity;
 import com.mobicage.rogerthat.UserFriendsActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendSearchActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendStore;
-import com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity;
+import com.mobicage.rogerthat.plugins.friends.MenuItemPresser;
 import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
 import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
 import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rpc.config.AppConstants;
 
 public class ActivityUtils {
+
+    public static final void simulateMenuPressOnItem(Context context, String serviceEmail, int order) {
+        if (AppConstants.NAVIGATION_CLICKS.length <= order) {
+            return;
+        }
+
+        if (AppConstants.NAVIGATION_CLICKS[order] != null) {
+            ActivityUtils.goToActivity(context, AppConstants.NAVIGATION_CLICKS[order]);
+            return;
+        }
+
+        if (AppConstants.NAVIGATION_TAGS[order] != null) {
+            ActivityUtils.goToActivityBehindTag(context, serviceEmail, AppConstants.NAVIGATION_TAGS[order]);
+            return;
+        }
+
+        L.bug("simulateMenuPressOnItem not implemented for order: " + order);
+    }
+
 
     public static void goToActivity(Context context, String activityName) {
         // todo ruben implement collapse
@@ -71,7 +90,7 @@ public class ActivityUtils {
     }
 
     public static void goToNewsActivity(Context context) {
-        Intent i = new Intent(context, NewsHomeActivity.class);
+        Intent i = new Intent(context, NewsActivity.class);
         context.startActivity(i);
     }
 
@@ -114,5 +133,19 @@ public class ActivityUtils {
     public static void goToSettingsActivity(Context context) {
         final Intent launchIntent = new Intent(context, SettingsActivity.class);
         context.startActivity(launchIntent);
+    }
+
+    public static void goToActivityBehindTag(final Context context, final String serviceEmail, final String tag) {
+        // todo ruben implements MenuItemPressingActivity
+
+//        MenuItemPresser menuItemPresser = new MenuItemPresser(context, serviceEmail);
+//
+//        menuItemPresser.itemPressed(tag, new MenuItemPresser.ResultHandler() {
+//            @Override
+//            public void onError() {
+//                L.e("SMI with hash " + tag + " not found!"); // XXX: log error to message.sender
+//                onTimeout();
+//            }
+//        });
     }
 }

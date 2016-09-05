@@ -163,7 +163,7 @@
             android:theme="@style/AppTheme.NoActionBar" >
         </activity>
         <activity
-            android:name="com.mobicage.rogerthat.NewsHomeActivity"
+            android:name="com.mobicage.rogerthat.NewsActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>

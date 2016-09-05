@@ -19,8 +19,6 @@
 package com.mobicage.rpc.config;
 
 import com.mobicage.rogerth.at.R;
-import com.mobicage.rogerthat.plugins.friends.FriendStore;
-import com.mobicage.rogerthat.util.logging.L;
 
 public class AppConstants {
     static final int APP_TYPE_ROGERTHAT = 0;
@@ -41,7 +39,7 @@ public class AppConstants {
 
     // Customized by App flavor
     public static final String APP_ID = "rogerthat";
-    public static final int HOME_ACTIVITY_LAYOUT = R.layout.homescreen_news;
+    public static final int HOME_ACTIVITY_LAYOUT = R.layout.messaging;
     public static final int HOMESCREEN_QRCODE_HEADER = R.string.loyalty_card_description;
     public static final boolean SHOW_HOMESCREEN_FOOTER = false;
     public static final boolean SHOW_NAV_HEADER = false;
@@ -57,13 +55,8 @@ public class AppConstants {
     public static final boolean SHOW_SCAN_IN_MORE = false;
     public static final boolean FULL_WIDTH_HEADERS = false;
 
-    private static final String[] NAVIGATION_ITEMS = new String[] {"messages", "services", "friends", "scan", "profile", "settings"};
-    public static final String getActivityNameForOrder(int order) {
-        if (NAVIGATION_ITEMS.length <= order) {
-            return null;
-        }
-        return NAVIGATION_ITEMS[order];
-    }
+    public static final String[] NAVIGATION_CLICKS = new String[] {"messages", "services", "friends", "scan", "profile", "settings"};
+    public static final String[] NAVIGATION_TAGS = new String[] {null, null, null, null, null, null};
 
     public static final boolean REGISTRATION_ASKS_LOCATION_PERMISSION = true;
     public static final int[] SEARCH_SERVICES_IF_NONE_CONNECTED = new int[] { -1 };

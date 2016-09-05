@@ -39,6 +39,7 @@ import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity;
 import com.mobicage.rogerthat.plugins.messaging.BrandingFailureException;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
+import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
 import com.mobicage.rogerthat.plugins.messaging.ServiceMessageDetailActivity;
 import com.mobicage.rogerthat.plugins.scan.ProcessScanActivity;
 import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
@@ -610,8 +611,10 @@ public class MainActivity extends ServiceBoundActivity {
         T.UI();
 
         final Intent homeActivityIntent;
-        if (AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.homescreen_news) {
-            homeActivityIntent  = new Intent(this, NewsHomeActivity.class);
+        if (AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.messaging) {
+            homeActivityIntent  = new Intent(this, MessagingActivity.class);
+        } else if (AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.news) {
+            homeActivityIntent  = new Intent(this, NewsActivity.class);
         } else {
             homeActivityIntent  = new Intent(this, HomeActivity.class);
         }
