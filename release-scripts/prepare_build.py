@@ -24,7 +24,7 @@ import sys
 import tempfile
 from xml.dom import minidom
 
-from PIL import Image
+from PIL import Image, ImageDraw
 import yaml
 
 
@@ -242,6 +242,22 @@ def generate_navigation_menu(doc, strings_map):
         items = doc['HOMESCREEN']['items']
         for i, item in enumerate(items):
             navigation_items.append(item["click"])
+
+            icon_file_name = "menu_%s.png" % (i)
+            source_file = os.path.join(APP_DIR, "build", icon_file_name)
+            app_utils.download_icon(item["icon"], "#FFFFFF", 512, source_file)
+            foreground_image = Image.open(source_file)
+
+            background_image = Image.new('RGBA', (1024, 1024))
+            draw = ImageDraw.Draw(background_image)
+            draw.ellipse((124, 124, 900, 900), fill="#%s" % doc["HOMESCREEN"]["color"], outline="#%s" % doc["HOMESCREEN"]["color"])
+
+            background_image.paste(foreground_image, (262, 262), mask=foreground_image)
+
+            background_image.save(source_file)
+
+            generate_resource_images(source_file, 0.2, 1)
+
             f.write("""
     <group
         android:checkableBehavior="single">
@@ -909,7 +925,6 @@ if __name__ == "__main__":
     print 'BUILD CFG:'
     print pprint.pformat(doc)
     print ''
-
 
     if APP_ID != MAIN_APP_ID:
         #### MORE IMAGES ###################################
