@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="None">Servicios de localización desactivados</string>
+    <string name="None">Necesitas volver a servicios de localización para poder continuar.</string>
     <string name="__me_as_recipient">mi</string>
     <string name="__me_as_sender">yo</string>
     <string name="about">Info</string>
@@ -37,18 +39,18 @@
     <string name="add_to_my_services">Añadir a isso app</string>
     <string name="add_via_contacts_description">Encontrar contactos que ya usen %1$s desde la agenda de su teléfono</string>
     <string name="add_via_contacts_notification">Resultado de la búsqueda de contactos mediante %1$s.</string>
-    <string name="add_via_contacts_waiting">Usted recibirá una notificación cuando su libreta de direcciones sea comprobada.</string>
+    <string name="add_via_contacts_waiting">Recibirás una notificación cuando tu libreta de direcciones sea comprobada.</string>
     <string name="add_via_email_description">Escriba la dirección de correo electrónico del usuario con el que desea conectarse</string>
     <string name="add_via_facebook_description">Encontrar contactos de Facebook a través de %1$s</string>
     <string name="add_via_facebook_notification">Resultado de la búsqueda de contactos de Facebook mediante %1$s.</string>
-    <string name="add_via_facebook_waiting">Usted recibirá una notificación cuando sus contactos de Facebook sean comprobados.</string>
+    <string name="add_via_facebook_waiting">Recibirás una notificación cuando tus contactos de Facebook sean comprobados.</string>
     <string name="address">Dirección</string>
     <string name="agenda">Eventos</string>
     <string name="alarm_sound">Tono de alarma</string>
     <string name="alarm_sound_custom">Personalizado</string>
     <string name="alarm_sound_default">Por defecto</string>
     <string name="all_friends">Todos los amigos</string>
-    <string name="already_friend">Usted ya es amigo de %1$s.</string>
+    <string name="already_friend">Ya eres amigo de %1$s.</string>
     <string name="ask_a_question">Contacto</string>
     <string name="associations">Asociaciones</string>
     <string name="attachment_can_not_be_displayed_in_your_version">El adjunto seleccionado no puede visualizarse en esta versión de la aplicación %1$s.</string>
@@ -105,9 +107,9 @@
     <string name="deselect_all">Desmarcar todo</string>
     <string name="detected_services_title">%1$s detecta los siguientes servicios en este lugar. Seleccione los servicios que desee agregar en su aplicación %1$s.</string>
     <string name="device_was_unregistered">El dispositivo ha sido desconectado.</string>
-    <string name="dialog_request_location_sharing">%1$s no permite compartir su ubicación con usted.\n\n¿Desea enviar una solicitud para que habilite la compartición de su ubicación?</string>
+    <string name="dialog_request_location_sharing">%1$s no permite compartir su ubicación contigo.\n\n¿Deseas enviar una solicitud para que habilite la compartición de su ubicación?</string>
     <string name="disabled">Discapacidad</string>
-    <string name="discover_services_long">Pulsa aquí para añadir un nuevo servicio a %1$s</string>
+    <string name="discover_services_long">Pulsa aquí para elegir tus servicios favoritos</string>
     <string name="discover_services_short">Añadir nuevo</string>
     <string name="dismissed_at">%1$s admitido.</string>
     <string name="dont_like">No me gusta</string>
@@ -119,7 +121,7 @@
     <string name="enabled">Habilitado</string>
     <string name="enabled_summary">Ejecutar como servicio en segundo plano</string>
     <string name="enabled_title">Ocultar servicio</string>
-    <string name="enter_search_query">Por favor, introduzca un texto para la búsqueda</string>
+    <string name="enter_search_query">Por favor, introduce un texto para la búsqueda</string>
     <string name="error_find_from_addressbook">Ha ocurrido un error en la búsqueda de la lista de contactos. Por favor, inténtelo de nuevo más tarde.</string>
     <string name="error_find_from_facebook">Se ha producido un error en la búsqueda de contactos de Facebook a través de %1$s. Por favor, inténtelo de nuevo más tarde.</string>
     <string name="error_load_facebook_friends">Ha ocurrido un error mientras se cargaba su lista de contactos de Facebook.</string>
@@ -148,7 +150,7 @@
     <string name="friend_bulk_update_received">Lista de contactos actualizada desde el servidor.</string>
     <string name="friend_invitation_register_first">Debe completar su registro para comunicarse con %1$s</string>
     <string name="friend_invite_failed">No se puede enviar la petición de invitación al servidor.</string>
-    <string name="friend_location_requested_body">Usted recibirá un mensaje cuando la ubicación de %1$s esté disponible.</string>
+    <string name="friend_location_requested_body">Recibirás un mensaje cuando la ubicación de %1$s esté disponible.</string>
     <string name="friend_location_requested_title">Ubicación solicitada.</string>
     <string name="friend_map_marker">Ubicado en: %1$s\nPrecisión: %2$dm</string>
     <string name="friend_remove_failed">No se puede enviar la desvinculación al servidor.</string>
@@ -190,7 +192,7 @@
     <string name="invitation_sent_successfully">Invitación enviada correctamente.</string>
     <string name="invitation_successfully_accepted">Invitación de %1$s aceptada correctamente.</string>
     <string name="invite">Invitar</string>
-    <string name="invite_as_friend">Usted no está conectado a %1$s. ¿Desea conectarse ahora?</string>
+    <string name="invite_as_friend">No estás conectado a %1$s. ¿Deseas conectarte ahora?</string>
     <string name="invite_colleague">Invitar al colega</string>
     <string name="invite_colleagues_long">Buscar e invitar a colegas</string>
     <string name="invite_colleagues_via_email">Invitar a colegas mediante correo electrónico</string>
@@ -297,7 +299,7 @@
     <string name="previous_in_thread">Mensajes anteriores en esta conversación</string>
     <string name="priority">Prioridad</string>
     <string name="processing">Procesando…</string>
-    <string name="processing_invitation">%1$s está procesando su invitación…</string>
+    <string name="processing_invitation">%1$s está procesando tu invitación…</string>
     <string name="processing_scan">Buscando…</string>
     <string name="profile">Perfil</string>
     <string name="qr_call_tel">¿Desea llamar a %1$s?</string>
@@ -308,8 +310,8 @@
     <string name="recommend_on_fb">Recomendar en tu muro de Facebook</string>
     <string name="recommend_on_fb_description">Permita que sus contactos de Facebook conozcan este formidable servicio.</string>
     <string name="recommend_service">Recomendar</string>
-    <string name="recommend_to_contacts">Recomendar a través de correo electrónico</string>
-    <string name="recommend_to_friends">Recomendar a contactos de %1$s</string>
+    <string name="recommend_to_contacts">Recomendar a contactos de tu agenda</string>
+    <string name="recommend_to_friends">Recomendar a tus contactos de %1$s</string>
     <string name="recommended_service">Recomendado</string>
     <string name="register_first">Por favor, complete su registro ahora</string>
     <string name="registration_activating_account">Activando su cuenta %1$s…</string>
@@ -359,12 +361,12 @@
     <string name="request_location_of">Solicitar la ubicación de %1$s</string>
     <string name="retrieving_information">Recuperando la información desde el servidor…</string>
     <string name="retry">Rever</string>
-    <string name="rogerthat">Roger that</string>
+    <string name="rogerthat">Entendido</string>
     <string name="rogerthat_system">Sistema Rogerthat</string>
     <string name="rogerthat_welcome">Bienvenido a %1$s. Tu aplicación para conectar con tus tiendas, proveedores y servicios favoritos y compartirlos con tus amigos.\n\nAntes de empezar es necesario registrarse. Pulse el botón verde para continuar.</string>
     <string name="rogerthat_welcome_enterprise">Bienvenido a la aplicación de %1$s.\n\nAntes de empezar es necesario registrarse en su cuenta.</string>
     <string name="save">Guardar</string>
-    <string name="save_canned_message_dialog_title">Por favor, introduzca un nombre para guardar el borrador de mensaje</string>
+    <string name="save_canned_message_dialog_title">Por favor, introduce un nombre para guardar el borrador del mensaje</string>
     <string name="save_canned_message_no_name">sin título</string>
     <string name="save_profile">Guardar perfil</string>
     <string name="scan">Escanear</string>
@@ -373,10 +375,10 @@
     <string name="scan_my_qr">Permita que alguien escanee su identficación.</string>
     <string name="scan_passport">Escanear una ID %1$s</string>
     <string name="scan_qr_code">Escanear código QR</string>
-    <string name="scanned_yourself">Usted ha escaneado su identificación personal %1$s de manera satisfactoria.</string>
+    <string name="scanned_yourself">Has escaneado tu identificación personal %1$s de manera satisfactoria.</string>
     <string name="scanner_communication_failure">Ha ocurrido un error mientras se comunicaba con el servidor.</string>
     <string name="scanner_failure">Ha ocurrido un error.</string>
-    <string name="search_services_if_none_connected_message">¿Quieres buscar %1$s en que barrio?</string>
+    <string name="search_services_if_none_connected_message">¿Quieres buscar %1$s en la zona?</string>
     <string name="searching">Buscando…</string>
     <string name="select_all">Marcar todo</string>
     <string name="select_size">Seleccionar tamaño</string>
@@ -403,7 +405,7 @@
     <string name="size_large">Grande</string>
     <string name="size_medium">Medio</string>
     <string name="size_small">Pequeño</string>
-    <string name="skip">Omit</string>
+    <string name="skip">Nada que añadir</string>
     <string name="smartsmiley_services">Servicios Smartsmiley</string>
     <string name="sounds">Sonido</string>
     <string name="specials">Promociones especiales</string>
@@ -459,6 +461,6 @@
     <string name="wont_store_data">No se preocupe, no almacenaremos esta información.</string>
     <string name="x_min_ago">Hace %1$s min</string>
     <string name="yes">Sí</string>
-    <string name="you_are_here">Usted se encuentra aquí</string>
+    <string name="you_are_here">Te encuentras aquí</string>
     <string name="your_location_displayed_friend_have_contacted_for_their_location">Su ubicación será mostrada. Se advertirá a los contactos que comparten su emplazamiento actual para que verifiquen su ubicación.</string>
 </resources>
