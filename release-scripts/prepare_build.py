@@ -26,7 +26,7 @@ from xml.dom import minidom
 
 from PIL import Image, ImageDraw
 import yaml
-
+import hashlib
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 APPS_REPO_DIR = os.path.join(CURRENT_DIR, "..", "..", "apps", 'res')
@@ -94,6 +94,11 @@ FRIENDS_CAPTION_ENUMS = {FRIENDS_CAPTION_FRIENDS: 'FriendsCaption.FRIENDS',
                          FRIENDS_CAPTION_CONTACTS: 'FriendsCaption.CONTACTS'}
 
 LICENSE = app_utils.get_license_header()
+
+def sha256_hash(val):
+    digester = hashlib.sha256()
+    digester.update(val)
+    return digester.hexdigest()
 
 def generate_resource_images(source_file_name, size, height_width_ratio):
     # size: percentage of screen width
@@ -244,7 +249,7 @@ def generate_navigation_menu(doc, strings_map):
         items = doc['HOMESCREEN']['items']
         for i, item in enumerate(items):
             navigation_clicks.append(item["click"])
-            navigation_tags.append(item.get("tag"))
+            navigation_tags.append(sha256_hash(item["tag"]) if item.get("tag") else None)
 
             icon_file_name = "menu_%s.png" % (i)
             source_file = os.path.join(APP_DIR, "build", icon_file_name)
