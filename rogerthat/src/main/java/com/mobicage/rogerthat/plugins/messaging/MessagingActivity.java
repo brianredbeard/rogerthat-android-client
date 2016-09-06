@@ -200,6 +200,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
     protected void onCreate(Bundle savedInstanceState) {
         T.UI();
         setContentView(R.layout.messaging);
+        setActivityName("messages");
         setListView((ListView) findViewById(R.id.message_list));
         super.onCreate(savedInstanceState);
         mResources = getResources();

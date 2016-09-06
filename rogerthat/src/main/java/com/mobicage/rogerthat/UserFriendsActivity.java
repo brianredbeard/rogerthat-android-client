@@ -230,6 +230,7 @@ public class UserFriendsActivity extends FriendsActivity {
     @Override
     protected void onServiceBound() {
         super.onServiceBound();
+        setActivityName("friends");
         setNavigationBarVisible(AppConstants.SHOW_NAV_HEADER);
         final int text;
         switch (AppConstants.FRIENDS_CAPTION) {

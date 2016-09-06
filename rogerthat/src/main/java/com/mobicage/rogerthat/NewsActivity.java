@@ -31,6 +31,7 @@ public class NewsActivity extends ServiceBoundActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.news);
+        setActivityName("news");
 
         Button testBtn = (Button) findViewById(R.id.btn_test);
         testBtn.setOnClickListener(new SafeViewOnClickListener() {
@@ -49,15 +50,5 @@ public class NewsActivity extends ServiceBoundActivity {
     @Override
     protected void onServiceUnbound() {
 
-    }
-
-    @Override
-    public void onOptionNavigationViewToolbarSelected(View v) {
-        String tag = (String)v.getTag();
-        if (tag.equals("news")) {
-            closeNavigationView();
-            return;
-        }
-        super.onOptionNavigationViewToolbarSelected(v);
     }
 }

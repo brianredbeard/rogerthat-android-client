@@ -55,18 +55,23 @@ public class ServiceFriendsActivity extends FriendsActivity {
         if (mOrganizationType == FriendStore.SERVICE_ORGANIZATION_TYPE_NON_PROFIT) {
             mOrganizationTypeStringId = R.string.associations;
             noServicesStringId = R.string.no_associations_found;
+            setActivityName("associations");
         } else if (mOrganizationType == FriendStore.SERVICE_ORGANIZATION_TYPE_PROFIT) {
             mOrganizationTypeStringId = R.string.merchants;
             noServicesStringId = R.string.no_merchants_found;
+            setActivityName("merchants");
         } else if (mOrganizationType == FriendStore.SERVICE_ORGANIZATION_TYPE_CITY) {
             mOrganizationTypeStringId = R.string.community_service;
             noServicesStringId = R.string.no_community_services_found;
+            setActivityName("community_services");
         } else if (mOrganizationType == FriendStore.SERVICE_ORGANIZATION_TYPE_EMERGENCY) {
             mOrganizationTypeStringId = R.string.care;
             noServicesStringId = R.string.no_care_institutions_found;
+            setActivityName("care");
         } else {
             mOrganizationTypeStringId = R.string.tab_services;
             noServicesStringId = R.string.no_services_found;
+            setActivityName("services");
         }
         noServicesTextView.setText(getString(noServicesStringId, getString(R.string.app_name)) + " " + getString(R
                 .string.click_magnifying_glass_to_search_services));
@@ -218,5 +223,4 @@ public class ServiceFriendsActivity extends FriendsActivity {
     protected CharSequence getHeaderCellSubText() {
         return getString(R.string.discover_services_long, getString(R.string.app_name));
     }
-
 }

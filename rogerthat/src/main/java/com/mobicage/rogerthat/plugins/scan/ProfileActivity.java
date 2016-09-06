@@ -385,6 +385,7 @@ public class ProfileActivity extends ServiceBoundActivity {
         registerReceiver(mBroadcastReceiver, filter);
 
         setContentView(R.layout.profile);
+        setActivityName("profile");
 
         boolean ageGenderSet = getIntent().getBooleanExtra(INTENT_KEY_COMPLETE_PROFILE, true);
         mShownAfterRegistration = !ageGenderSet;
@@ -618,5 +619,4 @@ public class ProfileActivity extends ServiceBoundActivity {
 
         super.onStop();
     }
-
 }

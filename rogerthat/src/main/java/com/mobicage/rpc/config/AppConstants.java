@@ -45,7 +45,7 @@ public class AppConstants {
     public static final boolean SHOW_NAV_HEADER = false;
     public static final String FACEBOOK_APP_ID = "188033791211994";
     public static final boolean FACEBOOK_REGISTRATION = true;
-    public static final String APP_EMAIL = null;
+    public static final String APP_EMAIL = "service-46e13548-a278-4780-a70a-450452a6542d@rogerth.at";
     public static final String APP_SERVICE_GUID = null;
     public static final boolean FRIENDS_ENABLED = true;
     public static final boolean SERVICES_ENABLED = true;

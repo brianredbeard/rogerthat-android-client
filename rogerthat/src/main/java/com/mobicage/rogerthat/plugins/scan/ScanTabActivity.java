@@ -74,6 +74,7 @@ public class ScanTabActivity extends ServiceBoundActivity {
         mFinishAfterScan = START_SCANNER_INTENT_ACTION.equals(intent.getAction());
 
         setContentView(R.layout.scan_tab_activity);
+        setActivityName("scan");
 
         final Button scanbutton = (Button) findViewById(R.id.scanbutton);
         scanbutton.setText(getString(R.string.scan_button, getString(R.string.app_name)));
@@ -232,5 +233,4 @@ public class ScanTabActivity extends ServiceBoundActivity {
         super.onConfigurationChanged(newConfig);
         sShowScannerOnResume = false;
     }
-
 }

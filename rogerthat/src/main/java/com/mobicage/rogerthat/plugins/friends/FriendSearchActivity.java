@@ -90,8 +90,8 @@ public class FriendSearchActivity extends ServiceBoundActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.friend_search);
+        setActivityName("directory");
 
         mSearchInfo = new SearchInfo();
         mSearchInfo.results = (ListView) findViewById(R.id.search_result_lists);

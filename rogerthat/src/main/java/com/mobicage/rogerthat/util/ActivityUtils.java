@@ -18,43 +18,28 @@
 
 package com.mobicage.rogerthat.util;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
 import com.mobicage.rogerthat.MoreActivity;
 import com.mobicage.rogerthat.NewsActivity;
+import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.ServiceFriendsActivity;
 import com.mobicage.rogerthat.SettingsActivity;
 import com.mobicage.rogerthat.UserFriendsActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendSearchActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendStore;
 import com.mobicage.rogerthat.plugins.friends.MenuItemPresser;
+import com.mobicage.rogerthat.plugins.friends.MenuItemPressingActivity;
 import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
 import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
 import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.config.AppConstants;
 
 public class ActivityUtils {
-
-    public static final void simulateMenuPressOnItem(Context context, String serviceEmail, int order) {
-        if (AppConstants.NAVIGATION_CLICKS.length <= order) {
-            return;
-        }
-
-        if (AppConstants.NAVIGATION_CLICKS[order] != null) {
-            ActivityUtils.goToActivity(context, AppConstants.NAVIGATION_CLICKS[order]);
-            return;
-        }
-
-        if (AppConstants.NAVIGATION_TAGS[order] != null) {
-            ActivityUtils.goToActivityBehindTag(context, serviceEmail, AppConstants.NAVIGATION_TAGS[order]);
-            return;
-        }
-
-        L.bug("simulateMenuPressOnItem not implemented for order: " + order);
-    }
-
 
     public static void goToActivity(Context context, String activityName) {
         // todo ruben implement collapse
@@ -135,17 +120,21 @@ public class ActivityUtils {
         context.startActivity(launchIntent);
     }
 
-    public static void goToActivityBehindTag(final Context context, final String serviceEmail, final String tag) {
+    public static void goToActivityBehindTag(final ServiceBoundActivity context, final String serviceEmail, final String tag) {
         // todo ruben implements MenuItemPressingActivity
+        L.d("goToActivityBehindTag called with context: " + context);
 
-//        MenuItemPresser menuItemPresser = new MenuItemPresser(context, serviceEmail);
-//
-//        menuItemPresser.itemPressed(tag, new MenuItemPresser.ResultHandler() {
-//            @Override
-//            public void onError() {
-//                L.e("SMI with hash " + tag + " not found!"); // XXX: log error to message.sender
-//                onTimeout();
-//            }
-//        });
+        if (context instanceof MenuItemPressingActivity) {
+            MenuItemPresser menuItemPresser = new MenuItemPresser(context, serviceEmail);
+            menuItemPresser.itemPressed(tag, new MenuItemPresser.ResultHandler() {
+                @Override
+                public void onError() {
+                    L.e("SMI with tag " + tag + " not found!"); // XXX: log error to message.sender
+                    onTimeout();
+                }
+            });
+        } else {
+            L.bug("goToActivityBehindTag called from wrong context: " + context);
+        }
     }
 }

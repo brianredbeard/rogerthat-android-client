@@ -49,6 +49,7 @@ public class MoreActivity extends ServiceBoundActivity {
     @Override
     protected void onServiceBound() {
         setContentView(R.layout.more);
+        setActivityName("more");
 
         MoreListAdapter matchesAdapter = new MoreListAdapter();
 

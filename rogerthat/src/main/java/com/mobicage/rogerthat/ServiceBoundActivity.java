@@ -57,6 +57,7 @@ import android.widget.TextView;
 
 import com.facebook.CallbackManager;
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.plugins.friends.MenuItemPressingActivity;
 import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
@@ -68,7 +69,7 @@ import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
 
-public abstract class ServiceBoundActivity extends AppCompatActivity implements Pausable, ServiceBound, NavigationView.OnNavigationItemSelectedListener {
+public abstract class ServiceBoundActivity extends AppCompatActivity implements Pausable, ServiceBound, MenuItemPressingActivity {
 
     public static final long MAX_TRANSMIT = 10 * 1000;
 
@@ -101,6 +102,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
     private Map<Integer, SafeRunnable[]> mPermissionRequests = new HashMap<>();
 
     private CallbackManager mFBCallbackMgr;
+    private String mActivityName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -385,7 +387,27 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(MenuItem item) {
+                int order = item.getOrder();
+
+                if (AppConstants.NAVIGATION_CLICKS.length <= order) {
+                    L.bug("ignoring navigation item clicked NAVIGATION_CLICKS.length <= order: " + order);
+                } else if (AppConstants.NAVIGATION_CLICKS[order] != null) {
+                    String activityName = AppConstants.NAVIGATION_CLICKS[order];
+                    if (activityName != null && !activityName.equals(mActivityName)) {
+                        ActivityUtils.goToActivity(ServiceBoundActivity.this, activityName);
+                    }
+                } else if (AppConstants.NAVIGATION_TAGS[order] != null) {
+                    ActivityUtils.goToActivityBehindTag(ServiceBoundActivity.this, AppConstants.APP_EMAIL, AppConstants.NAVIGATION_TAGS[order]);
+                } else {
+                    L.bug("ignoring navigation item clicked for order: " + order);
+                }
+                closeNavigationView();
+                return true;
+            }
+        });
         navigationView.setItemIconTintList(null);
 
         if (!CloudConstants.isCityApp()) {
@@ -460,6 +482,10 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         getDrawer().closeDrawer(GravityCompat.START);
     }
 
+    public void setActivityName(String activityName) {
+        mActivityName = activityName;
+    }
+
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -470,18 +496,11 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         }
     }
 
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        ActivityUtils.simulateMenuPressOnItem(this, AppConstants.APP_EMAIL, item.getOrder());
-        closeNavigationView();
-        return true;
-    }
-
-
     public void onOptionNavigationViewToolbarSelected(View v) {
-        // todo ruben
         String activityName = (String) v.getTag();
-        ActivityUtils.goToActivity(this, activityName);
+        if (activityName != null && !activityName.equals(mActivityName)) {
+            ActivityUtils.goToActivity(this, activityName);
+        }
         closeNavigationView();
     }
 }
