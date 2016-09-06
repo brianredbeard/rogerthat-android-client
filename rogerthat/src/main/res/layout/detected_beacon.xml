@@ -16,7 +16,7 @@
         <CheckBox
             android:id="@+id/invite_checkbox"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:layout_alignParentLeft="true"
             android:layout_marginRight="5dp"
             android:checked="true"

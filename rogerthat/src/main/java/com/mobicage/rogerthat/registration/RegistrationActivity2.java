@@ -95,6 +95,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -1253,13 +1254,15 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
             @Override
             public void pageDisplayed(Button back, Button next, ViewFlipper switcher) {
                 if (AppConstants.getRegistrationType() == AppConstants.REGISTRATION_TYPE_OAUTH) {
-                    mWiz.proceedToNextPage();
+                    mWiz.proceedToNextPage(); // todo ruben validate
                 } else {
+                    mEnterEmailAutoCompleteTextView.setThreshold(1000); // Prevent popping up automatically
+
                     if (AppConstants.FACEBOOK_APP_ID == null || !AppConstants.FACEBOOK_REGISTRATION) {
-                        sendRegistrationStep(RegistrationWizard2.REGISTRATION_STEP_EMAIL_LOGIN);
-                        mWiz.proceedToNextPage();
-                    } else {
-                        mEnterEmailAutoCompleteTextView.setThreshold(1000); // Prevent popping up automatically
+                        LinearLayout orLaylout = (LinearLayout) findViewById(R.id.or);
+                        orLaylout.setVisibility(View.INVISIBLE);
+                        Button facebookButton = (Button) findViewById(R.id.login_via_fb);
+                        facebookButton.setVisibility(View.INVISIBLE);
                     }
                 }
             }
@@ -1289,7 +1292,6 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                 if (AppConstants.getRegistrationType() == AppConstants.REGISTRATION_TYPE_OAUTH) {
                     mEnterEmailAutoCompleteTextView.setThreshold(1000); // Prevent popping up automatically
                 } else {
-                    sendRegistrationStep(RegistrationWizard2.REGISTRATION_STEP_EMAIL_LOGIN);
                     mWiz.proceedToNextPage();
                 }
             }
