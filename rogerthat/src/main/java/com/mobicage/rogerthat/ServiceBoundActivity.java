@@ -19,6 +19,7 @@
 package com.mobicage.rogerthat;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -368,13 +369,22 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
             NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
             navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
                 @Override
-                public boolean onNavigationItemSelected(MenuItem item) {
+                public boolean onNavigationItemSelected(final MenuItem item) {
                     int order = item.getOrder();
+                    String activityName = AppConstants.NAVIGATION_CLICKS[order];
+                    if (activityName != mActivityName) {
+                        mService.postDelayedOnUIHandler(new SafeRunnable() {
+                            @Override
+                            protected void safeRun() throws Exception {
+                                //item.setChecked(false);
+                                activateCurrentNavigationItem();
+                            }
+                        }, 250);
+                    }
 
                     if (AppConstants.NAVIGATION_CLICKS.length <= order) {
                         L.bug("ignoring navigation item clicked NAVIGATION_CLICKS.length <= order: " + order);
                     } else if (AppConstants.NAVIGATION_CLICKS[order] != null) {
-                        String activityName = AppConstants.NAVIGATION_CLICKS[order];
                         if (activityName != null && !activityName.equals(mActivityName)) {
                             ActivityUtils.goToActivity(ServiceBoundActivity.this, activityName);
                         }
@@ -466,6 +476,15 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
 
     public void setActivityName(String activityName) {
         mActivityName = activityName;
+        activateCurrentNavigationItem();
+    }
+
+    private void activateCurrentNavigationItem() {
+        int order = Arrays.asList(AppConstants.NAVIGATION_CLICKS).indexOf(mActivityName);
+        if (order >= 0) {
+            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+            navigationView.getMenu().getItem(order).setChecked(true);
+        }
     }
 
     @Override

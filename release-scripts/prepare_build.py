@@ -248,8 +248,8 @@ def generate_navigation_menu(doc, strings_map):
         f.write('<menu xmlns:android="http://schemas.android.com/apk/res/android">\n')
         items = doc['HOMESCREEN']['items']
         for i, item in enumerate(items):
-            navigation_clicks.append(item["click"])
-            navigation_tags.append(sha256_hash(item["tag"]) if item.get("tag") else None)
+            navigation_clicks.append(quoted_str_or_null(item["click"]))
+            navigation_tags.append(quoted_str_or_null(sha256_hash(item["tag"])) if item.get("tag") else "null")
 
             icon_file_name = "menu_%s.png" % (i)
             source_file = os.path.join(APP_DIR, "build", icon_file_name)
@@ -308,10 +308,14 @@ def convert_config():
 
     add_translations(doc)
 
-    ##### HOMESCREEN #############################################
-    if doc["HOMESCREEN"].get("style") == HOME_SCREEN_STYLE_2X3 or \
-        doc["HOMESCREEN"].get("style") == HOME_SCREEN_STYLE_3X3:
+    strings_map = get_translation_strings()
+    navigation_clicks, navigation_tags = generate_navigation_menu(doc, strings_map)
 
+    ##### HOMESCREEN #############################################
+    if doc["HOMESCREEN"].get("style") == HOME_SCREEN_STYLE_MESSAGING or \
+        doc["HOMESCREEN"].get("style") == HOME_SCREEN_STYLE_NEWS:
+        print "Not generating homescreen images"
+    else:
         color = doc["HOMESCREEN"]["color"]
 
         output = u'''%(LICENSE)s
@@ -330,11 +334,6 @@ def convert_config():
         ItemDef[] getItemDefs() {
             return new ItemDef[] {
     ''' % dict(LICENSE=LICENSE)
-
-
-        strings_map = get_translation_strings()
-
-        navigation_clicks, navigation_tags = generate_navigation_menu(doc, strings_map)
 
         for item in doc["HOMESCREEN"].get("items", []):
             icon_file_name = "menu_%sx%s.png" % (item["position"][0], item["position"][1])
@@ -469,7 +468,7 @@ def convert_config():
 
     if doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_ROGERTHAT:
         app_type = "APP_TYPE_ROGERTHAT"
-        home_activity = "R.layout.homescreen"
+        home_activity = "R.layout.messaging"
         show_profile_in_more = "true"
         show_scan_in_more = "false"
         services_enabled = "true"
@@ -493,7 +492,7 @@ def convert_config():
 
     elif doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_CONTENT_BRANDING:
         app_type = "APP_TYPE_CONTENT_BRANDING"
-        home_activity = "R.layout.homescreen"
+        home_activity = "R.layout.messaging"
         show_profile_in_more = "true"
         show_scan_in_more = "true"
         services_enabled = "true"
@@ -504,7 +503,7 @@ def convert_config():
 
     elif doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_YSAAA:
         app_type = "APP_TYPE_YSAAA"
-        home_activity = "R.layout.homescreen"
+        home_activity = "R.layout.messaging"
         show_profile_in_more = "false"
         show_scan_in_more = "false"
         services_enabled = "true"
@@ -645,8 +644,8 @@ public class AppConstants {
     public static final boolean SHOW_SCAN_IN_MORE = %(show_scan_in_more)s;
     public static final boolean FULL_WIDTH_HEADERS = %(full_width_headers)s;
 
-    private static final String[] NAVIGATION_CLICKS = new String[] { %(navigation_clicks)s };
-    private static final String[] NAVIGATION_TAGS = new String[] { %(navigation_tags)s };
+    public static final String[] NAVIGATION_CLICKS = new String[] { %(navigation_clicks)s };
+    public static final String[] NAVIGATION_TAGS = new String[] { %(navigation_tags)s };
 
     public static final boolean REGISTRATION_ASKS_LOCATION_PERMISSION = %(registration_asks_location_permission)s;
     public static final int[] SEARCH_SERVICES_IF_NONE_CONNECTED = new int[] {%(search_services_if_none_connected)s};
