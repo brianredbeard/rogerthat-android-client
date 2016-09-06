@@ -155,23 +155,6 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity implements M
         if (intent.getBooleanExtra(SHOW_ERROR_POPUP, false))
             UIUtils.showAlertDialog(this, null, R.string.error_please_try_again);
 
-        findViewById(R.id.navigation_bar_home_button).setOnClickListener(new SafeViewOnClickListener() {
-            @Override
-            public void safeOnClick(View v) {
-                long currentTime = System.currentTimeMillis();
-                if (getLastTimeClicked() != 0
-                    && currentTime < (getLastTimeClicked() + ServiceBoundActivity.DOUBLE_CLICK_TIMESPAN)) {
-                    L.d("ignoring click on home");
-                    return;
-                }
-                setLastTimeClicked(currentTime);
-                Intent i = new Intent(ServiceActionMenuActivity.this, HomeActivity.class);
-                i.setFlags(MainActivity.FLAG_CLEAR_STACK);
-                startActivity(i);
-                finish();
-            }
-        });
-
         goToMessagingActivityIfNeeded(intent);
     }
 
@@ -207,7 +190,6 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity implements M
         }
         pages.removeAllViews();
         pages.setVisibility(View.GONE);
-        setNavigationBarVisible(false);
         title.setVisibility(View.GONE);
         branding.setVisibility(View.GONE);
         activity.setBackgroundResource(R.drawable.activity_background);
@@ -287,16 +269,6 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity implements M
         filter.addAction(BrandingMgr.SERVICE_BRANDING_AVAILABLE_INTENT);
         filter.addAction(BrandingMgr.GENERIC_BRANDING_AVAILABLE_INTENT);
         registerReceiver(mBroadcastReceiver, filter);
-
-        findViewById(R.id.navigation_bar_home_button).setOnClickListener(new SafeViewOnClickListener() {
-            @Override
-            public void safeOnClick(View v) {
-                Intent i = new Intent(ServiceActionMenuActivity.this, HomeActivity.class);
-                i.setFlags(MainActivity.FLAG_CLEAR_STACK);
-                startActivity(i);
-                finish();
-            }
-        });
     }
 
     private void setBrandingHeight(int h) {
@@ -430,9 +402,8 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity implements M
                 L.bug("Could not display service action menu with branding.", e);
             }
         }
+        setTitle(menu.name);
         if (!showBranded) {
-            setNavigationBarVisible(AppConstants.SHOW_NAV_HEADER);
-            setNavigationBarTitle(menu.name);
             title.setVisibility(View.GONE);
             title.setText(menu.name);
         }

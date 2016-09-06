@@ -83,8 +83,6 @@ public abstract class ServiceBoundFragmentActivity extends FragmentActivity impl
     private ConnectivityManager mConnectivityManager;
     private List<SafeRunnable> mOnServiceBoundRunnables;
 
-    private long mLastTimeClicked = 0;
-    public static final long DOUBLE_CLICK_TIMESPAN = 1000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -304,43 +302,6 @@ public abstract class ServiceBoundFragmentActivity extends FragmentActivity impl
     @Override
     public MainService getMainService() {
         return mService;
-    }
-
-    public void setNavigationBarVisible(boolean isVisible) {
-        if (!AppConstants.SHOW_NAV_HEADER)
-            return;
-        final RelativeLayout navBar = (RelativeLayout) findViewById(R.id.nav_bar);
-        if (navBar == null) {
-            L.d("navBar not found in current activity");
-            return;
-        }
-        navBar.setVisibility(isVisible ? View.VISIBLE : View.GONE);
-    }
-
-    public void setNavigationBarTitle(String title) {
-        final TextView navBarTitle = (TextView) findViewById(R.id.navigation_bar_title);
-        if (navBarTitle == null) {
-            L.d("navBarTitle not found in current activity");
-            return;
-        }
-        navBarTitle.setText(title);
-    }
-
-    public void setNavigationBarTitle(int resid) {
-        final TextView navBarTitle = (TextView) findViewById(R.id.navigation_bar_title);
-        if (navBarTitle == null) {
-            L.d("navBarTitle not found in current activity");
-            return;
-        }
-        navBarTitle.setText(resid);
-    }
-
-    public void setLastTimeClicked(final long ts) {
-        mLastTimeClicked = ts;
-    }
-
-    public long getLastTimeClicked() {
-        return mLastTimeClicked;
     }
 
     @Override

@@ -231,7 +231,6 @@ public class UserFriendsActivity extends FriendsActivity {
     protected void onServiceBound() {
         super.onServiceBound();
         setActivityName("friends");
-        setNavigationBarVisible(AppConstants.SHOW_NAV_HEADER);
         final int text;
         switch (AppConstants.FRIENDS_CAPTION) {
         case COLLEAGUES:
@@ -245,17 +244,8 @@ public class UserFriendsActivity extends FriendsActivity {
             text = R.string.tab_friends;
             break;
         }
-        setNavigationBarTitle(text);
-        findViewById(R.id.navigation_bar_home_button).setOnClickListener(new SafeViewOnClickListener() {
-            @Override
-            public void safeOnClick(View v) {
-                Intent i = new Intent(UserFriendsActivity.this, HomeActivity.class);
-                i.setFlags(MainActivity.FLAG_CLEAR_STACK);
-                startActivity(i);
-                finish();
-            }
-        });
-    }
+        setTitle(text);
+     }
 
     @Override
     protected void onPause() {

@@ -7,8 +7,6 @@
     tools:ignore="UselessParent"
     android:focusableInTouchMode="true" >
     
-        <include android:id="@+id/nav_bar" layout="@layout/navigation_bar" />
-
         <LinearLayout
             android:id="@+id/group_layout"
             android:layout_width="fill_parent"

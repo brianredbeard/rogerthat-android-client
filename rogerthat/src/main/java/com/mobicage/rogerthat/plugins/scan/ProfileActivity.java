@@ -514,7 +514,6 @@ public class ProfileActivity extends ServiceBoundActivity {
             }
         });
 
-        setNavigationBarVisible(AppConstants.SHOW_NAV_HEADER);
         if (mShownAfterRegistration) {
             L.d("mShownAfterRegistration: " + mShownAfterRegistration);
             updateProfileLayout(true);
@@ -531,18 +530,9 @@ public class ProfileActivity extends ServiceBoundActivity {
                     finish();
                 }
             });
-            setNavigationBarTitle(R.string.complete_your_profile);
+            setTitle(R.string.complete_your_profile);
         } else {
-            setNavigationBarTitle(R.string.profile);
-            findViewById(R.id.navigation_bar_home_button).setOnClickListener(new SafeViewOnClickListener() {
-                @Override
-                public void safeOnClick(View v) {
-                    Intent i = new Intent(ProfileActivity.this, HomeActivity.class);
-                    i.setFlags(MainActivity.FLAG_CLEAR_STACK);
-                    startActivity(i);
-                    finish();
-                }
-            });
+            setTitle(R.string.profile);
         }
 
         updateQRBitMap();

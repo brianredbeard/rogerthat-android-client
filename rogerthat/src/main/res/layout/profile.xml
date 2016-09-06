@@ -6,8 +6,6 @@
     android:orientation="vertical"
     tools:ignore="UselessParent" >
     
-    <include android:id="@+id/nav_bar" layout="@layout/navigation_bar" />
-
     <ScrollView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"

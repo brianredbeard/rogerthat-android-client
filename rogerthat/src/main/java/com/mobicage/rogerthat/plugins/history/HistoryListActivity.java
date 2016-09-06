@@ -78,17 +78,7 @@ public class HistoryListActivity extends ServiceBoundCursorListActivity implemen
         mShowImportantOnly = mustShowImportantOnly(options);
         setListAdapter();
 
-        setNavigationBarVisible(AppConstants.SHOW_NAV_HEADER);
-        setNavigationBarTitle(R.string.stream_title);
-        findViewById(R.id.navigation_bar_home_button).setOnClickListener(new SafeViewOnClickListener() {
-            @Override
-            public void safeOnClick(View v) {
-                Intent i = new Intent(HistoryListActivity.this, HomeActivity.class);
-                i.setFlags(MainActivity.FLAG_CLEAR_STACK);
-                startActivity(i);
-                finish();
-            }
-        });
+        setTitle(R.string.stream_title);
     }
 
     private void createCursor() {

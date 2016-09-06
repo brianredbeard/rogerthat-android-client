@@ -42,7 +42,6 @@ public class AppConstants {
     public static final int HOME_ACTIVITY_LAYOUT = R.layout.messaging;
     public static final int HOMESCREEN_QRCODE_HEADER = R.string.loyalty_card_description;
     public static final boolean SHOW_HOMESCREEN_FOOTER = false;
-    public static final boolean SHOW_NAV_HEADER = false;
     public static final String FACEBOOK_APP_ID = "188033791211994";
     public static final boolean FACEBOOK_REGISTRATION = true;
     public static final String APP_EMAIL = "service-46e13548-a278-4780-a70a-450452a6542d@rogerth.at";

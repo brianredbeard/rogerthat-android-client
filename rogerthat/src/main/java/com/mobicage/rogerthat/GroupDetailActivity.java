@@ -428,18 +428,7 @@ public class GroupDetailActivity extends ServiceBoundActivity {
 
         initListView();
 
-        setNavigationBarVisible(AppConstants.SHOW_NAV_HEADER);
-        setNavigationBarTitle(mGroup.name);
-        findViewById(R.id.navigation_bar_home_button).setOnClickListener(new SafeViewOnClickListener() {
-            @Override
-            public void safeOnClick(View v) {
-                T.UI();
-                Intent i = new Intent(GroupDetailActivity.this, HomeActivity.class);
-                i.setFlags(MainActivity.FLAG_CLEAR_STACK);
-                startActivity(i);
-                finish();
-            }
-        });
+        setTitle(mGroup.name);
     }
 
     private void deleteGroup() {

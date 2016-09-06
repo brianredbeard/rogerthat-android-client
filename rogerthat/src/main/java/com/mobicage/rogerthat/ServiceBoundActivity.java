@@ -331,34 +331,8 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         return mService;
     }
 
-    public void setNavigationBarVisible(boolean isVisible) {
+    public void setNavigationBarBurgerVisible(boolean isVisible) {
         // todo ruben
-        final RelativeLayout navBar = (RelativeLayout) findViewById(R.id.nav_bar);
-        if (navBar == null) {
-            L.d("navBar not found in current activity");
-            return;
-        }
-        navBar.setVisibility(isVisible ? View.VISIBLE : View.GONE);
-    }
-
-    public void setNavigationBarTitle(String title) {
-        // todo ruben
-        final TextView navBarTitle = (TextView) findViewById(R.id.navigation_bar_title);
-        if (navBarTitle == null) {
-            L.d("navBarTitle not found in current activity");
-            return;
-        }
-        navBarTitle.setText(title);
-    }
-
-    public void setNavigationBarTitle(int resid) {
-        // todo ruben
-        final TextView navBarTitle = (TextView) findViewById(R.id.navigation_bar_title);
-        if (navBarTitle == null) {
-            L.d("navBarTitle not found in current activity");
-            return;
-        }
-        navBarTitle.setText(resid);
     }
 
     public void setLastTimeClicked(final long ts) {
@@ -371,48 +345,56 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
 
     @Override
     public void setContentView(int layoutResID) {
-        setContentView(getLayoutInflater().inflate(R.layout.navigation_view, null));
+        setContentView(layoutResID, true);
+    }
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+    public void setContentView(int layoutResID, boolean showNavigationBar) {
+        if (showNavigationBar) {
+            setContentView(getLayoutInflater().inflate(R.layout.navigation_view, null));
 
-        LinearLayout item = (LinearLayout) findViewById(R.id.linear_layout);
-        View child = getLayoutInflater().inflate(layoutResID, null);
-        item.addView(child);
+            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);
 
-        final DrawerLayout drawer = getDrawer();
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string
-                .navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
+            LinearLayout item = (LinearLayout) findViewById(R.id.linear_layout);
+            View child = getLayoutInflater().inflate(layoutResID, null);
+            item.addView(child);
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(MenuItem item) {
-                int order = item.getOrder();
+            final DrawerLayout drawer = getDrawer();
+            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string
+                    .navigation_drawer_open, R.string.navigation_drawer_close);
+            drawer.addDrawerListener(toggle);
+            toggle.syncState();
 
-                if (AppConstants.NAVIGATION_CLICKS.length <= order) {
-                    L.bug("ignoring navigation item clicked NAVIGATION_CLICKS.length <= order: " + order);
-                } else if (AppConstants.NAVIGATION_CLICKS[order] != null) {
-                    String activityName = AppConstants.NAVIGATION_CLICKS[order];
-                    if (activityName != null && !activityName.equals(mActivityName)) {
-                        ActivityUtils.goToActivity(ServiceBoundActivity.this, activityName);
+            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+            navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+                @Override
+                public boolean onNavigationItemSelected(MenuItem item) {
+                    int order = item.getOrder();
+
+                    if (AppConstants.NAVIGATION_CLICKS.length <= order) {
+                        L.bug("ignoring navigation item clicked NAVIGATION_CLICKS.length <= order: " + order);
+                    } else if (AppConstants.NAVIGATION_CLICKS[order] != null) {
+                        String activityName = AppConstants.NAVIGATION_CLICKS[order];
+                        if (activityName != null && !activityName.equals(mActivityName)) {
+                            ActivityUtils.goToActivity(ServiceBoundActivity.this, activityName);
+                        }
+                    } else if (AppConstants.NAVIGATION_TAGS[order] != null) {
+                        ActivityUtils.goToActivityBehindTag(ServiceBoundActivity.this, AppConstants.APP_EMAIL, AppConstants.NAVIGATION_TAGS[order]);
+                    } else {
+                        L.bug("ignoring navigation item clicked for order: " + order);
                     }
-                } else if (AppConstants.NAVIGATION_TAGS[order] != null) {
-                    ActivityUtils.goToActivityBehindTag(ServiceBoundActivity.this, AppConstants.APP_EMAIL, AppConstants.NAVIGATION_TAGS[order]);
-                } else {
-                    L.bug("ignoring navigation item clicked for order: " + order);
+                    closeNavigationView();
+                    return true;
                 }
-                closeNavigationView();
-                return true;
-            }
-        });
-        navigationView.setItemIconTintList(null);
+            });
+            navigationView.setItemIconTintList(null);
 
-        if (!CloudConstants.isCityApp()) {
-            LinearLayout navigationFooter = (LinearLayout) findViewById(R.id.nav_view_footer);
-            navigationFooter.setVisibility(View.GONE);
+            if (!CloudConstants.isCityApp()) {
+                LinearLayout navigationFooter = (LinearLayout) findViewById(R.id.nav_view_footer);
+                navigationFooter.setVisibility(View.GONE);
+            }
+        } else {
+            super.setContentView(layoutResID);
         }
     }
 

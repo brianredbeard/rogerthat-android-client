@@ -336,7 +336,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
             mNotYetProcessedIntent = null;
         }
 
-        setContentView(R.layout.registration2);
+        setContentView(R.layout.registration2, false);
 
         //Apply Fonts
         TextUtils.overrideFonts(this, findViewById(android.R.id.content));
@@ -361,14 +361,6 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
             findViewById(id).setVisibility(View.GONE);
 
         handleScreenOrientation(getResources().getConfiguration().orientation);
-
-        ScrollView rc = (ScrollView) findViewById(R.id.registration_container);
-        Resources resources = getResources();
-        if (CloudConstants.isRogerthatApp()) {
-            rc.setBackgroundColor(resources.getColor(R.color.mc_page_dark));
-        } else {
-            rc.setBackgroundColor(resources.getColor(R.color.mc_homescreen_background));
-        }
 
         TextView tosTextView = (TextView) findViewById(R.id.registration_tos);
         tosTextView.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/lato_light_italic.ttf"));

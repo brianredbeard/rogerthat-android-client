@@ -265,17 +265,7 @@ public class AddFriendsActivity extends ServiceBoundActivity {
         filter.addAction(FriendsPlugin.FACEBOOK_SCAN_FAILED_INTENT);
         registerReceiver(mBroadcastReceiver, filter);
 
-        setNavigationBarVisible(AppConstants.SHOW_NAV_HEADER);
-        setNavigationBarTitle(getNavigationBarTitle());
-        findViewById(R.id.navigation_bar_home_button).setOnClickListener(new SafeViewOnClickListener() {
-            @Override
-            public void safeOnClick(View v) {
-                Intent i = new Intent(AddFriendsActivity.this, HomeActivity.class);
-                i.setFlags(MainActivity.FLAG_CLEAR_STACK);
-                startActivity(i);
-                finish();
-            }
-        });
+        setTitle(getNavigationBarTitle());
     }
 
     private int getNavigationBarTitle() {

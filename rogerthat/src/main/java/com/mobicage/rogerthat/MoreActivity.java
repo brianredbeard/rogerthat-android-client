@@ -56,17 +56,7 @@ public class MoreActivity extends ServiceBoundActivity {
         ListView list = (ListView) findViewById(R.id.more_options_list);
         list.setAdapter(matchesAdapter);
 
-        setNavigationBarVisible(AppConstants.SHOW_NAV_HEADER);
-        setNavigationBarTitle(R.string.more);
-        findViewById(R.id.navigation_bar_home_button).setOnClickListener(new SafeViewOnClickListener() {
-            @Override
-            public void safeOnClick(View v) {
-                Intent i = new Intent(MoreActivity.this, HomeActivity.class);
-                i.setFlags(MainActivity.FLAG_CLEAR_STACK);
-                startActivity(i);
-                finish();
-            }
-        });
+        setTitle(R.string.more);
     }
 
     @Override

@@ -257,11 +257,9 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
         mMyEmail = mService.getIdentityStore().getIdentity().getEmail();
 
         if (mMemberFilter == null) {
-            setNavigationBarVisible(AppConstants.SHOW_NAV_HEADER);
-            setNavigationBarTitle(R.string.tab_messaging);
+            setTitle(R.string.tab_messaging);
         } else {
-            setNavigationBarVisible(true);
-            setNavigationBarTitle(getString(R.string.member_message_history, mFriendsPlugin.getName(mMemberFilter)));
+            setTitle(getString(R.string.member_message_history, mFriendsPlugin.getName(mMemberFilter)));
         }
 
         createCursorSet();
@@ -276,16 +274,6 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
         for (String action : getAllReceivingIntents())
             filter.addAction(action);
         registerReceiver(getDefaultBroadcastReceiver(), filter);
-
-        findViewById(R.id.navigation_bar_home_button).setOnClickListener(new SafeViewOnClickListener() {
-            @Override
-            public void safeOnClick(View v) {
-                Intent i = new Intent(MessagingActivity.this, HomeActivity.class);
-                i.setFlags(MainActivity.FLAG_CLEAR_STACK);
-                startActivity(i);
-                finish();
-            }
-        });
     }
 
     @Override

@@ -5,8 +5,6 @@
     android:background="@color/mc_background"
     android:orientation="vertical" >
     
-    <include android:id="@+id/nav_bar" layout="@layout/navigation_bar" />
-
     <LinearLayout
         android:id="@+id/delete_messages"
         android:layout_width="fill_parent"
@@ -35,7 +33,6 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_above="@id/delete_messages"
-        android:layout_below="@id/nav_bar"
         android:cacheColorHint="#00000000"
         android:divider="@drawable/divider"
         android:dividerHeight="1px"

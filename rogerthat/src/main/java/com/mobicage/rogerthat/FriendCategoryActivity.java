@@ -46,7 +46,7 @@ public class FriendCategoryActivity extends ServiceFriendsActivity {
     @Override
     protected void onServiceBound() {
         super.onServiceBound();
-        setNavigationBarTitle(mCategoryName);
+        setTitle(mCategoryName);
     }
 
     @Override
@@ -66,14 +66,7 @@ public class FriendCategoryActivity extends ServiceFriendsActivity {
 
     @Override
     protected View getHeaderView() {
-        if (!AppConstants.SHOW_NAV_HEADER) {
-            final View view = getLayoutInflater().inflate(R.layout.title_bar, null);
-            TextView textView = (TextView) view.findViewById(R.id.title);
-            textView.setText(mCategoryName);
-            return view;
-        } else {
-            return null;
-        }
+        return null;
     }
 
     @Override

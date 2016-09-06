@@ -95,33 +95,8 @@ public class SettingsActivity extends PreferenceActivity {
         IntentFilter filter = new IntentFilter(MainService.PREFERENCES_UPDATE_INTENT);
         registerReceiver(mBroadcastReceiver, filter);
 
-        setNavigationBarVisible(AppConstants.SHOW_NAV_HEADER);
-        final TextView navBarTitle = (TextView) findViewById(R.id.navigation_bar_title);
-        if (navBarTitle == null) {
-            L.d("navBarTitle not found in current activity");
-            return;
-        }
-        navBarTitle.setText(R.string.settings);
-        findViewById(R.id.navigation_bar_home_button).setOnClickListener(new SafeViewOnClickListener() {
-            @Override
-            public void safeOnClick(View v) {
-                Intent i = new Intent(SettingsActivity.this, HomeActivity.class);
-                i.setFlags(MainActivity.FLAG_CLEAR_STACK);
-                startActivity(i);
-                finish();
-            }
-        });
-    }
-
-    public void setNavigationBarVisible(boolean isVisible) {
-        if (!AppConstants.SHOW_NAV_HEADER)
-            return;
-        final RelativeLayout navBar = (RelativeLayout) findViewById(R.id.nav_bar);
-        if (navBar == null) {
-            L.d("navBar not found in current activity");
-            return;
-        }
-        navBar.setVisibility(isVisible ? View.VISIBLE : View.GONE);
+        setTitle(R.string.settings);
+        // todo ruben nav bar
     }
 
     private void showAlarmDialog(final Preference alarmPref) {

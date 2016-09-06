@@ -125,18 +125,7 @@ public class ServiceFriendsActivity extends FriendsActivity {
     @Override
     protected void onServiceBound() {
         super.onServiceBound();
-        setNavigationBarVisible(AppConstants.SHOW_NAV_HEADER);
-        setNavigationBarTitle(mOrganizationTypeStringId);
-
-        findViewById(R.id.navigation_bar_home_button).setOnClickListener(new SafeViewOnClickListener() {
-            @Override
-            public void safeOnClick(View v) {
-                Intent i = new Intent(ServiceFriendsActivity.this, HomeActivity.class);
-                i.setFlags(MainActivity.FLAG_CLEAR_STACK);
-                startActivity(i);
-                finish();
-            }
-        });
+        setTitle(mOrganizationTypeStringId);
     }
 
     @Override

@@ -85,17 +85,7 @@ public class ScanTabActivity extends ServiceBoundActivity {
             }
         });
 
-        setNavigationBarVisible(AppConstants.SHOW_NAV_HEADER);
-        setNavigationBarTitle(R.string.scan);
-        findViewById(R.id.navigation_bar_home_button).setOnClickListener(new SafeViewOnClickListener() {
-            @Override
-            public void safeOnClick(View v) {
-                Intent i = new Intent(ScanTabActivity.this, HomeActivity.class);
-                i.setFlags(MainActivity.FLAG_CLEAR_STACK);
-                startActivity(i);
-                finish();
-            }
-        });
+        setTitle(R.string.scan);
 
         final IntentFilter intentFilter = new IntentFilter(PERMISSION_CAMERA_UPDATED);
         registerReceiver(mBroadcastReceiver, intentFilter);

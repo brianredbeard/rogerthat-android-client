@@ -469,7 +469,6 @@ def convert_config():
 
     if doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_ROGERTHAT:
         app_type = "APP_TYPE_ROGERTHAT"
-        show_nav_header = "false"
         home_activity = "R.layout.homescreen"
         show_profile_in_more = "true"
         show_scan_in_more = "false"
@@ -478,7 +477,6 @@ def convert_config():
 
     elif doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_CITYPAPP:
         app_type = "APP_TYPE_CITYAPP"
-        show_nav_header = "true"
         home_activity = "R.layout.homescreen_3x3_with_qr_code"
         show_profile_in_more = bool_str(not mainScreenContainsProfile)
         show_scan_in_more = bool_str(not mainScreenContainsScan)
@@ -487,7 +485,6 @@ def convert_config():
 
     elif doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_ENTERPRISE:
         app_type = "APP_TYPE_ENTERPRISE"
-        show_nav_header = "true"
         home_activity = "R.layout.homescreen_2x3"
         show_profile_in_more = bool_str(not mainScreenContainsProfile)
         show_scan_in_more = bool_str(not mainScreenContainsScan)
@@ -496,7 +493,6 @@ def convert_config():
 
     elif doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_CONTENT_BRANDING:
         app_type = "APP_TYPE_CONTENT_BRANDING"
-        show_nav_header = "false"
         home_activity = "R.layout.homescreen"
         show_profile_in_more = "true"
         show_scan_in_more = "true"
@@ -508,7 +504,6 @@ def convert_config():
 
     elif doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_YSAAA:
         app_type = "APP_TYPE_YSAAA"
-        show_nav_header = "false"
         home_activity = "R.layout.homescreen"
         show_profile_in_more = "false"
         show_scan_in_more = "false"
@@ -521,16 +516,12 @@ def convert_config():
     home_screen_style = doc['HOMESCREEN'].get('style')
 
     if home_screen_style == HOME_SCREEN_STYLE_MESSAGING:
-        show_nav_header = "false"
         home_activity = "R.layout.messaging"
     elif home_screen_style == HOME_SCREEN_STYLE_NEWS:
-        show_nav_header = "false"
         home_activity = "R.layout.news"
     elif home_screen_style == HOME_SCREEN_STYLE_2X3:
-        show_nav_header = "true"
         home_activity = "R.layout.homescreen_2x3"
     elif home_screen_style == HOME_SCREEN_STYLE_3X3:
-        show_nav_header = "true"
         if doc['HOMESCREEN'].get('show_qr_code', doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_CITYPAPP):
             home_activity = "R.layout.homescreen_3x3_with_qr_code"
         else:
@@ -642,7 +633,6 @@ public class AppConstants {
     public static final int HOME_ACTIVITY_LAYOUT = %(home_activity)s;
     public static final int HOMESCREEN_QRCODE_HEADER = R.string.%(homescreen_qrcode_header_text)s;
     public static final boolean SHOW_HOMESCREEN_FOOTER = %(show_homescreen_footer)s;
-    public static final boolean SHOW_NAV_HEADER = %(show_nav_header)s;
     public static final String FACEBOOK_APP_ID = %(fb_app_id)s;
     public static final boolean FACEBOOK_REGISTRATION = %(fb_registration)s;
     public static final String APP_EMAIL = %(app_email)s;
@@ -685,7 +675,6 @@ public class AppConstants {
            home_activity=home_activity,
            homescreen_qrcode_header_text=homescreen_qrcode_header_text,
            show_homescreen_footer=show_homescreen_footer,
-           show_nav_header=show_nav_header,
            fb_app_id=fb_app_id,
            fb_registration=fb_registration,
            app_email=app_email,
