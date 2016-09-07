@@ -36,14 +36,21 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.design.widget.FloatingActionButton;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CursorAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -52,6 +59,8 @@ import android.widget.RadioButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.HomeActivity;
 import com.mobicage.rogerthat.IdentityStore;
@@ -59,12 +68,15 @@ import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MyIdentity;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
+import com.mobicage.rogerthat.plugins.messaging.MessageStore;
+import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.util.IOUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
+import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
 import com.mobicage.rogerthat.util.ui.UIUtils;
@@ -96,14 +108,12 @@ public class ProfileActivity extends ServiceBoundActivity {
 
     private final int PERMISSION_REQUEST_CAMERA = 1;
 
-    private void updateProfileForEdit() {
-        final Button updateBtn = (Button) findViewById(R.id.update_profile);
-        final ImageView qrcode = ((ImageView) findViewById(R.id.qrcode));
-        final RelativeLayout updateProfileName = ((RelativeLayout) findViewById(R.id.update_profile_name));
-        final LinearLayout updateProfileAvatar = ((LinearLayout) findViewById(R.id.update_profile_avatar));
+    private void updateProfileForEdit(boolean shouldSave) {
+        final RelativeLayout friendDetailHeader = ((RelativeLayout) findViewById(R.id.friend_detail_header));
+        final LinearLayout updateProfileNameAndAvatar = ((LinearLayout) findViewById(R.id.update_profile_name_and_avatar));
         final EditText newProfileName = ((EditText) findViewById(R.id.update_profile_name_value));
-        final ImageView newProfileAvatar = ((ImageView) findViewById(R.id.update_profile_avatar_img));
-        final Button updateAvatarBtn = (Button) findViewById(R.id.update_avatar);
+        final FloatingActionButton newProfileAvatar = ((FloatingActionButton) findViewById(R.id.update_profile_avatar_img));
+        newProfileAvatar.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_camera).color(Color.WHITE).sizeDp(24));
 
         final ImageView updateProfileBirthdateIcon = ((ImageView) findViewById(R.id.profile_birthdate_edit));
         final ImageView updateProfileGenderIcon = ((ImageView) findViewById(R.id.profile_gender_edit));
@@ -112,28 +122,11 @@ public class ProfileActivity extends ServiceBoundActivity {
         final RelativeLayout updateProfileGender = ((RelativeLayout) findViewById(R.id.profile_gender));
 
         if (mEditing) {
-            updateBtn.setText(R.string.save_profile);
-
-            qrcode.setVisibility(View.GONE);
-            updateProfileName.setVisibility(View.VISIBLE);
-            updateProfileAvatar.setVisibility(View.VISIBLE);
+            friendDetailHeader.setVisibility(View.GONE);
+            updateProfileNameAndAvatar.setVisibility(View.VISIBLE);
 
             updateProfileBirthdateIcon.setVisibility(View.VISIBLE);
             updateProfileGenderIcon.setVisibility(View.VISIBLE);
-            updateProfileBirthdate.setBackgroundResource(android.R.drawable.edit_text);
-            updateProfileGender.setBackgroundResource(android.R.drawable.edit_text);
-            updateProfileName.setBackgroundResource(android.R.drawable.edit_text);
-
-            updateProfileName.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (newProfileName.requestFocus()) {
-                        int pos = newProfileName.getText().length();
-                        newProfileName.setSelection(pos);
-                        UIUtils.showKeyboard(getApplicationContext());
-                    }
-                }
-            });
 
             updateProfileBirthdate.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -215,52 +208,45 @@ public class ProfileActivity extends ServiceBoundActivity {
                 }
             };
 
-            updateAvatarBtn.setOnClickListener(newAvatarListener);
             newProfileAvatar.setOnClickListener(newAvatarListener);
 
         } else {
-            updateBtn.setText(R.string.edit_profile);
-            if (AppConstants.FRIENDS_ENABLED)
-                qrcode.setVisibility(View.VISIBLE);
-            else
-                qrcode.setVisibility(View.GONE);
-            updateProfileName.setVisibility(View.GONE);
-            updateProfileAvatar.setVisibility(View.GONE);
+            friendDetailHeader.setVisibility(View.VISIBLE);
+            updateProfileNameAndAvatar.setVisibility(View.GONE);
 
-            updateProfileBirthdateIcon.setVisibility(View.GONE);
-            updateProfileGenderIcon.setVisibility(View.GONE);
-            updateProfileBirthdate.setBackgroundResource(0);
-            updateProfileGender.setBackgroundResource(0);
-            updateProfileName.setBackgroundResource(0);
+            updateProfileBirthdateIcon.setVisibility(View.INVISIBLE);
+            updateProfileGenderIcon.setVisibility(View.INVISIBLE);
             updateProfileBirthdate.setOnClickListener(null);
             updateProfileGender.setOnClickListener(null);
 
-            final byte[] byteArray;
-            if (mPhotoSelected) {
-                Bitmap bm = BitmapFactory.decodeFile(mUriSavedImage.getPath(), null);
-                bm = ImageHelper.rotateBitmap(bm, mPhoneExifRotation);
+            if (shouldSave) {
+                final byte[] byteArray;
+                if (mPhotoSelected) {
+                    Bitmap bm = BitmapFactory.decodeFile(mUriSavedImage.getPath(), null);
+                    bm = ImageHelper.rotateBitmap(bm, mPhoneExifRotation);
 
-                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                bm.compress(Bitmap.CompressFormat.PNG, 100, stream);
-                byteArray = stream.toByteArray();
-                File image;
-                try {
-                    image = getTmpUploadPhotoLocation();
-                } catch (IOException e) {
-                    L.d(e.getMessage());
-                    UIUtils.showLongToast(getApplicationContext(), e.getMessage());
-                    return;
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    bm.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                    byteArray = stream.toByteArray();
+                    File image;
+                    try {
+                        image = getTmpUploadPhotoLocation();
+                    } catch (IOException e) {
+                        L.d(e.getMessage());
+                        UIUtils.showLongToast(getApplicationContext(), e.getMessage());
+                        return;
+                    }
+                    image.delete();
+                    mPhotoSelected = false;
+                } else {
+                    byteArray = null;
                 }
-                image.delete();
-                mPhotoSelected = false;
-            } else {
-                byteArray = null;
-            }
-            Date d = mBirthdateCalender.getTime();
-            long epoch = d.getTime() / 1000;
+                Date d = mBirthdateCalender.getTime();
+                long epoch = d.getTime() / 1000;
 
-            mFriendsPlugin.updateProfile(newProfileName.getText().toString(), byteArray, null, epoch, mGender,
-                AppConstants.PROFILE_SHOW_GENDER_AND_BIRTHDATE, AppConstants.PROFILE_SHOW_GENDER_AND_BIRTHDATE);
+                mFriendsPlugin.updateProfile(newProfileName.getText().toString(), byteArray, null, epoch, mGender,
+                        AppConstants.PROFILE_SHOW_GENDER_AND_BIRTHDATE, AppConstants.PROFILE_SHOW_GENDER_AND_BIRTHDATE);
+            }
 
             if (mShownAfterRegistration)
                 finish();
@@ -349,10 +335,8 @@ public class ProfileActivity extends ServiceBoundActivity {
 
     private void handleCrop(int resultCode, Intent result) {
         if (resultCode == RESULT_OK) {
-            final ImageView newProfileAvatar = ((ImageView) findViewById(R.id.update_profile_avatar_img));
             Bitmap newAvatar = squeezeImage(Crop.getOutput(result));
             if (newAvatar != null) {
-                newProfileAvatar.setImageBitmap(newAvatar);
                 mPhotoSelected = true;
             }
         } else if (resultCode == Crop.RESULT_ERROR) {
@@ -402,16 +386,13 @@ public class ProfileActivity extends ServiceBoundActivity {
     private void updateView() {
         mIdentity = mIdentityStore.getIdentity();
         final ImageView image = (ImageView) findViewById(R.id.friend_avatar);
-        final ImageView newProfileAvatar = ((ImageView) findViewById(R.id.update_profile_avatar_img));
 
         final Bitmap avatarBitmap = mFriendsPlugin.getAvatarBitmap(mIdentity.getEmail());
         if (avatarBitmap == null) {
             Bitmap mbm = mFriendsPlugin.getMissingFriendAvatarBitmap();
             image.setImageBitmap(mbm);
-            newProfileAvatar.setImageBitmap(mbm);
         } else {
             image.setImageBitmap(avatarBitmap);
-            newProfileAvatar.setImageBitmap(avatarBitmap);
         }
 
         final TextView nameView = (TextView) findViewById(R.id.friend_name);
@@ -461,6 +442,12 @@ public class ProfileActivity extends ServiceBoundActivity {
             Map<String, String> profileData = mIdentity.getProfileDataDict();
             for (String k : AppConstants.PROFILE_DATA_FIELDS) {
                 final LinearLayout ll = (LinearLayout) View.inflate(this, R.layout.profile_data_detail, null);
+
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+
+                layoutParams.setMargins(0, 10, 0, 0);
+
                 final TextView tvKey = (TextView) ll.findViewById(R.id.profile_data_detail_key);
                 final TextView tvVal = (TextView) ll.findViewById(R.id.profile_data_detail_value);
 
@@ -471,52 +458,15 @@ public class ProfileActivity extends ServiceBoundActivity {
                 tvKey.setText(k);
                 tvVal.setText(v);
 
-                profileDataContainer.addView(ll);
+                profileDataContainer.addView(ll, layoutParams);
             }
         } else {
             profileDataContainer.setVisibility(View.GONE);
         }
 
-        final Button updateBtn = (Button) findViewById(R.id.update_profile);
-        updateBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mEditing && AppConstants.PROFILE_SHOW_GENDER_AND_BIRTHDATE) {
-                    if ((mGender != MyIdentity.GENDER_MALE && mGender != MyIdentity.GENDER_FEMALE) || mNeedBirthdate) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(ProfileActivity.this);
-                        builder.setTitle(R.string.complete_your_profile);
-
-                        StringBuilder errorMessage = new StringBuilder();
-                        if (mNeedBirthdate) {
-                            errorMessage.append(getString(R.string.missing_birthdate));
-                            errorMessage.append("\n");
-                        }
-
-                        if (mGender != MyIdentity.GENDER_MALE && mGender != MyIdentity.GENDER_FEMALE) {
-                            errorMessage.append(getString(R.string.missing_gender));
-                        }
-
-                        builder.setMessage(errorMessage);
-                        builder.setCancelable(true);
-                        builder.setPositiveButton(R.string.rogerthat, new SafeDialogInterfaceOnClickListener() {
-                            @Override
-                            public void safeOnClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        });
-                        builder.create().show();
-
-                        return;
-                    }
-                }
-
-                updateProfileLayout(!mEditing);
-            }
-        });
-
         if (mShownAfterRegistration) {
             L.d("mShownAfterRegistration: " + mShownAfterRegistration);
-            updateProfileLayout(true);
+            updateProfileLayout(true, false);
             final Button completeProfileSkip = ((Button) findViewById(R.id.complete_profile_skip));
 
             image.setVisibility(View.GONE);
@@ -531,6 +481,7 @@ public class ProfileActivity extends ServiceBoundActivity {
                 }
             });
             setTitle(R.string.complete_your_profile);
+            setNavigationBarBurgerVisible(false);
         } else {
             setTitle(R.string.profile);
         }
@@ -538,9 +489,9 @@ public class ProfileActivity extends ServiceBoundActivity {
         updateQRBitMap();
     }
 
-    private void updateProfileLayout(boolean goToEditingMode) {
+    private void updateProfileLayout(boolean goToEditingMode, boolean shouldSave) {
         mEditing = goToEditingMode;
-        updateProfileForEdit();
+        updateProfileForEdit(shouldSave);
         if (!mEditing) {
             final EditText newProfileName = ((EditText) findViewById(R.id.update_profile_name_value));
             UIUtils.hideKeyboard(getApplicationContext(), newProfileName);
@@ -608,5 +559,81 @@ public class ProfileActivity extends ServiceBoundActivity {
         }
 
         super.onStop();
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        for (int i = 0; i < menu.size(); i++) {
+            MenuItem item = menu.getItem(i);
+            switch (item.getItemId()) {
+                case R.id.edit_profile:
+                    item.setVisible(!mEditing);
+                    break;
+                case R.id.save_profile:
+                    item.setVisible(mEditing);
+                    break;
+                case R.id.cancel_edit_profile:
+                    item.setVisible(mEditing);
+                    break;
+            }
+        }
+
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        T.UI();
+        super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.edit_profile_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        T.UI();
+        switch (item.getItemId()) {
+            case R.id.edit_profile:
+                updateProfileLayout(true, false);
+                invalidateOptionsMenu();
+                return true;
+            case R.id.save_profile:
+                if (mEditing && AppConstants.PROFILE_SHOW_GENDER_AND_BIRTHDATE) {
+                    if ((mGender != MyIdentity.GENDER_MALE && mGender != MyIdentity.GENDER_FEMALE) || mNeedBirthdate) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(ProfileActivity.this);
+                        builder.setTitle(R.string.complete_your_profile);
+
+                        StringBuilder errorMessage = new StringBuilder();
+                        if (mNeedBirthdate) {
+                            errorMessage.append(getString(R.string.missing_birthdate));
+                            errorMessage.append("\n");
+                        }
+
+                        if (mGender != MyIdentity.GENDER_MALE && mGender != MyIdentity.GENDER_FEMALE) {
+                            errorMessage.append(getString(R.string.missing_gender));
+                        }
+
+                        builder.setMessage(errorMessage);
+                        builder.setCancelable(true);
+                        builder.setPositiveButton(R.string.rogerthat, new SafeDialogInterfaceOnClickListener() {
+                            @Override
+                            public void safeOnClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                        builder.create().show();
+
+                        return true;
+                    }
+                }
+                updateProfileLayout(false, true);
+                invalidateOptionsMenu();
+                return true;
+            case R.id.cancel_edit_profile:
+                updateProfileLayout(false, false);
+                invalidateOptionsMenu();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

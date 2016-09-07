@@ -365,7 +365,7 @@ public class SendMessageWizardActivity extends ServiceBoundActivity {
         super.onCreate(savedInstanceState);
         T.UI();
         T.setUIThread("SendMessageWizardActivity.onCreate()");
-        setContentView(R.layout.send_message_wizard_activity);
+        setContentView(R.layout.send_message_wizard_activity, false);
 
         _5_DP_IN_PX = UIUtils.convertDipToPixels(this, 5);
         _30_DP_IN_PX = UIUtils.convertDipToPixels(this, 30);

@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
         android:id="@+id/help"
         android:icon="@drawable/ic_menu_help"
+        app:showAsAction="ifRoom"
         android:title="@string/help"/>
     <item
         android:id="@+id/friend_map"
         android:icon="@drawable/ic_menu_compass"
+        app:showAsAction="ifRoom"
         android:title="@string/friends_map"/>
 
 </menu>

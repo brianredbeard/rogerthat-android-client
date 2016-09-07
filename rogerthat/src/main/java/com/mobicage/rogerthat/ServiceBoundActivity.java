@@ -44,6 +44,7 @@ import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -103,6 +104,8 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
     private Map<Integer, SafeRunnable[]> mPermissionRequests = new HashMap<>();
 
     private CallbackManager mFBCallbackMgr;
+
+    private ActionBarDrawerToggle mDrawerToggle;
     private String mActivityName;
 
     @Override
@@ -333,7 +336,13 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
     }
 
     public void setNavigationBarBurgerVisible(boolean isVisible) {
-        // todo ruben
+        if (isVisible) {
+            getDrawer().setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+            mDrawerToggle.setDrawerIndicatorEnabled(true);
+        } else {
+            getDrawer().setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+            mDrawerToggle.setDrawerIndicatorEnabled(false);
+        }
     }
 
     public void setLastTimeClicked(final long ts) {
@@ -361,10 +370,10 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
             item.addView(child);
 
             final DrawerLayout drawer = getDrawer();
-            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string
+            mDrawerToggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string
                     .navigation_drawer_open, R.string.navigation_drawer_close);
-            drawer.addDrawerListener(toggle);
-            toggle.syncState();
+            drawer.addDrawerListener(mDrawerToggle);
+            mDrawerToggle.syncState();
 
             NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
             navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {

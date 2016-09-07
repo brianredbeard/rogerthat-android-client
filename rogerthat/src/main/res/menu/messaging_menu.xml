@@ -1,24 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
         android:id="@+id/new_message"
         android:icon="@drawable/ic_menu_compose"
+        app:showAsAction="ifRoom"
         android:title="@string/compose_short">
     </item>
     <item
         android:id="@+id/delete_messages"
         android:icon="@drawable/ic_menu_delete"
+        app:showAsAction="ifRoom"
         android:title="@string/delete_conversations">
     </item>
     <item
         android:id="@+id/select_all"
         android:title="@string/select_all"
+        app:showAsAction="ifRoom"
         android:visible="false">
     </item>
     <item
         android:id="@+id/deselect_all"
         android:title="@string/deselect_all"
+        app:showAsAction="ifRoom"
         android:visible="false">
     </item>
 

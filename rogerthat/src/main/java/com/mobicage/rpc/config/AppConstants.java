@@ -60,7 +60,7 @@ public class AppConstants {
     public static final boolean REGISTRATION_ASKS_LOCATION_PERMISSION = true;
     public static final int[] SEARCH_SERVICES_IF_NONE_CONNECTED = new int[] { -1 };
 
-    public static final String[] PROFILE_DATA_FIELDS = new String[] {};
+    public static final String[] PROFILE_DATA_FIELDS = new String[] {"todo ruben field", "todo ruben teset"};
     public static final boolean PROFILE_SHOW_GENDER_AND_BIRTHDATE = true;
 
     public static final boolean MESSAGES_SHOW_REPLY_VS_UNREAD_COUNT = true;

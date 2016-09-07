@@ -1,22 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu
-	xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto">
 
 	<item
 		android:id="@+id/reply"
 		android:icon="@drawable/ic_menu_edit"
+		app:showAsAction="ifRoom"
 		android:title="@string/reply">
 	</item>
 
 	<item
 		android:id="@+id/help"
 		android:icon="@drawable/ic_menu_help"
+		app:showAsAction="ifRoom"
 		android:title="@string/help" >
 	</item>
 	
 	<item
 	    android:id="@+id/info"
 	    android:icon="@drawable/menu_info"
+		app:showAsAction="ifRoom"
 	    android:title="@string/about">
 	</item>
 

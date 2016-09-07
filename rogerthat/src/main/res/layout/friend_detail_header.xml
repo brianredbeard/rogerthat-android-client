@@ -1,7 +1,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/friend_detail_header"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content" >
+    android:layout_height="wrap_content"
+    android:layout_margin="5dp">
 
     <ImageView
         android:id="@+id/friend_avatar"
@@ -9,8 +10,9 @@
         android:layout_height="50dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
+        android:layout_marginTop="5dp"
         android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
+        android:layout_marginRight="15dp"
         android:background="@drawable/avatar_background_black"
         android:padding="1dp" >
     </ImageView>
@@ -29,6 +31,8 @@
 
     <TextView
         android:id="@+id/email"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="10dp"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/friend_name"
