@@ -137,6 +137,9 @@
                     android:layout_height="20dp"
                     android:layout_alignParentRight="true"
                     android:layout_centerInParent="true"
+                    app:ico_color="@android:color/darker_gray"
+                    app:ico_icon="faw_pencil"
+                    app:ico_size="48dp"
                     android:src="@drawable/ic_menu_edit"
                     android:visibility="invisible" >
                 </ImageView>

@@ -10,17 +10,16 @@
 	</item>
 
 	<item
-		android:id="@+id/help"
-		android:icon="@drawable/ic_menu_help"
-		app:showAsAction="ifRoom"
-		android:title="@string/help" >
-	</item>
-	
-	<item
 	    android:id="@+id/info"
 	    android:icon="@drawable/menu_info"
 		app:showAsAction="ifRoom"
 	    android:title="@string/about">
+	</item>
+
+	<item
+		android:id="@+id/help"
+		app:showAsAction="never"
+		android:title="@string/help" >
 	</item>
 
 </menu>

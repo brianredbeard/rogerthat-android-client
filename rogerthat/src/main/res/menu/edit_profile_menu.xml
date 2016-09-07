@@ -3,20 +3,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/edit_profile"
-        android:icon="@drawable/ic_menu_edit"
         app:showAsAction="ifRoom"
         android:title="@string/edit_profile"/>
 
     <item
         android:id="@+id/save_profile"
-        android:icon="@drawable/crop__ic_done"
         app:showAsAction="ifRoom"
         android:title="@string/save_profile"
         android:visible="false"/>
     
     <item
         android:id="@+id/cancel_edit_profile"
-        android:icon="@drawable/crop__ic_cancel"
         android:title="@string/cancel"
         app:showAsAction="ifRoom"
         android:visible="false"/>

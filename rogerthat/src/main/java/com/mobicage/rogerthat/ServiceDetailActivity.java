@@ -24,14 +24,19 @@ import org.jivesoftware.smack.util.Base64;
 import org.json.simple.JSONValue;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.view.Menu;
 import android.view.View;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SystemUtils;
+import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.to.service.FindServiceItemTO;
 
@@ -72,6 +77,14 @@ public class ServiceDetailActivity extends FriendDetailActivity {
             return -1;
 
         return R.menu.service_detail_menu;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        T.UI();
+        boolean result = super.onCreateOptionsMenu(menu);
+        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_trash).color(Color.DKGRAY).sizeDp(18));
+        return result;
     }
 
     @Override

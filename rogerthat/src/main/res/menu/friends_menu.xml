@@ -3,14 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/help"
-        android:icon="@drawable/ic_menu_help"
+        android:id="@+id/find_friends"
         app:showAsAction="ifRoom"
-        android:title="@string/help"/>
+        android:title="@string/invite_friends_short"/>
+
     <item
         android:id="@+id/friend_map"
-        android:icon="@drawable/ic_menu_compass"
         app:showAsAction="ifRoom"
         android:title="@string/friends_map"/>
+
+    <item
+        android:id="@+id/help"
+        app:showAsAction="never"
+        android:title="@string/help"/>
 
 </menu>

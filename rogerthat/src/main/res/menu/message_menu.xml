@@ -5,7 +5,6 @@
     <item
         android:id="@+id/show_details"
         android:title="@string/show_details"
-        app:showAsAction="ifRoom"
-        android:icon="@drawable/ic_menu_zoom"/>
+        app:showAsAction="never"/>
 
 </menu>

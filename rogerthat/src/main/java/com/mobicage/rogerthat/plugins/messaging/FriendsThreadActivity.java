@@ -281,6 +281,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.message_thread_menu, menu);
         inflater.inflate(R.menu.thread_menu, menu);
+        // todo ruben
         return true;
     }
 

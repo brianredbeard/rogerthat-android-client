@@ -4,7 +4,6 @@
 
     <item
         android:id="@+id/remove_friend"
-        android:icon="@drawable/menu_unfriend"
         app:showAsAction="ifRoom"
         android:title="@string/remove_friend"/>
 

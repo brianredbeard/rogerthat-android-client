@@ -54,6 +54,8 @@ import android.widget.SectionIndexer;
 import android.widget.TextView;
 import android.support.design.widget.NavigationView;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.HomeActivity;
 import com.mobicage.rogerthat.IdentityStore;
@@ -125,6 +127,8 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
         T.UI();
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.messaging_menu, menu);
+        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_envelope).color(Color.DKGRAY).sizeDp(18));
+        menu.getItem(1).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_trash).color(Color.DKGRAY).sizeDp(18));
         return true;
     }
 

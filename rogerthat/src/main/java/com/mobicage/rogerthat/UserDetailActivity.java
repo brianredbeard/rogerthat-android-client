@@ -18,9 +18,14 @@
 
 package com.mobicage.rogerthat;
 
+import android.graphics.Color;
+import android.view.Menu;
 import android.view.View;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.util.system.T;
 
 public class UserDetailActivity extends FriendDetailActivity {
 
@@ -47,6 +52,14 @@ public class UserDetailActivity extends FriendDetailActivity {
     @Override
     protected int getMenu() {
         return R.menu.friend_detail_menu;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        T.UI();
+        boolean result = super.onCreateOptionsMenu(menu);
+        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_trash).color(Color.DKGRAY).sizeDp(18));
+        return result;
     }
 
     @Override

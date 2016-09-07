@@ -49,6 +49,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -79,6 +80,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendStore;
@@ -228,15 +231,14 @@ public class SendMessageWizardActivity extends ServiceBoundActivity {
         for (int i = 0; i < menu.size(); i++) {
             MenuItem item = menu.getItem(i);
             switch (item.getItemId()) {
-            case R.id.create_group:
-            case R.id.load:
-                item.setVisible(mWiz.getPosition() == 0);
-                break;
-            case R.id.save:
-                item.setVisible(mWiz.getPosition() != 0);
-                break;
-            default:
-                break;
+                case R.id.load:
+                    item.setVisible(mWiz.getPosition() == 0);
+                    break;
+                case R.id.save:
+                    item.setVisible(mWiz.getPosition() != 0);
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -249,6 +251,7 @@ public class SendMessageWizardActivity extends ServiceBoundActivity {
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.send_message_wizard_menu, menu);
+        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_search_plus).color(Color.DKGRAY).sizeDp(18));
         return true;
     }
 
@@ -256,48 +259,18 @@ public class SendMessageWizardActivity extends ServiceBoundActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         T.UI();
         switch (item.getItemId()) {
-        case R.id.create_group:
-            showCreateGroup();
-            break;
-        case R.id.load:
-            showLoadCannedMessages();
-            break;
-        case R.id.save:
-            saveCannedMessage();
-            break;
+            case R.id.load:
+                showLoadCannedMessages();
+                break;
+            case R.id.save:
+                saveCannedMessage();
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
 
     private void showCreateGroup() {
-        final EditText edit = (EditText) getLayoutInflater().inflate(R.layout.save_canned_message_edit, null);
-        new AlertDialog.Builder(this).setTitle(R.string.create_group).setView(edit)
-            .setPositiveButton(R.string.ok, new SafeDialogInterfaceOnClickListener() {
-                @Override
-                public void safeOnClick(DialogInterface dialog, int which) {
-                    InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    mgr.hideSoftInputFromWindow(edit.getWindowToken(), 0);
-
-                    String name = edit.getText().toString();
-                    String guid = UUID.randomUUID().toString();
-                    mFriendsPlugin.getStore().insertGroup(guid, name, null, null);
-
-                    final Intent groupDetails = new Intent(SendMessageWizardActivity.this, GroupDetailActivity.class);
-                    groupDetails.putExtra(GroupDetailActivity.GUID, guid);
-                    groupDetails.putExtra(GroupDetailActivity.NEW_GROUP, true);
-                    startActivity(groupDetails);
-                }
-            }).setNegativeButton(R.string.cancel, new SafeDialogInterfaceOnClickListener() {
-                @Override
-                public void safeOnClick(DialogInterface dialog, int which) {
-                    InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    mgr.hideSoftInputFromWindow(edit.getWindowToken(), 0);
-                }
-            }).create().show();
-
-        edit.requestFocus();
-        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+        // todo ruben
     }
 
     private void saveCannedMessage() {

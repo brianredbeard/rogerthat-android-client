@@ -21,40 +21,37 @@ package com.mobicage.rogerthat;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.Adapter;
 import android.widget.Button;
 import android.widget.CursorAdapter;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
-import com.mobicage.rogerthat.plugins.friends.Group;
 import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
-import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.SeparatedListAdapter;
 import com.mobicage.rogerthat.util.ui.UIUtils;
@@ -64,16 +61,12 @@ public class UserFriendsActivity extends FriendsActivity {
 
     private final static String HINT_FRIEND_LOCATION_REQUESTED = "com.mobicage.rogerthat.plugins.friends.UserFriendsActivity.HINT_FRIEND_LOCATION_REQUESTED";
 
-    private final static int HEADERCELL_GROUPS = 0;
-    private final static int HEADERCELL_FRIENDS = 1;
-
     private Button mMapButton;
     private int mFirstVisibleItem = 0;
     private int mVisibleItemCount = 0;
     private View mLastExpandedActionView = null;
 
     private Cursor mCursorFriends = null;
-    private Cursor mCursorGroups = null;
 
     @Override
     protected int getLayout() {
@@ -93,9 +86,6 @@ public class UserFriendsActivity extends FriendsActivity {
             for (Adapter adapter : separatedListAdapter.sections.values()) {
                 Cursor c = null;
                 if (sectionIndex == 0) {
-                    createGroupCursor();
-                    c = mCursorGroups;
-                } else if (sectionIndex == 1) {
                     createFriendsCursor();
                     c = mCursorFriends;
                 } else {
@@ -130,72 +120,16 @@ public class UserFriendsActivity extends FriendsActivity {
         mCursorFriends = mFriendsPlugin.getStore().getUserFriendListCursor();
     }
 
-    private void createGroupCursor() {
-        if (mCursorGroups != null)
-            stopManagingCursor(mCursorGroups);
-        mCursorGroups = mFriendsPlugin.getStore().getGroupListCursor();
-    }
-
     @Override
     protected void loadCursorAndSetAdaptar() {
         createFriendsCursor();
         startManagingCursor(mCursorFriends);
 
-        View headerViewFriends = getLayoutInflater().inflate(R.layout.main_list_header, null);
-
-        final int longText;
-        final int shortText;
-        switch (AppConstants.FRIENDS_CAPTION) {
-        case COLLEAGUES:
-            longText = R.string.invite_colleagues_long;
-            shortText = R.string.find_colleagues;
-            break;
-        case CONTACTS:
-            longText = R.string.invite_contacts_long;
-            shortText = R.string.find_contacts;
-            break;
-        case FRIENDS:
-        default:
-            longText = R.string.invite_friends_long;
-            shortText = R.string.invite_friends_short;
-            break;
-        }
-
-        ((TextView) headerViewFriends.findViewById(R.id.mainheader)).setText(shortText);
-        ((TextView) headerViewFriends.findViewById(R.id.subheader)).setText(longText);
-        headerViewFriends.setTag(HEADERCELL_FRIENDS);
-
         FriendListAdapter fla = new FriendListAdapter(this, mCursorFriends, mFriendsPlugin.getStore(), null,
-            mFriendsPlugin, true, headerViewFriends);
-
-        createGroupCursor();
-        startManagingCursor(mCursorGroups);
-
-        View headerViewGroups = getLayoutInflater().inflate(R.layout.main_list_header, null);
-        ((TextView) headerViewGroups.findViewById(R.id.mainheader)).setText(R.string.create_groups_short);
-        ((TextView) headerViewGroups.findViewById(R.id.subheader)).setText(R.string.create_groups_long);
-        headerViewGroups.setTag(HEADERCELL_GROUPS);
-
-        GroupListAdapter gla = new GroupListAdapter(this, mCursorGroups, mFriendsPlugin.getStore(), null,
-            mFriendsPlugin, true, headerViewGroups);
+            mFriendsPlugin, false, null);
 
         SeparatedListAdapter adapter = new SeparatedListAdapter(this);
-
-        adapter.addSection(mService.getString(R.string.groups), gla);
-        final int text;
-        switch (AppConstants.FRIENDS_CAPTION) {
-        case COLLEAGUES:
-            text = R.string.colleagues;
-            break;
-        case CONTACTS:
-            text = R.string.contacts;
-            break;
-        case FRIENDS:
-        default:
-            text = R.string.tab_friends;
-            break;
-        }
-        adapter.addSection(mService.getString(text), fla);
+        adapter.addSection("todo ruben", fla);
 
         setListAdapter(adapter);
     }
@@ -253,9 +187,6 @@ public class UserFriendsActivity extends FriendsActivity {
         if (mCursorFriends != null) {
             stopManagingCursor(mCursorFriends);
         }
-        if (mCursorGroups != null) {
-            stopManagingCursor(mCursorGroups);
-        }
     }
 
     @Override
@@ -263,9 +194,6 @@ public class UserFriendsActivity extends FriendsActivity {
         super.onResume();
         if (getWasPaused() && mCursorFriends != null) {
             startManagingCursor(mCursorFriends);
-        }
-        if (getWasPaused() && mCursorGroups != null) {
-            startManagingCursor(mCursorGroups);
         }
     }
 
@@ -275,40 +203,7 @@ public class UserFriendsActivity extends FriendsActivity {
         Object tag = listItem.getTag();
         if (tag == null) {
             return;
-        } else if (tag instanceof Integer && (Integer) tag == HEADERCELL_FRIENDS) {
-            startActivity(new Intent(this, AddFriendsActivity.class));
-
-        } else if (tag instanceof Integer && (Integer) tag == HEADERCELL_GROUPS) {
-            final EditText edit = (EditText) getLayoutInflater().inflate(R.layout.save_canned_message_edit, null);
-            new AlertDialog.Builder(this).setTitle(R.string.create_group).setView(edit)
-                .setPositiveButton(R.string.ok, new SafeDialogInterfaceOnClickListener() {
-                    @Override
-                    public void safeOnClick(DialogInterface dialog, int which) {
-                        InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                        mgr.hideSoftInputFromWindow(edit.getWindowToken(), 0);
-
-                        String name = edit.getText().toString();
-                        String guid = UUID.randomUUID().toString();
-                        mFriendsPlugin.getStore().insertGroup(guid, name, null, null);
-
-                        final Intent groupDetails = new Intent(UserFriendsActivity.this, GroupDetailActivity.class);
-                        groupDetails.putExtra(GroupDetailActivity.GUID, guid);
-                        groupDetails.putExtra(GroupDetailActivity.NEW_GROUP, true);
-                        startActivity(groupDetails);
-                    }
-                }).setNegativeButton(R.string.cancel, new SafeDialogInterfaceOnClickListener() {
-                    @Override
-                    public void safeOnClick(DialogInterface dialog, int which) {
-                        InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                        mgr.hideSoftInputFromWindow(edit.getWindowToken(), 0);
-                    }
-                }).create().show();
-
-            edit.requestFocus();
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
-
-        } else if (tag instanceof Friend || tag instanceof Group) {
+        } else if (tag instanceof Friend) {
             if (mLastExpandedActionView != null)
                 mLastExpandedActionView.setVisibility(View.GONE);
 
@@ -326,16 +221,11 @@ public class UserFriendsActivity extends FriendsActivity {
                 actions.setVisibility(View.VISIBLE);
                 mLastExpandedActionView = actions;
 
-                if (tag instanceof Friend) {
-                    final Friend friend = (Friend) tag;
-                    handleLocation(listItem, friend);
-                    handleHistory(listItem, friend);
-                    handleSend(listItem, friend);
+                final Friend friend = (Friend) tag;
+                handleLocation(listItem, friend);
+                handleHistory(listItem, friend);
+                handleSend(listItem, friend);
 
-                } else {
-                    final Group group = (Group) tag;
-                    handleSend(listItem, group);
-                }
                 handleDetails(listItem);
             }
         }
@@ -351,25 +241,7 @@ public class UserFriendsActivity extends FriendsActivity {
                     final Intent friendDetails = new Intent(UserFriendsActivity.this, UserDetailActivity.class);
                     friendDetails.putExtra(FriendDetailActivity.EMAIL, ((Friend) tag).email);
                     startActivity(friendDetails);
-
-                } else if (tag instanceof Group) {
-                    final Intent groupDetails = new Intent(UserFriendsActivity.this, GroupDetailActivity.class);
-                    groupDetails.putExtra(GroupDetailActivity.GUID, ((Group) tag).guid);
-                    groupDetails.putExtra(GroupDetailActivity.NEW_GROUP, false);
-                    startActivity(groupDetails);
                 }
-            }
-        });
-    }
-
-    private void handleSend(final View listItem, final Group group) {
-        ImageView newMessage = (ImageView) listItem.findViewById(R.id.send);
-        newMessage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final Intent sendMessage = new Intent(UserFriendsActivity.this, SendMessageWizardActivity.class);
-                sendMessage.putExtra(SendMessageWizardActivity.GROUP_RECIPIENTS, new String[] { group.guid });
-                startActivity(sendMessage);
             }
         });
     }
@@ -466,6 +338,22 @@ public class UserFriendsActivity extends FriendsActivity {
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.friends_menu, menu);
+
+        switch (AppConstants.FRIENDS_CAPTION) {
+            case COLLEAGUES:
+                menu.getItem(0).setTitle(R.string.find_colleagues);
+                break;
+            case CONTACTS:
+                menu.getItem(0).setTitle(R.string.find_contacts);
+                break;
+            case FRIENDS:
+            default:
+                menu.getItem(0).setTitle(R.string.invite_friends_short);
+                break;
+        }
+
+        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_search).color(Color.DKGRAY).sizeDp(18));
+        menu.getItem(1).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_street_view).color(Color.DKGRAY).sizeDp(18));
         return true;
     }
 
@@ -474,12 +362,15 @@ public class UserFriendsActivity extends FriendsActivity {
         T.UI();
 
         switch (item.getItemId()) {
-        case R.id.help:
-            showHelp();
-            return true;
-        case R.id.friend_map:
-            startActivity(new Intent(UserFriendsActivity.this, FriendsLocationActivity.class));
-            return true;
+            case R.id.find_friends:
+                startActivity(new Intent(this, AddFriendsActivity.class));
+                return true;
+            case R.id.help:
+                showHelp();
+                return true;
+            case R.id.friend_map:
+                startActivity(new Intent(UserFriendsActivity.this, FriendsLocationActivity.class));
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }

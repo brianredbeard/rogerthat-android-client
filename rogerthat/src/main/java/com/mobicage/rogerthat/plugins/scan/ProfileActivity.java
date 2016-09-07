@@ -371,6 +371,8 @@ public class ProfileActivity extends ServiceBoundActivity {
         setContentView(R.layout.profile);
         setActivityName("profile");
 
+
+
         boolean ageGenderSet = getIntent().getBooleanExtra(INTENT_KEY_COMPLETE_PROFILE, true);
         mShownAfterRegistration = !ageGenderSet;
         if (mShownAfterRegistration) {
@@ -379,6 +381,11 @@ public class ProfileActivity extends ServiceBoundActivity {
 
         mFriendsPlugin = mService.getPlugin(FriendsPlugin.class);
         mIdentityStore = mService.getIdentityStore();
+
+        ImageView editBirthdateImageView = (ImageView)findViewById(R.id.profile_birthdate_edit);
+        editBirthdateImageView.setImageDrawable(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_pencil).color(Color.DKGRAY).sizeDp(18).paddingDp(2));
+        ImageView editGenderImageView = (ImageView)findViewById(R.id.profile_gender_edit);
+        editGenderImageView.setImageDrawable(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_pencil).color(Color.DKGRAY).sizeDp(18).paddingDp(2));
 
         updateView();
     }
@@ -586,6 +593,9 @@ public class ProfileActivity extends ServiceBoundActivity {
         T.UI();
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.edit_profile_menu, menu);
+        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_pencil).color(Color.DKGRAY).sizeDp(18));
+        menu.getItem(1).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_check).color(Color.DKGRAY).sizeDp(18));
+        menu.getItem(2).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_times).color(Color.DKGRAY).sizeDp(18));
         return true;
     }
 

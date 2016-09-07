@@ -2,20 +2,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item
-        android:id="@+id/create_group"
-        android:title="@string/create_group"
-		app:showAsAction="ifRoom"
-        android:icon="@drawable/ic_menu_allfriends"/>
 	<item
 		android:id="@+id/save"
 		android:title="@string/save"
-		app:showAsAction="ifRoom"
-		android:icon="@drawable/menu_save"/>
+		app:showAsAction="never"/>
 	<item
 		android:id="@+id/load"
 		android:title="@string/load_canned_message"
-		app:showAsAction="ifRoom"
-		android:icon="@drawable/menu_load"/>
+		app:showAsAction="never"/>
 		
 </menu>
