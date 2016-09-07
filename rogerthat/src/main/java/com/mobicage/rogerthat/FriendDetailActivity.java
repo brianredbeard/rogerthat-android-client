@@ -106,7 +106,7 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
     protected void onCreate(Bundle savedInstanceState) {
         T.UI();
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.friend_detail);
+        setContentViewWithoutNavigationBar(R.layout.friend_detail);
 
         mTopArea = findViewById(R.id.friend_detail_layout);
         mFindFriendLocationButton = (Button) findViewById(R.id.retrieve_friend_location_button);

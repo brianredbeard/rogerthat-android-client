@@ -123,7 +123,7 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity implements M
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         L.i("ServiceActionMenuActivity.onCreate");
-        setContentView(R.layout.service_action_menu);
+        setContentViewWithoutNavigationBar(R.layout.service_action_menu);
         Intent intent = getIntent();
         email = intent.getStringExtra(SERVICE_EMAIL);
         page = intent.getIntExtra(MENU_PAGE, 0);

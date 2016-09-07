@@ -36,6 +36,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.design.widget.NavigationView;
@@ -52,18 +53,22 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.facebook.CallbackManager;
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.MenuItemPressingActivity;
 import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
+import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.Pausable;
@@ -353,67 +358,73 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         return mLastTimeClicked;
     }
 
-    @Override
-    public void setContentView(int layoutResID) {
-        setContentView(layoutResID, true);
+    public void setContentViewWithoutNavigationBar(int layoutResID) {
+        super.setContentView(layoutResID);
     }
 
-    public void setContentView(int layoutResID, boolean showNavigationBar) {
-        if (showNavigationBar) {
-            setContentView(getLayoutInflater().inflate(R.layout.navigation_view, null));
+    @Override
+    public void setContentView(int layoutResID) {
+        setContentView(getLayoutInflater().inflate(R.layout.navigation_view, null));
 
-            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-            setSupportActionBar(toolbar);
-
-            LinearLayout item = (LinearLayout) findViewById(R.id.linear_layout);
-            View child = getLayoutInflater().inflate(layoutResID, null);
-            item.addView(child);
-
-            final DrawerLayout drawer = getDrawer();
-            mDrawerToggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string
-                    .navigation_drawer_open, R.string.navigation_drawer_close);
-            drawer.addDrawerListener(mDrawerToggle);
-            mDrawerToggle.syncState();
-
-            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-            navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-                @Override
-                public boolean onNavigationItemSelected(final MenuItem item) {
-                    int order = item.getOrder();
-                    String activityName = AppConstants.NAVIGATION_CLICKS[order];
-                    if (activityName != mActivityName) {
-                        mService.postDelayedOnUIHandler(new SafeRunnable() {
-                            @Override
-                            protected void safeRun() throws Exception {
-                                //item.setChecked(false);
-                                activateCurrentNavigationItem();
-                            }
-                        }, 250);
-                    }
-
-                    if (AppConstants.NAVIGATION_CLICKS.length <= order) {
-                        L.bug("ignoring navigation item clicked NAVIGATION_CLICKS.length <= order: " + order);
-                    } else if (AppConstants.NAVIGATION_CLICKS[order] != null) {
-                        if (activityName != null && !activityName.equals(mActivityName)) {
-                            ActivityUtils.goToActivity(ServiceBoundActivity.this, activityName);
-                        }
-                    } else if (AppConstants.NAVIGATION_TAGS[order] != null) {
-                        ActivityUtils.goToActivityBehindTag(ServiceBoundActivity.this, AppConstants.APP_EMAIL, AppConstants.NAVIGATION_TAGS[order]);
-                    } else {
-                        L.bug("ignoring navigation item clicked for order: " + order);
-                    }
-                    closeNavigationView();
-                    return true;
-                }
-            });
-            navigationView.setItemIconTintList(null);
-
-            if (!CloudConstants.isCityApp()) {
-                LinearLayout navigationFooter = (LinearLayout) findViewById(R.id.nav_view_footer);
-                navigationFooter.setVisibility(View.GONE);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setNavigationIcon(getResources().getDrawable(R.drawable.more_id));
+        toolbar.setNavigationOnClickListener(new SafeViewOnClickListener() {
+            @Override
+            public void safeOnClick(View v) {
+                L.w("test toolbar");
             }
-        } else {
-            super.setContentView(layoutResID);
+        });
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+
+        LinearLayout item = (LinearLayout) findViewById(R.id.linear_layout);
+        View child = getLayoutInflater().inflate(layoutResID, null);
+        item.addView(child);
+
+        final DrawerLayout drawer = getDrawer();
+        mDrawerToggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string
+                .navigation_drawer_open, R.string.navigation_drawer_close);
+        mDrawerToggle.setDrawerIndicatorEnabled(true);
+        drawer.addDrawerListener(mDrawerToggle);
+        mDrawerToggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(final MenuItem item) {
+                int order = item.getOrder();
+                String activityName = AppConstants.NAVIGATION_CLICKS[order];
+                if (activityName != mActivityName) {
+                    mService.postDelayedOnUIHandler(new SafeRunnable() {
+                        @Override
+                        protected void safeRun() throws Exception {
+                            //item.setChecked(false);
+                            activateCurrentNavigationItem();
+                        }
+                    }, 250);
+                }
+
+                if (AppConstants.NAVIGATION_CLICKS.length <= order) {
+                    L.bug("ignoring navigation item clicked NAVIGATION_CLICKS.length <= order: " + order);
+                } else if (AppConstants.NAVIGATION_CLICKS[order] != null) {
+                    if (activityName != null && !activityName.equals(mActivityName)) {
+                        ActivityUtils.goToActivity(ServiceBoundActivity.this, activityName, true);
+                    }
+                } else if (AppConstants.NAVIGATION_TAGS[order] != null) {
+                    ActivityUtils.goToActivityBehindTag(ServiceBoundActivity.this, AppConstants.APP_EMAIL, AppConstants.NAVIGATION_TAGS[order]);
+                } else {
+                    L.bug("ignoring navigation item clicked for order: " + order);
+                }
+                closeNavigationView();
+                return true;
+            }
+        });
+        navigationView.setItemIconTintList(null);
+
+        if (!CloudConstants.isCityApp()) {
+            LinearLayout navigationFooter = (LinearLayout) findViewById(R.id.nav_view_footer);
+            navigationFooter.setVisibility(View.GONE);
         }
     }
 
@@ -509,7 +520,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
     public void onOptionNavigationViewToolbarSelected(View v) {
         String activityName = (String) v.getTag();
         if (activityName != null && !activityName.equals(mActivityName)) {
-            ActivityUtils.goToActivity(this, activityName);
+            ActivityUtils.goToActivity(this, activityName, true);
         }
         closeNavigationView();
     }

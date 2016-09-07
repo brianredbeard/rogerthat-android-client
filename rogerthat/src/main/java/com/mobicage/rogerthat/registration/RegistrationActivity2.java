@@ -337,7 +337,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
             mNotYetProcessedIntent = null;
         }
 
-        setContentView(R.layout.registration2, false);
+        setContentViewWithoutNavigationBar(R.layout.registration2);
 
         //Apply Fonts
         TextUtils.overrideFonts(this, findViewById(android.R.id.content));

@@ -268,6 +268,7 @@ def generate_navigation_menu(doc, strings_map):
 
             f.write("""
     <group
+        android:id="@+id/nav_group_%(i)s"
         android:checkableBehavior="single">
         <item
             android:orderInCategory="%(i)s"
@@ -922,6 +923,8 @@ if __name__ == "__main__":
     print 'BUILD CFG:'
     print pprint.pformat(doc)
     print ''
+
+    # todo ruben generate ic_menu_hamburger
 
     if APP_ID != MAIN_APP_ID:
         #### MORE IMAGES ###################################

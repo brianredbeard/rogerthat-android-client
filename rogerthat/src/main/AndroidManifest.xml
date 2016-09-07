@@ -136,7 +136,14 @@
         </activity>
         <activity android:name="com.soundcloud.android.crop.MonitoredActivity" >
         </activity>
-        <activity android:name="com.mobicage.rogerthat.plugins.messaging.ChatInfoActivity" android:theme="@style/AppTheme.NoActionBar">
+        <activity
+            android:name="com.mobicage.rogerthat.plugins.messaging.ChatInfoActivity"
+            android:theme="@style/Theme.AppCompat.Light"
+            android:parentActivityName="com.mobicage.rogerthat.plugins.messaging.FriendsThreadActivity" >
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.plugins.messaging.FriendsThreadActivity" />
         </activity>
 
         <activity
@@ -177,7 +184,13 @@
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.AddFriendsActivity"
-            android:configChanges="orientation|screenSize">
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/Theme.AppCompat.Light"
+            android:parentActivityName="com.mobicage.rogerthat.UserFriendsActivity" >
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.UserFriendsActivity" />
         </activity>
         <activity android:name="com.mobicage.rogerthat.UserFriendsActivity" >
         </activity>
@@ -187,7 +200,12 @@
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="portrait"
+            android:parentActivityName="com.mobicage.rogerthat.ServiceFriendsActivity" >
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.ServiceFriendsActivity" />
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.friends.RecommendServiceActivity"
@@ -247,7 +265,12 @@
         <activity
             android:name="com.mobicage.rogerthat.UserDetailActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" >
+            android:theme="@style/Theme.AppCompat.Light">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.UserFriendsActivity" />
+
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.FriendDetailOrInviteActivity"

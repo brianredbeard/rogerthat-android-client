@@ -154,7 +154,7 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity implemen
             findViewById(R.id.scan_btn).setOnClickListener(new SafeViewOnClickListener() {
                 @Override
                 public void safeOnClick(View v) {
-                    ActivityUtils.goToScanActivity(AbstractHomeActivity.this);
+                    ActivityUtils.goToScanActivity(AbstractHomeActivity.this, false);
                 }
             });
         }
@@ -265,7 +265,7 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity implemen
             }
         }
 
-        ActivityUtils.goToServicesActivity(this, organizationType);
+        ActivityUtils.goToServicesActivity(this, organizationType, false);
     }
 
     protected void simulateMenuItemPress(String serviceEmail, long[] serviceCoords) {
@@ -299,19 +299,19 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity implemen
 
     protected void goToActivity(String activityName, boolean collapse) {
         if ("messages".equals(activityName)) {
-            ActivityUtils.goToMessagingActivity(this);
+            ActivityUtils.goToMessagingActivity(this, false);
         } else if ("scan".equals(activityName)) {
-            ActivityUtils.goToScanActivity(this);
+            ActivityUtils.goToScanActivity(this, false);
         } else if ("services".equals(activityName)) {
             goToServicesActivity(FriendStore.SERVICE_ORGANIZATION_TYPE_UNSPECIFIED, collapse);
         } else if ("friends".equals(activityName)) {
-            ActivityUtils.goToUserFriendsActivity(this);
+            ActivityUtils.goToUserFriendsActivity(this, false);
         } else if ("directory".equals(activityName)) {
-            ActivityUtils.goToFriendSearchActivity(this);
+            ActivityUtils.goToFriendSearchActivity(this, false);
         } else if ("profile".equals(activityName)) {
-            ActivityUtils.goToProfileActivity(this);
+            ActivityUtils.goToProfileActivity(this, false);
         } else if ("more".equals(activityName)) {
-            ActivityUtils.goToMoreActivity(this);
+            ActivityUtils.goToMoreActivity(this, false);
         } else if ("community_services".equals(activityName)) {
             goToServicesActivity(FriendStore.SERVICE_ORGANIZATION_TYPE_CITY, collapse);
         } else if ("merchants".equals(activityName)) {
@@ -330,7 +330,7 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity implemen
         if (intent.getBooleanExtra(INTENT_PROCESSED, false))
             return;
         if (url != null) {
-            ActivityUtils.goToMessagingActivity(this);
+            ActivityUtils.goToMessagingActivity(this, false);
             processUrl(url);
         } else if (intent.hasExtra(INTENT_KEY_LAUNCHINFO)) {
             String value = intent.getStringExtra(INTENT_KEY_LAUNCHINFO);
@@ -338,14 +338,14 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity implemen
                 // goToUserFriendsActivity();
 
             } else if (INTENT_VALUE_SHOW_MESSAGES.equals(value)) {
-                ActivityUtils.goToMessagingActivity(this);
+                ActivityUtils.goToMessagingActivity(this, false);
 
             } else if (INTENT_VALUE_SHOW_NEW_MESSAGES.equals(value)) {
                 if (intent.hasExtra(INTENT_KEY_MESSAGE)) {
                     String messageKey = intent.getStringExtra(INTENT_KEY_MESSAGE);
                     goToMessageDetail(messageKey);
                 } else {
-                    ActivityUtils.goToMessagingActivity(this);
+                    ActivityUtils.goToMessagingActivity(this, false);
                 }
 
             } else if (INTENT_VALUE_SHOW_UPDATED_MESSAGES.equals(value)) {
@@ -353,11 +353,11 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity implemen
                     String messageKey = intent.getStringExtra(INTENT_KEY_MESSAGE);
                     goToMessageDetail(messageKey);
                 } else {
-                    ActivityUtils.goToMessagingActivity(this);
+                    ActivityUtils.goToMessagingActivity(this, false);
                 }
 
             } else if (INTENT_VALUE_SHOW_SCANTAB.equals(value)) {
-                ActivityUtils.goToScanActivity(this);
+                ActivityUtils.goToScanActivity(this, false);
             } else {
                 L.bug("Unexpected (key, value) for HomeActivity intent: (" + INTENT_KEY_LAUNCHINFO + ", " + value + ")");
             }
