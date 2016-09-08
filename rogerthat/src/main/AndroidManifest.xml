@@ -306,6 +306,29 @@
             android:theme="@style/FullHeightDialog"
             android:windowSoftInputMode="adjustResize" >
         </activity>
+
+        <activity
+            android:name="com.mobicage.rogerthat.SendMessageContactActivity"
+            android:configChanges="orientation|screenSize"
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/Theme.AppCompat.Light"
+            android:parentActivityName="com.mobicage.rogerthat.plugins.messaging.MessagingActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.plugins.messaging.MessagingActivity" />
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.SendMessageMessageActivity"
+            android:configChanges="orientation|screenSize"
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/Theme.AppCompat.Light"
+            android:parentActivityName="com.mobicage.rogerthat.plugins.messaging.MessagingActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.plugins.messaging.MessagingActivity" />
+        </activity>
         <activity
             android:name="com.mobicage.rogerthat.widget.SendCannedMessageActivity"
             android:theme="@style/FullHeightDialog"

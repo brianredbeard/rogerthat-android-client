@@ -60,6 +60,7 @@ import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.HomeActivity;
 import com.mobicage.rogerthat.IdentityStore;
 import com.mobicage.rogerthat.MainActivity;
+import com.mobicage.rogerthat.SendMessageContactActivity;
 import com.mobicage.rogerthat.SendMessageWizardActivity;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.ServiceBoundCursorListActivity;
@@ -345,7 +346,8 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
         }
 
         setLastTimeClicked(currentTime);
-        Intent intent = new Intent(this, SendMessageWizardActivity.class);
+        
+        Intent intent = new Intent(this, SendMessageContactActivity.class);
         startActivity(intent);
     }
 

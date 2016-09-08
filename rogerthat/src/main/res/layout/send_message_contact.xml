@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
+
+	<LinearLayout
+		android:id="@+id/container"
+		android:orientation="vertical"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:background="@color/mc_background_color">
+
+		<HorizontalScrollView
+			android:id="@+id/recipients_scroller"
+			android:layout_width="fill_parent"
+			android:layout_height="100dp"
+			android:visibility="gone">
+
+			<LinearLayout
+				android:id="@+id/recipients"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:orientation="horizontal" >
+			</LinearLayout>
+
+		</HorizontalScrollView>
+
+		<View
+			android:id="@+id/recipients_divider"
+			android:layout_width="match_parent"
+			android:layout_height="1dp"
+			android:layout_marginTop="5dp"
+			android:layout_marginBottom="5dp"
+			android:background="@drawable/divider"
+			android:visibility="gone" />
+
+		<ListView
+			android:id="@+id/friend_list"
+			android:layout_height="fill_parent"
+			android:layout_width="fill_parent"
+			android:divider="@drawable/divider_gradient"
+			android:dividerHeight="1px"
+			android:cacheColorHint="#00000000"
+			android:fastScrollEnabled="true">
+		</ListView>
+	</LinearLayout>
+
+	<android.support.design.widget.FloatingActionButton
+		android:id="@+id/next_step"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_margin="16dp"
+		app:elevation="4dp"
+		app:fabSize="normal"
+		app:backgroundTint="@color/mc_primary_color"
+		android:clickable="true"
+		app:layout_anchor="@id/container"
+		app:layout_anchorGravity="bottom|right|end"/>
+
+
+</android.support.design.widget.CoordinatorLayout>
