@@ -62,7 +62,7 @@
         android:layout_above="@id/invite_services"
         android:layout_below="@id/detected_beacons_title"
         android:cacheColorHint="#00000000"
-        android:divider="@drawable/divider"
+        android:divider="@drawable/divider_gray"
         android:dividerHeight="1px"
         android:fastScrollEnabled="true" >
     </com.mobicage.rogerthat.util.ui.FSListView>

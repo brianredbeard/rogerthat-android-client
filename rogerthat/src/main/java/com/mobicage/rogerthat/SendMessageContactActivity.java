@@ -122,7 +122,12 @@ public class SendMessageContactActivity extends ServiceBoundActivity {
         mFloatingActionButton.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
-                L.d("todo ruben");
+                if (mFriendRecipients.size() == 0) {
+                    return;
+                }
+                Intent intent = new Intent(SendMessageContactActivity.this, SendMessageMessageActivity.class);
+                intent.putExtra(SendMessageMessageActivity.RECIPIENTS, mFriendRecipients.toArray(new String[] {}));
+                startActivity(intent);
             }
         });
     }

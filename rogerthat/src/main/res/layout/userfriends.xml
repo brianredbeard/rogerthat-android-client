@@ -9,7 +9,7 @@
 		android:id="@+id/friend_list"
 		android:layout_height="fill_parent"
 		android:layout_width="fill_parent"
-		android:divider="@drawable/divider"
+		android:divider="@drawable/divider_gray"
 		android:dividerHeight="1px"
 		android:background="@color/mc_highlight_background"
 		android:cacheColorHint="#00000000"

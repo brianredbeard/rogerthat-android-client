@@ -494,4 +494,5 @@
     <string name="select_friend">Select friend</string>
     <string name="select_contact">Select contact</string>
     <string name="select_colleague">Select colleague</string>
+    <string name="type_your_message">Type a message</string>
 </resources>
