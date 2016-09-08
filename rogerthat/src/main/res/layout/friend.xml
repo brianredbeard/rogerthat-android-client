@@ -20,7 +20,7 @@
                 android:id="@+id/friend_avatar"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
-                android:layout_gravity="center_horizontal" />
+                android:layout_gravity="center" />
 
             <ImageView
                 android:id="@+id/friend_status"

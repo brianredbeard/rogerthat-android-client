@@ -27,7 +27,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -35,9 +34,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.provider.MediaStore;
-import android.support.design.widget.FloatingActionButton;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -48,19 +45,15 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.ViewFlipper;
 
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
-import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.config.Configuration;
-import com.mobicage.rogerthat.config.ConfigurationProvider;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.messaging.AttachmentViewerActivity;
 import com.mobicage.rogerthat.plugins.messaging.Message;
@@ -94,12 +87,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 public class SendMessageMessageActivity extends ServiceBoundActivity {
+
 
     public static final String SAVE_CANNED_MESSAGE_MODE = "SendMessageWizardActivity.SAVE_CANNED_MESSAGE_MODE";
     public static final String CANNED_MESSAGE_SAVED = "SendMessageWizardActivity.CANNED_MESSAGE_SAVED";
@@ -126,6 +119,7 @@ public class SendMessageMessageActivity extends ServiceBoundActivity {
     private static final int GET_LOCATION = 2;
     private static final int PICK_IMAGE = 3;
     private static final int PICK_VIDEO = 4;
+    private static final int PICK_BUTTON = 5;
 
     private int _5_DP_IN_PX;
     private int _30_DP_IN_PX;
@@ -218,17 +212,13 @@ public class SendMessageMessageActivity extends ServiceBoundActivity {
 
         initImageButtonsNavigation();
 
-//        addEnterMessagePageHandler(mWiz);
-//        addButtonsPageHandler(mWiz);
-//        addImagePageHandler(mWiz);
-//        addVideoPageHandler(mWiz);
-
         mAttachmentContainer.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
                 mAttachmentContainer.setVisibility(View.GONE);
                 mHasImageSelected = false;
                 mHasVideoSelected = false;
+                initImageButtonsNavigation();
             }
         });
 
@@ -270,7 +260,6 @@ public class SendMessageMessageActivity extends ServiceBoundActivity {
             case PICK_IMAGE:
                 if (resultCode == Activity.RESULT_OK) {
                     if (mUriSavedFile == null) {
-                        final ViewFlipper vf = (ViewFlipper) findViewById(R.id.viewFlipper);
                         setupUploadFile("png", false);
                     }
                     if (data != null && data.getData() != null) {
@@ -286,7 +275,6 @@ public class SendMessageMessageActivity extends ServiceBoundActivity {
             case PICK_VIDEO:
                 if (resultCode == Activity.RESULT_OK) {
                     if (mUriSavedFile == null) {
-                        final ViewFlipper vf = (ViewFlipper) findViewById(R.id.viewFlipper);
                         setupUploadFile("mp4", false);
                     }
                     final ContentResolver cr = SendMessageMessageActivity.this.getContentResolver();
@@ -311,6 +299,13 @@ public class SendMessageMessageActivity extends ServiceBoundActivity {
                     }
                 }
                 break;
+
+            case PICK_BUTTON:
+                if (resultCode == Activity.RESULT_OK) {
+                    // todo ruben
+                }
+                break;
+
         }
     }
 
@@ -969,10 +964,7 @@ public class SendMessageMessageActivity extends ServiceBoundActivity {
             mImageButtons.add(IMAGE_BUTTON_BUTTONS);
         }
 
-        if (mHasImageSelected) {
-            mImageButtons.add(IMAGE_BUTTON_PICTURE);
-        } else if (mHasVideoSelected) {
-            mImageButtons.add(IMAGE_BUTTON_VIDEO);
+        if (mHasImageSelected || mHasVideoSelected) {
         } else {
             if (addPicture) {
                 mImageButtons.add(IMAGE_BUTTON_PICTURE);
@@ -1055,6 +1047,9 @@ public class SendMessageMessageActivity extends ServiceBoundActivity {
 
         } else if (IMAGE_BUTTON_BUTTONS == key) {
             UIUtils.hideKeyboard(SendMessageMessageActivity.this, mMessage);
+
+            Intent intent = new Intent(SendMessageMessageActivity.this, SendMessageButtonActivity.class);
+            startActivityForResult(intent, PICK_BUTTON);
 
             // todo ruben startactivityforresult
         } else if (IMAGE_BUTTON_PICTURE == key) {
