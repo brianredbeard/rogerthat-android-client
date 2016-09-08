@@ -94,13 +94,8 @@ import java.util.Set;
 public class SendMessageMessageActivity extends ServiceBoundActivity {
 
 
-    public static final String SAVE_CANNED_MESSAGE_MODE = "SendMessageWizardActivity.SAVE_CANNED_MESSAGE_MODE";
-    public static final String CANNED_MESSAGE_SAVED = "SendMessageWizardActivity.CANNED_MESSAGE_SAVED";
-    public static final String CANNED_MESSAGE_CANCELED = "SendMessageWizardActivity.CANNED_MESSAGE_CANCELED";
-    public static final String CANNED_MESSAGE_NAME = "SendMessageWizardActivity.CANNED_MESSAGE_NAME";
     public static final String PARENT_KEY = "parent_key";
     public static final String REPLIED_TO_KEY = "replied_to_key";
-    public static final String GROUP_RECIPIENTS = "group_recipients";
     public static final String RECIPIENTS = "recipients";
     public static final String INITIAL_TEXT = "initial_text";
     public static final String FLAGS = "flags";
@@ -108,18 +103,15 @@ public class SendMessageMessageActivity extends ServiceBoundActivity {
     public static final String DEFAULT_STICKY = "default_sticky";
 
     public static final String CONFIGKEY = "SEND_NEW_MESSAGE_WIZARD";
-    public static final String CONFIG_PICKLED_WIZARD_KEY = "CANNED_MESSAGE";
     private static final String CANNED_BUTTONS = "CANNED_BUTTONS";
 
     public static final int TO = 1;
     public static final int BCC = 2;
     public static final long NO_BUTTON_SELECTED = -1;
 
-    private static final int PICK_CONTACT = 1;
-    private static final int GET_LOCATION = 2;
-    private static final int PICK_IMAGE = 3;
-    private static final int PICK_VIDEO = 4;
-    private static final int PICK_BUTTON = 5;
+    private static final int PICK_IMAGE = 1;
+    private static final int PICK_VIDEO = 2;
+    private static final int PICK_BUTTON = 3;
 
     private int _5_DP_IN_PX;
     private int _30_DP_IN_PX;
@@ -189,6 +181,17 @@ public class SendMessageMessageActivity extends ServiceBoundActivity {
         mParentKey = intent.hasExtra(PARENT_KEY) ? intent.getStringExtra(PARENT_KEY) : null;
         mParentFlags = intent.getLongExtra(FLAGS, 0);
         mRepliedToKey = intent.hasExtra(REPLIED_TO_KEY) ? intent.getStringExtra(REPLIED_TO_KEY) : null;
+
+        if (intent.hasExtra(DEFAULT_PRIORITY)) {
+            mPriority = intent.getLongExtra(DEFAULT_PRIORITY, mPriority);
+        }
+
+        if (intent.hasExtra(DEFAULT_STICKY)) {
+            mIsSticky = intent.getBooleanExtra(DEFAULT_STICKY, mIsSticky);
+        }
+
+        if (mInitialText != null)
+            mMessage.setText(mInitialText);
     }
 
     @Override
@@ -209,7 +212,6 @@ public class SendMessageMessageActivity extends ServiceBoundActivity {
 
 
         loadCannedButtons();
-
         initImageButtonsNavigation();
 
         mAttachmentContainer.setOnClickListener(new SafeViewOnClickListener() {
@@ -232,9 +234,6 @@ public class SendMessageMessageActivity extends ServiceBoundActivity {
                 }
             }
         });
-
-
-        // initActivity todo ruben
     }
 
     @Override
@@ -302,7 +301,18 @@ public class SendMessageMessageActivity extends ServiceBoundActivity {
 
             case PICK_BUTTON:
                 if (resultCode == Activity.RESULT_OK) {
-                    // todo ruben
+                    try {
+                        mCannedButtons = (CannedButtons) Pickler.createObjectFromPickle(data.getByteArrayExtra("cannedbuttons"));
+                        mButtons = new LinkedHashSet<Long>();
+                        long[] buttons = data.getLongArrayExtra("buttons");
+                        if (buttons != null) {
+                            for (long l : buttons) {
+                                mButtons.add(l);
+                            }
+                        }
+                    } catch (Exception e) {
+                        L.bug(e);
+                    }
                 }
                 break;
 
@@ -1047,9 +1057,15 @@ public class SendMessageMessageActivity extends ServiceBoundActivity {
 
         } else if (IMAGE_BUTTON_BUTTONS == key) {
             UIUtils.hideKeyboard(SendMessageMessageActivity.this, mMessage);
+            try {
+                Intent intent = new Intent(SendMessageMessageActivity.this, SendMessageButtonActivity.class);
+                intent.putExtra("cannedbuttons", Pickler.getPickleFromObject(mCannedButtons));
+                intent.putExtra("buttons", mButtons.toArray(new Long[mButtons.size()]));
+                startActivityForResult(intent, PICK_BUTTON);
+            } catch (Exception e) {
+                L.bug(e);
+            }
 
-            Intent intent = new Intent(SendMessageMessageActivity.this, SendMessageButtonActivity.class);
-            startActivityForResult(intent, PICK_BUTTON);
 
             // todo ruben startactivityforresult
         } else if (IMAGE_BUTTON_PICTURE == key) {

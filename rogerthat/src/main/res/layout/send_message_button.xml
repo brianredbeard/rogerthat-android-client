@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:orientation="vertical">
+
+	<LinearLayout
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal" >
+
+		<Button
+			android:id="@+id/add_button"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginRight="5dp"
+			android:paddingLeft="20dp"
+			android:paddingRight="20dp"
+			android:text="+"
+			android:textSize="20dp"
+			tools:ignore="HardcodedText" >
+		</Button>
+
+		<HorizontalScrollView
+			android:id="@+id/buttons_scroller"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content" >
+
+			<LinearLayout
+				android:id="@+id/buttons"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:orientation="horizontal" >
+			</LinearLayout>
+		</HorizontalScrollView>
+	</LinearLayout>
+
+	<ListView
+		android:id="@+id/button_list"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:cacheColorHint="#00000000"
+		android:divider="@drawable/divider_gray"
+		android:dividerHeight="1px" >
+	</ListView>
+
+</LinearLayout>
