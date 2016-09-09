@@ -81,15 +81,13 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
     private static final int PICK_CONTACT = 1;
     private static final int GET_LOCATION = 2;
 
+    CannedButtonAdapter mCannedButtonAdapter;
     private ListView mButtonsListView;
     private EditText mActionView;
     private EditText mCaptionView;
 
     private Set<Long> mButtons = new LinkedHashSet<Long>();
     private CannedButtons mCannedButtons = null;
-    private long mSelectedButton = NO_BUTTON_SELECTED;
-
-
 
     @Override
     protected void onServiceBound() {
@@ -184,7 +182,8 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.send_message_button_menu, menu);
-        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_check).color(Color.DKGRAY).sizeDp(18));
+        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_plus).color(Color.DKGRAY).sizeDp(18));
+        menu.getItem(1).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_check).color(Color.DKGRAY).sizeDp(18));
         return true;
     }
 
@@ -193,6 +192,9 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
         T.UI();
 
         switch (item.getItemId()) {
+            case R.id.add:
+                addButton();
+                return true;
             case R.id.save:
                 try {
                     Intent resultIntent = new Intent();
@@ -252,20 +254,15 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
     }
 
     private void initButtonsList() {
-        final LinearLayout buttons = (LinearLayout) findViewById(R.id.buttons);
-        buttons.removeAllViews();
         for (Long buttonId : mButtons) {
             CannedButton button = mCannedButtons.getById(buttonId);
             if (button == null)
                 continue;
             button.setSelected(true);
-            Button b = addButton(buttons, button);
-            if (mSelectedButton == button.getId())
-                selectButton(b);
         }
         mButtonsListView = (ListView) findViewById(R.id.button_list);
-        final CannedButtonAdapter cannedButtonAdapter = new CannedButtonAdapter(mCannedButtons);
-        mButtonsListView.setAdapter(cannedButtonAdapter);
+        mCannedButtonAdapter = new CannedButtonAdapter(mCannedButtons);
+        mButtonsListView.setAdapter(mCannedButtonAdapter);
         mButtonsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(final AdapterView<?> parent, final View view, final int position, final long id) {
@@ -274,10 +271,9 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
                     cannedButton.setSelected(!cannedButton.isSelected());
                     setButtonItemView(view, cannedButton);
                     if (cannedButton.isSelected()) {
-                        addButton(buttons, cannedButton);
                         mButtons.add(cannedButton.getId());
                     } else {
-                        removeSelectedButton(buttons, cannedButton);
+                        mButtons.remove(cannedButton.getId());
                     }
                 } catch (Exception e) {
                     L.bug(e);
@@ -298,10 +294,7 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
                                 public void safeOnClick(DialogInterface dialog, int which) {
                                     handled = false;
                                     mCannedButtons.remove(cannedButton);
-                                    if (cannedButton.isSelected()) {
-                                        removeSelectedButton(buttons, cannedButton);
-                                    }
-                                    cannedButtonAdapter.notifyDataSetChanged();
+                                    mCannedButtonAdapter.notifyDataSetChanged();
                                 }
                             }).setNegativeButton(R.string.no, new SafeDialogInterfaceOnClickListener() {
                         @Override
@@ -314,87 +307,6 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
                     L.bug(e);
                     return false;
                 }
-            }
-        });
-        Button addButton = (Button) findViewById(R.id.add_button);
-        addButton.setOnClickListener(new SafeViewOnClickListener() {
-            @Override
-            public void safeOnClick(View v) {
-                final View dialog = getLayoutInflater().inflate(R.layout.new_button_dialog, null);
-                mCaptionView = (EditText) dialog.findViewById(R.id.button_caption);
-                mActionView = (EditText) dialog.findViewById(R.id.button_action);
-                final Button actionHelp = (Button) dialog.findViewById(R.id.action_help_button);
-                final RadioButton telRadio = (RadioButton) dialog.findViewById(R.id.action_tel);
-                final RadioButton geoRadio = (RadioButton) dialog.findViewById(R.id.action_geo);
-                final RadioButton wwwRadio = (RadioButton) dialog.findViewById(R.id.action_www);
-                telRadio.setChecked(true);
-                telRadio.setOnClickListener(new SafeViewOnClickListener() {
-                    @Override
-                    public void safeOnClick(View v) {
-                        mActionView.setText("tel://");
-                        actionHelp.setVisibility(View.VISIBLE);
-                    }
-                });
-                geoRadio.setOnClickListener(new SafeViewOnClickListener() {
-                    @Override
-                    public void safeOnClick(View v) {
-                        mActionView.setText("geo://");
-                        actionHelp.setVisibility(View.VISIBLE);
-                    }
-                });
-                wwwRadio.setOnClickListener(new SafeViewOnClickListener() {
-                    @Override
-                    public void safeOnClick(View v) {
-                        mActionView.setText("http://");
-                        actionHelp.setVisibility(View.GONE);
-                    }
-                });
-                actionHelp.setOnClickListener(new SafeViewOnClickListener() {
-                    @Override
-                    public void safeOnClick(View v) {
-                        if (telRadio.isChecked()) {
-                            Intent intent = new Intent(Intent.ACTION_PICK,
-                                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
-                            startActivityForResult(intent, PICK_CONTACT);
-                        } else if (geoRadio.isChecked()) {
-                            Intent intent = new Intent(SendMessageButtonActivity.this, GetLocationActivity.class);
-                            startActivityForResult(intent, GET_LOCATION);
-                        }
-                    }
-                });
-                AlertDialog alertDialog = new AlertDialog.Builder(SendMessageButtonActivity.this)
-                        .setTitle(R.string.create_button_title).setView(dialog)
-                        .setPositiveButton(getString(R.string.ok), new SafeDialogInterfaceOnClickListener() {
-                            @Override
-                            public void safeOnClick(DialogInterface di, int which) {
-                                Matcher action = actionPattern.matcher(mActionView.getText());
-                                if (!action.matches()) {
-                                    UIUtils.showLongToast(SendMessageButtonActivity.this,
-                                            getString(R.string.action_not_valid));
-                                    return;
-                                }
-                                String caption = mCaptionView.getText().toString();
-                                if ("".equals(caption.trim())) {
-                                    UIUtils.showLongToast(SendMessageButtonActivity.this,
-                                            getString(R.string.caption_required));
-                                    return;
-                                }
-                                CannedButton cannedButton = new CannedButton(caption, "".equals(action.group(2)) ? null
-                                        : action.group());
-                                mCannedButtons.add(cannedButton);
-                                cannedButton.setSelected(true);
-                                cannedButtonAdapter.notifyDataSetChanged();
-                                addButton(buttons, cannedButton);
-                                mButtons.add(cannedButton.getId());
-                            }
-                        }).setNegativeButton(getString(R.string.cancel), new SafeDialogInterfaceOnClickListener() {
-                            @Override
-                            public void safeOnClick(DialogInterface dialog, int which) {
-                            }
-                        }).create();
-                alertDialog.setCanceledOnTouchOutside(true);
-                alertDialog.show();
-
             }
         });
     }
@@ -425,74 +337,79 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
         view.setTag(item);
     }
 
-    private Button addButton(final LinearLayout buttons, final CannedButton cannedButton) {
-        final Button button = new Button(SendMessageButtonActivity.this);
-        button.setText(cannedButton.getCaption());
-        button.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
-        button.setTag(cannedButton);
-        button.setOnClickListener(new SafeViewOnClickListener() {
+    private void addButton() {
+        final View dialog = getLayoutInflater().inflate(R.layout.new_button_dialog, null);
+        mCaptionView = (EditText) dialog.findViewById(R.id.button_caption);
+        mActionView = (EditText) dialog.findViewById(R.id.button_action);
+        final Button actionHelp = (Button) dialog.findViewById(R.id.action_help_button);
+        final RadioButton telRadio = (RadioButton) dialog.findViewById(R.id.action_tel);
+        final RadioButton geoRadio = (RadioButton) dialog.findViewById(R.id.action_geo);
+        final RadioButton wwwRadio = (RadioButton) dialog.findViewById(R.id.action_www);
+        telRadio.setChecked(true);
+        telRadio.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
-
-                if (mSelectedButton == cannedButton.getId())
-                    mSelectedButton = NO_BUTTON_SELECTED;
-
-                cannedButton.setSelected(false);
-                View view = mButtonsListView.findViewWithTag(cannedButton);
-                setButtonItemView(view, cannedButton);
-                buttons.removeView(button);
-                mButtons.remove(cannedButton.getId());
+                mActionView.setText("tel://");
+                actionHelp.setVisibility(View.VISIBLE);
             }
         });
-        button.setOnLongClickListener(new View.OnLongClickListener() {
+        geoRadio.setOnClickListener(new SafeViewOnClickListener() {
             @Override
-            public boolean onLongClick(View v) {
-                try {
-                    boolean selected = cannedButton.getId() == mSelectedButton;
-                    if (!selected) {
-                        selectButton(button);
-                        mSelectedButton = cannedButton.getId();
-                        for (int i = 0; i < buttons.getChildCount(); i++) {
-                            View view = buttons.getChildAt(i);
-                            if (!(view instanceof Button) || view == button)
-                                continue;
-                            Button b = (Button) view;
-                            unSelectButton(b);
-                        }
-                    } else {
-                        unSelectButton(button);
-                        mSelectedButton = NO_BUTTON_SELECTED;
-                    }
-                    return true;
-                } catch (Exception e) {
-                    L.bug(e);
-                    return false;
+            public void safeOnClick(View v) {
+                mActionView.setText("geo://");
+                actionHelp.setVisibility(View.VISIBLE);
+            }
+        });
+        wwwRadio.setOnClickListener(new SafeViewOnClickListener() {
+            @Override
+            public void safeOnClick(View v) {
+                mActionView.setText("http://");
+                actionHelp.setVisibility(View.GONE);
+            }
+        });
+        actionHelp.setOnClickListener(new SafeViewOnClickListener() {
+            @Override
+            public void safeOnClick(View v) {
+                if (telRadio.isChecked()) {
+                    Intent intent = new Intent(Intent.ACTION_PICK,
+                            ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
+                    startActivityForResult(intent, PICK_CONTACT);
+                } else if (geoRadio.isChecked()) {
+                    Intent intent = new Intent(SendMessageButtonActivity.this, GetLocationActivity.class);
+                    startActivityForResult(intent, GET_LOCATION);
                 }
             }
         });
-        buttons.addView(button);
-        HorizontalScrollView scroller = (HorizontalScrollView) findViewById(R.id.buttons_scroller);
-        scroller.smoothScrollTo(buttons.getWidth(), 0);
-        return button;
-    }
-
-    private void selectButton(final Button button) {
-        ImageView statusImageView = (ImageView) button.findViewById(R.id.status);
-        statusImageView.setVisibility(View.VISIBLE);
-    }
-
-    private void unSelectButton(final Button button) {
-        ImageView statusImageView = (ImageView) button.findViewById(R.id.status);
-        statusImageView.setVisibility(View.GONE);
-    }
-
-    private void removeSelectedButton(final LinearLayout buttons, final CannedButton cannedButton) {
-
-        if (mSelectedButton== cannedButton.getId())
-            mSelectedButton = NO_BUTTON_SELECTED;
-
-        Button button = (Button) buttons.findViewWithTag(cannedButton);
-        buttons.removeView(button);
-        mButtons.remove(cannedButton.getId());
+        AlertDialog alertDialog = new AlertDialog.Builder(SendMessageButtonActivity.this)
+                .setTitle(R.string.create_button_title).setView(dialog)
+                .setPositiveButton(getString(R.string.ok), new SafeDialogInterfaceOnClickListener() {
+                    @Override
+                    public void safeOnClick(DialogInterface di, int which) {
+                        Matcher action = actionPattern.matcher(mActionView.getText());
+                        if (!action.matches()) {
+                            UIUtils.showLongToast(SendMessageButtonActivity.this,
+                                    getString(R.string.action_not_valid));
+                            return;
+                        }
+                        String caption = mCaptionView.getText().toString();
+                        if ("".equals(caption.trim())) {
+                            UIUtils.showLongToast(SendMessageButtonActivity.this,
+                                    getString(R.string.caption_required));
+                            return;
+                        }
+                        CannedButton cannedButton = new CannedButton(caption, "".equals(action.group(2)) ? null
+                                : action.group());
+                        mCannedButtons.add(cannedButton);
+                        cannedButton.setSelected(true);
+                        mCannedButtonAdapter.notifyDataSetChanged();
+                        mButtons.add(cannedButton.getId());
+                    }
+                }).setNegativeButton(getString(R.string.cancel), new SafeDialogInterfaceOnClickListener() {
+                    @Override
+                    public void safeOnClick(DialogInterface dialog, int which) {
+                    }
+                }).create();
+        alertDialog.setCanceledOnTouchOutside(true);
+        alertDialog.show();
     }
 }

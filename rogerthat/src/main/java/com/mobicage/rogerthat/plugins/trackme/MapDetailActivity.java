@@ -88,7 +88,7 @@ public class MapDetailActivity extends ServiceBoundMapActivity {
             TextView title = (TextView) findViewById(R.id.title);
             title.setText(R.string.validate_discovered_location);
             ImageButton backImageButton = (ImageButton) findViewById(R.id.back);
-            backImageButton.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_angle_left).color(Color.BLACK).sizeDp(24));
+            backImageButton.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_angle_left).color(Color.BLACK).sizeDp(20));
             backImageButton.setOnClickListener(new SafeViewOnClickListener() {
                 @Override
                 public void safeOnClick(View v) {
