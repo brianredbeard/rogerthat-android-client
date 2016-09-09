@@ -229,9 +229,7 @@
             android:name="com.mobicage.rogerthat.plugins.friends.ContentBrandingActionScreenActivity"
             android:configChanges="orientation|screenSize">
         </activity>
-        <activity
-            android:name="com.mobicage.rogerthat.GetLocationActivity"
-            android:theme="@style/AppTheme.NoActionBar" >
+        <activity android:name="com.mobicage.rogerthat.GetLocationActivity">
         </activity>
         <activity android:name="com.mobicage.rogerthat.SettingsActivity" >
         </activity>

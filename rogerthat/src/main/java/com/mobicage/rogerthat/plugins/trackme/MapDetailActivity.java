@@ -19,16 +19,20 @@
 package com.mobicage.rogerthat.plugins.trackme;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapView;
 import com.google.android.maps.OverlayItem;
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MyIdentity;
 import com.mobicage.rogerthat.ServiceBoundMapActivity;
@@ -54,6 +58,7 @@ public class MapDetailActivity extends ServiceBoundMapActivity {
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         setContentView(R.layout.map_dialog);
+        setTitle(R.string.friends_map);
 
         mMapView = (MapView) findViewById(R.id.map);
 
@@ -80,12 +85,20 @@ public class MapDetailActivity extends ServiceBoundMapActivity {
         mMapView.getController().setCenter(point);
 
         if (intent.getBooleanExtra(VERIFY, false)) {
+            TextView title = (TextView) findViewById(R.id.title);
+            title.setText(R.string.validate_discovered_location);
+            ImageButton backImageButton = (ImageButton) findViewById(R.id.back);
+            backImageButton.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_angle_left).color(Color.BLACK).sizeDp(24));
+            backImageButton.setOnClickListener(new SafeViewOnClickListener() {
+                @Override
+                public void safeOnClick(View v) {
+                    onBackPressed();
+                }
+            });
+
             LinearLayout mapVerify = (LinearLayout) findViewById(R.id.map_verify);
             mapVerify.setVisibility(View.VISIBLE);
-            TextView title = (TextView) findViewById(R.id.title);
-            title.setVisibility(View.VISIBLE);
-            View titleDivider = findViewById(R.id.title_divider);
-            titleDivider.setVisibility(View.VISIBLE);
+            setTitle(R.string.validate_discovered_location);
             Button mapYes = (Button) findViewById(R.id.map_yes);
             mapYes.setVisibility(View.VISIBLE);
             Button mapNo = (Button) findViewById(R.id.map_no);
@@ -114,6 +127,9 @@ public class MapDetailActivity extends ServiceBoundMapActivity {
                     finish();
                 }
             });
+        } else {
+            LinearLayout cutomAppbar = (LinearLayout) findViewById(R.id.custom_appbar);
+            cutomAppbar.setVisibility(View.GONE);
         }
     }
 

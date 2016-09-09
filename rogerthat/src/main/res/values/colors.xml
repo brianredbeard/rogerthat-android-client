@@ -29,6 +29,7 @@
     <color name="mc_primary_color">#84B53F</color>
     <color name="mc_secondary_color">#006536</color>
     <color name="mc_background_color">#EBEBEB</color>
+    <color name="mc_background_color_light">#F5F5F5</color>
     <color name="mc_words_color">#4D4D4D</color>
 
     <color name="mc_priority_high_text">#FFFFFF</color>

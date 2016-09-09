@@ -210,7 +210,6 @@ public class SendMessageMessageActivity extends ServiceBoundActivity {
         final ImageView attachmentStatus = (ImageView) findViewById(R.id.attachment_status);
         attachmentStatus.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_times).color(Color.WHITE).sizeDp(12));
 
-
         loadCannedButtons();
         initImageButtonsNavigation();
 
@@ -302,9 +301,9 @@ public class SendMessageMessageActivity extends ServiceBoundActivity {
             case PICK_BUTTON:
                 if (resultCode == Activity.RESULT_OK) {
                     try {
-                        mCannedButtons = (CannedButtons) Pickler.createObjectFromPickle(data.getByteArrayExtra("cannedbuttons"));
+                        mCannedButtons = (CannedButtons) Pickler.createObjectFromPickle(data.getByteArrayExtra(SendMessageButtonActivity.CANNED_BUTTONS));
                         mButtons = new LinkedHashSet<Long>();
-                        long[] buttons = data.getLongArrayExtra("buttons");
+                        long[] buttons = data.getLongArrayExtra(SendMessageButtonActivity.BUTTONS);
                         if (buttons != null) {
                             for (long l : buttons) {
                                 mButtons.add(l);
@@ -459,7 +458,11 @@ public class SendMessageMessageActivity extends ServiceBoundActivity {
         }
         request.buttons = buttons.toArray(new ButtonTO[buttons.size()]);
         if (mParentKey == null) {
-            request.members = mFriendRecipients;
+            request.members = new String[mFriendRecipients.length + 1];
+            for (int i = 0; i < request.members.length - 1 ; i++) {
+                request.members[i] = mFriendRecipients[i];
+            }
+            request.members[request.members.length - 1] = me;
         } else
             request.members = new String[0]; // Server calculates members in case of reply
         long selectedButton = mSelectedButton;
@@ -1059,39 +1062,23 @@ public class SendMessageMessageActivity extends ServiceBoundActivity {
             UIUtils.hideKeyboard(SendMessageMessageActivity.this, mMessage);
             try {
                 Intent intent = new Intent(SendMessageMessageActivity.this, SendMessageButtonActivity.class);
-                intent.putExtra("cannedbuttons", Pickler.getPickleFromObject(mCannedButtons));
-                intent.putExtra("buttons", mButtons.toArray(new Long[mButtons.size()]));
+                intent.putExtra(SendMessageButtonActivity.CANNED_BUTTONS, Pickler.getPickleFromObject(mCannedButtons));
+                long[] primitiveLongArray = new long[mButtons.size()];
+                Long[] longArray = mButtons.toArray(new Long[mButtons.size()]);
+                for (int i =0; i < longArray.length; i++) {
+                    primitiveLongArray[i] = longArray[i].longValue();
+                }
+                intent.putExtra(SendMessageButtonActivity.BUTTONS, primitiveLongArray);
                 startActivityForResult(intent, PICK_BUTTON);
             } catch (Exception e) {
                 L.bug(e);
             }
-
-
-            // todo ruben startactivityforresult
         } else if (IMAGE_BUTTON_PICTURE == key) {
             UIUtils.hideKeyboard(SendMessageMessageActivity.this, mMessage);
-
-            if (mHasImageSelected) {
-                ImageView imagePreview = (ImageView) findViewById(R.id.message_image);
-                imagePreview.setVisibility(View.GONE);
-                mHasImageSelected = false;
-//                        updateAddImageBtnText(); // todo ruben
-                initImageButtonsNavigation();
-            } else {
-                getNewPicture();
-            }
+            getNewPicture();
         } else if (IMAGE_BUTTON_VIDEO == key) {
             UIUtils.hideKeyboard(SendMessageMessageActivity.this, mMessage);
-
-            if (mHasVideoSelected) {
-                ImageView videoPreview = (ImageView) findViewById(R.id.message_video);
-                videoPreview.setVisibility(View.GONE);
-                mHasVideoSelected = false;
-//                        updateAddVideoBtnText(); // todo ruben
-                initImageButtonsNavigation();
-            } else {
-                getNewVideo();
-            }
+            getNewVideo();
 
         } else if (IMAGE_BUTTON_PRIORITY == key) {
             UIUtils.hideKeyboard(SendMessageMessageActivity.this, mMessage);

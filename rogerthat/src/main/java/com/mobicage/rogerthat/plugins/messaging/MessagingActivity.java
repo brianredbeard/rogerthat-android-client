@@ -353,6 +353,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
 
     private void setEditing(boolean editing) {
         mEditing = editing;
+        invalidateOptionsMenu();
         mToBeDeleted = mEditing ? new HashSet<String>() : null;
 
         findViewById(R.id.delete_messages).setVisibility(mEditing ? View.VISIBLE : View.GONE);
@@ -362,7 +363,8 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
     }
 
     private void calculateFirstCellIsComposeMessage() {
-        mFirstCellIsComposeMessage = AppConstants.FRIENDS_ENABLED ? (mMemberFilter == null && !mEditing) : false;
+        // todo ruben
+//        mFirstCellIsComposeMessage = AppConstants.FRIENDS_ENABLED ? (mMemberFilter == null && !mEditing) : false;
     }
 
     // Object put in view tag. Contains fast references to message and subviews

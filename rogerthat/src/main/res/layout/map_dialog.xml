@@ -4,26 +4,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content" >
 
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:background="@color/mc_black"
-        android:gravity="center"
-        android:padding="2dp"
-        android:text="@string/validate_discovered_location"
-        android:textColor="@color/mc_divider_green"
-        android:textSize="18sp"
-        android:visibility="gone" />
-
-    <View
-        android:id="@+id/title_divider"
-        style="@style/RogerThatThickDivider"
-        android:layout_below="@id/title"
-        android:visibility="gone" >
-    </View>
+    <include layout="@layout/custom_appbar" />
 
     <LinearLayout
         android:id="@+id/map_verify"
@@ -57,8 +38,8 @@
         android:id="@+id/map"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
+        android:layout_below="@id/custom_appbar"
         android:layout_above="@id/map_verify"
-        android:layout_below="@id/title_divider"
         android:clickable="true"
         android:visibility="gone"
         android:apiKey="@string/google_maps_debug_api_key" />

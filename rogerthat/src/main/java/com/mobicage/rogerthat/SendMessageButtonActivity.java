@@ -74,7 +74,8 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
 
     private static final Pattern actionPattern = Pattern.compile("^(tel://|geo://|https?://)(.*)$");
 
-    public static String RESULT = "result";
+    public static String CANNED_BUTTONS = "cannedbuttons";
+    public static String BUTTONS = "buttons";
     public static final long NO_BUTTON_SELECTED = -1;
 
     private static final int PICK_CONTACT = 1;
@@ -101,9 +102,9 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
 
         Intent intent = getIntent();
         try {
-            mCannedButtons = (CannedButtons) Pickler.createObjectFromPickle(intent.getByteArrayExtra("cannedbuttons"));
+            mCannedButtons = (CannedButtons) Pickler.createObjectFromPickle(intent.getByteArrayExtra(CANNED_BUTTONS));
             mButtons = new LinkedHashSet<Long>();
-            long[] buttons = intent.getLongArrayExtra("buttons");
+            long[] buttons = intent.getLongArrayExtra(BUTTONS);
             if (buttons != null) {
                 for (long l : buttons) {
                     mButtons.add(l);
@@ -116,18 +117,6 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
         }
 
         initButtonsList();
-
-        try {
-            Intent resultIntent = new Intent();
-            intent.putExtra("cannedbuttons", Pickler.getPickleFromObject(mCannedButtons));
-            intent.putExtra("buttons", mButtons.toArray(new Long[mButtons.size()]));
-            setResult(Activity.RESULT_OK, resultIntent);
-            finish();
-        } catch (Exception e) {
-            L.bug(e);
-            setResult(Activity.RESULT_CANCELED);
-            finish();
-        }
     }
 
     @Override
@@ -187,6 +176,42 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
                 }
                 break;
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        T.UI();
+        super.onCreateOptionsMenu(menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.send_message_button_menu, menu);
+        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_check).color(Color.DKGRAY).sizeDp(18));
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        T.UI();
+
+        switch (item.getItemId()) {
+            case R.id.save:
+                try {
+                    Intent resultIntent = new Intent();
+                    resultIntent.putExtra(CANNED_BUTTONS, Pickler.getPickleFromObject(mCannedButtons));
+                    long[] primitiveLongArray = new long[mButtons.size()];
+                    Long[] longArray = mButtons.toArray(new Long[mButtons.size()]);
+                    for (int i =0; i < longArray.length; i++) {
+                        primitiveLongArray[i] = longArray[i].longValue();
+                    }
+                    resultIntent.putExtra(BUTTONS, primitiveLongArray);
+                    setResult(Activity.RESULT_OK, resultIntent);
+                } catch (Exception e) {
+                    L.bug(e);
+                    setResult(Activity.RESULT_CANCELED);
+                }
+                finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private class CannedButtonAdapter extends BaseAdapter {
@@ -307,21 +332,21 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
                     @Override
                     public void safeOnClick(View v) {
                         mActionView.setText("tel://");
-                        actionHelp.setEnabled(true);
+                        actionHelp.setVisibility(View.VISIBLE);
                     }
                 });
                 geoRadio.setOnClickListener(new SafeViewOnClickListener() {
                     @Override
                     public void safeOnClick(View v) {
                         mActionView.setText("geo://");
-                        actionHelp.setEnabled(true);
+                        actionHelp.setVisibility(View.VISIBLE);
                     }
                 });
                 wwwRadio.setOnClickListener(new SafeViewOnClickListener() {
                     @Override
                     public void safeOnClick(View v) {
                         mActionView.setText("http://");
-                        actionHelp.setEnabled(false);
+                        actionHelp.setVisibility(View.GONE);
                     }
                 });
                 actionHelp.setOnClickListener(new SafeViewOnClickListener() {
@@ -380,12 +405,12 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
         Resources resources = getResources();
         captionTextView.setTextColor(resources.getColor(android.R.color.primary_text_light));
         actionTextView.setTextColor(resources.getColor(android.R.color.secondary_text_light));
+        ImageView statusImageView = (ImageView) view.findViewById(R.id.status);
+        statusImageView.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_check).color(Color.WHITE).sizeDp(12));
         if (item.isSelected()) {
-            view.setBackgroundColor(resources.getColor(R.color.mc_highlight_background));
-            captionTextView.setTypeface(Typeface.DEFAULT_BOLD);
+            statusImageView.setVisibility(View.VISIBLE);
         } else {
-            view.setBackgroundColor(resources.getColor(R.color.mc_background));
-            captionTextView.setTypeface(Typeface.DEFAULT);
+            statusImageView.setVisibility(View.GONE);
         }
         captionTextView.setText(item.getCaption());
         String action = item.getAction();
@@ -452,13 +477,13 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
     }
 
     private void selectButton(final Button button) {
-        button.setTextColor(getResources().getColor(R.color.mc_highlight_background));
-        button.setTypeface(Typeface.DEFAULT, Typeface.BOLD_ITALIC);
+        ImageView statusImageView = (ImageView) button.findViewById(R.id.status);
+        statusImageView.setVisibility(View.VISIBLE);
     }
 
     private void unSelectButton(final Button button) {
-        button.setTextColor(getResources().getColor(android.R.color.primary_text_light));
-        button.setTypeface(Typeface.DEFAULT);
+        ImageView statusImageView = (ImageView) button.findViewById(R.id.status);
+        statusImageView.setVisibility(View.GONE);
     }
 
     private void removeSelectedButton(final LinearLayout buttons, final CannedButton cannedButton) {
