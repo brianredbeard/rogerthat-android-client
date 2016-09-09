@@ -53,5 +53,4 @@ public class ScaleImageView extends ImageView {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         }
     }
-
 }

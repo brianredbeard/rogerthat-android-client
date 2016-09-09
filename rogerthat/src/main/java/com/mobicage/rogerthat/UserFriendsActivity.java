@@ -251,8 +251,8 @@ public class UserFriendsActivity extends FriendsActivity {
         newMessage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final Intent sendMessage = new Intent(UserFriendsActivity.this, SendMessageWizardActivity.class);
-                sendMessage.putExtra(SendMessageWizardActivity.RECIPIENTS, new String[] { friend.email });
+                final Intent sendMessage = new Intent(UserFriendsActivity.this, SendMessageMessageActivity.class);
+                sendMessage.putExtra(SendMessageMessageActivity.RECIPIENTS, new String[] { friend.email });
                 startActivity(sendMessage);
             }
         });

@@ -44,18 +44,4 @@
         android:background="@drawable/appwidget_button_center"
         android:src="@drawable/document_pencil" />
 
-    <ImageView
-        android:layout_width="1dip"
-        android:layout_height="match_parent"
-        android:background="@drawable/appwidget_divider" />
-
-    <ImageView
-        android:id="@+id/btn_canned_msg"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="6dp"
-        android:layout_weight="1"
-        android:background="@drawable/appwidget_button_right"
-        android:src="@drawable/document_right" />
-
 </LinearLayout>

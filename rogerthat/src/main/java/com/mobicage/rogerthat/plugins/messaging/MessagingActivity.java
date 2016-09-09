@@ -38,6 +38,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -52,16 +53,12 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SectionIndexer;
 import android.widget.TextView;
-import android.support.design.widget.NavigationView;
 
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
-import com.mobicage.rogerthat.HomeActivity;
 import com.mobicage.rogerthat.IdentityStore;
-import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.SendMessageContactActivity;
-import com.mobicage.rogerthat.SendMessageWizardActivity;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.ServiceBoundCursorListActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
@@ -84,6 +81,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
     private static final long sGMTOffsetMillis = TimeUtils.getGMTOffsetMillis();
 
     // Owned by UI thread
+    private FloatingActionButton mFloatingActionButton;
     private MessagingPlugin mMessagingPlugin;
     private FriendsPlugin mFriendsPlugin;
     private String mMemberFilter;
@@ -101,12 +99,6 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
         for (int i = 0; i < menu.size(); i++) {
             MenuItem item = menu.getItem(i);
             switch (item.getItemId()) {
-                case R.id.new_message:
-                    if (!mEditing)
-                        item.setVisible(AppConstants.FRIENDS_ENABLED);
-                    else
-                        item.setVisible(false);
-                    break;
                 case R.id.select_all:
                 case R.id.deselect_all:
                     item.setVisible(mEditing);
@@ -128,8 +120,6 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
         T.UI();
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.messaging_menu, menu);
-        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_envelope).color(Color.DKGRAY).sizeDp(18));
-        menu.getItem(1).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_trash).color(Color.DKGRAY).sizeDp(18));
         return true;
     }
 
@@ -137,9 +127,6 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         T.UI();
         switch (item.getItemId()) {
-            case R.id.new_message:
-                showSendMessageWizardActivity();
-                return true;
             case R.id.delete_messages:
                 setEditing(true);
                 return true;
@@ -178,6 +165,8 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
         if (getWasPaused() && mCursorSet != null) {
             startManagingCursor(mCursorSet.cursor);
             startManagingCursor(mCursorSet.indexer);
+
+            ((CursorAdapter) getListAdapter()).notifyDataSetChanged();
         }
     }
 
@@ -238,6 +227,20 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
                 setEditing(false);
             }
         });
+
+        mFloatingActionButton = ((FloatingActionButton) findViewById(R.id.add));
+        mFloatingActionButton.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_plus).color(Color.WHITE).sizeDp(24));
+
+        mFloatingActionButton.setOnClickListener(new SafeViewOnClickListener() {
+            @Override
+            public void safeOnClick(View v) {
+                showSendMessageActivity();
+            }
+        });
+
+        if (!AppConstants.FRIENDS_ENABLED) {
+            mFloatingActionButton.hide();
+        }
     }
 
     @Override
@@ -290,7 +293,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
     protected void onListItemClick(ListView l, View v, int position, long id) {
         T.UI();
         if (mFirstCellIsComposeMessage && (position == 0)) {
-            showSendMessageWizardActivity();
+            showSendMessageActivity();
         } else {
             final Object tag = v.getTag();
             if (tag != null) {
@@ -337,7 +340,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
         }
     }
 
-    private void showSendMessageWizardActivity() {
+    private void showSendMessageActivity() {
         long currentTime = System.currentTimeMillis();
         if (getLastTimeClicked() != 0
                 && (currentTime < (getLastTimeClicked() + ServiceBoundActivity.DOUBLE_CLICK_TIMESPAN))) {
@@ -353,6 +356,14 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
 
     private void setEditing(boolean editing) {
         mEditing = editing;
+        if (AppConstants.FRIENDS_ENABLED) {
+            if (editing) {
+                mFloatingActionButton.hide();
+            } else {
+                mFloatingActionButton.show();
+            }
+        }
+
         invalidateOptionsMenu();
         mToBeDeleted = mEditing ? new HashSet<String>() : null;
 

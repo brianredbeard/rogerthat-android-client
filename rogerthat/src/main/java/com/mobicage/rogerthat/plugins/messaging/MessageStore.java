@@ -408,27 +408,19 @@ public class MessageStore implements Closeable {
                 mInsertMessageBIZZ.bindLong(11, dirty ? 1 : 0);
 
                 StringBuilder sb = new StringBuilder();
-                if (senderIsMobileOwner)
-                    sb.append(mMainService.getString(R.string.__me_as_sender));
-                else
-                    sb.append(mFriendsPlugin.getName(message.sender));
-                sb.append(" >> ");
                 boolean needscomma = false;
                 for (MemberStatusTO member : message.members) {
                     MemberStatusTO memberStatus = member;
                     if (memberStatus.member.equals(me)) {
                         memberStatus.status |= MessagingPlugin.STATUS_RECEIVED;
                     }
-                    if (memberStatus.member.equals(message.sender))
+                    if (memberStatus.member.equals(me))
                         continue;
                     if (needscomma)
                         sb.append(", ");
                     else
                         needscomma = true;
-                    if (memberStatus.member.equals(me))
-                        sb.append(mMainService.getString(R.string.__me_as_recipient));
-                    else
-                        sb.append(mFriendsPlugin.getName(memberStatus.member));
+                    sb.append(mFriendsPlugin.getName(memberStatus.member));
                 }
                 mInsertMessageBIZZ.bindString(12, sb.toString());
 

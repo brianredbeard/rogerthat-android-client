@@ -62,7 +62,8 @@ import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.HomeActivity;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
-import com.mobicage.rogerthat.SendMessageWizardActivity;
+import com.mobicage.rogerthat.SendMessageContactActivity;
+import com.mobicage.rogerthat.SendMessageMessageActivity;
 import com.mobicage.rogerthat.ServiceBound;
 import com.mobicage.rogerthat.config.Configuration;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
@@ -89,7 +90,6 @@ import com.mobicage.rpc.CallReceiver;
 import com.mobicage.rpc.IJSONable;
 import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.rpc.ResponseHandler;
-import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.rpc.http.HttpCommunicator;
 import com.mobicage.to.messaging.AttachmentTO;
@@ -1603,10 +1603,8 @@ public class MessagingPlugin implements MobicagePlugin {
                 }
 
                 request.attachments[0].download_url = resultUrl;
-
-                final FriendsPlugin friendsPlugin = mMainService.getPlugin(FriendsPlugin.class);
                 try {
-                    SendMessageWizardActivity.sendMessage(request, parentMessageKey, messageKey, friendsPlugin, this,
+                    SendMessageMessageActivity.sendMessage(request, parentMessageKey, messageKey, this,
                         mMainService);
                 } catch (Exception e) {
                     L.bug("Failed to send message after transfer was complete", e);

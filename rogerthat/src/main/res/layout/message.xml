@@ -27,7 +27,7 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_alignParentTop="true"
-            android:layout_marginRight="5dp"
+            android:layout_marginRight="10dp"
             android:layout_toRightOf="@id/message_checkbox"
             android:background="@drawable/avatar_background_black"
             android:padding="1dp" >

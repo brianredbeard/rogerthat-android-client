@@ -57,7 +57,6 @@ import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
-import com.mobicage.rogerthat.widget.SendCannedMessageActivity;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.to.friends.ServiceMenuItemTO;
@@ -75,7 +74,6 @@ public class MainActivity extends ServiceBoundActivity {
     public static final String ACTION_WIDGET_MAIN = "ROGERTHAT_ACTION_WIDGET_MAIN";
     public static final String ACTION_WIDGET_SCAN = "ROGERTHAT_ACTION_WIDGET_SCAN";
     public static final String ACTION_WIDGET_COMPOSE = "ROGERTHAT_ACTION_WIDGET_COMPOSE";
-    public static final String ACTION_WIDGET_SEND_CANNED_MSG = "ROGERTHAT_ACTION_WIDGET_SEND_CANNED_MSG";
 
     public static final String ACTION_NOTIFICATION_ENTER_PIN = "ROGERTHAT_ACTION_NOTIFICATION_ENTER_PIN";
     public static final String ACTION_NOTIFICATION_MESSAGE_UPDATES = "ROGERTHAT_ACTION_NOTIFICATION_MESSAGE_UPDATES";
@@ -168,8 +166,7 @@ public class MainActivity extends ServiceBoundActivity {
             }
         }
 
-        if (ACTION_WIDGET_SCAN.equals(intentAction) || ACTION_WIDGET_COMPOSE.equals(intentAction)
-            || ACTION_WIDGET_SEND_CANNED_MSG.equals(intentAction)) {
+        if (ACTION_WIDGET_SCAN.equals(intentAction) || ACTION_WIDGET_COMPOSE.equals(intentAction)) {
 
             // Started via one of the last 3 widget buttons
             processWidgetIntent(intent, hasRegistered);
@@ -265,8 +262,6 @@ public class MainActivity extends ServiceBoundActivity {
             } else if (ACTION_WIDGET_COMPOSE.equals(intent.getAction())) {
                 startSendMessageWizard();
 
-            } else if (ACTION_WIDGET_SEND_CANNED_MSG.equals(intent.getAction())) {
-                startSendCannedMessage();
             }
         } else {
             alertMustRegisterFirst();
@@ -693,14 +688,10 @@ public class MainActivity extends ServiceBoundActivity {
         startActivity(scanIntent);
     }
 
-    private void startSendCannedMessage() {
-        L.d("Starting SendCannedMessageActivity");
-        startActivity(new Intent(this, SendCannedMessageActivity.class));
-    }
-
     private void startSendMessageWizard() {
-        L.d("Starting SendMessageWizardActivity");
-        startActivity(new Intent(this, SendMessageWizardActivity.class));
+        if (AppConstants.FRIENDS_ENABLED) {
+            L.d("Starting SendMessageContactActivity");
+            startActivity(new Intent(this, SendMessageContactActivity.class));
+        }
     }
-
 }

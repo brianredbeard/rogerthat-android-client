@@ -114,6 +114,16 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
             finish();
         }
 
+        FloatingActionButton floatingActionButton = ((FloatingActionButton) findViewById(R.id.add));
+        floatingActionButton.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_plus).color(Color.WHITE).sizeDp(24));
+
+        floatingActionButton.setOnClickListener(new SafeViewOnClickListener() {
+            @Override
+            public void safeOnClick(View v) {
+                addButton();
+            }
+        });
+
         initButtonsList();
     }
 
@@ -182,8 +192,7 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.send_message_button_menu, menu);
-        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_plus).color(Color.DKGRAY).sizeDp(18));
-        menu.getItem(1).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_check).color(Color.DKGRAY).sizeDp(18));
+        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_check).color(Color.DKGRAY).sizeDp(18));
         return true;
     }
 
@@ -192,9 +201,6 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
         T.UI();
 
         switch (item.getItemId()) {
-            case R.id.add:
-                addButton();
-                return true;
             case R.id.save:
                 try {
                     Intent resultIntent = new Intent();

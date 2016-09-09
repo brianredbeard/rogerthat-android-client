@@ -3,13 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/new_message"
-        app:showAsAction="ifRoom"
-        android:title="@string/compose_short">
-    </item>
-    <item
         android:id="@+id/delete_messages"
-        app:showAsAction="ifRoom"
+        app:showAsAction="never"
         android:title="@string/delete_conversations">
     </item>
     <item

@@ -6,181 +6,19 @@
 	android:layout_height="match_parent"
 	android:background="@color/mc_background_color">
 
-	<ListView
-		android:id="@+id/chat_list_view"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:paddingTop="8dp"
-		android:paddingBottom="4dp"
-		android:layout_marginBottom="4dp"
-		android:clipToPadding="false"
-		android:divider="@drawable/divider_gray"
-		android:scrollbarStyle="outsideOverlay"
-		android:layout_above="@+id/bottomlayout"
-		android:stackFromBottom="false"
-		android:transcriptMode="normal"/>
-
-	<LinearLayout
-		android:id="@+id/bottomlayout"
+	<com.mobicage.rogerthat.util.ui.SendMessageView
+		android:id="@+id/chat_container"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:orientation="vertical"
 		android:layout_alignParentBottom="true"
 		android:layout_marginRight="8dp"
 		android:layout_marginLeft="8dp"
-		android:layout_marginBottom="8dp">
+		android:layout_marginBottom="8dp"
+		android:background="@color/mc_background_color">
 
-		<LinearLayout
-			android:id="@+id/imageButtons"
-			android:layout_width="fill_parent"
-			android:layout_height="wrap_content"
-			android:layout_marginBottom="5dp"
-			android:layout_marginTop="5dp"
-			android:orientation="horizontal" >
+		<include layout="@layout/chat_container_message" />
 
-			<ImageView
-				android:id="@+id/imageButtonsText"
-				android:layout_width="30dp"
-				android:layout_height="30dp"
-				android:layout_weight="1"
-				android:padding="5dp"
-				android:src="@drawable/fa_font" >
-			</ImageView>
-
-			<ImageView
-				android:id="@+id/imageButtonsButtons"
-				android:layout_width="30dp"
-				android:layout_height="30dp"
-				android:layout_weight="1"
-				android:padding="5dp"
-				android:src="@drawable/fa_list" >
-			</ImageView>
-
-			<ImageView
-				android:id="@+id/imageButtonsCamera"
-				android:layout_width="30dp"
-				android:layout_height="30dp"
-				android:layout_weight="1"
-				android:padding="5dp"
-				android:src="@drawable/fa_camera" >
-			</ImageView>
-
-			<ImageView
-				android:id="@+id/imageButtonsVideoCamera"
-				android:layout_width="30dp"
-				android:layout_height="30dp"
-				android:layout_weight="1"
-				android:padding="5dp"
-				android:src="@drawable/fa_video_camera" >
-			</ImageView>
-
-			<ImageView
-				android:id="@+id/imageButtonsSticky"
-				android:layout_width="30dp"
-				android:layout_height="30dp"
-				android:layout_weight="1"
-				android:padding="5dp"
-				android:src="@drawable/fa_sticky_0" >
-			</ImageView>
-
-			<ImageView
-				android:id="@+id/imageButtonsPriorities"
-				android:layout_width="30dp"
-				android:layout_height="30dp"
-				android:layout_weight="1"
-				android:padding="5dp"
-				android:src="@drawable/fa_priority_1" >
-			</ImageView>
-
-			<ImageView
-				android:id="@+id/imageButtonsSpaceFiller1"
-				android:layout_width="30dp"
-				android:layout_height="30dp"
-				android:layout_weight="1"
-				android:padding="5dp"
-				android:visibility="gone" >
-			</ImageView>
-
-			<ImageView
-				android:id="@+id/imageButtonsSpaceFiller2"
-				android:layout_width="30dp"
-				android:layout_height="30dp"
-				android:layout_weight="1"
-				android:padding="5dp"
-				android:visibility="gone" >
-			</ImageView>
-		</LinearLayout>
-
-		<LinearLayout
-			android:id="@+id/view_text"
-			android:layout_width="fill_parent"
-			android:layout_height="wrap_content"
-			android:layout_marginBottom="5dp"
-			android:layout_marginTop="5dp"
-			android:orientation="horizontal">
-
-			<FrameLayout
-				android:id="@+id/attachment_container"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_marginRight="10dp"
-				android:layout_gravity="bottom"
-				android:background="@color/mc_highlight_background"
-				android:visibility="gone">
-
-				<ImageView
-					android:id="@+id/attachment_preview"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_gravity="bottom"
-					android:src="@drawable/mobicage"/>
-
-				<ImageView
-					android:id="@+id/attachment_status"
-					android:layout_gravity="top|right"
-					android:layout_width="25dp"
-					android:layout_height="25dp"
-					android:padding="8dp"
-					android:background="@drawable/circle_red"/>
-
-			</FrameLayout>
-
-			<LinearLayout
-				android:layout_width="0dp"
-				android:layout_height="wrap_content"
-				android:layout_weight="1"
-				android:minHeight="50dp"
-				android:orientation="horizontal"
-				android:layout_gravity="bottom"
-				android:paddingBottom="15dp"
-				android:paddingLeft="12dp"
-				android:paddingRight="20dp"
-				android:background="@drawable/input">
-
-				<EditText
-					android:id="@+id/message"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:layout_gravity="bottom"
-					android:layout_marginLeft="12dp"
-					android:hint="@string/type_your_message"
-					android:singleLine="false"
-					android:inputType="textMultiLine"
-					android:textSize="18sp"
-					android:textColorHint="#c4c0bd"
-					android:background="@null"/>
-
-			</LinearLayout>
-
-			<ImageButton
-				android:id="@+id/submit"
-				android:layout_width="50dp"
-				android:layout_height="50dp"
-				android:layout_gravity="bottom"
-				android:background="@drawable/circle_tint"/>
-
-		</LinearLayout>
-
-	</LinearLayout>
+	</com.mobicage.rogerthat.util.ui.SendMessageView>
 
 </RelativeLayout>

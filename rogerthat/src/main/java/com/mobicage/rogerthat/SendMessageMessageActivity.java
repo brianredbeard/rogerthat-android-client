@@ -35,6 +35,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -54,7 +55,6 @@ import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.config.Configuration;
-import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.messaging.AttachmentViewerActivity;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessageStore;
@@ -71,6 +71,7 @@ import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
+import com.mobicage.rogerthat.util.ui.SendMessageView;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.to.messaging.AttachmentTO;
 import com.mobicage.to.messaging.ButtonTO;
@@ -133,7 +134,6 @@ public class SendMessageMessageActivity extends ServiceBoundActivity {
     private Uri mUriSavedFile;
 
     // Owned by UI thread
-    private FriendsPlugin mFriendsPlugin;
     private MessagingPlugin mMessagingPlugin;
     private String mTmpKey;
 
@@ -164,7 +164,7 @@ public class SendMessageMessageActivity extends ServiceBoundActivity {
         T.UI();
 
         setContentViewWithoutNavigationBar(R.layout.send_message_message);
-        setActivityName("send_message_message");
+        setActivityName("chat_container_message");
         setTitle(R.string.title_message);
 
         _5_DP_IN_PX = UIUtils.convertDipToPixels(this, 5);
@@ -196,9 +196,12 @@ public class SendMessageMessageActivity extends ServiceBoundActivity {
 
     @Override
     protected void onServiceBound() {
-        mFriendsPlugin = mService.getPlugin(FriendsPlugin.class);
         mMessagingPlugin = mService.getPlugin(MessagingPlugin.class);
         mTmpKey = mMessagingPlugin.generateTmpKey();
+
+
+        SendMessageView sendMessageView = (SendMessageView) findViewById(R.id.chat_container);
+        sendMessageView.setActive(mService);
 
         mMessage = (EditText) findViewById(R.id.message);
         final ImageButton submitButton = (ImageButton) findViewById(R.id.submit);
@@ -318,6 +321,15 @@ public class SendMessageMessageActivity extends ServiceBoundActivity {
         }
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                UIUtils.hideKeyboard(SendMessageMessageActivity.this, mMessage);
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     private void loadCannedButtons() {
         final Configuration cfg = mService.getConfigurationProvider().getConfiguration(CONFIGKEY);
 
@@ -371,9 +383,15 @@ public class SendMessageMessageActivity extends ServiceBoundActivity {
         if (mRepliedToKey != null)
             dismissMessageOnReply(mRepliedToKey);
 
-        Intent intent = new Intent(this, MessagingActivity.class);
-        intent.setFlags(MainActivity.FLAG_CLEAR_STACK);
-        startActivity(intent);
+        if (mFriendRecipients == null) {
+            UIUtils.hideKeyboard(SendMessageMessageActivity.this, mMessage);
+            setResult(RESULT_OK);
+            finish();
+        } else {
+            Intent intent = new Intent(this, MessagingActivity.class);
+            intent.setFlags(MainActivity.FLAG_CLEAR_STACK);
+            startActivity(intent);
+        }
     }
 
     private void dismissMessageOnReply(final String repliedToKey) {
@@ -386,21 +404,23 @@ public class SendMessageMessageActivity extends ServiceBoundActivity {
                 && store.messageNeedsAnswerUI(repliedToKey)) {
             mMessagingPlugin.ackMessage(message, null, null, null, this, null);
         }
-    };
+    }
 
-    public void sendMessage(final SendMessageRequestTO request) throws Exception {
+    public static void sendMessage(final SendMessageRequestTO request, final String parentKey, final String tmpKey,
+                                   final MessagingPlugin messagingPlugin, final MainService mainService)
+            throws Exception {
         T.dontCare();
 
         SafeRunnable sendMessageRunnable = new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
                 final SendMessageResponseHandler responseHandler = new SendMessageResponseHandler();
-                responseHandler.setTmpKey(mTmpKey);
-                responseHandler.setParentKey(mParentKey);
+                responseHandler.setTmpKey(tmpKey);
+                responseHandler.setParentKey(parentKey);
                 boolean attachmentsUploaded = request.attachments != null && request.attachments.length > 0;
                 responseHandler.setAttachmentsUploaded(attachmentsUploaded);
                 if (attachmentsUploaded)
-                    mMessagingPlugin.getStore().insertAttachments(request.attachments, mTmpKey);
+                    messagingPlugin.getStore().insertAttachments(request.attachments, tmpKey);
                 com.mobicage.api.messaging.Rpc.sendMessage(responseHandler, request);
             }
         };
@@ -408,11 +428,18 @@ public class SendMessageMessageActivity extends ServiceBoundActivity {
         if (T.getThreadType() == T.UI) {
             sendMessageRunnable.run();
         } else {
-            mService.postAtFrontOfUIHandler(sendMessageRunnable);
+            mainService.postAtFrontOfUIHandler(sendMessageRunnable);
         }
+
     }
 
-    public void sendMessage(final String me) throws Exception {
+    private void sendMessage(final SendMessageRequestTO request) throws Exception {
+        T.dontCare();
+
+        sendMessage(request, mParentKey, mTmpKey, mMessagingPlugin, mService);
+    }
+
+    private void sendMessage(final String me) throws Exception {
 
         T.UI();
         final SendMessageRequestTO request = new SendMessageRequestTO();

@@ -43,9 +43,6 @@ public class RogerthatWidgetProvider extends AppWidgetProvider {
         remoteViews.setOnClickPendingIntent(R.id.btn_send_msg,
             createPendingIntent(context, MainActivity.ACTION_WIDGET_COMPOSE));
 
-        remoteViews.setOnClickPendingIntent(R.id.btn_canned_msg,
-            createPendingIntent(context, MainActivity.ACTION_WIDGET_SEND_CANNED_MSG));
-
         appWidgetManager.updateAppWidget(appWidgetIds, remoteViews);
     }
 

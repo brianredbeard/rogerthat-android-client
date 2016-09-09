@@ -65,7 +65,7 @@ import android.widget.TextView;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.FriendDetailOrInviteActivity;
 import com.mobicage.rogerthat.IdentityStore;
-import com.mobicage.rogerthat.SendMessageWizardActivity;
+import com.mobicage.rogerthat.SendMessageMessageActivity;
 import com.mobicage.rogerthat.ServiceBoundCursorListActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
@@ -104,8 +104,6 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
     private String mParentMessageKey;
     private MessagingPlugin mMessagingPlugin;
     private MessageStore mMessageStore;
-    private ImageView mSenderAvatar;
-    private LinearLayout mMemberAvatars;
     private FriendsPlugin mFriendsPlugin;
     private String mMyEmail;
     private Scroller mScroller;
@@ -133,7 +131,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.message_thread);
+        setContentViewWithoutNavigationBar(R.layout.message_thread);
 
         _1_DP_IN_PX = UIUtils.convertDipToPixels(this, 1);
         _3_DP_IN_PX = UIUtils.convertDipToPixels(this, 3);
@@ -145,21 +143,12 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         final Intent intent = getIntent();
         mParentMessageKey = intent.getStringExtra(PARENT_MESSAGE_KEY);
         mFlags = intent.getLongExtra(MESSAGE_FLAGS, 0);
-        mSenderAvatar = (ImageView) findViewById(R.id.sender_avatar);
-        mMemberAvatars = (LinearLayout) findViewById(R.id.member_avatars);
         setListView((ListView) findViewById(R.id.thread_messages));
         mScroller = Scroller.getInstance();
         ListView listView = getListView();
         listView.setDivider(null);
         listView.setVerticalScrollBarEnabled(false);
         mScroller.setListView(listView);
-
-        findViewById(R.id.reply).setOnClickListener(new SafeViewOnClickListener() {
-            @Override
-            public void safeOnClick(View v) {
-                showReplyMessageWizard();
-            }
-        });
 
         final IntentFilter filter1 = new IntentFilter();
         for (String action : getAllReceivingIntents()) {
@@ -209,13 +198,6 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         Slider instance = new Slider(this, this,
             new LeftSwiper(this, mMessagingPlugin, mParentMessageKey, memberFilter), new RightSwiper(this,
                 mMessagingPlugin, mParentMessageKey, memberFilter));
-        instance.setOnDoubleTapListener(new Slider.OnDoubleTapListener() {
-            @Override
-            public boolean onDoubleTap(MotionEvent event) {
-                showReplyMessageWizard();
-                return true;
-            }
-        });
         mGestureScanner = new GestureDetector(instance);
 
         if (!UIUtils.showHint(this, mService, HINT_DOUBLE_TAP, R.string.hint_double_tap))
@@ -290,9 +272,6 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         for (int i = 0; i < menu.size(); i++) {
             MenuItem item = menu.getItem(i);
             switch (item.getItemId()) {
-            case R.id.reply:
-                item.setVisible(SystemUtils.isFlagEnabled(mFlags, MessagingPlugin.FLAG_ALLOW_REPLY));
-                break;
             case R.id.delete_conversation:
                 item.setVisible(!SystemUtils.isFlagEnabled(mFlags, MessagingPlugin.FLAG_NOT_REMOVABLE));
                 break;
@@ -308,9 +287,6 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         T.UI();
         switch (item.getItemId()) {
-        case R.id.reply:
-            showReplyMessageWizard();
-            return true;
         case R.id.help:
             new AlertDialog.Builder(FriendsThreadActivity.this).setTitle(R.string.help)
                 .setMessage(getString(R.string.message_thread_help)).setPositiveButton(getString(R.string.ok), null)
@@ -757,7 +733,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             TextView messageInfo = (TextView) view.findViewById(R.id.message_info);
             String senderName;
             if (isSender) {
-                senderName = getString(R.string.__me_as_sender);
+                senderName = getString(R.string.__me_as_sender); // todo ruben
             } else {
                 senderName = mFriendsPlugin.getName(message.sender);
                 senderName = senderName.split(" ")[0];
@@ -858,20 +834,14 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
     }
 
     private void displayMembers(MessageTO parentMessage) {
-        View headerView = findViewById(R.id.message_thread_header);
         final boolean isChat = SystemUtils.isFlagEnabled(mFlags, MessagingPlugin.FLAG_DYNAMIC_CHAT);
         if (isChat) {
-            headerView.setVisibility(View.GONE);
+            setTitle("todo ruben chat");
             return;
         }
-
-        headerView.setVisibility(View.VISIBLE);
+        setTitle("todo ruben member");
 
         Collection<MemberStatusTO> leastMemberStatusses = mMessageStore.getLeastMemberStatusses(mParentMessageKey);
-        // Set sender avatar
-        mSenderAvatar.setImageBitmap(mFriendsPlugin.getAvatarBitmap(parentMessage.sender));
-        // Add member avatars
-        mMemberAvatars.removeAllViews();
         MemberStatusTO senderStatus = null;
         for (final MemberStatusTO ms : leastMemberStatusses) {
             if (ms.member.equals(parentMessage.sender)) {
@@ -885,15 +855,10 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                 avatar.setLayoutParams(layoutParams);
                 setAvatarBackground(avatar, ms);
                 configureAvatarOnClickListener(ms.member, avatar, isChat);
-                mMemberAvatars.addView(avatar);
             }
         }
         if (senderStatus == null) {
             L.bug("Sender status could not be determined!");
-            mSenderAvatar.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-        } else {
-            setAvatarBackground(mSenderAvatar, senderStatus);
-            configureAvatarOnClickListener(senderStatus.member, mSenderAvatar, isChat);
         }
     }
 
@@ -902,13 +867,14 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             return false;
         }
 
+        // todo ruben unused
         final Intent intent = new Intent(FriendsThreadActivity.this,
-            com.mobicage.rogerthat.SendMessageWizardActivity.class);
-        intent.putExtra(SendMessageWizardActivity.PARENT_KEY, mParentMessageKey);
-        intent.putExtra(SendMessageWizardActivity.REPLIED_TO_KEY, mParentMessageKey);
-        intent.putExtra(SendMessageWizardActivity.FLAGS, mFlags);
-        intent.putExtra(SendMessageWizardActivity.DEFAULT_PRIORITY, mParentMessage.default_priority);
-        intent.putExtra(SendMessageWizardActivity.DEFAULT_STICKY, mParentMessage.default_sticky);
+            com.mobicage.rogerthat.SendMessageMessageActivity.class);
+        intent.putExtra(SendMessageMessageActivity.PARENT_KEY, mParentMessageKey);
+        intent.putExtra(SendMessageMessageActivity.REPLIED_TO_KEY, mParentMessageKey);
+        intent.putExtra(SendMessageMessageActivity.FLAGS, mFlags);
+        intent.putExtra(SendMessageMessageActivity.DEFAULT_PRIORITY, mParentMessage.default_priority);
+        intent.putExtra(SendMessageMessageActivity.DEFAULT_STICKY, mParentMessage.default_sticky);
         startActivity(intent);
         return true;
     }
