@@ -85,6 +85,7 @@ import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
+import com.mobicage.rogerthat.util.ui.SendMessageView;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.CallReceiver;
 import com.mobicage.rpc.IJSONable;
@@ -1604,7 +1605,7 @@ public class MessagingPlugin implements MobicagePlugin {
 
                 request.attachments[0].download_url = resultUrl;
                 try {
-                    SendMessageMessageActivity.sendMessage(request, parentMessageKey, messageKey, this,
+                    SendMessageView.sendMessage(request, parentMessageKey, messageKey, this,
                         mMainService);
                 } catch (Exception e) {
                     L.bug("Failed to send message after transfer was complete", e);

@@ -63,12 +63,14 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.EnterPinActivity;
 import com.mobicage.rogerthat.FriendDetailOrInviteActivity;
 import com.mobicage.rogerthat.IdentityStore;
 import com.mobicage.rogerthat.SendMessageMessageActivity;
 import com.mobicage.rogerthat.ServiceBoundCursorListActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
+import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
@@ -78,6 +80,7 @@ import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.time.TimeUtils;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
+import com.mobicage.rogerthat.util.ui.SendMessageView;
 import com.mobicage.rogerthat.util.ui.Slider;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.IncompleteMessageException;
@@ -97,7 +100,6 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
 
     public final static String BUTTON_INFO = "buttonInfo";
 
-    private final static String HINT_DOUBLE_TAP = "com.mobicage.rogerthat.plugins.messaging.FriendsThreadActivity.HINT_DOUBLE_TAP";
     private final static String HINT_SWIPE = "com.mobicage.rogerthat.plugins.messaging.FriendsThreadActivity.HINT_SWIPE";
 
     private boolean mScrollToBottomOnUpdate = false;
@@ -112,6 +114,8 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
     private long mFlags;
     private Message mParentMessage;
     private Set<String> mRenderedMessages;
+
+    private SendMessageView mSendMessageView;
 
     private int _1_DP_IN_PX;
     private int _3_DP_IN_PX;
@@ -200,12 +204,35 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                 mMessagingPlugin, mParentMessageKey, memberFilter));
         mGestureScanner = new GestureDetector(instance);
 
-        if (!UIUtils.showHint(this, mService, HINT_DOUBLE_TAP, R.string.hint_double_tap))
-            UIUtils.showHint(this, mService, HINT_SWIPE, R.string.hint_swipe);
+        UIUtils.showHint(this, mService, HINT_SWIPE, R.string.hint_swipe);
+
+        mSendMessageView = (SendMessageView) findViewById(R.id.chat_container);
+        if (SystemUtils.isFlagEnabled(mFlags, MessagingPlugin.FLAG_ALLOW_REPLY)) {
+            mSendMessageView.setActive(this, mService, null, null, mParentMessageKey, mFlags, mParentMessageKey, mParentMessage.default_priority, mParentMessage.default_sticky);
+        } else {
+            mSendMessageView.setVisibility(View.GONE);
+        }
     }
 
     @Override
     protected void onServiceUnbound() {
+    }
+
+    @Override
+    protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (!mServiceIsBound) {
+            addOnServiceBoundRunnable(new SafeRunnable() {
+                @Override
+                protected void safeRun() throws Exception {
+                    onActivityResult(requestCode, resultCode, data);
+                }
+            });
+            return;
+        }
+
+        mSendMessageView.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -263,7 +290,6 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.message_thread_menu, menu);
         inflater.inflate(R.menu.thread_menu, menu);
-        // todo ruben
         return true;
     }
 
@@ -272,12 +298,15 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         for (int i = 0; i < menu.size(); i++) {
             MenuItem item = menu.getItem(i);
             switch (item.getItemId()) {
-            case R.id.delete_conversation:
-                item.setVisible(!SystemUtils.isFlagEnabled(mFlags, MessagingPlugin.FLAG_NOT_REMOVABLE));
-                break;
-            case R.id.info:
-                item.setVisible(SystemUtils.isFlagEnabled(mFlags, MessagingPlugin.FLAG_DYNAMIC_CHAT));
-                break;
+                case R.id.members:
+                    item.setVisible(!SystemUtils.isFlagEnabled(mFlags, MessagingPlugin.FLAG_DYNAMIC_CHAT));
+                    break;
+                case R.id.delete_conversation:
+                    item.setVisible(!SystemUtils.isFlagEnabled(mFlags, MessagingPlugin.FLAG_NOT_REMOVABLE));
+                    break;
+                case R.id.info:
+                    item.setVisible(SystemUtils.isFlagEnabled(mFlags, MessagingPlugin.FLAG_DYNAMIC_CHAT));
+                    break;
             }
         }
         return true;
@@ -287,19 +316,29 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         T.UI();
         switch (item.getItemId()) {
-        case R.id.help:
-            new AlertDialog.Builder(FriendsThreadActivity.this).setTitle(R.string.help)
-                .setMessage(getString(R.string.message_thread_help)).setPositiveButton(getString(R.string.ok), null)
-                .create().show();
-            return true;
-        case R.id.delete_conversation:
-            mMessagingPlugin.removeConversationFromList(this, mParentMessageKey);
-            return true;
-        case R.id.info:
-            startActivity(ChatInfoActivity.createIntent(this, mParentMessageKey));
-            return true;
-        default:
-            return super.onOptionsItemSelected(item);
+            case R.id.members:
+                Intent intent = new Intent(this, FriendsThreadMembersActivity.class);
+                String[] members = new String[mParentMessage.members.length];
+                for (int i = 0; i < mParentMessage.members.length; i++) {
+                    members[i] = mParentMessage.members[i].member;
+                }
+                intent.putExtra(FriendsThreadMembersActivity.ME, mMyEmail);
+                intent.putExtra(FriendsThreadMembersActivity.MEMBERS, members);
+                startActivity(intent);
+                return true;
+            case R.id.help:
+                new AlertDialog.Builder(FriendsThreadActivity.this).setTitle(R.string.help)
+                    .setMessage(getString(R.string.message_thread_help)).setPositiveButton(getString(R.string.ok), null)
+                    .create().show();
+                return true;
+            case R.id.delete_conversation:
+                mMessagingPlugin.removeConversationFromList(this, mParentMessageKey);
+                return true;
+            case R.id.info:
+                startActivity(ChatInfoActivity.createIntent(this, mParentMessageKey));
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 
@@ -733,7 +772,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             TextView messageInfo = (TextView) view.findViewById(R.id.message_info);
             String senderName;
             if (isSender) {
-                senderName = getString(R.string.__me_as_sender); // todo ruben
+                senderName = getString(R.string.__me_as_sender);
             } else {
                 senderName = mFriendsPlugin.getName(message.sender);
                 senderName = senderName.split(" ")[0];
@@ -836,14 +875,18 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
     private void displayMembers(MessageTO parentMessage) {
         final boolean isChat = SystemUtils.isFlagEnabled(mFlags, MessagingPlugin.FLAG_DYNAMIC_CHAT);
         if (isChat) {
-            setTitle("todo ruben chat");
+            setTitle(R.string.group_chat);
             return;
         }
-        setTitle("todo ruben member");
+        List<String> members = new ArrayList<>();
 
         Collection<MemberStatusTO> leastMemberStatusses = mMessageStore.getLeastMemberStatusses(mParentMessageKey);
         MemberStatusTO senderStatus = null;
         for (final MemberStatusTO ms : leastMemberStatusses) {
+            if (!ms.member.equals(mMyEmail)) {
+                members.add(ms.member);
+            }
+
             if (ms.member.equals(parentMessage.sender)) {
                 senderStatus = ms;
             } else {
@@ -860,23 +903,24 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         if (senderStatus == null) {
             L.bug("Sender status could not be determined!");
         }
-    }
 
-    private boolean showReplyMessageWizard() {
-        if (!SystemUtils.isFlagEnabled(mFlags, MessagingPlugin.FLAG_ALLOW_REPLY)) {
-            return false;
+        if (members.size() > 1) {
+            setTitle(R.string.group_chat);
+            final StringBuilder sb = new StringBuilder();
+            boolean firstTime = true;
+            for (String member : members) {
+                if (firstTime) {
+                    firstTime = false;
+                } else {
+                    sb.append(", ");
+                }
+                sb.append(mFriendsPlugin.getName(member));
+            }
+
+            getSupportActionBar().setSubtitle(sb.toString());
+        } else {
+            setTitle(mFriendsPlugin.getName(members.get(0)));
         }
-
-        // todo ruben unused
-        final Intent intent = new Intent(FriendsThreadActivity.this,
-            com.mobicage.rogerthat.SendMessageMessageActivity.class);
-        intent.putExtra(SendMessageMessageActivity.PARENT_KEY, mParentMessageKey);
-        intent.putExtra(SendMessageMessageActivity.REPLIED_TO_KEY, mParentMessageKey);
-        intent.putExtra(SendMessageMessageActivity.FLAGS, mFlags);
-        intent.putExtra(SendMessageMessageActivity.DEFAULT_PRIORITY, mParentMessage.default_priority);
-        intent.putExtra(SendMessageMessageActivity.DEFAULT_STICKY, mParentMessage.default_sticky);
-        startActivity(intent);
-        return true;
     }
 
     @Override

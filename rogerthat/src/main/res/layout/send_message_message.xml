@@ -12,9 +12,7 @@
 		android:layout_height="wrap_content"
 		android:orientation="vertical"
 		android:layout_alignParentBottom="true"
-		android:layout_marginRight="8dp"
-		android:layout_marginLeft="8dp"
-		android:layout_marginBottom="8dp"
+		android:layout_margin="5dp"
 		android:background="@color/mc_background_color">
 
 		<include layout="@layout/chat_container_message" />

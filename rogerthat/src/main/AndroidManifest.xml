@@ -184,6 +184,16 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.mobicage.rogerthat.plugins.messaging.MessagingActivity" />
         </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.plugins.messaging.FriendsThreadMembersActivity"
+            android:windowSoftInputMode="adjustResize|stateHidden"
+            android:theme="@style/Theme.AppCompat.Light"
+            android:parentActivityName="com.mobicage.rogerthat.plugins.messaging.FriendsThreadActivity" >
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.plugins.messaging.FriendsThreadActivity" />
+        </activity>
         <activity android:name="com.mobicage.rogerthat.plugins.messaging.MessagingActivity" >
         </activity>
         <activity android:name="com.mobicage.rogerthat.plugins.messaging.ServiceThreadActivity" >
@@ -269,6 +279,7 @@
         <activity
             android:name="com.mobicage.rogerthat.UserDetailActivity"
             android:screenOrientation="portrait"
+            android:parentActivityName="com.mobicage.rogerthat.UserFriendsActivity"
             android:theme="@style/Theme.AppCompat.Light">
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
@@ -278,8 +289,13 @@
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.FriendDetailOrInviteActivity"
+            android:parentActivityName="com.mobicage.rogerthat.plugins.messaging.FriendsThreadMembersActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" >
+            android:theme="@style/Theme.AppCompat.Light">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.plugins.messaging.FriendsThreadMembersActivity" />
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.messaging.ServiceMessageDetailActivity"

@@ -495,4 +495,5 @@
     <string name="select_contact">Select contact</string>
     <string name="select_colleague">Select colleague</string>
     <string name="type_your_message">Type a message</string>
+    <string name="group_chat">Group chat</string>
 </resources>

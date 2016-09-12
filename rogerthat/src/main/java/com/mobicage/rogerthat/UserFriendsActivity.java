@@ -53,7 +53,6 @@ import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.T;
-import com.mobicage.rogerthat.util.ui.SeparatedListAdapter;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.AppConstants;
 
@@ -81,22 +80,12 @@ public class UserFriendsActivity extends FriendsActivity {
     @Override
     protected void changeCursor() {
         if (mServiceIsBound) {
-            SeparatedListAdapter separatedListAdapter = ((SeparatedListAdapter) getListAdapter());
-            int sectionIndex = 0;
-            for (Adapter adapter : separatedListAdapter.sections.values()) {
-                Cursor c = null;
-                if (sectionIndex == 0) {
-                    createFriendsCursor();
-                    c = mCursorFriends;
-                } else {
-                    L.w("Don't know how to change if section " + sectionIndex);
-                }
-                if (c != null) {
-                    ((CursorAdapter) adapter).changeCursor(c);
-                }
-                sectionIndex += 1;
+            FriendListAdapter fla = ((FriendListAdapter) getListAdapter());
+            createFriendsCursor();
+            if (mCursorFriends != null) {
+                fla.changeCursor(mCursorFriends);
             }
-            separatedListAdapter.notifyDataSetChanged();
+            fla.notifyDataSetChanged();
         }
 
         if (mMapButton != null) {
@@ -127,11 +116,7 @@ public class UserFriendsActivity extends FriendsActivity {
 
         FriendListAdapter fla = new FriendListAdapter(this, mCursorFriends, mFriendsPlugin.getStore(), null,
             mFriendsPlugin, false, null);
-
-        SeparatedListAdapter adapter = new SeparatedListAdapter(this);
-        adapter.addSection("todo ruben", fla);
-
-        setListAdapter(adapter);
+        setListAdapter(fla);
     }
 
     private void updateMapButtonCaption() {

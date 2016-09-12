@@ -67,7 +67,7 @@ public class FriendDetailOrInviteActivity extends ServiceBoundActivity {
     protected void onCreate(Bundle savedInstanceState) {
         T.UI();
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.friend_detail_or_invite);
+        setContentViewWithoutNavigationBar(R.layout.friend_detail_or_invite);
     }
 
     @Override
@@ -182,6 +182,7 @@ public class FriendDetailOrInviteActivity extends ServiceBoundActivity {
             image.setImageBitmap(ImageHelper.getRoundedCornerAvatar(avatarBitmap));
         }
 
+        setTitle(mFriend.getDisplayName());
         nameView.setText(mFriend.getDisplayName());
         nameView.setTextColor(getResources().getColor(android.R.color.primary_text_light));
 
