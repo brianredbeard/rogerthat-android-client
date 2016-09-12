@@ -546,8 +546,6 @@ def convert_config():
     fb_registration = bool_str(doc["APP_CONSTANTS"]["FACEBOOK_REGISTRATION"])
     full_width_headers = bool_str(full_width_headers)
 
-    messages_show_reply_vs_unread_count = bool_str(doc["APP_CONSTANTS"].get('MESSAGES_SHOW_REPLY_VS_UNREAD_COUNT', "true"))
-
     profile_settings = doc.get('PROFILE', dict())
     profile_data_fields = ','.join(['"%s"' % s for s in profile_settings.get('DATA_FIELDS', [])])
     profile_show_gender_and_birthdate = bool_str(profile_settings.get('SHOW_GENDER_AND_BIRTHDATE', "true"))
@@ -654,8 +652,6 @@ public class AppConstants {
     public static final String[] PROFILE_DATA_FIELDS = new String[] { %(profile_data_fields)s };
     public static final boolean PROFILE_SHOW_GENDER_AND_BIRTHDATE = %(profile_show_gender_and_birthdate)s;
 
-    public static final boolean MESSAGES_SHOW_REPLY_VS_UNREAD_COUNT = %(messages_show_reply_vs_unread_count)s;
-
     public static final String ABOUT_WEBSITE = "%(about_website)s";
     public static final String ABOUT_WEBSITE_URL = "%(about_website_url)s";
     public static final String ABOUT_EMAIL = "%(about_email)s";
@@ -690,7 +686,6 @@ public class AppConstants {
            navigation_tags=','.join(navigation_tags),
            profile_data_fields=profile_data_fields,
            profile_show_gender_and_birthdate=profile_show_gender_and_birthdate,
-           messages_show_reply_vs_unread_count=messages_show_reply_vs_unread_count,
            about_website=about_website,
            about_website_url=about_website_url,
            about_email=about_email,

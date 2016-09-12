@@ -386,7 +386,6 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
         TextView messageView;
         TextView messageCountView;
         ImageView avatarView;
-        ImageView statusView;
         CheckBox checkBox;
     }
 
@@ -512,7 +511,6 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
                 holder.recipientsView = (TextView) view.findViewById(R.id.recipients);
                 holder.timestampView = (TextView) view.findViewById(R.id.timestamp);
                 holder.messageView = (TextView) view.findViewById(R.id.message);
-                holder.statusView = (ImageView) view.findViewById(R.id.status_icon);
                 holder.messageCountView = (TextView) view.findViewById(R.id.message_count);
                 holder.checkBox = (CheckBox) view.findViewById(R.id.message_checkbox);
                 view.setTag(holder);
@@ -520,7 +518,6 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
             holder.message = message;
 
             final boolean dynamicChat = SystemUtils.isFlagEnabled(message.flags, MessagingPlugin.FLAG_DYNAMIC_CHAT);
-            setStatusIcon(holder, dynamicChat);
             setMessageOnView(view, holder, dynamicChat);
 
             return view;
@@ -637,18 +634,9 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
             if (dynamicChat)
                 replyCount--;
 
-            long messageCountText = 0;
-            if (AppConstants.MESSAGES_SHOW_REPLY_VS_UNREAD_COUNT) {
-                if (replyCount > 1) {
-                    messageCountText = replyCount;
-                } else {
-                    messageCountText = 0;
-                }
-            } else {
-                messageCountText = message.unreadCount;
-                if (dynamicChat && replyCount < messageCountText) {
-                    messageCountText--;
-                }
+            long messageCountText = message.unreadCount;
+            if (dynamicChat && replyCount < messageCountText) {
+                messageCountText--;
             }
             if (messageCountText >= 1) {
                 messageCountView.setText("" + messageCountText);
@@ -756,37 +744,6 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
             holder.checkBox.setVisibility(mEditing
                     && !SystemUtils.isFlagEnabled(message.flags, MessagingPlugin.FLAG_NOT_REMOVABLE) ? View.VISIBLE
                     : View.GONE);
-        }
-
-        private void setStatusIcon(ViewInfoHolder holder, boolean dynamicChat) {
-            final Message message = holder.message;
-            if (dynamicChat) {
-                if (message.priority == Message.PRIORITY_URGENT_WITH_ALARM) {
-                    holder.statusView.setImageResource(R.drawable.status_ringing);
-                    holder.statusView.setVisibility(View.VISIBLE);
-                } else {
-                    holder.statusView.setVisibility(View.GONE);
-                }
-            } else {
-                if ((message.flags & MessagingPlugin.FLAG_LOCKED) == MessagingPlugin.FLAG_LOCKED) {
-                    holder.statusView.setImageResource(R.drawable.status_locked);
-                } else if (message.hasTempKey) {
-                    holder.statusView.setImageDrawable(null);
-                } else if (message.recipients_status == MessageMemberStatusSummaryEncoding.ERROR) {
-                    holder.statusView.setImageResource(R.drawable.status_red);
-                } else if (message.alert_flags >= AlertManager.ALERT_FLAG_RING_5
-                        && !mMessagingPlugin.isMessageAckedByMe(message)) {
-                    holder.statusView.setImageResource(R.drawable.status_ringing);
-                } else if (message.numAcked() != 0) {
-                    holder.statusView.setImageResource(R.drawable.status_blue);
-                } else if (message.numRecipients() == message.numReceived()) {
-                    holder.statusView.setImageResource(R.drawable.status_green);
-                } else {
-                    // message is on server
-                    holder.statusView.setImageResource(R.drawable.status_yellow);
-                }
-                holder.statusView.setVisibility(View.VISIBLE);
-            }
         }
 
         @Override

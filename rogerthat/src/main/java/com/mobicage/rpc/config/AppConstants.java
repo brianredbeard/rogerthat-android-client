@@ -63,8 +63,6 @@ public class AppConstants {
     public static final String[] PROFILE_DATA_FIELDS = new String[] {"todo ruben field", "todo ruben teset"};
     public static final boolean PROFILE_SHOW_GENDER_AND_BIRTHDATE = true;
 
-    public static final boolean MESSAGES_SHOW_REPLY_VS_UNREAD_COUNT = true;
-
     public static final String ABOUT_WEBSITE = "www.rogerthat.net";
     public static final String ABOUT_WEBSITE_URL = "http://www.rogerthat.net";
     public static final String ABOUT_EMAIL = "info@mobicage.com";
