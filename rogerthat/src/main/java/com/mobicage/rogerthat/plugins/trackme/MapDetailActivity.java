@@ -21,6 +21,7 @@ package com.mobicage.rogerthat.plugins.trackme;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -84,15 +85,13 @@ public class MapDetailActivity extends ServiceBoundMapActivity {
         mMapView.getOverlays().add(overlay);
         mMapView.getController().setCenter(point);
 
+        final Toolbar bar = (Toolbar) findViewById(R.id.toolbar);
         if (intent.getBooleanExtra(VERIFY, false)) {
-            TextView title = (TextView) findViewById(R.id.title);
-            title.setText(R.string.validate_discovered_location);
-            ImageButton backImageButton = (ImageButton) findViewById(R.id.back);
-            backImageButton.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_angle_left).color(Color.BLACK).sizeDp(20));
-            backImageButton.setOnClickListener(new SafeViewOnClickListener() {
+
+            bar.setNavigationOnClickListener(new View.OnClickListener() {
                 @Override
-                public void safeOnClick(View v) {
-                    onBackPressed();
+                public void onClick(View v) {
+                    finish();
                 }
             });
 
@@ -128,8 +127,7 @@ public class MapDetailActivity extends ServiceBoundMapActivity {
                 }
             });
         } else {
-            LinearLayout cutomAppbar = (LinearLayout) findViewById(R.id.custom_appbar);
-            cutomAppbar.setVisibility(View.GONE);
+            bar.setVisibility(View.GONE);
         }
     }
 

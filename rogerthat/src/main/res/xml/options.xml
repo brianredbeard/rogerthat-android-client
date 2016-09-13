@@ -34,6 +34,9 @@
         <Preference
             android:key="my_profile"
             android:title="@string/profile"></Preference>
+        <Preference
+            android:key="about"
+            android:title="@string/about"></Preference>
     </PreferenceCategory>
 
 </PreferenceScreen> 

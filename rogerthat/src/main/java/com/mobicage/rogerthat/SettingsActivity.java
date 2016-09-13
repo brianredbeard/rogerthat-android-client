@@ -36,6 +36,7 @@ import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.RelativeLayout;
@@ -49,7 +50,7 @@ import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.config.AppConstants;
 
-public class SettingsActivity extends PreferenceActivity {
+public class SettingsActivity extends ServiceBoundPreferenceActivity {
 
     private String mCustomAlarm = null;
     private String mCustomTitle = null;
@@ -92,11 +93,39 @@ public class SettingsActivity extends PreferenceActivity {
             }
         });
 
+        Toolbar bar = (Toolbar) findViewById(R.id.toolbar);
+        bar.setNavigationOnClickListener(new SafeViewOnClickListener() {
+            @Override
+            public void safeOnClick(View v) {
+                onBackPressed();
+            }
+        });
+
+
         IntentFilter filter = new IntentFilter(MainService.PREFERENCES_UPDATE_INTENT);
         registerReceiver(mBroadcastReceiver, filter);
 
         setTitle(R.string.settings);
         // todo ruben nav bar
+    }
+
+    @Override
+    protected void onServiceBound() {
+        final Preference aboutPref = findPreference(MainService.PREFERENCE_ABOUT);
+        aboutPref.setSummary(getString(R.string.about_version, mService.getMajorVersion(), mService.getMinorVersion()));
+        aboutPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                Intent intent = new Intent(SettingsActivity.this, AboutActivity.class);
+                startActivity(intent);
+                return true;
+            }
+        });
+    }
+
+    @Override
+    protected void onServiceUnbound() {
+
     }
 
     private void showAlarmDialog(final Preference alarmPref) {

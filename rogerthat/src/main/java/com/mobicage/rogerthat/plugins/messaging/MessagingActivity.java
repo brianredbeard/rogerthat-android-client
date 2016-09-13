@@ -90,7 +90,6 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
     private MessagingPlugin mMessagingPlugin;
     private FriendsPlugin mFriendsPlugin;
     private String mMemberFilter;
-    private boolean mFirstCellIsComposeMessage = false;
     private String mMyEmail;
     private Resources mResources;
     private boolean mEditing = false;
@@ -298,8 +297,6 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
             }
         }
 
-        calculateFirstCellIsComposeMessage();
-
         findViewById(R.id.delete_done_button).setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
@@ -323,12 +320,11 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
         mFloatingActionButton.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
-                // todo ruben check memberfilter and skip select friend
                 showSendMessageActivity();
             }
         });
 
-        if (!AppConstants.FRIENDS_ENABLED) {
+        if (!AppConstants.FRIENDS_ENABLED || mMemberFilter != null) {
             mFloatingActionButton.hide();
         }
 
@@ -362,23 +358,16 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         T.UI();
-        if (mFirstCellIsComposeMessage && (position == 0)) {
-            showSendMessageActivity();
-        } else {
-            final Object tag = v.getTag();
-            if (tag != null) {
-                final ViewInfoHolder holder = (ViewInfoHolder) tag;
-                final Message message = holder.message;
-                mMessagingPlugin.showMessage(this, message, mMemberFilter);
-            }
+        final Object tag = v.getTag();
+        if (tag != null) {
+            final ViewInfoHolder holder = (ViewInfoHolder) tag;
+            final Message message = holder.message;
+            mMessagingPlugin.showMessage(this, message, mMemberFilter);
         }
     }
 
     @Override
     protected boolean onListItemLongClick(ListView l, View v, int position, long id) {
-        if (mFirstCellIsComposeMessage && (position == 0))
-            return false;
-
         final Object tag = v.getTag();
         if (tag != null) {
             final ViewInfoHolder holder = (ViewInfoHolder) tag;
@@ -439,13 +428,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
 
         findViewById(R.id.delete_messages).setVisibility(mEditing ? View.VISIBLE : View.GONE);
 
-        calculateFirstCellIsComposeMessage();
         ((CursorAdapter) getListAdapter()).notifyDataSetChanged();
-    }
-
-    private void calculateFirstCellIsComposeMessage() {
-        // todo ruben
-//        mFirstCellIsComposeMessage = AppConstants.FRIENDS_ENABLED ? (mMemberFilter == null && !mEditing) : false;
     }
 
     // Object put in view tag. Contains fast references to message and subviews
@@ -496,7 +479,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
 
         private void buildSectionIndex() {
             mSections = new Section[mIndexerCursor.getCount()];
-            int pos = mFirstCellIsComposeMessage ? 1 : 0;
+            int pos = 0;
             int index = 0;
             if (mIndexerCursor.moveToFirst()) {
                 while (true) {
@@ -526,8 +509,6 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
         @Override
         public int getCount() {
             int c = super.getCount();
-            if (mFirstCellIsComposeMessage)
-                c++;
             return c;
         }
 
@@ -544,16 +525,6 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             T.UI();
-            if (mFirstCellIsComposeMessage) {
-                if (position == 0) {
-                    View headerView = mLayoutInflater.inflate(R.layout.main_list_header, null);
-                    ((TextView) headerView.findViewById(R.id.mainheader)).setText(R.string.new_message_short);
-                    ((TextView) headerView.findViewById(R.id.subheader)).setText(R.string.new_message_long);
-                    return headerView;
-                }
-                position--;
-            }
-
             if (!mCursor.moveToPosition(position)) {
                 throw new IllegalStateException("couldn't move cursor to position " + position);
             }

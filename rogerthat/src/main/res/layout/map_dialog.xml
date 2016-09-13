@@ -4,7 +4,20 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content" >
 
-    <include layout="@layout/custom_appbar" />
+    <android.support.v7.widget.Toolbar
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/toolbar"
+        app:theme="@style/Theme.AppCompat.Light"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="?attr/actionBarSize"
+        app:navigationContentDescription="@string/abc_action_bar_up_description"
+        android:background="@color/mc_background_color"
+        app:navigationIcon="?attr/homeAsUpIndicator"
+        app:title="@string/validate_discovered_location"
+        android:elevation="5dp"
+        />
 
     <LinearLayout
         android:id="@+id/map_verify"
@@ -38,7 +51,7 @@
         android:id="@+id/map"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_below="@id/custom_appbar"
+        android:layout_below="@id/toolbar"
         android:layout_above="@id/map_verify"
         android:clickable="true"
         android:visibility="gone"

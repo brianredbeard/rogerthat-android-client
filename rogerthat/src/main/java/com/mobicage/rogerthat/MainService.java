@@ -144,6 +144,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
     private final static String PREFERENCES_READY = "ready";
     public final static String PREFERENCE_EMAIL = "email";
     public final static String PREFERENCE_MY_PROFILE = "my_profile";
+    public final static String PREFERENCE_ABOUT = "about";
     public final static String PREFERENCE_ALARM_SOUND = "alarm_sound";
     public final static String PREFERENCE_ALARM_TITLE = "alarm_title";
 

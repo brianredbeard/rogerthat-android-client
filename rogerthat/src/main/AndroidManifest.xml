@@ -337,7 +337,12 @@
         <activity
             android:name="com.mobicage.rogerthat.AboutActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" >
+            android:theme="@style/Theme.AppCompat.Light"
+            android:parentActivityName="com.mobicage.rogerthat.SettingsActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.SettingsActivity" />
         </activity>
 
         <activity

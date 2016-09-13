@@ -32,7 +32,7 @@ public class AbstractAboutActivity extends ServiceBoundActivity {
 
     @Override
     protected void onServiceBound() {
-        setContentView(R.layout.about);
+        setContentViewWithoutNavigationBar(R.layout.about);
 
         Button visitRogerthat = (Button) findViewById(R.id.about_btn_visit_rogerthat);
         visitRogerthat.setText(AppConstants.ABOUT_WEBSITE);

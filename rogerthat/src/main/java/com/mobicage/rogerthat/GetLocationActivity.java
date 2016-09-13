@@ -37,6 +37,7 @@ import android.media.Image;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -111,15 +112,12 @@ public class GetLocationActivity extends ServiceBoundMapActivity {
         T.UI();
         setContentView(R.layout.get_location);
         setTitle(R.string.get_location);
+        final Toolbar bar = (Toolbar) findViewById(R.id.toolbar);
 
-        TextView title = (TextView) findViewById(R.id.title);
-        title.setText(R.string.get_location);
-        ImageButton backImageButton = (ImageButton) findViewById(R.id.back);
-        backImageButton.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_angle_left).color(Color.BLACK).sizeDp(20));
-        backImageButton.setOnClickListener(new SafeViewOnClickListener() {
+        bar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
-            public void safeOnClick(View v) {
-                onBackPressed();
+            public void onClick(View v) {
+                finish();
             }
         });
 
