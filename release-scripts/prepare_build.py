@@ -549,7 +549,7 @@ def convert_config():
     else:
         raise Exception("There is no app_type defined")
 
-    home_screen_style = doc['HOMESCREEN'].get('style')
+    home_screen_style = doc['HOMESCREEN']['style']
 
     if home_screen_style == HOME_SCREEN_STYLE_MESSAGING:
         home_activity = "R.layout.messaging"
@@ -753,7 +753,6 @@ public class AppConstants {
 
     colors = dict(mc_homescreen_background='homescreen_background',
                   mc_homescreen_text='homescreen_text',
-                  mc_homescreen_divider='homescreen_divider',
                   mc_primary_color='primary_color',
                   mc_secondary_color='secondary_color')
     with open(os.path.join(path, "colors.xml"), 'r+') as f:
