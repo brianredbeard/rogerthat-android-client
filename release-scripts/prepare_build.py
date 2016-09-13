@@ -27,6 +27,12 @@ from xml.dom import minidom
 from PIL import Image, ImageDraw
 import yaml
 import hashlib
+import logging
+
+logging.basicConfig(
+        level=logging.INFO,
+        format="%(levelname)s [%(asctime)s] [%(funcName)s:%(lineno)d] %(message)s",
+        datefmt="%H:%M:%S", stream=sys.stdout)
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 APPS_REPO_DIR = os.path.join(CURRENT_DIR, "..", "..", "apps", 'res')
@@ -38,7 +44,6 @@ SRC_JAVA_DIR = os.path.join(ANDROID_SRC_DIR, 'main', 'java')
 TEST_SRC_JAVA_DIR = os.path.join(ANDROID_SRC_DIR, 'androidTest', 'java')
 SRC_RES_DIR = os.path.join(ANDROID_SRC_DIR, 'main', 'res')
 
-
 MAIN_APP_ID = "rogerthat"
 
 APP_TYPE_ROGERTHAT = "rogerthat"
@@ -47,38 +52,42 @@ APP_TYPE_ENTERPRISE = "enterprise"
 APP_TYPE_CONTENT_BRANDING = "content_branding"
 APP_TYPE_YSAAA = "ysaaa"
 
-LAUNCHER_ICON_SIZES = { 'drawable-ldpi-v5':    36,
-                        'drawable':            48,
-                        'drawable-mdpi-v5':    48,
-                        'drawable-hdpi-v5':    72,
-                        'drawable-xhdpi-v5':   96,
-                        'drawable-xxhdpi-v5':  180,
-                        'drawable-xxxhdpi-v5': 196,
-                        }
+LAUNCHER_ICON_SIZES = {
+    'drawable-ldpi-v5': 36,
+    'drawable': 48,
+    'drawable-mdpi-v5': 48,
+    'drawable-hdpi-v5': 72,
+    'drawable-xhdpi-v5': 96,
+    'drawable-xxhdpi-v5': 180,
+    'drawable-xxxhdpi-v5': 196,
+}
 
-ICON_SIZES = {'drawable-ldpi-v5':    36,
-              'drawable':            48,
-              'drawable-mdpi-v5':    48,
-              'drawable-hdpi-v5':    72,
-              'drawable-xhdpi-v5':   96,
-              'drawable-xxhdpi-v5':  180,
-              }
+ICON_SIZES = {
+    'drawable-ldpi-v5': 36,
+    'drawable': 48,
+    'drawable-mdpi-v5': 48,
+    'drawable-hdpi-v5': 72,
+    'drawable-xhdpi-v5': 96,
+    'drawable-xxhdpi-v5': 180,
+}
 
-SCREEN_SIZES = {'drawable-ldpi-v5':    240,
-                'drawable':            320,
-                'drawable-mdpi-v5':    320,
-                'drawable-hdpi-v5':    480,
-                'drawable-xhdpi-v5':   720,
-                'drawable-xxhdpi-v5':  1080,
-                }
+SCREEN_SIZES = {
+    'drawable-ldpi-v5': 240,
+    'drawable': 320,
+    'drawable-mdpi-v5': 320,
+    'drawable-hdpi-v5': 480,
+    'drawable-xhdpi-v5': 720,
+    'drawable-xxhdpi-v5': 1080,
+}
 
-NOTIFICATION_ICON_SIZES = {'drawable-ldpi-v5':    18,
-                           'drawable':            24,
-                           'drawable-mdpi-v5':    36,
-                           'drawable-hdpi-v5':    48,
-                           'drawable-xhdpi-v5':   72,
-                           'drawable-xxhdpi-v5':  96,
-                           }
+NOTIFICATION_ICON_SIZES = {
+    'drawable-ldpi-v5': 18,
+    'drawable': 24,
+    'drawable-mdpi-v5': 36,
+    'drawable-hdpi-v5': 48,
+    'drawable-xhdpi-v5': 72,
+    'drawable-xxhdpi-v5': 96,
+}
 
 HOME_SCREEN_STYLE_NEWS = "news"
 HOME_SCREEN_STYLE_MESSAGING = "messaging"
@@ -93,12 +102,39 @@ FRIENDS_CAPTION_ENUMS = {FRIENDS_CAPTION_FRIENDS: 'FriendsCaption.FRIENDS',
                          FRIENDS_CAPTION_COLLEAGUES: 'FriendsCaption.COLLEAGUES',
                          FRIENDS_CAPTION_CONTACTS: 'FriendsCaption.CONTACTS'}
 
+COLOURED_BUTTONS = {
+    'facebook': ('#39527F', '#39527F'),
+    'gray': ('#989898', '#989898'),
+    'primary': {
+        'sizes': {
+            'drawable-ldpi-v5': SCREEN_SIZES['drawable-ldpi-v5'] * .9,
+            'drawable': SCREEN_SIZES['drawable'] * .9,
+            'drawable-mdpi-v5': SCREEN_SIZES['drawable-mdpi-v5'] * .9,
+            'drawable-hdpi-v5': SCREEN_SIZES['drawable-hdpi-v5'] * .9,
+            'drawable-xhdpi-v5': SCREEN_SIZES['drawable-xhdpi-v5'] * .9,
+            'drawable-xxhdpi-v5': SCREEN_SIZES['drawable-xxhdpi-v5'] * .9,
+        }
+    },
+    'small_square': {
+        'sizes': {
+            'drawable-ldpi-v5': SCREEN_SIZES['drawable-ldpi-v5'] * .1,
+            'drawable': SCREEN_SIZES['drawable'] * .1,
+            'drawable-mdpi-v5': SCREEN_SIZES['drawable-mdpi-v5'] * .1,
+            'drawable-hdpi-v5': SCREEN_SIZES['drawable-hdpi-v5'] * .1,
+            'drawable-xhdpi-v5': SCREEN_SIZES['drawable-xhdpi-v5'] * .1,
+            'drawable-xxhdpi-v5': SCREEN_SIZES['drawable-xxhdpi-v5'] * .1,
+        }
+    }
+}
+
 LICENSE = app_utils.get_license_header()
+
 
 def sha256_hash(val):
     digester = hashlib.sha256()
     digester.update(val)
     return digester.hexdigest()
+
 
 def generate_resource_images(source_file_name, size, height_width_ratio):
     # size: percentage of screen width
@@ -112,12 +148,16 @@ def generate_resource_images(source_file_name, size, height_width_ratio):
     im1_heigth_width_ratio_str = "%.2f" % im1_heigth_width_ratio
     height_width_ratio_str = "%.2f" % height_width_ratio
     if im1_heigth_width_ratio_str != height_width_ratio_str:
-        raise Exception("Cannot generate resource images for %s ratio does not match (IMG:%s, GIVEN:%s)" % (source_file_name, im1_heigth_width_ratio_str, height_width_ratio_str))
+        raise Exception(
+                "Cannot generate resource images for %s ratio does not match (IMG:%s, GIVEN:%s)" % (
+                    source_file_name, im1_heigth_width_ratio_str, height_width_ratio_str))
 
     for drawable_folder_name, screen_width in SCREEN_SIZES.iteritems():
         width = int(screen_width * size)
         height = int(width * height_width_ratio)
-        app_utils.resize_image(source_file_name, os.path.join(SRC_RES_DIR, drawable_folder_name, resource_name), width, height)
+        app_utils.resize_image(source_file_name,
+                               os.path.join(SRC_RES_DIR, drawable_folder_name, resource_name),
+                               width, height)
 
 
 def bool_str(b):
@@ -172,7 +212,6 @@ def rename_package():
         else:
             raise Exception("Could not apply DEVICE_TYPE '%s'" % device_type)
 
-
         s = re.sub('package=".*"', 'package="%s"' % NEW_PACKAGE_NAME, s)
         s = re.sub('<(permission|uses-permission) android:name="%s\\.(.*)"' % OLD_PACKAGE_NAME.replace('.', '\\.'),
                    lambda m: '<%s android:name="%s.%s"' % (m.group(1), NEW_PACKAGE_NAME, m.group(2)),
@@ -195,9 +234,8 @@ def rename_package():
         f.write(s)
         f.truncate()
 
-    print ''
-    print "old package name: %s" % OLD_PACKAGE_NAME
-    print "new package name: %s" % NEW_PACKAGE_NAME
+    logging.info("old package name: %s" % OLD_PACKAGE_NAME)
+    logging.info("new package name: %s" % NEW_PACKAGE_NAME)
 
     for d in (SRC_RES_DIR, SRC_JAVA_DIR, TEST_SRC_JAVA_DIR):
         for dname, _, files in os.walk(d):
@@ -221,7 +259,7 @@ def create_notification_icon(android_icon_filename, android_notification_icon_fi
             new_data.append((255, 255, 255, 0))
             continue
         gray_factor = item[0] * 0.2126 + item[1] * 0.7152 + item[2] * 0.0722
-        if gray_factor > 240 :  # Almost white
+        if gray_factor > 240:  # Almost white
             new_data.append((255, 255, 255, 0))  # Make transparent
         else:
             new_data.append((255, 255, 255, int(255 - gray_factor)))  # Make white
@@ -424,7 +462,6 @@ def convert_config():
         shutil.copy2(path, source_file)
         generate_resource_images(source_file, 0.75, 180.0 / 960.0)
 
-
     ##### STRINGS ###########################################
 
     output = '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n'
@@ -462,7 +499,6 @@ def convert_config():
 
         with open(os.path.join(path, "fb.xml"), 'w+') as f:
             f.write(output.encode('utf-8'))
-
 
     if doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_ROGERTHAT:
         app_type = "APP_TYPE_ROGERTHAT"
@@ -510,7 +546,7 @@ def convert_config():
     else:
         raise Exception("There is no app_type defined")
 
-    home_screen_style = doc['HOMESCREEN'].get('style')
+    home_screen_style = doc['HOMESCREEN']['style']
 
     if home_screen_style == HOME_SCREEN_STYLE_MESSAGING:
         home_activity = "R.layout.messaging"
@@ -714,7 +750,6 @@ public class AppConstants {
 
     colors = dict(mc_homescreen_background='homescreen_background',
                   mc_homescreen_text='homescreen_text',
-                  mc_homescreen_divider='homescreen_divider',
                   mc_primary_color='primary_color',
                   mc_secondary_color='secondary_color')
     with open(os.path.join(path, "colors.xml"), 'r+') as f:
@@ -742,12 +777,12 @@ public class AppConstants {
 
 def encode_translation(s):
     return s.replace("\n", "\\n") \
-            .replace("'", "\\'") \
-            .replace('\r', '') \
-            .replace('"', '\\"') \
-            .replace("&", "&amp;") \
-            .replace("<", "&lt;") \
-            .replace(">", "&gt;")
+        .replace("'", "\\'") \
+        .replace('\r', '') \
+        .replace('"', '\\"') \
+        .replace("&", "&amp;") \
+        .replace("<", "&lt;") \
+        .replace(">", "&gt;")
 
 
 def add_translations(doc):
@@ -845,6 +880,24 @@ def validate_android_manifest():
                         "\n- ".join(missing_activities))
 
 
+def generate_coloured_buttons(primary_colour, secondary_colour):
+    logging.info('Generating button backgrounds...')
+    button_height = 2
+    for button_name, button_content in COLOURED_BUTTONS.iteritems():
+        if 'sizes' not in button_content:
+            file_path = os.path.join(SRC_RES_DIR, u'drawable', u'%s_button.png' % button_name)
+            primary, secondary = button_content
+            width = 1
+            app_utils.create_button(file_path, primary, secondary, width, button_height)
+        else:
+            for drawable_folder_name, screen_width in SCREEN_SIZES.iteritems():
+                file_path = os.path.join(SRC_RES_DIR, drawable_folder_name,
+                                         u'%s_button.png' % button_name)
+                primary, secondary = u'#%s' % primary_colour, u'#%s' % secondary_colour
+                width = COLOURED_BUTTONS[button_name]['sizes'][drawable_folder_name]
+                app_utils.create_button(file_path, primary, secondary, int(width), button_height)
+
+
 ##### START ########################################
 
 if __name__ == "__main__":
@@ -854,7 +907,7 @@ if __name__ == "__main__":
     validate_android_manifest()
 
     APP_ID = sys.argv[1]
-    print 'APP ID:', APP_ID
+    logging.info('APP ID: %s', APP_ID)
 
     APP_DIR = os.path.join(APPS_REPO_DIR, APP_ID)
 
@@ -912,9 +965,8 @@ if __name__ == "__main__":
     with open(os.path.join(APP_DIR, "build.yaml"), 'r') as f:
         doc = yaml.load(f)
 
-    print 'BUILD CFG:'
-    print pprint.pformat(doc)
-    print ''
+    logging.info('BUILD CFG:')
+    logging.info(pprint.pformat(doc))
 
     # todo ruben generate ic_menu_hamburger
 
@@ -939,5 +991,7 @@ if __name__ == "__main__":
         convert_config()
         rename_package()
     else:
-        print "app_id was rogerthat, no prepare needed"
+        logging.info('app_id was rogerthat, only limited prepare is needed')
     generate_custom_cloud_constants(doc)
+    generate_coloured_buttons(doc['COLORS']['APP_PRIMARY_COLOR'],
+                              doc['COLORS']['APP_SECONDARY_COLOR'])
