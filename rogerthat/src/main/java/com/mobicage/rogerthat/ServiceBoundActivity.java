@@ -61,6 +61,7 @@ import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.MenuItemPressingActivity;
 import com.mobicage.rogerthat.util.ActivityUtils;
+import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
@@ -355,6 +356,12 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
 
     public void setContentViewWithoutNavigationBar(int layoutResID) {
         super.setContentView(layoutResID);
+        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
+    }
+
+    public void setContentViewWithoutNavigationBar(View view) {
+        super.setContentView(view);
+        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
     }
 
     @Override
@@ -430,11 +437,13 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
     @Override
     public void setContentView(View view) {
         super.setContentView(view);
+        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
     }
 
     @Override
     public void setContentView(View view, ViewGroup.LayoutParams params) {
         super.setContentView(view, params);
+        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
     }
 
     public boolean askPermissionIfNeeded(final String permission, final int requestCode, final SafeRunnable onGranted,

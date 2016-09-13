@@ -55,6 +55,7 @@ import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr.BrandingResult;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr.ColorScheme;
 import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
+import com.mobicage.rogerthat.plugins.messaging.MessagingFilterActivity;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.plugins.messaging.mfr.EmptyStaticFlowException;
 import com.mobicage.rogerthat.plugins.messaging.mfr.JsMfr;
@@ -298,7 +299,7 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
         history.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
-                final Intent viewMessages = new Intent(FriendDetailActivity.this, MessagingActivity.class);
+                final Intent viewMessages = new Intent(FriendDetailActivity.this, MessagingFilterActivity.class);
                 viewMessages.putExtra(MessagingPlugin.MEMBER_FILTER, mFriend.email);
                 startActivity(viewMessages);
             }

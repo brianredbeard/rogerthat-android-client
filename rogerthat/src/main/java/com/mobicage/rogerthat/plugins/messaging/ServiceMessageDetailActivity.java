@@ -47,6 +47,7 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -54,6 +55,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.WindowManager;
 import android.webkit.WebSettings;
@@ -78,6 +80,7 @@ import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.IdentityStore;
 import com.mobicage.rogerthat.MainActivity;
+import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.ServiceBoundMapActivity;
 import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
@@ -105,7 +108,7 @@ import com.mobicage.to.messaging.AttachmentTO;
 import com.mobicage.to.messaging.ButtonTO;
 import com.mobicage.to.messaging.MemberStatusTO;
 
-public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implements MenuItemPressingActivity {
+public class ServiceMessageDetailActivity extends ServiceBoundActivity implements MenuItemPressingActivity {
 
     private final static String HINT_BROADCAST = "com.mobicage.rogerthat.plugins.messaging.ServiceMessageDetailActivity.HINT_BROADCAST";
 
@@ -202,7 +205,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
         super.onCreate(savedInstanceState);
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        mFontAwesomeTypeFace = Typeface.createFromAsset(getAssets(), "FontAwesome.ttf"); // todo ruben
+        mFontAwesomeTypeFace = Typeface.createFromAsset(getAssets(), "FontAwesome.ttf");
     }
 
     @Override
@@ -243,7 +246,8 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
 
         mStatusImage = (ImageView) activityView.findViewById(R.id.status_image);
 
-        setContentView(activityView);
+        setContentViewWithoutNavigationBar(activityView);
+
         activity = (RelativeLayout) activityView;
 
         final Intent intent = getIntent();
@@ -635,19 +639,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
         }
 
         if (mCurrentMessage.broadcast_type != null) {
-            L.d("Show broadcast spam control");
-            final RelativeLayout broadcastSpamControl = (RelativeLayout) findViewById(R.id.broadcast_spam_control);
-            View broadcastSpamControlBorder = findViewById(R.id.broadcast_spam_control_border);
-            final View broadcastSpamControlDivider = findViewById(R.id.broadcast_spam_control_divider);
-
-            final LinearLayout broadcastSpamControlTextContainer = (LinearLayout) findViewById(R.id.broadcast_spam_control_text_container);
-            TextView broadcastSpamControlText = (TextView) findViewById(R.id.broadcast_spam_control_text);
-
-            final LinearLayout broadcastSpamControlSettingsContainer = (LinearLayout) findViewById(R.id.broadcast_spam_control_settings_container);
-            TextView broadcastSpamControlSettingsText = (TextView) findViewById(R.id.broadcast_spam_control_settings_text);
-            TextView broadcastSpamControlIcon = (TextView) findViewById(R.id.broadcast_spam_control_icon);
-            broadcastSpamControlIcon.setTypeface(mFontAwesomeTypeFace);
-            broadcastSpamControlIcon.setText(R.string.fa_bell);
+            L.d("todo ruben Show broadcast spam control");
 
             final ServiceMenuItemDetails smi = mFriendsPlugin.getStore().getBroadcastServiceMenuItem(mCurrentMessage
                     .sender);
@@ -656,88 +648,31 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
                 collapseDetails(DETAIL_SECTIONS);
                 return;
             }
-            broadcastSpamControl.setVisibility(View.VISIBLE);
 
-            broadcastSpamControlSettingsContainer.setOnClickListener(new SafeViewOnClickListener() {
-
-                @Override
-                public void safeOnClick(View v) {
-                    L.d("goto broadcast settings");
-                    if (mMenuItemPresser == null) {
-                        //noinspection unchecked,unchecked
-                        mMenuItemPresser = new MenuItemPresser(ServiceMessageDetailActivity.this, mCurrentMessage
-                                .sender);
-                    }
-                    mMenuItemPresser.itemPressed(smi, smi.menuGeneration, new MenuItemPresser.ResultHandler() {
-                        @Override
-                        public void onSuccess() {
-                            overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_up);
-                            finish();
-                        }
-                    });
-
-                }
-
-            });
+//            broadcastSpamControlSettingsContainer.setOnClickListener(new SafeViewOnClickListener() {
+//
+//                @Override
+//                public void safeOnClick(View v) {
+//                    L.d("goto broadcast settings");
+//                    if (mMenuItemPresser == null) {
+//                        //noinspection unchecked,unchecked
+//                        mMenuItemPresser = new MenuItemPresser(ServiceMessageDetailActivity.this, mCurrentMessage
+//                                .sender);
+//                    }
+//                    mMenuItemPresser.itemPressed(smi, smi.menuGeneration, new MenuItemPresser.ResultHandler() {
+//                        @Override
+//                        public void onSuccess() {
+//                            overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_up);
+//                            finish();
+//                        }
+//                    });
+//
+//                }
+//
+//            });
 
             UIUtils.showHint(this, mService, HINT_BROADCAST, R.string.hint_broadcast, mCurrentMessage.broadcast_type,
                 mFriendsPlugin.getName(mCurrentMessage.sender));
-
-            broadcastSpamControlText
-                .setText(getString(R.string.broadcast_subscribed_to, mCurrentMessage.broadcast_type));
-            broadcastSpamControlSettingsText.setText(smi.label);
-            int ligthAlpha = 180;
-            int darkAlpha = 70;
-            int alpha = ligthAlpha;
-            if (br != null && br.scheme == ColorScheme.DARK) {
-                broadcastSpamControlIcon.setTextColor(getResources().getColor(android.R.color.black));
-                broadcastSpamControlBorder.setBackgroundColor(darkSchemeTextColor);
-                broadcastSpamControlDivider.setBackgroundColor(darkSchemeTextColor);
-                activity.setBackgroundColor(darkSchemeTextColor);
-                broadcastSpamControlText.setTextColor(lightSchemeTextColor);
-                broadcastSpamControlSettingsText.setTextColor(lightSchemeTextColor);
-                int alpacolor = Color.argb(darkAlpha, Color.red(lightSchemeTextColor),
-                    Color.green(lightSchemeTextColor), Color.blue(lightSchemeTextColor));
-                broadcastSpamControl.setBackgroundColor(alpacolor);
-
-                alpha = darkAlpha;
-            } else {
-                broadcastSpamControlIcon.setTextColor(getResources().getColor(android.R.color.white));
-                broadcastSpamControlBorder.setBackgroundColor(lightSchemeTextColor);
-                broadcastSpamControlDivider.setBackgroundColor(lightSchemeTextColor);
-                activity.setBackgroundColor(lightSchemeTextColor);
-                broadcastSpamControlText.setTextColor(darkSchemeTextColor);
-                broadcastSpamControlSettingsText.setTextColor(darkSchemeTextColor);
-                int alpacolor = Color.argb(darkAlpha, Color.red(darkSchemeTextColor), Color.green(darkSchemeTextColor),
-                    Color.blue(darkSchemeTextColor));
-                broadcastSpamControl.setBackgroundColor(alpacolor);
-            }
-
-            if (br != null && br.color != null) {
-                int alphaColor = Color.argb(alpha, Color.red(br.color), Color.green(br.color), Color.blue(br.color));
-                broadcastSpamControl.setBackgroundColor(alphaColor);
-            }
-
-            mService.postOnUIHandler(new SafeRunnable() {
-
-                @Override
-                protected void safeRun() throws Exception {
-                    int maxHeight = broadcastSpamControl.getHeight();
-                    broadcastSpamControlDivider.getLayoutParams().height = maxHeight;
-                    broadcastSpamControlDivider.requestLayout();
-
-                    broadcastSpamControlSettingsContainer.getLayoutParams().height = maxHeight;
-                    broadcastSpamControlSettingsContainer.requestLayout();
-
-                    broadcastSpamControlTextContainer.getLayoutParams().height = maxHeight;
-                    broadcastSpamControlTextContainer.requestLayout();
-
-                    int broadcastSpamControlWidth = broadcastSpamControl.getWidth();
-                    android.view.ViewGroup.LayoutParams lp = broadcastSpamControlSettingsContainer.getLayoutParams();
-                    lp.width = broadcastSpamControlWidth / 4;
-                    broadcastSpamControlSettingsContainer.setLayoutParams(lp);
-                }
-            });
         }
 
         if (!isUpdate)
@@ -758,12 +693,22 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
         widget.loadMessage(mCurrentMessage, this, widgetLayout);
 
         if (!widgetLayout.isEnabled()) {
-            for (int i = 0; i < widget.getChildCount(); i++) {
-                View v = widget.getChildAt(i);
-                v.setEnabled(false);
-            }
+            disableView(widget);
         }
         widgetLayout.addView(widget);
+    }
+
+    private void disableView(View v) {
+        if (v instanceof ViewGroup) {
+            ViewGroup vg = (ViewGroup) v;
+            for (int i = 0; i < vg.getChildCount(); i++) {
+                View child = vg.getChildAt(i);
+                disableView(child);
+            }
+        } else {
+            v.setEnabled(false);
+            v.setFocusable(false);
+        }
     }
 
     private Comparator<MemberStatusTO> getMemberstatusComparator() {
@@ -1469,10 +1414,5 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
                 }
             }, 1000 * expectNext);
         }
-    }
-
-    @Override
-    protected boolean isRouteDisplayed() {
-        return false;
     }
 }

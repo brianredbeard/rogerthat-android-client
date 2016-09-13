@@ -67,7 +67,7 @@ public class DetectedBeaconActivity extends ServiceBoundActivity {
 
     @Override
     protected void onServiceBound() {
-        setContentView(R.layout.detected_beacons);
+        setContentViewWithoutNavigationBar(R.layout.detected_beacons);
         mFriendsPlugin = mService.getPlugin(FriendsPlugin.class);
         Intent intent = getIntent();
         mAgeGenderSet = intent.getBooleanExtra(EXTRA_AGE_AND_GENDER_SET, true);

@@ -69,7 +69,7 @@ public class EnterPinActivity extends ServiceBoundActivity implements PinEntryLi
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
-        setContentView(R.layout.enter_pin);
+        setContentViewWithoutNavigationBar(R.layout.enter_pin);
 
         Intent intent = getIntent();
         String message = intent.getStringExtra(MESSAGE);

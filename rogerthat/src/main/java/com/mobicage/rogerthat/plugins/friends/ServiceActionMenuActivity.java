@@ -55,6 +55,8 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.EnterPinActivity;
 import com.mobicage.rogerthat.FriendDetailActivity;
@@ -68,6 +70,7 @@ import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr.BrandingResult;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr.ColorScheme;
 import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
+import com.mobicage.rogerthat.plugins.messaging.MessagingFilterActivity;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.plugins.scan.ProcessScanActivity;
 import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
@@ -95,7 +98,6 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity implements M
     private class Cell {
         ImageView icon;
         TextView label;
-        TextView faIcon;
     }
 
     private TextView title;
@@ -145,8 +147,6 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity implements M
 
         });
 
-        TextUtils.overrideFonts(this, findViewById(android.R.id.content)); // todo ruben
-
         pages = (LinearLayout) findViewById(R.id.pages);
         Resources resources = getResources();
         darkSchemeTextColor = resources.getColor(android.R.color.primary_text_dark);
@@ -170,7 +170,7 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity implements M
     }
 
     private void goToMessagingActivity() {
-        final Intent viewMessages = new Intent(ServiceActionMenuActivity.this, MessagingActivity.class);
+        final Intent viewMessages = new Intent(ServiceActionMenuActivity.this, MessagingFilterActivity.class);
         viewMessages.putExtra(MessagingPlugin.MEMBER_FILTER, email);
         startActivity(viewMessages);
     }
@@ -181,7 +181,6 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity implements M
                 Cell cell = cells[x][y];
                 ((View) cell.icon.getParent()).setOnClickListener(null);
                 cell.icon.setVisibility(View.INVISIBLE);
-                cell.faIcon.setVisibility(View.GONE);
                 cell.label.setVisibility(View.INVISIBLE);
                 cell.label.setTextColor(lightSchemeTextColor);
                 cell.label.setShadowLayer(2, 1, 1, Color.WHITE);
@@ -202,9 +201,6 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity implements M
     @Override
     protected void onServiceBound() {
         L.d("ServiceActionMenuActivity onServiceBound()");
-        final Typeface faTypeFace = Typeface.createFromAsset(getAssets(), "FontAwesome.ttf"); // todo ruben
-        final int defaultFirstRowTextColor = Color.parseColor("#646464");
-
         final FriendsPlugin friendsPlugin = mService.getPlugin(FriendsPlugin.class);
         final ServiceMenu menu = friendsPlugin.getStore().getMenu(email, page);
 
@@ -219,29 +215,26 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity implements M
                 cellLayout.setLayoutParams(lp);
                 Cell cell = new Cell();
                 cell.icon = (ImageView) cellLayout.findViewById(R.id.icon);
-                cell.faIcon = (TextView) cellLayout.findViewById(R.id.fa_icon);
                 cell.label = (TextView) cellLayout.findViewById(R.id.label);
                 cells[x][y] = cell;
                 if (y == 0) {
-                    cell.icon.setVisibility(View.GONE);
-                    cell.faIcon.setTypeface(faTypeFace);
-                    cell.faIcon.setTextColor(defaultFirstRowTextColor);
                     switch (x) {
                     case 0:
-                        cell.faIcon.setVisibility(View.VISIBLE);
-                        cell.faIcon.setText(R.string.fa_info);
+                        cell.icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_info).color(getResources().getColor(R.color.mc_page_light)).sizeDp(24).paddingDp(2));
                         break;
                     case 1:
-                        cell.faIcon.setVisibility(View.VISIBLE);
-                        cell.faIcon.setText(R.string.fa_envelope);
+                        cell.icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_envelope).color(getResources().getColor(R.color.mc_page_light)).sizeDp(24).paddingDp(2));
                         break;
                     case 2:
-                        cell.faIcon.setVisibility(View.INVISIBLE);
-                        cell.faIcon.setText(R.string.fa_phone);
+                        cell.icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_phone).color(getResources().getColor(R.color.mc_page_light)).sizeDp(24).paddingDp(2));
                         break;
                     case 3:
-                        cell.faIcon.setVisibility(View.INVISIBLE);
-                        cell.faIcon.setText(CloudConstants.isYSAAA() ? R.string.fa_qrcode : R.string.fa_thumbs_o_up);
+                        cell.icon.setVisibility(View.INVISIBLE);
+                        if (CloudConstants.isYSAAA()) {
+                            cell.icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_qrcode).color(getResources().getColor(R.color.mc_page_light)).sizeDp(24).paddingDp(2));
+                        } else {
+                            cell.icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_thumbs_o_up).color(getResources().getColor(R.color.mc_page_light)).sizeDp(24).paddingDp(2));
+                        }
                         break;
 
                     default:
@@ -415,11 +408,16 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity implements M
             p.setBackgroundDrawable(d);
         }
 
-        if (menuItemColor == null)
-            menuItemColor = Color.parseColor("#646464");
-
-        for (Cell cell : new Cell[] { cells[0][0], cells[1][0], cells[2][0], cells[3][0] })
-            cell.faIcon.setTextColor(menuItemColor);
+        if (menuItemColor != null) {
+            cells[0][0].icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_info).color(menuItemColor).sizeDp(24).paddingDp(2));
+            cells[1][0].icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_envelope).color(menuItemColor).sizeDp(24).paddingDp(2));
+            cells[2][0].icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_phone).color(menuItemColor).sizeDp(24).paddingDp(2));
+            if (CloudConstants.isYSAAA()) {
+                cells[3][0].icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_qrcode).color(menuItemColor).sizeDp(24).paddingDp(2));
+            } else {
+                cells[3][0].icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_thumbs_o_up).color(menuItemColor).sizeDp(24).paddingDp(2));
+            }
+        }
 
         if (menu.maxPage > 0) {
             for (int i = 0; i <= menu.maxPage; i++) {
@@ -533,9 +531,8 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity implements M
                 startActivity(friendDetails);
             }
         };
-        ((View) cell.faIcon.getParent()).setOnClickListener(onClickListener);
-        cell.icon.setVisibility(View.GONE);
-        cell.faIcon.setVisibility(View.VISIBLE);
+        ((View) cell.icon.getParent()).setOnClickListener(onClickListener);
+        cell.icon.setVisibility(View.VISIBLE);
         cell.label.setVisibility(View.VISIBLE);
         usedCells.add(cell);
     }
@@ -554,14 +551,13 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity implements M
                     return;
                 }
                 setLastTimeClicked(currentTime);
-                final Intent viewMessages = new Intent(ServiceActionMenuActivity.this, MessagingActivity.class);
+                final Intent viewMessages = new Intent(ServiceActionMenuActivity.this, MessagingFilterActivity.class);
                 viewMessages.putExtra(MessagingPlugin.MEMBER_FILTER, email);
                 startActivity(viewMessages);
             }
         };
-        ((View) cell.faIcon.getParent()).setOnClickListener(onClickListener);
-        cell.icon.setVisibility(View.GONE);
-        cell.faIcon.setVisibility(View.VISIBLE);
+        ((View) cell.icon.getParent()).setOnClickListener(onClickListener);
+        cell.icon.setVisibility(View.VISIBLE);
         cell.label.setVisibility(View.VISIBLE);
         usedCells.add(cell);
         handleBadge(friendStore);
@@ -620,8 +616,7 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity implements M
                 }
             };
             ((View) cell.icon.getParent()).setOnClickListener(onClickListener);
-            cell.icon.setVisibility(View.GONE);
-            cell.faIcon.setVisibility(View.VISIBLE);
+            cell.icon.setVisibility(View.VISIBLE);
             cell.label.setVisibility(View.VISIBLE);
             usedCells.add(cell);
         }
@@ -652,8 +647,7 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity implements M
                 }
             };
             ((View) cell.icon.getParent()).setOnClickListener(onClickListener);
-            cell.icon.setVisibility(View.GONE);
-            cell.faIcon.setVisibility(View.VISIBLE);
+            cell.icon.setVisibility(View.VISIBLE);
             cell.label.setVisibility(View.VISIBLE);
             usedCells.add(cell);
         }
@@ -677,8 +671,7 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity implements M
             }
         };
         ((View) cell.icon.getParent()).setOnClickListener(onClickListener);
-        cell.icon.setVisibility(View.GONE);
-        cell.faIcon.setVisibility(View.VISIBLE);
+        cell.icon.setVisibility(View.VISIBLE);
         cell.label.setVisibility(View.VISIBLE);
         usedCells.add(cell);
     }

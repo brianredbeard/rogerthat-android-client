@@ -60,7 +60,7 @@ import com.mobicage.rogerthat.util.ui.UIUtils;
 
 import org.w3c.dom.Text;
 
-public class GetLocationActivity extends ServiceBoundMapActivity {
+public class GetLocationActivity extends ServiceBoundActivity {
 
     private final static int TURNING_ON_GPS = 1;
     private final static int LOCATION_REQUEST_CODE = 2;
@@ -102,24 +102,12 @@ public class GetLocationActivity extends ServiceBoundMapActivity {
         }
     }
 
-    @Override
-    protected boolean isRouteDisplayed() {
-        return false;
-    }
 
     @Override
     protected void onServiceBound() {
         T.UI();
-        setContentView(R.layout.get_location);
+        setContentViewWithoutNavigationBar(R.layout.get_location);
         setTitle(R.string.get_location);
-        final Toolbar bar = (Toolbar) findViewById(R.id.toolbar);
-
-        bar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
 
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);

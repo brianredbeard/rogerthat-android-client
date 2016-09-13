@@ -13,21 +13,10 @@
     </ImageView>
 
     <TextView
-        android:id="@+id/fa_icon"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_below="@id/icon"
-        android:layout_centerHorizontal="true"
-        android:gravity="center"
-        android:textSize="45sp"
-        android:visibility="gone" >
-    </TextView>
-
-    <TextView
         android:id="@+id/label"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/fa_icon"
+        android:layout_below="@id/icon"
         android:layout_marginTop="5dp"
         android:gravity="center_horizontal"
         android:textSize="12.5dp"

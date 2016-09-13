@@ -80,6 +80,7 @@ public class ServiceFriendsActivity extends FriendsActivity {
                 .string.click_magnifying_glass_to_search_services));
 
         ImageButton magnifyingGlass = (ImageButton) findViewById(R.id.ic_magnifying_glass);
+        magnifyingGlass.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_search).color(getResources().getColor(R.color.mc_primary_color)).sizeDp(200).paddingDp(20));
 
         magnifyingGlass.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -108,6 +109,7 @@ public class ServiceFriendsActivity extends FriendsActivity {
         if (mServiceIsBound) {
             createCursor();
             ((FriendListAdapter) getListAdapter()).changeCursor(getCursor());
+            updateVisibleItems();
         }
     }
 
@@ -130,6 +132,10 @@ public class ServiceFriendsActivity extends FriendsActivity {
     @Override
     protected void loadCursorAndSetAdaptar() {
         super.loadCursorAndSetAdaptar();
+        updateVisibleItems();
+    }
+
+    private void updateVisibleItems() {
         if (mListAdapter.getCount() == 0) {
             boolean found = false;
             for (int i = 0; i < AppConstants.SEARCH_SERVICES_IF_NONE_CONNECTED.length; i++) {
@@ -139,7 +145,6 @@ public class ServiceFriendsActivity extends FriendsActivity {
                 }
             }
             if (found) {
-                // TODO ruben: Show the magnifying glass
                 findViewById(R.id.no_services).setVisibility(View.VISIBLE);
                 findViewById(R.id.friend_list).setVisibility(View.GONE);
             }

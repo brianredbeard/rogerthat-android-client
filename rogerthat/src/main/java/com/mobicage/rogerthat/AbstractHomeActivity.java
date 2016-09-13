@@ -305,7 +305,7 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity implemen
         } else if ("services".equals(activityName)) {
             goToServicesActivity(FriendStore.SERVICE_ORGANIZATION_TYPE_UNSPECIFIED, collapse);
         } else if ("friends".equals(activityName)) {
-            ActivityUtils.goToUserFriendsActivity(this, false);
+            ActivityUtils.goToFriendSearchActivity(this, false);
         } else if ("directory".equals(activityName)) {
             ActivityUtils.goToFriendSearchActivity(this, false);
         } else if ("profile".equals(activityName)) {

@@ -106,7 +106,6 @@ public class SettingsActivity extends ServiceBoundPreferenceActivity {
         registerReceiver(mBroadcastReceiver, filter);
 
         setTitle(R.string.settings);
-        // todo ruben nav bar
     }
 
     @Override

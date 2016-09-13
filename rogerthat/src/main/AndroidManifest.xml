@@ -139,11 +139,11 @@
         <activity
             android:name="com.mobicage.rogerthat.plugins.messaging.ChatInfoActivity"
             android:theme="@style/Theme.AppCompat.Light"
-            android:parentActivityName="com.mobicage.rogerthat.plugins.messaging.FriendsThreadActivity" >
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity" >
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.mobicage.rogerthat.plugins.messaging.FriendsThreadActivity" />
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
 
         <activity
@@ -174,92 +174,109 @@
             android:name="com.mobicage.rogerthat.NewsActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
-        </activity>
+        </activity> <!-- todo ruben -->
         <activity
             android:name="com.mobicage.rogerthat.plugins.messaging.FriendsThreadActivity"
             android:windowSoftInputMode="adjustResize|stateHidden"
             android:theme="@style/Theme.AppCompat.Light"
-            android:parentActivityName="com.mobicage.rogerthat.plugins.messaging.MessagingActivity" >
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity" >
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.mobicage.rogerthat.plugins.messaging.MessagingActivity" />
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.messaging.FriendsThreadMembersActivity"
             android:windowSoftInputMode="adjustResize|stateHidden"
             android:theme="@style/Theme.AppCompat.Light"
-            android:parentActivityName="com.mobicage.rogerthat.plugins.messaging.FriendsThreadActivity" >
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity" >
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.mobicage.rogerthat.plugins.messaging.FriendsThreadActivity" />
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity android:name="com.mobicage.rogerthat.plugins.messaging.MessagingActivity" >
         </activity>
-        <activity android:name="com.mobicage.rogerthat.plugins.messaging.ServiceThreadActivity" >
+        <activity
+            android:name="com.mobicage.rogerthat.plugins.messaging.MessagingFilterActivity"
+            android:theme="@style/Theme.AppCompat.Light"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity" >
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
+
+        <activity android:name="com.mobicage.rogerthat.plugins.messaging.ServiceThreadActivity" >
+        </activity> <!-- todo ruben -->
         <activity
             android:name="com.mobicage.rogerthat.AddFriendsActivity"
             android:configChanges="orientation|screenSize"
             android:theme="@style/Theme.AppCompat.Light"
-            android:parentActivityName="com.mobicage.rogerthat.UserFriendsActivity" >
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity" >
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.mobicage.rogerthat.UserFriendsActivity" />
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity android:name="com.mobicage.rogerthat.UserFriendsActivity" >
         </activity>
         <activity android:name="com.mobicage.rogerthat.ServiceFriendsActivity" >
         </activity>
         <activity android:name="com.mobicage.rogerthat.FriendCategoryActivity" >
-        </activity>
+        </activity> <!-- todo ruben -->
         <activity
             android:name="com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light"
-            android:parentActivityName="com.mobicage.rogerthat.ServiceFriendsActivity" >
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity" >
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.mobicage.rogerthat.ServiceFriendsActivity" />
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.friends.RecommendServiceActivity"
             android:configChanges="orientation|screenSize"
-            android:parentActivityName="com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity"
             android:theme="@style/Theme.AppCompat.Light">
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity" />
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.friends.ServiceSearchActivity"
             android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="stateHidden"
             android:theme="@style/Theme.AppCompat.Light"
-            android:parentActivityName="com.mobicage.rogerthat.ServiceFriendsActivity" >
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity" >
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.mobicage.rogerthat.ServiceFriendsActivity" />
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.friends.FriendSearchActivity"
             android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="stateHidden" >
-        </activity>
+        </activity> <!-- todo ruben -->
         <activity
             android:name="com.mobicage.rogerthat.plugins.friends.ActionScreenActivity"
-            android:configChanges="orientation|screenSize">
+            android:configChanges="orientation|screenSize"> <!-- todo ruben -->
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.friends.ContentBrandingActionScreenActivity"
-            android:configChanges="orientation|screenSize">
+            android:configChanges="orientation|screenSize"> <!-- todo ruben test loyalty -->
         </activity>
-        <activity android:name="com.mobicage.rogerthat.GetLocationActivity">
+        <activity
+            android:name="com.mobicage.rogerthat.GetLocationActivity"
+            android:theme="@style/Theme.AppCompat.Light"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity android:name="com.mobicage.rogerthat.SettingsActivity" >
         </activity>
@@ -274,110 +291,126 @@
         <activity
             android:name="com.mobicage.rogerthat.plugins.scan.ProcessScanActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" >
+            android:theme="@style/AppTheme.NoActionBar" > <!-- todo ruben -->
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.scan.InviteFriendActivity"
-            android:theme="@style/AppTheme.NoActionBar" >
+            android:theme="@style/AppTheme.NoActionBar" > <!-- todo ruben -->
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.scan.ServiceActionActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" >
+            android:theme="@style/AppTheme.NoActionBar" > <!-- todo ruben -->
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.ServiceDetailActivity"
             android:screenOrientation="portrait"
-            android:parentActivityName="com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity"
             android:theme="@style/Theme.AppCompat.Light">
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity" />
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.UserDetailActivity"
             android:screenOrientation="portrait"
-            android:parentActivityName="com.mobicage.rogerthat.UserFriendsActivity"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity"
             android:theme="@style/Theme.AppCompat.Light">
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.mobicage.rogerthat.UserFriendsActivity" />
+                android:value="com.mobicage.rogerthat.MainActivity" />
 
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.FriendDetailOrInviteActivity"
-            android:parentActivityName="com.mobicage.rogerthat.plugins.messaging.FriendsThreadMembersActivity"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light">
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.mobicage.rogerthat.plugins.messaging.FriendsThreadMembersActivity" />
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.messaging.ServiceMessageDetailActivity"
             android:configChanges="orientation|screenSize"
-            android:theme="@style/AppTheme.NoActionBar" >
+            android:theme="@style/Theme.AppCompat.Light"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.messaging.AttachmentViewerActivity"
             android:configChanges="orientation|screenSize"
-            android:theme="@android:style/Theme.Light.NoTitleBar" >
+            android:theme="@style/Theme.AppCompat.Light"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.FriendLocationActivity"
-            android:theme="@style/AppTheme.NoActionBar" >
+            android:theme="@style/AppTheme.NoActionBar" > <!-- todo ruben -->
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.FriendsLocationActivity"
-            android:theme="@style/AppTheme.NoActionBar" >
+            android:theme="@style/AppTheme.NoActionBar" > <!-- todo ruben -->
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.AboutActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light"
-            android:parentActivityName="com.mobicage.rogerthat.SettingsActivity">
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity">
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.mobicage.rogerthat.SettingsActivity" />
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
 
         <activity
             android:name="com.mobicage.rogerthat.SendMessageContactActivity"
             android:configChanges="orientation|screenSize"
             android:theme="@style/Theme.AppCompat.Light"
-            android:parentActivityName="com.mobicage.rogerthat.plugins.messaging.MessagingActivity">
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity">
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.mobicage.rogerthat.plugins.messaging.MessagingActivity" />
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.SendMessageMessageActivity"
             android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.AppCompat.Light"
-            android:parentActivityName="com.mobicage.rogerthat.SendMessageContactActivity">
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity">
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.mobicage.rogerthat.SendMessageContactActivity" />
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.SendMessageButtonActivity"
             android:configChanges="orientation|screenSize"
             android:theme="@style/Theme.AppCompat.Light"
-            android:parentActivityName="com.mobicage.rogerthat.SendMessageMessageActivity">
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity">
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.mobicage.rogerthat.SendMessageMessageActivity" />
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
 
-        <activity android:name="com.mobicage.rogerthat.plugins.history.HistoryListActivity" >
+        <activity android:name="com.mobicage.rogerthat.plugins.history.HistoryListActivity"
+            android:theme="@style/Theme.AppCompat.Light"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.GroupDetailActivity"
