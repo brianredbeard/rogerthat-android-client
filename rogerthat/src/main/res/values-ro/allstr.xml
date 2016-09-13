@@ -178,7 +178,7 @@
     <string name="hint_double_tap">Atingeti de doua ori pentru a raspunde</string>
     <string name="hint_swipe">Glisati cu degetul pentru a deschide o alta conversatie</string>
     <string name="ibeacon_usage_augment_experience">%1$s foloseste iBeacons pentru a spori experienta dvs. ca si utilizator</string>
-    <string name="ibeacon_usage_discover_services_automatically">Descopera automat servicii pentru clienti</string>
+    <string name="ibeacon_usage_discover_services_automatically">Descopera automat servicii pentru clienti.</string>
     <string name="ibeacon_usage_not_used_for">%1$s nu:</string>
     <string name="ibeacon_usage_store">Stocati locatia dvs.</string>
     <string name="ibeacon_usage_track_location_without_concent">Urmăriți-vă locația fără consimțământul dumneavoastră prealabil</string>
@@ -215,13 +215,13 @@
     <string name="loading">Incarcare…</string>
     <string name="locate_friend">Unde este %1$s ?</string>
     <string name="location_usage">Utilizarea locatiei</string>
-    <string name="location_usage_augment_experience">%1$s foloseste serviciile de localizare pentru a spori experienta dvs. ca si utilizator</string>
-    <string name="location_usage_discover_services_automatically">Descopera automat servicii pentru clienti</string>
-    <string name="location_usage_location_friends">Dezvaluie locatia cu prietenii dvs. (numai atunci cand permiteti acest lucru)</string>
+    <string name="location_usage_augment_experience">%1$s foloseste serviciile de localizare pentru a spori experienta dvs. ca si utilizator.</string>
+    <string name="location_usage_discover_services_automatically">Descopera automat servicii pentru clienti.</string>
+    <string name="location_usage_location_friends">Dezvaluie locatia cu prietenii dvs. (numai atunci cand permiteti acest lucru).</string>
     <string name="location_usage_not_used_for">%1$s nu:</string>
-    <string name="location_usage_services_area">Gasiti servicii pentru clienti in zona dumneavoastra</string>
+    <string name="location_usage_services_area">Gasiti servicii pentru clienti in zona dumneavoastra.</string>
     <string name="location_usage_store">Stocati locatia dvs.</string>
-    <string name="location_usage_track_location_without_concent">Urmariti locatia dumneavoastra fara consimtamantul dumneavoastra prealabil</string>
+    <string name="location_usage_track_location_without_concent">Urmariti locatia dumneavoastra fara consimtamantul dumneavoastra prealabil.</string>
     <string name="location_usage_used_for">%1$s utilizeaza locatia dvs. la:</string>
     <string name="locking">Mesaje blocate, va rugam asteptati…</string>
     <string name="logs_forwarded">Jurnalele %2$s sunt transmise la %1$s.</string>
