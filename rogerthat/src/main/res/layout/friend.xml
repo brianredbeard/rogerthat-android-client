@@ -87,52 +87,49 @@
                 android:textColor="@android:color/secondary_text_light"
                 android:textSize="14sp"
                 android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/actions"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="10dp"
+                android:visibility="gone" >
+
+                <ImageView
+                    android:id="@+id/location"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:layout_weight="1">
+                </ImageView>
+
+                <ImageView
+                    android:id="@+id/send"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:layout_weight="1">
+                </ImageView>
+
+                <ImageView
+                    android:id="@+id/details"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:layout_weight="1">
+                </ImageView>
+
+                <ImageView
+                    android:id="@+id/history"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:layout_weight="1" >
+                </ImageView>
+
+            </LinearLayout>
         </LinearLayout>
     </RelativeLayout>
-
-    <LinearLayout
-        android:id="@+id/actions"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="5dp"
-        android:visibility="gone" >
-
-        <ImageView
-            android:id="@+id/location"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/mc_state_selector"
-            android:src="@drawable/friend_location" >
-        </ImageView>
-
-        <ImageView
-            android:id="@+id/history"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/mc_state_selector"
-            android:src="@drawable/friend_history" >
-        </ImageView>
-
-        <ImageView
-            android:id="@+id/send"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/mc_state_selector"
-            android:src="@drawable/friend_new_message" >
-        </ImageView>
-
-        <ImageView
-            android:id="@+id/details"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/mc_state_selector"
-            android:src="@drawable/friend_details" >
-        </ImageView>
-    </LinearLayout>
 
 </LinearLayout>

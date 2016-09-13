@@ -83,6 +83,12 @@ public class ServiceDetailActivity extends FriendDetailActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         T.UI();
         boolean result = super.onCreateOptionsMenu(menu);
+        if (mExistence == Friend.NOT_FOUND)
+            return result;
+
+        if (SystemUtils.isFlagEnabled(mFriend.flags, FriendsPlugin.FRIEND_NOT_REMOVABLE))
+            return result;
+
         menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_trash).color(Color.DKGRAY).sizeDp(18));
         return result;
     }

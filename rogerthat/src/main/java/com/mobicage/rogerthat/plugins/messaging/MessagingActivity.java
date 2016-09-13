@@ -323,6 +323,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
         mFloatingActionButton.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
+                // todo ruben check memberfilter and skip select friend
                 showSendMessageActivity();
             }
         });

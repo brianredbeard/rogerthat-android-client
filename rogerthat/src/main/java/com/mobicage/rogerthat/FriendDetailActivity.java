@@ -45,6 +45,8 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
@@ -52,6 +54,8 @@ import com.mobicage.rogerthat.plugins.messaging.BrandingFailureException;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr.BrandingResult;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr.ColorScheme;
+import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
+import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.plugins.messaging.mfr.EmptyStaticFlowException;
 import com.mobicage.rogerthat.plugins.messaging.mfr.JsMfr;
 import com.mobicage.rogerthat.plugins.messaging.mfr.MessageFlowRun;
@@ -93,7 +97,6 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
     private AlertDialog mRequestFriendToShareLocationDialog;
 
     // assigned in onCreate
-    private Button mFindFriendLocationButton;
     private View mTopArea;
     private View mFriendArea;
     private ViewGroup mServiceArea;
@@ -109,7 +112,6 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
         setContentViewWithoutNavigationBar(R.layout.friend_detail);
 
         mTopArea = findViewById(R.id.friend_detail_layout);
-        mFindFriendLocationButton = (Button) findViewById(R.id.retrieve_friend_location_button);
         mServiceArea = (ViewGroup) findViewById(R.id.service_area);
         mPokeArea = findViewById(R.id.poke_area);
         mFriendArea = findViewById(R.id.friend_area);
@@ -216,6 +218,8 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
             return;
         }
 
+        setTitle(mFriend.getDisplayName());
+
         if (getPassportVisibility() != View.GONE) {
             GetFriendIdentityQRCodeResponseHandler rh = new GetFriendIdentityQRCodeResponseHandler();
             rh.setFriendEmail(mFriend.email);
@@ -229,14 +233,9 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
             }
         }
 
-        CheckBox iShareLocationCheckBox = (CheckBox) findViewById(R.id.share_location);
-        // Increase space between checkbox and text
-        iShareLocationCheckBox.setPadding(
-            iShareLocationCheckBox.getPaddingLeft() + UIUtils.convertDipToPixels(this, 10),
-            iShareLocationCheckBox.getPaddingTop(), iShareLocationCheckBox.getPaddingRight(),
-            iShareLocationCheckBox.getPaddingBottom());
-
-        mFindFriendLocationButton.setOnClickListener(new SafeViewOnClickListener() {
+        ImageView location = (ImageView) findViewById(R.id.location);
+        location.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_map_marker).color(getResources().getColor(R.color.mc_primary_color)).sizeDp(35));
+        location.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
                 T.UI();
@@ -254,7 +253,6 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
                     builder.create().show();
 
                     mFriendsPlugin.scheduleSingleFriendLocationRetrieval(mFriend.email);
-                    mFindFriendLocationButton.setEnabled(false);
                 } else {
 
                     SafeDialogInterfaceOnClickListener onPositiveClickListener = new SafeDialogInterfaceOnClickListener() {
@@ -283,6 +281,35 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
                 }
             }
         });
+
+        ImageView newMessage = (ImageView) findViewById(R.id.send);
+        newMessage.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_envelope).color(getResources().getColor(R.color.mc_primary_color)).sizeDp(35));
+        newMessage.setOnClickListener(new SafeViewOnClickListener() {
+            @Override
+            public void safeOnClick(View v) {
+                final Intent sendMessage = new Intent(FriendDetailActivity.this, SendMessageMessageActivity.class);
+                sendMessage.putExtra(SendMessageMessageActivity.RECIPIENTS, new String[] { mFriend.email });
+                startActivity(sendMessage);
+            }
+        });
+
+        ImageView history = (ImageView) findViewById(R.id.history);
+        history.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_history).color(getResources().getColor(R.color.mc_primary_color)).sizeDp(35));
+        history.setOnClickListener(new SafeViewOnClickListener() {
+            @Override
+            public void safeOnClick(View v) {
+                final Intent viewMessages = new Intent(FriendDetailActivity.this, MessagingActivity.class);
+                viewMessages.putExtra(MessagingPlugin.MEMBER_FILTER, mFriend.email);
+                startActivity(viewMessages);
+            }
+        });
+
+        CheckBox iShareLocationCheckBox = (CheckBox) findViewById(R.id.share_location);
+        // Increase space between checkbox and text
+        iShareLocationCheckBox.setPadding(
+                iShareLocationCheckBox.getPaddingLeft() + UIUtils.convertDipToPixels(this, 10),
+                iShareLocationCheckBox.getPaddingTop(), iShareLocationCheckBox.getPaddingRight(),
+                iShareLocationCheckBox.getPaddingBottom());
 
         IntentFilter filter = getIntentFilter();
         if (filter != null)
@@ -608,12 +635,6 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
                 mFriendsPlugin.updateFriendShareLocation(friend.email, isChecked);
             }
         });
-
-        mFindFriendLocationButton.setEnabled(true);
-        if (friend.sharesLocation)
-            mFindFriendLocationButton.setText(getString(R.string.locate_friend, mFriendName));
-        else
-            mFindFriendLocationButton.setText(getString(R.string.request_location_of, mFriendName));
 
         dismissDialogs();
 

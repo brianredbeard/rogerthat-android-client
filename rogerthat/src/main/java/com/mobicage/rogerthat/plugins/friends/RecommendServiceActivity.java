@@ -115,7 +115,8 @@ public class RecommendServiceActivity extends ServiceBoundActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.recommend_service);
+        setContentViewWithoutNavigationBar(R.layout.recommend_service);
+        setTitle(R.string.recommend_service);
 
         mViewFlipper = (ViewFlipper) findViewById(R.id.view_flipper);
 

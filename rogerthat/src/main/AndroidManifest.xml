@@ -227,7 +227,13 @@
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.friends.RecommendServiceActivity"
-            android:configChanges="orientation|screenSize">
+            android:configChanges="orientation|screenSize"
+            android:parentActivityName="com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity"
+            android:theme="@style/Theme.AppCompat.Light">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity" />
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.friends.ServiceSearchActivity"
@@ -282,7 +288,12 @@
         <activity
             android:name="com.mobicage.rogerthat.ServiceDetailActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" >
+            android:parentActivityName="com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity"
+            android:theme="@style/Theme.AppCompat.Light">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity" />
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.UserDetailActivity"

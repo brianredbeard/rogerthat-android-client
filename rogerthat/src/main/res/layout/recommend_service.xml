@@ -8,7 +8,7 @@
         android:id="@+id/tab_view"
         android:layout_width="fill_parent"
         android:layout_height="50dp"
-        android:background="@android:color/white"
+        android:background="@color/mc_background_color"
         android:baselineAligned="false" >
 
         <RelativeLayout
@@ -111,7 +111,7 @@
         android:id="@+id/view_flipper"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:background="@color/mc_background"
+        android:background="@color/mc_background_color"
         android:inAnimation="@android:anim/fade_in"
         android:outAnimation="@android:anim/fade_out" >
 

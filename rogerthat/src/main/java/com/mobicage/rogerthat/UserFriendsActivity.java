@@ -218,6 +218,7 @@ public class UserFriendsActivity extends FriendsActivity {
 
     private void handleDetails(final View listItem) {
         ImageView details = (ImageView) listItem.findViewById(R.id.details);
+        details.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_user).color(getResources().getColor(R.color.mc_primary_color)).sizeDp(24));
         details.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -233,6 +234,7 @@ public class UserFriendsActivity extends FriendsActivity {
 
     private void handleSend(final View listItem, final Friend friend) {
         ImageView newMessage = (ImageView) listItem.findViewById(R.id.send);
+        newMessage.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_envelope).color(getResources().getColor(R.color.mc_primary_color)).sizeDp(24));
         newMessage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -245,6 +247,7 @@ public class UserFriendsActivity extends FriendsActivity {
 
     private void handleHistory(final View listItem, final Friend friend) {
         ImageView history = (ImageView) listItem.findViewById(R.id.history);
+        history.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_history).color(getResources().getColor(R.color.mc_primary_color)).sizeDp(24));
         history.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -257,6 +260,7 @@ public class UserFriendsActivity extends FriendsActivity {
 
     private void handleLocation(final View listItem, final Friend friend) {
         ImageView location = (ImageView) listItem.findViewById(R.id.location);
+        location.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_map_marker).color(getResources().getColor(R.color.mc_primary_color)).sizeDp(24));
         location.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

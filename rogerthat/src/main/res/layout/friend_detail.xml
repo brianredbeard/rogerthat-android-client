@@ -6,7 +6,7 @@
     <ScrollView
         android:id="@+id/friend_detail_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:background="@color/mc_background_color"
         android:fillViewport="true"
         android:scrollbarStyle="insideOverlay"
@@ -14,7 +14,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical">
 
             <include layout="@layout/friend_detail_header" />
@@ -28,7 +28,7 @@
                 <TextView
                     android:id="@+id/description"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_marginLeft="5dp"
                     android:layout_marginRight="5dp"
                     android:textSize="16sp" />
@@ -47,20 +47,46 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
-                android:layout_marginTop="15dp"
                 android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/actions"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:orientation="horizontal" >
+
+                    <ImageView
+                        android:id="@+id/location"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:layout_weight="1">
+                    </ImageView>
+
+                    <ImageView
+                        android:id="@+id/send"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:layout_weight="1">
+                    </ImageView>
+
+                    <ImageView
+                        android:id="@+id/history"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:layout_weight="1" >
+                    </ImageView>
+
+                </LinearLayout>
 
                 <CheckBox
                     android:id="@+id/share_location"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textSize="16sp" />
-
-                <Button
-                    android:id="@+id/retrieve_friend_location_button"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp" />
 
                 <com.mobicage.rogerthat.widget.ResizableImageView
                     android:id="@+id/qrcode"
