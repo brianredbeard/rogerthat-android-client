@@ -4,7 +4,7 @@
     android:id="@+id/activity"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="@drawable/activity_background"
+    android:background="@color/mc_background_color"
     android:gravity="center_horizontal" >
 
     <ImageView

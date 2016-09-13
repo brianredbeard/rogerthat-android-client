@@ -532,7 +532,7 @@ public class AdvancedOrderWidget extends Widget {
         }
         renderListData();
 
-        mFontAwesomeTypeFace = Typeface.createFromAsset(mActivity.getAssets(), "FontAwesome.ttf");
+        mFontAwesomeTypeFace = Typeface.createFromAsset(mActivity.getAssets(), "FontAwesome.ttf"); // todo ruben
         mBasketBtn = (TextView) findViewById(R.id.basket);
         mBasketBtn.setText(R.string.fa_shopping_cart);
         mBasketBtn.setTypeface(mFontAwesomeTypeFace);

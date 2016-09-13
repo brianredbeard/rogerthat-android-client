@@ -57,12 +57,17 @@ import android.widget.TextView;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.HomeActivity;
 import com.mobicage.rogerthat.IdentityStore;
+import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.SendMessageContactActivity;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.ServiceBoundCursorListActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.messaging.MessageStore.CursorSet;
+import com.mobicage.rogerthat.plugins.scan.ProcessScanActivity;
+import com.mobicage.rogerthat.util.ActivityUtils;
+import com.mobicage.rogerthat.util.RegexPatterns;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
@@ -198,14 +203,98 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
         setListView((ListView) findViewById(R.id.message_list));
         super.onCreate(savedInstanceState);
         mResources = getResources();
+    }
 
-        // todo color messages in drawer
+    private void processMessageUpdatesIntent(final Intent intent) {
+        final String url = intent.getDataString();
+        if (intent.getBooleanExtra(HomeActivity.INTENT_PROCESSED, false))
+            return;
+        if (url != null) {
+            ActivityUtils.goToMessagingActivity(this, false);
+            processUrl(url);
+        } else if (intent.hasExtra(HomeActivity.INTENT_KEY_LAUNCHINFO)) {
+            String value = intent.getStringExtra(HomeActivity.INTENT_KEY_LAUNCHINFO);
+            if (HomeActivity.INTENT_VALUE_SHOW_FRIENDS.equals(value)) {
+                // goToUserFriendsActivity();
+
+            } else if (HomeActivity.INTENT_VALUE_SHOW_MESSAGES.equals(value)) {
+                ActivityUtils.goToMessagingActivity(this, false);
+
+            } else if (HomeActivity.INTENT_VALUE_SHOW_NEW_MESSAGES.equals(value)) {
+                if (intent.hasExtra(HomeActivity.INTENT_KEY_MESSAGE)) {
+                    String messageKey = intent.getStringExtra(HomeActivity.INTENT_KEY_MESSAGE);
+                    goToMessageDetail(messageKey);
+                } else {
+                    ActivityUtils.goToMessagingActivity(this, false);
+                }
+
+            } else if (HomeActivity.INTENT_VALUE_SHOW_UPDATED_MESSAGES.equals(value)) {
+                if (intent.hasExtra(HomeActivity.INTENT_KEY_MESSAGE)) {
+                    String messageKey = intent.getStringExtra(HomeActivity.INTENT_KEY_MESSAGE);
+                    goToMessageDetail(messageKey);
+                } else {
+                    ActivityUtils.goToMessagingActivity(this, false);
+                }
+
+            } else if (HomeActivity.INTENT_VALUE_SHOW_SCANTAB.equals(value)) {
+                ActivityUtils.goToScanActivity(this, false);
+            } else {
+                L.bug("Unexpected (key, value) for HomeActivity intent: (" + HomeActivity.INTENT_KEY_LAUNCHINFO + ", " + value + ")");
+            }
+        }
+        intent.putExtra(HomeActivity.INTENT_PROCESSED, true);
+    }
+
+    private void processUrl(final String url) {
+        T.UI();
+        if (RegexPatterns.OPEN_HOME_URL.matcher(url).matches())
+            return;
+
+        if (RegexPatterns.FRIEND_INVITE_URL.matcher(url).matches()
+                || RegexPatterns.SERVICE_INTERACT_URL.matcher(url).matches()) {
+            final Intent launchIntent = new Intent(this, ProcessScanActivity.class);
+            launchIntent.putExtra(ProcessScanActivity.URL, url);
+            launchIntent.putExtra(ProcessScanActivity.SCAN_RESULT, false);
+            startActivity(launchIntent);
+        }
+    }
+
+    private void goToMessageDetail(final String messageKey) {
+        Message message = mMessagingPlugin.getStore().getPartialMessageByKey(messageKey);
+        mMessagingPlugin.showMessage(this, message, null);
+    }
+
+    @Override
+    protected String[] getAllReceivingIntents() {
+        return new String[]{MessagingPlugin.NEW_MESSAGE_RECEIVED_INTENT,
+                MessagingPlugin.MESSAGE_MEMBER_STATUS_UPDATE_RECEIVED_INTENT, MessagingPlugin.MESSAGE_DIRTY_CLEANED_INTENT,
+                MessagingPlugin.MESSAGE_KEY_UPDATED_INTENT, MessagingPlugin.MESSAGE_LOCKED_INTENT,
+                MessagingPlugin.MESSAGE_PROCESSED_INTENT, MessagingPlugin.MESSAGE_FAILURE,
+                MessagingPlugin.MESSAGE_THREAD_VISIBILITY_CHANGED_INTENT, MessagingPlugin.THREAD_DELETED_INTENT,
+                MessagingPlugin.THREAD_RECOVERED_INTENT, MessagingPlugin.THREAD_MODIFIED_INTENT,
+                FriendsPlugin.FRIEND_AVATAR_CHANGED_INTENT, IdentityStore.IDENTITY_CHANGED_INTENT,
+                FriendsPlugin.FRIENDS_LIST_REFRESHED};
+    }
+
+    @Override
+    protected void onServiceBound() {
+        T.UI();
+        mMessagingPlugin = mService.getPlugin(MessagingPlugin.class);
+        if (mMemberFilter == null)
+            mMessagingPlugin.inboxOpened();
+        mFriendsPlugin = mService.getPlugin(FriendsPlugin.class);
+        mMyEmail = mService.getIdentityStore().getIdentity().getEmail();
 
         Intent intent = getIntent();
         if (intent != null) {
-            Bundle extras = intent.getExtras();
-            if (extras != null) {
-                mMemberFilter = extras.getString(MessagingPlugin.MEMBER_FILTER);
+            final String intentAction = intent.getAction();
+            if (MainActivity.ACTION_NOTIFICATION_MESSAGE_UPDATES.equals(intentAction)) {
+                processMessageUpdatesIntent(intent);
+            } else {
+                Bundle extras = intent.getExtras();
+                if (extras != null) {
+                    mMemberFilter = extras.getString(MessagingPlugin.MEMBER_FILTER);
+                }
             }
         }
 
@@ -241,28 +330,6 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
         if (!AppConstants.FRIENDS_ENABLED) {
             mFloatingActionButton.hide();
         }
-    }
-
-    @Override
-    protected String[] getAllReceivingIntents() {
-        return new String[]{MessagingPlugin.NEW_MESSAGE_RECEIVED_INTENT,
-                MessagingPlugin.MESSAGE_MEMBER_STATUS_UPDATE_RECEIVED_INTENT, MessagingPlugin.MESSAGE_DIRTY_CLEANED_INTENT,
-                MessagingPlugin.MESSAGE_KEY_UPDATED_INTENT, MessagingPlugin.MESSAGE_LOCKED_INTENT,
-                MessagingPlugin.MESSAGE_PROCESSED_INTENT, MessagingPlugin.MESSAGE_FAILURE,
-                MessagingPlugin.MESSAGE_THREAD_VISIBILITY_CHANGED_INTENT, MessagingPlugin.THREAD_DELETED_INTENT,
-                MessagingPlugin.THREAD_RECOVERED_INTENT, MessagingPlugin.THREAD_MODIFIED_INTENT,
-                FriendsPlugin.FRIEND_AVATAR_CHANGED_INTENT, IdentityStore.IDENTITY_CHANGED_INTENT,
-                FriendsPlugin.FRIENDS_LIST_REFRESHED};
-    }
-
-    @Override
-    protected void onServiceBound() {
-        T.UI();
-        mMessagingPlugin = mService.getPlugin(MessagingPlugin.class);
-        if (mMemberFilter == null)
-            mMessagingPlugin.inboxOpened();
-        mFriendsPlugin = mService.getPlugin(FriendsPlugin.class);
-        mMyEmail = mService.getIdentityStore().getIdentity().getEmail();
 
         if (mMemberFilter == null) {
             setTitle(R.string.tab_messaging);
@@ -282,6 +349,8 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
         for (String action : getAllReceivingIntents())
             filter.addAction(action);
         registerReceiver(getDefaultBroadcastReceiver(), filter);
+
+
     }
 
     @Override

@@ -86,7 +86,7 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity implemen
         }
     }
 
-    protected static final String INTENT_PROCESSED = "processed";
+    public static final String INTENT_PROCESSED = "processed";
 
     public final static String INTENT_KEY_LAUNCHINFO = "launchInfo";
     public final static String INTENT_VALUE_SHOW_MESSAGES = "showMessages";

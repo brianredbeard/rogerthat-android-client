@@ -1,7 +1,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="@color/mc_white"
+    android:background="@color/mc_background_color"
     android:padding="3dp">
 
     <ImageView
@@ -10,7 +10,6 @@
         android:layout_height="45dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:background="@drawable/avatar_background_black"
         android:padding="1dp"
         android:scaleType="fitCenter" />
 
@@ -25,9 +24,9 @@
 
         <ProgressBar
             android:id="@+id/friend_spinner"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginRight="5dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight="10dp"
             android:indeterminate="true"
             android:visibility="gone" />
 
@@ -37,14 +36,13 @@
         <!--android:layout_height="wrap_content"-->
         <!--android:visibility="gone" />-->
 
-        <TextView
+        <ImageView
             android:id="@+id/friend_existence"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="30dp"
             android:layout_marginRight="10dp"
             android:padding="7dp"
-            android:textColor="@color/mc_white"
             android:visibility="gone" />
 
     </LinearLayout>

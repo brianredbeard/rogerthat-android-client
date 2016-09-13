@@ -35,8 +35,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.LinearGradient;
-import android.graphics.Shader;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -55,6 +54,7 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -62,6 +62,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.ServiceDetailActivity;
@@ -109,7 +111,8 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.service_search);
+        setContentViewWithoutNavigationBar(R.layout.service_search);
+        setTitle(R.string.discover_services_short);
 
         mSearchCategoryLabels = (LinearLayout) findViewById(R.id.search_category);
         mSearchCategoryViewFlipper = (SafeViewFlipper) findViewById(R.id.search_result_lists);
@@ -151,7 +154,9 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
             }
         });
 
-        findViewById(R.id.search_button).setOnClickListener(new SafeViewOnClickListener() {
+        final ImageButton searchButton = (ImageButton) findViewById(R.id.search_button);
+        searchButton.setImageDrawable(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_search).color(Color.DKGRAY).sizeDp(24));
+        searchButton.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
                 if (TextUtils.isEmptyOrWhitespace(mSearchString)) {
@@ -263,7 +268,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
             @Override
             public String[] onSafeReceive(Context context, Intent intent) {
                 String action = intent.getAction();
-
+                L.i("onSafeReceive: "+ action);
                 if (mSearchString != null && FriendsPlugin.SERVICE_SEARCH_RESULT_INTENT.equals(action)) {
                     if (mSearchString.equals(intent.getStringExtra(SEARCH_STRING))) {
                         mProgressDialog.dismiss();
@@ -500,18 +505,15 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
             // Set status icon
             v.findViewById(R.id.friend_existence_layout).setVisibility(View.VISIBLE);
             ProgressBar spinnerView = (ProgressBar) v.findViewById(R.id.friend_spinner);
-            TextView statusView = (TextView) v.findViewById(R.id.friend_existence);
-
-            Typeface fa = Typeface.createFromAsset(getAssets(), "FontAwesome.ttf");
-            statusView.setTypeface(fa);
+            ImageView statusView = (ImageView) v.findViewById(R.id.friend_existence);
 
             switch (existence) {
                 case Friend.ACTIVE:
                     spinnerView.setVisibility(View.GONE);
                     statusView.setVisibility(View.VISIBLE);
-                    statusView.setText(R.string.fa_check);
-                    statusView.setTextSize(18);
+                    statusView.setImageDrawable(new IconicsDrawable(ServiceSearchActivity.this).icon(FontAwesome.Icon.faw_check).color(Color.WHITE).sizeDp(18));
                     statusView.setBackgroundResource(R.drawable.grey_gradient);
+
 
                     break;
                 case Friend.DELETED:
@@ -519,9 +521,8 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
                 case Friend.NOT_FOUND:
                     spinnerView.setVisibility(View.GONE);
                     statusView.setVisibility(View.VISIBLE);
-                    statusView.setText(R.string.fa_plus);
-                    statusView.setTextSize(20);
-                    statusView.setBackgroundResource(R.drawable.green_gradient);
+                    statusView.setImageDrawable(new IconicsDrawable(ServiceSearchActivity.this).icon(FontAwesome.Icon.faw_plus).color(Color.WHITE).sizeDp(18));
+                    statusView.setBackgroundResource(R.drawable.tint_gradient);
 
                     break;
                 case Friend.INVITE_PENDING:

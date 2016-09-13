@@ -474,19 +474,10 @@ public class ProfileActivity extends ServiceBoundActivity {
         if (mShownAfterRegistration) {
             L.d("mShownAfterRegistration: " + mShownAfterRegistration);
             updateProfileLayout(true, false);
-            final Button completeProfileSkip = ((Button) findViewById(R.id.complete_profile_skip));
 
             image.setVisibility(View.GONE);
             nameView.setVisibility(View.GONE);
             emailView.setVisibility(View.GONE);
-            completeProfileSkip.setVisibility(View.VISIBLE);
-
-            completeProfileSkip.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    finish();
-                }
-            });
             setTitle(R.string.complete_your_profile);
             setNavigationBarBurgerVisible(false);
         } else {

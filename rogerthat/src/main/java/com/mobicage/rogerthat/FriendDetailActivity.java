@@ -507,7 +507,7 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
         webView.setVisibility(View.VISIBLE);
 
         if (br.color == null) {
-            mTopArea.setBackgroundResource(R.drawable.activity_background);
+            mTopArea.setBackgroundResource(R.color.mc_background_color);
         } else {
             mTopArea.setBackgroundColor(br.color);
         }
@@ -593,7 +593,7 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
         } else {
             descriptionView.setVisibility(View.VISIBLE);
             mServiceArea.findViewById(R.id.webview).setVisibility(View.GONE);
-            mTopArea.setBackgroundResource(R.drawable.activity_background);
+            mTopArea.setBackgroundResource(R.color.mc_background_color);
         }
 
         final CheckBox iShareLocationCheckBox = (CheckBox) findViewById(R.id.share_location);

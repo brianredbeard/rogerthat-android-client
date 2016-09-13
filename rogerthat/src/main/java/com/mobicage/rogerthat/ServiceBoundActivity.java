@@ -375,7 +375,11 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
 
         LinearLayout item = (LinearLayout) findViewById(R.id.linear_layout);
         View child = getLayoutInflater().inflate(layoutResID, null);
-        item.addView(child);
+
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+
+        item.addView(child, layoutParams);
 
         final DrawerLayout drawer = getDrawer();
         mDrawerToggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string

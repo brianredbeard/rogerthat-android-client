@@ -76,7 +76,7 @@
                 android:background="@color/mc_highlight_background"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
+                android:layout_marginTop="3dp"
                 android:padding="10dp"
                 android:orientation="horizontal" >
 
@@ -127,7 +127,7 @@
                 android:background="@color/mc_highlight_background"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
+                android:layout_marginTop="3dp"
                 android:padding="10dp"
                 android:orientation="horizontal" >
 
@@ -137,9 +137,6 @@
                     android:layout_height="20dp"
                     android:layout_alignParentRight="true"
                     android:layout_centerInParent="true"
-                    app:ico_color="@android:color/darker_gray"
-                    app:ico_icon="faw_pencil"
-                    app:ico_size="48dp"
                     android:src="@drawable/ic_menu_edit"
                     android:visibility="invisible" >
                 </ImageView>
@@ -177,28 +174,11 @@
 
             </RelativeLayout>
 
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:layout_gravity="bottom"
-                android:layout_marginTop="10dp"
-                android:orientation="horizontal" >
-
-                <Button
-                    android:id="@+id/complete_profile_skip"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/skip"
-                    android:visibility="gone" >
-                </Button>
-
-            </LinearLayout>
-            
             <LinearLayout 
                 android:id="@+id/profile_data"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
                 android:orientation="vertical"
                 android:visibility="gone" >
             </LinearLayout>

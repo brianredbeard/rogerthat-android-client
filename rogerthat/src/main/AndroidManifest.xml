@@ -149,6 +149,7 @@
         <activity
             android:name="com.mobicage.rogerthat.registration.RegistrationActivity2"
             android:configChanges="keyboardHidden|orientation"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar" >
         </activity>
@@ -217,6 +218,7 @@
         <activity
             android:name="com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity"
             android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light"
             android:parentActivityName="com.mobicage.rogerthat.ServiceFriendsActivity" >
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
@@ -230,7 +232,13 @@
         <activity
             android:name="com.mobicage.rogerthat.plugins.friends.ServiceSearchActivity"
             android:configChanges="orientation|screenSize"
-            android:windowSoftInputMode="stateHidden" >
+            android:windowSoftInputMode="stateHidden"
+            android:theme="@style/Theme.AppCompat.Light"
+            android:parentActivityName="com.mobicage.rogerthat.ServiceFriendsActivity" >
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.ServiceFriendsActivity" />
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.friends.FriendSearchActivity"
@@ -324,7 +332,6 @@
         <activity
             android:name="com.mobicage.rogerthat.SendMessageContactActivity"
             android:configChanges="orientation|screenSize"
-            android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.AppCompat.Light"
             android:parentActivityName="com.mobicage.rogerthat.plugins.messaging.MessagingActivity">
             <!-- Parent activity meta-data to support 4.0 and lower -->
@@ -346,7 +353,6 @@
         <activity
             android:name="com.mobicage.rogerthat.SendMessageButtonActivity"
             android:configChanges="orientation|screenSize"
-            android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.AppCompat.Light"
             android:parentActivityName="com.mobicage.rogerthat.SendMessageMessageActivity">
             <!-- Parent activity meta-data to support 4.0 and lower -->

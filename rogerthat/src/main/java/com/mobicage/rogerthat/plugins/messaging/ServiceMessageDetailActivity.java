@@ -202,7 +202,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
         super.onCreate(savedInstanceState);
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        mFontAwesomeTypeFace = Typeface.createFromAsset(getAssets(), "FontAwesome.ttf");
+        mFontAwesomeTypeFace = Typeface.createFromAsset(getAssets(), "FontAwesome.ttf"); // todo ruben
     }
 
     @Override

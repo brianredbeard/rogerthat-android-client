@@ -2,12 +2,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/mc_background_color"
     android:orientation="vertical">
 
-    <FrameLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/message_thread_header"
+        android:orientation="horizontal"
         android:padding="5dp">
 
         <EditText
@@ -15,7 +16,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="@string/discover_services_short"
+            android:hint="@string/enter_search_query"
             android:imeOptions="actionSearch"
             android:inputType="textEmailAddress" />
 
@@ -23,16 +24,17 @@
             android:id="@+id/search_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="right"
+            android:layout_gravity="right|center_vertical"
             android:background="@null"
-            android:src="@drawable/ic_menu_search" />
-    </FrameLayout>
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp" />
+    </LinearLayout>
 
     <HorizontalScrollView
         android:id="@+id/search_category_scroll_container"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:background="@color/mc_background"
+        android:background="@color/mc_background_color"
         android:scrollbars="none">
 
         <LinearLayout
@@ -48,6 +50,7 @@
     <com.mobicage.rogerthat.util.ui.SafeViewFlipper
         android:id="@+id/search_result_lists"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent" />
+        android:layout_height="fill_parent"
+        android:background="@color/mc_background_color"/>
 
 </LinearLayout>

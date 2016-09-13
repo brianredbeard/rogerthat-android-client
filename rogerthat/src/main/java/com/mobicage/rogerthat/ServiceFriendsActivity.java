@@ -19,6 +19,7 @@
 package com.mobicage.rogerthat;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -28,6 +29,8 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendStore;
@@ -75,10 +78,6 @@ public class ServiceFriendsActivity extends FriendsActivity {
         }
         noServicesTextView.setText(getString(noServicesStringId, getString(R.string.app_name)) + " " + getString(R
                 .string.click_magnifying_glass_to_search_services));
-
-
-        //Change Fonts.
-        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
 
         ImageButton magnifyingGlass = (ImageButton) findViewById(R.id.ic_magnifying_glass);
 
@@ -140,7 +139,7 @@ public class ServiceFriendsActivity extends FriendsActivity {
                 }
             }
             if (found) {
-                // TODO: (Donato) Show the magnifying glass
+                // TODO ruben: Show the magnifying glass
                 findViewById(R.id.no_services).setVisibility(View.VISIBLE);
                 findViewById(R.id.friend_list).setVisibility(View.GONE);
             }
@@ -150,13 +149,6 @@ public class ServiceFriendsActivity extends FriendsActivity {
     @Override
     protected void onListItemClick(ListView listView, final View listItem, int position, long id) {
         T.UI();
-
-        if (position == 0) {
-            // tapped header cell
-            startSearching();
-            return;
-        }
-
         Friend friend = (Friend) listItem.getTag();
         if (friend.category != null && friend.category.friendCount > 1) {
             Intent intent = new Intent(this, FriendCategoryActivity.class);
@@ -188,6 +180,7 @@ public class ServiceFriendsActivity extends FriendsActivity {
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.services_menu, menu);
+        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_search).color(Color.DKGRAY).sizeDp(18));
         return true;
     }
 
@@ -196,6 +189,9 @@ public class ServiceFriendsActivity extends FriendsActivity {
         T.UI();
 
         switch (item.getItemId()) {
+            case R.id.find_services:
+                startSearching();
+                return true;
             case R.id.help:
                 showHelp();
                 return true;
@@ -205,11 +201,11 @@ public class ServiceFriendsActivity extends FriendsActivity {
 
     @Override
     protected CharSequence getHeaderCellMainText() {
-        return getString(R.string.discover_services_short, getString(R.string.app_name));
+        return null;
     }
 
     @Override
     protected CharSequence getHeaderCellSubText() {
-        return getString(R.string.discover_services_long, getString(R.string.app_name));
+        return null;
     }
 }

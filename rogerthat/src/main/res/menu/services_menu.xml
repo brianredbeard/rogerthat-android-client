@@ -3,6 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/find_services"
+        app:showAsAction="ifRoom"
+        android:title="@string/discover_services_short"/>
+
+    <item
         android:id="@+id/help"
         app:showAsAction="never"
         android:title="@string/help"/>

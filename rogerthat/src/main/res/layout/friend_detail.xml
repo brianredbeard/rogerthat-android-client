@@ -1,12 +1,13 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/mc_background_color">
 
     <ScrollView
         android:id="@+id/friend_detail_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/activity_background"
+        android:background="@color/mc_background_color"
         android:fillViewport="true"
         android:scrollbarStyle="insideOverlay"
         android:scrollbars="none">
@@ -86,7 +87,7 @@
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:textColor="@color/mc_white"
-            android:background="@drawable/green_gradient"
+            android:background="@drawable/tint_gradient"
             android:textSize="20sp" />
     </RelativeLayout>
 </RelativeLayout>

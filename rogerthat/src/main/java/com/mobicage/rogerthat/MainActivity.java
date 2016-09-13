@@ -326,8 +326,15 @@ public class MainActivity extends ServiceBoundActivity {
                     finish();
                 }
             } else {
-                Intent i = new Intent(this, HomeActivity.class);
+                final Intent i;
+                if (AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.messaging || AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.news) {
+                    // todo ruben this is not working
+                    i  = new Intent(this, MessagingActivity.class);
+                } else {
+                    i  = new Intent(this, HomeActivity.class);
+                }
                 i.setFlags(FLAG_CLEAR_STACK);
+                i.setAction(ACTION_NOTIFICATION_MESSAGE_UPDATES);
                 i.putExtras(intent.getExtras());
                 startActivity(i);
                 finish();

@@ -41,6 +41,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@color/mc_background_color"
             android:layout_above="@+id/login_via_email">
 
             <Button
@@ -71,7 +72,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_above="@+id/or"
-            android:background="@drawable/green_gradient"
+            android:background="@drawable/tint_gradient"
             android:minHeight="50dp"
             android:gravity="center"
             android:text="@string/registration_sing_up_email"

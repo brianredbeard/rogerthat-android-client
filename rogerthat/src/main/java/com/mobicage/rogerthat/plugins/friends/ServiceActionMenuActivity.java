@@ -145,7 +145,7 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity implements M
 
         });
 
-        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
+        TextUtils.overrideFonts(this, findViewById(android.R.id.content)); // todo ruben
 
         pages = (LinearLayout) findViewById(R.id.pages);
         Resources resources = getResources();
@@ -192,7 +192,7 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity implements M
         pages.setVisibility(View.GONE);
         title.setVisibility(View.GONE);
         branding.setVisibility(View.GONE);
-        activity.setBackgroundResource(R.drawable.activity_background);
+        activity.setBackgroundResource(R.color.mc_background_color);
         for (TableRow row : tableRows) {
             row.setVisibility(View.VISIBLE);
         }
@@ -202,7 +202,7 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity implements M
     @Override
     protected void onServiceBound() {
         L.d("ServiceActionMenuActivity onServiceBound()");
-        final Typeface faTypeFace = Typeface.createFromAsset(getAssets(), "FontAwesome.ttf");
+        final Typeface faTypeFace = Typeface.createFromAsset(getAssets(), "FontAwesome.ttf"); // todo ruben
         final int defaultFirstRowTextColor = Color.parseColor("#646464");
 
         final FriendsPlugin friendsPlugin = mService.getPlugin(FriendsPlugin.class);
