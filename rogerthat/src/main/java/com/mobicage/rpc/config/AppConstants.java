@@ -44,7 +44,7 @@ public class AppConstants {
     public static final boolean SHOW_HOMESCREEN_FOOTER = false;
     public static final String FACEBOOK_APP_ID = "188033791211994";
     public static final boolean FACEBOOK_REGISTRATION = true;
-    public static final String APP_EMAIL = "service-46e13548-a278-4780-a70a-450452a6542d@rogerth.at";
+    public static final String APP_EMAIL = null;
     public static final String APP_SERVICE_GUID = null;
     public static final boolean FRIENDS_ENABLED = true;
     public static final boolean SERVICES_ENABLED = true;
@@ -54,13 +54,13 @@ public class AppConstants {
     public static final boolean SHOW_SCAN_IN_MORE = false;
     public static final boolean FULL_WIDTH_HEADERS = false;
 
-    public static final String[] NAVIGATION_CLICKS = new String[] {"messages", "services", "friends", "scan", "profile", "settings"};
-    public static final String[] NAVIGATION_TAGS = new String[] {null, null, null, null, null, null};
+    public static final String[] NAVIGATION_CLICKS = new String[] {"messages", "services", "friends", "scan", "profile", "settings", "stream"};
+    public static final String[] NAVIGATION_TAGS = new String[] {null, null, null, null, null, null, null};
 
     public static final boolean REGISTRATION_ASKS_LOCATION_PERMISSION = true;
     public static final int[] SEARCH_SERVICES_IF_NONE_CONNECTED = new int[] { -1 };
 
-    public static final String[] PROFILE_DATA_FIELDS = new String[] {"todo ruben field", "todo ruben teset"};
+    public static final String[] PROFILE_DATA_FIELDS = new String[] {};
     public static final boolean PROFILE_SHOW_GENDER_AND_BIRTHDATE = true;
 
     public static final String ABOUT_WEBSITE = "www.rogerthat.net";

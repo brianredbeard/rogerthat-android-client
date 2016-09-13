@@ -180,7 +180,6 @@
     <string name="help">Help</string>
     <string name="high">High</string>
     <string name="hint_broadcast">Check the bottom bar to see why you received this message.\n\nNote: You can unsubscribe using \'Notification settings\' if you don\'t want \'%1$s\' messages from %2$s any more.</string>
-    <string name="hint_double_tap">Double tap to reply</string>
     <string name="hint_swipe">Swipe to jump to another conversation</string>
     <string name="ibeacon_usage_augment_experience">The %1$s app uses iBeacons to augment your user experience.</string>
     <string name="ibeacon_usage_discover_services_automatically">Discover customer services automatically</string>
@@ -250,7 +249,7 @@
     <string name="message_notification_one_message_from">1 new message from %1$s.</string>
     <string name="message_or_buttons_required">Message and or buttons are required.</string>
     <string name="message_saved">Message saved successfully.</string>
-    <string name="message_thread_help">Double tap to reply.\n\nSwipe to jump to another conversation.\n\nLock a message by long pressing your photo next to the text balloon.</string>
+    <string name="message_thread_help">Swipe to jump to another conversation.\n\nLock a message by long pressing your photo next to the text balloon.</string>
     <string name="min_date_reached">Cannot select earlier time.</string>
     <string name="missing_birthdate">Day of birth is missing</string>
     <string name="missing_gender">Gender is missing</string>

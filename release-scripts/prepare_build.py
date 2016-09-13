@@ -309,9 +309,6 @@ def convert_config():
 
     add_translations(doc)
 
-    strings_map = get_translation_strings()
-    navigation_clicks, navigation_tags = generate_navigation_menu(doc, strings_map)
-
     ##### HOMESCREEN #############################################
     if doc["HOMESCREEN"].get("style") == HOME_SCREEN_STYLE_MESSAGING or \
         doc["HOMESCREEN"].get("style") == HOME_SCREEN_STYLE_NEWS:
@@ -920,6 +917,9 @@ if __name__ == "__main__":
     print ''
 
     # todo ruben generate ic_menu_hamburger
+
+    strings_map = get_translation_strings()
+    navigation_clicks, navigation_tags = generate_navigation_menu(doc, strings_map)
 
     if APP_ID != MAIN_APP_ID:
         #### MORE IMAGES ###################################

@@ -33,6 +33,7 @@ import com.mobicage.rogerthat.plugins.friends.FriendSearchActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendStore;
 import com.mobicage.rogerthat.plugins.friends.MenuItemPresser;
 import com.mobicage.rogerthat.plugins.friends.MenuItemPressingActivity;
+import com.mobicage.rogerthat.plugins.history.HistoryListActivity;
 import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
 import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
 import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
@@ -70,6 +71,8 @@ public class ActivityUtils {
             goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_NON_PROFIT, clearStack);
         } else if ("emergency_services".equals(activityName)) {
             goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_EMERGENCY, clearStack);
+        } else if ("stream".equals(activityName)) {
+            goToStreamActivity(context, clearStack);
         } else {
             L.bug("unknown goToActivity: " + activityName);
             return false;
@@ -144,6 +147,14 @@ public class ActivityUtils {
 
     public static void goToSettingsActivity(Context context, boolean clearStack) {
         final Intent i = new Intent(context, SettingsActivity.class);
+        if (clearStack) {
+            i.setFlags(MainActivity.FLAG_CLEAR_STACK);
+        }
+        context.startActivity(i);
+    }
+
+    public static void goToStreamActivity(Context context, boolean clearStack) {
+        Intent i = new Intent(context, HistoryListActivity.class);
         if (clearStack) {
             i.setFlags(MainActivity.FLAG_CLEAR_STACK);
         }
