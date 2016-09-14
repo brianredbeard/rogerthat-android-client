@@ -8,7 +8,7 @@
     <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:background="@color/mc_background"
+        android:background="@color/mc_background_color"
         android:orientation="vertical" >
 
         <LinearLayout

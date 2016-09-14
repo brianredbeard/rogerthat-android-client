@@ -18,33 +18,6 @@
 
 package com.mobicage.rogerthat.plugins.messaging.widgets;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HTTP;
-import org.jivesoftware.smack.util.Base64;
-import org.json.simple.JSONValue;
-
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -67,6 +40,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mobicage.api.messaging.Rpc;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.messaging.Message;
@@ -89,6 +63,33 @@ import com.mobicage.to.messaging.forms.SubmitMyDigiPassFormResponseTO;
 import com.vasco.mydigipass.sdk.MDPMobile;
 import com.vasco.mydigipass.sdk.MDPResponse;
 import com.vasco.mydigipass.sdk.OnMDPAuthenticationListener;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
+import org.jivesoftware.smack.util.Base64;
+import org.json.simple.JSONValue;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 public class MyDigiPassWidget extends Widget implements OnMDPAuthenticationListener {
 
@@ -151,7 +152,7 @@ public class MyDigiPassWidget extends Widget implements OnMDPAuthenticationListe
             }
 
             if (mFontAwesomeTypeFace == null) {
-                mFontAwesomeTypeFace = Typeface.createFromAsset(getContext().getAssets(), "FontAwesome.ttf");
+                mFontAwesomeTypeFace = new FontAwesome().getTypeface(mActivity);
             }
 
             final TextView faTextView = (TextView) v.findViewById(R.id.fa_text_view);

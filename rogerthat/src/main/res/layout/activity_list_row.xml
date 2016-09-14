@@ -3,7 +3,7 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:backgroundTint="@color/mc_list_item_background">
+    android:background="@color/mc_list_item_background">
 
     <View
         android:id="@+id/top_divider_line"

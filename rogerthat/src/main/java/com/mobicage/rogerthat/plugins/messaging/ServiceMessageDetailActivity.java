@@ -17,20 +17,6 @@
  */
 package com.mobicage.rogerthat.plugins.messaging;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.TreeSet;
-
-import org.json.JSONObject;
-import org.json.simple.JSONValue;
-
-import thirdparty.nishantnair.FlowLayout;
-
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -43,11 +29,9 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -81,7 +65,6 @@ import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.IdentityStore;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.ServiceBoundActivity;
-import com.mobicage.rogerthat.ServiceBoundMapActivity;
 import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.friends.MenuItemPresser;
@@ -107,6 +90,20 @@ import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.to.messaging.AttachmentTO;
 import com.mobicage.to.messaging.ButtonTO;
 import com.mobicage.to.messaging.MemberStatusTO;
+
+import org.json.JSONObject;
+import org.json.simple.JSONValue;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.TreeSet;
+
+import thirdparty.nishantnair.FlowLayout;
 
 public class ServiceMessageDetailActivity extends ServiceBoundActivity implements MenuItemPressingActivity {
 
@@ -148,11 +145,8 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity implement
     private Timer mExpectNextTimer = null;
     private boolean mSomebodyAnswered = false;
     private boolean mTransfering = false;
-    private Typeface mFontAwesomeTypeFace;
 
-    private RelativeLayout activity;
     private ImageView mStatusImage;
-    private String mContext;
 
     public void setTransfering(boolean b) {
         mTransfering = b;
@@ -205,7 +199,6 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity implement
         super.onCreate(savedInstanceState);
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        mFontAwesomeTypeFace = Typeface.createFromAsset(getAssets(), "FontAwesome.ttf");
     }
 
     @Override
@@ -247,8 +240,6 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity implement
         mStatusImage = (ImageView) activityView.findViewById(R.id.status_image);
 
         setContentViewWithoutNavigationBar(activityView);
-
-        activity = (RelativeLayout) activityView;
 
         final Intent intent = getIntent();
         String messageKey = intent.getStringExtra("message");
@@ -342,7 +333,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity implement
         WebView web = (WebView) findViewById(R.id.webview);
         FrameLayout flay = (FrameLayout) findViewById(R.id.message_details);
         Resources resources = getResources();
-        flay.setBackgroundColor(resources.getColor(R.color.mc_background));
+        flay.setBackgroundColor(resources.getColor(R.color.mc_background_color));
         boolean showBranded = false;
 
         int darkSchemeTextColor = resources.getColor(android.R.color.primary_text_dark);

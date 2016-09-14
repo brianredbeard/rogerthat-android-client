@@ -2,7 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="@color/mc_homescreen_background">
 
     <com.mobicage.rogerthat.util.ui.ScaleImageView
         android:id="@+id/full_width_rogerthat_logo2"
@@ -44,19 +46,24 @@
             android:background="@color/mc_background_color"
             android:layout_above="@+id/login_via_email">
 
-            <Button
+            <ImageButton
                 android:id="@+id/get_accounts"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
-                android:layout_gravity="center_vertical"
-                android:text="@string/fa_user_plus" />
+                android:layout_alignParentEnd="true"
+                android:layout_gravity="center"
+                android:layout_marginBottom="10dp"
+                app:ico_color="@color/mc_primary_color"
+                app:ico_icon="@string/faw_user_plus"
+                app:ico_size="25dp"/>
 
             <AutoCompleteTextView
                 android:id="@+id/registration_enter_email"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_toLeftOf="@id/get_accounts"
+                android:layout_toStartOf="@id/get_accounts"
                 android:completionThreshold="1"
                 android:gravity="center"
                 android:hint="@string/registration_email"

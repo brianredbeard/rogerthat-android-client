@@ -18,16 +18,7 @@
 
 package com.mobicage.rogerthat;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -36,29 +27,26 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.support.design.widget.NavigationView;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.LayoutInflaterCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
 import com.facebook.CallbackManager;
-import com.mikepenz.fontawesome_typeface_library.FontAwesome;
-import com.mikepenz.iconics.IconicsDrawable;
+import com.mikepenz.iconics.context.IconicsLayoutInflater;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.MenuItemPressingActivity;
 import com.mobicage.rogerthat.util.ActivityUtils;
@@ -73,6 +61,14 @@ import com.mobicage.rogerthat.util.ui.Pausable;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
 
 public abstract class ServiceBoundActivity extends AppCompatActivity implements Pausable, ServiceBound, MenuItemPressingActivity {
 
@@ -114,6 +110,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         T.setUIThread("ServiceBoundActivity.onCreate()");
+        LayoutInflaterCompat.setFactory(getLayoutInflater(), new IconicsLayoutInflater(getDelegate()));
         super.onCreate(savedInstanceState);
         logMethod("onCreate");
         SystemUtils.logIntentFlags(getIntent());

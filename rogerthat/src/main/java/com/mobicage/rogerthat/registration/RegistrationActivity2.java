@@ -17,46 +17,6 @@
  */
 package com.mobicage.rogerthat.registration;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.net.ssl.SSLException;
-
-import org.altbeacon.beacon.Beacon;
-import org.altbeacon.beacon.BeaconManager;
-import org.altbeacon.beacon.BeaconParser;
-import org.altbeacon.beacon.BleNotAvailableException;
-import org.altbeacon.beacon.MonitorNotifier;
-import org.altbeacon.beacon.RangeNotifier;
-import org.altbeacon.beacon.Region;
-import org.altbeacon.beacon.logging.LogManager;
-import org.altbeacon.beacon.logging.Loggers;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HTTP;
-import org.jivesoftware.smack.ConnectionConfiguration;
-import org.jivesoftware.smack.Logger;
-import org.jivesoftware.smack.XMPPConnection;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -67,7 +27,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.net.Uri;
@@ -95,8 +54,8 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.ViewFlipper;
@@ -124,7 +83,6 @@ import com.mobicage.rogerthat.util.GoogleServicesUtils;
 import com.mobicage.rogerthat.util.GoogleServicesUtils.GCMRegistrationIdFoundCallback;
 import com.mobicage.rogerthat.util.RegexPatterns;
 import com.mobicage.rogerthat.util.Security;
-import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeAsyncTask;
@@ -141,6 +99,46 @@ import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.rpc.newxmpp.XMPPConfigurationFactory;
 import com.mobicage.to.beacon.BeaconRegionTO;
 import com.mobicage.to.location.BeaconDiscoveredRequestTO;
+
+import org.altbeacon.beacon.Beacon;
+import org.altbeacon.beacon.BeaconManager;
+import org.altbeacon.beacon.BeaconParser;
+import org.altbeacon.beacon.BleNotAvailableException;
+import org.altbeacon.beacon.MonitorNotifier;
+import org.altbeacon.beacon.RangeNotifier;
+import org.altbeacon.beacon.Region;
+import org.altbeacon.beacon.logging.LogManager;
+import org.altbeacon.beacon.logging.Loggers;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
+import org.jivesoftware.smack.ConnectionConfiguration;
+import org.jivesoftware.smack.Logger;
+import org.jivesoftware.smack.XMPPConnection;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.net.ssl.SSLException;
 
 
 public class RegistrationActivity2 extends ServiceBoundActivity {
@@ -339,7 +337,6 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
 
         setContentViewWithoutNavigationBar(R.layout.registration2);
 
-        final Typeface faTypeFace = Typeface.createFromAsset(getAssets(), "FontAwesome.ttf");
         final int[] visibleLogos;
         final int[] goneLogos;
         if (AppConstants.FULL_WIDTH_HEADERS) {
@@ -397,7 +394,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
             }
         });
 
-        initLocationUsageStep(faTypeFace);
+        initLocationUsageStep();
 
         View.OnClickListener emailLoginListener = new View.OnClickListener() {
             @Override
@@ -464,14 +461,13 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
 
         facebookButton.setOnClickListener(facebookLoginListener);
 
-        initOauthStep(faTypeFace);
+        initOauthStep();
 
-        final Button getAccountsButton = (Button) findViewById(R.id.get_accounts);
+        final ImageButton getAccountsButton = (ImageButton) findViewById(R.id.get_accounts);
         if (configureEmailAutoComplete()) {
             // GET_ACCOUNTS permission is granted
             getAccountsButton.setVisibility(View.GONE);
         } else {
-            getAccountsButton.setTypeface(faTypeFace);
             getAccountsButton.setOnClickListener(new SafeViewOnClickListener() {
                 @Override
                 public void safeOnClick(View v) {
@@ -539,8 +535,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
         }
     }
 
-    private void initLocationUsageStep(Typeface faTypeFace) {
-        ((TextView) findViewById(R.id.ibeacon_usage_icon)).setTypeface(faTypeFace);
+    private void initLocationUsageStep() {
 
         final String appName = getString(R.string.app_name);
         ((TextView) findViewById(R.id.ibeacon_usage_augment_experience)).setText(getString(R.string
@@ -559,16 +554,13 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
         });
     }
 
-    private void initOauthStep(Typeface faTypeFace) {
+    private void initOauthStep() {
         View.OnClickListener oauthLoginListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 getOauthRegistrationInfo();
             }
         };
-
-        TextView oauthIcon = (TextView)findViewById(R.id.oauth_icon);
-        oauthIcon.setTypeface(faTypeFace);
 
         TextView oauthText = (TextView)findViewById(R.id.oauth_text);
         oauthText.setText(getString(R.string.authenticate_via_your_oauth_account, AppConstants.REGISTRATION_TYPE_OAUTH_DOMAIN));

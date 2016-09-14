@@ -7,7 +7,7 @@
         android:id="@+id/message_details"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:background="@color/mc_background" >
+        android:background="@color/mc_background_color" >
 
         <ScrollView
             android:id="@+id/message_scroll_view"

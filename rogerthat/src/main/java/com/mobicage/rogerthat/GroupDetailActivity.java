@@ -535,7 +535,7 @@ public class GroupDetailActivity extends ServiceBoundActivity {
             view.setBackgroundColor(resources.getColor(R.color.mc_highlight_background));
             name.setTypeface(Typeface.DEFAULT_BOLD);
         } else {
-            view.setBackgroundColor(resources.getColor(R.color.mc_background));
+            view.setBackgroundColor(resources.getColor(R.color.mc_background_color));
             name.setTypeface(Typeface.DEFAULT);
         }
     }

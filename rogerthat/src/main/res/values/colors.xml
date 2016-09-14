@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="mc_background">#E6E6E6</color>
     <color name="mc_blue">#ff003058</color>
     <color name="mc_blue2">#ff005094</color>
     <color name="mc_green">#ff99cc33</color>
@@ -18,6 +17,7 @@
     <color name="mc_highlight_light">#66FFFFFF</color>
     <color name="mc_highlight_dark">#33000000</color>
     <color name="mc_gray_11">#BBBBBB</color>
+    <color name="mc_default_text">#4D4D4D</color>
     <color name="mc_highlight_background">#FFFFFFFF</color>
     <color name="mc_about_blue">#3E3E3D</color>
     <color name="mc_white">#FFFFFF</color>

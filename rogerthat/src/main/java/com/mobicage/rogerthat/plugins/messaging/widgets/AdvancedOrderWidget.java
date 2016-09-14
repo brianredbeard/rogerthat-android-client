@@ -49,6 +49,7 @@ import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mobicage.api.messaging.Rpc;
 import com.mobicage.models.properties.forms.AdvancedOrderCategory;
 import com.mobicage.models.properties.forms.AdvancedOrderItem;
@@ -532,7 +533,9 @@ public class AdvancedOrderWidget extends Widget {
         }
         renderListData();
 
-        mFontAwesomeTypeFace = Typeface.createFromAsset(mActivity.getAssets(), "FontAwesome.ttf");
+        if (mFontAwesomeTypeFace == null) {
+            mFontAwesomeTypeFace = new FontAwesome().getTypeface(mActivity);
+        }
         mBasketBtn = (TextView) findViewById(R.id.basket);
         mBasketBtn.setText(R.string.fa_shopping_cart);
         mBasketBtn.setTypeface(mFontAwesomeTypeFace);

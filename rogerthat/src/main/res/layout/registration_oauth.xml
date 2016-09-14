@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="@color/mc_homescreen_background">
 
     <com.mobicage.rogerthat.util.ui.ScaleImageView
         android:id="@+id/full_width_rogerthat_logo4"
@@ -38,15 +40,15 @@
             android:layout_gravity="center"
             android:orientation="vertical">
 
-            <TextView
+            <ImageView
                 android:id="@+id/oauth_icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:gravity="center"
-                android:text="@string/fa_lock"
-                android:textColor="@color/mc_primary_color"
-                android:textSize="75sp"/>
+                app:ico_color="@color/mc_primary_color"
+                app:ico_icon="@string/faw_lock"
+                app:ico_size="75dp"/>
 
             <TextView
                 android:id="@+id/oauth_text"

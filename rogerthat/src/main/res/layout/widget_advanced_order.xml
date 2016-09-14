@@ -2,49 +2,49 @@
 <com.mobicage.rogerthat.plugins.messaging.widgets.AdvancedOrderWidget xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical" >
-    
+    android:orientation="vertical">
+
     <LinearLayout
         android:id="@+id/advanced_order_container"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" >
-    
-	    <LinearLayout                
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_gravity="right"
-	        android:orientation="horizontal">   
-	    
-	        <TextView
-	            android:id="@+id/basket"
-	            android:layout_width="50dp"
-	            android:layout_height="50dp"
-	            android:background="@android:color/transparent"
-	            android:scaleType="fitCenter"
-	            android:textSize="35sp" />
-	    
-	    </LinearLayout>
-	
-	    <ListView
-	        android:id="@+id/list_view"
-	        android:layout_width="fill_parent"
-	        android:layout_height="wrap_content"
-	        android:layout_margin="5dp"
-	        android:background="@drawable/gray_border"
-	        android:divider="@color/mc_divider_gray"
-	        android:dividerHeight="1dip" />
-    
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/basket"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
+                android:textSize="35sp" />
+
+        </LinearLayout>
+
+        <ListView
+            android:id="@+id/list_view"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:background="@drawable/gray_border"
+            android:divider="@color/mc_divider_gray"
+            android:dividerHeight="1dip" />
+
     </LinearLayout>
-    
+
     <TextView
-		 android:id="@+id/advanced_order_locked"
-		 android:layout_width="fill_parent"
-		 android:layout_height="wrap_content"
-		 android:layout_gravity="center_vertical"
-		 android:layout_margin="5dp"
-		 android:background="@android:color/transparent"
-		 android:textSize="17sp"
-		 android:visibility="gone" />
+        android:id="@+id/advanced_order_locked"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_margin="5dp"
+        android:background="@android:color/transparent"
+        android:textSize="17sp"
+        android:visibility="gone" />
 
 </com.mobicage.rogerthat.plugins.messaging.widgets.AdvancedOrderWidget>
