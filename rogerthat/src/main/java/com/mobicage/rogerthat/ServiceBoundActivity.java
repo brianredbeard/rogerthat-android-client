@@ -39,6 +39,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -510,7 +511,14 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         int order = Arrays.asList(AppConstants.NAVIGATION_CLICKS).indexOf(mActivityName);
         if (order >= 0) {
             NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-            navigationView.getMenu().getItem(order).setChecked(true);
+            if (navigationView == null)
+                return;
+
+            Menu menu = navigationView.getMenu();
+            if (menu == null)
+                return;
+
+            menu.getItem(order).setChecked(true);
         }
     }
 

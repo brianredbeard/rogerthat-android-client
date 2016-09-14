@@ -43,10 +43,19 @@ public abstract class FriendsActivity extends ServiceBoundCursorListActivity {
 
     protected abstract CharSequence getHeaderCellSubText();
 
+    protected boolean useAppBar() {
+        return true;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         T.UI();
-        setContentView(getLayout());
+        if (useAppBar()) {
+            setContentView(getLayout());
+        } else {
+            setContentViewWithoutNavigationBar(getLayout());
+        }
+
         final ListView listView = (ListView) findViewById(R.id.friend_list);
         setListView(listView);
 
