@@ -337,7 +337,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
         if (mMemberFilter == null) {
             setTitle(R.string.tab_messaging);
         } else {
-            setTitle(getString(R.string.member_message_history, mFriendsPlugin.getName(mMemberFilter)));
+            setTitle(R.string.message_history);
         }
 
         createCursorSet();

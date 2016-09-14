@@ -114,6 +114,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity implement
 
     public final static String STARTED_FROM_SERVICE_MENU = "STARTED_FROM_SERVICE_MENU";
     public static final String JUMP_TO_SERVICE_HOME_SCREEN = "JUMP_TO_SERVICE_HOME_SCREEN";
+    public static final String TITLE = "TITLE";
 
     private final static int[] DETAIL_SECTIONS = new int[] { R.id.previous_messages_in_thread_title,
         R.id.previous_messages_in_thread, R.id.message_section_title, R.id.member_details_title, R.id.members,
@@ -244,6 +245,10 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity implement
 
         final Intent intent = getIntent();
         String messageKey = intent.getStringExtra("message");
+        String title = intent.getStringExtra(TITLE);
+        if (title != null) {
+            setTitle(title);
+        }
         mCurrentMessage = mStore.getFullMessageByKey(messageKey);
         invalidateOptionsMenu();
 
