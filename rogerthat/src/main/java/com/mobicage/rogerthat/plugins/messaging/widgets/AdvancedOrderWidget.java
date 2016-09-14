@@ -827,7 +827,7 @@ public class AdvancedOrderWidget extends Widget {
         if (mDetailDialog != null && mDetailDialog.isShowing())
             return;
         mCurrentItemDetail = position;
-        final View v = mLayoutInFlater.inflate(R.layout.widget_advanced_order_item_detail, this, false); // todo ruben
+        final View v = mLayoutInFlater.inflate(R.layout.widget_advanced_order_item_detail, this, false);
 
         mDetailDialog = new Dialog(mActivity);
         mDetailDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -962,7 +962,7 @@ public class AdvancedOrderWidget extends Widget {
     private void showAdvancedOrderBasket() {
         if (mBasketDialog != null && mBasketDialog.isShowing())
             return;
-        final View v = mLayoutInFlater.inflate(R.layout.widget_advanced_order_basket, this, false); // todo ruben
+        final View v = mLayoutInFlater.inflate(R.layout.widget_advanced_order_basket, this, false);
         mBasketDialog = new Dialog(mActivity);
         mBasketDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         mBasketDialog.setContentView(v);

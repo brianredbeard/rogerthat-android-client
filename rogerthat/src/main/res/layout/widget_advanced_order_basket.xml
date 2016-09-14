@@ -48,7 +48,7 @@
             android:textSize="20sp"
             android:background="@android:color/transparent"
             android:layout_gravity="center_vertical"
-            android:textColor="@color/mc_about_blue" />
+            android:textColor="@android:color/black" />
         
         <View
 	        android:layout_width="1dp"
@@ -64,7 +64,7 @@
             android:textSize="20sp"
             android:background="@android:color/transparent"
             android:layout_gravity="center_vertical"
-            android:textColor="@color/mc_about_blue"
+            android:textColor="@android:color/black"
             android:text="@string/continue_shopping" />
 
     </LinearLayout>
