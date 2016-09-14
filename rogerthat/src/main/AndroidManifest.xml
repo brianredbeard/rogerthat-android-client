@@ -149,7 +149,7 @@
         <activity
             android:name="com.mobicage.rogerthat.registration.RegistrationActivity2"
             android:configChanges="keyboardHidden|orientation"
-            android:windowSoftInputMode="adjustResize|stateHidden"
+            android:windowSoftInputMode="adjustPan|stateHidden"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar" >
         </activity>

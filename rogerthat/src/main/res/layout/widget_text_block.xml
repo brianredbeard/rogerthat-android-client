@@ -8,19 +8,17 @@
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"
 	    android:orientation="horizontal">
-            
-	    <EditText
-	        android:id="@+id/edit_text"
-	        android:layout_weight="1"
-            android:layout_width="0dp"
-	        android:layout_height="wrap_content"
-	        android:gravity="top"
-	        android:inputType="textCapSentences|textMultiLine"
-			android:lines="3"
-	        android:minLines="3"
-			android:text="asfd\nasfdasdf"
-	        android:singleLine="false" >
-	    </EditText>
+
+		<EditText
+			android:id="@+id/edit_text"
+			android:layout_weight="1"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:gravity="top"
+			android:inputType="textCapSentences|textMultiLine"
+			android:minLines="3"
+			android:singleLine="false" >
+		</EditText>
 	    
 	    <ImageButton
 	        android:id="@+id/btn_speak"

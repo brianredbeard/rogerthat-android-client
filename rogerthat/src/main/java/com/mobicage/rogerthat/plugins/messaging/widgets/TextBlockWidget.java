@@ -19,6 +19,7 @@
 package com.mobicage.rogerthat.plugins.messaging.widgets;
 
 import android.content.Context;
+import android.text.InputType;
 import android.util.AttributeSet;
 
 import com.mobicage.api.messaging.Rpc;
@@ -37,6 +38,11 @@ public class TextBlockWidget extends TextLineWidget {
 
     public TextBlockWidget(Context context, AttributeSet attrs) {
         super(context, attrs);
+    }
+
+    @Override
+    public int getDefaultInputTypes() {
+        return InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES;
     }
 
     @Override

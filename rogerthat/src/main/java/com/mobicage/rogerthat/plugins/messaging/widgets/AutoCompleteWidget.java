@@ -21,6 +21,7 @@ package com.mobicage.rogerthat.plugins.messaging.widgets;
 import java.util.List;
 
 import android.content.Context;
+import android.text.InputType;
 import android.util.AttributeSet;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -41,6 +42,11 @@ public class AutoCompleteWidget extends TextLineWidget {
 
     public AutoCompleteWidget(Context context, AttributeSet attrs) {
         super(context, attrs);
+    }
+
+    @Override
+    public int getDefaultInputTypes() {
+        return InputType.TYPE_TEXT_FLAG_CAP_SENTENCES;
     }
 
     @Override

@@ -61,6 +61,7 @@ import android.view.WindowManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.Button;
+import android.widget.CursorAdapter;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
@@ -253,6 +254,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity implement
         final Intent intent = getIntent();
         String messageKey = intent.getStringExtra("message");
         mCurrentMessage = mStore.getFullMessageByKey(messageKey);
+        invalidateOptionsMenu();
 
         if (intent.hasExtra("submitToJSMFR")) {
             messageSubmitToJsMfr(intent, intent.getAction());
@@ -1048,12 +1050,30 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity implement
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        for (int i = 0; i < menu.size(); i++) {
+            MenuItem item = menu.getItem(i);
+            switch (item.getItemId()) {
+                case R.id.show_notification_settings:
+                    item.setVisible(mCurrentMessage.broadcast_type != null);
+                    break;
+                case R.id.show_details:
+                default:
+                    item.setVisible(false);
+                    break;
+            }
+        }
+
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         T.UI();
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.message_menu, menu);
-        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_search_plus).color(Color.DKGRAY).sizeDp(18));
+        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_bell).color(Color.DKGRAY).sizeDp(18));
         return true;
     }
 
@@ -1061,9 +1081,29 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity implement
     public boolean onOptionsItemSelected(MenuItem item) {
         T.UI();
         switch (item.getItemId()) {
-        case R.id.show_details:
-            expandDetails();
-            return true;
+            case R.id.show_notification_settings:
+                final ServiceMenuItemDetails smi = mFriendsPlugin.getStore().getBroadcastServiceMenuItem(mCurrentMessage.sender);
+                if (smi == null) {
+                    L.bug("BroadcastData was null for: " + mCurrentMessage.sender);
+                } else {
+                    L.d("goto broadcast settings");
+                    if (mMenuItemPresser == null) {
+                        //noinspection unchecked,unchecked
+                        mMenuItemPresser = new MenuItemPresser(ServiceMessageDetailActivity.this, mCurrentMessage.sender);
+                    }
+                    mMenuItemPresser.itemPressed(smi, smi.menuGeneration, new MenuItemPresser.ResultHandler() {
+                        @Override
+                        public void onSuccess() {
+                            overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_up);
+                            finish();
+                        }
+                    });
+                }
+
+                return true;
+            case R.id.show_details:
+                expandDetails();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -1150,8 +1190,10 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity implement
             return;
         }
 
-        if (isUpdate)
+        if (isUpdate) {
             mCurrentMessage = mStore.getFullMessageByKey(mCurrentMessage.key);
+            invalidateOptionsMenu();
+        }
 
         boolean isLocked = (mCurrentMessage.flags & MessagingPlugin.FLAG_LOCKED) == MessagingPlugin.FLAG_LOCKED;
         boolean isRinging = mCurrentMessage.alert_flags >= AlertManager.ALERT_FLAG_RING_5
