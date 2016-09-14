@@ -131,62 +131,44 @@ public class ProfileActivity extends ServiceBoundActivity {
             updateProfileBirthdate.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    final Dialog dialog = new Dialog(ProfileActivity.this);
-                    dialog.setContentView(R.layout.profile_update_birthdate);
-                    dialog.setTitle(R.string.birthdate);
-                    Button saveBirthdateBtn = (Button) dialog.findViewById(R.id.ok);
-                    final DatePicker datepickerBirthdate = ((DatePicker) dialog.findViewById(R.id.birthdate_datepicker));
                     final TextView friendBirthdate = ((TextView) findViewById(R.id.profile_birthdate_text));
-
+                    final View dialog = getLayoutInflater().inflate(R.layout.ds_date_picker, null);
+                    final DatePicker datepickerBirthdate = (DatePicker) dialog.findViewById(R.id.date_picker);
                     datepickerBirthdate.setDescendantFocusability(DatePicker.FOCUS_BLOCK_DESCENDANTS);
-
-                    saveBirthdateBtn.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            mBirthdateCalender.set(Calendar.YEAR, datepickerBirthdate.getYear());
-                            mBirthdateCalender.set(Calendar.MONTH, datepickerBirthdate.getMonth());
-                            mBirthdateCalender.set(Calendar.DAY_OF_MONTH, datepickerBirthdate.getDayOfMonth());
-                            String birthdateString = mIdentity.getDisplayBirthdate(mBirthdateCalender);
-                            mNeedBirthdate = false;
-                            friendBirthdate.setText(birthdateString);
-                            dialog.dismiss();
-                        }
-                    });
-
                     datepickerBirthdate.init(mBirthdateCalender.get(Calendar.YEAR),
-                        mBirthdateCalender.get(Calendar.MONTH), mBirthdateCalender.get(Calendar.DAY_OF_MONTH), null);
-                    dialog.show();
+                            mBirthdateCalender.get(Calendar.MONTH),
+                            mBirthdateCalender.get(Calendar.DAY_OF_MONTH),
+                            null);
+                    AlertDialog alertDialog = new AlertDialog.Builder(ProfileActivity.this)
+                            .setView(dialog)
+                            .setPositiveButton(getString(R.string.ok), new SafeDialogInterfaceOnClickListener() {
+                                @Override
+                                public void safeOnClick(DialogInterface di, int which) {
+                                    mBirthdateCalender.set(Calendar.YEAR, datepickerBirthdate.getYear());
+                                    mBirthdateCalender.set(Calendar.MONTH, datepickerBirthdate.getMonth());
+                                    mBirthdateCalender.set(Calendar.DAY_OF_MONTH, datepickerBirthdate.getDayOfMonth());
+                                    String birthdateString = mIdentity.getDisplayBirthdate(mBirthdateCalender);
+                                    mNeedBirthdate = false;
+                                    friendBirthdate.setText(birthdateString);
+                                }
+                            }).setNegativeButton(getString(R.string.cancel), new SafeDialogInterfaceOnClickListener() {
+                                @Override
+                                public void safeOnClick(DialogInterface dialog, int which) {
+                                }
+                            }).create();
+                    alertDialog.setCanceledOnTouchOutside(true);
+                    alertDialog.show();
                 }
             });
 
             updateProfileGender.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    final Dialog dialog = new Dialog(ProfileActivity.this);
-                    dialog.setContentView(R.layout.profile_update_gender);
-                    dialog.setTitle(R.string.gender);
-                    Button saveGenderBtn = (Button) dialog.findViewById(R.id.ok);
+                    final View dialog = getLayoutInflater().inflate(R.layout.profile_update_gender, null);
+
                     final RadioButton maleRadioButton = ((RadioButton) dialog.findViewById(R.id.gender_male));
                     final RadioButton femaleRadioButton = ((RadioButton) dialog.findViewById(R.id.gender_female));
                     final TextView friendGender = ((TextView) findViewById(R.id.profile_gender_text));
-
-                    saveGenderBtn.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            if (femaleRadioButton.isChecked()) {
-                                mGender = MyIdentity.GENDER_FEMALE;
-                            } else {
-                                mGender = MyIdentity.GENDER_MALE;
-                            }
-
-                            if (mGender == MyIdentity.GENDER_FEMALE) {
-                                friendGender.setText(R.string.female);
-                            } else {
-                                friendGender.setText(R.string.male);
-                            }
-                            dialog.dismiss();
-                        }
-                    });
 
                     if (mGender == MyIdentity.GENDER_FEMALE) {
                         maleRadioButton.setChecked(false);
@@ -196,7 +178,30 @@ public class ProfileActivity extends ServiceBoundActivity {
                         femaleRadioButton.setChecked(false);
                     }
 
-                    dialog.show();
+                    AlertDialog alertDialog = new AlertDialog.Builder(ProfileActivity.this)
+                            .setView(dialog)
+                            .setPositiveButton(getString(R.string.ok), new SafeDialogInterfaceOnClickListener() {
+                                @Override
+                                public void safeOnClick(DialogInterface di, int which) {
+                                    if (femaleRadioButton.isChecked()) {
+                                        mGender = MyIdentity.GENDER_FEMALE;
+                                    } else {
+                                        mGender = MyIdentity.GENDER_MALE;
+                                    }
+
+                                    if (mGender == MyIdentity.GENDER_FEMALE) {
+                                        friendGender.setText(R.string.female);
+                                    } else {
+                                        friendGender.setText(R.string.male);
+                                    }
+                                }
+                            }).setNegativeButton(getString(R.string.cancel), new SafeDialogInterfaceOnClickListener() {
+                                @Override
+                                public void safeOnClick(DialogInterface dialog, int which) {
+                                }
+                            }).create();
+                    alertDialog.setCanceledOnTouchOutside(true);
+                    alertDialog.show();
                 }
             });
 

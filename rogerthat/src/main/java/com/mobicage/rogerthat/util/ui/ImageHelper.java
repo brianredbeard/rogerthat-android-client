@@ -38,6 +38,8 @@ import com.soundcloud.android.crop.CropUtil;
 public class ImageHelper {
 
     public static Bitmap getRoundedCornerAvatar(final Bitmap bitmap) {
+        if (bitmap == null)
+            return null;
         int roundingPixels = bitmap.getWidth() / 1;
         return getRoundedCornerBitmap(bitmap, roundingPixels);
     }

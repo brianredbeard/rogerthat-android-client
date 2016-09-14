@@ -114,6 +114,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity implement
 
     public final static String STARTED_FROM_SERVICE_MENU = "STARTED_FROM_SERVICE_MENU";
     public static final String JUMP_TO_SERVICE_HOME_SCREEN = "JUMP_TO_SERVICE_HOME_SCREEN";
+    public static final String TITLE = "TITLE";
 
     private final static int[] DETAIL_SECTIONS = new int[] { R.id.previous_messages_in_thread_title,
         R.id.previous_messages_in_thread, R.id.message_section_title, R.id.member_details_title, R.id.members,
@@ -244,6 +245,10 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity implement
 
         final Intent intent = getIntent();
         String messageKey = intent.getStringExtra("message");
+        String title = intent.getStringExtra(TITLE);
+        if (title != null) {
+            setTitle(title);
+        }
         mCurrentMessage = mStore.getFullMessageByKey(messageKey);
         invalidateOptionsMenu();
 
@@ -632,37 +637,12 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity implement
         }
 
         if (mCurrentMessage.broadcast_type != null) {
-            L.d("todo ruben Show broadcast spam control");
-
             final ServiceMenuItemDetails smi = mFriendsPlugin.getStore().getBroadcastServiceMenuItem(mCurrentMessage
                     .sender);
             if (smi == null) {
                 L.bug("BroadcastData was null for: " + mCurrentMessage.sender);
-                collapseDetails(DETAIL_SECTIONS);
                 return;
             }
-
-//            broadcastSpamControlSettingsContainer.setOnClickListener(new SafeViewOnClickListener() {
-//
-//                @Override
-//                public void safeOnClick(View v) {
-//                    L.d("goto broadcast settings");
-//                    if (mMenuItemPresser == null) {
-//                        //noinspection unchecked,unchecked
-//                        mMenuItemPresser = new MenuItemPresser(ServiceMessageDetailActivity.this, mCurrentMessage
-//                                .sender);
-//                    }
-//                    mMenuItemPresser.itemPressed(smi, smi.menuGeneration, new MenuItemPresser.ResultHandler() {
-//                        @Override
-//                        public void onSuccess() {
-//                            overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_up);
-//                            finish();
-//                        }
-//                    });
-//
-//                }
-//
-//            });
 
             UIUtils.showHint(this, mService, HINT_BROADCAST, R.string.hint_broadcast, mCurrentMessage.broadcast_type,
                 mFriendsPlugin.getName(mCurrentMessage.sender));

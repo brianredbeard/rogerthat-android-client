@@ -887,6 +887,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         mItemLabel = intent.getStringExtra(ITEM_LABEL);
         mItemCoords = intent.getLongArrayExtra(ITEM_COORDS);
         mRunInBackground = intent.getBooleanExtra(RUN_IN_BACKGROUND, true);
+        setTitle(mItemLabel);
     }
 
     @Override

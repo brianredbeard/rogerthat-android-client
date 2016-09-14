@@ -36,6 +36,11 @@ public class FriendCategoryActivity extends ServiceFriendsActivity {
     private String mCategoryName = null;
 
     @Override
+    protected boolean useAppBar() {
+        return false;
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         Intent intent = getIntent();
         mCategoryId = intent.getStringExtra(FRIEND_CATEGORY_ID);

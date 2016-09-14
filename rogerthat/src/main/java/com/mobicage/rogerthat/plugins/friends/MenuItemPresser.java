@@ -89,6 +89,7 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
     // fields set by itemPressed
     private ResultHandler mResultHandler = mDefaultResultHandler; // mResultHandler is never null for simplicity
     private String mContextMatch = "";
+    private ServiceMenuItemTO mItem;
     private long mLastTimeClicked = 0;
 
     public MenuItemPresser(T activity, String email) {
@@ -110,6 +111,7 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
 
     public void itemPressed(final ServiceMenuItemTO item, final long menuGeneration, final ResultHandler
             resultHandler) {
+        mItem = item;
         mResultHandler = resultHandler == null ? mDefaultResultHandler : resultHandler;
 
         long currentTime = System.currentTimeMillis();
@@ -250,6 +252,7 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
                             i.putExtra(FriendsThreadActivity.MESSAGE_FLAGS, flags);
                         } else {
                             i = new Intent(context, ServiceMessageDetailActivity.class);
+                            i.putExtra(ServiceMessageDetailActivity.TITLE, mItem.label);
                             if (mActivity instanceof AbstractHomeActivity) {
                                 i.putExtra(ServiceMessageDetailActivity.JUMP_TO_SERVICE_HOME_SCREEN, false);
                             }
