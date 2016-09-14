@@ -117,8 +117,8 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:background="@color/mc_background_color"
-        android:inAnimation="@android:anim/slide_in_left"
-        android:outAnimation="@android:anim/slide_out_right" >
+        android:inAnimation="@android:anim/fade_in"
+        android:outAnimation="@android:anim/fade_out">
 
         <include layout="@layout/add_friends_via_contacts" />
 
