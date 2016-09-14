@@ -117,8 +117,8 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:background="@color/mc_background_color"
-        android:inAnimation="@android:anim/fade_in"
-        android:outAnimation="@android:anim/fade_out" >
+        android:inAnimation="@android:anim/slide_in_left"
+        android:outAnimation="@android:anim/slide_out_right" >
 
         <include layout="@layout/add_friends_via_contacts" />
 
@@ -126,39 +126,8 @@
 
         <include layout="@layout/add_friends_via_qr_scan" />
 
-        <LinearLayout
-            android:id="@+id/add_via_email"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:orientation="vertical"
-            android:padding="10dp" >
+        <include layout="@layout/add_friends_via_email" />
 
-            <TextView
-                android:id="@+id/add_via_email_description"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="50dp"
-                android:gravity="center"
-                android:text="@string/add_via_email_description"
-                android:textSize="16sp" />
-
-            <AutoCompleteTextView
-                android:id="@+id/add_via_email_text_field"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/email"
-                android:imeOptions="actionDone"
-                android:inputType="textEmailAddress"
-                android:textColor="@android:color/primary_text_light"
-                android:textSize="16sp" />
-
-            <Button
-                android:id="@+id/add_via_email_button"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="50dp" />
-        </LinearLayout>
     </com.mobicage.rogerthat.util.ui.SafeViewFlipper>
 
 </LinearLayout>
