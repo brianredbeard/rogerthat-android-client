@@ -32,7 +32,7 @@ public class AboutActivity extends AbstractAboutActivity {
         super.onServiceBound();
 
         ImageView header = (ImageView) findViewById(AppConstants.FULL_WIDTH_HEADERS ? R.id.full_width_rogerthat_logo
-            : R.id.rogerthat_logo);
+                : R.id.rogerthat_logo);
         header.setVisibility(View.VISIBLE);
         ImageView aboutProvidedLogo = (ImageView) findViewById(R.id.about_provided_logo);
         aboutProvidedLogo.setImageResource(R.drawable.about_footer);
@@ -47,7 +47,7 @@ public class AboutActivity extends AbstractAboutActivity {
             aboutProvidedText.setText(getString(R.string.about_provided_by_enterprise, getString(R.string.app_name)));
         } else {
             aboutInfoRogerthat.setText(getString(R.string.about_more_info, getString(R.string.app_name)));
-            headerSlogan.setVisibility(View.VISIBLE);
+            headerSlogan.setVisibility(CloudConstants.isCityApp() ? View.GONE: View.VISIBLE);
             headerSlogan.setText(R.string.slogan);
             aboutProvidedText.setText(getString(R.string.about_provided_by, getString(R.string.app_name)));
         }

@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/mc_highlight_background" >
+    android:layout_height="match_parent"
+    android:background="@color/mc_background_color">
 
     <com.mobicage.rogerthat.util.ui.ScaleImageView
         android:id="@+id/full_width_rogerthat_logo"
@@ -37,7 +38,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="10dp"
             android:gravity="center_horizontal"
             android:textColor="#000"
             android:textSize="15sp" />
@@ -51,16 +52,25 @@
             android:gravity="center_horizontal"
             android:textColor="@color/mc_about_blue"
             android:textSize="16sp" />
-
-        <Button
-            android:id="@+id/about_btn_visit_rogerthat"
+        <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:background="@drawable/about_link"
-            android:text="_www.rogerthat.net_"
-            android:textColor="@color/mc_white"
-            android:textSize="16sp" />
+            android:background="@drawable/tint_gradient"
+            android:layout_gravity="center_horizontal">
+            <Button
+                android:id="@+id/about_btn_visit_rogerthat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="20dp"
+                android:paddingStart="20dp"
+                android:paddingRight="20dp"
+                android:paddingEnd="20dp"
+                android:background="?attr/selectableItemBackground"
+                android:text="_www.rogerthat.net_"
+                android:textColor="@color/mc_white"
+                android:textSize="16sp" />
+        </FrameLayout>
+
 
         <RelativeLayout
             android:id="@+id/about_btn_email_rogerthat"
@@ -73,11 +83,14 @@
 
             <ImageView
                 android:id="@+id/about_email_icon"
-                android:layout_width="15dp"
-                android:layout_height="15dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="10dp"
-                android:src="@drawable/about_email" >
+                android:layout_marginEnd="10dp"
+                app:ico_color="@color/mc_primary_color"
+                app:ico_icon="@string/faw_envelope_o"
+                app:ico_size="15dp">
             </ImageView>
 
             <TextView
@@ -85,6 +98,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_toRightOf="@+id/about_email_icon"
+                android:layout_toEndOf="@+id/about_email_icon"
                 android:text="_info@mobicage.com_"
                 android:textColor="@color/mc_about_blue"
                 android:textSize="13sp" />
@@ -100,11 +114,14 @@
 
             <ImageView
                 android:id="@+id/about_twitter_icon"
-                android:layout_width="15dp"
-                android:layout_height="15dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="10dp"
-                android:src="@drawable/about_twitter" >
+                android:layout_marginEnd="10dp"
+                app:ico_color="@color/mc_primary_color"
+                app:ico_icon="@string/faw_twitter"
+                app:ico_size="15dp">
             </ImageView>
 
             <TextView
@@ -112,6 +129,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_toRightOf="@+id/about_twitter_icon"
+                android:layout_toEndOf="@+id/about_twitter_icon"
                 android:text="_@rogerthat_"
                 android:textColor="@color/mc_about_blue"
                 android:textSize="13sp" />
@@ -132,7 +150,10 @@
                 android:layout_height="15dp"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="10dp"
-                android:src="@drawable/about_facebook" >
+                android:layout_marginEnd="10dp"
+                app:ico_color="@color/mc_primary_color"
+                app:ico_icon="@string/faw_facebook_official"
+                app:ico_size="15dp" >
             </ImageView>
 
             <TextView
@@ -140,6 +161,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_toRightOf="@+id/about_facebook_icon"
+                android:layout_toEndOf="@+id/about_facebook_icon"
                 android:text="_/rogerthatplatform_"
                 android:textColor="@color/mc_about_blue"
                 android:textSize="13sp" />
