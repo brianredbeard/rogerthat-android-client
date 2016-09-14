@@ -56,7 +56,7 @@ public class InviteFriendActivity extends ServiceBoundActivity {
     @Override
     protected void onServiceBound() {
         T.UI();
-        setContentView(R.layout.friend_invite);
+        setContentViewWithoutNavigationBar(R.layout.friend_invite);
         final int btnText;
         switch (AppConstants.FRIENDS_CAPTION) {
         case COLLEAGUES:
@@ -116,7 +116,7 @@ public class InviteFriendActivity extends ServiceBoundActivity {
                 }
             }
 
-            ((TextView) findViewById(R.id.title_bar)).setText(R.string.successful_scan);
+            setTitle(R.string.successful_scan);
 
             final Bitmap bitmap = ImageHelper.getRoundedCornerAvatar(BitmapFactory.decodeByteArray(mFriend.avatar, 0,
                 mFriend.avatar.length));

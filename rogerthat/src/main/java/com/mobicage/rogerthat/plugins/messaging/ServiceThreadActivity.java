@@ -38,6 +38,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -111,7 +112,7 @@ public class ServiceThreadActivity extends ServiceBoundCursorListActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.service_thread);
+        setContentViewWithoutNavigationBar(R.layout.service_thread);
         mParentMessageKey = getIntent().getStringExtra(PARENT_MESSAGE_KEY);
         setListView((ListView) findViewById(R.id.thread_messages));
 
@@ -255,7 +256,7 @@ public class ServiceThreadActivity extends ServiceBoundCursorListActivity {
             final Message message = mMessageStore.readFullThreadMessageFromCursor(cursor);
             final int position = cursor.getPosition();
 
-            final RelativeLayout svcDetail = (RelativeLayout) view.findViewById(R.id.svc_detail);
+            final LinearLayout svcDetail = (LinearLayout) view.findViewById(R.id.svc_detail);
             final ImageView avatarView = (ImageView) svcDetail.findViewById(R.id.avatar);
             final TextView recipientsView = (TextView) svcDetail.findViewById(R.id.recipients);
 

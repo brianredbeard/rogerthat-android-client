@@ -207,8 +207,15 @@
                 android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
 
-        <activity android:name="com.mobicage.rogerthat.plugins.messaging.ServiceThreadActivity" >
-        </activity> <!-- todo ruben -->
+        <activity
+            android:name="com.mobicage.rogerthat.plugins.messaging.ServiceThreadActivity"
+            android:theme="@style/Theme.AppCompat.Light"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity" >
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
+        </activity>
         <activity
             android:name="com.mobicage.rogerthat.AddFriendsActivity"
             android:configChanges="orientation|screenSize"
@@ -297,16 +304,27 @@
         <activity
             android:name="com.mobicage.rogerthat.plugins.scan.ProcessScanActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" > <!-- todo ruben -->
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.scan.InviteFriendActivity"
-            android:theme="@style/AppTheme.NoActionBar" > <!-- todo ruben -->
+            android:screenOrientation="portrait"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity"
+            android:theme="@style/Theme.AppCompat.Light">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.scan.ServiceActionActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" > <!-- todo ruben -->
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity"
+            android:theme="@style/Theme.AppCompat.Light">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.ServiceDetailActivity"
