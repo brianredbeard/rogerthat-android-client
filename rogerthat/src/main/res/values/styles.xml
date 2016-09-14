@@ -21,6 +21,12 @@
         <!--Change de color of the NavigationDrawer Icon in the Toolbar.-->
         <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
 
+        <item name="android:textColor">@color/mc_default_text</item>
+
+    </style>
+
+    <style name="ButtonTheme" parent="android:style/Widget.Button">
+        <item name="android:textColor">@color/mc_default_text</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
