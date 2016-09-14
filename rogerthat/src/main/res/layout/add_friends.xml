@@ -7,8 +7,9 @@
     <LinearLayout
         android:id="@+id/tab_view"
         android:layout_width="fill_parent"
-        android:layout_height="50dp"
-        android:background="@android:color/white"
+        android:layout_height="70dp"
+        android:background="@color/mc_background_color"
+        android:paddingTop="10dp"
         android:baselineAligned="false" >
 
         <RelativeLayout
@@ -30,6 +31,7 @@
                 android:layout_height="fill_parent"
                 android:layout_above="@id/contacts_indicator"
                 android:layout_margin="5dp"
+                android:paddingBottom="10dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/contacts_icon" />
         </RelativeLayout>
@@ -54,6 +56,7 @@
                 android:layout_height="fill_parent"
                 android:layout_above="@id/facebook_indicator"
                 android:layout_margin="5dp"
+                android:paddingBottom="10dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/f" />
         </RelativeLayout>
@@ -78,6 +81,7 @@
                 android:layout_height="fill_parent"
                 android:layout_above="@id/qr_scan_indicator"
                 android:layout_margin="5dp"
+                android:paddingBottom="10dp"
                 android:scaleType="fitCenter" 
                 android:src="@drawable/qr_icon" />
         </RelativeLayout>
@@ -102,6 +106,7 @@
                 android:layout_height="fill_parent"
                 android:layout_above="@id/mail_indicator"
                 android:layout_margin="5dp"
+                android:paddingBottom="10dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/mail_icon" />
         </RelativeLayout>
