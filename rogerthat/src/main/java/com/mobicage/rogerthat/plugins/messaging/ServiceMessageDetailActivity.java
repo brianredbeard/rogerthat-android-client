@@ -637,37 +637,12 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity implement
         }
 
         if (mCurrentMessage.broadcast_type != null) {
-            L.d("todo ruben Show broadcast spam control");
-
             final ServiceMenuItemDetails smi = mFriendsPlugin.getStore().getBroadcastServiceMenuItem(mCurrentMessage
                     .sender);
             if (smi == null) {
                 L.bug("BroadcastData was null for: " + mCurrentMessage.sender);
-                collapseDetails(DETAIL_SECTIONS);
                 return;
             }
-
-//            broadcastSpamControlSettingsContainer.setOnClickListener(new SafeViewOnClickListener() {
-//
-//                @Override
-//                public void safeOnClick(View v) {
-//                    L.d("goto broadcast settings");
-//                    if (mMenuItemPresser == null) {
-//                        //noinspection unchecked,unchecked
-//                        mMenuItemPresser = new MenuItemPresser(ServiceMessageDetailActivity.this, mCurrentMessage
-//                                .sender);
-//                    }
-//                    mMenuItemPresser.itemPressed(smi, smi.menuGeneration, new MenuItemPresser.ResultHandler() {
-//                        @Override
-//                        public void onSuccess() {
-//                            overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_up);
-//                            finish();
-//                        }
-//                    });
-//
-//                }
-//
-//            });
 
             UIUtils.showHint(this, mService, HINT_BROADCAST, R.string.hint_broadcast, mCurrentMessage.broadcast_type,
                 mFriendsPlugin.getName(mCurrentMessage.sender));
