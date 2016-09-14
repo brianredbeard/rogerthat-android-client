@@ -666,7 +666,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             super.setTheme(android.R.style.Theme_Black_NoTitleBar_Fullscreen);
         }
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.action_screen);
+        setContentViewWithoutNavigationBar(R.layout.action_screen);
         mBranding = (WebView) findViewById(R.id.branding);
         WebSettings brandingSettings = mBranding.getSettings();
         brandingSettings.setJavaScriptEnabled(true);

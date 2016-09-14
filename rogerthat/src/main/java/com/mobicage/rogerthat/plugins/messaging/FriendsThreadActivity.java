@@ -84,6 +84,7 @@ import com.mobicage.rogerthat.util.ui.SendMessageView;
 import com.mobicage.rogerthat.util.ui.Slider;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.IncompleteMessageException;
+import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.to.messaging.ButtonTO;
 import com.mobicage.to.messaging.MemberStatusTO;
 import com.mobicage.to.messaging.MessageTO;
@@ -848,9 +849,14 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                     Intent intent = new Intent(FriendsThreadActivity.this, ProfileActivity.class);
                     startActivity(intent);
                 } else if (isChat) {
-                    Intent intent = new Intent(FriendsThreadActivity.this, FriendDetailOrInviteActivity.class);
-                    intent.putExtra(FriendDetailOrInviteActivity.EMAIL, friendEmail);
-                    startActivity(intent);
+                    final int contactType = mFriendsPlugin.getContactType(friendEmail);
+                    if ((contactType & FriendsPlugin.FRIEND) == FriendsPlugin.FRIEND && AppConstants.FRIENDS_ENABLED) {
+                        mFriendsPlugin.launchDetailActivity(FriendsThreadActivity.this, friendEmail);
+                    } else {
+                        Intent intent = new Intent(FriendsThreadActivity.this, FriendDetailOrInviteActivity.class);
+                        intent.putExtra(FriendDetailOrInviteActivity.EMAIL, friendEmail);
+                        startActivity(intent);
+                    }
                 } else {
                     final int contactType = mFriendsPlugin.getContactType(friendEmail);
                     if ((contactType & FriendsPlugin.FRIEND) == FriendsPlugin.FRIEND) {

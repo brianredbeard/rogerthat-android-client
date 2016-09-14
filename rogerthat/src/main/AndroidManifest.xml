@@ -263,7 +263,13 @@
         </activity> <!-- todo ruben -->
         <activity
             android:name="com.mobicage.rogerthat.plugins.friends.ActionScreenActivity"
-            android:configChanges="orientation|screenSize"> <!-- todo ruben -->
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/Theme.AppCompat.Light"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity" >
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.friends.ContentBrandingActionScreenActivity"
