@@ -55,6 +55,7 @@ import android.view.ViewGroup;
 
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+
 import com.facebook.CallbackManager;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.iconics.IconicsDrawable;
@@ -90,7 +91,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
             return null;
         }
     };
-    private Dialog mTransmitProgressDialog;
+    private AlertDialog mTransmitProgressDialog;
     private ProgressBar mTransmitProgressBar;
     private long mTransmitStart = 0;
 
@@ -119,10 +120,12 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         IntentFilter filter = new IntentFilter(MainService.CLOSE_ACTIVITY_INTENT);
         registerReceiver(closeActivityListener, filter);
         doBindService();
-        mTransmitProgressDialog = new Dialog(this);
-        mTransmitProgressDialog.setContentView(R.layout.progressdialog);
-        mTransmitProgressDialog.setTitle(R.string.transmitting);
-        mTransmitProgressBar = (ProgressBar) mTransmitProgressDialog.findViewById(R.id.progress_bar);
+
+        mConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        View progressDialg = getLayoutInflater().inflate(R.layout.progressdialog, null);
+        mTransmitProgressDialog = new AlertDialog.Builder(this).setTitle(R.string.transmitting).setView(progressDialg).create();
+        mTransmitProgressBar = (ProgressBar) progressDialg.findViewById(R.id.progress_bar);
         mTransmitProgressDialog.setCancelable(true);
         mTransmitProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
             @Override
@@ -130,7 +133,6 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
                 completeTransmit(null);
             }
         });
-        mConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
     }
 
     @Override
