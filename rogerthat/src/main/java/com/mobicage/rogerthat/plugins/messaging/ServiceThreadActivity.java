@@ -17,9 +17,6 @@
  */
 package com.mobicage.rogerthat.plugins.messaging;
 
-import java.util.Arrays;
-import java.util.Map;
-
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -40,7 +37,6 @@ import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.mobicage.rogerth.at.R;
@@ -58,6 +54,9 @@ import com.mobicage.rogerthat.util.ui.Slider;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.to.messaging.ButtonTO;
 import com.mobicage.to.messaging.MemberStatusTO;
+
+import java.util.Arrays;
+import java.util.Map;
 
 public class ServiceThreadActivity extends ServiceBoundCursorListActivity {
 
@@ -287,6 +286,7 @@ public class ServiceThreadActivity extends ServiceBoundCursorListActivity {
                 });
             } else {
                 svcDetail.setOnClickListener(null);
+                svcDetail.setVisibility(View.GONE);
                 avatarView.setVisibility(View.GONE);
                 recipientsView.setVisibility(View.GONE);
             }

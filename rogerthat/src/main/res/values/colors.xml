@@ -43,6 +43,5 @@
     <color name="mc_pin_yellow">#FFD900</color>
     <color name="mc_pin_green">#87CD03</color>
 
-    <color name="mc_list_item_background">#FAFAFA</color>
-    <color name="mc_list_item_3_line">#FAFAFA</color>
+    <color name="mc_list_item_3_line">#757575</color>
 </resources>
