@@ -592,7 +592,7 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
             findViewById(R.id.poke_area).setVisibility(View.GONE);
         } else {
             findViewById(R.id.poke_area).setVisibility(View.VISIBLE);
-            final Button pokeBtn = (Button) mServiceArea.findViewById(R.id.poke_button);
+            final Button pokeBtn = (Button) findViewById(R.id.poke_button);
             pokeBtn.setText(friend.pokeDescription);
             pokeBtn.setOnClickListener(new SafeViewOnClickListener() {
                 @Override

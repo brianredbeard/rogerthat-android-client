@@ -57,7 +57,8 @@ public class ChatInfoActivity extends ServiceBoundActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mChatKey = getIntent().getStringExtra(CHAT_KEY);
-        setContentView(R.layout.chat_info);
+        setContentViewWithoutNavigationBar(R.layout.chat_info);
+        setTitle(R.string.about);
     }
 
     @Override
