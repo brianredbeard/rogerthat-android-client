@@ -1,25 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 
     <ImageButton
         android:id="@+id/nav_hamburger"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
+        android:layout_gravity="end"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:layout_marginTop="26dp"
+        android:layout_marginBottom="20dp"
         android:background="@null"
+        android:paddingTop="40dp"
         android:onClick="onOptionNavigationViewToolbarSelected"
-        android:src="@drawable/ic_menu_hamburger" />
+        app:ico_color="@color/mc_primary_color"
+        app:ico_icon="@string/faw_bars"
+        app:ico_size="20dp" />
 
     <ImageView
         android:id="@+id/nav_header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/nav_hamburger"
-        android:layout_centerHorizontal="true"
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
         android:adjustViewBounds="true"
@@ -30,7 +33,6 @@
         android:layout_width="match_parent"
         android:layout_marginTop="30dp"
         android:layout_height="1dp"
-        android:layout_below="@id/nav_header"
         android:background="@drawable/divider_gradient" />
 
-</RelativeLayout>
+</LinearLayout>
