@@ -55,12 +55,14 @@ import android.view.ViewGroup;
 
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+
 import com.facebook.CallbackManager;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.MenuItemPressingActivity;
 import com.mobicage.rogerthat.util.ActivityUtils;
+import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
@@ -89,7 +91,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
             return null;
         }
     };
-    private Dialog mTransmitProgressDialog;
+    private AlertDialog mTransmitProgressDialog;
     private ProgressBar mTransmitProgressBar;
     private long mTransmitStart = 0;
 
@@ -118,10 +120,12 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         IntentFilter filter = new IntentFilter(MainService.CLOSE_ACTIVITY_INTENT);
         registerReceiver(closeActivityListener, filter);
         doBindService();
-        mTransmitProgressDialog = new Dialog(this);
-        mTransmitProgressDialog.setContentView(R.layout.progressdialog);
-        mTransmitProgressDialog.setTitle(R.string.transmitting);
-        mTransmitProgressBar = (ProgressBar) mTransmitProgressDialog.findViewById(R.id.progress_bar);
+
+        mConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        View progressDialg = getLayoutInflater().inflate(R.layout.progressdialog, null);
+        mTransmitProgressDialog = new AlertDialog.Builder(this).setTitle(R.string.transmitting).setView(progressDialg).create();
+        mTransmitProgressBar = (ProgressBar) progressDialg.findViewById(R.id.progress_bar);
         mTransmitProgressDialog.setCancelable(true);
         mTransmitProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
             @Override
@@ -129,7 +133,6 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
                 completeTransmit(null);
             }
         });
-        mConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
     }
 
     @Override
@@ -355,6 +358,12 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
 
     public void setContentViewWithoutNavigationBar(int layoutResID) {
         super.setContentView(layoutResID);
+        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
+    }
+
+    public void setContentViewWithoutNavigationBar(View view) {
+        super.setContentView(view);
+        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
     }
 
     @Override
@@ -430,11 +439,13 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
     @Override
     public void setContentView(View view) {
         super.setContentView(view);
+        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
     }
 
     @Override
     public void setContentView(View view, ViewGroup.LayoutParams params) {
         super.setContentView(view, params);
+        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
     }
 
     public boolean askPermissionIfNeeded(final String permission, final int requestCode, final SafeRunnable onGranted,

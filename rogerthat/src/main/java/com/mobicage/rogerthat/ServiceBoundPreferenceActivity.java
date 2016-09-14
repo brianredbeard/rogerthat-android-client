@@ -50,6 +50,7 @@ import com.facebook.CallbackManager;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.MenuItemPressingActivity;
 import com.mobicage.rogerthat.util.ActivityUtils;
+import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
@@ -69,42 +70,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
-public abstract class ServiceBoundPreferenceActivity extends PreferenceActivity implements Pausable, ServiceBound {
+public abstract class ServiceBoundPreferenceActivity extends PreferenceActivity implements ServiceBound {
 
     public static final long MAX_TRANSMIT = 10 * 1000;
 
     protected volatile MainService mService;
     protected boolean mServiceIsBound = false; // Owned by UI thread
-    private boolean mPaused = false; // Owned by UI thread
-    final private Queue<SafeRunnable> mWorkQueue = new LinkedList<SafeRunnable>();
-
-    private final BroadcastReceiver closeActivityListener = new SafeBroadcastReceiver() {
-        @Override
-        public String[] onSafeReceive(Context context, Intent intent) {
-            L.d("Received CLOSE_ACTIVITY_INTENT");
-            finish();
-            return null;
-        }
-    };
-    private Dialog mTransmitProgressDialog;
-    private ProgressBar mTransmitProgressBar;
-    private long mTransmitStart = 0;
-
-    private SafeRunnable mTransmitTimeoutRunnable;
-
-    private ConnectivityManager mConnectivityManager;
-    private List<SafeRunnable> mOnServiceBoundRunnables;
-
-    private long mLastTimeClicked = 0;
-    public static final long DOUBLE_CLICK_TIMESPAN = 1000;
-
-    private boolean mWasPaused = false;
-    private Map<Integer, SafeRunnable[]> mPermissionRequests = new HashMap<>();
-
-    private CallbackManager mFBCallbackMgr;
-
-    private ActionBarDrawerToggle mDrawerToggle;
-    private String mActivityName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,21 +83,7 @@ public abstract class ServiceBoundPreferenceActivity extends PreferenceActivity 
         super.onCreate(savedInstanceState);
         logMethod("onCreate");
         SystemUtils.logIntentFlags(getIntent());
-        IntentFilter filter = new IntentFilter(MainService.CLOSE_ACTIVITY_INTENT);
-        registerReceiver(closeActivityListener, filter);
         doBindService();
-        mTransmitProgressDialog = new Dialog(this);
-        mTransmitProgressDialog.setContentView(R.layout.progressdialog);
-        mTransmitProgressDialog.setTitle(R.string.transmitting);
-        mTransmitProgressBar = (ProgressBar) mTransmitProgressDialog.findViewById(R.id.progress_bar);
-        mTransmitProgressDialog.setCancelable(true);
-        mTransmitProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                completeTransmit(null);
-            }
-        });
-        mConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
     }
 
     @Override
@@ -134,76 +91,7 @@ public abstract class ServiceBoundPreferenceActivity extends PreferenceActivity 
         T.UI();
         logMethod("onDestroy");
         super.onDestroy();
-        unregisterReceiver(closeActivityListener);
         doUnbindService();
-    }
-
-    public void showTransmitting(SafeRunnable onTimeout) {
-        T.UI();
-        mTransmitTimeoutRunnable = onTimeout;
-        mTransmitStart = System.currentTimeMillis();
-        mTransmitProgressBar.setProgress(0);
-        mTransmitProgressDialog.show();
-        mService.postDelayedOnUIHandler(mIncreaseProgress, 100);
-    }
-
-    public boolean isTransmitting() {
-        T.UI();
-        return mTransmitProgressDialog.isShowing();
-    }
-
-    public void completeTransmit(final SafeRunnable afterComplete) {
-        T.UI();
-        mTransmitProgressDialog.dismiss();
-        mService.removeFromUIHandler(mIncreaseProgress);
-        mTransmitProgressBar.setProgress(100);
-        if (afterComplete != null && mService != null) {
-            mService.postDelayedOnUIHandler(new SafeRunnable() {
-                @Override
-                protected void safeRun() throws Exception {
-                    afterComplete.run();
-                }
-            }, 200);
-        }
-    }
-
-    private final SafeRunnable mIncreaseProgress = new SafeRunnable() {
-        @Override
-        protected void safeRun() throws Exception {
-            T.UI();
-            if (mTransmitProgressDialog.isShowing()) {
-                int completenessLevel = (int) ((System.currentTimeMillis() - mTransmitStart) * 100 / MAX_TRANSMIT);
-                if (completenessLevel < 100) {
-                    mTransmitProgressBar.setProgress(completenessLevel);
-                    if (mService != null)
-                        mService.postDelayedOnUIHandler(mIncreaseProgress, 100);
-                } else {
-                    mTransmitProgressDialog.dismiss();
-                    showActionScheduledDialog();
-                }
-            }
-        }
-    };
-
-    public void showActionScheduledDialog() {
-        new AlertDialog.Builder(ServiceBoundPreferenceActivity.this).setMessage(R.string.action_scheduled)
-                .setPositiveButton(R.string.rogerthat, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        if (mTransmitTimeoutRunnable != null)
-                            mTransmitTimeoutRunnable.run();
-                    }
-                }).create().show();
-    }
-
-    public boolean checkConnectivity() {
-        NetworkInfo activeNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
-    }
-
-    public boolean checkConnectivityIsWifi() {
-        return mService.getNetworkConnectivityManager().isWifiConnected();
     }
 
     private void doBindService() {
@@ -228,12 +116,6 @@ public abstract class ServiceBoundPreferenceActivity extends PreferenceActivity 
                 L.bug(e);
                 finish();
             }
-            if (mOnServiceBoundRunnables != null) {
-                for (SafeRunnable runnable : mOnServiceBoundRunnables) {
-                    runnable.run();
-                }
-                mOnServiceBoundRunnables = null;
-            }
         }
 
         @Override
@@ -246,13 +128,6 @@ public abstract class ServiceBoundPreferenceActivity extends PreferenceActivity 
             // in our own process, we should never see this happen.
         }
     };
-
-    protected void addOnServiceBoundRunnable(SafeRunnable runnable) {
-        if (mOnServiceBoundRunnables == null) {
-            mOnServiceBoundRunnables = new ArrayList<SafeRunnable>();
-        }
-        mOnServiceBoundRunnables.add(runnable);
-    }
 
     private void doUnbindService() {
         T.UI();
@@ -277,21 +152,12 @@ public abstract class ServiceBoundPreferenceActivity extends PreferenceActivity 
     protected void onPause() {
         T.UI();
         super.onPause();
-        mPaused = true;
-        mWasPaused = true;
     }
 
     @Override
     protected void onResume() {
         T.UI();
         super.onResume();
-        mPaused = false;
-        SafeRunnable runnable = mWorkQueue.poll();
-        // XXX: limit execution time to 9 seconds
-        while (runnable != null) {
-            runnable.run();
-            runnable = mWorkQueue.poll();
-        }
     }
 
     @Override
@@ -306,23 +172,6 @@ public abstract class ServiceBoundPreferenceActivity extends PreferenceActivity 
         super.onStart();
     }
 
-    @Override
-    public boolean getPaused() {
-        T.UI();
-        return mPaused;
-    }
-
-    public boolean getWasPaused() {
-        T.UI();
-        return mWasPaused;
-    }
-
-    @Override
-    public void queue(SafeRunnable runnable) {
-        T.UI();
-        mWorkQueue.add(runnable);
-    }
-
     protected void logMethod(String method) {
         L.d(getClass().getName() + "(ServiceBoundActivity)." + method);
     }
@@ -330,94 +179,6 @@ public abstract class ServiceBoundPreferenceActivity extends PreferenceActivity 
     @Override
     public MainService getMainService() {
         return mService;
-    }
-
-    public void setNavigationBarBurgerVisible(boolean isVisible) {
-        if (isVisible) {
-            getDrawer().setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-            mDrawerToggle.setDrawerIndicatorEnabled(true);
-        } else {
-            getDrawer().setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-            mDrawerToggle.setDrawerIndicatorEnabled(false);
-        }
-    }
-
-    public void setLastTimeClicked(final long ts) {
-        mLastTimeClicked = ts;
-    }
-
-    public long getLastTimeClicked() {
-        return mLastTimeClicked;
-    }
-
-
-    public boolean askPermissionIfNeeded(final String permission, final int requestCode, final SafeRunnable onGranted,
-                                         final SafeRunnable onDenied) {
-        final boolean granted = mService.isPermitted(permission);
-        if (!granted) {
-            L.i("Requesting permission: " + permission);
-            mPermissionRequests.put(requestCode, new SafeRunnable[]{onGranted, onDenied});
-
-            ActivityCompat.requestPermissions(this, new String[]{permission}, requestCode);
-        }
-        return !granted;
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        final SafeRunnable[] runnables = mPermissionRequests.remove(requestCode);
-        if (runnables == null) {
-            L.d("Unknown permissionResult requestCode in " + getLocalClassName() + ": " + requestCode);
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-            return;
-        }
-
-        final boolean granted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
-        final SafeRunnable runnable = runnables[granted ? 0 : 1];
-        if (runnable != null) {
-            runnable.run();
-        }
-    }
-
-    public CallbackManager getFacebookCallbackManager() {
-        if (mFBCallbackMgr == null) {
-            mFBCallbackMgr = CallbackManager.Factory.create();
-        }
-        return mFBCallbackMgr;
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (mFBCallbackMgr != null ) {
-            mFBCallbackMgr.onActivityResult(requestCode, resultCode, data);
-        }
-    }
-
-
-    public DrawerLayout getDrawer() {
-        return (DrawerLayout) findViewById(R.id.drawer_layout);
-    }
-
-    public void openNavigationView() {
-        getDrawer().openDrawer(GravityCompat.START);
-    }
-
-    public void closeNavigationView() {
-        getDrawer().closeDrawer(GravityCompat.START);
-    }
-
-    public void setActivityName(String activityName) {
-        mActivityName = activityName;
-        activateCurrentNavigationItem();
-    }
-
-    private void activateCurrentNavigationItem() {
-        int order = Arrays.asList(AppConstants.NAVIGATION_CLICKS).indexOf(mActivityName);
-        if (order >= 0) {
-            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-            navigationView.getMenu().getItem(order).setChecked(true);
-        }
     }
 
     @Override
@@ -431,20 +192,19 @@ public abstract class ServiceBoundPreferenceActivity extends PreferenceActivity 
     }
 
     @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer != null && drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
+    public void setContentView(int layoutResID) {
+        setContentView(getLayoutInflater().inflate(layoutResID, null));
     }
 
-    public void onOptionNavigationViewToolbarSelected(View v) {
-        String activityName = (String) v.getTag();
-        if (activityName != null && !activityName.equals(mActivityName)) {
-            ActivityUtils.goToActivity(this, activityName, true);
-        }
-        closeNavigationView();
+    @Override
+    public void setContentView(View view) {
+        super.setContentView(view);
+        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
+    }
+
+    @Override
+    public void setContentView(View view, ViewGroup.LayoutParams params) {
+        super.setContentView(view, params);
+        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
     }
 }

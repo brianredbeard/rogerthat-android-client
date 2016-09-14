@@ -51,6 +51,7 @@ import com.google.android.maps.MapActivity;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendAvatar;
+import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
@@ -101,10 +102,12 @@ public abstract class ServiceBoundMapActivity extends MapActivity implements Pau
         mUnknownAvatar = getResources().getDrawable(R.drawable.unknown_avatar);
         mICDachboardAvatar = getResources().getDrawable(R.drawable.ic_dashboard);
         doBindService();
-        mTransmitProgressDialog = new Dialog(this);
-        mTransmitProgressDialog.setContentView(R.layout.progressdialog);
-        mTransmitProgressDialog.setTitle(R.string.transmitting);
-        mTransmitProgressBar = (ProgressBar) mTransmitProgressDialog.findViewById(R.id.progress_bar);
+
+        mConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        View progressDialg = getLayoutInflater().inflate(R.layout.progressdialog, null);
+        mTransmitProgressDialog = new AlertDialog.Builder(this).setTitle(R.string.transmitting).setView(progressDialg).create();
+        mTransmitProgressBar = (ProgressBar) progressDialg.findViewById(R.id.progress_bar);
         mTransmitProgressDialog.setCancelable(true);
         mTransmitProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
             @Override
@@ -112,7 +115,6 @@ public abstract class ServiceBoundMapActivity extends MapActivity implements Pau
                 completeTransmit(null);
             }
         });
-        mConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
     }
 
     @Override
@@ -331,11 +333,13 @@ public abstract class ServiceBoundMapActivity extends MapActivity implements Pau
     @Override
     public void setContentView(View view) {
         super.setContentView(view);
+        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
     }
 
     @Override
     public void setContentView(View view, ViewGroup.LayoutParams params) {
         super.setContentView(view, params);
+        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
     }
 
     public boolean askPermissionIfNeeded(final String permission, final int requestCode, final SafeRunnable onGranted,

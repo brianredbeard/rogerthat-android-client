@@ -18,6 +18,8 @@
 
 package com.mobicage.rogerthat.plugins.messaging;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.view.View;
@@ -34,6 +36,7 @@ import com.mobicage.rogerthat.FriendDetailOrInviteActivity;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
+import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
 
 import java.util.HashMap;
@@ -78,15 +81,27 @@ public class FriendsThreadMembersActivity extends ServiceBoundActivity {
 
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> listView, View view, int position, long id) {
+            public void onItemClick(AdapterView<?> listView, View view, final int position, long id) {
                 T.UI();
                 if (mMyEmail.equals(mMembers[position])) {
                     Intent intent = new Intent(FriendsThreadMembersActivity.this, ProfileActivity.class);
                     startActivity(intent);
                 } else {
-                    Intent intent = new Intent(FriendsThreadMembersActivity.this, FriendDetailOrInviteActivity.class);
-                    intent.putExtra(FriendDetailOrInviteActivity.EMAIL, mMembers[position]);
-                    startActivity(intent);
+                    final int contactType = mFriendsPlugin.getContactType(mMembers[position]);
+                    if ((contactType & FriendsPlugin.FRIEND) == FriendsPlugin.FRIEND) {
+                        mFriendsPlugin.launchDetailActivity(FriendsThreadMembersActivity.this, mMembers[position]);
+                    } else {
+                        if ((contactType & FriendsPlugin.NON_FRIEND) == FriendsPlugin.NON_FRIEND) {
+                            new AlertDialog.Builder(FriendsThreadMembersActivity.this)
+                                    .setMessage(getString(R.string.invite_as_friend, new Object[] { mMembers[position] }))
+                                    .setPositiveButton(R.string.yes, new SafeDialogInterfaceOnClickListener() {
+                                        @Override
+                                        public void safeOnClick(DialogInterface dialog, int which) {
+                                            mFriendsPlugin.inviteFriend(mMembers[position], null, null, true);
+                                        }
+                                    }).setNegativeButton(R.string.no, null).create().show();
+                        }
+                    }
                 }
             }
         });

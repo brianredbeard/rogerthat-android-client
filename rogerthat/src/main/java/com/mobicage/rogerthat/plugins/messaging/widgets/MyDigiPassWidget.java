@@ -151,8 +151,7 @@ public class MyDigiPassWidget extends Widget implements OnMDPAuthenticationListe
             }
 
             if (mFontAwesomeTypeFace == null) {
-                // todo ruben
-                mFontAwesomeTypeFace = Typeface.createFromAsset(getContext().getAssets(), "FontAwesome.ttf"); // todo ruben
+                mFontAwesomeTypeFace = Typeface.createFromAsset(getContext().getAssets(), "FontAwesome.ttf");
             }
 
             final TextView faTextView = (TextView) v.findViewById(R.id.fa_text_view);

@@ -197,9 +197,6 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         T.UI();
-        setContentView(R.layout.messaging);
-        setActivityName("messages");
-        setListView((ListView) findViewById(R.id.message_list));
         super.onCreate(savedInstanceState);
         mResources = getResources();
     }
@@ -279,8 +276,6 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
     protected void onServiceBound() {
         T.UI();
         mMessagingPlugin = mService.getPlugin(MessagingPlugin.class);
-        if (mMemberFilter == null)
-            mMessagingPlugin.inboxOpened();
         mFriendsPlugin = mService.getPlugin(FriendsPlugin.class);
         mMyEmail = mService.getIdentityStore().getIdentity().getEmail();
 
@@ -296,6 +291,17 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
                 }
             }
         }
+
+        if (mMemberFilter == null) {
+            mMessagingPlugin.inboxOpened();
+            setContentView(R.layout.messaging);
+            setActivityName("messages");
+        } else {
+            setContentViewWithoutNavigationBar(R.layout.messaging);
+            setActivityName("messages_filter");
+        }
+
+        setListView((ListView) findViewById(R.id.message_list));
 
         findViewById(R.id.delete_done_button).setOnClickListener(new SafeViewOnClickListener() {
             @Override

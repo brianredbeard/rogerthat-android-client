@@ -47,6 +47,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
@@ -93,10 +94,12 @@ public abstract class ServiceBoundFragmentActivity extends FragmentActivity impl
         IntentFilter filter = new IntentFilter(MainService.CLOSE_ACTIVITY_INTENT);
         registerReceiver(closeActivityListener, filter);
         doBindService();
-        mTransmitProgressDialog = new Dialog(this);
-        mTransmitProgressDialog.setContentView(R.layout.progressdialog);
-        mTransmitProgressDialog.setTitle(R.string.transmitting);
-        mTransmitProgressBar = (ProgressBar) mTransmitProgressDialog.findViewById(R.id.progress_bar);
+
+        mConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        View progressDialg = getLayoutInflater().inflate(R.layout.progressdialog, null);
+        mTransmitProgressDialog = new AlertDialog.Builder(this).setTitle(R.string.transmitting).setView(progressDialg).create();
+        mTransmitProgressBar = (ProgressBar) progressDialg.findViewById(R.id.progress_bar);
         mTransmitProgressDialog.setCancelable(true);
         mTransmitProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
             @Override
@@ -104,7 +107,6 @@ public abstract class ServiceBoundFragmentActivity extends FragmentActivity impl
                 completeTransmit(null);
             }
         });
-        mConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
     }
 
     @Override
@@ -312,10 +314,12 @@ public abstract class ServiceBoundFragmentActivity extends FragmentActivity impl
     @Override
     public void setContentView(View view) {
         super.setContentView(view);
+        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
     }
 
     @Override
     public void setContentView(View view, ViewGroup.LayoutParams params) {
         super.setContentView(view, params);
+        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
     }
 }

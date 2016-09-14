@@ -271,11 +271,11 @@ public class AttachmentViewerActivity extends ServiceBoundActivity {
         mGenerateThumbnail = intent.getBooleanExtra("generate_thumbnail", false);
 
         if (mContentType.toLowerCase(Locale.US).startsWith("video/")) {
-            setContentView(R.layout.file_viewer_video);
+            setContentViewWithoutNavigationBar(R.layout.file_viewer_video);
             mVideoview = (VideoView) findViewById(R.id.videoView);
         } else {
             getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-            setContentView(R.layout.file_viewer);
+            setContentViewWithoutNavigationBar(R.layout.file_viewer);
             mWebview = (WebView) findViewById(R.id.webview);
 
             mWebview.setWebChromeClient(new WebChromeClient() {
@@ -300,14 +300,8 @@ public class AttachmentViewerActivity extends ServiceBoundActivity {
                 }
             });
 
-            final TextView titleTextView = (TextView) findViewById(R.id.title);
-            if (TextUtils.isEmptyOrWhitespace(mName)) {
-                titleTextView.setVisibility(View.GONE);
-                findViewById(R.id.divider).setVisibility(View.GONE);
-            } else {
-                titleTextView.setVisibility(View.VISIBLE);
-                titleTextView.setText(mName);
-                findViewById(R.id.divider).setVisibility(View.VISIBLE);
+            if (!TextUtils.isEmptyOrWhitespace(mName)) {
+                setTitle(mName);
             }
         }
 

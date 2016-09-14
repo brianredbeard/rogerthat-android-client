@@ -48,6 +48,7 @@ import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
+import com.mobicage.rogerthat.plugins.messaging.MessagingFilterActivity;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
@@ -251,7 +252,7 @@ public class UserFriendsActivity extends FriendsActivity {
         history.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final Intent viewMessages = new Intent(UserFriendsActivity.this, MessagingActivity.class);
+                final Intent viewMessages = new Intent(UserFriendsActivity.this, MessagingFilterActivity.class);
                 viewMessages.putExtra(MessagingPlugin.MEMBER_FILTER, friend.email);
                 startActivity(viewMessages);
             }

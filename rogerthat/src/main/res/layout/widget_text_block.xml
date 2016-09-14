@@ -16,7 +16,9 @@
 	        android:layout_height="wrap_content"
 	        android:gravity="top"
 	        android:inputType="textCapSentences|textMultiLine"
+			android:lines="3"
 	        android:minLines="3"
+			android:text="asfd\nasfdasdf"
 	        android:singleLine="false" >
 	    </EditText>
 	    

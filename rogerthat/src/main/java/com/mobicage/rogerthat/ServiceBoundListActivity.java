@@ -34,6 +34,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
@@ -146,10 +147,12 @@ public abstract class ServiceBoundListActivity extends ListActivity implements S
     @Override
     public void setContentView(View view) {
         super.setContentView(view);
+        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
     }
 
     @Override
     public void setContentView(View view, ViewGroup.LayoutParams params) {
         super.setContentView(view, params);
+        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
     }
 }

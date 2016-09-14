@@ -62,7 +62,7 @@ public class ActivityUtils {
         } else if ("more".equals(activityName)) {
             goToMoreActivity(context, clearStack);
         } else if ("settings".equals(activityName)) {
-            goToSettingsActivity(context, clearStack);
+            goToSettingsActivity(context, false);
         } else if ("community_services".equals(activityName)) {
             goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_CITY, clearStack);
         } else if ("merchants".equals(activityName)) {
@@ -72,7 +72,7 @@ public class ActivityUtils {
         } else if ("emergency_services".equals(activityName)) {
             goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_EMERGENCY, clearStack);
         } else if ("stream".equals(activityName)) {
-            goToStreamActivity(context, clearStack);
+            goToStreamActivity(context, false);
         } else {
             L.bug("unknown goToActivity: " + activityName);
             return false;

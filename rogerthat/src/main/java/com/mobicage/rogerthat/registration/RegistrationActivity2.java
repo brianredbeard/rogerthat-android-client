@@ -339,10 +339,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
 
         setContentViewWithoutNavigationBar(R.layout.registration2);
 
-        //Apply Fonts
-        TextUtils.overrideFonts(this, findViewById(android.R.id.content)); // todo ruben
-
-        final Typeface faTypeFace = Typeface.createFromAsset(getAssets(), "FontAwesome.ttf"); // todo ruben
+        final Typeface faTypeFace = Typeface.createFromAsset(getAssets(), "FontAwesome.ttf");
         final int[] visibleLogos;
         final int[] goneLogos;
         if (AppConstants.FULL_WIDTH_HEADERS) {
