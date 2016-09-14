@@ -230,8 +230,15 @@
         </activity>
         <activity android:name="com.mobicage.rogerthat.ServiceFriendsActivity" >
         </activity>
-        <activity android:name="com.mobicage.rogerthat.FriendCategoryActivity" >
-        </activity> <!-- todo ruben -->
+        <activity
+            android:name="com.mobicage.rogerthat.FriendCategoryActivity"
+            android:theme="@style/Theme.AppCompat.Light"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity" >
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
+        </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity"
             android:screenOrientation="portrait"
@@ -267,7 +274,7 @@
             android:name="com.mobicage.rogerthat.plugins.friends.FriendSearchActivity"
             android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="stateHidden" >
-        </activity> <!-- todo ruben -->
+        </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.friends.ActionScreenActivity"
             android:configChanges="orientation|screenSize"
@@ -378,12 +385,8 @@
                 android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity
-            android:name="com.mobicage.rogerthat.FriendLocationActivity"
-            android:theme="@style/AppTheme.NoActionBar" > <!-- todo ruben -->
-        </activity>
-        <activity
             android:name="com.mobicage.rogerthat.FriendsLocationActivity"
-            android:theme="@style/AppTheme.NoActionBar" > <!-- todo ruben -->
+            android:theme="@style/AppTheme.NoActionBar" >
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.AboutActivity"
