@@ -37,14 +37,12 @@
     <color name="mc_priority_urgent_text">#FFFFFF</color>
     <color name="mc_priority_urgent_background">#FF8481</color>
 
-    <color name="colorPrimary">#84B53F</color>
-    <color name="colorPrimaryDark">#006536</color>
-    <color name="colorAccent">#84B53F</color>
-
     <color name="mc_pin_gray">#3A3A3A</color>
     <color name="mc_pin_gray_light">#C8C6C7</color>
     <color name="mc_pin_red">#FE6B00</color>
     <color name="mc_pin_yellow">#FFD900</color>
     <color name="mc_pin_green">#87CD03</color>
 
+    <color name="mc_list_item_background">#FAFAFA</color>
+    <color name="mc_list_item_3_line">#FAFAFA</color>
 </resources>
