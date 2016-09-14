@@ -38,6 +38,8 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
@@ -1391,8 +1393,9 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
 
     @Override
     protected void onServiceUnbound() {
-    }
 
+    }
+    
     private void createWorkerThread() {
         T.UI();
         mWorkerThread = new HandlerThread("rogerthat_registration_worker");

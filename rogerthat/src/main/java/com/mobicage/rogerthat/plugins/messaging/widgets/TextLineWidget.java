@@ -31,6 +31,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.speech.RecognizerIntent;
 import android.text.InputFilter;
+import android.text.InputType;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.EditText;
@@ -77,6 +78,10 @@ public class TextLineWidget extends Widget {
         return false;
     }
 
+    public int getDefaultInputTypes() {
+        return InputType.TYPE_NULL;
+    }
+
     @Override
     public void initializeWidget() {
         mEditText = (EditText) findViewById(R.id.edit_text);
@@ -84,7 +89,7 @@ public class TextLineWidget extends Widget {
         mEditText.setHint((String) mWidgetMap.get("place_holder"));
         mEditText.setFilters(new InputFilter[] { new InputFilter.LengthFilter(((Long) mWidgetMap.get("max_chars"))
             .intValue()) });
-        mEditText.setInputType(KeyboardType.getInputType((String) mWidgetMap.get("keyboard_type")));
+        mEditText.setInputType(getDefaultInputTypes() | KeyboardType.getInputType((String) mWidgetMap.get("keyboard_type")));
 
         ImageButton btnSpeak = (ImageButton) findViewById(R.id.btn_speak);
         if (AppConstants.SPEECH_TO_TEXT && isSpeechRecognitionActivityPresented(mActivity)) {
