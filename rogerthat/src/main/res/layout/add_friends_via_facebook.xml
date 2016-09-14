@@ -8,22 +8,25 @@
         android:id="@+id/add_via_facebook_0"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
+        android:layout_gravity="start"
+        android:layout_marginTop="10dp"
         android:orientation="vertical"
-        android:padding="10dp" >
+        android:padding="20dp">
 
         <TextView
             android:id="@+id/add_via_facebook_description"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="50dp"
+            android:layout_marginBottom="20dp"
             android:gravity="center"
             android:textSize="16sp" />
 
         <Button
             android:id="@+id/add_via_facebook_button"
-            android:layout_width="fill_parent"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center_horizontal"
             android:layout_height="wrap_content"
+            android:textSize="16sp"
             android:text="@string/find_from_facebook" />
 
         <TextView
@@ -31,6 +34,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="50dp"
+            android:layout_marginTop="10dp"
             android:gravity="center"
             android:text="@string/wont_store_data"
             android:textSize="12sp" />
@@ -48,7 +52,7 @@
         <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="50dp"
+            android:layout_marginBottom="20dp"
             android:gravity="center"
             android:text="@string/add_via_facebook_waiting"
             android:textSize="16sp" />
