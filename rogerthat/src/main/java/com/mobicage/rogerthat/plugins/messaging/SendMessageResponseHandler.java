@@ -34,7 +34,7 @@ public class SendMessageResponseHandler extends ResponseHandler<SendMessageRespo
     private final int CLASS_VERSION = 2;
 
     private volatile String mParentKey;
-    private volatile String mTmpKey;
+    private volatile String mKey;
     private volatile boolean mAttachmentsUploaded;
 
     @Override
@@ -43,30 +43,25 @@ public class SendMessageResponseHandler extends ResponseHandler<SendMessageRespo
         try {
             SendMessageResponseTO resp = response.getResponse();
             MessagingPlugin messagingPlugin = mMainService.getPlugin(MessagingPlugin.class);
-            messagingPlugin.replaceTmpKey(mTmpKey, resp.key, resp.timestamp);
 
             if (mAttachmentsUploaded) {
                 String parentKeyBackup = mParentKey;
-                String tmpMessageKey = mTmpKey.replace(MessagingPlugin.TMP_KEY_PREFIX, "");
 
                 if (mParentKey == null) {
-                    IOUtils.copyDirectory(messagingPlugin.attachmentTreadDir(tmpMessageKey),
-                        messagingPlugin.attachmentTreadDir(resp.key));
-                    mParentKey = resp.key;
+                    mParentKey = mKey;
                 }
-                IOUtils.copyDirectory(messagingPlugin.attachmentsDir(mParentKey, tmpMessageKey),
+                IOUtils.copyDirectory(messagingPlugin.attachmentsDir(mParentKey, mKey),
                     messagingPlugin.attachmentsDir(mParentKey, resp.key));
 
                 if (parentKeyBackup == null) {
-                    IOUtils.deleteRecursive(messagingPlugin.attachmentTreadDir(tmpMessageKey));
+                    IOUtils.deleteRecursive(messagingPlugin.attachmentTreadDir(mKey));
                 }
-                IOUtils.deleteRecursive(messagingPlugin.attachmentsDir(mParentKey, tmpMessageKey));
-
+                IOUtils.deleteRecursive(messagingPlugin.attachmentsDir(mParentKey, mKey));
             }
         } catch (Exception e) {
             L.d("Send message failed", e);
             final MessagingPlugin plugin = mMainService.getPlugin(MessagingPlugin.class);
-            plugin.setMessageFailed(mTmpKey);
+            plugin.setMessageFailed(mKey);
         }
     }
 
@@ -80,7 +75,7 @@ public class SendMessageResponseHandler extends ResponseHandler<SendMessageRespo
     public void writePickle(DataOutput out) throws IOException {
         T.dontCare();
         super.writePickle(out);
-        out.writeUTF(mTmpKey);
+        out.writeUTF(mKey);
         out.writeUTF(mParentKey == null ? "" : mParentKey);
         out.writeBoolean(mAttachmentsUploaded);
     }
@@ -89,7 +84,7 @@ public class SendMessageResponseHandler extends ResponseHandler<SendMessageRespo
     public void readFromPickle(int version, DataInput in) throws IOException, PickleException {
         T.dontCare();
         super.readFromPickle(version, in);
-        mTmpKey = in.readUTF();
+        mKey = in.readUTF();
         if (version >= 2) {
             mParentKey = in.readUTF();
             mParentKey = "".equals(mParentKey) ? null : mParentKey;
@@ -105,9 +100,9 @@ public class SendMessageResponseHandler extends ResponseHandler<SendMessageRespo
         mParentKey = parentKey;
     }
 
-    public void setTmpKey(String tmpKey) {
+    public void setKey(String key) {
         T.UI();
-        mTmpKey = tmpKey;
+        mKey = key;
     }
 
     public void setAttachmentsUploaded(boolean attachmentsUploaded) {

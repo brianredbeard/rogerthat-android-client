@@ -1161,7 +1161,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
     }
 
     public static void sendMessage(final SendMessageRequestTO request, final String parentKey,
-                                   final String tmpKey, final MessagingPlugin messagingPlugin,
+                                   final String key, final MessagingPlugin messagingPlugin,
                                    final MainService mainService) throws Exception {
         com.mobicage.rogerthat.util.system.T.dontCare();
 
@@ -1169,12 +1169,12 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
             @Override
             protected void safeRun() throws Exception {
                 final SendMessageResponseHandler responseHandler = new SendMessageResponseHandler();
-                responseHandler.setTmpKey(tmpKey);
+                responseHandler.setKey(key);
                 responseHandler.setParentKey(parentKey);
                 boolean attachmentsUploaded = request.attachments != null && request.attachments.length > 0;
                 responseHandler.setAttachmentsUploaded(attachmentsUploaded);
                 if (attachmentsUploaded)
-                    messagingPlugin.getStore().insertAttachments(request.attachments, tmpKey);
+                    messagingPlugin.getStore().insertAttachments(request.attachments, key);
                 com.mobicage.api.messaging.Rpc.sendMessage(responseHandler, request);
             }
         };
