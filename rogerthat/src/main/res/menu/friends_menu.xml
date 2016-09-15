@@ -5,25 +5,16 @@
     <item
         android:id="@+id/find_friends"
         app:showAsAction="ifRoom"
-        android:title="@string/invite_friends_short"
-        app:ico_color="@color/mc_primary_icon"
-        app:ico_icon="@string/faw_camera"
-        app:ico_size="18dp" />
+        android:title="@string/invite_friends_short" />
 
     <item
         android:id="@+id/friend_map"
         app:showAsAction="ifRoom"
-        android:title="@string/friends_map"
-        app:ico_color="@color/mc_primary_icon"
-        app:ico_icon="@string/faw_street_view"
-        app:ico_size="18dp" />
+        android:title="@string/friends_map" />
 
     <item
         android:id="@+id/help"
         app:showAsAction="never"
-        android:title="@string/help"
-        app:ico_color="@color/mc_primary_icon"
-        app:ico_icon="@string/faw_question"
-        app:ico_size="18dp" />
+        android:title="@string/help" />
 
 </menu>

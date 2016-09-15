@@ -573,6 +573,10 @@ public class ProfileActivity extends ServiceBoundActivity {
         T.UI();
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.edit_profile_menu, menu);
+        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_pencil).color(Color.DKGRAY).sizeDp(18));
+        menu.getItem(1).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_check).color(Color.DKGRAY).sizeDp(18));
+        menu.getItem(2).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_times).color(Color.DKGRAY).sizeDp(18));
+
         return true;
     }
 

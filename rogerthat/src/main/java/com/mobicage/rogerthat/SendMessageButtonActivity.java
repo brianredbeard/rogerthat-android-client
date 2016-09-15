@@ -181,6 +181,7 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.send_message_button_menu, menu);
+        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_check).color(Color.DKGRAY).sizeDp(18));
         return true;
     }
 
