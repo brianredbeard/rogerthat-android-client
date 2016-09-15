@@ -4,18 +4,27 @@
     <item
         android:id="@+id/edit_profile"
         app:showAsAction="ifRoom"
-        android:title="@string/edit_profile"/>
+        android:title="@string/edit_profile"
+        app:ico_color="@color/mc_primary_icon"
+        app:ico_icon="@string/faw_pencil"
+        app:ico_size="18dp"/>
 
     <item
         android:id="@+id/save_profile"
         app:showAsAction="ifRoom"
         android:title="@string/save_profile"
-        android:visible="false"/>
+        android:visible="false"
+        app:ico_color="@color/mc_primary_icon"
+        app:ico_icon="@string/faw_check"
+        app:ico_size="18dp"/>
     
     <item
         android:id="@+id/cancel_edit_profile"
         android:title="@string/cancel"
         app:showAsAction="ifRoom"
-        android:visible="false"/>
+        android:visible="false"
+        app:ico_color="@color/mc_primary_icon"
+        app:ico_icon="@string/faw_times"
+        app:ico_size="18dp"/>
 
 </menu>

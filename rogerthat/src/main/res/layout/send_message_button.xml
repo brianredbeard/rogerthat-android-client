@@ -25,6 +25,9 @@
 	app:backgroundTint="@color/mc_primary_color"
 	android:clickable="true"
 	app:layout_anchor="@id/button_list"
-	app:layout_anchorGravity="bottom|right|end"/>
+	app:ico_color="@color/mc_white"
+	app:ico_icon="@string/faw_plus"
+	app:ico_size="24dp"
+	app:layout_anchorGravity="bottom|right|end" />
 
 </android.support.design.widget.CoordinatorLayout>

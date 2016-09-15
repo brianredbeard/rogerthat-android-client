@@ -1,6 +1,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/mc_background_color">
 
     <ScrollView
@@ -61,7 +62,10 @@
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:padding="10dp"
-                        android:layout_weight="1">
+                        android:layout_weight="1"
+                        app:ico_color="@color/mc_primary_icon"
+                        app:ico_icon="@string/faw_map_marker"
+                        app:ico_size="35dp">
                     </ImageView>
 
                     <ImageView
@@ -69,7 +73,10 @@
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:padding="10dp"
-                        android:layout_weight="1">
+                        android:layout_weight="1"
+                        app:ico_color="@color/mc_primary_icon"
+                        app:ico_icon="@string/faw_envelope"
+                        app:ico_size="35dp">
                     </ImageView>
 
                     <ImageView
@@ -77,7 +84,10 @@
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:padding="10dp"
-                        android:layout_weight="1" >
+                        android:layout_weight="1"
+                        app:ico_color="@color/mc_primary_icon"
+                        app:ico_icon="@string/faw_history"
+                        app:ico_size="35dp">
                     </ImageView>
 
                 </LinearLayout>

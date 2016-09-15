@@ -18,15 +18,6 @@
 
 package com.mobicage.rogerthat.plugins.friends;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.jivesoftware.smack.util.Base64;
-import org.json.simple.JSONValue;
-
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -80,6 +71,15 @@ import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.to.service.FindServiceCategoryTO;
 import com.mobicage.to.service.FindServiceItemTO;
 import com.mobicage.to.service.FindServiceResponseTO;
+
+import org.jivesoftware.smack.util.Base64;
+import org.json.simple.JSONValue;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ServiceSearchActivity extends ServiceBoundActivity {
 
@@ -155,7 +155,6 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
         });
 
         final ImageButton searchButton = (ImageButton) findViewById(R.id.search_button);
-        searchButton.setImageDrawable(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_search).color(Color.DKGRAY).sizeDp(24));
         searchButton.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {

@@ -133,7 +133,6 @@ public class FriendSearchActivity extends ServiceBoundActivity {
         });
 
         final ImageButton searchButton = (ImageButton) findViewById(R.id.search_button);
-        searchButton.setImageDrawable(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_search).color(Color.DKGRAY).sizeDp(24));
         searchButton.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {

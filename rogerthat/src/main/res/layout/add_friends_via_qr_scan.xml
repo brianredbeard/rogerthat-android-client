@@ -8,12 +8,25 @@
     android:orientation="vertical"
     android:padding="20dp">
 
-    <Button
-        android:id="@+id/add_via_qr_scan_button"
+    <FrameLayout
         android:layout_width="wrap_content"
-        android:layout_gravity="center_horizontal"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp" />
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/tint_gradient">
+
+        <Button
+            android:id="@+id/add_via_qr_scan_button"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal"
+            android:background="?attr/selectableItemBackground"
+            android:paddingEnd="20dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:paddingStart="20dp"
+            android:textColor="@color/mc_white" />
+    </FrameLayout>
 
     <TextView
         android:id="@+id/add_via_qr_description"
@@ -24,10 +37,32 @@
         android:layout_marginBottom="10dp"
         android:textSize="16sp" />
 
-    <ImageView
-        android:id="@+id/my_qr"
-        android:layout_width="300dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_height="fill_parent" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <!-- Child LinearLayout width is set to 60% of the screen -->
+
+        <com.mobicage.rogerthat.util.ui.ScaleImageView
+            android:id="@+id/my_qr"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_weight="6"
+            android:adjustViewBounds="true"
+            android:background="@drawable/avatar_background_black_with_white_bg"
+            android:padding="20dp"
+            android:scaleType="fitStart" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+    </LinearLayout>
 </LinearLayout>

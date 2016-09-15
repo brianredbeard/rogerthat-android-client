@@ -36,7 +36,7 @@
         android:layout_width="60dp"
         android:layout_height="30dp"
         android:layout_marginTop="-10dp"
-        android:text="pppgggteadsfasfdasfdasdfasf"
+        android:text="friend name"
         android:layout_gravity="center"
         android:gravity="center"
         android:lines="1"

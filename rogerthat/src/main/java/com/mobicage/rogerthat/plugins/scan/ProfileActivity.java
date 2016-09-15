@@ -18,39 +18,25 @@
 
 package com.mobicage.rogerthat.plugins.scan;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Map;
-
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
-import android.widget.CursorAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -62,27 +48,30 @@ import android.widget.TextView;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
-import com.mobicage.rogerthat.HomeActivity;
 import com.mobicage.rogerthat.IdentityStore;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MyIdentity;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
-import com.mobicage.rogerthat.plugins.messaging.MessageStore;
-import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.util.IOUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
-import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
-import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.AppConstants;
 import com.soundcloud.android.crop.Crop;
 import com.soundcloud.android.crop.CropUtil;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Map;
 
 public class ProfileActivity extends ServiceBoundActivity {
 
@@ -387,11 +376,6 @@ public class ProfileActivity extends ServiceBoundActivity {
         mFriendsPlugin = mService.getPlugin(FriendsPlugin.class);
         mIdentityStore = mService.getIdentityStore();
 
-        ImageView editBirthdateImageView = (ImageView)findViewById(R.id.profile_birthdate_edit);
-        editBirthdateImageView.setImageDrawable(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_pencil).color(Color.DKGRAY).sizeDp(18).paddingDp(2));
-        ImageView editGenderImageView = (ImageView)findViewById(R.id.profile_gender_edit);
-        editGenderImageView.setImageDrawable(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_pencil).color(Color.DKGRAY).sizeDp(18).paddingDp(2));
-
         updateView();
     }
 
@@ -589,9 +573,6 @@ public class ProfileActivity extends ServiceBoundActivity {
         T.UI();
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.edit_profile_menu, menu);
-        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_pencil).color(Color.DKGRAY).sizeDp(18));
-        menu.getItem(1).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_check).color(Color.DKGRAY).sizeDp(18));
-        menu.getItem(2).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_times).color(Color.DKGRAY).sizeDp(18));
         return true;
     }
 

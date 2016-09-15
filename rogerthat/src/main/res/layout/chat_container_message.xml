@@ -1,5 +1,5 @@
-<LinearLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
 	android:orientation="vertical"
@@ -24,7 +24,9 @@
 			android:layout_height="30dp"
 			android:layout_weight="1"
 			android:padding="5dp"
-			android:src="@drawable/fa_font" >
+            app:ico_color="@color/mc_primary_icon"
+            app:ico_icon="@string/faw_font"
+            app:ico_size="30dp">
 		</ImageView>
 
 		<ImageView
@@ -33,7 +35,9 @@
 			android:layout_height="30dp"
 			android:layout_weight="1"
 			android:padding="5dp"
-			android:src="@drawable/fa_list" >
+            app:ico_color="@color/mc_primary_icon"
+            app:ico_icon="@string/faw_list"
+            app:ico_size="30dp">
 		</ImageView>
 
 		<ImageView
@@ -42,7 +46,9 @@
 			android:layout_height="30dp"
 			android:layout_weight="1"
 			android:padding="5dp"
-			android:src="@drawable/fa_camera" >
+            app:ico_color="@color/mc_primary_icon"
+            app:ico_icon="@string/faw_camera"
+            app:ico_size="30dp">
 		</ImageView>
 
 		<ImageView
@@ -51,7 +57,9 @@
 			android:layout_height="30dp"
 			android:layout_weight="1"
 			android:padding="5dp"
-			android:src="@drawable/fa_video_camera" >
+            app:ico_color="@color/mc_primary_icon"
+            app:ico_icon="@string/faw_video_camera"
+            app:ico_size="30dp">
 		</ImageView>
 
 		<ImageView
@@ -60,7 +68,9 @@
 			android:layout_height="30dp"
 			android:layout_weight="1"
 			android:padding="5dp"
-			android:src="@drawable/fa_sticky_0" >
+            app:ico_color="@color/mc_primary_icon"
+            app:ico_icon="@string/faw_sticky_note_o"
+            app:ico_size="30dp">
 		</ImageView>
 
 		<ImageView
@@ -69,7 +79,9 @@
 			android:layout_height="30dp"
 			android:layout_weight="1"
 			android:padding="5dp"
-			android:src="@drawable/fa_priority_1" >
+            app:ico_color="@color/mc_primary_icon"
+            app:ico_icon="@string/faw_exclamation"
+            app:ico_size="30dp">
 		</ImageView>
 
 		<ImageView
@@ -124,7 +136,10 @@
 				android:layout_width="25dp"
 				android:layout_height="25dp"
 				android:padding="8dp"
-				android:background="@drawable/circle_red"/>
+                android:background="@drawable/circle_red"
+                app:ico_color="@color/mc_white"
+                app:ico_icon="@string/faw_times"
+                app:ico_size="12dp" />
 
 		</FrameLayout>
 
@@ -157,10 +172,13 @@
 
 		<ImageButton
 			android:id="@+id/submit"
-			android:layout_width="50dp"
-			android:layout_height="50dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
 			android:layout_gravity="bottom"
-			android:background="@drawable/circle_tint"/>
+            android:background="@drawable/circle_tint"
+            app:ico_color="@color/mc_white"
+            app:ico_icon="@string/faw_paper_plane"
+            app:ico_size="24dp" />
 
 	</LinearLayout>
 

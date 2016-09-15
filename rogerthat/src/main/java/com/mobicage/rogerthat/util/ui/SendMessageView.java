@@ -29,7 +29,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -51,8 +50,6 @@ import android.widget.RadioButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.mikepenz.fontawesome_typeface_library.FontAwesome;
-import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.CannedButton;
 import com.mobicage.rogerthat.CannedButtons;
@@ -191,12 +188,9 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
         mKey = UUID.randomUUID().toString();
 
         final ImageButton submitButton = (ImageButton) findViewById(R.id.submit);
-        submitButton.setImageDrawable(new IconicsDrawable(activity, FontAwesome.Icon.faw_paper_plane).color(Color.WHITE).sizeDp(24));
 
         mAttachmentContainer = (FrameLayout) findViewById(R.id.attachment_container);
         mAttachmentPreview = (ImageView) findViewById(R.id.attachment_preview);
-        final ImageView attachmentStatus = (ImageView) findViewById(R.id.attachment_status);
-        attachmentStatus.setImageDrawable(new IconicsDrawable(activity, FontAwesome.Icon.faw_times).color(Color.WHITE).sizeDp(12));
 
         mAttachmentContainer.setOnClickListener(new SafeViewOnClickListener() {
             @Override
@@ -960,11 +954,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
             savePriorityBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (stickyEnabled.isChecked()) {
-                        mIsSticky = true;
-                    } else {
-                        mIsSticky = false;
-                    }
+                    mIsSticky = stickyEnabled.isChecked();
 
                     dialog.dismiss();
                     initImageButtonsNavigation();
