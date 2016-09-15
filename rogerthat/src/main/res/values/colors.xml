@@ -18,6 +18,7 @@
     <color name="mc_highlight_dark">#33000000</color>
     <color name="mc_gray_11">#BBBBBB</color>
     <color name="mc_default_text">#4D4D4D</color>
+    <color name="mc_default_text_inverse">#FFFFFF</color>
     <color name="mc_highlight_background">#FFFFFFFF</color>
     <color name="mc_about_blue">#3E3E3D</color>
     <color name="mc_white">#FFFFFF</color>

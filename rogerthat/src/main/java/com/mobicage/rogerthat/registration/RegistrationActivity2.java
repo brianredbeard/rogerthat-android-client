@@ -387,7 +387,6 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
             agreeBtn.setText(R.string.registration_btn_agree_tos);
         }
 
-        agreeBtn.getBackground().setColorFilter(Message.GREEN_BUTTON_COLOR, PorterDuff.Mode.MULTIPLY);
         agreeBtn.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {

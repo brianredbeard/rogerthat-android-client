@@ -22,7 +22,7 @@
         <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
 
         <item name="android:textColor">@color/mc_default_text</item>
-
+        <item name="android:textColorPrimaryInverse">@color/mc_default_text_inverse</item>
     </style>
 
     <style name="ButtonTheme" parent="android:style/Widget.Button">
@@ -81,9 +81,9 @@
         <item name="android:src">@drawable/selector_pin_entry</item>
     </style>
 
-    <style name="ButtonBackground" parent="Widget.AppCompat.Button"></style>
-
-    <style name="ColoredButtonBackground" parent="Widget.AppCompat.Button.Colored"></style>
+    <style name="ButtonBackground" parent="Widget.AppCompat.Button.Colored">
+        <item name="android:textColor">@color/mc_default_text_inverse</item>
+    </style>
 
     <style name="FacebookButtonBackground" parent="Widget.AppCompat.Button">
         <item name="android:background">@drawable/btn_facebook</item>

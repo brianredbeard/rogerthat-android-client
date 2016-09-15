@@ -124,7 +124,6 @@
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:text="@string/allow"
-            android:textSize="18sp"
-            android:textStyle="bold"/>
+            android:textSize="18sp"/>
     </RelativeLayout>
 </LinearLayout>

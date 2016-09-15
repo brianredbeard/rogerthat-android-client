@@ -109,7 +109,7 @@ public class MainActivity extends ServiceBoundActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         T.UI();
-        setContentView(R.layout.blank);
+        setContentViewWithoutNavigationBar(R.layout.blank);
         //noinspection PointlessBooleanExpression
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && CloudConstants.DEBUG_LOGGING) {
             WebView.setWebContentsDebuggingEnabled(true);

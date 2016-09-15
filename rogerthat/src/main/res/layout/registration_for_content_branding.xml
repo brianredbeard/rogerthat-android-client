@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout android:id="@+id/activity"
                 xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="fill_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
                 android:background="@color/mc_homescreen_background"
                 android:gravity="center_vertical">
@@ -85,9 +85,8 @@
                 android:layout_weight="30"
                 android:minWidth="100dp"
                 android:text="@string/scan_qr_code"
-                android:textColor="@android:color/primary_text_light"
-                android:textSize="18sp"
-                android:textStyle="bold"/>
+                style="@style/ButtonBackground"
+                android:textSize="18sp"/>
 
             <View
                 android:layout_width="0dp"
