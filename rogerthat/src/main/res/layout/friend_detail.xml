@@ -54,41 +54,62 @@
                     android:id="@+id/actions"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
+                    android:gravity="center"
                     android:layout_marginBottom="10dp"
                     android:orientation="horizontal" >
 
-                    <ImageView
-                        android:id="@+id/location"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
-                        android:padding="10dp"
-                        android:layout_weight="1"
-                        app:ico_color="@color/mc_primary_icon"
-                        app:ico_icon="@string/faw_map_marker"
-                        app:ico_size="35dp">
-                    </ImageView>
+                    <Space
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_weight="1" />
 
                     <ImageView
-                        android:id="@+id/send"
-                        android:layout_width="fill_parent"
+                        android:id="@+id/location"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:padding="10dp"
-                        android:layout_weight="1"
+                        android:background="@null"
+                        android:foreground="?attr/selectableItemBackground"
+                        app:ico_color="@color/mc_primary_icon"
+                        app:ico_icon="@string/faw_map_marker"
+                        app:ico_size="35dp" />
+
+                    <Space
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_weight="1" />
+                    <ImageView
+                        android:id="@+id/send"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:background="@null"
+                        android:foreground="?attr/selectableItemBackground"
                         app:ico_color="@color/mc_primary_icon"
                         app:ico_icon="@string/faw_envelope"
                         app:ico_size="35dp">
                     </ImageView>
 
+                    <Space
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_weight="1" />
                     <ImageView
                         android:id="@+id/history"
-                        android:layout_width="fill_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:background="@null"
+                        android:foreground="?attr/selectableItemBackground"
                         android:padding="10dp"
-                        android:layout_weight="1"
                         app:ico_color="@color/mc_primary_icon"
                         app:ico_icon="@string/faw_history"
                         app:ico_size="35dp">
                     </ImageView>
+
+                    <Space
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_weight="1" />
 
                 </LinearLayout>
 

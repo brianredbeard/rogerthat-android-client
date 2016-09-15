@@ -21,22 +21,18 @@
             android:gravity="center"
             android:textSize="16sp" />
 
-        <FrameLayout
+        <Button
+            android:id="@+id/add_via_facebook_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal">
-
-            <Button
-                android:id="@+id/add_via_facebook_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                style="@style/ButtonBackground"
-                android:paddingLeft="20dp"
-                android:paddingRight="20dp"
-                android:text="@string/find_from_facebook"
-                android:textSize="16sp" />
-        </FrameLayout>
+            style="@style/ButtonBackground"
+            android:layout_gravity="center_horizontal"
+            android:paddingEnd="20dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:paddingStart="20dp"
+            android:text="@string/find_from_facebook"
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/add_via_facebook_dont_worry"

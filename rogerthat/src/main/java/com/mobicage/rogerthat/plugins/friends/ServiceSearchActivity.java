@@ -26,7 +26,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -494,7 +493,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
             ImageView avatarView = (ImageView) v.findViewById(R.id.friend_avatar);
             avatarView.setImageBitmap(avatar);
             LayoutParams lp = avatarView.getLayoutParams();
-            lp.width = lp.height = UIUtils.convertDipToPixels(ServiceSearchActivity.this, 50);
+            lp.width = lp.height = UIUtils.convertDipToPixels(ServiceSearchActivity.this, 40);
 
             // Set name
             ((TextView) v.findViewById(R.id.friend_name)).setText(item.name);
@@ -505,14 +504,14 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
             v.findViewById(R.id.friend_existence_layout).setVisibility(View.VISIBLE);
             ProgressBar spinnerView = (ProgressBar) v.findViewById(R.id.friend_spinner);
             ImageView statusView = (ImageView) v.findViewById(R.id.friend_existence);
+            int buttonColor = getColor(R.color.mc_default_text_inverse);
 
             switch (existence) {
                 case Friend.ACTIVE:
                     spinnerView.setVisibility(View.GONE);
                     statusView.setVisibility(View.VISIBLE);
-                    statusView.setImageDrawable(new IconicsDrawable(ServiceSearchActivity.this).icon(FontAwesome.Icon.faw_check).color(Color.WHITE).sizeDp(18));
-                    statusView.setBackgroundResource(R.drawable.grey_gradient);
-
+                    statusView.setImageDrawable(new IconicsDrawable(ServiceSearchActivity.this).icon(FontAwesome.Icon.faw_check).color(buttonColor).sizeDp(18));
+                    statusView.setBackgroundColor(getColor(R.color.mc_default_button));
 
                     break;
                 case Friend.DELETED:
@@ -520,8 +519,8 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
                 case Friend.NOT_FOUND:
                     spinnerView.setVisibility(View.GONE);
                     statusView.setVisibility(View.VISIBLE);
-                    statusView.setImageDrawable(new IconicsDrawable(ServiceSearchActivity.this).icon(FontAwesome.Icon.faw_plus).color(Color.WHITE).sizeDp(18));
-                    statusView.setBackgroundResource(R.drawable.tint_gradient);
+                    statusView.setImageDrawable(new IconicsDrawable(ServiceSearchActivity.this).icon(FontAwesome.Icon.faw_plus).color(buttonColor).sizeDp(18));
+                    statusView.setBackgroundColor(getColor(R.color.mc_primary_color));
 
                     break;
                 case Friend.INVITE_PENDING:

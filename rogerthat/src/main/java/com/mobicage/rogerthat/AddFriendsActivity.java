@@ -18,18 +18,6 @@
 
 package com.mobicage.rogerthat;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.json.simple.JSONValue;
-
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -65,7 +53,6 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.ViewFlipper;
 
 import com.facebook.AccessToken;
-import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.login.LoginResult;
@@ -101,6 +88,18 @@ import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.to.friends.FacebookRogerthatProfileMatchTO;
 import com.mobicage.to.friends.FindRogerthatUsersViaEmailResponseTO;
 import com.mobicage.to.friends.FindRogerthatUsersViaFacebookResponseTO;
+
+import org.json.simple.JSONValue;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class AddFriendsActivity extends ServiceBoundActivity {
 

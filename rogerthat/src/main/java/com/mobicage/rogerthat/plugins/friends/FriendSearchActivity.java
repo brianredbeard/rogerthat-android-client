@@ -18,18 +18,6 @@
 
 package com.mobicage.rogerthat.plugins.friends;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.json.simple.JSONValue;
-
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -37,7 +25,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -57,8 +44,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
-import com.mikepenz.fontawesome_typeface_library.FontAwesome;
-import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.FriendDetailOrInviteActivity;
 import com.mobicage.rogerthat.MyIdentity;
@@ -74,6 +59,18 @@ import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.to.friends.FindFriendItemTO;
 import com.mobicage.to.friends.FindFriendResponseTO;
+
+import org.json.simple.JSONValue;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class FriendSearchActivity extends ServiceBoundActivity {
 
@@ -336,7 +333,7 @@ public class FriendSearchActivity extends ServiceBoundActivity {
             // Set avatar
             final ImageView avatarView = (ImageView) v.findViewById(R.id.friend_avatar);
             LayoutParams lp = avatarView.getLayoutParams();
-            lp.width = lp.height = UIUtils.convertDipToPixels(FriendSearchActivity.this, 50);
+            lp.width = lp.height = UIUtils.convertDipToPixels(FriendSearchActivity.this, 40);
 
             new SafeAsyncTask<Object, Object, Object>() {
                 @Override

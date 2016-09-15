@@ -1,9 +1,15 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="fill_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:background="?attr/selectableItemBackground"
+    android:minHeight="72dp"
     android:orientation="vertical"
-    android:padding="5dp">
+    android:paddingEnd="?attr/listPreferredItemPaddingRight"
+    android:paddingLeft="?attr/listPreferredItemPaddingLeft"
+    android:paddingRight="?attr/listPreferredItemPaddingRight"
+    android:paddingStart="?attr/listPreferredItemPaddingLeft">
 
     <RelativeLayout
         android:layout_width="fill_parent"
@@ -12,25 +18,28 @@
 
         <FrameLayout
             android:id="@+id/friend_avatar_container"
-            android:layout_width="70dp"
-            android:layout_height="70dp"
-            android:layout_marginRight="10dp"
+            android:layout_width="55dp"
+            android:layout_height="72dp"
             android:layout_gravity="center">
 
             <ImageView
                 android:id="@+id/friend_avatar"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:layout_gravity="center" />
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                tools:src="@drawable/unknown_avatar" />
 
             <ImageView
                 android:id="@+id/friend_status"
-                android:layout_width="25dp"
-                android:layout_height="25dp"
-                android:layout_marginTop="40dp"
-                android:layout_marginLeft="40dp"
-                android:padding="8dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginLeft="36dp"
+                android:layout_marginStart="36dp"
+                android:layout_marginTop="42dp"
                 android:background="@drawable/circle_tint"
+                android:padding="5dp"
+                android:visibility="visible"
+                tools:visibility="visible"
                 app:ico_color="@color/mc_white"
                 app:ico_icon="@string/faw_check"
                 app:ico_size="12dp" />
@@ -45,7 +54,7 @@
             android:layout_alignParentRight="true"
             android:gravity="center"
             android:orientation="horizontal"
-            android:visibility="gone" >
+            android:visibility="gone">
 
             <ProgressBar
                 android:id="@+id/friend_spinner"
@@ -59,92 +68,117 @@
                 android:id="@+id/friend_existence"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:visibility="gone" />
+                android:visibility="gone"
+                tools:visibility="visible" />
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="fill_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
+            android:layout_alignWithParentIfMissing="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="16dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginStart="15dp"
             android:layout_toLeftOf="@id/friend_existence_layout"
 			android:layout_toRightOf="@id/friend_avatar_container"
-            android:layout_marginTop="5dp"
-            android:paddingLeft="5dp">
+            android:paddingBottom="16dp"
+            android:paddingTop="16dp">
 
             <TextView
                 android:id="@+id/friend_name"
-                android:layout_width="fill_parent"
+                style="@style/TextAppearance.AppCompat.Body2"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:ellipsize="end"
+                android:gravity="center_vertical"
                 android:singleLine="true"
-                android:textColor="@android:color/primary_text_light"
-                android:textSize="20sp"/>
+                android:textSize="20sp"
+                tools:text="Friend that has a really long name" />
 
             <TextView
                 android:id="@+id/friend_subtitle"
-                android:layout_width="fill_parent"
+                style="@style/TextAppearance.AppCompat.Body1"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:singleLine="true"
-                android:textColor="@android:color/secondary_text_light"
                 android:textSize="14sp"
-                android:visibility="gone" />
+                android:visibility="gone"
+                tools:text="Friend subtitle"
+                tools:visibility="visible" />
 
             <LinearLayout
                 android:id="@+id/actions"
+                android:orientation="horizontal"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
+                android:gravity="center"
                 android:layout_marginTop="10dp"
-                android:visibility="gone" >
+                android:visibility="gone">
 
                 <ImageView
                     android:id="@+id/location"
-                    android:layout_width="fill_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="10dp"
-                    android:layout_weight="1"
+                    android:background="?attr/selectableItemBackground"
                     app:ico_color="@color/mc_primary_icon"
                     app:ico_icon="@string/faw_map_marker"
-                    app:ico_size="24dp">
+                    app:ico_size="28dp">
                 </ImageView>
 
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
                 <ImageView
                     android:id="@+id/send"
-                    android:layout_width="fill_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="10dp"
-                    android:layout_weight="1"
+                    android:background="?attr/selectableItemBackground"
                     app:ico_color="@color/mc_primary_icon"
                     app:ico_icon="@string/faw_envelope"
-                    app:ico_size="24dp">
+                    app:ico_size="28dp">
                 </ImageView>
 
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
                 <ImageView
                     android:id="@+id/details"
-                    android:layout_width="fill_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="10dp"
-                    android:layout_weight="1"
+                    android:background="?attr/selectableItemBackground"
                     app:ico_color="@color/mc_primary_icon"
                     app:ico_icon="@string/faw_user"
-                    app:ico_size="24dp">
+                    app:ico_size="28dp">
                 </ImageView>
 
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
                 <ImageView
                     android:id="@+id/history"
-                    android:layout_width="fill_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="10dp"
-                    android:layout_weight="1"
+                    android:background="?attr/selectableItemBackground"
                     app:ico_color="@color/mc_primary_icon"
                     app:ico_icon="@string/faw_history"
-                    app:ico_size="24dp">
+                    app:ico_size="28dp">
                 </ImageView>
 
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
             </LinearLayout>
         </LinearLayout>
     </RelativeLayout>
-
 </LinearLayout>

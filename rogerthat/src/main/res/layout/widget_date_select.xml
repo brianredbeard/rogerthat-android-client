@@ -19,6 +19,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:padding="2dp"
+        android:background="@null"
+        android:foreground="?attr/selectableItemBackground"
         app:ico_color="@color/mc_primary_icon"
         app:ico_icon="@string/faw_calendar_o"
         app:ico_size="24dp" />
@@ -28,6 +30,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="5dp"
+        android:background="@null"
+        android:foreground="?attr/selectableItemBackground"
+        android:padding="2dp"
         app:ico_color="@color/mc_primary_icon"
         app:ico_icon="@string/faw_clock_o"
         app:ico_size="24dp" />

@@ -17,13 +17,6 @@
  */
 package com.mobicage.rogerthat;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import java.util.regex.Matcher;
-
-import org.jivesoftware.smack.util.Base64;
-
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -45,8 +38,6 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.mikepenz.fontawesome_typeface_library.FontAwesome;
-import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
@@ -54,7 +45,6 @@ import com.mobicage.rogerthat.plugins.messaging.BrandingFailureException;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr.BrandingResult;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr.ColorScheme;
-import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
 import com.mobicage.rogerthat.plugins.messaging.MessagingFilterActivity;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.plugins.messaging.mfr.EmptyStaticFlowException;
@@ -74,6 +64,13 @@ import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.to.friends.FriendTO;
 import com.mobicage.to.service.StartServiceActionRequestTO;
 import com.mobicage.to.system.GetIdentityQRCodeRequestTO;
+
+import org.jivesoftware.smack.util.Base64;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.regex.Matcher;
 
 public abstract class FriendDetailActivity extends ServiceBoundActivity {
 
