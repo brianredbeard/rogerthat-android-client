@@ -119,14 +119,11 @@
             android:layout_alignParentBottom="true"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="30dp"
-            android:background="@drawable/tint_gradient"
+            style="@style/ButtonBackground"
             android:minHeight="50dp"
             android:paddingLeft="10dp"
-            android:paddingStart="10dp"
             android:paddingRight="10dp"
-            android:paddingEnd="10dp"
             android:text="@string/allow"
-            android:textColor="@color/mc_white"
             android:textSize="18sp"
             android:textStyle="bold"/>
     </RelativeLayout>

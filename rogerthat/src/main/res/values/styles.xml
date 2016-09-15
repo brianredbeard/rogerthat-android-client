@@ -80,4 +80,13 @@
     <style name="PinEntry">
         <item name="android:src">@drawable/selector_pin_entry</item>
     </style>
+
+    <style name="ButtonBackground" parent="Widget.AppCompat.Button"></style>
+
+    <style name="ColoredButtonBackground" parent="Widget.AppCompat.Button.Colored"></style>
+
+    <style name="FacebookButtonBackground" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/btn_facebook</item>
+        <item name="android:textColor">@color/mc_white</item>
+    </style>
 </resources>

@@ -55,19 +55,15 @@
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/tint_gradient"
             android:layout_gravity="center_horizontal">
             <Button
                 android:id="@+id/about_btn_visit_rogerthat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingLeft="20dp"
-                android:paddingStart="20dp"
                 android:paddingRight="20dp"
-                android:paddingEnd="20dp"
-                android:background="?attr/selectableItemBackground"
+                style="@style/ButtonBackground"
                 android:text="_www.rogerthat.net_"
-                android:textColor="@color/mc_white"
                 android:textSize="16sp" />
         </FrameLayout>
 
@@ -87,7 +83,6 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="10dp"
-                android:layout_marginEnd="10dp"
                 app:ico_color="@color/mc_primary_icon"
                 app:ico_icon="@string/faw_envelope_o"
                 app:ico_size="15dp">
@@ -118,7 +113,6 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="10dp"
-                android:layout_marginEnd="10dp"
                 app:ico_color="@color/mc_primary_icon"
                 app:ico_icon="@string/faw_twitter"
                 app:ico_size="15dp">
@@ -150,7 +144,6 @@
                 android:layout_height="15dp"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="10dp"
-                android:layout_marginEnd="10dp"
                 app:ico_color="@color/mc_primary_icon"
                 app:ico_icon="@string/faw_facebook_official"
                 app:ico_size="15dp" >

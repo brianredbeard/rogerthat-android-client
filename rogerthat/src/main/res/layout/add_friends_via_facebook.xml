@@ -24,21 +24,17 @@
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:background="@drawable/tint_gradient">
+            android:layout_gravity="center_horizontal">
 
             <Button
                 android:id="@+id/add_via_facebook_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:background="?attr/selectableItemBackground"
-                android:paddingEnd="20dp"
+                style="@style/ButtonBackground"
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
-                android:paddingStart="20dp"
                 android:text="@string/find_from_facebook"
-                android:textColor="@color/mc_white"
                 android:textSize="16sp" />
         </FrameLayout>
 

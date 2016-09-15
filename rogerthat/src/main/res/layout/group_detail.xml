@@ -28,18 +28,15 @@
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:layout_gravity="center_horizontal"
-					android:layout_weight="1"
-					android:background="@drawable/tint_gradient">
+					android:layout_weight="1">
 
 					<Button
 						android:id="@+id/save_group"
-						style="?attr/selectableItemBackground"
+						style="@style/ButtonBackground"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
-						android:paddingEnd="20dp"
 						android:paddingLeft="20dp"
 						android:paddingRight="20dp"
-						android:paddingStart="20dp"
 						android:text="@string/save"
 						android:visibility="gone" />
 				</FrameLayout>
@@ -48,18 +45,15 @@
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:layout_gravity="center_horizontal"
-					android:layout_weight="1"
-					android:background="@drawable/tint_gradient">
+					android:layout_weight="1">
 
 					<Button
 						android:id="@+id/cancel"
-						style="?attr/selectableItemBackground"
+						style="@style/ButtonBackground"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
-						android:paddingEnd="20dp"
 						android:paddingLeft="20dp"
 						android:paddingRight="20dp"
-						android:paddingStart="20dp"
 						android:text="@string/cancel"
 						android:visibility="gone" />
 				</FrameLayout>
@@ -126,18 +120,15 @@
 				<FrameLayout
 					android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-					android:layout_gravity="center_horizontal"
-					android:background="@drawable/tint_gradient">
+					android:layout_gravity="center_horizontal">
 
 					<Button
 						android:id="@+id/update_avatar"
 						android:layout_width="fill_parent"
 						android:layout_height="wrap_content"
-						android:background="?attr/selectableItemBackground"
-						android:paddingEnd="20dp"
+						style="@style/ButtonBackground"
 						android:paddingLeft="20dp"
 						android:paddingRight="20dp"
-						android:paddingStart="20dp"
 						android:text="@string/get_new_avatar" />
 				</FrameLayout>
             </LinearLayout>

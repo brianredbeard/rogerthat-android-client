@@ -12,21 +12,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="20dp"
-        android:background="@drawable/tint_gradient">
+        android:layout_marginBottom="20dp">
 
         <Button
             android:id="@+id/add_via_qr_scan_button"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center_horizontal"
-            android:background="?attr/selectableItemBackground"
-            android:paddingEnd="20dp"
+            style="@style/ButtonBackground"
             android:paddingLeft="20dp"
             android:paddingRight="20dp"
-            android:paddingStart="20dp"
-            android:textSize="16sp"
-            android:textColor="@color/mc_white" />
+            android:textSize="16sp"/>
     </FrameLayout>
 
     <TextView
