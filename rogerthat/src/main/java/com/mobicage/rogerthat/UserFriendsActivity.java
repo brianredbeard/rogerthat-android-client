@@ -18,36 +18,25 @@
 
 package com.mobicage.rogerthat;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
-import android.widget.Adapter;
 import android.widget.Button;
-import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.TextView;
 
-import com.mikepenz.fontawesome_typeface_library.FontAwesome;
-import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
-import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
 import com.mobicage.rogerthat.plugins.messaging.MessagingFilterActivity;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.util.logging.L;
@@ -56,6 +45,10 @@ import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.AppConstants;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class UserFriendsActivity extends FriendsActivity {
 
@@ -219,7 +212,6 @@ public class UserFriendsActivity extends FriendsActivity {
 
     private void handleDetails(final View listItem) {
         ImageView details = (ImageView) listItem.findViewById(R.id.details);
-        details.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_user).color(getResources().getColor(R.color.mc_primary_color)).sizeDp(24));
         details.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -235,7 +227,6 @@ public class UserFriendsActivity extends FriendsActivity {
 
     private void handleSend(final View listItem, final Friend friend) {
         ImageView newMessage = (ImageView) listItem.findViewById(R.id.send);
-        newMessage.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_envelope).color(getResources().getColor(R.color.mc_primary_color)).sizeDp(24));
         newMessage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -248,7 +239,6 @@ public class UserFriendsActivity extends FriendsActivity {
 
     private void handleHistory(final View listItem, final Friend friend) {
         ImageView history = (ImageView) listItem.findViewById(R.id.history);
-        history.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_history).color(getResources().getColor(R.color.mc_primary_color)).sizeDp(24));
         history.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -261,7 +251,6 @@ public class UserFriendsActivity extends FriendsActivity {
 
     private void handleLocation(final View listItem, final Friend friend) {
         ImageView location = (ImageView) listItem.findViewById(R.id.location);
-        location.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_map_marker).color(getResources().getColor(R.color.mc_primary_color)).sizeDp(24));
         location.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -342,8 +331,6 @@ public class UserFriendsActivity extends FriendsActivity {
                 break;
         }
 
-        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_search).color(Color.DKGRAY).sizeDp(18));
-        menu.getItem(1).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_street_view).color(Color.DKGRAY).sizeDp(18));
         return true;
     }
 

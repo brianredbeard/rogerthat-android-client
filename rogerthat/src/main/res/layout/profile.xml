@@ -87,7 +87,10 @@
                     android:layout_height="20dp"
                     android:layout_alignParentRight="true"
                     android:layout_centerInParent="true"
-                    android:src="@drawable/ic_menu_edit"
+                    app:ico_color="@color/mc_primary_icon"
+                    app:ico_icon="@string/faw_pencil"
+                    app:ico_padding="2dp"
+                    app:ico_size="18dp"
                     android:visibility="invisible" >
                 </ImageView>
 
@@ -138,7 +141,10 @@
                     android:layout_height="20dp"
                     android:layout_alignParentRight="true"
                     android:layout_centerInParent="true"
-                    android:src="@drawable/ic_menu_edit"
+                    app:ico_color="@color/mc_primary_icon"
+                    app:ico_icon="@string/faw_pencil"
+                    app:ico_padding="2dp"
+                    app:ico_size="18dp"
                     android:visibility="invisible" >
                 </ImageView>
 

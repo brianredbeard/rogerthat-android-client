@@ -54,7 +54,7 @@
                 android:layout_alignParentEnd="true"
                 android:layout_gravity="center"
                 android:layout_marginBottom="10dp"
-                app:ico_color="@color/mc_primary_color"
+                app:ico_color="@color/mc_primary_icon"
                 app:ico_icon="@string/faw_user_plus"
                 app:ico_size="25dp"/>
 

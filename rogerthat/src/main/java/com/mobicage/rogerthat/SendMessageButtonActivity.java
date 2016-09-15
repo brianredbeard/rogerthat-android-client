@@ -24,13 +24,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.support.design.widget.FloatingActionButton;
-import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -41,18 +37,12 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
-import com.mikepenz.fontawesome_typeface_library.FontAwesome;
-import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
-import com.mobicage.rogerthat.plugins.friends.Friend;
-import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.pickle.Pickler;
 import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
@@ -60,10 +50,7 @@ import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
-import com.mobicage.rpc.config.AppConstants;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -115,8 +102,6 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
         }
 
         FloatingActionButton floatingActionButton = ((FloatingActionButton) findViewById(R.id.add));
-        floatingActionButton.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_plus).color(Color.WHITE).sizeDp(24));
-
         floatingActionButton.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
@@ -192,7 +177,6 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.send_message_button_menu, menu);
-        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_check).color(Color.DKGRAY).sizeDp(18));
         return true;
     }
 
@@ -324,7 +308,6 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
         captionTextView.setTextColor(resources.getColor(android.R.color.primary_text_light));
         actionTextView.setTextColor(resources.getColor(android.R.color.secondary_text_light));
         ImageView statusImageView = (ImageView) view.findViewById(R.id.status);
-        statusImageView.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_check).color(Color.WHITE).sizeDp(12));
         if (item.isSelected()) {
             statusImageView.setVisibility(View.VISIBLE);
         } else {

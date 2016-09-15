@@ -18,6 +18,31 @@
 
 package com.mobicage.rogerthat.plugins.messaging.widgets;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.util.AttributeSet;
+import android.view.View;
+import android.widget.DatePicker;
+import android.widget.ImageButton;
+import android.widget.TextView;
+import android.widget.TimePicker;
+import android.widget.Toast;
+
+import com.mobicage.api.messaging.Rpc;
+import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.plugins.messaging.Message;
+import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
+import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
+import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
+import com.mobicage.rogerthat.util.system.T;
+import com.mobicage.rogerthat.util.ui.UIUtils;
+import com.mobicage.rpc.ResponseHandler;
+import com.mobicage.to.messaging.forms.LongWidgetResultTO;
+import com.mobicage.to.messaging.forms.SubmitDateSelectFormRequestTO;
+import com.mobicage.to.messaging.forms.SubmitDateSelectFormResponseTO;
+
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -26,46 +51,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UnknownFormatConversionException;
-import java.util.regex.Matcher;
-
-import android.annotation.TargetApi;
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.res.Configuration;
-import android.graphics.Color;
-import android.provider.ContactsContract;
-import android.util.AttributeSet;
-import android.view.View;
-import android.widget.Button;
-import android.widget.DatePicker;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.RadioButton;
-import android.widget.TextView;
-import android.widget.TimePicker;
-import android.widget.Toast;
-
-import com.mikepenz.fontawesome_typeface_library.FontAwesome;
-import com.mikepenz.iconics.IconicsDrawable;
-import com.mobicage.api.messaging.Rpc;
-import com.mobicage.rogerth.at.R;
-import com.mobicage.rogerthat.CannedButton;
-import com.mobicage.rogerthat.GetLocationActivity;
-import com.mobicage.rogerthat.plugins.messaging.Message;
-import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
-import com.mobicage.rogerthat.util.logging.L;
-import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
-import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
-import com.mobicage.rogerthat.util.system.SystemUtils;
-import com.mobicage.rogerthat.util.system.T;
-import com.mobicage.rogerthat.util.ui.UIUtils;
-import com.mobicage.rpc.ResponseHandler;
-import com.mobicage.to.messaging.forms.LongWidgetResultTO;
-import com.mobicage.to.messaging.forms.SubmitDateSelectFormRequestTO;
-import com.mobicage.to.messaging.forms.SubmitDateSelectFormResponseTO;
 
 public class DateSelectWidget extends Widget {
 
@@ -128,16 +113,14 @@ public class DateSelectWidget extends Widget {
     private void initDateSlider() {
         T.UI();
         ImageButton pickDate = (ImageButton) findViewById(R.id.pick_date);
-        pickDate.setImageDrawable(new IconicsDrawable(mActivity, FontAwesome.Icon.faw_calendar_o).color(Color.BLACK).sizeDp(24).paddingDp(2));
         ImageButton pickTime = (ImageButton) findViewById(R.id.pick_time);
-        pickTime.setImageDrawable(new IconicsDrawable(mActivity, FontAwesome.Icon.faw_clock_o).color(Color.BLACK).sizeDp(24).paddingDp(2));
         if (MODE_DATE.equals(mMode)) {
             pickTime.setVisibility(View.GONE);
         } else if (MODE_TIME.equals(mMode)) {
             pickDate.setVisibility(View.GONE);
         } else {
             if (!MODE_DATE_TIME.equals(mMode)) {
-                L.e("I dont know date_select mode '" + mMode + "'. Falling back to date_time");
+                L.e("I don't know date_select mode '" + mMode + "'. Falling back to date_time");
             }
         }
 

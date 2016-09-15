@@ -38,7 +38,7 @@
             android:gravity="center_horizontal"
             android:layout_marginBottom="25dp"
             android:textColor="@color/mc_primary_color"
-            app:ico_color="@color/mc_primary_color"
+            app:ico_color="@color/mc_primary_icon"
             app:ico_icon="@string/faw_compass"
             app:ico_size="75dp"/>
 

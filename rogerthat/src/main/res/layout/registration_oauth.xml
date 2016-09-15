@@ -46,7 +46,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:gravity="center"
-                app:ico_color="@color/mc_primary_color"
+                app:ico_color="@color/mc_primary_icon"
                 app:ico_icon="@string/faw_lock"
                 app:ico_size="75dp"/>
 

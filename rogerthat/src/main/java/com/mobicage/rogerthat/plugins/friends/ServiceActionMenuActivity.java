@@ -17,28 +17,23 @@
  */
 package com.mobicage.rogerthat.plugins.friends;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.Manifest;
-import android.app.Activity;
-import android.content.pm.PackageManager;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.app.ActivityCompat;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -58,18 +53,14 @@ import android.widget.TextView;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
-import com.mobicage.rogerthat.EnterPinActivity;
 import com.mobicage.rogerthat.FriendDetailActivity;
 import com.mobicage.rogerthat.HomeActivity;
-import com.mobicage.rogerthat.MainActivity;
-import com.mobicage.rogerthat.OauthActivity;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.ServiceDetailActivity;
 import com.mobicage.rogerthat.plugins.messaging.BrandingFailureException;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr.BrandingResult;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr.ColorScheme;
-import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
 import com.mobicage.rogerthat.plugins.messaging.MessagingFilterActivity;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.plugins.scan.ProcessScanActivity;
@@ -84,9 +75,11 @@ import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.Slider;
 import com.mobicage.rogerthat.util.ui.UIUtils;
-import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.to.friends.ServiceMenuItemTO;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ServiceActionMenuActivity extends ServiceBoundActivity implements MenuItemPressingActivity {
 
@@ -230,11 +223,11 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity implements M
                         break;
                     case 3:
                         cell.icon.setVisibility(View.INVISIBLE);
+                        FontAwesome.Icon iconName = FontAwesome.Icon.faw_thumbs_o_up;
                         if (CloudConstants.isYSAAA()) {
-                            cell.icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_qrcode).color(getResources().getColor(R.color.mc_page_light)).sizeDp(24).paddingDp(2));
-                        } else {
-                            cell.icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_thumbs_o_up).color(getResources().getColor(R.color.mc_page_light)).sizeDp(24).paddingDp(2));
+                            iconName = FontAwesome.Icon.faw_qrcode;
                         }
+                        cell.icon.setImageDrawable(new IconicsDrawable(this, iconName).color(getResources().getColor(R.color.mc_page_light)).sizeDp(24).paddingDp(2));
                         break;
 
                     default:

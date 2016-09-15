@@ -18,11 +18,6 @@
 
 package com.mobicage.rogerthat.plugins.messaging.widgets;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -48,6 +43,11 @@ import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.to.messaging.forms.SubmitTextLineFormRequestTO;
 import com.mobicage.to.messaging.forms.SubmitTextLineFormResponseTO;
 import com.mobicage.to.messaging.forms.UnicodeWidgetResultTO;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 public class TextLineWidget extends Widget {
 

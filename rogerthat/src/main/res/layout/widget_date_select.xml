@@ -1,29 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.mobicage.rogerthat.plugins.messaging.widgets.DateSelectWidget
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.mobicage.rogerthat.plugins.messaging.widgets.DateSelectWidget xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal" >
+    android:orientation="horizontal">
 
     <TextView
         android:id="@+id/label"
-        android:gravity="center_horizontal"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:textSize="20dp">
-    </TextView>
+        android:gravity="center_horizontal"
+        android:textSize="20sp" />
 
     <ImageButton
         android:id="@+id/pick_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical" />
+        android:layout_gravity="center_vertical"
+        android:padding="2dp"
+        app:ico_color="@color/mc_primary_icon"
+        app:ico_icon="@string/faw_calendar_o"
+        app:ico_size="24dp" />
 
     <ImageButton
         android:id="@+id/pick_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical" />
+        android:layout_gravity="center_vertical"
+        app:ico_color="@color/mc_primary_icon"
+        app:ico_icon="@string/faw_clock_o"
+        app:ico_size="24dp" />
 
 </com.mobicage.rogerthat.plugins.messaging.widgets.DateSelectWidget>

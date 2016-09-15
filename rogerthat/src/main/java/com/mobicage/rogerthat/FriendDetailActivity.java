@@ -235,7 +235,6 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
         }
 
         ImageView location = (ImageView) findViewById(R.id.location);
-        location.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_map_marker).color(getResources().getColor(R.color.mc_primary_color)).sizeDp(35));
         location.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
@@ -284,7 +283,6 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
         });
 
         ImageView newMessage = (ImageView) findViewById(R.id.send);
-        newMessage.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_envelope).color(getResources().getColor(R.color.mc_primary_color)).sizeDp(35));
         newMessage.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
@@ -295,7 +293,6 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
         });
 
         ImageView history = (ImageView) findViewById(R.id.history);
-        history.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_history).color(getResources().getColor(R.color.mc_primary_color)).sizeDp(35));
         history.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {

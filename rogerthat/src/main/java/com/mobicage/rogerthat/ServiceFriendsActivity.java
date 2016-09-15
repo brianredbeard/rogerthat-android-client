@@ -36,8 +36,6 @@ import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendStore;
 import com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity;
 import com.mobicage.rogerthat.plugins.friends.ServiceSearchActivity;
-import com.mobicage.rogerthat.util.TextUtils;
-import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.config.AppConstants;
 
@@ -80,7 +78,7 @@ public class ServiceFriendsActivity extends FriendsActivity {
                 .string.click_magnifying_glass_to_search_services));
 
         ImageButton magnifyingGlass = (ImageButton) findViewById(R.id.ic_magnifying_glass);
-        magnifyingGlass.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_search).color(getResources().getColor(R.color.mc_primary_color)).sizeDp(200).paddingDp(20));
+        magnifyingGlass.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_search).color(getResources().getColor(R.color.mc_primary_icon)).sizeDp(200).paddingDp(20));
 
         magnifyingGlass.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -5,6 +5,9 @@
     <item
         android:id="@+id/save"
         app:showAsAction="always"
-        android:title="@string/save"/>
+        android:title="@string/save"
+        app:ico_color="@color/mc_white"
+        app:ico_icon="@string/faw_check"
+        app:ico_size="18dp" />
 
 </menu>

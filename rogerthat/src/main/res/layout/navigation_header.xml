@@ -15,7 +15,7 @@
         android:background="@null"
         android:paddingTop="40dp"
         android:onClick="onOptionNavigationViewToolbarSelected"
-        app:ico_color="@color/mc_primary_color"
+        app:ico_color="@color/mc_primary_icon"
         app:ico_icon="@string/faw_bars"
         app:ico_size="20dp" />
 
