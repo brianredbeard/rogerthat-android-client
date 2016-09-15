@@ -16,10 +16,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackground"
-            android:paddingEnd="20dp"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp"
-            android:paddingStart="20dp"
+            android:padding="10dp"
+            android:layout_gravity="center"
             android:text="@string/scan_button"
             android:textColor="@color/mc_white"
             android:textSize="18sp" />
