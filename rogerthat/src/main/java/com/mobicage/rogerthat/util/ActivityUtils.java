@@ -43,14 +43,22 @@ import com.mobicage.rpc.config.AppConstants;
 
 public class ActivityUtils {
 
+    public static void goToActivity(Context context, Class clazz, boolean clearStack) {
+        Intent i = new Intent(context, clazz);
+        if (clearStack) {
+            i.addFlags(MainActivity.FLAG_CLEAR_STACK);
+        }
+        context.startActivity(i);
+    }
+
     public static boolean goToActivity(Context context, String activityName, boolean clearStack) {
         // todo ruben implement collapse
         if ("news".equals(activityName)) {
-            goToNewsActivity(context, clearStack);
+            goToActivity(context, NewsActivity.class, clearStack);
         } else if ("messages".equals(activityName)) {
-            goToMessagingActivity(context, clearStack);
+            goToActivity(context, MessagingActivity.class, clearStack);
         } else if ("scan".equals(activityName)) {
-            goToScanActivity(context, clearStack);
+            goToActivity(context, ScanTabActivity.class, clearStack);
         } else if ("services".equals(activityName)) {
             goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_UNSPECIFIED, clearStack);
         } else if ("friends".equals(activityName)) {
@@ -58,11 +66,11 @@ public class ActivityUtils {
         } else if ("directory".equals(activityName)) {
             goToFriendSearchActivity(context, clearStack);
         } else if ("profile".equals(activityName)) {
-            goToProfileActivity(context, clearStack);
+            goToActivity(context, ProfileActivity.class, clearStack);
         } else if ("more".equals(activityName)) {
-            goToMoreActivity(context, clearStack);
+            goToActivity(context, MoreActivity.class, clearStack);
         } else if ("settings".equals(activityName)) {
-            goToSettingsActivity(context, false);
+            goToActivity(context, SettingsActivity.class, clearStack);
         } else if ("community_services".equals(activityName)) {
             goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_CITY, clearStack);
         } else if ("merchants".equals(activityName)) {
@@ -72,7 +80,7 @@ public class ActivityUtils {
         } else if ("emergency_services".equals(activityName)) {
             goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_EMERGENCY, clearStack);
         } else if ("stream".equals(activityName)) {
-            goToStreamActivity(context, false);
+            goToActivity(context, HistoryListActivity.class, false);
         } else {
             L.bug("unknown goToActivity: " + activityName);
             return false;
@@ -80,85 +88,37 @@ public class ActivityUtils {
         return true;
     }
 
-    public static void goToNewsActivity(Context context, boolean clearStack) {
-        Intent i = new Intent(context, NewsActivity.class);
-        if (clearStack) {
-            i.setFlags(MainActivity.FLAG_CLEAR_STACK);
-        }
-        context.startActivity(i);
-    }
-
     public static void goToMessagingActivity(Context context, boolean clearStack) {
-        Intent i = new Intent(context, MessagingActivity.class);
-        if (clearStack) {
-            i.setFlags(MainActivity.FLAG_CLEAR_STACK);
-        }
-        context.startActivity(i);
+        goToActivity(context, MessagingActivity.class, clearStack);
     }
 
     public static void goToUserFriendsActivity(Context context, boolean clearStack) {
-        Intent i = new Intent(context, UserFriendsActivity.class);
-        if (clearStack) {
-            i.setFlags(MainActivity.FLAG_CLEAR_STACK);
-        }
-        context.startActivity(i);
+        goToActivity(context, UserFriendsActivity.class, clearStack);
     }
 
     public static void goToServicesActivity(Context context, int organizationType, boolean clearStack) {
         final Intent i = new Intent(context, ServiceFriendsActivity.class);
         i.putExtra(ServiceFriendsActivity.ORGANIZATION_TYPE, organizationType);
         if (clearStack) {
-            i.setFlags(MainActivity.FLAG_CLEAR_STACK);
+            i.addFlags(MainActivity.FLAG_CLEAR_STACK);
         }
         context.startActivity(i);
     }
 
     public static void goToScanActivity(Context context, boolean clearStack) {
-        Intent i = new Intent(context, ScanTabActivity.class);
-        if (clearStack) {
-            i.setFlags(MainActivity.FLAG_CLEAR_STACK);
-        }
-        context.startActivity(i);
+        goToActivity(context, ScanTabActivity.class, clearStack);
     }
 
     public static void goToMoreActivity(Context context, boolean clearStack) {
-        final Intent i = new Intent(context, MoreActivity.class);
-        if (clearStack) {
-            i.setFlags(MainActivity.FLAG_CLEAR_STACK);
-        }
-        context.startActivity(i);
+        goToActivity(context, MoreActivity.class, clearStack);
     }
 
     public static void goToProfileActivity(Context context, boolean clearStack) {
-        final Intent i = new Intent(context, ProfileActivity.class);
-        if (clearStack) {
-            i.setFlags(MainActivity.FLAG_CLEAR_STACK);
-        }
-        context.startActivity(i);
+        goToActivity(context, ProfileActivity.class, clearStack);
     }
 
     public static void goToFriendSearchActivity(Context context, boolean clearStack) {
-        final Intent i = new Intent(context, FriendSearchActivity.class);
-        if (clearStack) {
-            i.setFlags(MainActivity.FLAG_CLEAR_STACK);
-        }
-        context.startActivity(i);
-    }
-
-    public static void goToSettingsActivity(Context context, boolean clearStack) {
-        final Intent i = new Intent(context, SettingsActivity.class);
-        if (clearStack) {
-            i.setFlags(MainActivity.FLAG_CLEAR_STACK);
-        }
-        context.startActivity(i);
-    }
-
-    public static void goToStreamActivity(Context context, boolean clearStack) {
-        Intent i = new Intent(context, HistoryListActivity.class);
-        if (clearStack) {
-            i.setFlags(MainActivity.FLAG_CLEAR_STACK);
-        }
-        context.startActivity(i);
+        goToActivity(context, FriendSearchActivity.class, clearStack);
     }
 
     public static void goToActivityBehindTag(final ServiceBoundActivity context, final String serviceEmail, final String tag) {

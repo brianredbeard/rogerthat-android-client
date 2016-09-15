@@ -28,6 +28,7 @@ public class SendMessageRequestTO implements com.mobicage.rpc.IJSONable {
     public com.mobicage.to.messaging.AttachmentTO[] attachments;
     public com.mobicage.to.messaging.ButtonTO[] buttons;
     public long flags;
+    public String key;
     public String[] members;
     public String message;
     public String parent_key;
@@ -77,6 +78,12 @@ public class SendMessageRequestTO implements com.mobicage.rpc.IJSONable {
             this.flags = ((Long) val).longValue();
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.SendMessageRequestTO object is missing field 'flags'");
+        }
+        if (json.containsKey("key")) {
+            Object val = json.get("key");
+            this.key = (String) val;
+        } else {
+            throw new IncompleteMessageException("com.mobicage.to.messaging.SendMessageRequestTO object is missing field 'key'");
         }
         if (json.containsKey("members")) {
             org.json.simple.JSONArray val_arr = (org.json.simple.JSONArray) json.get("members");
@@ -146,6 +153,7 @@ public class SendMessageRequestTO implements com.mobicage.rpc.IJSONable {
             obj.put("buttons", arr);
         }
         obj.put("flags", this.flags);
+        obj.put("key", this.key);
         if (this.members == null) {
             obj.put("members", null);
         } else {

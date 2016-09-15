@@ -68,8 +68,11 @@ import java.util.Map;
 
 public class MainActivity extends ServiceBoundActivity {
 
+    public static final int FLAG_NEW_STACK = Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP
+        | Intent.FLAG_ACTIVITY_CLEAR_TASK;
+
     public static final int FLAG_CLEAR_STACK = Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP
-        | Intent.FLAG_ACTIVITY_SINGLE_TOP;
+            | Intent.FLAG_ACTIVITY_SINGLE_TOP;
 
     public static final String ACTION_WIDGET_MAIN = "ROGERTHAT_ACTION_WIDGET_MAIN";
     public static final String ACTION_WIDGET_SCAN = "ROGERTHAT_ACTION_WIDGET_SCAN";
@@ -328,12 +331,11 @@ public class MainActivity extends ServiceBoundActivity {
             } else {
                 final Intent i;
                 if (AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.messaging || AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.news) {
-                    // todo ruben this is not working
                     i  = new Intent(this, MessagingActivity.class);
                 } else {
                     i  = new Intent(this, HomeActivity.class);
                 }
-                i.setFlags(FLAG_CLEAR_STACK);
+                i.setFlags(FLAG_NEW_STACK);
                 i.setAction(ACTION_NOTIFICATION_MESSAGE_UPDATES);
                 i.putExtras(intent.getExtras());
                 startActivity(i);
