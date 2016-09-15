@@ -33,6 +33,7 @@ import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.AttributeSet;
 import android.view.View;
@@ -55,12 +56,15 @@ import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.CannedButton;
 import com.mobicage.rogerthat.CannedButtons;
+import com.mobicage.rogerthat.HomeActivity;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.SendMessageButtonActivity;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.config.Configuration;
+import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.messaging.AttachmentViewerActivity;
+import com.mobicage.rogerthat.plugins.messaging.FriendsThreadActivity;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessageStore;
 import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
@@ -92,6 +96,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayout {
 
@@ -125,7 +130,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
     private String mRepliedToKey = null;
 
     private MessagingPlugin mMessagingPlugin;
-    private String mTmpKey;
+    private String mKey;
 
     private MainService mMainService;
 
@@ -183,7 +188,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
             mMessage.setText(initialText);
         }
 
-        mTmpKey = mMessagingPlugin.generateTmpKey();
+        mKey = UUID.randomUUID().toString();
 
         final ImageButton submitButton = (ImageButton) findViewById(R.id.submit);
         submitButton.setImageDrawable(new IconicsDrawable(activity, FontAwesome.Icon.faw_paper_plane).color(Color.WHITE).sizeDp(24));
@@ -240,8 +245,15 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
                         hideKeyboard();
                         resetLayout();
                     } else {
+                        Bundle b = new Bundle();
+                        b.putString(HomeActivity.INTENT_KEY_LAUNCHINFO, HomeActivity.INTENT_VALUE_SHOW_NEW_MESSAGES);
+                        b.putString(HomeActivity.INTENT_KEY_MESSAGE, mKey);
+
+
                         Intent intent = new Intent(mActivity, MessagingActivity.class);
-                        intent.setFlags(MainActivity.FLAG_CLEAR_STACK);
+                        intent.setAction(MainActivity.ACTION_NOTIFICATION_MESSAGE_UPDATES);
+                        intent.putExtras(b);
+                        intent.setFlags(MainActivity.FLAG_NEW_STACK);
                         mActivity.startActivity(intent);
                     }
                 } catch (Exception e) {
@@ -277,7 +289,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
     }
 
     private void resetLayout() {
-        mTmpKey = mMessagingPlugin.generateTmpKey();
+        mKey = UUID.randomUUID().toString();
 
         mMessage.setText("");
         mMessage.clearFocus();
@@ -893,7 +905,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
         } else if (IMAGE_BUTTON_PRIORITY == key) {
             hideKeyboard();
             final Dialog dialog = new Dialog(mActivity);
-            dialog.setContentView(R.layout.msg_priority_picker);
+            dialog.setContentView(R.layout.msg_priority_picker); // todo ruben
             dialog.setTitle(R.string.priority);
             Button savePriorityBtn = (Button) dialog.findViewById(R.id.ok);
             final RadioButton priorityNormalBtn = ((RadioButton) dialog.findViewById(R.id.priority_normal));
@@ -939,7 +951,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
         } else if (IMAGE_BUTTON_STICKY == key) {
             hideKeyboard();
             final Dialog dialog = new Dialog(mActivity);
-            dialog.setContentView(R.layout.msg_sticky_picker);
+            dialog.setContentView(R.layout.msg_sticky_picker); // todo ruben
             dialog.setTitle(R.string.sticky);
             Button savePriorityBtn = (Button) dialog.findViewById(R.id.ok);
             final RadioButton stickyDisabled = ((RadioButton) dialog.findViewById(R.id.sticky_disabled));
@@ -1050,6 +1062,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
             request.flags |= MessagingPlugin.FLAG_ALLOW_REPLY_ALL | MessagingPlugin.FLAG_SHARED_MEMBERS;
 
         request.timeout = 0;
+        request.key = mKey;
         request.parent_key = mParentKey;
         request.message = mMessage.getText().toString();
         request.priority = mPriority;
@@ -1092,21 +1105,20 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
 
         if (mHasImageSelected || mHasVideoSelected) {
             AttachmentTO att = new AttachmentTO();
-            att.download_url = mTmpKey;
+            att.download_url = mKey;
             att.name = "";
             att.size = mTmpUploadFile.length();
             att.content_type = mUploadFileExtenstion;
             if (att.size == 0)
                 att.size = -1;
             request.attachments = new AttachmentTO[] { att };
-            mMessagingPlugin.putSendMessageRequest(mTmpKey, request);
+            mMessagingPlugin.putSendMessageRequest(mKey, request);
 
-            String downloadUrlHash = mMessagingPlugin.attachmentDownloadUrlHash(mTmpKey);
-            String tmpMessageKey = mTmpKey.replace(MessagingPlugin.TMP_KEY_PREFIX, "");
+            String downloadUrlHash = mMessagingPlugin.attachmentDownloadUrlHash(mKey);
             File attachmentsDir;
             try {
-                attachmentsDir = mMessagingPlugin.attachmentsDir(mParentKey == null ? tmpMessageKey : mParentKey,
-                        tmpMessageKey);
+                attachmentsDir = mMessagingPlugin.attachmentsDir(mParentKey == null ? mKey : mParentKey,
+                        mKey);
             } catch (IOException e) {
                 L.d("Unable to create attachment directory", e);
                 UIUtils.showAlertDialog(mMainService, "", R.string.unable_to_read_write_sd_card);
@@ -1134,7 +1146,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
             }
 
             mMainService.postAtFrontOfBIZZHandler(storeMessageRunnable);
-            mMessagingPlugin.startUploadingFile(attachmentFile, mParentKey, mTmpKey, null, 0, false,
+            mMessagingPlugin.startUploadingFile(attachmentFile, mParentKey, mKey, null, 0, false,
                     mUploadFileExtenstion);
 
         } else {
@@ -1145,7 +1157,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
     }
 
     public void sendMessage(final SendMessageRequestTO request) throws Exception {
-        sendMessage(request, mParentKey, mTmpKey, mMessagingPlugin, mMainService);
+        sendMessage(request, mParentKey, mKey, mMessagingPlugin, mMainService);
     }
 
     public static void sendMessage(final SendMessageRequestTO request, final String parentKey,
@@ -1177,7 +1189,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
     public MessageTO storeMessage(final String me, final SendMessageRequestTO request) {
         com.mobicage.rogerthat.util.system.T.BIZZ();
         final MessageTO message = new MessageTO();
-        message.key = mTmpKey;
+        message.key = mKey;
         message.sender = me;
         message.flags = request.flags;
         message.timeout = request.timeout;
