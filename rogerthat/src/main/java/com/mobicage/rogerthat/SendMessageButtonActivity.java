@@ -24,6 +24,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.support.design.widget.FloatingActionButton;
@@ -42,6 +43,8 @@ import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.pickle.Pickler;
@@ -102,6 +105,7 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
         }
 
         FloatingActionButton floatingActionButton = ((FloatingActionButton) findViewById(R.id.add));
+        floatingActionButton.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_plus).color(Color.WHITE).sizeDp(24));
         floatingActionButton.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
