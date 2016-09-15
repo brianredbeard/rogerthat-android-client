@@ -132,12 +132,17 @@
             android:windowSoftInputMode="stateAlwaysHidden" >
         </activity>
 
-        <activity android:name="com.soundcloud.android.crop.CropImageActivity" >
+        <activity
+            android:name="com.soundcloud.android.crop.CropImageActivity"
+            android:screenOrientation="portrait">
         </activity>
-        <activity android:name="com.soundcloud.android.crop.MonitoredActivity" >
+        <activity
+            android:name="com.soundcloud.android.crop.MonitoredActivity"
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.messaging.ChatInfoActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light"
             android:parentActivityName="com.mobicage.rogerthat.MainActivity" >
             <!-- Parent activity meta-data to support 4.0 and lower -->
@@ -177,6 +182,7 @@
         </activity> <!-- todo ruben -->
         <activity
             android:name="com.mobicage.rogerthat.plugins.messaging.FriendsThreadActivity"
+            android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize|stateHidden"
             android:theme="@style/Theme.AppCompat.Light"
             android:parentActivityName="com.mobicage.rogerthat.MainActivity" >
@@ -187,6 +193,7 @@
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.messaging.FriendsThreadMembersActivity"
+            android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize|stateHidden"
             android:theme="@style/Theme.AppCompat.Light"
             android:parentActivityName="com.mobicage.rogerthat.MainActivity" >
@@ -199,6 +206,7 @@
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.messaging.MessagingFilterActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light"
             android:parentActivityName="com.mobicage.rogerthat.MainActivity" >
             <!-- Parent activity meta-data to support 4.0 and lower -->
@@ -209,6 +217,7 @@
 
         <activity
             android:name="com.mobicage.rogerthat.plugins.messaging.ServiceThreadActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light"
             android:parentActivityName="com.mobicage.rogerthat.MainActivity" >
             <!-- Parent activity meta-data to support 4.0 and lower -->
@@ -218,6 +227,7 @@
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.AddFriendsActivity"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize"
             android:theme="@style/Theme.AppCompat.Light"
             android:parentActivityName="com.mobicage.rogerthat.MainActivity" >
@@ -226,12 +236,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
-        <activity android:name="com.mobicage.rogerthat.UserFriendsActivity" >
+        <activity android:name="com.mobicage.rogerthat.UserFriendsActivity"
+            android:screenOrientation="portrait">
         </activity>
-        <activity android:name="com.mobicage.rogerthat.ServiceFriendsActivity" >
+        <activity android:name="com.mobicage.rogerthat.ServiceFriendsActivity"
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.FriendCategoryActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light"
             android:parentActivityName="com.mobicage.rogerthat.MainActivity" >
             <!-- Parent activity meta-data to support 4.0 and lower -->
@@ -251,6 +264,7 @@
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.friends.RecommendServiceActivity"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize"
             android:parentActivityName="com.mobicage.rogerthat.MainActivity"
             android:theme="@style/Theme.AppCompat.Light">
@@ -261,6 +275,7 @@
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.friends.ServiceSearchActivity"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="stateHidden"
             android:theme="@style/Theme.AppCompat.Light"
@@ -272,6 +287,7 @@
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.friends.FriendSearchActivity"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="stateHidden" >
         </activity>
@@ -291,6 +307,7 @@
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.GetLocationActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light"
             android:parentActivityName="com.mobicage.rogerthat.MainActivity">
             <!-- Parent activity meta-data to support 4.0 and lower -->
@@ -298,10 +315,13 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
-        <activity android:name="com.mobicage.rogerthat.SettingsActivity" >
+        <activity
+            android:name="com.mobicage.rogerthat.SettingsActivity"
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.scan.ScanTabActivity"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize">
         </activity>
         <activity
@@ -356,8 +376,8 @@
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.FriendDetailOrInviteActivity"
-            android:parentActivityName="com.mobicage.rogerthat.MainActivity"
             android:screenOrientation="portrait"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity"
             android:theme="@style/Theme.AppCompat.Light">
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
@@ -366,6 +386,7 @@
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.messaging.ServiceMessageDetailActivity"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize"
             android:theme="@style/Theme.AppCompat.Light"
             android:parentActivityName="com.mobicage.rogerthat.MainActivity">
@@ -386,6 +407,7 @@
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.FriendsLocationActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" >
         </activity>
         <activity
@@ -401,6 +423,7 @@
 
         <activity
             android:name="com.mobicage.rogerthat.SendMessageContactActivity"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize"
             android:theme="@style/Theme.AppCompat.Light"
             android:parentActivityName="com.mobicage.rogerthat.MainActivity">
@@ -411,6 +434,7 @@
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.SendMessageMessageActivity"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.AppCompat.Light"
@@ -422,6 +446,7 @@
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.SendMessageButtonActivity"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize"
             android:theme="@style/Theme.AppCompat.Light"
             android:parentActivityName="com.mobicage.rogerthat.MainActivity">
@@ -431,7 +456,9 @@
                 android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
 
-        <activity android:name="com.mobicage.rogerthat.plugins.history.HistoryListActivity"
+        <activity
+            android:name="com.mobicage.rogerthat.plugins.history.HistoryListActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light"
             android:parentActivityName="com.mobicage.rogerthat.MainActivity">
             <!-- Parent activity meta-data to support 4.0 and lower -->
@@ -443,7 +470,9 @@
             android:name="com.mobicage.rogerthat.GroupDetailActivity"
             android:screenOrientation="portrait" >
         </activity>
-        <activity android:name="com.mobicage.rogerthat.plugins.trackme.MapDetailActivity" >
+        <activity
+            android:name="com.mobicage.rogerthat.plugins.trackme.MapDetailActivity"
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.registration.DetectedBeaconActivity"
