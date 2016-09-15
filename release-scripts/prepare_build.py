@@ -16,18 +16,17 @@
 #
 # @@license_version:1.1@@
 
+import hashlib
+import logging
 import os
 import pprint
 import re
 import shutil
 import sys
 import tempfile
-from xml.dom import minidom
-
-from PIL import Image, ImageDraw
 import yaml
-import hashlib
-import logging
+from PIL import Image, ImageDraw
+from xml.dom import minidom
 
 logging.basicConfig(
         level=logging.INFO,
@@ -751,7 +750,8 @@ public class AppConstants {
     colors = dict(mc_homescreen_background='homescreen_background',
                   mc_homescreen_text='homescreen_text',
                   mc_primary_color='primary_color',
-                  mc_secondary_color='secondary_color')
+                  mc_secondary_color='secondary_color',
+                  mc_icon_color='primary_color')
     with open(os.path.join(path, "colors.xml"), 'r+') as f:
         s = f.read()
         for mc_color_name, color_name in colors.iteritems():
@@ -967,8 +967,6 @@ if __name__ == "__main__":
 
     logging.info('BUILD CFG:')
     logging.info(pprint.pformat(doc))
-
-    # todo ruben generate ic_menu_hamburger
 
     strings_map = get_translation_strings()
     navigation_clicks, navigation_tags = generate_navigation_menu(doc, strings_map)
