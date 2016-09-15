@@ -496,4 +496,5 @@
     <string name="type_your_message">Type a message</string>
     <string name="group_chat">Group chat</string>
     <string name="notification_settings">Notification settings</string>
+    <string name="news">News</string>
 </resources>

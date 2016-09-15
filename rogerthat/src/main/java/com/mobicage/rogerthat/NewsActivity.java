@@ -20,35 +20,81 @@ package com.mobicage.rogerthat;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
+import com.mobicage.rogerthat.plugins.history.HistoryItem;
+import com.mobicage.rogerthat.plugins.history.HistoryListAdapter;
+import com.mobicage.rogerthat.plugins.history.HistoryPlugin;
+import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
+import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 
-public class NewsActivity extends ServiceBoundActivity {
+public class NewsActivity extends ServiceBoundCursorListActivity {
+
+    private HistoryPlugin mHistoryPlugin;
+    private MessagingPlugin mMessagingPlugin;
+    private FriendsPlugin mFriendsPlugin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.news);
+        setListView((ListView) findViewById(R.id.news_list));
         setActivityName("news");
-
-        Button testBtn = (Button) findViewById(R.id.btn_test);
-        testBtn.setOnClickListener(new SafeViewOnClickListener() {
-            @Override
-            public void safeOnClick(View v) {
-                Toast.makeText(NewsActivity.this, "This is a TEST", Toast.LENGTH_SHORT).show();
-            }
-        });
+        setTitle(R.string.news);
     }
 
     @Override
     protected void onServiceBound() {
-
+        mHistoryPlugin = mService.getPlugin(HistoryPlugin.class);
+        mMessagingPlugin = mService.getPlugin(MessagingPlugin.class);
+        mFriendsPlugin = mService.getPlugin(FriendsPlugin.class);
+        setListAdapter();
     }
 
     @Override
     protected void onServiceUnbound() {
+    }
 
+    private void createCursor() {
+        setCursor(mHistoryPlugin.getStore().getFullCursor());
+    }
+
+    private void setListAdapter() {
+        if (getCursor() != null) {
+            stopManagingCursor(getCursor());
+            getCursor().close();
+        }
+        createCursor();
+        startManagingCursor(getCursor());
+        final NewsListAdapter adapter = new NewsListAdapter(this, getCursor(), mMessagingPlugin, mFriendsPlugin);
+        setListAdapter(adapter);
+    }
+
+    @Override
+    protected void changeCursor() {
+        if (mServiceIsBound) {
+            createCursor();
+            ((NewsListAdapter) getListAdapter()).changeCursor(getCursor());
+        }
+    }
+
+    @Override
+    protected void onListItemClick(ListView l, View v, int position, long id) {
+        L.i("NewsActivity onListItemClick");
+    }
+
+    @Override
+    protected boolean onListItemLongClick(ListView l, View v, int position, long id) {
+        L.i("NewsActivity onListItemLongClick");
+        return false;
+    }
+
+    @Override
+    protected String[] getAllReceivingIntents() {
+        return new String[] {};
     }
 }

@@ -68,10 +68,12 @@ public class HistoryStore implements Closeable {
     }
 
     Cursor getImportantOnlyCursor() {
+
         return mDb.rawQuery(mContext.getString(R.string.sql_activity_cursor_important_only_query), null);
     }
 
-    Cursor getFullCursor() {
+    public Cursor getFullCursor() {
+        // todo ruben make protected again
         return mDb.rawQuery(mContext.getString(R.string.sql_activity_cursor_full_query), null);
     }
 
