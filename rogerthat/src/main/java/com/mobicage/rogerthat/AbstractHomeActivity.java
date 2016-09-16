@@ -37,7 +37,6 @@ import android.widget.TextView;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.Friend;
-import com.mobicage.rogerthat.plugins.friends.FriendSearchActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendStore;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.friends.MenuItemPresser;
@@ -47,11 +46,8 @@ import com.mobicage.rogerthat.plugins.friends.ServiceMenu;
 import com.mobicage.rogerthat.plugins.friends.ServiceMenuItem;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessageStore;
-import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.plugins.scan.ProcessScanActivity;
-import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
-import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
 import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.RegexPatterns;
 import com.mobicage.rogerthat.util.logging.L;
@@ -161,7 +157,10 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity implemen
 
         if (!AppConstants.SHOW_HOMESCREEN_FOOTER) {
             for (int id : new int[]{R.id.homescreen_footer, R.id.invisible_homescreen_footer}) {
-                findViewById(id).setVisibility(View.GONE);
+                View view = findViewById(id);
+                if (view != null) {
+                    view.setVisibility(View.GONE);
+                }
             }
 
             final View secondSpacerView = findViewById(R.id.second_spacerview);
