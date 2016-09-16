@@ -4,17 +4,16 @@
     android:layout_height="fill_parent"
     android:background="@color/mc_background_color"
     android:gravity="center"
-    android:orientation="vertical" >
-
+    android:orientation="vertical">
 
         <Button
             android:id="@+id/scanbutton"
+
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            style="@style/ButtonBackground"
+            android:theme="@style/ButtonBackground"
             android:paddingLeft="20dp"
             android:paddingRight="20dp"
-            android:layout_gravity="center"
             android:text="@string/scan_button"
             android:textSize="16sp" />
 

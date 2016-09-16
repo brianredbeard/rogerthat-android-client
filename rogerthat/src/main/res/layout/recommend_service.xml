@@ -197,7 +197,7 @@
 
             <Button
                 android:id="@+id/recommend_email_button"
-                style="@style/ButtonBackground"
+                android:theme="@style/ButtonBackground"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
@@ -229,7 +229,7 @@
             <Button
                 android:id="@+id/recommend_on_fb_button"
                 android:layout_height="wrap_content"
-                style="@style/ButtonBackground"
+                android:theme="@style/ButtonBackground"
                 android:layout_width="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:paddingEnd="20dp"

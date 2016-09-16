@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="ButtonBackground" parent="Widget.AppCompat.Button.Colored">
+        <item name="android:textColor">@color/mc_default_text_inverse</item>
+        <item name="android:colorButtonNormal">@color/mc_primary_color</item>
+    </style>
+</resources>

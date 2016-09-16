@@ -52,21 +52,17 @@
             android:gravity="center_horizontal"
             android:textColor="@color/mc_about_blue"
             android:textSize="16sp" />
-        <FrameLayout
+
+        <Button
+            android:id="@+id/about_btn_visit_rogerthat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal">
-            <Button
-                android:id="@+id/about_btn_visit_rogerthat"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingLeft="20dp"
-                android:paddingRight="20dp"
-                style="@style/ButtonBackground"
-                tools:text="www.rogerthat.net"
-                android:textSize="16sp" />
-        </FrameLayout>
-
+            android:layout_gravity="center_horizontal"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:textSize="16sp"
+            android:theme="@style/ButtonBackground"
+            tools:text="www.rogerthat.net" />
 
         <RelativeLayout
             android:id="@+id/about_btn_email_rogerthat"
