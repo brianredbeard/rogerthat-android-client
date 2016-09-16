@@ -26,6 +26,7 @@ import java.util.Map;
 public class FriendTO implements com.mobicage.rpc.IJSONable {
 
     public com.mobicage.to.friends.ServiceMenuTO actionMenu;
+    public com.mobicage.to.friends.ServiceActionTO[] actions;
     public String appData;
     public String avatarHash;
     public long avatarId;
@@ -62,6 +63,22 @@ public class FriendTO implements com.mobicage.rpc.IJSONable {
             this.actionMenu = val == null ? null : new com.mobicage.to.friends.ServiceMenuTO((Map<String, Object>) val);
         } else {
             throw new IncompleteMessageException("com.mobicage.to.friends.FriendTO object is missing field 'actionMenu'");
+        }
+        if (json.containsKey("actions")) {
+            org.json.simple.JSONArray val_arr = (org.json.simple.JSONArray) json.get("actions");
+            if (val_arr == null) {
+                this.actions = null;
+            } else {
+                this.actions = new com.mobicage.to.friends.ServiceActionTO[val_arr.size()];
+                for (int i=0; i < val_arr.size(); i++) {
+                    Object item = val_arr.get(i);
+                    if (item != null) {
+                        this.actions[i] = new com.mobicage.to.friends.ServiceActionTO((Map<String, Object>) item);
+                    }
+                }
+            }
+        } else {
+            this.actions = new com.mobicage.to.friends.ServiceActionTO[0];
         }
         if (json.containsKey("appData")) {
             Object val = json.get("appData");
@@ -227,6 +244,15 @@ public class FriendTO implements com.mobicage.rpc.IJSONable {
     public Map<String, Object> toJSONMap() {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
         obj.put("actionMenu", this.actionMenu == null ? null : this.actionMenu.toJSONMap());
+        if (this.actions == null) {
+            obj.put("actions", null);
+        } else {
+            org.json.simple.JSONArray arr = new org.json.simple.JSONArray();
+            for (int i=0; i < this.actions.length; i++) {
+                arr.add(this.actions[i].toJSONMap());
+            }
+            obj.put("actions", arr);
+        }
         obj.put("appData", this.appData);
         obj.put("avatarHash", this.avatarHash);
         obj.put("avatarId", this.avatarId);

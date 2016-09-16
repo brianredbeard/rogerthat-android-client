@@ -38,7 +38,7 @@ import com.mobicage.rogerthat.util.system.T;
 public class DatabaseManager implements Closeable {
 
     private final static String DB_NAME = "mc.db";
-    private final static int DB_VERSION = 71;
+    private final static int DB_VERSION = 72;
 
     private final MainService mMainService;
     private final SQLiteDatabase mDb;

@@ -394,6 +394,15 @@ FROM member_status ms INNER JOIN (
     <string name="sql_services_count_grouped_by_organization_type">SELECT organization_type, COUNT(*) FROM friend WHERE (existence = 0 OR existence = 4) AND type = 2 GROUP BY organization_type</string>
     <string name="sql_services_count_by_organization_type">SELECT COUNT(*) FROM (SELECT IFNULL(category_id, email) AS category FROM friend WHERE type=2 AND (existence = 0 OR existence = 4) AND organization_type=? GROUP BY category)</string>
 
+    <!-- news -->
+    <string name="sql_news_insert_item">INSERT OR REPLACE INTO news (id, \"timestamp\", sender_email, sender_name, sender_avatar_id, title, message, image_url, label, reach, qr_code_content, qr_code_caption, version) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)</string>
+    <string name="sql_news_list_item_versions">SELECT id, version FROM news</string>
+    <string name="sql_news_insert_button">INSERT INTO news_buttons (news_id, id, caption, \"action\", \"index\") VALUES (?,?,?,?,?)</string>
+    <string name="sql_news_insert_rogered_user">INSERT INTO news_rogered_users (news_id, friend) VALUES (?,?)</string>
+    <string name="sql_news_get_item">SELECT timestamp, sender_email, sender_name, sender_avatar_id, title, message, image_url, label, reach, qr_code_content, qr_code_caption, version FROM news WHERE id=?</string>
+    <string name="sql_news_get_buttons">SELECT id, caption, action FROM news_buttons WHERE news_id = ? ORDER BY \"index\"</string>
+    <string name="sql_news_get_rogered_users">SELECT friend FROM news_rogered_users WHERE news_id = ? LIMIT 2</string>
+
     <!-- iOS-only queries -->
     <string name="sql_friend_count_by_type">SELECT COUNT(*) FROM friend WHERE (existence = 0 OR existence = 4) AND \"type\" = ?</string>
     <string name="sql_friend_update_email_hash">UPDATE friend SET email_hash = ? WHERE email = ?</string>

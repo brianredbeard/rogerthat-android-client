@@ -79,6 +79,7 @@ import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.history.HistoryPlugin;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
+import com.mobicage.rogerthat.plugins.news.NewsPlugin;
 import com.mobicage.rogerthat.plugins.system.SystemPlugin;
 import com.mobicage.rogerthat.plugins.trackme.TrackmePlugin;
 import com.mobicage.rogerthat.upgrade.Upgrader;
@@ -882,6 +883,10 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         MobicagePlugin messagingPlugin = new com.mobicage.rogerthat.plugins.messaging.MessagingPlugin(mConfigProvider,
             this, mDatabaseManager, brandingMgr);
         mPlugins.put(MessagingPlugin.class.toString(), messagingPlugin);
+
+        // operations on friends and friend lists
+        MobicagePlugin newsPlugin = new com.mobicage.rogerthat.plugins.news.NewsPlugin(this, mDatabaseManager);
+        mPlugins.put(NewsPlugin.class.toString(), newsPlugin);
 
         for (MobicagePlugin plugin : mPlugins.values())
             plugin.initialize();

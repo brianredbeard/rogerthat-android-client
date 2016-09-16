@@ -17,10 +17,21 @@
  */
 package com.mobicage.rogerthat;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CursorAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mobicage.rogerth.at.R;
@@ -29,72 +40,177 @@ import com.mobicage.rogerthat.plugins.history.HistoryItem;
 import com.mobicage.rogerthat.plugins.history.HistoryListAdapter;
 import com.mobicage.rogerthat.plugins.history.HistoryPlugin;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
+import com.mobicage.rogerthat.plugins.news.NewsPlugin;
+import com.mobicage.rogerthat.plugins.news.NewsStore;
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
+import com.mobicage.rogerthat.util.system.T;
+import com.mobicage.to.news.BaseNewsItemTO;
 
-public class NewsActivity extends ServiceBoundCursorListActivity {
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-    private HistoryPlugin mHistoryPlugin;
-    private MessagingPlugin mMessagingPlugin;
+public class NewsActivity extends ServiceBoundActivity {
+
+    private NewsListAdapter mListAdapter;
+    private ListView mListView;
+    private NewsPlugin mNewsPlugin;
+    private NewsStore mNewsStore;
     private FriendsPlugin mFriendsPlugin;
+
+    private Map<Long, Long> mDBItems = new HashMap<>();
+    private List<Long> mOrder = new ArrayList<>();
+    private Map<Long, BaseNewsItemTO> mItems = new HashMap<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.news);
-        setListView((ListView) findViewById(R.id.news_list));
         setActivityName("news");
         setTitle(R.string.news);
     }
 
+    private final BroadcastReceiver mBroadcastReceiver = new SafeBroadcastReceiver() {
+        @Override
+        public String[] onSafeReceive(Context context, Intent intent) {
+            T.UI();
+            String action = intent.getAction();
+            if (NewsPlugin.GET_NEWS_RECEIVED_INTENT.equals(action)) {
+                boolean shouldUpdateLayout = false;
+                Set<Long> idsToRequest = new LinkedHashSet<>();
+                long[] ids = intent.getLongArrayExtra("ids");
+                long[] versions = intent.getLongArrayExtra("versions");
+
+                for (int i= 0 ; i < ids.length; i++) {
+                    if (!mDBItems.containsKey(ids[i])) {
+                        idsToRequest.add(ids[i]);
+                    } else if (mDBItems.get(ids[i]) < versions[i]){
+                        idsToRequest.add(ids[i]);
+                    } else if (!mOrder.contains(ids[i])) {
+                        mItems.put(ids[i], mNewsStore.getNewsItem(ids[i]));
+                        mOrder.add(ids[i]);
+                        shouldUpdateLayout = true;
+                    }
+                }
+
+                if (idsToRequest.size() > 0) {
+                    long[] primitiveLongArray = new long[idsToRequest.size()];
+                    Long[] longArray = idsToRequest.toArray(new Long[idsToRequest.size()]);
+                    for (int i =0; i < longArray.length; i++) {
+                        primitiveLongArray[i] = longArray[i].longValue();
+                    }
+                    mNewsPlugin.getNewsItems(primitiveLongArray);
+                }
+                if (shouldUpdateLayout) {
+                    mListAdapter.notifyDataSetChanged();
+                }
+
+            } else if (NewsPlugin.GET_NEWS_ITEMS_RECEIVED_INTENT.equals(action)) {
+                long[] ids = intent.getLongArrayExtra("ids");
+                long[] versions = intent.getLongArrayExtra("versions");
+
+                for (int i= 0 ; i < ids.length; i++) {
+                    mDBItems.put(ids[i], versions[i]);
+                    mItems.put(ids[i], mNewsStore.getNewsItem(ids[i]));
+                    mOrder.add(ids[i]);
+                }
+
+                mListAdapter.notifyDataSetChanged();
+            }
+            return new String[] { action };
+        }
+    };
+
     @Override
     protected void onServiceBound() {
-        mHistoryPlugin = mService.getPlugin(HistoryPlugin.class);
-        mMessagingPlugin = mService.getPlugin(MessagingPlugin.class);
+        mNewsPlugin = mService.getPlugin(NewsPlugin.class);
+        mNewsStore = mNewsPlugin.getStore();
         mFriendsPlugin = mService.getPlugin(FriendsPlugin.class);
-        setListAdapter();
+
+
+        mListView = (ListView) findViewById(R.id.news_list);
+        mListAdapter = new NewsListAdapter(this, mOrder, mItems);
+        mListView.setAdapter(mListAdapter);
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(final AdapterView<?> parent, final View view, final int position, final long id) {
+                try {
+                    final BaseNewsItemTO newsItem = (BaseNewsItemTO) view.getTag();
+                    L.i("BaseNewsItemTO click: " + newsItem.id);
+                } catch (Exception e) {
+                    L.bug(e);
+                }
+            }
+        });
+
+        // todo ruben fill up mDBItems select id, version from News;
+        mNewsPlugin.getNews();
+
+        final IntentFilter filter = new IntentFilter();
+        filter.addAction(NewsPlugin.GET_NEWS_RECEIVED_INTENT);
+        filter.addAction(NewsPlugin.GET_NEWS_ITEMS_RECEIVED_INTENT);
+        registerReceiver(mBroadcastReceiver, filter);
     }
 
     @Override
     protected void onServiceUnbound() {
     }
 
-    private void createCursor() {
-        setCursor(mHistoryPlugin.getStore().getFullCursor());
-    }
+    public class NewsListAdapter extends BaseAdapter {
 
-    private void setListAdapter() {
-        if (getCursor() != null) {
-            stopManagingCursor(getCursor());
-            getCursor().close();
+        private final LayoutInflater mLayoutInflater;
+        private final Context mContext;
+        private List<Long> mOrder;
+        private Map<Long, BaseNewsItemTO> mItems;
+
+        public NewsListAdapter(Context context, List<Long> order, Map<Long, BaseNewsItemTO> items) {
+            T.UI();
+            mContext = context;
+            mOrder = order;
+            mItems = items;
+            mLayoutInflater = LayoutInflater.from(mContext);
         }
-        createCursor();
-        startManagingCursor(getCursor());
-        final NewsListAdapter adapter = new NewsListAdapter(this, getCursor(), mMessagingPlugin, mFriendsPlugin);
-        setListAdapter(adapter);
-    }
 
-    @Override
-    protected void changeCursor() {
-        if (mServiceIsBound) {
-            createCursor();
-            ((NewsListAdapter) getListAdapter()).changeCursor(getCursor());
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            T.UI();
+
+            final View view;
+
+            if (convertView == null) {
+                view = mLayoutInflater.inflate(R.layout.news_list_item, parent, false);
+            } else {
+                view = convertView;
+            }
+
+            Long newsId = mOrder.get(position);
+            BaseNewsItemTO newsItem = mItems.get(newsId);
+
+            TextView titleTextView = (TextView) view.findViewById(R.id.title);
+            titleTextView.setText(newsItem.title);
+
+            return view;
         }
-    }
 
-    @Override
-    protected void onListItemClick(ListView l, View v, int position, long id) {
-        L.i("NewsActivity onListItemClick");
-    }
+        @Override
+        public int getCount() {
+            return mOrder.size();
+        }
 
-    @Override
-    protected boolean onListItemLongClick(ListView l, View v, int position, long id) {
-        L.i("NewsActivity onListItemLongClick");
-        return false;
-    }
+        @Override
+        public Object getItem(int position) {
+            return mOrder.get(position);
+        }
 
-    @Override
-    protected String[] getAllReceivingIntents() {
-        return new String[] {};
+        @Override
+        public long getItemId(int position) {
+            return mOrder.get(position);
+        }
     }
 }

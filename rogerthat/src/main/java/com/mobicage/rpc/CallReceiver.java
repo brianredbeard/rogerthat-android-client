@@ -23,6 +23,7 @@ public class CallReceiver {
     public static volatile com.mobicage.capi.friends.IClientRpc comMobicageCapiFriendsIClientRpc = null;
     public static volatile com.mobicage.capi.location.IClientRpc comMobicageCapiLocationIClientRpc = null;
     public static volatile com.mobicage.capi.messaging.IClientRpc comMobicageCapiMessagingIClientRpc = null;
+    public static volatile com.mobicage.capi.news.IClientRpc comMobicageCapiNewsIClientRpc = null;
     public static volatile com.mobicage.capi.services.IClientRpc comMobicageCapiServicesIClientRpc = null;
     public static volatile com.mobicage.capi.system.IClientRpc comMobicageCapiSystemIClientRpc = null;
 
@@ -162,6 +163,9 @@ public class CallReceiver {
         }
         if ("com.mobicage.capi.messaging.updateTextLineForm".equals(function)) {
             return comMobicageCapiMessagingIClientRpc.updateTextLineForm(Parser.ComMobicageToMessagingFormsUpdateTextLineFormRequestTO(call.arguments.get("request")));
+        }
+        if ("com.mobicage.capi.news.disableNews".equals(function)) {
+            return comMobicageCapiNewsIClientRpc.disableNews(Parser.ComMobicageToNewsDisableNewsRequestTO(call.arguments.get("request")));
         }
         if ("com.mobicage.capi.services.receiveApiCallResult".equals(function)) {
             return comMobicageCapiServicesIClientRpc.receiveApiCallResult(Parser.ComMobicageToServiceReceiveApiCallResultRequestTO(call.arguments.get("request")));
