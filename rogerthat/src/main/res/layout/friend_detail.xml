@@ -143,7 +143,7 @@
             android:id="@+id/poke_button"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            style="@style/ButtonBackground"
+            android:theme="@style/ButtonBackground"
             android:textSize="20sp" />
     </RelativeLayout>
 </RelativeLayout>

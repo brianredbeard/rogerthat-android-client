@@ -17,17 +17,6 @@
  */
 package com.mobicage.rogerthat.plugins.messaging;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -35,8 +24,6 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.Typeface;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.view.KeyEvent;
@@ -75,11 +62,21 @@ import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.time.TimeUtils;
-import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.to.messaging.AttachmentTO;
 import com.mobicage.to.messaging.ButtonTO;
 import com.mobicage.to.messaging.MemberStatusTO;
+
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 public class MessagingActivity extends ServiceBoundCursorListActivity {
 
@@ -686,31 +683,10 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
                 messageCountText--;
             }
             if (messageCountText >= 1) {
-                messageCountView.setText("" + messageCountText);
-                messageCountView.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
-
-                if (threadBackgroundColor != Integer.MAX_VALUE) {
-                    final int bgColor;
-                    final int color;
-                    if (UIUtils.getLuminus(threadBackgroundColor) < 0.5f) {
-                        // Dark background
-                        // bg color white , alpha 0.75
-                        // color black
-                        bgColor = Color.argb(192, 255, 255, 255);
-                        color = Color.BLACK;
-                    } else {
-                        // Light background
-                        // bg color black , alpha 0.25
-                        // color white
-                        bgColor = Color.argb(63, 0, 0, 0);
-                        color = Color.WHITE;
-                    }
-                    messageCountView.setTextColor(color);
-                    GradientDrawable bgShape = (GradientDrawable) messageCountView.getBackground();
-                    bgShape.setColor(bgColor);
-                }
+                messageCountView.setText(String.valueOf(messageCountText));
+                messageCountView.setVisibility(View.VISIBLE);
             } else {
-                messageCountView.getLayoutParams().width = 0;
+                messageCountView.setVisibility(View.GONE);
             }
 
             final TextView timestamp = holder.timestampView;
@@ -750,30 +726,30 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
                 messageView.setTextColor(threadTextColor);
             }
 
-            if (!message.threadDirty) {
-                messageView.setTypeface(null, Typeface.NORMAL);
-                if (threadBackgroundColor == Integer.MAX_VALUE)
-                    view.setBackgroundDrawable(getResources().getDrawable(R.drawable.mc_message_background));
-                if (threadTextColor == Integer.MAX_VALUE) {
-                    messageView.setTextColor(mResources.getColorStateList(android.R.color.secondary_text_light));
-                }
-            } else {
-                if (message.threadNeedsMyAnswer)
-                    messageView.setTypeface(null, Typeface.BOLD);
-                else
-                    messageView.setTypeface(null, Typeface.ITALIC);
-                if (threadBackgroundColor == Integer.MAX_VALUE)
-                    view.setBackgroundDrawable(getResources().getDrawable(R.drawable.mc_message_highlighted_background));
-                if (threadTextColor == Integer.MAX_VALUE) {
-                    messageView.setTextColor(mResources.getColorStateList(android.R.color.primary_text_light));
-                }
-            }
+//            if (!message.threadDirty) {
+//                messageView.setTypeface(null, Typeface.NORMAL);
+//                if (threadBackgroundColor == Integer.MAX_VALUE)
+//                    view.setBackgroundDrawable(getResources().getDrawable(R.drawable.mc_message_background));
+//                if (threadTextColor == Integer.MAX_VALUE) {
+//                    messageView.setTextColor(mResources.getColorStateList(android.R.color.secondary_text_light));
+//                }
+//            } else {
+//                if (message.threadNeedsMyAnswer)
+//                    messageView.setTypeface(null, Typeface.BOLD);
+//                else
+//                    messageView.setTypeface(null, Typeface.ITALIC);
+//                if (threadBackgroundColor == Integer.MAX_VALUE)
+//                    view.setBackgroundDrawable(getResources().getDrawable(R.drawable.mc_message_highlighted_background));
+//                if (threadTextColor == Integer.MAX_VALUE) {
+//                    messageView.setTextColor(mResources.getColorStateList(android.R.color.primary_text_light));
+//                }
+//            }
 
             messageView.setTextSize(18);
             recipientsView.setTextSize(14);
 
-            if (threadBackgroundColor != Integer.MAX_VALUE)
-                view.setBackgroundColor(threadBackgroundColor);
+//            if (threadBackgroundColor != Integer.MAX_VALUE)
+//                view.setBackgroundColor(threadBackgroundColor);
 
             holder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override

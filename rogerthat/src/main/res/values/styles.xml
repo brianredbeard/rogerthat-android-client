@@ -83,7 +83,7 @@
 
     <style name="ButtonBackground" parent="Widget.AppCompat.Button.Colored">
         <item name="android:textColor">@color/mc_default_text_inverse</item>
-        <item name="android:foreground">?attr/selectableItemBackground</item>
+        <item name="android:background">@color/mc_primary_color</item>
     </style>
 
     <style name="FacebookButtonBackground" parent="Widget.AppCompat.Button">

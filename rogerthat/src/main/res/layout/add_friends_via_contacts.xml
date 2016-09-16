@@ -21,22 +21,16 @@
             android:gravity="center"
             android:textSize="16sp" />
 
-        <FrameLayout
+        <Button
+            android:id="@+id/add_via_contacts_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal">
-
-            <Button
-                android:id="@+id/add_via_contacts_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:paddingLeft="20dp"
-                android:paddingRight="20dp"
-                android:text="@string/scan_my_addressbook"
-                style="@style/ButtonBackground"
-                android:textSize="16sp" />
-        </FrameLayout>
+            android:layout_gravity="center_horizontal"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:text="@string/scan_my_addressbook"
+            android:textSize="16sp"
+            android:theme="@style/ButtonBackground" />
 
         <TextView
             android:id="@+id/add_via_contacts_dont_worry"

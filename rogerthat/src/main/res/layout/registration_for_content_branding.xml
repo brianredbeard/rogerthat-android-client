@@ -85,7 +85,7 @@
                 android:layout_weight="30"
                 android:minWidth="100dp"
                 android:text="@string/scan_qr_code"
-                style="@style/ButtonBackground"
+                android:theme="@style/ButtonBackground"
                 android:textSize="18sp"/>
 
             <View

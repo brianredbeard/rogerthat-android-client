@@ -6,6 +6,7 @@
     android:layout_height="match_parent">
 
     <RelativeLayout
+        android:id="@+id/messages_container"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:background="@color/mc_background_color"
@@ -39,7 +40,6 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_above="@id/delete_messages"
-            android:cacheColorHint="#00000000"
             android:divider="@drawable/divider_white"
             android:dividerHeight="1px"
             android:fastScrollEnabled="true" >
@@ -56,7 +56,7 @@
         app:fabSize="normal"
         app:backgroundTint="@color/mc_primary_color"
         android:clickable="true"
-        app:layout_anchor="@id/message_list"
+        app:layout_anchor="@id/messages_container"
         app:layout_anchorGravity="bottom|right|end"/>
 
 </android.support.design.widget.CoordinatorLayout>
