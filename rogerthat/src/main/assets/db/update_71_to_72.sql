@@ -16,7 +16,7 @@ CREATE TABLE news (
 
 CREATE TABLE news_buttons (
     news_id INTEGER NOT NULL,
-    id TEXT NOT NULL,
+    id TEXT,
     caption TEXT NOT NULL,
     "action" TEXT,
     "index" INTEGER,

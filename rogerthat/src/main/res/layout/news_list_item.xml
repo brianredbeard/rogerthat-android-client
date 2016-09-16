@@ -73,7 +73,7 @@
             android:layout_height="1dp"
             android:background="@color/mc_divider_gray" />
 
-        <com.mobicage.rogerthat.widget.Resizable16by9ImageView
+        <com.mobicage.rogerthat.widget.Resizable16by6ImageView
             android:id="@+id/image"
             android:layout_marginTop="10dp"
             android:layout_width="fill_parent"

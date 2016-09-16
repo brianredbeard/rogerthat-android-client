@@ -120,25 +120,22 @@ public class NewsStore implements Closeable {
                 mInsertNewsItem.bindString(3, item.sender.email);
                 mInsertNewsItem.bindString(4, item.sender.name);
                 mInsertNewsItem.bindLong(5, item.sender.avatar_id);
-                mInsertNewsItem.bindString(6, item.title);
-                mInsertNewsItem.bindString(7, item.message);
-                mInsertNewsItem.bindString(8, item.image_url);
-                mInsertNewsItem.bindString(9, item.label);
+                bindString(mInsertNewsItem, 6, item.title);
+                bindString(mInsertNewsItem, 7, item.message);
+                bindString(mInsertNewsItem, 8, item.image_url);
+                bindString(mInsertNewsItem, 9, item.label);
                 mInsertNewsItem.bindLong(10, item.reach);
-                mInsertNewsItem.bindString(11, item.qr_code_content);
-                mInsertNewsItem.bindString(12, item.qr_code_caption);
+                bindString(mInsertNewsItem, 11, item.qr_code_content);
+                bindString(mInsertNewsItem, 12, item.qr_code_caption);
                 mInsertNewsItem.bindLong(13, item.version);
                 mInsertNewsItem.execute();
 
                 for (int i = 0; i < item.buttons.length; i++) {
                     NewsActionButtonTO button = item.buttons[i];
                     mInsertNewsButton.bindLong(1, item.id);
-                    mInsertNewsButton.bindString(2, button.id);
+                    bindString(mInsertNewsButton, 2, button.id);
                     mInsertNewsButton.bindString(3, button.caption);
-                    if (button.action == null)
-                        mInsertNewsButton.bindNull(4);
-                    else
-                        mInsertNewsButton.bindString(4, button.action);
+                    bindString(mInsertNewsButton, 4, button.action);
                     mInsertNewsButton.bindLong(5, i);
                     mInsertNewsButton.execute();
                 }
