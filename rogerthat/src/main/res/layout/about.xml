@@ -63,7 +63,7 @@
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
                 style="@style/ButtonBackground"
-                android:text="_www.rogerthat.net_"
+                tools:text="www.rogerthat.net"
                 android:textSize="16sp" />
         </FrameLayout>
 
@@ -94,7 +94,7 @@
                 android:layout_height="wrap_content"
                 android:layout_toRightOf="@+id/about_email_icon"
                 android:layout_toEndOf="@+id/about_email_icon"
-                android:text="_info@mobicage.com_"
+                tools:text="_info@mobicage.com_"
                 android:textColor="@color/mc_about_blue"
                 android:textSize="13sp" />
         </RelativeLayout>
@@ -124,7 +124,7 @@
                 android:layout_height="wrap_content"
                 android:layout_toRightOf="@+id/about_twitter_icon"
                 android:layout_toEndOf="@+id/about_twitter_icon"
-                android:text="_@rogerthat_"
+                tools:text="_@rogerthat_"
                 android:textColor="@color/mc_about_blue"
                 android:textSize="13sp" />
         </RelativeLayout>
@@ -155,7 +155,7 @@
                 android:layout_height="wrap_content"
                 android:layout_toRightOf="@+id/about_facebook_icon"
                 android:layout_toEndOf="@+id/about_facebook_icon"
-                android:text="_/rogerthatplatform_"
+                tools:text="_/rogerthatplatform_"
                 android:textColor="@color/mc_about_blue"
                 android:textSize="13sp" />
         </RelativeLayout>

@@ -49,7 +49,7 @@ public class AboutActivity extends AbstractAboutActivity {
             aboutInfoRogerthat.setText(getString(R.string.about_more_info, getString(R.string.app_name)));
             headerSlogan.setVisibility(CloudConstants.isCityApp() ? View.GONE: View.VISIBLE);
             headerSlogan.setText(R.string.slogan);
-            aboutProvidedText.setText(getString(R.string.about_provided_by, getString(R.string.app_name)));
+            aboutProvidedText.setText(getString(R.string.about_provided_by));
         }
     }
 

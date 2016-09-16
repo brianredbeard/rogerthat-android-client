@@ -1,93 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
- <LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:padding="5dp"
-    android:orientation="horizontal">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="72dp"
+    android:background="?attr/selectableItemBackground"
+    android:minHeight="72dp"
+    android:orientation="horizontal"
+    android:paddingEnd="?attr/listPreferredItemPaddingRight"
+    android:paddingLeft="?attr/listPreferredItemPaddingLeft"
+    android:paddingRight="?attr/listPreferredItemPaddingRight"
+    android:paddingStart="?attr/listPreferredItemPaddingLeft">
 
     <CheckBox
         android:id="@+id/message_checkbox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_marginRight="5dp"
-        android:checked="false"
         android:layout_gravity="center_vertical"
-        android:visibility="visible" />
+        android:checked="false"
+        android:visibility="visible"
+        tools:visibility="gone" />
+
 
     <ImageView
         android:id="@+id/avatar"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_alignParentTop="true"
-        android:layout_marginRight="10dp"
-        android:layout_toRightOf="@id/message_checkbox"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center"
         android:background="@drawable/avatar_background_black"
-        android:padding="1dp" >
-    </ImageView>
+        android:layout_marginRight="16dp"
+        tools:src="@drawable/unknown_avatar" />
 
     <LinearLayout
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingBottom="16dp"
+        android:paddingTop="16dp">
 
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="20dp"
-            android:orientation="horizontal" >
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/recipients"
-                android:layout_width="0dp"
-                android:layout_weight="1"
+                style="@style/TextAppearance.AppCompat.Body2"
+                android:layout_width="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_toLeftOf="@+id/timestamp"
+                android:layout_toStartOf="@+id/timestamp"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"
                 android:ellipsize="end"
-                android:singleLine="true" >
-            </TextView>
+                android:singleLine="true"
+                android:textSize="12sp"
+                tools:text="Firstname Lastname or something else that is can be long" />
 
             <TextView
                 android:id="@+id/timestamp"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
+                android:layout_height="16dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_gravity="end"
+                android:layout_marginLeft="16dp"
+                android:layout_marginStart="16dp"
+                android:gravity="end"
                 android:textColor="@android:color/secondary_text_light"
-                android:textSize="12sp" >
-            </TextView>
-        </LinearLayout>
+                android:textSize="12sp"
+                tools:text="Sep 7" />
+        </RelativeLayout>
 
         <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="30dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/message"
+                style="@style/TextAppearance.AppCompat.Body1"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="3dp"
-                android:layout_marginTop="5dp"
+                android:layout_marginTop="4dp"
                 android:ellipsize="end"
                 android:singleLine="true"
-                android:textColor="@android:color/primary_text_light"
-                android:textSize="18sp" >
-            </TextView>
+                android:textSize="14sp"
+                tools:text="Message content goes here. Long text should not overlap"
+                tools:visibility="visible" />
 
             <TextView
                 android:id="@+id/message_count"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="3dp"
-                android:layout_marginTop="5dp"
+                android:layout_height="18dp"
                 android:background="@drawable/reply_count"
-                android:paddingLeft="4dp"
-                android:paddingRight="4dp"
-                android:singleLine="true"
-                android:textColor="@android:color/white"
-                android:textSize="14sp" >
-            </TextView>
+                android:layout_gravity="bottom"
+                android:layout_marginLeft="16dp"
+                android:layout_marginStart="16dp"
+                android:gravity="center"
+                android:paddingLeft="6dp"
+                android:paddingRight="6dp"
+                android:textColor="@color/mc_white"
+                android:textSize="12sp"
+                android:visibility="visible"
+                tools:text="4" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>
+
