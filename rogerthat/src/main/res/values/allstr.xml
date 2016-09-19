@@ -505,4 +505,6 @@
     <string name="group_chat">Group chat</string>
     <string name="notification_settings">Notification settings</string>
     <string name="news">News</string>
+    <string name="news_members">%1$s Rogered this message.</string>
+    <string name="news_members_and_x_others">%1$s and %2$s others Rogered this message.</string>
 </resources>

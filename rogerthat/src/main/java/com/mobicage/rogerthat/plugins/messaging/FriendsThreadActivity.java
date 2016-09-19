@@ -63,14 +63,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.mobicage.rogerth.at.R;
-import com.mobicage.rogerthat.EnterPinActivity;
 import com.mobicage.rogerthat.FriendDetailOrInviteActivity;
 import com.mobicage.rogerthat.IdentityStore;
-import com.mobicage.rogerthat.SendMessageMessageActivity;
 import com.mobicage.rogerthat.ServiceBoundCursorListActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
-import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
@@ -318,13 +315,13 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         T.UI();
         switch (item.getItemId()) {
             case R.id.members:
-                Intent intent = new Intent(this, FriendsThreadMembersActivity.class);
+                Intent intent = new Intent(this, MembersActivity.class);
                 String[] members = new String[mParentMessage.members.length];
                 for (int i = 0; i < mParentMessage.members.length; i++) {
                     members[i] = mParentMessage.members[i].member;
                 }
-                intent.putExtra(FriendsThreadMembersActivity.ME, mMyEmail);
-                intent.putExtra(FriendsThreadMembersActivity.MEMBERS, members);
+                intent.putExtra(MembersActivity.ME, mMyEmail);
+                intent.putExtra(MembersActivity.MEMBERS, members);
                 startActivity(intent);
                 return true;
             case R.id.help:

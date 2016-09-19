@@ -193,7 +193,7 @@
                 android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity
-            android:name="com.mobicage.rogerthat.plugins.messaging.FriendsThreadMembersActivity"
+            android:name="com.mobicage.rogerthat.plugins.messaging.MembersActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize|stateHidden"
             android:theme="@style/Theme.AppCompat.Light"

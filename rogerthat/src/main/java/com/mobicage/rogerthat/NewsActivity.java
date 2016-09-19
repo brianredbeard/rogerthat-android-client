@@ -26,9 +26,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,6 +50,7 @@ import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.friends.MenuItemPresser;
 import com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity;
 import com.mobicage.rogerthat.plugins.history.HistoryItem;
+import com.mobicage.rogerthat.plugins.messaging.MembersActivity;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.plugins.news.NewsPlugin;
@@ -169,7 +174,6 @@ public class NewsActivity extends ServiceBoundActivity {
                 } else {
                     swipeContainer.setRefreshing(false);
                 }
-                L.i("shouldUpdateLayout: " + shouldUpdateLayout);
 
                 if (shouldUpdateLayout) {
                     mListAdapter.notifyDataSetChanged();
@@ -251,17 +255,6 @@ public class NewsActivity extends ServiceBoundActivity {
 
         mListView = (ListView) findViewById(R.id.news_list);
         setListAdapater();
-        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(final AdapterView<?> parent, final View view, final int position, final long id) {
-                try {
-                    final BaseNewsItemTO newsItem = (BaseNewsItemTO) view.getTag();
-                    L.i("BaseNewsItemTO click: " + newsItem.id);
-                } catch (Exception e) {
-                    L.bug(e);
-                }
-            }
-        });
 
         mDBItems = mNewsStore.getNewsItemVersions();
         mNewsPlugin.getNews();
@@ -306,6 +299,49 @@ public class NewsActivity extends ServiceBoundActivity {
 
             final BaseNewsItemTO newsItem = getNewsItem(position);
 
+            LinearLayout membersContainer = (LinearLayout) view.findViewById(R.id.members_container);
+            TextView members = (TextView) view.findViewById(R.id.members);
+
+            // todo ruben remove
+//            newsItem.users_that_rogered = new String[] {"pin2@gsm.gsm", "pin2@gsm.gsm", "pin2@gsm.gsm"};
+
+            if (newsItem.users_that_rogered.length > 0) {
+                List<String> names = new ArrayList<>();
+                for (String email : newsItem.users_that_rogered) {
+                    String name = mFriendsPlugin.getStore().getName(email);
+                    if (name != null) {
+                        names.add(name);
+                    }
+                }
+
+                if (names.size() > 2) {
+                    final SpannableString text = new SpannableString(getString(R.string.news_members_and_x_others, names.get(0), names.size() - 1));
+                    text.setSpan(new StyleSpan(Typeface.BOLD), 0, names.get(0).length(),
+                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    members.setText(text);
+
+                } else {
+                    String namesPart = android.text.TextUtils.join(" & ", names);
+                    final SpannableString text = new SpannableString(getString(R.string.news_members, namesPart));
+                    text.setSpan(new StyleSpan(Typeface.BOLD), 0, namesPart.length(),
+                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    members.setText(text);
+                }
+
+                membersContainer.setVisibility(View.VISIBLE);
+                membersContainer.setOnClickListener(new SafeViewOnClickListener() {
+                    @Override
+                    public void safeOnClick(View v) {
+                        Intent intent = new Intent(NewsActivity.this, MembersActivity.class);
+                        intent.putExtra(MembersActivity.ME, mService.getIdentityStore().getIdentity().getEmail());
+                        intent.putExtra(MembersActivity.MEMBERS, newsItem.users_that_rogered);
+                        startActivity(intent);
+                    }
+                });
+            } else {
+                membersContainer.setVisibility(View.GONE);
+            }
+
             Resizable16by6ImageView image = (Resizable16by6ImageView) view.findViewById(R.id.image);
             if (!TextUtils.isEmptyOrWhitespace(newsItem.image_url)) {
                 if (mCachedDownloader.isStorageAvailable()) {
@@ -326,8 +362,13 @@ public class NewsActivity extends ServiceBoundActivity {
                 }
             }
             ImageView serviceAvatar = (ImageView) view.findViewById(R.id.service_avatar);
-            // todo ruben we should check if friends else download
-            new DownloadImageTask(serviceAvatar, true).execute(CloudConstants.CACHED_AVATAR_URL_PREFIX + newsItem.sender.avatar_id);
+            Bitmap avatar = mFriendsPlugin.getStore().getAvatarBitmap(newsItem.sender.email);
+            if (avatar == null) {
+                new DownloadImageTask(serviceAvatar, true).execute(CloudConstants.CACHED_AVATAR_URL_PREFIX + newsItem.sender.avatar_id);
+            } else {
+                serviceAvatar.setImageBitmap(avatar);
+            }
+
             serviceAvatar.setOnClickListener(new SafeViewOnClickListener() {
                 @Override
                 public void safeOnClick(View v) {
@@ -351,6 +392,9 @@ public class NewsActivity extends ServiceBoundActivity {
                 }
             });
 
+            // todo ruben we need to make sure the save for later pin is not hiding anything
+            // android:layout_marginRight="30dp"
+
             TextView serviceName = (TextView) view.findViewById(R.id.service_name);
             serviceName.setText(newsItem.sender.name);
 
@@ -359,8 +403,19 @@ public class NewsActivity extends ServiceBoundActivity {
 
             TextView title = (TextView) view.findViewById(R.id.title);
             title.setText(newsItem.title);
+            if (newsItem.users_that_rogered.length == 0 && TextUtils.isEmptyOrWhitespace(newsItem.image_url)) {
+                LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) title.getLayoutParams();
+                lp.setMargins(0,0,70,0);
+                title.setLayoutParams(lp);
+            }
+
             TextView text = (TextView) view.findViewById(R.id.text);
-            text.setText(newsItem.message);
+            if (TextUtils.isEmptyOrWhitespace(newsItem.message)) {
+                text.setVisibility(View.GONE);
+            } else {
+                text.setVisibility(View.VISIBLE);
+                text.setText(newsItem.message);
+            }
             TextView reach = (TextView) view.findViewById(R.id.reach);
             reach.setText(newsItem.reach + "");
             TextView label = (TextView) view.findViewById(R.id.label);
@@ -379,22 +434,33 @@ public class NewsActivity extends ServiceBoundActivity {
                     }
                 });
                 actions.addView(btn);
+                if (SystemUtils.isFlagEnabled(newsItem.flags, FLAG_ACTION_FOLLOW) || newsItem.buttons.length > 0) {
+                    View spacer = mLayoutInflater.inflate(R.layout.news_list_item_action_spacer, parent, false);
+                    actions.addView(spacer);
+                }
             }
 
             if (SystemUtils.isFlagEnabled(newsItem.flags, FLAG_ACTION_FOLLOW)) {
                 Button btn = (Button) mLayoutInflater.inflate(R.layout.news_list_item_action, parent, false);
                 btn.setBackgroundColor(getResources().getColor(R.color.mc_divider_gray));
-                btn.setText(getString(R.string.rogerthat)); // todo ruben follow
+                btn.setText(getString(R.string.follow));
                 btn.setOnClickListener(new SafeViewOnClickListener() {
                     @Override
                     public void safeOnClick(View v) {
-                        L.i("btn click follow");
+                        mFriendsPlugin.inviteFriend(newsItem.sender.email, null, null, false);
                     }
                 });
                 actions.addView(btn);
+
+                if (newsItem.buttons.length > 0) {
+                    View spacer = mLayoutInflater.inflate(R.layout.news_list_item_action_spacer, parent, false);
+                    actions.addView(spacer);
+                }
             }
 
-            for (final NewsActionButtonTO button : newsItem.buttons) {
+            for (int i = 0; i < newsItem.buttons.length; i++) {
+                final NewsActionButtonTO button = newsItem.buttons[i];
+
                 Map<String, String> actionInfo = mMessagingPlugin.getButtonActionInfo(button);
                 final String buttonAction = actionInfo.get("androidAction");
                 final String buttonUrl = actionInfo.get("androidUrl");
@@ -404,8 +470,6 @@ public class NewsActivity extends ServiceBoundActivity {
                 btn.setOnClickListener(new SafeViewOnClickListener() {
                     @Override
                     public void safeOnClick(View v) {
-                        L.i("btn click:" + button.id);
-
                         if (Message.MC_CONFIRM_PREFIX.equals(buttonAction)) {
                             // ignore
                         } else if (Message.MC_SMI_PREFIX.equals(buttonAction)) {
@@ -436,6 +500,11 @@ public class NewsActivity extends ServiceBoundActivity {
                 });
 
                 actions.addView(btn);
+
+                if ( newsItem.buttons.length > i + 1) {
+                    View spacer = mLayoutInflater.inflate(R.layout.news_list_item_action_spacer, parent, false);
+                    actions.addView(spacer);
+                }
             }
 
             return view;

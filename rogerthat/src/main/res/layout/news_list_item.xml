@@ -7,7 +7,7 @@
     android:orientation="vertical"
     android:background="@color/mc_background_color">
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -20,251 +20,225 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:minHeight="25dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:orientation="vertical">
 
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:id="@+id/members_container"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="15dp"
-                android:text="Bart Pede"
-                android:textSize="12sp"
-                android:textStyle="bold"/>
+                android:orientation="vertical"
+                android:gravity="center_vertical">
 
-            <TextView
-                android:layout_width="wrap_content"
+                <TextView
+                    android:id="@+id/members"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="35dp"
+                    android:paddingTop="5dp"
+                    android:paddingBottom="5dp"
+                    android:text="Bart Pede and Ruben Mattan Rogered this message"
+                    android:textSize="12sp"/>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/mc_divider_gray" />
+
+            </LinearLayout>
+
+            <com.mobicage.rogerthat.widget.Resizable16by6ImageView
+                android:id="@+id/image"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:text="and"
-                android:textSize="12sp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:text="Ruben Mattan"
-                android:textSize="12sp"
-                android:textStyle="bold"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:text="Rogered this message"
-                android:textSize="12sp"/>
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"></View>
-
-            <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="5dp"
-                android:background="@color/mc_primary_color"
-                app:ico_color="@color/mc_white"
-                app:ico_icon="@string/faw_thumb_tack"
-                app:ico_size="15dp"/>
-
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/mc_divider_gray" />
-
-        <com.mobicage.rogerthat.widget.Resizable16by6ImageView
-            android:id="@+id/image"
-            android:layout_marginTop="10dp"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/description"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
-            android:paddingTop="0dp"
-            android:visibility="gone"
-            tools:visibility="visible"
-            tools:src="@drawable/mobicage"/>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="10dp">
+                android:layout_below="@id/description"
+                android:visibility="gone"
+                tools:visibility="visible"
+                tools:src="@drawable/mobicage"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="15dp">
-
-                <ImageView
-                    android:id="@+id/service_avatar"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_margin="5dp"
-                    android:src="@drawable/unknown_avatar" />
+                android:orientation="vertical"
+                android:padding="10dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginLeft="5dp">
+                    android:orientation="horizontal">
 
-                    <TextView
-                        android:id="@+id/title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/mc_primary_color"
-                        android:text="Scan uw mobiele klantenkaart en maak kans op een diner voor 2 personen!"
-                        android:textSize="16sp"
-                        android:textStyle="bold"/>
+                    <ImageView
+                        android:id="@+id/service_avatar"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_margin="5dp"
+                        android:src="@drawable/unknown_avatar" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                        android:orientation="vertical"
+                        android:layout_marginLeft="5dp">
 
                         <TextView
-                            android:id="@+id/service_name"
+                            android:id="@+id/title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Ma-Tu-Vu"
-                            android:textSize="12sp"
-                            android:textStyle="italic" />
+                            android:textColor="@color/mc_primary_color"
+                            android:text="Scan uw mobiele klantenkaart en maak kans op een diner voor 2 personen!"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
 
-                        <TextView
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="-"
-                            android:layout_marginLeft="5dp"
-                            android:textSize="12sp"
-                            android:textStyle="italic"  />
+                            android:orientation="horizontal">
 
-                        <TextView
-                            android:id="@+id/date"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="12/01/2016"
-                            android:layout_marginLeft="5dp"
-                            android:textSize="12sp"
-                            android:textStyle="italic"  />
+                            <TextView
+                                android:id="@+id/service_name"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Ma-Tu-Vu"
+                                android:textSize="12sp"
+                                android:textStyle="italic" />
 
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="-"
+                                android:layout_marginLeft="5dp"
+                                android:textSize="12sp"
+                                android:textStyle="italic"  />
+
+                            <TextView
+                                android:id="@+id/date"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="12/01/2016"
+                                android:layout_marginLeft="5dp"
+                                android:textSize="12sp"
+                                android:textStyle="italic"  />
+
+                        </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
+
+                <TextView
+                    android:id="@+id/text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginTop="10dp"
+                    android:text="Kom langs en scan uw mobile klantenkaart bij het afrekenen om zo kans te maken op een gratis 3-gangen etentje voor 2 personen."
+                    android:textSize="14sp"/>
+
             </LinearLayout>
-
-            <TextView
-                android:id="@+id/text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:text="Kom langs en scan uw mobile klantenkaart bij het afrekenen om zo kans te maken op een gratis 3-gangen etentje voor 2 personen."
-                android:textSize="14sp" />
-
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="10dp"
-            android:background="@color/mc_divider_gray" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="20dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="15dp"
-                android:text="Reach:"
-                android:textSize="10sp" />
-
-            <TextView
-                android:id="@+id/reach"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="2dp"
-                android:text="549"
-                android:textSize="10sp"
-                android:textStyle="bold"/>
-
-            <TextView
-                android:id="@+id/label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:text="[nieuws]"
-                android:textSize="10sp"/>
 
             <View
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"></View>
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/mc_divider_gray" />
 
             <LinearLayout
-                android:id="@+id/actions"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="20dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-                <Button
+                <TextView
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:background="@color/mc_primary_color"
-                    android:textColor="@color/mc_white"
-                    android:gravity="center"
-                    android:paddingLeft="5dp"
-                    android:paddingRight="5dp"
-                    android:minWidth="0dp"
-                    android:text="Rogerthat"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="15dp"
+                    android:text="Reach:"
+                    android:textSize="10sp" />
+
+                <TextView
+                    android:id="@+id/reach"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="2dp"
+                    android:text="549"
+                    android:textSize="10sp"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:id="@+id/label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:text="[nieuws]"
                     android:textSize="10sp"/>
 
-                <Button
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"></View>
+
+                <LinearLayout
+                    android:id="@+id/actions"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:background="@color/mc_divider_gray"
-                    android:textColor="@color/mc_white"
-                    android:gravity="center"
-                    android:paddingLeft="5dp"
-                    android:paddingRight="5dp"
-                    android:minWidth="0dp"
-                    android:text="Volgen"
-                    android:textSize="10sp"/>
+                    android:orientation="horizontal">
 
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:background="@color/mc_primary_color"
-                    android:textColor="@color/mc_white"
-                    android:gravity="center"
-                    android:paddingLeft="5dp"
-                    android:paddingRight="5dp"
-                    android:minWidth="0dp"
-                    android:text="Reserveren"
-                    android:textSize="10sp"/>
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:background="@color/mc_primary_color"
+                        android:textColor="@color/mc_white"
+                        android:gravity="center"
+                        android:paddingLeft="5dp"
+                        android:paddingRight="5dp"
+                        android:minWidth="0dp"
+                        android:text="Rogerthat"
+                        android:textSize="10sp"/>
 
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:background="@color/mc_divider_gray"
-                    android:textColor="@color/mc_white"
-                    android:gravity="center"
-                    android:paddingLeft="5dp"
-                    android:paddingRight="5dp"
-                    android:minWidth="0dp"
-                    android:text="Volgen"
-                    android:textSize="10sp"/>
+                    <View android:layout_width="2dp"
+                        android:layout_height="match_parent"
+                        android:background="@color/mc_white" />
 
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:background="@color/mc_divider_gray"
+                        android:textColor="@color/mc_white"
+                        android:gravity="center"
+                        android:paddingLeft="5dp"
+                        android:paddingRight="5dp"
+                        android:minWidth="0dp"
+                        android:text="Volgen"
+                        android:textSize="10sp"/>
+
+                    <View android:layout_width="2dp"
+                        android:layout_height="match_parent"
+                        android:background="@color/mc_white" />
+
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:background="@color/mc_primary_color"
+                        android:textColor="@color/mc_white"
+                        android:gravity="center"
+                        android:paddingLeft="5dp"
+                        android:paddingRight="5dp"
+                        android:minWidth="0dp"
+                        android:text="Reserveren"
+                        android:textSize="10sp"/>
+
+                </LinearLayout>
 
             </LinearLayout>
-
         </LinearLayout>
-    </LinearLayout>
+
+        <ImageButton
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:padding="5dp"
+            android:background="@drawable/news_pin_background"
+            android:layout_gravity="top|right"
+            app:ico_color="@color/mc_white"
+            app:ico_icon="@string/faw_thumb_tack"
+            app:ico_size="15dp"/>
+
+    </FrameLayout>
 </LinearLayout>

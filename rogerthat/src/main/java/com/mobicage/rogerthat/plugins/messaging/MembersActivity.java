@@ -32,7 +32,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.mobicage.rogerth.at.R;
-import com.mobicage.rogerthat.FriendDetailOrInviteActivity;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
@@ -43,7 +42,7 @@ import java.util.HashMap;
 
 import java.util.Map;
 
-public class FriendsThreadMembersActivity extends ServiceBoundActivity {
+public class MembersActivity extends ServiceBoundActivity {
 
     public static final String ME = "me";
     public static final String MEMBERS = "members";
@@ -84,15 +83,15 @@ public class FriendsThreadMembersActivity extends ServiceBoundActivity {
             public void onItemClick(AdapterView<?> listView, View view, final int position, long id) {
                 T.UI();
                 if (mMyEmail.equals(mMembers[position])) {
-                    Intent intent = new Intent(FriendsThreadMembersActivity.this, ProfileActivity.class);
+                    Intent intent = new Intent(MembersActivity.this, ProfileActivity.class);
                     startActivity(intent);
                 } else {
                     final int contactType = mFriendsPlugin.getContactType(mMembers[position]);
                     if ((contactType & FriendsPlugin.FRIEND) == FriendsPlugin.FRIEND) {
-                        mFriendsPlugin.launchDetailActivity(FriendsThreadMembersActivity.this, mMembers[position]);
+                        mFriendsPlugin.launchDetailActivity(MembersActivity.this, mMembers[position]);
                     } else {
                         if ((contactType & FriendsPlugin.NON_FRIEND) == FriendsPlugin.NON_FRIEND) {
-                            new AlertDialog.Builder(FriendsThreadMembersActivity.this)
+                            new AlertDialog.Builder(MembersActivity.this)
                                     .setMessage(getString(R.string.invite_as_friend, new Object[] { mMembers[position] }))
                                     .setPositiveButton(R.string.yes, new SafeDialogInterfaceOnClickListener() {
                                         @Override
