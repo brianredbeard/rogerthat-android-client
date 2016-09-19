@@ -74,10 +74,5 @@ public class Test1Register {
                 .perform(waitUntilExists(withId(R.id.registration_enter_pin), 2000));
         onView(withId(R.id.registration_enter_pin))
                 .perform(typeText("0666"));
-        while(!activityTestRule.getActivity().isFinishing()){
-            Thread.sleep(250);
-        }
-        // Allow the activity to finish
-        Thread.sleep(1000);
     }
 }

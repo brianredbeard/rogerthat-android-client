@@ -61,6 +61,7 @@ import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.time.TimeUtils;
+import com.mobicage.rogerthat.util.ui.TestUtils;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rogerthat.widget.Resizable16by6ImageView;
 import com.mobicage.rpc.config.CloudConstants;
@@ -81,16 +82,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-<<<<<<<HEAD
-        =======
-        >>>>>>>origin/app_redesign
-        <<<<<<<HEAD
-        =======
-        >>>>>>>origin/app_redesign
-        <<<<<<<HEAD
-        =======
-        >>>>>>>origin/app_redesign
-
 public class NewsActivity extends ServiceBoundActivity {
 
     protected NewsListAdapter mListAdapter;
@@ -98,7 +89,7 @@ public class NewsActivity extends ServiceBoundActivity {
     private final static int FLAG_ACTION_ROGERTHAT = 1;
     private final static int FLAG_ACTION_FOLLOW = 2;
 
-    private SwipeRefreshLayout swipeContainer;
+    protected SwipeRefreshLayout swipeContainer;
     private NewsPlugin mNewsPlugin;
     private NewsStore mNewsStore;
     private MessagingPlugin mMessagingPlugin;
@@ -254,7 +245,9 @@ public class NewsActivity extends ServiceBoundActivity {
             }
         });
         swipeContainer.setColorSchemeResources(R.color.mc_primary_color, R.color.mc_secondary_color);
-        swipeContainer.setRefreshing(true);
+        if (!TestUtils.isRunningTest()) {
+            swipeContainer.setRefreshing(true);
+        }
 
         mListView = (ListView) findViewById(R.id.news_list);
         setListAdapater();

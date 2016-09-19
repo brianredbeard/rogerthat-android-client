@@ -9,6 +9,7 @@ import com.mobicage.to.news.NewsSenderTO;
 import java.util.ArrayList;
 import java.util.List;
 
+// Also used in  util.ui.TestUtils to see if we are currently running test or not
 public class FakeNewsActivity extends NewsActivity {
 
     private BaseNewsItemTO createNewsItem(int id, int title, int message, int label, String email, int sender, NewsActionButtonTO[] buttons) {
@@ -52,6 +53,7 @@ public class FakeNewsActivity extends NewsActivity {
                 R.string.sample_news_item_message_2, R.string.news, "service@rogerthat.net",
                 R.string.sample_news_item_sender_2, buttons2));
 
+        swipeContainer.setRefreshing(false);
         mListAdapter = new NewsListAdapter(this) {
             @Override
             protected BaseNewsItemTO getNewsItem(int position) {
