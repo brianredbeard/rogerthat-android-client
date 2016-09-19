@@ -268,6 +268,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
 
         final LinearLayout optionButtons = (LinearLayout) findViewById(R.id.imageButtons);
         if (mFriendRecipients == null) {
+            mMessage.clearFocus();
             mMessage.setOnFocusChangeListener(new OnFocusChangeListener() {
                 @Override
                 public void onFocusChange(View v, boolean hasFocus) {

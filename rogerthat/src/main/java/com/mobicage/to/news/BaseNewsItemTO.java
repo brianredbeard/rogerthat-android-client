@@ -27,6 +27,7 @@ public class BaseNewsItemTO implements com.mobicage.rpc.IJSONable {
 
     public com.mobicage.to.news.NewsActionButtonTO[] buttons;
     public com.mobicage.to.news.NewsSenderTO sender;
+    public long flags;
     public long id;
     public String image_url;
     public String label;
@@ -65,6 +66,12 @@ public class BaseNewsItemTO implements com.mobicage.rpc.IJSONable {
             this.sender = val == null ? null : new com.mobicage.to.news.NewsSenderTO((Map<String, Object>) val);
         } else {
             throw new IncompleteMessageException("com.mobicage.to.news.BaseNewsItemTO object is missing field 'sender'");
+        }
+        if (json.containsKey("flags")) {
+            Object val = json.get("flags");
+            this.flags = ((Long) val).longValue();
+        } else {
+            throw new IncompleteMessageException("com.mobicage.to.news.BaseNewsItemTO object is missing field 'flags'");
         }
         if (json.containsKey("id")) {
             Object val = json.get("id");
@@ -155,6 +162,7 @@ public class BaseNewsItemTO implements com.mobicage.rpc.IJSONable {
             obj.put("buttons", arr);
         }
         obj.put("sender", this.sender == null ? null : this.sender.toJSONMap());
+        obj.put("flags", this.flags);
         obj.put("id", this.id);
         obj.put("image_url", this.image_url);
         obj.put("label", this.label);

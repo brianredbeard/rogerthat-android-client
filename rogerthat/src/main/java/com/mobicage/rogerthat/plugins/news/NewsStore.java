@@ -126,6 +126,7 @@ public class NewsStore implements Closeable {
                 bindString(mInsertNewsItem, 11, item.qr_code_content);
                 bindString(mInsertNewsItem, 12, item.qr_code_caption);
                 mInsertNewsItem.bindLong(13, item.version);
+                mInsertNewsItem.bindLong(14, item.flags);
                 mInsertNewsItem.execute();
 
                 for (int i = 0; i < item.buttons.length; i++) {
@@ -171,6 +172,7 @@ public class NewsStore implements Closeable {
             newsItem.qr_code_content = c.getString(9);
             newsItem.qr_code_caption = c.getString(10);
             newsItem.version = c.getLong(11);
+            newsItem.flags = c.getLong(12);
 
             addButtons(newsItem);
             addRogeredUsers(newsItem);

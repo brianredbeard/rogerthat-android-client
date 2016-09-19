@@ -120,6 +120,7 @@ import com.mobicage.to.messaging.forms.SubmitPhotoUploadFormResponseTO;
 import com.mobicage.to.messaging.forms.UnicodeListWidgetResultTO;
 import com.mobicage.to.messaging.forms.UnicodeWidgetResultTO;
 import com.mobicage.to.messaging.jsmfr.FlowStartedRequestTO;
+import com.mobicage.to.news.NewsActionButtonTO;
 import com.mobicage.to.system.SettingsTO;
 
 public class MessagingPlugin implements MobicagePlugin {
@@ -540,35 +541,43 @@ public class MessagingPlugin implements MobicagePlugin {
     }
 
     public Map<String, String> getButtonActionInfo(ButtonTO button) {
+        return getButtonActionInfo(button.action);
+    }
+
+    public Map<String, String> getButtonActionInfo(NewsActionButtonTO button) {
+        return getButtonActionInfo(button.action);
+    }
+
+    private Map<String, String> getButtonActionInfo(String action) {
         String buttonAction = null;
         String buttonUrl = null;
 
-        if (button.action != null) {
-            if (button.action.startsWith(Message.MC_TEL_PREFIX)) {
+        if (action != null) {
+            if (action.startsWith(Message.MC_TEL_PREFIX)) {
                 buttonAction = Intent.ACTION_DIAL;
-                buttonUrl = ANDROID_TEL_PREFIX + button.action.substring(Message.MC_TEL_PREFIX.length());
+                buttonUrl = ANDROID_TEL_PREFIX + action.substring(Message.MC_TEL_PREFIX.length());
 
-            } else if (button.action.startsWith(Message.MC_HTTP_PREFIX)) {
+            } else if (action.startsWith(Message.MC_HTTP_PREFIX)) {
                 buttonAction = Intent.ACTION_VIEW;
-                buttonUrl = ANDROID_HTTP_PREFIX + button.action.substring(Message.MC_HTTP_PREFIX.length());
+                buttonUrl = ANDROID_HTTP_PREFIX + action.substring(Message.MC_HTTP_PREFIX.length());
 
-            } else if (button.action.startsWith(Message.MC_GEO_PREFIX)) {
+            } else if (action.startsWith(Message.MC_GEO_PREFIX)) {
                 buttonAction = Intent.ACTION_VIEW;
-                buttonUrl = ANDROID_GEO_PREFIX + button.action.substring(Message.MC_GEO_PREFIX.length());
+                buttonUrl = ANDROID_GEO_PREFIX + action.substring(Message.MC_GEO_PREFIX.length());
 
-            } else if (button.action.startsWith(Message.MC_HTTPS_PREFIX)) {
+            } else if (action.startsWith(Message.MC_HTTPS_PREFIX)) {
                 buttonAction = Intent.ACTION_VIEW;
-                buttonUrl = ANDROID_HTTPS_PREFIX + button.action.substring(Message.MC_HTTPS_PREFIX.length());
+                buttonUrl = ANDROID_HTTPS_PREFIX + action.substring(Message.MC_HTTPS_PREFIX.length());
 
-            } else if (button.action.startsWith(Message.MC_MAILTO_PREFIX)) {
+            } else if (action.startsWith(Message.MC_MAILTO_PREFIX)) {
                 buttonAction = Intent.ACTION_VIEW;
-                buttonUrl = ANDROID_MAILTO_PREFIX + button.action.substring(Message.MC_MAILTO_PREFIX.length());
+                buttonUrl = ANDROID_MAILTO_PREFIX + action.substring(Message.MC_MAILTO_PREFIX.length());
 
             } else {
                 for (final String prefix : new String[]{Message.MC_CONFIRM_PREFIX, Message.MC_SMI_PREFIX}) {
-                    if (button.action.startsWith(prefix)) {
+                    if (action.startsWith(prefix)) {
                         buttonAction = prefix;
-                        buttonUrl = button.action.substring(prefix.length());
+                        buttonUrl = action.substring(prefix.length());
                         break;
                     }
                 }
