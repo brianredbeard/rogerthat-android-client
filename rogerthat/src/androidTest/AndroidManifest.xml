@@ -1,0 +1,8 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.mobicage.rogerthat.test"
+    android:configChanges="orientation|screenSize">
+
+    <application>
+        <activity android:name="screenshots.FakeNewsActivity" />
+    </application>
+</manifest>

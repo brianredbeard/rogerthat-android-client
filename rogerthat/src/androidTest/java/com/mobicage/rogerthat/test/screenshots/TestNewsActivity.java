@@ -23,7 +23,6 @@ import android.support.test.runner.AndroidJUnit4;
 import android.test.UiThreadTest;
 
 import com.mobicage.rogerth.at.R;
-import com.mobicage.rogerthat.HomeActivity;
 import com.mobicage.rpc.config.AppConstants;
 
 import org.junit.ClassRule;
@@ -34,22 +33,24 @@ import org.junit.runner.RunWith;
 import tools.fastlane.screengrab.Screengrab;
 import tools.fastlane.screengrab.locale.LocaleTestRule;
 
-@SuppressWarnings({"ConstantConditions", "PointlessBooleanExpression"})
+
+@SuppressWarnings({"ConstantConditions"})
 @RunWith(AndroidJUnit4.class)
-public class TestTakeHomescreenScreenshot {
+public class TestNewsActivity {
 
     @ClassRule
     public static final LocaleTestRule localeTestRule = new LocaleTestRule();
 
     @Rule
-    public ActivityTestRule<HomeActivity> activityTestRule = new ActivityTestRule<>(HomeActivity.class);
+    public ActivityTestRule<FakeNewsActivity> activityTestRule = new ActivityTestRule<>(FakeNewsActivity.class);
 
     @Test
     @UiThreadTest
-    public void takeHomeScreenScreenshot(){
+    public void takeHomeScreenScreenshot() {
 
-        if (AppConstants.HOME_ACTIVITY_LAYOUT != R.layout.news && AppConstants.HOME_ACTIVITY_LAYOUT != R.layout.messaging) {
+        if (AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.news) {
             Screengrab.screenshot("homescreen");
         }
     }
 }
+

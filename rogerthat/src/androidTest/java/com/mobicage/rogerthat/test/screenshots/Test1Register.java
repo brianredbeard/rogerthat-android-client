@@ -18,6 +18,7 @@
 
 package com.mobicage.rogerthat.test.screenshots;
 
+import android.support.test.espresso.Espresso;
 import android.support.test.espresso.PerformException;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
@@ -38,7 +39,6 @@ import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.action.ViewActions.typeText;
 import static android.support.test.espresso.matcher.ViewMatchers.isRoot;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static com.mobicage.rogerthat.test.ui_test_helpers.UiTestHelpers.waitUntilExists;
 
 @RunWith(AndroidJUnit4.class)
@@ -64,23 +64,14 @@ public class Test1Register {
         } catch (PerformException ex) {
             L.i("Not clicking 'agree to TOS because it was already clicked'");
         }
-        try {
-            onView(withId(R.id.login_via_email))
-                    .perform(click());
-        }catch(PerformException exc){
-            // facebook disabled
-        };
         // Fill in email field
         onView(withId(R.id.registration_enter_email))
                 .perform(typeText("apple.review@rogerth.at"));
+        Espresso.closeSoftKeyboard();
         onView(withId(R.id.login_via_email))
                 .perform(click());
-/*
-        TODO: this suddenly stopped working
         onView(isRoot())
                 .perform(waitUntilExists(withId(R.id.registration_enter_pin), 2000));
-*/
-        Thread.sleep(5000);
         onView(withId(R.id.registration_enter_pin))
                 .perform(typeText("0666"));
         while(!activityTestRule.getActivity().isFinishing()){

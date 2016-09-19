@@ -19,17 +19,22 @@
 package com.mobicage.rogerthat.test.screenshots;
 
 import android.support.test.rule.ActivityTestRule;
+import android.support.test.runner.AndroidJUnit4;
 import android.test.UiThreadTest;
 
+import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MoreActivity;
+import com.mobicage.rpc.config.AppConstants;
 
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import tools.fastlane.screengrab.Screengrab;
 import tools.fastlane.screengrab.locale.LocaleTestRule;
 
+@RunWith(AndroidJUnit4.class)
 public class TestMoreActivity {
     @ClassRule
     public static final LocaleTestRule localeTestRule = new LocaleTestRule();
@@ -40,6 +45,9 @@ public class TestMoreActivity {
     @Test
     @UiThreadTest
     public void takeMoreActivityScreenshot(){
-        Screengrab.screenshot("more");
+
+        if (AppConstants.HOME_ACTIVITY_LAYOUT != R.layout.news && AppConstants.HOME_ACTIVITY_LAYOUT != R.layout.messaging) {
+            Screengrab.screenshot("more");
+        }
     }
 }

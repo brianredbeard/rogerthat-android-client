@@ -180,6 +180,8 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
         </activity> <!-- todo ruben -->
+        <activity android:name="com.mobicage.rogerthat.test.screenshots.FakeNewsActivity" />
+
         <activity
             android:name="com.mobicage.rogerthat.plugins.messaging.FriendsThreadActivity"
             android:screenOrientation="portrait"

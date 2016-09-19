@@ -21,30 +21,21 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.Button;
-import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
-import com.mobicage.rogerthat.plugins.history.HistoryItem;
-import com.mobicage.rogerthat.plugins.history.HistoryListAdapter;
-import com.mobicage.rogerthat.plugins.history.HistoryPlugin;
-import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.plugins.news.NewsPlugin;
 import com.mobicage.rogerthat.plugins.news.NewsStore;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
-import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.to.news.BaseNewsItemTO;
 
@@ -57,8 +48,8 @@ import java.util.Set;
 
 public class NewsActivity extends ServiceBoundActivity {
 
-    private NewsListAdapter mListAdapter;
-    private ListView mListView;
+    protected NewsListAdapter mListAdapter;
+    protected ListView mListView;
     private NewsPlugin mNewsPlugin;
     private NewsStore mNewsStore;
     private FriendsPlugin mFriendsPlugin;
@@ -127,6 +118,11 @@ public class NewsActivity extends ServiceBoundActivity {
         }
     };
 
+    protected void setListAdapater() {
+        mListAdapter = new NewsListAdapter(this, mOrder, mItems);
+        mListView.setAdapter(mListAdapter);
+    }
+
     @Override
     protected void onServiceBound() {
         mNewsPlugin = mService.getPlugin(NewsPlugin.class);
@@ -135,8 +131,7 @@ public class NewsActivity extends ServiceBoundActivity {
 
 
         mListView = (ListView) findViewById(R.id.news_list);
-        mListAdapter = new NewsListAdapter(this, mOrder, mItems);
-        mListView.setAdapter(mListAdapter);
+        setListAdapater();
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(final AdapterView<?> parent, final View view, final int position, final long id) {
@@ -162,9 +157,9 @@ public class NewsActivity extends ServiceBoundActivity {
     protected void onServiceUnbound() {
     }
 
-    public class NewsListAdapter extends BaseAdapter {
+    public static class NewsListAdapter extends BaseAdapter {
 
-        private final LayoutInflater mLayoutInflater;
+        protected LayoutInflater mLayoutInflater;
         private final Context mContext;
         private List<Long> mOrder;
         private Map<Long, BaseNewsItemTO> mItems;
@@ -175,6 +170,11 @@ public class NewsActivity extends ServiceBoundActivity {
             mOrder = order;
             mItems = items;
             mLayoutInflater = LayoutInflater.from(mContext);
+        }
+
+        protected BaseNewsItemTO getNewsItem(int position) {
+            Long newsId = mOrder.get(position);
+            return mItems.get(newsId);
         }
 
         @Override
@@ -189,8 +189,7 @@ public class NewsActivity extends ServiceBoundActivity {
                 view = convertView;
             }
 
-            Long newsId = mOrder.get(position);
-            BaseNewsItemTO newsItem = mItems.get(newsId);
+            BaseNewsItemTO newsItem = getNewsItem(position);
 
             TextView titleTextView = (TextView) view.findViewById(R.id.title);
             titleTextView.setText(newsItem.title);

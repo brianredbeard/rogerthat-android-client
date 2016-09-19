@@ -150,6 +150,7 @@
     <string name="find_contacts">Find contacts</string>
     <string name="find_from_facebook">Find friends from Facebook</string>
     <string name="finishButton">Finish</string>
+    <string name="follow">Follow</string>
     <string name="friend_bulk_update_received">Updated friends list from server.</string>
     <string name="friend_invitation_register_first">Complete the registration to communicate with %1$s</string>
     <string name="friend_invite_failed">Could not send invitation request to server.</string>
@@ -378,12 +379,19 @@
     <string name="reply">Reply</string>
     <string name="report_card">Report Card</string>
     <string name="request_location_of">Request location of %1$s</string>
+    <string name="reserve">Reserve</string>
     <string name="retrieving_information">Retrieving information from server…</string>
     <string name="retry">Retry</string>
     <string name="rogerthat">Roger that</string>
     <string name="rogerthat_system">Rogerthat System</string>
     <string name="rogerthat_welcome">Welcome to %1$s. Your App to connect with your Service Providers and share them with friends.\n\nBefore you can start you need to register. Tap the \"Agree\" button to proceed.</string>
     <string name="rogerthat_welcome_enterprise">Welcome to the %1$s app.\n\nBefore you can get started you need to register your user account.</string>
+    <string name="sample_news_item_title_1">This is a sample news item title</string>
+    <string name="sample_news_item_title_2">Scan your mobile loyalty card and win a dinner for 2 persons!</string>
+    <string name="sample_news_item_message_1">News items are a nice way to reach your clients.</string>
+    <string name="sample_news_item_message_2">Come and scan to your mobile loyalty card at checkout in order to win a free 3-course dinner for 2 persons.</string>
+    <string name="sample_news_item_sender_1">Sample service</string>
+    <string name="sample_news_item_sender_2">Example restaurant</string>
     <string name="save">Save</string>
     <string name="save_canned_message_dialog_title">Provide a name for the saved message</string>
     <string name="save_canned_message_no_name">no name</string>
