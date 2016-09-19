@@ -177,9 +177,8 @@
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.NewsActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar">
-        </activity> <!-- todo ruben -->
+            android:screenOrientation="portrait">
+        </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.messaging.FriendsThreadActivity"
             android:screenOrientation="portrait"
@@ -202,7 +201,9 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
-        <activity android:name="com.mobicage.rogerthat.plugins.messaging.MessagingActivity" >
+        <activity
+            android:name="com.mobicage.rogerthat.plugins.messaging.MessagingActivity"
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.messaging.MessagingFilterActivity"

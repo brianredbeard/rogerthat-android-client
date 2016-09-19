@@ -87,7 +87,6 @@ public class NewsStore implements Closeable {
     private final SQLiteStatement mInsertNewsItem;
     private final SQLiteStatement mInsertNewsButton;
     private final SQLiteStatement mInsertNewsRogeredUser;
-    private final SQLiteStatement mListItemVersions;
 
     private final SQLiteDatabase mDb;
     private final MainService mMainService;
@@ -102,7 +101,6 @@ public class NewsStore implements Closeable {
         mInsertNewsItem = mDb.compileStatement(mMainService.getString(R.string.sql_news_insert_item));
         mInsertNewsButton = mDb.compileStatement(mMainService.getString(R.string.sql_news_insert_button));
         mInsertNewsRogeredUser = mDb.compileStatement(mMainService.getString(R.string.sql_news_insert_rogered_user));
-        mListItemVersions = mDb.compileStatement(mMainService.getString(R.string.sql_news_list_item_versions));
     }
 
     @Override
@@ -150,7 +148,7 @@ public class NewsStore implements Closeable {
     }
 
     public BaseNewsItemTO getNewsItem(long newsId) {
-        T.BIZZ();
+        T.dontCare();
         final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_news_get_item),
                 new String[] { "" + newsId });
 
@@ -180,7 +178,6 @@ public class NewsStore implements Closeable {
         } finally {
             c.close();
         }
-
     }
 
     private void addButtons(BaseNewsItemTO newsItem) {
@@ -223,6 +220,26 @@ public class NewsStore implements Closeable {
                 rogeredUsers.add(c.getString(0));
 
             newsItem.users_that_rogered = rogeredUsers.toArray(new String[rogeredUsers.size()]);
+        } finally {
+            c.close();
+        }
+    }
+
+    public Map<Long, Long> getNewsItemVersions() {
+        T.dontCare();
+        Map<Long, Long> dbVersions = new HashMap<>();
+        final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_news_list_item_versions),
+                new String[]{});
+
+        try {
+            if (!c.moveToFirst()) {
+                return dbVersions;
+            }
+            dbVersions.put(c.getLong(0), c.getLong(1));
+            while (c.moveToNext())
+                dbVersions.put(c.getLong(0), c.getLong(1));
+
+            return dbVersions;
         } finally {
             c.close();
         }
