@@ -58,6 +58,7 @@ import com.mobicage.rogerthat.plugins.messaging.AdvancedOrderWidgetResult;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.util.CachedDownloader;
+import com.mobicage.rogerthat.util.DownloadImageTask;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeAsyncTask;
@@ -928,35 +929,6 @@ public class AdvancedOrderWidget extends Widget {
         });
 
         mDetailDialog.show();
-    }
-
-    private class DownloadImageTask extends SafeAsyncTask<String, Void, Bitmap> {
-        ImageView bmImage;
-
-        public DownloadImageTask(ImageView bmImage) {
-            this.bmImage = bmImage;
-        }
-
-        @Override
-        protected Bitmap safeDoInBackground(String... urls) {
-            String urldisplay = urls[0];
-            Bitmap mIcon11 = null;
-            try {
-                InputStream in = new java.net.URL(urldisplay).openStream();
-                mIcon11 = BitmapFactory.decodeStream(in);
-            } catch (Exception e) {
-                L.d("AdvancedOrder DownloadImageTask error", e);
-            }
-            return mIcon11;
-        }
-
-        @Override
-        protected void onPostExecute(Bitmap result) {
-            if (result != null) {
-                bmImage.setImageBitmap(result);
-                bmImage.setVisibility(View.VISIBLE);
-            }
-        }
     }
 
     private void showAdvancedOrderBasket() {
