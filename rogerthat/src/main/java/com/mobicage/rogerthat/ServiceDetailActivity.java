@@ -38,11 +38,13 @@ import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.IncompleteMessageException;
+import com.mobicage.to.friends.GetUserInfoResponseTO;
 import com.mobicage.to.service.FindServiceItemTO;
 
 public class ServiceDetailActivity extends FriendDetailActivity {
 
     public static final String FIND_SERVICE_RESULT = "FIND_SERVICE_RESULT";
+    public static final String GET_USER_INFO_RESULT = "GET_USER_INFO_RESULT";
     public static final String EXISTENCE = "EXISTENCE";
 
     private int mExistence = Friend.ACTIVE;
@@ -133,6 +135,29 @@ public class ServiceDetailActivity extends FriendDetailActivity {
                 service.name = item.name;
                 service.type = FriendsPlugin.FRIEND_TYPE_SERVICE;
                 service.qualifiedIdentifier = item.qualified_identifier;
+                return service;
+
+            } catch (IncompleteMessageException e) {
+                L.bug(e);
+                return null;
+            }
+        } else if (intent.hasExtra(GET_USER_INFO_RESULT)) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> map = (Map<String, Object>) JSONValue.parse(intent.getStringExtra(GET_USER_INFO_RESULT));
+            try {
+                GetUserInfoResponseTO item = new GetUserInfoResponseTO(map);
+
+                Friend service = new Friend();
+                service.avatar = Base64.decode(item.avatar);
+                service.avatarId = 0;
+                service.description = item.description;
+                service.descriptionBranding = TextUtils.isEmptyOrWhitespace(item.descriptionBranding) ? null
+                        : item.descriptionBranding;
+                service.email = item.email;
+                service.existenceStatus = mExistence;
+                service.name = item.name;
+                service.type = FriendsPlugin.FRIEND_TYPE_SERVICE;
+                service.qualifiedIdentifier = item.qualifiedIdentifier;
                 return service;
 
             } catch (IncompleteMessageException e) {

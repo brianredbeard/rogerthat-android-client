@@ -6,28 +6,27 @@
 	android:layout_height="match_parent"
 	android:background="@color/mc_background_color">
 
-<ListView
-	android:id="@+id/button_list"
-	android:layout_width="fill_parent"
-	android:layout_height="fill_parent"
-	android:cacheColorHint="#00000000"
-	android:divider="@drawable/divider_gray"
-	android:dividerHeight="1px" >
-</ListView>
+	<ListView
+		android:id="@+id/button_list"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:divider="@drawable/divider_gray"
+		android:dividerHeight="1px" >
+	</ListView>
 
-<android.support.design.widget.FloatingActionButton
-	android:id="@+id/add"
-	android:layout_width="wrap_content"
-	android:layout_height="wrap_content"
-	android:layout_margin="16dp"
-	app:elevation="4dp"
-	app:fabSize="normal"
-	app:backgroundTint="@color/mc_primary_color"
-	android:clickable="true"
-	app:layout_anchor="@id/button_list"
-	app:ico_color="@color/mc_white"
-	app:ico_icon="@string/faw_plus"
-	app:ico_size="24dp"
-	app:layout_anchorGravity="bottom|right|end" />
+	<android.support.design.widget.FloatingActionButton
+		android:id="@+id/add"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_margin="16dp"
+		app:elevation="4dp"
+		app:fabSize="normal"
+		app:backgroundTint="@color/mc_primary_color"
+		android:clickable="true"
+		app:layout_anchor="@id/button_list"
+		app:ico_color="@color/mc_white"
+		app:ico_icon="@string/faw_plus"
+		app:ico_size="24dp"
+		app:layout_anchorGravity="bottom|right|end" />
 
 </android.support.design.widget.CoordinatorLayout>

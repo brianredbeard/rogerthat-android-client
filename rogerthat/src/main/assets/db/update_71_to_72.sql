@@ -11,12 +11,13 @@ CREATE TABLE news (
     reach INTEGER,
     qr_code_content TEXT,
     qr_code_caption TEXT,
-    version INTEGER
+    version INTEGER,
+    flags INTEGER
 );
 
 CREATE TABLE news_buttons (
     news_id INTEGER NOT NULL,
-    id TEXT,
+    id TEXT NOT NULL,
     caption TEXT NOT NULL,
     "action" TEXT,
     "index" INTEGER,

@@ -19,7 +19,8 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="25dp"
+            android:layout_height="wrap_content"
+            android:minHeight="25dp"
             android:orientation="horizontal"
             android:gravity="center_vertical">
 
@@ -101,8 +102,8 @@
 
                 <ImageView
                     android:id="@+id/service_avatar"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
                     android:layout_margin="5dp"
                     android:src="@drawable/unknown_avatar" />
 
@@ -124,8 +125,7 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginTop="5dp">
+                        android:orientation="horizontal">
 
                         <TextView
                             android:id="@+id/service_name"
@@ -174,7 +174,8 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="25dp"
+            android:layout_height="wrap_content"
+            android:minHeight="20dp"
             android:orientation="horizontal"
             android:gravity="center_vertical">
 
@@ -183,61 +184,86 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="15dp"
                 android:text="Reach:"
-                android:textSize="12sp" />
+                android:textSize="10sp" />
 
             <TextView
                 android:id="@+id/reach"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
+                android:layout_marginLeft="2dp"
                 android:text="549"
-                android:textSize="12sp"
+                android:textSize="10sp"
                 android:textStyle="bold"/>
 
             <TextView
+                android:id="@+id/label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:text="[nieuws]"
-                android:textSize="12sp"/>
+                android:textSize="10sp"/>
 
             <View
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"></View>
 
-            <TextView
+            <LinearLayout
+                android:id="@+id/actions"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:background="@color/mc_primary_color"
-                android:textColor="@color/mc_white"
-                android:gravity="center_vertical"
-                android:paddingLeft="5dp"
-                android:paddingRight="5dp"
-                android:text="Rogerthat"
-                android:textSize="12sp"/>
+                android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:background="@color/mc_divider_gray"
-                android:textColor="@color/mc_white"
-                android:gravity="center_vertical"
-                android:paddingLeft="5dp"
-                android:paddingRight="5dp"
-                android:text="Volgen"
-                android:textSize="12sp"/>
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:background="@color/mc_primary_color"
+                    android:textColor="@color/mc_white"
+                    android:gravity="center"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:minWidth="0dp"
+                    android:text="Rogerthat"
+                    android:textSize="10sp"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:background="@color/mc_primary_color"
-                android:textColor="@color/mc_white"
-                android:gravity="center_vertical"
-                android:paddingLeft="5dp"
-                android:paddingRight="5dp"
-                android:text="Reserveren"
-                android:textSize="12sp"/>
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:background="@color/mc_divider_gray"
+                    android:textColor="@color/mc_white"
+                    android:gravity="center"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:minWidth="0dp"
+                    android:text="Volgen"
+                    android:textSize="10sp"/>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:background="@color/mc_primary_color"
+                    android:textColor="@color/mc_white"
+                    android:gravity="center"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:minWidth="0dp"
+                    android:text="Reserveren"
+                    android:textSize="10sp"/>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:background="@color/mc_divider_gray"
+                    android:textColor="@color/mc_white"
+                    android:gravity="center"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:minWidth="0dp"
+                    android:text="Volgen"
+                    android:textSize="10sp"/>
+
+
+            </LinearLayout>
 
         </LinearLayout>
     </LinearLayout>

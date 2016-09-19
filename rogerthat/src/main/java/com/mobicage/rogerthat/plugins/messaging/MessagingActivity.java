@@ -726,6 +726,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
                 messageView.setTextColor(threadTextColor);
             }
 
+            // todo ruben
 //            if (!message.threadDirty) {
 //                messageView.setTypeface(null, Typeface.NORMAL);
 //                if (threadBackgroundColor == Integer.MAX_VALUE)
@@ -745,8 +746,8 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
 //                }
 //            }
 
-            messageView.setTextSize(18);
-            recipientsView.setTextSize(14);
+//            messageView.setTextSize(18);
+//            recipientsView.setTextSize(14);
 
 //            if (threadBackgroundColor != Integer.MAX_VALUE)
 //                view.setBackgroundColor(threadBackgroundColor);

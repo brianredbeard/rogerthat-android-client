@@ -80,7 +80,7 @@
                 android:layout_centerVertical="true"
                 android:layout_marginRight="10dp"
                 app:ico_color="@color/mc_primary_icon"
-                app:ico_icon="@string/faw_envelope_o"
+                app:ico_icon="@string/faw_envelope"
                 app:ico_size="15dp">
             </ImageView>
 
