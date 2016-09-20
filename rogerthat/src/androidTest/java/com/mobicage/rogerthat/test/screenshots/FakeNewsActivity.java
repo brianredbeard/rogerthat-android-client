@@ -41,7 +41,7 @@ public class FakeNewsActivity extends NewsActivity {
     }
 
     @Override
-    protected void setListAdapater() {
+    protected void setListAdapter() {
         final List<BaseNewsItemTO> items = new ArrayList<>();
 
         NewsActionButtonTO[] buttons = createNewsActionButtons(R.string.rogerthat, R.string.follow);

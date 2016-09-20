@@ -213,10 +213,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
-                android:paddingEnd="20dp"
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
-                android:paddingStart="20dp"
                 android:text="@string/recommend_service"
                 android:textSize="16sp" />
         </LinearLayout>
@@ -244,10 +242,8 @@
                 android:theme="@style/ButtonBackground"
                 android:layout_width="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:paddingEnd="20dp"
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
-                android:paddingStart="20dp"
                 android:text="@string/recommend_on_fb" />
         </LinearLayout>
     </com.mobicage.rogerthat.util.ui.SafeViewFlipper>

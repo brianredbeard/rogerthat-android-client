@@ -5,10 +5,8 @@
     android:background="?attr/selectableItemBackground"
     android:minHeight="72dp"
     android:orientation="horizontal"
-    android:paddingEnd="?attr/listPreferredItemPaddingRight"
     android:paddingLeft="?attr/listPreferredItemPaddingLeft"
-    android:paddingRight="?attr/listPreferredItemPaddingRight"
-    android:paddingStart="?attr/listPreferredItemPaddingLeft">
+    android:paddingRight="?attr/listPreferredItemPaddingRight">
 
     <ImageView
         android:id="@+id/friend_avatar"
@@ -60,7 +58,6 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_marginLeft="16dp"
-        android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:gravity="center"
         android:orientation="horizontal"
@@ -72,7 +69,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginEnd="5dp"
             android:layout_marginRight="5dp"
             android:indeterminate="true"
             android:indeterminateTint="@color/mc_primary_color"

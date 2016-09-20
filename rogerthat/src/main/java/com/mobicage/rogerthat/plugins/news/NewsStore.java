@@ -50,10 +50,14 @@ public class NewsStore implements Closeable {
     private final SQLiteStatement mInsertNewsButton;
     private final SQLiteStatement mInsertNewsRogeredUser;
 
+    private final SQLiteStatement mUpdateNewsItem;
     private final SQLiteStatement mUpdateNewsDirty;
     private final SQLiteStatement mUpdateNewsPinned;
     private final SQLiteStatement mUpdateNewsRogered;
     private final SQLiteStatement mUpdateNewsDeleted;
+
+    private final SQLiteStatement mDeleteNewsButtons;
+    private final SQLiteStatement mDeleteNewsRogeredUsers;
 
     private final SQLiteDatabase mDb;
     private final MainService mMainService;
@@ -67,10 +71,14 @@ public class NewsStore implements Closeable {
         mInsertNewsButton = mDb.compileStatement(mMainService.getString(R.string.sql_news_insert_button));
         mInsertNewsRogeredUser = mDb.compileStatement(mMainService.getString(R.string.sql_news_insert_rogered_user));
 
+        mUpdateNewsItem = mDb.compileStatement(mMainService.getString(R.string.sql_news_update_item));
         mUpdateNewsDirty = mDb.compileStatement(mMainService.getString(R.string.sql_news_update_dirty));
         mUpdateNewsPinned = mDb.compileStatement(mMainService.getString(R.string.sql_news_update_pinned));
         mUpdateNewsRogered = mDb.compileStatement(mMainService.getString(R.string.sql_news_update_rogered));
         mUpdateNewsDeleted = mDb.compileStatement(mMainService.getString(R.string.sql_news_update_deleted));
+
+        mDeleteNewsButtons = mDb.compileStatement(mMainService.getString(R.string.sql_news_delete_buttons));
+        mDeleteNewsRogeredUsers = mDb.compileStatement(mMainService.getString(R.string.sql_news_delete_rogerthat_users));
     }
 
     @Override
@@ -80,15 +88,53 @@ public class NewsStore implements Closeable {
         mInsertNewsButton.close();
         mInsertNewsRogeredUser.close();
 
+        mUpdateNewsItem.close();
         mUpdateNewsDirty.close();
         mUpdateNewsPinned.close();
         mUpdateNewsRogered.close();
         mUpdateNewsDeleted.close();
+
+        mDeleteNewsButtons.close();
+        mDeleteNewsRogeredUsers.close();
     }
 
-    public void saveNewsItem(final BaseNewsItemTO item) {
+    public void saveNewsItem(final BaseNewsItemTO item, final boolean isUpdate) {
+        if (isUpdate) {
+            updateNewsItem(item);
+        } else {
+            insertNewsItem(item);
+        }
+    }
+
+    private void insertButtons(final BaseNewsItemTO item) {
+        mDeleteNewsButtons.bindLong(1, item.id);
+        mDeleteNewsButtons.execute();
+
+        for (int i = 0; i < item.buttons.length; i++) {
+            NewsActionButtonTO button = item.buttons[i];
+            mInsertNewsButton.bindLong(1, item.id);
+            bindString(mInsertNewsButton, 2, button.id);
+            mInsertNewsButton.bindString(3, button.caption);
+            bindString(mInsertNewsButton, 4, button.action);
+            mInsertNewsButton.bindLong(5, i);
+            mInsertNewsButton.execute();
+        }
+    }
+
+    private void insertUsers(final BaseNewsItemTO item) {
+        mDeleteNewsRogeredUsers.bindLong(1, item.id);
+        mDeleteNewsRogeredUsers.execute();
+
+        for (int i = 0; i < item.users_that_rogered.length; i++) {
+            mInsertNewsRogeredUser.bindLong(1, item.id);
+            mInsertNewsRogeredUser.bindString(2, item.users_that_rogered[i]);
+            mInsertNewsRogeredUser.execute();
+        }
+    }
+
+    private void insertNewsItem(final BaseNewsItemTO item) {
         T.BIZZ();
-        TransactionHelper.runInTransaction(mDb, "saveNewsItem", new TransactionWithoutResult() {
+        TransactionHelper.runInTransaction(mDb, "insertNewsItem", new TransactionWithoutResult() {
             @Override
             protected void run() {
                 mInsertNewsItem.bindLong(1, item.id);
@@ -109,25 +155,37 @@ public class NewsStore implements Closeable {
                 mInsertNewsItem.bindLong(16, 0); // pinned
                 mInsertNewsItem.bindLong(17, 0); // rogererd
                 mInsertNewsItem.bindLong(18, 0); // deleted
-
-                // todo ruben we should update instead of insert or replace to keep dirty & pinned
                 mInsertNewsItem.execute();
 
-                for (int i = 0; i < item.buttons.length; i++) {
-                    NewsActionButtonTO button = item.buttons[i];
-                    mInsertNewsButton.bindLong(1, item.id);
-                    bindString(mInsertNewsButton, 2, button.id);
-                    mInsertNewsButton.bindString(3, button.caption);
-                    bindString(mInsertNewsButton, 4, button.action);
-                    mInsertNewsButton.bindLong(5, i);
-                    mInsertNewsButton.execute();
-                }
+                insertButtons(item);
+                insertUsers(item);
+            }
+        });
+    }
 
-                for (int i = 0; i < item.users_that_rogered.length; i++) {
-                    mInsertNewsRogeredUser.bindLong(1, item.id);
-                    mInsertNewsRogeredUser.bindString(2, item.users_that_rogered[i]);
-                    mInsertNewsRogeredUser.execute();
-                }
+    private void updateNewsItem(final BaseNewsItemTO item) {
+        T.BIZZ();
+        TransactionHelper.runInTransaction(mDb, "updateNewsItem", new TransactionWithoutResult() {
+            @Override
+            protected void run() {
+                mUpdateNewsItem.bindLong(1, item.timestamp);
+                mUpdateNewsItem.bindString(2, item.sender.email);
+                mUpdateNewsItem.bindString(3, item.sender.name);
+                mUpdateNewsItem.bindLong(4, item.sender.avatar_id);
+                bindString(mUpdateNewsItem, 5, item.title);
+                bindString(mUpdateNewsItem, 6, item.message);
+                bindString(mUpdateNewsItem, 7, item.image_url);
+                bindString(mUpdateNewsItem, 8, item.label);
+                mUpdateNewsItem.bindLong(9, item.reach);
+                bindString(mUpdateNewsItem, 10, item.qr_code_content);
+                bindString(mUpdateNewsItem, 11, item.qr_code_caption);
+                mUpdateNewsItem.bindLong(12, item.version);
+                mUpdateNewsItem.bindLong(13, item.flags);
+                mUpdateNewsItem.bindLong(14, item.id);
+                mUpdateNewsItem.execute();
+
+                insertButtons(item);
+                insertUsers(item);
             }
         });
     }

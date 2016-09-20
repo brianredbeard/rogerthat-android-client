@@ -77,7 +77,6 @@ import com.mobicage.rogerthat.widget.Resizable16by6ImageView;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.to.friends.GetUserInfoRequestTO;
 import com.mobicage.to.friends.GetUserInfoResponseTO;
-import com.mobicage.to.news.BaseNewsItemTO;
 import com.mobicage.to.news.NewsActionButtonTO;
 
 import org.json.simple.JSONValue;
@@ -91,6 +90,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 public class NewsActivity extends ServiceBoundActivity {
 
@@ -116,6 +116,11 @@ public class NewsActivity extends ServiceBoundActivity {
 
     private int mExistence;
     private String mExpectedEmailHash;
+
+    private boolean mIsLoadingMoreNews = false;
+    private boolean mShouldLoadMoreNews = false;
+    private String mUUID;
+    private String mCursor;
 
 
     @Override
@@ -144,6 +149,15 @@ public class NewsActivity extends ServiceBoundActivity {
                     }
                 }
             } else if (NewsPlugin.GET_NEWS_RECEIVED_INTENT.equals(action)) {
+                String uuid = intent.getStringExtra("uuid");
+                if (mUUID == null || !mUUID.equals(uuid)) {
+                    L.i("Ignoring GET_NEWS_RECEIVED_INTENT uuid did not match");
+                    return new String[] { action };
+                }
+
+                long[] ids = intent.getLongArrayExtra("ids");
+                long[] versions = intent.getLongArrayExtra("versions");
+                mCursor = intent.getStringExtra("cursor");
                 boolean shouldUpdateLayout = false;
 
                 if (mSwipeContainer.isRefreshing()) {
@@ -160,9 +174,7 @@ public class NewsActivity extends ServiceBoundActivity {
                 }
 
                 Set<Long> idsToRequest = new LinkedHashSet<>();
-                long[] ids = intent.getLongArrayExtra("ids");
-                long[] versions = intent.getLongArrayExtra("versions");
-
+                Set<Long> updatedIds = new LinkedHashSet<>();
                 for (int i= 0 ; i < ids.length; i++) {
                     if (!mLiveOrder.contains(ids[i])) {
                         mLiveOrder.add(ids[i]);
@@ -171,6 +183,7 @@ public class NewsActivity extends ServiceBoundActivity {
                         idsToRequest.add(ids[i]);
                     } else if (mDBItems.get(ids[i]).version < versions[i]){
                         idsToRequest.add(ids[i]);
+                        updatedIds.add(ids[i]);
                     } else if (mDBItems.get(ids[i]).deleted) {
                         // news item was removed
                     } else if (!mOrder.contains(ids[i])) {
@@ -181,14 +194,17 @@ public class NewsActivity extends ServiceBoundActivity {
                 }
 
                 if (idsToRequest.size() > 0) {
-                    long[] primitiveLongArray = new long[idsToRequest.size()];
-                    Long[] longArray = idsToRequest.toArray(new Long[idsToRequest.size()]);
-                    for (int i =0; i < longArray.length; i++) {
-                        primitiveLongArray[i] = longArray[i].longValue();
+                    long[] primitiveIdsToRequest = new long[idsToRequest.size()];
+                    Long[] tmpArray1 = idsToRequest.toArray(new Long[idsToRequest.size()]);
+                    for (int i =0; i < tmpArray1.length; i++) {
+                        primitiveIdsToRequest[i] = tmpArray1[i].longValue();
                     }
-                    mNewsPlugin.getNewsItems(primitiveLongArray);
+
+                    mNewsPlugin.getNewsItems(primitiveIdsToRequest, updatedIds);
                 } else {
                     mSwipeContainer.setRefreshing(false);
+                    mIsLoadingMoreNews = false;
+                    mShouldLoadMoreNews = ids.length > 0;
                 }
 
                 if (shouldUpdateLayout) {
@@ -222,6 +238,9 @@ public class NewsActivity extends ServiceBoundActivity {
                 }
                 Collections.sort(mOrder, comparator);
                 mSwipeContainer.setRefreshing(false);
+
+                mIsLoadingMoreNews = false;
+                mShouldLoadMoreNews = true;
                 mListAdapter.notifyDataSetChanged();
 
             } else if (NewsPlugin.DELETE_NEWS_ITEM_INTENT.equals(action)) {
@@ -272,7 +291,7 @@ public class NewsActivity extends ServiceBoundActivity {
         }
     };
 
-    protected void setListAdapater() {
+    protected void setListAdapter() {
         mListAdapter = new NewsListAdapter(this);
         mListView.setAdapter(mListAdapter);
     }
@@ -294,7 +313,7 @@ public class NewsActivity extends ServiceBoundActivity {
         mSwipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                mNewsPlugin.getNews();
+                requestMoreNews(true);
             }
         });
         mSwipeContainer.setColorSchemeResources(R.color.mc_primary_color, R.color.mc_secondary_color);
@@ -303,7 +322,7 @@ public class NewsActivity extends ServiceBoundActivity {
         }
 
         mListView = (ListView) findViewById(R.id.news_list);
-        setListAdapater();
+        setListAdapter();
 
         mDBItems = mNewsStore.getNewsItemVersions();
         boolean shouldUpdateLayout = false;
@@ -319,7 +338,7 @@ public class NewsActivity extends ServiceBoundActivity {
         if (shouldUpdateLayout) {
             mListAdapter.notifyDataSetChanged();
         }
-        mNewsPlugin.getNews();
+        requestMoreNews(true);
 
         final IntentFilter filter = new IntentFilter(CachedDownloader.CACHED_DOWNLOAD_AVAILABLE_INTENT);
         filter.addAction(NewsPlugin.GET_NEWS_RECEIVED_INTENT);
@@ -331,6 +350,19 @@ public class NewsActivity extends ServiceBoundActivity {
 
     @Override
     protected void onServiceUnbound() {
+    }
+
+    private void requestMoreNews(boolean isRefresh) {
+        if (mIsLoadingMoreNews) {
+            L.e("requestMoreNews called when already loading news");
+        }
+        mIsLoadingMoreNews = true;
+        mShouldLoadMoreNews = false;
+        if (isRefresh) {
+            mCursor = null;
+        }
+        mUUID = UUID.randomUUID().toString();
+        mNewsPlugin.getNews(mCursor, mUUID);
     }
 
     private void updatedPinnedLayout(ImageButton pinned, boolean isPinned) {
@@ -364,6 +396,12 @@ public class NewsActivity extends ServiceBoundActivity {
             T.UI();
             final View view;
 
+            if (position >= mOrder.size() - 10) {
+                if (mCursor != null && mShouldLoadMoreNews) {
+                    requestMoreNews(false);
+                }
+            }
+
             if (convertView == null) {
                 view = mLayoutInflater.inflate(R.layout.news_list_item, parent, false);
             } else {
@@ -395,9 +433,6 @@ public class NewsActivity extends ServiceBoundActivity {
 
             LinearLayout membersContainer = (LinearLayout) view.findViewById(R.id.members_container);
             TextView members = (TextView) view.findViewById(R.id.members);
-
-            // todo ruben remove
-//            newsItem.users_that_rogered = new String[] {"pin2@gsm.gsm", "pin2@gsm.gsm", "pin2@gsm.gsm"};
 
             if (newsItem.users_that_rogered.length > 0) {
                 List<String> names = new ArrayList<>();

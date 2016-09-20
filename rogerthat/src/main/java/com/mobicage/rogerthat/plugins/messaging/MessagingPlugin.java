@@ -135,7 +135,6 @@ public class MessagingPlugin implements MobicagePlugin {
 
     public final static String NEW_MESSAGE_RECEIVED_INTENT = "com.mobicage.rogerthat.plugins.messaging.NEW_MESSAGE_RECEIVED";
     public final static String MESSAGE_MEMBER_STATUS_UPDATE_RECEIVED_INTENT = "com.mobicage.rogerthat.plugins.messaging.MESSAGE_MEMBER_STATUS_UPDATE_RECEIVED";
-    public final static String MESSAGE_KEY_UPDATED_INTENT = "com.mobicage.rogerthat.plugins.messaging.MESSAGE_KEY_UPDATED";
     public final static String MESSAGE_FAILURE = "com.mobicage.rogerthat.plugins.messaging.MESSAGE_FAILURE";
     public final static String MESSAGE_DIRTY_CLEANED_INTENT = "com.mobicage.rogerthat.plugins.messaging.MESSAGE_DIRTY_CLEANED";
     public final static String MESSAGE_THREAD_VISIBILITY_CHANGED_INTENT = "com.mobicage.rogerthat.plugins.messaging.MESSAGE_THREAD_VISIBILITY_CHANGED_INTENT";
@@ -147,8 +146,6 @@ public class MessagingPlugin implements MobicagePlugin {
     public final static String THREAD_MODIFIED_INTENT = "com.mobicage.rogerthat.plugins.messaging.THREAD_MODIFIED_INTENT";
     public static final String MESSAGE_JSMFR_ERROR = "com.mobicage.rogerthat.plugins.messaging.JSMFR_ERROR";
     public static final String MESSAGE_SUBMIT_PHOTO_UPLOAD = "com.mobicage.api.messaging.submitPhotoUploadForm";
-
-    public final static String TMP_KEY_PREFIX = "_tmp/";
 
     public final static long FLAG_ALLOW_DISMISS = 1;
     public final static long FLAG_ALLOW_CUSTOM_REPLY = 2;
@@ -385,44 +382,40 @@ public class MessagingPlugin implements MobicagePlugin {
 
     public void showMessage(Context context, Message message, boolean detail, String memberFilter, boolean
             jumpToServiceHomeScreenWhenFinished) {
-        if (isTmpKey(message.key) && message.parent_key == null)
-            UIUtils.showLongToast(context, context.getString(R.string.message_not_on_server));
-        else {
-            FriendsPlugin friendsPlugin = mMainService.getPlugin(FriendsPlugin.class);
-            int friendType = friendsPlugin.getStore().getFriendType(message.sender);
+        FriendsPlugin friendsPlugin = mMainService.getPlugin(FriendsPlugin.class);
+        int friendType = friendsPlugin.getStore().getFriendType(message.sender);
 
-            String threadKey = message.parent_key != null ? message.parent_key : message.key;
-            if (SystemUtils.isFlagEnabled(message.flags, FLAG_DYNAMIC_CHAT)
-                || isHumanThread(message, friendType, friendsPlugin)) {
+        String threadKey = message.parent_key != null ? message.parent_key : message.key;
+        if (SystemUtils.isFlagEnabled(message.flags, FLAG_DYNAMIC_CHAT)
+            || isHumanThread(message, friendType, friendsPlugin)) {
 
-                Intent intent = FriendsThreadActivity.createIntent(context, threadKey, message.flags, memberFilter);
+            Intent intent = FriendsThreadActivity.createIntent(context, threadKey, message.flags, memberFilter);
+            context.startActivity(intent);
+
+        } else if (FriendsPlugin.SYSTEM_FRIEND.equals(message.sender)
+            || (friendType == FriendsPlugin.FRIEND_TYPE_SERVICE)
+            || (friendType == FriendsPlugin.FRIEND_TYPE_UNKNOWN)) {
+            // System sent this message, or Service sent this message, or
+            // non-friend sent this message
+            // Let's show the service thread view
+            // For the case of non-friend we actually do not know whether it
+            // was a svc or a user
+            // Showing the service thread view is the safest
+            if (detail || message.dirty || message.needsMyAnswer || message.replyCount == 1) {
+                final Intent intent = new Intent(context, ServiceMessageDetailActivity.class);
+                intent.putExtra("message", message.key);
+                intent.putExtra(ServiceMessageDetailActivity.JUMP_TO_SERVICE_HOME_SCREEN,
+                        jumpToServiceHomeScreenWhenFinished);
+                intent.putExtra(MEMBER_FILTER, memberFilter);
                 context.startActivity(intent);
 
-            } else if (FriendsPlugin.SYSTEM_FRIEND.equals(message.sender)
-                || (friendType == FriendsPlugin.FRIEND_TYPE_SERVICE)
-                || (friendType == FriendsPlugin.FRIEND_TYPE_UNKNOWN)) {
-                // System sent this message, or Service sent this message, or
-                // non-friend sent this message
-                // Let's show the service thread view
-                // For the case of non-friend we actually do not know whether it
-                // was a svc or a user
-                // Showing the service thread view is the safest
-                if (detail || message.dirty || message.needsMyAnswer || message.replyCount == 1) {
-                    final Intent intent = new Intent(context, ServiceMessageDetailActivity.class);
-                    intent.putExtra("message", message.key);
-                    intent.putExtra(ServiceMessageDetailActivity.JUMP_TO_SERVICE_HOME_SCREEN,
-                            jumpToServiceHomeScreenWhenFinished);
-                    intent.putExtra(MEMBER_FILTER, memberFilter);
-                    context.startActivity(intent);
-
-                } else {
-                    Intent intent = ServiceThreadActivity.createIntent(context, threadKey, memberFilter,
-                        message.parent_key != null);
-                    context.startActivity(intent);
-                }
             } else {
-                L.bug("showMessage - unexpected friendType " + friendType + " for email " + message.sender);
+                Intent intent = ServiceThreadActivity.createIntent(context, threadKey, memberFilter,
+                    message.parent_key != null);
+                context.startActivity(intent);
             }
+        } else {
+            L.bug("showMessage - unexpected friendType " + friendType + " for email " + message.sender);
         }
     }
 
@@ -460,8 +453,6 @@ public class MessagingPlugin implements MobicagePlugin {
                             if (nextKey == null)
                                 nextKey = cursor.getString(1); // message key
 
-                            if (isTmpKey(nextKey))
-                                continue;
                             String nextSender = cursor.getString(2);
                             long nextFlags = cursor.getLong(3);
                             Intent intent = getThreadActivityIntent(context, nextKey, nextSender, nextFlags,
@@ -495,9 +486,6 @@ public class MessagingPlugin implements MobicagePlugin {
                             if (prevKey == null)
                                 prevKey = cursor.getString(1); // message key
 
-                            if (isTmpKey(prevKey)) {
-                                continue;
-                            }
                             String prevSender = cursor.getString(2);
                             long prevFlags = cursor.getLong(3);
                             Intent intent = getThreadActivityIntent(context, prevKey, prevSender, prevFlags,
@@ -727,11 +715,6 @@ public class MessagingPlugin implements MobicagePlugin {
                 // If not, we should request the messages we don't have.
 
                 List<String> children = mStore.listChildMessagesInThread(threadKey);
-                for (String childMessageKey : children) {
-                    if (isTmpKey(childMessageKey)) {
-                        children.remove(childMessageKey);
-                    }
-                }
 
                 if (children.size() == 0) {
                     offset = threadKey;
@@ -1072,24 +1055,6 @@ public class MessagingPlugin implements MobicagePlugin {
             return;
         }
         messageLocked(message.key, new MemberStatusTO[0], DIRTY_BEHAVIOR_NORMAL, false, lockDoneRunnable);
-    }
-
-    public String generateTmpKey() {
-        return TMP_KEY_PREFIX + UUID.randomUUID().toString();
-    }
-
-    public boolean isTmpKey(String messageKey) {
-        return messageKey.startsWith(TMP_KEY_PREFIX);
-    }
-
-    public void replaceTmpKey(String tmpKey, String serverKey, long timestamp) {
-        T.BIZZ();
-        mStore.replaceTmpKeyAndTimestamp(tmpKey, serverKey, timestamp);
-        mMessageHistory.updateMessageTmpKeyInHistory(tmpKey, serverKey);
-        Intent intent = new Intent(MessagingPlugin.MESSAGE_KEY_UPDATED_INTENT);
-        intent.putExtra("oldKey", tmpKey);
-        intent.putExtra("serverKey", serverKey);
-        mMainService.sendBroadcast(intent);
     }
 
     public boolean deleteConversation(final String threadKey) {
@@ -1571,7 +1536,11 @@ public class MessagingPlugin implements MobicagePlugin {
 
     public void setTransferCompleted(final String parentMessageKey, final String messageKey, String resultUrl) {
         T.BIZZ();
-        if (isTmpKey(messageKey)) {
+        Message message = mStore.getFullMessageByKey(messageKey);
+        if (message == null) {
+            return;
+        }
+        if (message.form == null) {
             Configuration cfg = mConfigProvider.getConfiguration(TRANSFER_PHOTO_UPLOAD_SEND_MESSAGE_CONFIGKEY);
 
             String serializedMessageRequest = cfg.get(messageKey, "");
@@ -1591,11 +1560,11 @@ public class MessagingPlugin implements MobicagePlugin {
 
                 String tmpDownloadUrlHash = attachmentDownloadUrlHash(request.attachments[0].download_url);
                 String downloadUrlHash = attachmentDownloadUrlHash(resultUrl);
-                String tmpMessageKey = messageKey.replace(MessagingPlugin.TMP_KEY_PREFIX, "");
                 File attachmentsDir;
                 try {
-                    attachmentsDir = attachmentsDir(parentMessageKey == null ? tmpMessageKey : parentMessageKey,
-                        tmpMessageKey);
+                    // todo ruben check if needed
+                    attachmentsDir = attachmentsDir(parentMessageKey == null ? messageKey : parentMessageKey,
+                            messageKey);
                 } catch (IOException e) {
                     L.d("Unable to create attachment directory", e);
                     UIUtils.showAlertDialog(mMainService, "", R.string.unable_to_read_write_sd_card);
@@ -1622,92 +1591,89 @@ public class MessagingPlugin implements MobicagePlugin {
             }
 
         } else {
-            Message message = mStore.getFullMessageByKey(messageKey);
-            if (message != null && message.form != null) {
-                if (Widget.TYPE_PHOTO_UPLOAD.equals(message.form.get("type"))) {
-                    final SubmitPhotoUploadFormRequestTO request = new SubmitPhotoUploadFormRequestTO();
-                    request.timestamp = message.members[0].acked_timestamp;
-                    request.button_id = message.members[0].button_id;
-                    request.message_key = messageKey;
-                    request.parent_message_key = parentMessageKey;
-                    if (Message.POSITIVE.equals(request.button_id)) {
-                        request.result = new UnicodeWidgetResultTO();
-                        request.result.value = resultUrl;
+            if (Widget.TYPE_PHOTO_UPLOAD.equals(message.form.get("type"))) {
+                final SubmitPhotoUploadFormRequestTO request = new SubmitPhotoUploadFormRequestTO();
+                request.timestamp = message.members[0].acked_timestamp;
+                request.button_id = message.members[0].button_id;
+                request.message_key = messageKey;
+                request.parent_message_key = parentMessageKey;
+                if (Message.POSITIVE.equals(request.button_id)) {
+                    request.result = new UnicodeWidgetResultTO();
+                    request.result.value = resultUrl;
+                }
+                boolean isSentByJSMFR = (message.flags & FLAG_SENT_BY_JSMFR) == FLAG_SENT_BY_JSMFR;
+
+                transferQueueDelete(messageKey);
+                if (UIUtils.getTopActivity(mMainService) instanceof ServiceMessageDetailActivity) {
+                    // Send an Intent to ServiceMessageDetailActivity so it can hide the processing dialog
+                    final Intent iSubmitPhotoUploadForm = new Intent(ServiceMessageDetailActivity.class.getName());
+                    iSubmitPhotoUploadForm.putExtra("threadKey", parentMessageKey == null ? messageKey
+                        : parentMessageKey);
+                    iSubmitPhotoUploadForm.putExtra("message_key", messageKey);
+                    iSubmitPhotoUploadForm.setAction(MessagingPlugin.MESSAGE_SUBMIT_PHOTO_UPLOAD);
+                    if (isSentByJSMFR) {
+                        iSubmitPhotoUploadForm.putExtra("submitToJSMFR",
+                            JSONValue.toJSONString(request.toJSONMap()));
                     }
-                    boolean isSentByJSMFR = (message.flags & FLAG_SENT_BY_JSMFR) == FLAG_SENT_BY_JSMFR;
+                    mMainService.sendBroadcast(iSubmitPhotoUploadForm);
+                    L.d("------------------------------------------------------------");
+                    L.d("ServiceMessageDetailActivity on top");
+                    L.d("------------------------------------------------------------");
+                } else {
+                    L.d("------------------------------------------------------------");
+                    L.d("ServiceMessageDetailActivity NOT on top");
+                    L.d("------------------------------------------------------------");
 
-                    transferQueueDelete(messageKey);
-                    if (UIUtils.getTopActivity(mMainService) instanceof ServiceMessageDetailActivity) {
-                        // Send an Intent to ServiceMessageDetailActivity so it can hide the processing dialog
-                        final Intent iSubmitPhotoUploadForm = new Intent(ServiceMessageDetailActivity.class.getName());
-                        iSubmitPhotoUploadForm.putExtra("threadKey", parentMessageKey == null ? messageKey
-                            : parentMessageKey);
-                        iSubmitPhotoUploadForm.putExtra("message_key", messageKey);
-                        iSubmitPhotoUploadForm.setAction(MessagingPlugin.MESSAGE_SUBMIT_PHOTO_UPLOAD);
-                        if (isSentByJSMFR) {
-                            iSubmitPhotoUploadForm.putExtra("submitToJSMFR",
-                                JSONValue.toJSONString(request.toJSONMap()));
-                        }
-                        mMainService.sendBroadcast(iSubmitPhotoUploadForm);
-                        L.d("------------------------------------------------------------");
-                        L.d("ServiceMessageDetailActivity on top");
-                        L.d("------------------------------------------------------------");
-                    } else {
-                        L.d("------------------------------------------------------------");
-                        L.d("ServiceMessageDetailActivity NOT on top");
-                        L.d("------------------------------------------------------------");
-
-                        if (isSentByJSMFR) {
-                            mMainService.postOnUIHandler(new SafeRunnable() {
-                                @Override
-                                protected void safeRun() throws Exception {
-                                    // TODO read from db
-                                    JSONObject json = jsmfrTransferCompletedLoad();
-                                    // TODO add current message
-                                    JSONObject transfer = new JSONObject();
-                                    try {
-                                        transfer.put("threadKey", parentMessageKey == null ? messageKey
-                                            : parentMessageKey);
-                                        transfer.put("submitToJSMFR", JSONValue.toJSONString(request.toJSONMap()));
-                                        json.put(messageKey, transfer);
-                                    } catch (JSONException e) {
-                                        // TODO Auto-generated catch block
-                                        e.printStackTrace();
-                                    }
-                                    // TODO save to db
-                                    jsmfrTransferCompletedSave(json);
-
-                                    String n_message = mMainService.getString(R.string.transfer_complete_notification);
-                                    String title = mMainService
-                                        .getString(R.string.transfer_complete_notification_title);
-                                    int notificationId = R.integer.transfer_complete_continue;
-                                    boolean withSound = false;
-                                    boolean withVibration = true;
-                                    boolean withLight = false;
-                                    boolean autoCancel = false;
-                                    int icon = R.drawable.notification_icon;
-                                    int notificationNumber = 0;
-                                    Bundle b = new Bundle();
-                                    b.putString("threadKey", parentMessageKey == null ? messageKey : parentMessageKey);
-                                    b.putString("message_key", messageKey);
-                                    b.putBoolean("submitToJSMFR", true);
-                                    String tickerText = null;
-                                    long timestamp = mMainService.currentTimeMillis();
-
-                                    UIUtils.doNotification(mMainService, title, n_message, notificationId,
-                                        MainActivity.ACTION_NOTIFICATION_PHOTO_UPLOAD_DONE, withSound, withVibration,
-                                        withLight, autoCancel, icon, notificationNumber, b, tickerText, timestamp);
+                    if (isSentByJSMFR) {
+                        mMainService.postOnUIHandler(new SafeRunnable() {
+                            @Override
+                            protected void safeRun() throws Exception {
+                                // TODO read from db
+                                JSONObject json = jsmfrTransferCompletedLoad();
+                                // TODO add current message
+                                JSONObject transfer = new JSONObject();
+                                try {
+                                    transfer.put("threadKey", parentMessageKey == null ? messageKey
+                                        : parentMessageKey);
+                                    transfer.put("submitToJSMFR", JSONValue.toJSONString(request.toJSONMap()));
+                                    json.put(messageKey, transfer);
+                                } catch (JSONException e) {
+                                    // TODO Auto-generated catch block
+                                    e.printStackTrace();
                                 }
-                            });
-                        }
-                    }
+                                // TODO save to db
+                                jsmfrTransferCompletedSave(json);
 
-                    if (!isSentByJSMFR) {
-                        try {
-                            Rpc.submitPhotoUploadForm(new ResponseHandler<SubmitPhotoUploadFormResponseTO>(), request);
-                        } catch (Exception e) {
-                            L.e("Sending the submitPhotoUploadForm failed.", e);
-                        }
+                                String n_message = mMainService.getString(R.string.transfer_complete_notification);
+                                String title = mMainService
+                                    .getString(R.string.transfer_complete_notification_title);
+                                int notificationId = R.integer.transfer_complete_continue;
+                                boolean withSound = false;
+                                boolean withVibration = true;
+                                boolean withLight = false;
+                                boolean autoCancel = false;
+                                int icon = R.drawable.notification_icon;
+                                int notificationNumber = 0;
+                                Bundle b = new Bundle();
+                                b.putString("threadKey", parentMessageKey == null ? messageKey : parentMessageKey);
+                                b.putString("message_key", messageKey);
+                                b.putBoolean("submitToJSMFR", true);
+                                String tickerText = null;
+                                long timestamp = mMainService.currentTimeMillis();
+
+                                UIUtils.doNotification(mMainService, title, n_message, notificationId,
+                                    MainActivity.ACTION_NOTIFICATION_PHOTO_UPLOAD_DONE, withSound, withVibration,
+                                    withLight, autoCancel, icon, notificationNumber, b, tickerText, timestamp);
+                            }
+                        });
+                    }
+                }
+
+                if (!isSentByJSMFR) {
+                    try {
+                        Rpc.submitPhotoUploadForm(new ResponseHandler<SubmitPhotoUploadFormResponseTO>(), request);
+                    } catch (Exception e) {
+                        L.e("Sending the submitPhotoUploadForm failed.", e);
                     }
                 }
             }

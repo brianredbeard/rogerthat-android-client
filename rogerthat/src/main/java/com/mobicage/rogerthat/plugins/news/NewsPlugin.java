@@ -36,6 +36,7 @@ import com.mobicage.to.news.NewsRogeredRequestTO;
 import com.mobicage.to.news.NewsRogeredResponseTO;
 import com.mobicage.to.system.SettingsTO;
 import java.io.IOException;
+import java.util.Set;
 
 
 public class NewsPlugin implements MobicagePlugin {
@@ -88,15 +89,15 @@ public class NewsPlugin implements MobicagePlugin {
         return mStore;
     }
 
-    public void getNews() {
+    public void getNews(final String cursor, final String uuid) {
         SafeRunnable runnable = new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
                 final GetNewsResponseHandler responseHandler = new GetNewsResponseHandler();
-                responseHandler.setUUID("todo ruben");
+                responseHandler.setUUID(uuid);
 
                 GetNewsRequestTO request = new GetNewsRequestTO();
-                request.cursor = null;
+                request.cursor = cursor;
 
                 com.mobicage.api.news.Rpc.getNews(responseHandler, request);
             }
@@ -109,11 +110,13 @@ public class NewsPlugin implements MobicagePlugin {
         }
     }
 
-    public void getNewsItems(final long[] ids) {
+    public void getNewsItems(final long[] ids, final Set<Long> updatedIds) {
         SafeRunnable runnable = new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
                 final GetNewsItemsResponseHandler responseHandler = new GetNewsItemsResponseHandler();
+                responseHandler.setUpdatedIds(updatedIds);
+
                 GetNewsItemsRequestTO request = new GetNewsItemsRequestTO();
                 request.ids = ids;
 
