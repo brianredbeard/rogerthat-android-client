@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
@@ -38,11 +39,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
@@ -52,6 +56,8 @@ import com.mobicage.rogerthat.plugins.history.HistoryItem;
 import com.mobicage.rogerthat.plugins.messaging.MembersActivity;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
+import com.mobicage.rogerthat.plugins.news.NewsItem;
+import com.mobicage.rogerthat.plugins.news.NewsItemDetails;
 import com.mobicage.rogerthat.plugins.news.NewsPlugin;
 import com.mobicage.rogerthat.plugins.news.NewsStore;
 import com.mobicage.rogerthat.plugins.scan.GetUserInfoResponseHandler;
@@ -100,10 +106,10 @@ public class NewsActivity extends ServiceBoundActivity {
     private FriendsPlugin mFriendsPlugin;
     private CachedDownloader mCachedDownloader;
 
-    private Map<Long, Long> mDBItems = new HashMap<>();
+    private Map<Long, NewsItemDetails> mDBItems = new HashMap<>();
     private List<Long> mOrder = new ArrayList<>();
     private List<Long> mLiveOrder = new ArrayList<>();
-    private Map<Long, BaseNewsItemTO> mItems = new HashMap<>();
+    private Map<Long, NewsItem> mItems = new HashMap<>();
     private Map<String, ArrayList<Resizable16by6ImageView>> mImageViews = new HashMap<>();
 
     private ProgressDialog mProgressDialog;
@@ -143,7 +149,14 @@ public class NewsActivity extends ServiceBoundActivity {
                 if (mSwipeContainer.isRefreshing()) {
                     mOrder = new ArrayList<>();
                     mLiveOrder = new ArrayList<>();
-                    mItems = new HashMap<>();
+
+                    for (NewsItemDetails d : mDBItems.values()) {
+                        if (d.pinned) {
+                            shouldUpdateLayout = true;
+                            mLiveOrder.add(d.id);
+                            mOrder.add(d.id);
+                        }
+                    }
                 }
 
                 Set<Long> idsToRequest = new LinkedHashSet<>();
@@ -151,10 +164,12 @@ public class NewsActivity extends ServiceBoundActivity {
                 long[] versions = intent.getLongArrayExtra("versions");
 
                 for (int i= 0 ; i < ids.length; i++) {
-                    mLiveOrder.add(ids[i]);
+                    if (!mLiveOrder.contains(ids[i])) {
+                        mLiveOrder.add(ids[i]);
+                    }
                     if (!mDBItems.containsKey(ids[i])) {
                         idsToRequest.add(ids[i]);
-                    } else if (mDBItems.get(ids[i]) < versions[i]){
+                    } else if (mDBItems.get(ids[i]).version < versions[i]){
                         idsToRequest.add(ids[i]);
                     } else if (!mOrder.contains(ids[i])) {
                         mItems.put(ids[i], mNewsStore.getNewsItem(ids[i]));
@@ -180,12 +195,20 @@ public class NewsActivity extends ServiceBoundActivity {
 
             } else if (NewsPlugin.GET_NEWS_ITEMS_RECEIVED_INTENT.equals(action)) {
                 long[] ids = intent.getLongArrayExtra("ids");
-                long[] versions = intent.getLongArrayExtra("versions");
 
                 for (int i= 0 ; i < ids.length; i++) {
-                    mDBItems.put(ids[i], versions[i]);
-                    mOrder.add(ids[i]);
-                    mItems.put(ids[i], mNewsStore.getNewsItem(ids[i]));
+                    NewsItem item = mNewsStore.getNewsItem(ids[i]);
+
+                    NewsItemDetails d = new NewsItemDetails();
+                    d.id = item.id;
+                    d.version = item.version;
+                    d.dirty = item.dirty;
+                    d.pinned = item.pinned;
+                    mDBItems.put(item.id, d);
+                    if (!mOrder.contains(item.id)) {
+                        mOrder.add(item.id);
+                    }
+                    mItems.put(item.id, item);
                 }
                 Collections.sort(mOrder, comparator);
                 mSwipeContainer.setRefreshing(false);
@@ -256,6 +279,19 @@ public class NewsActivity extends ServiceBoundActivity {
         setListAdapater();
 
         mDBItems = mNewsStore.getNewsItemVersions();
+        boolean shouldUpdateLayout = false;
+        for (NewsItemDetails d : mDBItems.values()) {
+            if (d.pinned) {
+                shouldUpdateLayout = true;
+                mLiveOrder.add(d.id);
+                mOrder.add(d.id);
+                mItems.put(d.id, mNewsStore.getNewsItem(d.id));
+            }
+        }
+
+        if (shouldUpdateLayout) {
+            mListAdapter.notifyDataSetChanged();
+        }
         mNewsPlugin.getNews();
 
         final IntentFilter filter = new IntentFilter(CachedDownloader.CACHED_DOWNLOAD_AVAILABLE_INTENT);
@@ -269,6 +305,16 @@ public class NewsActivity extends ServiceBoundActivity {
     protected void onServiceUnbound() {
     }
 
+    private void updatedPinnedLayout(ImageButton pinned, boolean isPinned) {
+        if (isPinned) {
+            pinned.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_thumb_tack).color(getResources().getColor(R.color.mc_primary_color)).sizeDp(24));
+            pinned.setBackgroundResource(R.drawable.news_pin_background_pinned);
+        } else {
+            pinned.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_thumb_tack).color(Color.WHITE).sizeDp(24));
+            pinned.setBackgroundResource(R.drawable.news_pin_background_normal);
+        }
+    }
+
     public class NewsListAdapter extends BaseAdapter {
 
         protected LayoutInflater mLayoutInflater;
@@ -280,7 +326,7 @@ public class NewsActivity extends ServiceBoundActivity {
             mLayoutInflater = LayoutInflater.from(mContext);
         }
 
-        protected BaseNewsItemTO getNewsItem(int position) {
+        protected NewsItem getNewsItem(int position) {
             Long newsId = mOrder.get(position);
             return mItems.get(newsId);
         }
@@ -296,7 +342,28 @@ public class NewsActivity extends ServiceBoundActivity {
                 view = convertView;
             }
 
-            final BaseNewsItemTO newsItem = getNewsItem(position);
+            final NewsItem newsItem = getNewsItem(position);
+            if (!newsItem.dirty) {
+                newsItem.dirty = true;
+                mDBItems.get(newsItem.id).dirty = true;
+
+                mNewsStore.setNewsItemDirty(newsItem.id);
+                mNewsPlugin.markNewsAsRead(new long[] { newsItem.id });
+            }
+
+            final ImageButton pinned = (ImageButton) view.findViewById(R.id.pinned);
+            updatedPinnedLayout(pinned, newsItem.pinned);
+            pinned.setOnClickListener(new SafeViewOnClickListener() {
+                @Override
+                public void safeOnClick(View v) {
+                    boolean isPinned = !newsItem.pinned;
+                    newsItem.pinned = isPinned;
+                    mDBItems.get(newsItem.id).pinned = isPinned;
+                    mNewsStore.setNewsItemPinned(newsItem.id, isPinned);
+
+                    updatedPinnedLayout(pinned, isPinned);
+                }
+            });
 
             LinearLayout membersContainer = (LinearLayout) view.findViewById(R.id.members_container);
             TextView members = (TextView) view.findViewById(R.id.members);
@@ -342,7 +409,9 @@ public class NewsActivity extends ServiceBoundActivity {
             }
 
             Resizable16by6ImageView image = (Resizable16by6ImageView) view.findViewById(R.id.image);
-            if (!TextUtils.isEmptyOrWhitespace(newsItem.image_url)) {
+            if (TextUtils.isEmptyOrWhitespace(newsItem.image_url)) {
+                image.setVisibility(View.GONE);
+            } else {
                 if (mCachedDownloader.isStorageAvailable()) {
                     File cachedFile = mCachedDownloader.getCachedFilePath(newsItem.image_url);
                     if (cachedFile != null) {
@@ -525,6 +594,15 @@ public class NewsActivity extends ServiceBoundActivity {
     private final Comparator<Long> comparator = new Comparator<Long>() {
         @Override
         public int compare(Long item1, Long item2) {
+            NewsItemDetails d1 = mDBItems.get(item1);
+            NewsItemDetails d2 = mDBItems.get(item2);
+
+            if (d1.pinned && !d2.pinned) {
+                return 1;
+            } else if (!d1.pinned && d2.pinned) {
+                return -1;
+            }
+
             int position1 = mLiveOrder.indexOf(item1);
             int position2 = mLiveOrder.indexOf(item2);
             return position1 > position2 ? 1 : -1;

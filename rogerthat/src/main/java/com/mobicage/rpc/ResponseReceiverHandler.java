@@ -545,6 +545,15 @@ public class ResponseReceiverHandler {
                 resp.setResult(Parser.ComMobicageToNewsGetNewsItemsResponseTO(rpcr.result));
             ((IResponseHandler<com.mobicage.to.news.GetNewsItemsResponseTO>) responseHandler).handle(resp);
         }
+        if ("com.mobicage.api.news.markNewsAsRead".equals(function)) {
+            final Response<com.mobicage.to.news.MarkNewsAsReadResponseTO> resp = new Response<com.mobicage.to.news.MarkNewsAsReadResponseTO>();
+            resp.setError(rpcr.error);
+            resp.setSuccess(rpcr.success);
+            resp.setCallId(rpcr.callId);
+            if (rpcr.success)
+                resp.setResult(Parser.ComMobicageToNewsMarkNewsAsReadResponseTO(rpcr.result));
+            ((IResponseHandler<com.mobicage.to.news.MarkNewsAsReadResponseTO>) responseHandler).handle(resp);
+        }
         if ("com.mobicage.api.services.findService".equals(function)) {
             final Response<com.mobicage.to.service.FindServiceResponseTO> resp = new Response<com.mobicage.to.service.FindServiceResponseTO>();
             resp.setError(rpcr.error);

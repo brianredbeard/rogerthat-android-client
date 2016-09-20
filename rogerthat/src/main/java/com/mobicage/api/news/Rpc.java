@@ -42,4 +42,15 @@ public class Rpc {
         com.mobicage.rpc.Rpc.call("com.mobicage.api.news.getNewsItems", arguments, responseHandler);
     }
 
+    public static void markNewsAsRead(com.mobicage.rpc.IResponseHandler<com.mobicage.to.news.MarkNewsAsReadResponseTO> responseHandler,
+            com.mobicage.to.news.MarkNewsAsReadRequestTO request) throws Exception {
+        java.util.Map<java.lang.String, java.lang.Object> arguments = new java.util.LinkedHashMap<java.lang.String, java.lang.Object>();
+        if (request == null) {
+            arguments.put("request", null);
+        } else {
+            arguments.put("request", request.toJSONMap());
+        }
+        com.mobicage.rpc.Rpc.call("com.mobicage.api.news.markNewsAsRead", arguments, responseHandler);
+    }
+
 }

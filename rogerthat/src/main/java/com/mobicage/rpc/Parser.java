@@ -2113,6 +2113,20 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
+    public static com.mobicage.to.news.MarkNewsAsReadRequestTO ComMobicageToNewsMarkNewsAsReadRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.news.MarkNewsAsReadRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.news.MarkNewsAsReadResponseTO ComMobicageToNewsMarkNewsAsReadResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.news.MarkNewsAsReadResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
     public static com.mobicage.to.news.NewsActionButtonTO ComMobicageToNewsNewsActionButtonTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;

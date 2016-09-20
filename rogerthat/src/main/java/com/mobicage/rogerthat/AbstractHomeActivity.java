@@ -114,12 +114,7 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity implemen
         super.onCreate(savedInstanceState);
         LayoutInflater inflater = getLayoutInflater();
 
-        if (AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.news) {
-            setContentView(AppConstants.HOME_ACTIVITY_LAYOUT);
-
-        } else {
-            setContentViewWithoutNavigationBar(AppConstants.HOME_ACTIVITY_LAYOUT);
-        }
+        setContentViewWithoutNavigationBar(AppConstants.HOME_ACTIVITY_LAYOUT);
 
         if (AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.homescreen_3x3_with_qr_code ||
                 AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.homescreen_3x3) {

@@ -12,7 +12,9 @@ CREATE TABLE news (
     qr_code_content TEXT,
     qr_code_caption TEXT,
     version INTEGER,
-    flags INTEGER
+    flags INTEGER,
+    dirty INTEGER,
+    pinned INTEGER
 );
 
 CREATE TABLE news_buttons (

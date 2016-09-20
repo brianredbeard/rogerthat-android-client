@@ -17,90 +17,56 @@
  */
 package com.mobicage.rogerthat.plugins.news;
 
-import android.content.ContentValues;
-import android.content.Context;
+
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteDoneException;
 import android.database.sqlite.SQLiteStatement;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
-import com.mobicage.rogerthat.plugins.history.HistoryItem;
-import com.mobicage.rogerthat.plugins.messaging.GetConversationAvatarResponseHandler;
-import com.mobicage.rogerthat.plugins.messaging.Message;
-import com.mobicage.rogerthat.plugins.messaging.MessageBreadCrumb;
-import com.mobicage.rogerthat.plugins.messaging.MessageBreadCrumbs;
-import com.mobicage.rogerthat.plugins.messaging.MessageMemberStatusSummaryEncoding;
-import com.mobicage.rogerthat.plugins.messaging.MessageUpdateNotAllowedException;
-import com.mobicage.rogerthat.plugins.messaging.mfr.MessageFlowRun;
-import com.mobicage.rogerthat.util.TextUtils;
+
 import com.mobicage.rogerthat.util.db.DatabaseManager;
-import com.mobicage.rogerthat.util.db.MultiThreadedSQLStatement;
-import com.mobicage.rogerthat.util.db.Transaction;
 import com.mobicage.rogerthat.util.db.TransactionHelper;
 import com.mobicage.rogerthat.util.db.TransactionWithoutResult;
-import com.mobicage.rogerthat.util.logging.L;
-import com.mobicage.rogerthat.util.pickle.PickleException;
-import com.mobicage.rogerthat.util.pickle.Pickler;
-import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.T;
-import com.mobicage.rogerthat.util.time.TimeUtils;
-import com.mobicage.rogerthat.util.ui.ImageHelper;
-import com.mobicage.rpc.config.CloudConstants;
-import com.mobicage.to.messaging.AttachmentTO;
-import com.mobicage.to.messaging.ButtonTO;
-import com.mobicage.to.messaging.GetConversationAvatarRequestTO;
-import com.mobicage.to.messaging.MemberStatusTO;
-import com.mobicage.to.messaging.MemberStatusUpdateRequestTO;
-import com.mobicage.to.messaging.MessageTO;
+
 import com.mobicage.to.news.NewsActionButtonTO;
 import com.mobicage.to.news.BaseNewsItemTO;
 import com.mobicage.to.news.NewsSenderTO;
 
-import org.jivesoftware.smack.util.Base64;
-import org.json.simple.JSONValue;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static com.mobicage.rogerthat.util.db.DBUtils.bindString;
 
 public class NewsStore implements Closeable {
 
-    public class CursorSet {
-        public Cursor cursor;
-        public int query;
-        public Cursor indexer;
-    }
-
     private final SQLiteStatement mInsertNewsItem;
     private final SQLiteStatement mInsertNewsButton;
     private final SQLiteStatement mInsertNewsRogeredUser;
 
+    private final SQLiteStatement mUpdateNewsDirty;
+    private final SQLiteStatement mUpdateNewsPinned;
+
     private final SQLiteDatabase mDb;
     private final MainService mMainService;
-    private final FriendsPlugin mFriendsPlugin;
 
     public NewsStore(final DatabaseManager databaseManager, final MainService mainService) {
         T.UI();
         mDb = databaseManager.getDatabase();
         mMainService = mainService;
-        mFriendsPlugin = mMainService.getPlugin(FriendsPlugin.class);
 
         mInsertNewsItem = mDb.compileStatement(mMainService.getString(R.string.sql_news_insert_item));
         mInsertNewsButton = mDb.compileStatement(mMainService.getString(R.string.sql_news_insert_button));
         mInsertNewsRogeredUser = mDb.compileStatement(mMainService.getString(R.string.sql_news_insert_rogered_user));
+
+        mUpdateNewsDirty = mDb.compileStatement(mMainService.getString(R.string.sql_news_update_dirty));
+        mUpdateNewsPinned = mDb.compileStatement(mMainService.getString(R.string.sql_news_update_pinned));
     }
 
     @Override
@@ -127,6 +93,10 @@ public class NewsStore implements Closeable {
                 bindString(mInsertNewsItem, 12, item.qr_code_caption);
                 mInsertNewsItem.bindLong(13, item.version);
                 mInsertNewsItem.bindLong(14, item.flags);
+                mInsertNewsItem.bindLong(15, 0);
+                mInsertNewsItem.bindLong(16, 0);
+
+                // todo ruben we should update instead of insert or replace to keep dirty & pinned
                 mInsertNewsItem.execute();
 
                 for (int i = 0; i < item.buttons.length; i++) {
@@ -148,7 +118,29 @@ public class NewsStore implements Closeable {
         });
     }
 
-    public BaseNewsItemTO getNewsItem(long newsId) {
+    public void setNewsItemDirty(final long newsId) {
+        TransactionHelper.runInTransaction(mDb, "setNewsItemDirty", new TransactionWithoutResult() {
+            @Override
+            protected void run() {
+                mUpdateNewsDirty.bindLong(1, 1);
+                mUpdateNewsDirty.bindLong(2, newsId);
+                mUpdateNewsDirty.execute();
+            }
+        });
+    }
+
+    public void setNewsItemPinned(final long newsId, final boolean pinned) {
+        TransactionHelper.runInTransaction(mDb, "setNewsItemPinned", new TransactionWithoutResult() {
+            @Override
+            protected void run() {
+                mUpdateNewsPinned.bindLong(1, pinned ? 1: 0);
+                mUpdateNewsPinned.bindLong(2, newsId);
+                mUpdateNewsPinned.execute();
+            }
+        });
+    }
+
+    public NewsItem getNewsItem(long newsId) {
         T.dontCare();
         final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_news_get_item),
                 new String[] { "" + newsId });
@@ -157,7 +149,7 @@ public class NewsStore implements Closeable {
             if (!c.moveToFirst()) {
                 return null;
             }
-            BaseNewsItemTO newsItem = new BaseNewsItemTO();
+            NewsItem newsItem = new NewsItem();
             newsItem.id = newsId;
             newsItem.timestamp = c.getLong(0);
             newsItem.sender = new NewsSenderTO();
@@ -173,6 +165,8 @@ public class NewsStore implements Closeable {
             newsItem.qr_code_caption = c.getString(10);
             newsItem.version = c.getLong(11);
             newsItem.flags = c.getLong(12);
+            newsItem.dirty = c.getLong(13) > 0;
+            newsItem.pinned = c.getLong(14) > 0;
 
             addButtons(newsItem);
             addRogeredUsers(newsItem);
@@ -182,7 +176,7 @@ public class NewsStore implements Closeable {
         }
     }
 
-    private void addButtons(BaseNewsItemTO newsItem) {
+    private void addButtons(NewsItem newsItem) {
         final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_news_get_buttons),
                 new String[] { "" + newsItem.id });
         try {
@@ -208,7 +202,7 @@ public class NewsStore implements Closeable {
         return button;
     }
 
-    public void addRogeredUsers(BaseNewsItemTO newsItem) {
+    public void addRogeredUsers(NewsItem newsItem) {
         final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_news_get_rogered_users),
                 new String[] { "" + newsItem.id });
         try {
@@ -227,9 +221,9 @@ public class NewsStore implements Closeable {
         }
     }
 
-    public Map<Long, Long> getNewsItemVersions() {
+    public Map<Long, NewsItemDetails> getNewsItemVersions() {
         T.dontCare();
-        Map<Long, Long> dbVersions = new HashMap<>();
+        Map<Long, NewsItemDetails> dbVersions = new HashMap<>();
         final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_news_list_item_versions),
                 new String[]{});
 
@@ -237,13 +231,26 @@ public class NewsStore implements Closeable {
             if (!c.moveToFirst()) {
                 return dbVersions;
             }
-            dbVersions.put(c.getLong(0), c.getLong(1));
-            while (c.moveToNext())
-                dbVersions.put(c.getLong(0), c.getLong(1));
+
+            NewsItemDetails d = readDetails(c);
+            dbVersions.put(d.id, d);
+            while (c.moveToNext()) {
+                NewsItemDetails d2 = readDetails(c);
+                dbVersions.put(d2.id, d2);
+            }
 
             return dbVersions;
         } finally {
             c.close();
         }
+    }
+
+    private NewsItemDetails readDetails(Cursor c) {
+        NewsItemDetails d = new NewsItemDetails();
+        d.id = c.getLong(0);
+        d.version = c.getLong(1);
+        d.dirty = c.getLong(2) > 0;
+        d.pinned = c.getLong(3) > 0;
+        return d;
     }
 }

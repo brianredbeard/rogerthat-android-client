@@ -231,10 +231,11 @@
         </LinearLayout>
 
         <ImageButton
+            android:id="@+id/pinned"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:padding="5dp"
-            android:background="@drawable/news_pin_background"
+            android:background="@drawable/news_pin_background_normal"
             android:layout_gravity="top|right"
             app:ico_color="@color/mc_white"
             app:ico_icon="@string/faw_thumb_tack"

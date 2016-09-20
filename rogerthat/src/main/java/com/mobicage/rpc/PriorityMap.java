@@ -83,6 +83,7 @@ public class PriorityMap {
         sPrioritySet.add("com.mobicage.api.messaging.jsmfr.newFlowMessage");
         sPrioritySet.add("com.mobicage.api.news.getNews");
         sPrioritySet.add("com.mobicage.api.news.getNewsItems");
+        sPrioritySet.add("com.mobicage.api.news.markNewsAsRead");
         sPrioritySet.add("com.mobicage.api.services.findService");
         sPrioritySet.add("com.mobicage.api.services.getActionInfo");
         sPrioritySet.add("com.mobicage.api.services.getMenuIcon");
