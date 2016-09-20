@@ -50,7 +50,7 @@
             android:layout_centerHorizontal="true"
             android:gravity="center_horizontal"
             android:text="@string/ibeacon_usage_augment_experience"
-            android:textSize="24sp"
+            android:textSize="22sp"
             android:textColor="@color/mc_default_text"/>
 
         <TextView
@@ -74,7 +74,7 @@
             android:layout_centerHorizontal="true"
             android:gravity="center_horizontal"
             android:text="@string/ibeacon_usage_discover_services_automatically"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:textColor="@color/mc_default_text" />
 
         <TextView
@@ -98,7 +98,7 @@
             android:layout_centerHorizontal="true"
             android:gravity="center_horizontal"
             android:text="@string/ibeacon_usage_store"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:textColor="@color/mc_default_text" />
 
         <TextView
@@ -109,7 +109,7 @@
             android:layout_centerHorizontal="true"
             android:gravity="center_horizontal"
             android:text="@string/ibeacon_usage_track_location_without_concent"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:textColor="@color/mc_default_text" />
 
         <Button

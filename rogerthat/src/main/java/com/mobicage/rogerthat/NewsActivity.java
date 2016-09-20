@@ -36,7 +36,6 @@ import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -94,7 +93,7 @@ public class NewsActivity extends ServiceBoundActivity {
     private final static int FLAG_ACTION_ROGERTHAT = 1;
     private final static int FLAG_ACTION_FOLLOW = 2;
 
-    protected SwipeRefreshLayout swipeContainer;
+    private SwipeRefreshLayout mSwipeContainer;
     private NewsPlugin mNewsPlugin;
     private NewsStore mNewsStore;
     private MessagingPlugin mMessagingPlugin;
@@ -141,7 +140,7 @@ public class NewsActivity extends ServiceBoundActivity {
             } else if (NewsPlugin.GET_NEWS_RECEIVED_INTENT.equals(action)) {
                 boolean shouldUpdateLayout = false;
 
-                if (swipeContainer.isRefreshing()) {
+                if (mSwipeContainer.isRefreshing()) {
                     mOrder = new ArrayList<>();
                     mLiveOrder = new ArrayList<>();
                     mItems = new HashMap<>();
@@ -172,7 +171,7 @@ public class NewsActivity extends ServiceBoundActivity {
                     }
                     mNewsPlugin.getNewsItems(primitiveLongArray);
                 } else {
-                    swipeContainer.setRefreshing(false);
+                    mSwipeContainer.setRefreshing(false);
                 }
 
                 if (shouldUpdateLayout) {
@@ -189,7 +188,7 @@ public class NewsActivity extends ServiceBoundActivity {
                     mItems.put(ids[i], mNewsStore.getNewsItem(ids[i]));
                 }
                 Collections.sort(mOrder, comparator);
-                swipeContainer.setRefreshing(false);
+                mSwipeContainer.setRefreshing(false);
                 mListAdapter.notifyDataSetChanged();
             } else if (FriendsPlugin.FRIEND_INFO_RECEIVED_INTENT.equals(action)) {
                 if (mExpectedEmailHash != null && mExpectedEmailHash.equals(intent.getStringExtra(ProcessScanActivity.EMAILHASH))) {
@@ -241,16 +240,16 @@ public class NewsActivity extends ServiceBoundActivity {
         mProgressDialog.setIndeterminate(true);
         mProgressDialog.setCancelable(false);
 
-        swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
-        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        mSwipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
+        mSwipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 mNewsPlugin.getNews();
             }
         });
-        swipeContainer.setColorSchemeResources(R.color.mc_primary_color, R.color.mc_secondary_color);
+        mSwipeContainer.setColorSchemeResources(R.color.mc_primary_color, R.color.mc_secondary_color);
         if (!TestUtils.isRunningTest()) {
-            swipeContainer.setRefreshing(true);
+            mSwipeContainer.setRefreshing(true);
         }
 
         mListView = (ListView) findViewById(R.id.news_list);

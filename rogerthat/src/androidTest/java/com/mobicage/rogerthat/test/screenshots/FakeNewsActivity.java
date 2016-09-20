@@ -53,7 +53,6 @@ public class FakeNewsActivity extends NewsActivity {
                 R.string.sample_news_item_message_2, R.string.news, "service@rogerthat.net",
                 R.string.sample_news_item_sender_2, buttons2));
 
-        swipeContainer.setRefreshing(false);
         mListAdapter = new NewsListAdapter(this) {
             @Override
             protected BaseNewsItemTO getNewsItem(int position) {
