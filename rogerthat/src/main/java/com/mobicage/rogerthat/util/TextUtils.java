@@ -70,13 +70,13 @@ public class TextUtils {
 //                }
 //            } else if (v instanceof EditText) {
 //                ((EditText) v).setTypeface(Typeface.createFromAsset(context.getAssets(), "fonts/lato_light.ttf"));
-//                ((EditText) v).setTextColor(ContextCompat.getColor(context, R.color.mc_words_color));
+//                ((EditText) v).setTextColor(ContextCompat.getColor(context, R.color.mc_default_text));
 //            } else if (v instanceof Button) {
 //                ((Button) v).setTypeface(Typeface.createFromAsset(context.getAssets(), "fonts/lato_bold.ttf"));
 //                ((Button) v).setTextColor(ContextCompat.getColor(context, android.R.color.white));
 //            } else if (v instanceof TextView) {
 //                ((TextView) v).setTypeface(Typeface.createFromAsset(context.getAssets(), "fonts/lato_light.ttf"));
-//                ((TextView) v).setTextColor(ContextCompat.getColor(context, R.color.mc_words_color));
+//                ((TextView) v).setTextColor(ContextCompat.getColor(context, R.color.mc_default_text));
 //            }
 //        } catch (Exception e) {
 //            e.printStackTrace();

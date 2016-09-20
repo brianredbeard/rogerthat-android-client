@@ -361,7 +361,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
 
         TextView tosTextView = (TextView) findViewById(R.id.registration_tos);
         tosTextView.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/lato_light_italic.ttf"));
-        tosTextView.setTextColor(ContextCompat.getColor(RegistrationActivity2.this, R.color.mc_words_color));
+        tosTextView.setTextColor(ContextCompat.getColor(RegistrationActivity2.this, R.color.mc_default_text));
 
         TextView signupTextView = (TextView) findViewById(R.id.registration);
         signupTextView.setText(getString(CloudConstants.isCityApp() ? R.string.registration_city_app_sign_up : R

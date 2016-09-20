@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="mc_blue">#ff003058</color>
     <color name="mc_blue2">#ff005094</color>
     <color name="mc_green">#ff99cc33</color>
     <color name="mc_red_divider">#ff0000</color>
@@ -32,7 +31,6 @@
     <color name="mc_border_color">#96006536</color>
     <color name="mc_background_color">#EBEBEB</color>
     <color name="mc_background_color_light">#F5F5F5</color>
-    <color name="mc_words_color">#4D4D4D</color>
     <color name="mc_default_button">#989898</color>
 
     <color name="mc_priority_high_text">#FFFFFF</color>
