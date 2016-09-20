@@ -88,15 +88,15 @@ public class NewsPlugin implements MobicagePlugin {
         return mStore;
     }
 
-    public void getNews() {
+    public void getNews(final String cursor, final String uuid) {
         SafeRunnable runnable = new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
                 final GetNewsResponseHandler responseHandler = new GetNewsResponseHandler();
-                responseHandler.setUUID("todo ruben");
+                responseHandler.setUUID(uuid);
 
                 GetNewsRequestTO request = new GetNewsRequestTO();
-                request.cursor = null;
+                request.cursor = cursor;
 
                 com.mobicage.api.news.Rpc.getNews(responseHandler, request);
             }

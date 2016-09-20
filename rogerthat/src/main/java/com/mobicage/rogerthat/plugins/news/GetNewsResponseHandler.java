@@ -61,6 +61,8 @@ public class GetNewsResponseHandler extends ResponseHandler<GetNewsResponseTO> {
             Intent intent = new Intent(NewsPlugin.GET_NEWS_RECEIVED_INTENT);
             intent.putExtra("ids", resp.ids);
             intent.putExtra("versions", resp.versions);
+            intent.putExtra("cursor", resp.cursor);
+            intent.putExtra("uuid", this.mUUID);
             mMainService.sendBroadcast(intent);
         } catch (Exception e) {
             L.e("Server responded with an error.", e);

@@ -96,19 +96,12 @@
 
                             <TextView
                                 android:id="@+id/service_name"
-                                android:layout_width="wrap_content"
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
+                                android:layout_weight="1"
                                 android:text="Ma-Tu-Vu"
                                 android:textSize="12sp"
                                 android:textStyle="italic" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="-"
-                                android:layout_marginLeft="5dp"
-                                android:textSize="12sp"
-                                android:textStyle="italic"  />
 
                             <TextView
                                 android:id="@+id/date"
