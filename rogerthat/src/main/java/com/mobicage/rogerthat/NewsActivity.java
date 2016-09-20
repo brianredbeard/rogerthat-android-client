@@ -151,7 +151,7 @@ public class NewsActivity extends ServiceBoundActivity {
                     mLiveOrder = new ArrayList<>();
 
                     for (NewsItemDetails d : mDBItems.values()) {
-                        if (d.pinned) {
+                        if (d.pinned && !d.deleted) {
                             shouldUpdateLayout = true;
                             mLiveOrder.add(d.id);
                             mOrder.add(d.id);
@@ -171,6 +171,8 @@ public class NewsActivity extends ServiceBoundActivity {
                         idsToRequest.add(ids[i]);
                     } else if (mDBItems.get(ids[i]).version < versions[i]){
                         idsToRequest.add(ids[i]);
+                    } else if (mDBItems.get(ids[i]).deleted) {
+                        // news item was removed
                     } else if (!mOrder.contains(ids[i])) {
                         mItems.put(ids[i], mNewsStore.getNewsItem(ids[i]));
                         mOrder.add(ids[i]);
@@ -192,7 +194,7 @@ public class NewsActivity extends ServiceBoundActivity {
                 if (shouldUpdateLayout) {
                     mListAdapter.notifyDataSetChanged();
                 }
-                
+
             } else if (NewsPlugin.GET_NEWS_ITEMS_RECEIVED_INTENT.equals(action)) {
                 long[] ids = intent.getLongArrayExtra("ids");
 
@@ -204,15 +206,40 @@ public class NewsActivity extends ServiceBoundActivity {
                     d.version = item.version;
                     d.dirty = item.dirty;
                     d.pinned = item.pinned;
+                    d.rogered = item.rogered;
+                    d.deleted = item.deleted;
                     mDBItems.put(item.id, d);
-                    if (!mOrder.contains(item.id)) {
-                        mOrder.add(item.id);
+
+                    if (item.deleted) {
+                        mOrder.remove(item.id);
+                    } else {
+                        if (!mOrder.contains(item.id)) {
+                            mOrder.add(item.id);
+                        }
                     }
+
                     mItems.put(item.id, item);
                 }
                 Collections.sort(mOrder, comparator);
                 mSwipeContainer.setRefreshing(false);
                 mListAdapter.notifyDataSetChanged();
+
+            } else if (NewsPlugin.DELETE_NEWS_ITEM_INTENT.equals(action)) {
+                long id = intent.getLongExtra("id", -1);
+                if (id > 0) {
+                    if (mDBItems.containsKey(id)) {
+                        mDBItems.get(id).deleted = true;
+                    }
+                    if (mItems.containsKey(id)) {
+                        mItems.get(id).deleted = true;
+                    }
+
+                    mLiveOrder.remove(id);
+                    if (mOrder.remove(id)) {
+                        mListAdapter.notifyDataSetChanged();
+                    }
+                }
+
             } else if (FriendsPlugin.FRIEND_INFO_RECEIVED_INTENT.equals(action)) {
                 if (mExpectedEmailHash != null && mExpectedEmailHash.equals(intent.getStringExtra(ProcessScanActivity.EMAILHASH))) {
                     mProgressDialog.dismiss();
@@ -281,7 +308,7 @@ public class NewsActivity extends ServiceBoundActivity {
         mDBItems = mNewsStore.getNewsItemVersions();
         boolean shouldUpdateLayout = false;
         for (NewsItemDetails d : mDBItems.values()) {
-            if (d.pinned) {
+            if (d.pinned && !d.deleted) {
                 shouldUpdateLayout = true;
                 mLiveOrder.add(d.id);
                 mOrder.add(d.id);
@@ -297,6 +324,7 @@ public class NewsActivity extends ServiceBoundActivity {
         final IntentFilter filter = new IntentFilter(CachedDownloader.CACHED_DOWNLOAD_AVAILABLE_INTENT);
         filter.addAction(NewsPlugin.GET_NEWS_RECEIVED_INTENT);
         filter.addAction(NewsPlugin.GET_NEWS_ITEMS_RECEIVED_INTENT);
+        filter.addAction(NewsPlugin.DELETE_NEWS_ITEM_INTENT);
         filter.addAction(FriendsPlugin.FRIEND_INFO_RECEIVED_INTENT);
         registerReceiver(mBroadcastReceiver, filter);
     }

@@ -18,6 +18,8 @@
 
 package com.mobicage.rogerthat.plugins.news;
 
+import android.content.Intent;
+
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
@@ -111,7 +113,14 @@ public class NewsCallReceiver implements com.mobicage.capi.news.IClientRpc {
     public DisableNewsResponseTO disableNews(DisableNewsRequestTO request) throws Exception {
         T.BIZZ();
         DisableNewsResponseTO response = new DisableNewsResponseTO();
-        // todo ruben
+
+        NewsPlugin newsPlugin = mMainService.getPlugin(NewsPlugin.class);
+        newsPlugin.getStore().setNewsItemDeleted(request.news_id);
+
+        Intent intent = new Intent(NewsPlugin.DELETE_NEWS_ITEM_INTENT);
+        intent.putExtra("id", request.news_id);
+        mMainService.sendBroadcast(intent);
+
         return response;
     }
 
