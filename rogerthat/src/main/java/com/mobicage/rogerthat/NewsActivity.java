@@ -174,6 +174,7 @@ public class NewsActivity extends ServiceBoundActivity {
                 }
 
                 Set<Long> idsToRequest = new LinkedHashSet<>();
+                Set<Long> updatedIds = new LinkedHashSet<>();
                 for (int i= 0 ; i < ids.length; i++) {
                     if (!mLiveOrder.contains(ids[i])) {
                         mLiveOrder.add(ids[i]);
@@ -182,6 +183,7 @@ public class NewsActivity extends ServiceBoundActivity {
                         idsToRequest.add(ids[i]);
                     } else if (mDBItems.get(ids[i]).version < versions[i]){
                         idsToRequest.add(ids[i]);
+                        updatedIds.add(ids[i]);
                     } else if (mDBItems.get(ids[i]).deleted) {
                         // news item was removed
                     } else if (!mOrder.contains(ids[i])) {
@@ -192,12 +194,13 @@ public class NewsActivity extends ServiceBoundActivity {
                 }
 
                 if (idsToRequest.size() > 0) {
-                    long[] primitiveLongArray = new long[idsToRequest.size()];
-                    Long[] longArray = idsToRequest.toArray(new Long[idsToRequest.size()]);
-                    for (int i =0; i < longArray.length; i++) {
-                        primitiveLongArray[i] = longArray[i].longValue();
+                    long[] primitiveIdsToRequest = new long[idsToRequest.size()];
+                    Long[] tmpArray1 = idsToRequest.toArray(new Long[idsToRequest.size()]);
+                    for (int i =0; i < tmpArray1.length; i++) {
+                        primitiveIdsToRequest[i] = tmpArray1[i].longValue();
                     }
-                    mNewsPlugin.getNewsItems(primitiveLongArray);
+
+                    mNewsPlugin.getNewsItems(primitiveIdsToRequest, updatedIds);
                 } else {
                     mSwipeContainer.setRefreshing(false);
                     mIsLoadingMoreNews = false;
@@ -430,7 +433,7 @@ public class NewsActivity extends ServiceBoundActivity {
 
             LinearLayout membersContainer = (LinearLayout) view.findViewById(R.id.members_container);
             TextView members = (TextView) view.findViewById(R.id.members);
-            
+
             if (newsItem.users_that_rogered.length > 0) {
                 List<String> names = new ArrayList<>();
                 for (String email : newsItem.users_that_rogered) {
