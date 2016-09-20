@@ -1,5 +1,5 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
 	android:orientation="vertical"
@@ -155,7 +155,7 @@
 			android:paddingRight="20dp"
 			android:background="@drawable/input">
 
-			<EditText
+			<android.support.design.widget.TextInputEditText
 				android:id="@+id/message"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
@@ -166,7 +166,7 @@
 				android:inputType="textMultiLine"
 				android:textSize="18sp"
 				android:textColorHint="#c4c0bd"
-				android:background="@null"/>
+				android:background="@null" />
 
 		</LinearLayout>
 

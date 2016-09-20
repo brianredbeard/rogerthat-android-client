@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_view_footer"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -11,38 +11,46 @@
 
     <ImageButton
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="30dp"
         android:layout_weight="1"
         android:background="@null"
         android:onClick="onOptionNavigationViewToolbarSelected"
         android:tag="news"
-        android:src="@drawable/menu_toolbar_0"/>
+        app:ico_color="@color/mc_white"
+        app:ico_icon="@string/faw_newspaper_o"
+        app:ico_padding="5dp" />
 
     <ImageButton
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="30dp"
         android:layout_weight="1"
         android:background="@null"
         android:onClick="onOptionNavigationViewToolbarSelected"
         android:tag="order"
-        android:src="@drawable/menu_toolbar_1"/>
+        app:ico_color="@color/mc_white"
+        app:ico_icon="@string/faw_shopping_cart"
+        app:ico_padding="5dp" />
 
     <ImageButton
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="30dp"
         android:layout_weight="1"
         android:background="@null"
         android:onClick="onOptionNavigationViewToolbarSelected"
         android:tag="events"
-        android:src="@drawable/menu_toolbar_2"/>
+        app:ico_color="@color/mc_white"
+        app:ico_icon="@string/faw_calendar"
+        app:ico_padding="5dp" />
 
     <ImageButton
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="30dp"
         android:layout_weight="1"
         android:background="@null"
         android:onClick="onOptionNavigationViewToolbarSelected"
         android:tag="loyalty"
-        android:src="@drawable/menu_toolbar_3"/>
+        app:ico_color="@color/mc_white"
+        app:ico_icon="@string/faw_credit_card"
+        app:ico_padding="5dp" />
 
 </LinearLayout>
