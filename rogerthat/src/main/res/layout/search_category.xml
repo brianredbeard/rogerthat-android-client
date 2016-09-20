@@ -19,6 +19,6 @@
         android:id="@+id/indicator"
         android:layout_width="fill_parent"
         android:layout_height="5dp"
-        android:background="@color/mc_blue2" />
+        android:background="@color/mc_primary_color" />
 
 </LinearLayout>

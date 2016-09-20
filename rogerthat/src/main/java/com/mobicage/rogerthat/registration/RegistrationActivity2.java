@@ -1394,7 +1394,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
     protected void onServiceUnbound() {
 
     }
-    
+
     private void createWorkerThread() {
         T.UI();
         mWorkerThread = new HandlerThread("rogerthat_registration_worker");
