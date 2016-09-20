@@ -175,8 +175,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             if (!SystemUtils.isFlagEnabled(mFlags, MessagingPlugin.FLAG_DYNAMIC_CHAT) && !mParentMessage.threadDirty) {
                 List<String> dirties = new ArrayList<String>(mRenderedMessages.size());
                 for (String key : mRenderedMessages)
-                    if (!mMessagingPlugin.isTmpKey(key))
-                        dirties.add(key);
+                    dirties.add(key);
                 mMessagingPlugin.markMessagesAsRead(mParentMessageKey, dirties.toArray(new String[dirties.size()]));
             }
         }
@@ -419,8 +418,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             setMessage(message, context, view);
             setAttachments(message, context, view);
             if (!isChat || allowChatButtons) {
-                boolean isLocked = SystemUtils.isFlagEnabled(message.flags, MessagingPlugin.FLAG_LOCKED)
-                    || mMessagingPlugin.isTmpKey(message.key);
+                boolean isLocked = SystemUtils.isFlagEnabled(message.flags, MessagingPlugin.FLAG_LOCKED);
                 boolean canEdit = isLocked;
                 if (!canEdit && allowChatButtons) {
                     canEdit = true;
@@ -466,7 +464,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                             attachment.messageKey, attachment.download_url)) {
                         // Show spinner if in queue and disable click
                         ProgressBar spinner = (ProgressBar) view.findViewById(R.id.spinner);
-                        spinner.setVisibility(View.VISIBLE);
+                        spinner.setVisibility(View.VISIBLE); // todo ruben
 
                     } else {
                         final ImageView attachmentImageView = (ImageView) View.inflate(mContext,
@@ -690,7 +688,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
 
         private void setSenderAvatar(Context context, View view, Cursor c, final MessageTO message) {
             ImageView senderAvatar = (ImageView) view.findViewById(R.id.sender_avatar);
-            ProgressBar spinner = (ProgressBar) view.findViewById(R.id.spinner);
+            ProgressBar spinner = (ProgressBar) view.findViewById(R.id.spinner); // todo ruben
             final boolean isChat = SystemUtils.isFlagEnabled(message.flags, MessagingPlugin.FLAG_DYNAMIC_CHAT);
             final SafeRunnable friendNotFoundRunnable;
             if (isChat) {
@@ -706,11 +704,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             senderAvatar
                 .setImageBitmap(mFriendsPlugin.getAvatarBitmap(message.sender, !isChat, friendNotFoundRunnable));
 
-            if (mMessagingPlugin.isTmpKey(message.key)) {
-                spinner.setVisibility(View.VISIBLE);
-            } else {
-                spinner.setVisibility(View.GONE);
-            }
+            spinner.setVisibility(View.GONE); // todo ruben
 
             final boolean isSender = message.sender.equals(mMyEmail);
             if (isSender && !isChat && !SystemUtils.isFlagEnabled(message.flags, MessagingPlugin.FLAG_LOCKED)) {
@@ -718,8 +712,6 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                     @Override
                     public boolean onLongClick(View v) {
                         if (!isSender)
-                            return false;
-                        if (mMessagingPlugin.isTmpKey(message.key))
                             return false;
                         final ProgressDialog dialog = ProgressDialog.show(FriendsThreadActivity.this, "",
                             getString(R.string.locking), true, false);
@@ -940,8 +932,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             MessagingPlugin.MESSAGE_LOCKED_INTENT, MessagingPlugin.MESSAGE_PROCESSED_INTENT,
             MessagingPlugin.NEW_MESSAGE_RECEIVED_INTENT, FriendsPlugin.FRIEND_AVATAR_CHANGED_INTENT,
             FriendsPlugin.FRIEND_UPDATE_INTENT, IdentityStore.IDENTITY_CHANGED_INTENT,
-            FriendsPlugin.FRIENDS_LIST_REFRESHED, MessagingPlugin.NEW_MESSAGE_QUEUED_TO_BACKLOG_INTENT,
-            MessagingPlugin.MESSAGE_KEY_UPDATED_INTENT };
+            FriendsPlugin.FRIENDS_LIST_REFRESHED, MessagingPlugin.NEW_MESSAGE_QUEUED_TO_BACKLOG_INTENT };
     }
 
     private boolean iAmMember(final Message message) {

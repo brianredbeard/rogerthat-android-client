@@ -261,7 +261,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
     protected String[] getAllReceivingIntents() {
         return new String[]{MessagingPlugin.NEW_MESSAGE_RECEIVED_INTENT,
                 MessagingPlugin.MESSAGE_MEMBER_STATUS_UPDATE_RECEIVED_INTENT, MessagingPlugin.MESSAGE_DIRTY_CLEANED_INTENT,
-                MessagingPlugin.MESSAGE_KEY_UPDATED_INTENT, MessagingPlugin.MESSAGE_LOCKED_INTENT,
+                MessagingPlugin.MESSAGE_LOCKED_INTENT,
                 MessagingPlugin.MESSAGE_PROCESSED_INTENT, MessagingPlugin.MESSAGE_FAILURE,
                 MessagingPlugin.MESSAGE_THREAD_VISIBILITY_CHANGED_INTENT, MessagingPlugin.THREAD_DELETED_INTENT,
                 MessagingPlugin.THREAD_RECOVERED_INTENT, MessagingPlugin.THREAD_MODIFIED_INTENT,

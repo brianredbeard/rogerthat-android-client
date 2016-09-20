@@ -6,10 +6,8 @@
     android:background="?attr/selectableItemBackground"
     android:minHeight="72dp"
     android:orientation="horizontal"
-    android:paddingEnd="?attr/listPreferredItemPaddingRight"
     android:paddingLeft="?attr/listPreferredItemPaddingLeft"
-    android:paddingRight="?attr/listPreferredItemPaddingRight"
-    android:paddingStart="?attr/listPreferredItemPaddingLeft">
+    android:paddingRight="?attr/listPreferredItemPaddingRight">
 
     <FrameLayout
         android:id="@+id/friend_avatar_container"
@@ -29,7 +27,6 @@
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:layout_marginLeft="20dp"
-            android:layout_marginStart="20dp"
             android:layout_marginTop="40dp"
             android:background="@drawable/circle_tint"
             android:padding="5dp"
@@ -56,7 +53,6 @@
             android:id="@+id/friend_spinner"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_marginEnd="5dp"
             android:layout_marginRight="5dp"
             android:indeterminate="true"
             android:visibility="gone" />
@@ -74,10 +70,8 @@
         android:layout_height="wrap_content"
         android:layout_alignWithParentIfMissing="true"
         android:layout_centerVertical="true"
-        android:layout_marginEnd="16dp"
-        android:layout_marginLeft="15dp"
+        android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
-        android:layout_marginStart="16dp"
         android:layout_toEndOf="@id/friend_avatar_container"
         android:layout_toLeftOf="@id/friend_existence_layout"
         android:layout_toRightOf="@id/friend_avatar_container"

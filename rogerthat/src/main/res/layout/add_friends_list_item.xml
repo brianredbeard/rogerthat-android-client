@@ -5,10 +5,8 @@
     android:layout_height="wrap_content"
     android:minHeight="72dp"
     android:orientation="horizontal"
-    android:paddingEnd="?attr/listPreferredItemPaddingRight"
     android:paddingLeft="?attr/listPreferredItemPaddingLeft"
-    android:paddingRight="?attr/listPreferredItemPaddingRight"
-    android:paddingStart="?attr/listPreferredItemPaddingLeft">
+    android:paddingRight="?attr/listPreferredItemPaddingRight">
     <!-- https://material.google.com/components/lists.html#lists-specs -->
     <!-- https://gist.github.com/renanferrari/42f7f325a5ead7c1f689 -->
     <ImageView
@@ -63,7 +61,6 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_marginLeft="16dp"
-        android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:scaleType="centerInside"
         android:textSize="14sp"
