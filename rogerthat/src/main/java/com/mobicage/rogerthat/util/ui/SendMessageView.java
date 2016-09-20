@@ -20,10 +20,12 @@ package com.mobicage.rogerthat.util.ui;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -56,6 +58,7 @@ import com.mobicage.rogerthat.CannedButtons;
 import com.mobicage.rogerthat.HomeActivity;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
+import com.mobicage.rogerthat.MyIdentity;
 import com.mobicage.rogerthat.SendMessageButtonActivity;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.config.Configuration;
@@ -72,6 +75,7 @@ import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.pickle.PickleException;
 import com.mobicage.rogerthat.util.pickle.Pickler;
 import com.mobicage.rogerthat.util.system.SafeAsyncTask;
+import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
@@ -899,33 +903,14 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
 
         } else if (IMAGE_BUTTON_PRIORITY == key) {
             hideKeyboard();
-            final Dialog dialog = new Dialog(mActivity);
-            dialog.setContentView(R.layout.msg_priority_picker); // todo ruben
-            dialog.setTitle(R.string.priority);
-            Button savePriorityBtn = (Button) dialog.findViewById(R.id.ok);
+
+            final View dialog = mActivity.getLayoutInflater().inflate(R.layout.msg_priority_picker, null);
+
             final RadioButton priorityNormalBtn = ((RadioButton) dialog.findViewById(R.id.priority_normal));
             final RadioButton priorityHighBtn = ((RadioButton) dialog.findViewById(R.id.priority_high));
             final RadioButton priorityUrgentBtn = ((RadioButton) dialog.findViewById(R.id.priority_urgent));
             final RadioButton priorityUrgentWithAlarmBtn = ((RadioButton) dialog
                     .findViewById(R.id.priority_urgent_with_alarm));
-
-            savePriorityBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (priorityHighBtn.isChecked()) {
-                        mPriority = Message.PRIORITY_HIGH;
-                    } else if (priorityUrgentBtn.isChecked()) {
-                        mPriority = Message.PRIORITY_URGENT;
-                    } else if (priorityUrgentWithAlarmBtn.isChecked()) {
-                        mPriority = Message.PRIORITY_URGENT_WITH_ALARM;
-                    } else {
-                        mPriority = Message.PRIORITY_NORMAL;
-                    }
-
-                    dialog.dismiss();
-                    initImageButtonsNavigation();
-                }
-            });
 
             priorityNormalBtn.setChecked(false);
             priorityHighBtn.setChecked(false);
@@ -942,25 +927,37 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
                 priorityNormalBtn.setChecked(true);
             }
 
-            dialog.show();
+            AlertDialog alertDialog = new AlertDialog.Builder(mActivity)
+                    .setTitle(R.string.priority)
+                    .setView(dialog)
+                    .setPositiveButton(mActivity.getString(R.string.ok), new SafeDialogInterfaceOnClickListener() {
+                        @Override
+                        public void safeOnClick(DialogInterface di, int which) {
+                            if (priorityHighBtn.isChecked()) {
+                                mPriority = Message.PRIORITY_HIGH;
+                            } else if (priorityUrgentBtn.isChecked()) {
+                                mPriority = Message.PRIORITY_URGENT;
+                            } else if (priorityUrgentWithAlarmBtn.isChecked()) {
+                                mPriority = Message.PRIORITY_URGENT_WITH_ALARM;
+                            } else {
+                                mPriority = Message.PRIORITY_NORMAL;
+                            }
+                            initImageButtonsNavigation();
+                        }
+                    }).setNegativeButton(mActivity.getString(R.string.cancel), new SafeDialogInterfaceOnClickListener() {
+                        @Override
+                        public void safeOnClick(DialogInterface dialog, int which) {
+                        }
+                    }).create();
+            alertDialog.setCanceledOnTouchOutside(true);
+            alertDialog.show();
+
         } else if (IMAGE_BUTTON_STICKY == key) {
             hideKeyboard();
-            final Dialog dialog = new Dialog(mActivity);
-            dialog.setContentView(R.layout.msg_sticky_picker); // todo ruben
-            dialog.setTitle(R.string.sticky);
-            Button savePriorityBtn = (Button) dialog.findViewById(R.id.ok);
+            final View dialog = mActivity.getLayoutInflater().inflate(R.layout.msg_sticky_picker, null);
+
             final RadioButton stickyDisabled = ((RadioButton) dialog.findViewById(R.id.sticky_disabled));
             final RadioButton stickyEnabled = ((RadioButton) dialog.findViewById(R.id.sticky_enabled));
-
-            savePriorityBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mIsSticky = stickyEnabled.isChecked();
-
-                    dialog.dismiss();
-                    initImageButtonsNavigation();
-                }
-            });
 
             stickyDisabled.setChecked(false);
             stickyEnabled.setChecked(false);
@@ -971,24 +968,30 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
                 stickyDisabled.setChecked(true);
             }
 
-            dialog.show();
-        } else if (IMAGE_BUTTON_MORE == key) {final Dialog dialog = new Dialog(mActivity);
+            AlertDialog alertDialog = new AlertDialog.Builder(mActivity)
+                    .setTitle(R.string.sticky)
+                    .setView(dialog)
+                    .setPositiveButton(mActivity.getString(R.string.ok), new SafeDialogInterfaceOnClickListener() {
+                        @Override
+                        public void safeOnClick(DialogInterface di, int which) {
+                            mIsSticky = stickyEnabled.isChecked();
+                            initImageButtonsNavigation();
+                        }
+                    }).setNegativeButton(mActivity.getString(R.string.cancel), new SafeDialogInterfaceOnClickListener() {
+                        @Override
+                        public void safeOnClick(DialogInterface dialog, int which) {
+                        }
+                    }).create();
+            alertDialog.setCanceledOnTouchOutside(true);
+            alertDialog.show();
+
+        } else if (IMAGE_BUTTON_MORE == key) {
             hideKeyboard();
-            dialog.setContentView(R.layout.msg_more_picker);
-            dialog.setTitle(R.string.more);
+            final View dialog = mActivity.getLayoutInflater().inflate(R.layout.msg_more_picker, null);
             final ListView pickMsgMore = (ListView) dialog.findViewById(R.id.pick_msg_more);
 
-            pickMsgMore.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(final AdapterView<?> parent, final View view, final int position, final long id) {
-                    dialog.dismiss();
-                    PickMoreItem item = (PickMoreItem) view.getTag();
-                    processOnClickListenerForKey(item.imageButtonKey);
-                }
-            });
-
-            List<PickMoreItem> items = new ArrayList<PickMoreItem>();
-            for (int i = mMaxImageButtonsOnScreen - 2; i < mImageButtons.size(); i++) {
+            List<PickMoreItem> items = new ArrayList<>();
+            for (int i = mMaxImageButtonsOnScreen - 1; i < mImageButtons.size(); i++) {
                 int k = mImageButtons.get(i);
                 String t = "";
                 if (k == IMAGE_BUTTON_TEXT) {
@@ -1011,15 +1014,25 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
             }
             pickMsgMore.setAdapter(new ListAdapter(mActivity, items));
 
-            Button closeMoreBtn = (Button) dialog.findViewById(R.id.close);
-            closeMoreBtn.setOnClickListener(new View.OnClickListener() {
+            final AlertDialog alertDialog = new AlertDialog.Builder(mActivity)
+                    .setTitle(R.string.more)
+                    .setView(dialog)
+                    .setNegativeButton(mActivity.getString(R.string.cancel), new SafeDialogInterfaceOnClickListener() {
+                        @Override
+                        public void safeOnClick(DialogInterface dialog, int which) {
+                        }
+                    }).create();
+            alertDialog.setCanceledOnTouchOutside(true);
+            alertDialog.show();
+
+            pickMsgMore.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
-                public void onClick(View v) {
-                    dialog.dismiss();
+                public void onItemClick(final AdapterView<?> parent, final View view, final int position, final long id) {
+                    alertDialog.dismiss();
+                    PickMoreItem item = (PickMoreItem) view.getTag();
+                    processOnClickListenerForKey(item.imageButtonKey);
                 }
             });
-
-            dialog.show();
         } else {
             L.d("Could not find processOnClickListener for key: " + key);
         }
