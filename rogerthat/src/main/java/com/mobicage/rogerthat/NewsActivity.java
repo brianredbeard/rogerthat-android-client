@@ -391,9 +391,6 @@ public class NewsActivity extends ServiceBoundActivity {
                 }
             });
 
-            // todo ruben we need to make sure the save for later pin is not hiding anything
-            // android:layout_marginRight="30dp"
-
             TextView serviceName = (TextView) view.findViewById(R.id.service_name);
             serviceName.setText(newsItem.sender.name);
 

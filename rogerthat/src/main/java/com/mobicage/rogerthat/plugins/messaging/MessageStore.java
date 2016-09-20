@@ -409,7 +409,8 @@ public class MessageStore implements Closeable {
 
                 StringBuilder sb = new StringBuilder();
                 boolean needscomma = false;
-                if (mFriendsPlugin.getStore().getFriendType(message.sender) == FriendsPlugin.FRIEND_TYPE_SERVICE) {
+                if (FriendsPlugin.SYSTEM_FRIEND.equals(message.sender) ||
+                        mFriendsPlugin.getStore().getFriendType(message.sender) == FriendsPlugin.FRIEND_TYPE_SERVICE) {
                     needscomma = true;
                     sb.append(mFriendsPlugin.getName(message.sender));
                 }
