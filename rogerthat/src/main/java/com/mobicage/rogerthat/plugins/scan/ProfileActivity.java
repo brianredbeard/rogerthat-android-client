@@ -168,6 +168,7 @@ public class ProfileActivity extends ServiceBoundActivity {
                     }
 
                     AlertDialog alertDialog = new AlertDialog.Builder(ProfileActivity.this)
+                            .setTitle(R.string.gender)
                             .setView(dialog)
                             .setPositiveButton(getString(R.string.ok), new SafeDialogInterfaceOnClickListener() {
                                 @Override
