@@ -192,7 +192,7 @@ public class NewsActivity extends ServiceBoundActivity {
                 if (shouldUpdateLayout) {
                     mListAdapter.notifyDataSetChanged();
                 }
-
+                
             } else if (NewsPlugin.GET_NEWS_ITEMS_RECEIVED_INTENT.equals(action)) {
                 long[] ids = intent.getLongArrayExtra("ids");
 
@@ -619,9 +619,9 @@ public class NewsActivity extends ServiceBoundActivity {
             NewsItemDetails d2 = mDBItems.get(item2);
 
             if (d1.pinned && !d2.pinned) {
-                return 1;
-            } else if (!d1.pinned && d2.pinned) {
                 return -1;
+            } else if (!d1.pinned && d2.pinned) {
+                return 1;
             }
 
             int position1 = mLiveOrder.indexOf(item1);
