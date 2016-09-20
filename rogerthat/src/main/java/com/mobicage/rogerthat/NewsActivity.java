@@ -503,7 +503,7 @@ public class NewsActivity extends ServiceBoundActivity {
                             newsItem.rogered = true;
                             mDBItems.get(newsItem.id).rogered = true;
                             mNewsStore.setNewsItemRogered(newsItem.id);
-                            mNewsPlugin.newsRogered(new long[] { newsItem.id });
+                            mNewsPlugin.newsRogered(newsItem.id);
 
                             btn.setBackgroundColor(getResources().getColor(R.color.mc_divider_gray));
                             btn.setOnClickListener(null);

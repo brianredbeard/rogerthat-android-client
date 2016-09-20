@@ -25,40 +25,24 @@ import java.util.Map;
 
 public class NewsRogeredRequestTO implements com.mobicage.rpc.IJSONable {
 
-    public long[] ids;
+    public long news_id;
 
     public NewsRogeredRequestTO() {
     }
 
     public NewsRogeredRequestTO(Map<String, Object> json) throws IncompleteMessageException {
-        if (json.containsKey("ids")) {
-            org.json.simple.JSONArray val_arr = (org.json.simple.JSONArray) json.get("ids");
-            if (val_arr == null) {
-                this.ids = null;
-            } else {
-                this.ids = new long[val_arr.size()];
-                for (int i=0; i < val_arr.size(); i++) {
-                    this.ids[i] = ((Long) val_arr.get(i)).longValue();
-                }
-            }
+        if (json.containsKey("news_id")) {
+            Object val = json.get("news_id");
+            this.news_id = ((Long) val).longValue();
         } else {
-            throw new IncompleteMessageException("com.mobicage.to.news.NewsRogeredRequestTO object is missing field 'ids'");
+            throw new IncompleteMessageException("com.mobicage.to.news.NewsRogeredRequestTO object is missing field 'news_id'");
         }
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Map<String, Object> toJSONMap() {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
-        if (this.ids == null) {
-            obj.put("ids", null);
-        } else {
-            org.json.simple.JSONArray arr = new org.json.simple.JSONArray();
-            for (int i=0; i < this.ids.length; i++) {
-                arr.add(this.ids[i]);
-            }
-            obj.put("ids", arr);
-        }
+        obj.put("news_id", this.news_id);
         return obj;
     }
 

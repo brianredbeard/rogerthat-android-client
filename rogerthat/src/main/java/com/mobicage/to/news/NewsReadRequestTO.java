@@ -25,24 +25,24 @@ import java.util.Map;
 
 public class NewsReadRequestTO implements com.mobicage.rpc.IJSONable {
 
-    public long[] ids;
+    public long[] news_ids;
 
     public NewsReadRequestTO() {
     }
 
     public NewsReadRequestTO(Map<String, Object> json) throws IncompleteMessageException {
-        if (json.containsKey("ids")) {
-            org.json.simple.JSONArray val_arr = (org.json.simple.JSONArray) json.get("ids");
+        if (json.containsKey("news_ids")) {
+            org.json.simple.JSONArray val_arr = (org.json.simple.JSONArray) json.get("news_ids");
             if (val_arr == null) {
-                this.ids = null;
+                this.news_ids = null;
             } else {
-                this.ids = new long[val_arr.size()];
+                this.news_ids = new long[val_arr.size()];
                 for (int i=0; i < val_arr.size(); i++) {
-                    this.ids[i] = ((Long) val_arr.get(i)).longValue();
+                    this.news_ids[i] = ((Long) val_arr.get(i)).longValue();
                 }
             }
         } else {
-            throw new IncompleteMessageException("com.mobicage.to.news.NewsReadRequestTO object is missing field 'ids'");
+            throw new IncompleteMessageException("com.mobicage.to.news.NewsReadRequestTO object is missing field 'news_ids'");
         }
     }
 
@@ -50,14 +50,14 @@ public class NewsReadRequestTO implements com.mobicage.rpc.IJSONable {
     @SuppressWarnings("unchecked")
     public Map<String, Object> toJSONMap() {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
-        if (this.ids == null) {
-            obj.put("ids", null);
+        if (this.news_ids == null) {
+            obj.put("news_ids", null);
         } else {
             org.json.simple.JSONArray arr = new org.json.simple.JSONArray();
-            for (int i=0; i < this.ids.length; i++) {
-                arr.add(this.ids[i]);
+            for (int i=0; i < this.news_ids.length; i++) {
+                arr.add(this.news_ids[i]);
             }
-            obj.put("ids", arr);
+            obj.put("news_ids", arr);
         }
         return obj;
     }

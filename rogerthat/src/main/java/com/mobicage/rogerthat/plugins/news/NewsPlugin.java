@@ -133,8 +133,8 @@ public class NewsPlugin implements MobicagePlugin {
             protected void safeRun() throws Exception {
                 ResponseHandler<NewsReadResponseTO> responseHandler = new ResponseHandler<NewsReadResponseTO>();
                 NewsReadRequestTO request = new NewsReadRequestTO();
-                request.ids = ids;
-                L.d("newsRead: " + request.ids);
+                request.news_ids = ids;
+                L.d("newsRead: " + request.news_ids);
                 com.mobicage.api.news.Rpc.newsRead(responseHandler, request);
             }
         };
@@ -146,14 +146,14 @@ public class NewsPlugin implements MobicagePlugin {
         }
     }
 
-    public void newsRogered(final long[] ids) {
+    public void newsRogered(final long id) {
         SafeRunnable runnable = new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
                 ResponseHandler<NewsRogeredResponseTO> responseHandler = new ResponseHandler<NewsRogeredResponseTO>();
                 NewsRogeredRequestTO request = new NewsRogeredRequestTO();
-                request.ids = ids;
-                L.d("newsRogered: " + request.ids);
+                request.news_id = id;
+                L.d("newsRogered: " + request.news_id);
                 com.mobicage.api.news.Rpc.newsRogered(responseHandler, request);
             }
         };
