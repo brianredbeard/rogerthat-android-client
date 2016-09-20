@@ -52,6 +52,8 @@ public class NewsStore implements Closeable {
 
     private final SQLiteStatement mUpdateNewsDirty;
     private final SQLiteStatement mUpdateNewsPinned;
+    private final SQLiteStatement mUpdateNewsRogered;
+    private final SQLiteStatement mUpdateNewsDeleted;
 
     private final SQLiteDatabase mDb;
     private final MainService mMainService;
@@ -67,11 +69,21 @@ public class NewsStore implements Closeable {
 
         mUpdateNewsDirty = mDb.compileStatement(mMainService.getString(R.string.sql_news_update_dirty));
         mUpdateNewsPinned = mDb.compileStatement(mMainService.getString(R.string.sql_news_update_pinned));
+        mUpdateNewsRogered = mDb.compileStatement(mMainService.getString(R.string.sql_news_update_rogered));
+        mUpdateNewsDeleted = mDb.compileStatement(mMainService.getString(R.string.sql_news_update_deleted));
     }
 
     @Override
     public void close() throws IOException {
         T.UI();
+        mInsertNewsItem.close();
+        mInsertNewsButton.close();
+        mInsertNewsRogeredUser.close();
+
+        mUpdateNewsDirty.close();
+        mUpdateNewsPinned.close();
+        mUpdateNewsRogered.close();
+        mUpdateNewsDeleted.close();
     }
 
     public void saveNewsItem(final BaseNewsItemTO item) {
@@ -93,8 +105,10 @@ public class NewsStore implements Closeable {
                 bindString(mInsertNewsItem, 12, item.qr_code_caption);
                 mInsertNewsItem.bindLong(13, item.version);
                 mInsertNewsItem.bindLong(14, item.flags);
-                mInsertNewsItem.bindLong(15, 0);
-                mInsertNewsItem.bindLong(16, 0);
+                mInsertNewsItem.bindLong(15, 0); // dirty
+                mInsertNewsItem.bindLong(16, 0); // pinned
+                mInsertNewsItem.bindLong(17, 0); // rogererd
+                mInsertNewsItem.bindLong(18, 0); // deleted
 
                 // todo ruben we should update instead of insert or replace to keep dirty & pinned
                 mInsertNewsItem.execute();
@@ -140,6 +154,28 @@ public class NewsStore implements Closeable {
         });
     }
 
+    public void setNewsItemRogered(final long newsId) {
+        TransactionHelper.runInTransaction(mDb, "setNewsItemRogered", new TransactionWithoutResult() {
+            @Override
+            protected void run() {
+                mUpdateNewsRogered.bindLong(1, 1);
+                mUpdateNewsRogered.bindLong(2, newsId);
+                mUpdateNewsRogered.execute();
+            }
+        });
+    }
+
+    public void setNewsItemDeleted(final long newsId) {
+        TransactionHelper.runInTransaction(mDb, "setNewsItemDeleted", new TransactionWithoutResult() {
+            @Override
+            protected void run() {
+                mUpdateNewsDeleted.bindLong(1, 1);
+                mUpdateNewsDeleted.bindLong(2, newsId);
+                mUpdateNewsDeleted.execute();
+            }
+        });
+    }
+
     public NewsItem getNewsItem(long newsId) {
         T.dontCare();
         final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_news_get_item),
@@ -167,6 +203,8 @@ public class NewsStore implements Closeable {
             newsItem.flags = c.getLong(12);
             newsItem.dirty = c.getLong(13) > 0;
             newsItem.pinned = c.getLong(14) > 0;
+            newsItem.rogered = c.getLong(15) > 0;
+            newsItem.deleted = c.getLong(16) > 0;
 
             addButtons(newsItem);
             addRogeredUsers(newsItem);
@@ -251,6 +289,8 @@ public class NewsStore implements Closeable {
         d.version = c.getLong(1);
         d.dirty = c.getLong(2) > 0;
         d.pinned = c.getLong(3) > 0;
+        d.rogered = c.getLong(4) > 0;
+        d.deleted = c.getLong(5) > 0;
         return d;
     }
 }

@@ -23,13 +23,13 @@ import com.mobicage.rpc.IncompleteMessageException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class MarkNewsAsReadResponseTO implements com.mobicage.rpc.IJSONable {
+public class NewsReadResponseTO implements com.mobicage.rpc.IJSONable {
 
 
-    public MarkNewsAsReadResponseTO() {
+    public NewsReadResponseTO() {
     }
 
-    public MarkNewsAsReadResponseTO(Map<String, Object> json) throws IncompleteMessageException {
+    public NewsReadResponseTO(Map<String, Object> json) throws IncompleteMessageException {
     }
 
     @Override

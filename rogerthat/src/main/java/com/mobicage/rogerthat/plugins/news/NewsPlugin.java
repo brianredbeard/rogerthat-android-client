@@ -28,12 +28,12 @@ import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.CallReceiver;
 
 import com.mobicage.rpc.ResponseHandler;
-import com.mobicage.to.messaging.MarkMessagesAsReadRequestTO;
-import com.mobicage.to.messaging.MarkMessagesAsReadResponseTO;
 import com.mobicage.to.news.GetNewsItemsRequestTO;
 import com.mobicage.to.news.GetNewsRequestTO;
-import com.mobicage.to.news.MarkNewsAsReadRequestTO;
-import com.mobicage.to.news.MarkNewsAsReadResponseTO;
+import com.mobicage.to.news.NewsReadRequestTO;
+import com.mobicage.to.news.NewsReadResponseTO;
+import com.mobicage.to.news.NewsRogeredRequestTO;
+import com.mobicage.to.news.NewsRogeredResponseTO;
 import com.mobicage.to.system.SettingsTO;
 import java.io.IOException;
 
@@ -127,15 +127,34 @@ public class NewsPlugin implements MobicagePlugin {
         }
     }
 
-    public void markNewsAsRead(final long[] ids) {
+    public void newsRead(final long[] ids) {
         SafeRunnable runnable = new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
-                ResponseHandler<MarkNewsAsReadResponseTO> responseHandler = new ResponseHandler<MarkNewsAsReadResponseTO>();
-                MarkNewsAsReadRequestTO request = new MarkNewsAsReadRequestTO();
+                ResponseHandler<NewsReadResponseTO> responseHandler = new ResponseHandler<NewsReadResponseTO>();
+                NewsReadRequestTO request = new NewsReadRequestTO();
                 request.ids = ids;
-                L.d("markNewsAsRead: " + request.ids);
-                com.mobicage.api.news.Rpc.markNewsAsRead(responseHandler, request);
+                L.d("newsRead: " + request.ids);
+                com.mobicage.api.news.Rpc.newsRead(responseHandler, request);
+            }
+        };
+
+        if (com.mobicage.rogerthat.util.system.T.getThreadType() == com.mobicage.rogerthat.util.system.T.BIZZ) {
+            runnable.run();
+        } else {
+            mMainService.postAtFrontOfBIZZHandler(runnable);
+        }
+    }
+
+    public void newsRogered(final long[] ids) {
+        SafeRunnable runnable = new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                ResponseHandler<NewsRogeredResponseTO> responseHandler = new ResponseHandler<NewsRogeredResponseTO>();
+                NewsRogeredRequestTO request = new NewsRogeredRequestTO();
+                request.ids = ids;
+                L.d("newsRogered: " + request.ids);
+                com.mobicage.api.news.Rpc.newsRogered(responseHandler, request);
             }
         };
 

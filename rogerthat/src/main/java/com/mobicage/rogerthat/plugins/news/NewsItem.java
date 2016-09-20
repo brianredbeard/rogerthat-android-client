@@ -32,6 +32,8 @@ public class NewsItem extends BaseNewsItemTO {
 
     public boolean dirty;
     public boolean pinned;
+    public boolean rogered;
+    public boolean deleted;
 
     public NewsItem() {
     }
@@ -40,6 +42,8 @@ public class NewsItem extends BaseNewsItemTO {
         super(json);
         this.dirty =  (boolean) json.get("dirty");
         this.pinned = (boolean) json.get("pinned");
+        this.rogered = (boolean) json.get("rogered");
+        this.deleted = (boolean) json.get("deleted");
     }
 
     public static NewsItem fromFormMessage(Map<String, Object> form) {

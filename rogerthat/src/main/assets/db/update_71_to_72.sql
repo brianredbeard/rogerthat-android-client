@@ -14,7 +14,9 @@ CREATE TABLE news (
     version INTEGER,
     flags INTEGER,
     dirty INTEGER,
-    pinned INTEGER
+    pinned INTEGER,
+    rogered INTEGER,
+    deleted INTEGER
 );
 
 CREATE TABLE news_buttons (

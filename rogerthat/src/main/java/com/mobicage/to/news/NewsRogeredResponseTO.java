@@ -15,19 +15,27 @@
  *
  * @@license_version:1.1@@
  */
-package com.mobicage.rogerthat.plugins.news;
 
-import com.mobicage.rogerthat.util.logging.L;
+package com.mobicage.to.news;
+
 import com.mobicage.rpc.IncompleteMessageException;
-import com.mobicage.to.news.BaseNewsItemTO;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class NewsItemDetails {
-    public long id;
-    public long version;
-    public boolean dirty;
-    public boolean pinned;
-    public boolean rogered;
-    public boolean deleted;
+public class NewsRogeredResponseTO implements com.mobicage.rpc.IJSONable {
+
+
+    public NewsRogeredResponseTO() {
+    }
+
+    public NewsRogeredResponseTO(Map<String, Object> json) throws IncompleteMessageException {
+    }
+
+    @Override
+    public Map<String, Object> toJSONMap() {
+        Map<String, Object> obj = new LinkedHashMap<String, Object>();
+        return obj;
+    }
+
 }

@@ -23,14 +23,14 @@ import com.mobicage.rpc.IncompleteMessageException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class MarkNewsAsReadRequestTO implements com.mobicage.rpc.IJSONable {
+public class NewsReadRequestTO implements com.mobicage.rpc.IJSONable {
 
     public long[] ids;
 
-    public MarkNewsAsReadRequestTO() {
+    public NewsReadRequestTO() {
     }
 
-    public MarkNewsAsReadRequestTO(Map<String, Object> json) throws IncompleteMessageException {
+    public NewsReadRequestTO(Map<String, Object> json) throws IncompleteMessageException {
         if (json.containsKey("ids")) {
             org.json.simple.JSONArray val_arr = (org.json.simple.JSONArray) json.get("ids");
             if (val_arr == null) {
@@ -42,7 +42,7 @@ public class MarkNewsAsReadRequestTO implements com.mobicage.rpc.IJSONable {
                 }
             }
         } else {
-            throw new IncompleteMessageException("com.mobicage.to.news.MarkNewsAsReadRequestTO object is missing field 'ids'");
+            throw new IncompleteMessageException("com.mobicage.to.news.NewsReadRequestTO object is missing field 'ids'");
         }
     }
 

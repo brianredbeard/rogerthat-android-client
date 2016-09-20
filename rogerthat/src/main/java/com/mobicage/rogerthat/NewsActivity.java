@@ -307,10 +307,10 @@ public class NewsActivity extends ServiceBoundActivity {
 
     private void updatedPinnedLayout(ImageButton pinned, boolean isPinned) {
         if (isPinned) {
-            pinned.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_thumb_tack).color(getResources().getColor(R.color.mc_primary_color)).sizeDp(24));
+            pinned.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_thumb_tack).color(getResources().getColor(R.color.mc_primary_color)).sizeDp(16));
             pinned.setBackgroundResource(R.drawable.news_pin_background_pinned);
         } else {
-            pinned.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_thumb_tack).color(Color.WHITE).sizeDp(24));
+            pinned.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_thumb_tack).color(Color.WHITE).sizeDp(16));
             pinned.setBackgroundResource(R.drawable.news_pin_background_normal);
         }
     }
@@ -348,7 +348,7 @@ public class NewsActivity extends ServiceBoundActivity {
                 mDBItems.get(newsItem.id).dirty = true;
 
                 mNewsStore.setNewsItemDirty(newsItem.id);
-                mNewsPlugin.markNewsAsRead(new long[] { newsItem.id });
+                mNewsPlugin.newsRead(new long[] { newsItem.id });
             }
 
             final ImageButton pinned = (ImageButton) view.findViewById(R.id.pinned);
@@ -490,14 +490,27 @@ public class NewsActivity extends ServiceBoundActivity {
             actions.removeAllViews();
 
             if (SystemUtils.isFlagEnabled(newsItem.flags, FLAG_ACTION_ROGERTHAT)) {
-                Button btn = (Button) mLayoutInflater.inflate(R.layout.news_list_item_action, parent, false);
+                final Button btn = (Button) mLayoutInflater.inflate(R.layout.news_list_item_action, parent, false);
                 btn.setText(getString(R.string.rogerthat));
-                btn.setOnClickListener(new SafeViewOnClickListener() {
-                    @Override
-                    public void safeOnClick(View v) {
-                        L.i("btn click rogerthat");
-                    }
-                });
+
+                if (newsItem.rogered) {
+                    btn.setBackgroundColor(getResources().getColor(R.color.mc_divider_gray));
+                } else {
+                    btn.setBackgroundColor(getResources().getColor(R.color.mc_primary_color));
+                    btn.setOnClickListener(new SafeViewOnClickListener() {
+                        @Override
+                        public void safeOnClick(View v) {
+                            newsItem.rogered = true;
+                            mDBItems.get(newsItem.id).rogered = true;
+                            mNewsStore.setNewsItemRogered(newsItem.id);
+                            mNewsPlugin.newsRogered(new long[] { newsItem.id });
+
+                            btn.setBackgroundColor(getResources().getColor(R.color.mc_divider_gray));
+                            btn.setOnClickListener(null);
+                        }
+                    });
+                }
+
                 actions.addView(btn);
                 if (SystemUtils.isFlagEnabled(newsItem.flags, FLAG_ACTION_FOLLOW) || newsItem.buttons.length > 0) {
                     View spacer = mLayoutInflater.inflate(R.layout.news_list_item_action_spacer, parent, false);
@@ -506,15 +519,23 @@ public class NewsActivity extends ServiceBoundActivity {
             }
 
             if (SystemUtils.isFlagEnabled(newsItem.flags, FLAG_ACTION_FOLLOW)) {
-                Button btn = (Button) mLayoutInflater.inflate(R.layout.news_list_item_action, parent, false);
-                btn.setBackgroundColor(getResources().getColor(R.color.mc_divider_gray));
+                final Button btn = (Button) mLayoutInflater.inflate(R.layout.news_list_item_action, parent, false);
                 btn.setText(getString(R.string.follow));
-                btn.setOnClickListener(new SafeViewOnClickListener() {
-                    @Override
-                    public void safeOnClick(View v) {
-                        mFriendsPlugin.inviteFriend(newsItem.sender.email, null, null, false);
-                    }
-                });
+
+                int existenceStatus = mFriendsPlugin.getStore().getExistence(newsItem.sender.email);
+                if (Friend.ACTIVE == existenceStatus) {
+                    btn.setBackgroundColor(getResources().getColor(R.color.mc_divider_gray));
+                } else {
+                    btn.setBackgroundColor(getResources().getColor(R.color.mc_primary_color));
+                    btn.setOnClickListener(new SafeViewOnClickListener() {
+                        @Override
+                        public void safeOnClick(View v) {
+                            mFriendsPlugin.inviteFriend(newsItem.sender.email, null, null, false);
+                            btn.setBackgroundColor(getResources().getColor(R.color.mc_divider_gray));
+                            btn.setOnClickListener(null);
+                        }
+                    });
+                }
                 actions.addView(btn);
 
                 if (newsItem.buttons.length > 0) {

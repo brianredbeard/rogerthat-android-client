@@ -545,14 +545,23 @@ public class ResponseReceiverHandler {
                 resp.setResult(Parser.ComMobicageToNewsGetNewsItemsResponseTO(rpcr.result));
             ((IResponseHandler<com.mobicage.to.news.GetNewsItemsResponseTO>) responseHandler).handle(resp);
         }
-        if ("com.mobicage.api.news.markNewsAsRead".equals(function)) {
-            final Response<com.mobicage.to.news.MarkNewsAsReadResponseTO> resp = new Response<com.mobicage.to.news.MarkNewsAsReadResponseTO>();
+        if ("com.mobicage.api.news.newsRead".equals(function)) {
+            final Response<com.mobicage.to.news.NewsReadResponseTO> resp = new Response<com.mobicage.to.news.NewsReadResponseTO>();
             resp.setError(rpcr.error);
             resp.setSuccess(rpcr.success);
             resp.setCallId(rpcr.callId);
             if (rpcr.success)
-                resp.setResult(Parser.ComMobicageToNewsMarkNewsAsReadResponseTO(rpcr.result));
-            ((IResponseHandler<com.mobicage.to.news.MarkNewsAsReadResponseTO>) responseHandler).handle(resp);
+                resp.setResult(Parser.ComMobicageToNewsNewsReadResponseTO(rpcr.result));
+            ((IResponseHandler<com.mobicage.to.news.NewsReadResponseTO>) responseHandler).handle(resp);
+        }
+        if ("com.mobicage.api.news.newsRogered".equals(function)) {
+            final Response<com.mobicage.to.news.NewsRogeredResponseTO> resp = new Response<com.mobicage.to.news.NewsRogeredResponseTO>();
+            resp.setError(rpcr.error);
+            resp.setSuccess(rpcr.success);
+            resp.setCallId(rpcr.callId);
+            if (rpcr.success)
+                resp.setResult(Parser.ComMobicageToNewsNewsRogeredResponseTO(rpcr.result));
+            ((IResponseHandler<com.mobicage.to.news.NewsRogeredResponseTO>) responseHandler).handle(resp);
         }
         if ("com.mobicage.api.services.findService".equals(function)) {
             final Response<com.mobicage.to.service.FindServiceResponseTO> resp = new Response<com.mobicage.to.service.FindServiceResponseTO>();
