@@ -45,6 +45,11 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.client.android.Contents;
+import com.google.zxing.client.android.Intents;
+import com.google.zxing.client.android.encode.QRCodeEncoder;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
@@ -71,6 +76,7 @@ import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.time.TimeUtils;
+import com.mobicage.rogerthat.util.ui.ScaleImageView;
 import com.mobicage.rogerthat.util.ui.TestUtils;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rogerthat.widget.Resizable16by6ImageView;
@@ -106,6 +112,7 @@ public class NewsActivity extends ServiceBoundActivity {
     private FriendsPlugin mFriendsPlugin;
     private CachedDownloader mCachedDownloader;
 
+    private int mDisplayWidth;
     private Map<Long, NewsItemDetails> mDBItems = new HashMap<>();
     private List<Long> mOrder = new ArrayList<>();
     private List<Long> mLiveOrder = new ArrayList<>();
@@ -321,6 +328,8 @@ public class NewsActivity extends ServiceBoundActivity {
             mSwipeContainer.setRefreshing(true);
         }
 
+        mDisplayWidth = UIUtils.getDisplayWidth(this);
+
         mListView = (ListView) findViewById(R.id.news_list);
         setListAdapter();
 
@@ -471,27 +480,56 @@ public class NewsActivity extends ServiceBoundActivity {
                 membersContainer.setVisibility(View.GONE);
             }
 
+
+            LinearLayout qrCodeContainer = (LinearLayout) view.findViewById(R.id.qr_code_container);
             Resizable16by6ImageView image = (Resizable16by6ImageView) view.findViewById(R.id.image);
-            if (TextUtils.isEmptyOrWhitespace(newsItem.image_url)) {
+
+            if (newsItem.type == NewsItem.TYPE_QR_CODE) {
                 image.setVisibility(View.GONE);
+                ScaleImageView qrCode = (ScaleImageView) view.findViewById(R.id.qr_code);
+                TextView qrCodeCaption = (TextView) view.findViewById(R.id.qr_code_caption);
+
+                try {
+                    Intent intent = new Intent();
+                    intent.setAction(Intents.Encode.ACTION);
+                    intent.putExtra(Intents.Encode.TYPE, Contents.Type.TEXT);
+                    intent.putExtra(Intents.Encode.DATA, newsItem.qr_code_content);
+                    intent.putExtra(Intents.Encode.FORMAT, BarcodeFormat.QR_CODE);
+                    QRCodeEncoder qrCodeEncoder = new QRCodeEncoder(NewsActivity.this, intent, mDisplayWidth / 2, false);
+                    Bitmap bitmap = qrCodeEncoder.encodeAsBitmap();
+                    qrCode.setImageBitmap(bitmap);
+                    qrCodeCaption.setText(newsItem.qr_code_caption);
+                    qrCodeContainer.setVisibility(View.VISIBLE);
+                } catch (WriterException e) {
+                    qrCodeContainer.setVisibility(View.GONE);
+                    L.e(e);
+                }
+
             } else {
-                if (mCachedDownloader.isStorageAvailable()) {
-                    File cachedFile = mCachedDownloader.getCachedFilePath(newsItem.image_url);
-                    if (cachedFile != null) {
-                        Bitmap bm = BitmapFactory.decodeFile(cachedFile.getAbsolutePath());
-                        image.setImageBitmap(bm);
-                        image.setVisibility(View.VISIBLE);
-                    } else {
-                        if (!mImageViews.containsKey(newsItem.image_url)) {
-                            mImageViews.put(newsItem.image_url, new ArrayList<Resizable16by6ImageView>());
-                        }
-                        mImageViews.get(newsItem.image_url).add(image);
-                        // item started downloading intent when ready
-                    }
+                qrCodeContainer.setVisibility(View.GONE);
+                if (TextUtils.isEmptyOrWhitespace(newsItem.image_url)) {
+                    image.setVisibility(View.GONE);
                 } else {
-                    new DownloadImageTask(image).execute(newsItem.image_url);
+                    if (mCachedDownloader.isStorageAvailable()) {
+                        File cachedFile = mCachedDownloader.getCachedFilePath(newsItem.image_url);
+                        if (cachedFile != null) {
+                            Bitmap bm = BitmapFactory.decodeFile(cachedFile.getAbsolutePath());
+                            image.setImageBitmap(bm);
+                            image.setVisibility(View.VISIBLE);
+                        } else {
+                            if (!mImageViews.containsKey(newsItem.image_url)) {
+                                mImageViews.put(newsItem.image_url, new ArrayList<Resizable16by6ImageView>());
+                            }
+                            mImageViews.get(newsItem.image_url).add(image);
+                            // item started downloading intent when ready
+                        }
+                    } else {
+                        new DownloadImageTask(image).execute(newsItem.image_url);
+                    }
                 }
             }
+
+
             ImageView serviceAvatar = (ImageView) view.findViewById(R.id.service_avatar);
             Bitmap avatar = mFriendsPlugin.getStore().getAvatarBitmap(newsItem.sender.email);
             if (avatar == null) {

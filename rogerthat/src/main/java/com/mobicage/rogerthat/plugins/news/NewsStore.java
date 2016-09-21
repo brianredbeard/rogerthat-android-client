@@ -24,15 +24,12 @@ import android.database.sqlite.SQLiteStatement;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainService;
-import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
-
 import com.mobicage.rogerthat.util.db.DatabaseManager;
 import com.mobicage.rogerthat.util.db.TransactionHelper;
 import com.mobicage.rogerthat.util.db.TransactionWithoutResult;
 import com.mobicage.rogerthat.util.system.T;
-
-import com.mobicage.to.news.NewsActionButtonTO;
 import com.mobicage.to.news.BaseNewsItemTO;
+import com.mobicage.to.news.NewsActionButtonTO;
 import com.mobicage.to.news.NewsSenderTO;
 
 import java.io.Closeable;
@@ -151,10 +148,11 @@ public class NewsStore implements Closeable {
                 bindString(mInsertNewsItem, 12, item.qr_code_caption);
                 mInsertNewsItem.bindLong(13, item.version);
                 mInsertNewsItem.bindLong(14, item.flags);
-                mInsertNewsItem.bindLong(15, 0); // dirty
-                mInsertNewsItem.bindLong(16, 0); // pinned
-                mInsertNewsItem.bindLong(17, 0); // rogererd
-                mInsertNewsItem.bindLong(18, 0); // deleted
+                mInsertNewsItem.bindLong(15, item.type);
+                mInsertNewsItem.bindLong(16, 0); // dirty
+                mInsertNewsItem.bindLong(17, 0); // pinned
+                mInsertNewsItem.bindLong(18, 0); // rogererd
+                mInsertNewsItem.bindLong(19, 0); // deleted
                 mInsertNewsItem.execute();
 
                 insertButtons(item);
@@ -259,10 +257,11 @@ public class NewsStore implements Closeable {
             newsItem.qr_code_caption = c.getString(10);
             newsItem.version = c.getLong(11);
             newsItem.flags = c.getLong(12);
-            newsItem.dirty = c.getLong(13) > 0;
-            newsItem.pinned = c.getLong(14) > 0;
-            newsItem.rogered = c.getLong(15) > 0;
-            newsItem.deleted = c.getLong(16) > 0;
+            newsItem.type = c.getLong(13);
+            newsItem.dirty = c.getLong(14) > 0;
+            newsItem.pinned = c.getLong(15) > 0;
+            newsItem.rogered = c.getLong(16) > 0;
+            newsItem.deleted = c.getLong(17) > 0;
 
             addButtons(newsItem);
             addRogeredUsers(newsItem);

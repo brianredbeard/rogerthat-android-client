@@ -13,6 +13,7 @@ CREATE TABLE news (
     qr_code_caption TEXT,
     version INTEGER,
     flags INTEGER,
+    type INTEGER,
     dirty INTEGER,
     pinned INTEGER,
     rogered INTEGER,

@@ -37,6 +37,7 @@ public class BaseNewsItemTO implements com.mobicage.rpc.IJSONable {
     public long reach;
     public long timestamp;
     public String title;
+    public long type;
     public String[] users_that_rogered;
     public long version;
 
@@ -127,6 +128,12 @@ public class BaseNewsItemTO implements com.mobicage.rpc.IJSONable {
         } else {
             throw new IncompleteMessageException("com.mobicage.to.news.BaseNewsItemTO object is missing field 'title'");
         }
+        if (json.containsKey("type")) {
+            Object val = json.get("type");
+            this.type = ((Long) val).longValue();
+        } else {
+            throw new IncompleteMessageException("com.mobicage.to.news.BaseNewsItemTO object is missing field 'type'");
+        }
         if (json.containsKey("users_that_rogered")) {
             org.json.simple.JSONArray val_arr = (org.json.simple.JSONArray) json.get("users_that_rogered");
             if (val_arr == null) {
@@ -172,6 +179,7 @@ public class BaseNewsItemTO implements com.mobicage.rpc.IJSONable {
         obj.put("reach", this.reach);
         obj.put("timestamp", this.timestamp);
         obj.put("title", this.title);
+        obj.put("type", this.type);
         if (this.users_that_rogered == null) {
             obj.put("users_that_rogered", null);
         } else {

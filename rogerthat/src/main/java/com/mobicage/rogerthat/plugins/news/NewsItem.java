@@ -17,18 +17,17 @@
  */
 package com.mobicage.rogerthat.plugins.news;
 
-import java.util.Map;
-
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rpc.IncompleteMessageException;
-import com.mobicage.to.messaging.ButtonTO;
-import com.mobicage.to.messaging.MemberStatusTO;
-import com.mobicage.to.messaging.MessageTO;
 import com.mobicage.to.news.BaseNewsItemTO;
+
+import java.util.Map;
 
 @SuppressWarnings("unchecked")
 public class NewsItem extends BaseNewsItemTO {
 
+    public static long TYPE_NORMAL = 1;
+    public static long TYPE_QR_CODE = 2;
 
     public boolean dirty;
     public boolean pinned;
