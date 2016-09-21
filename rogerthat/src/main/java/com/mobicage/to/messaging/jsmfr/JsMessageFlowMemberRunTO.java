@@ -25,6 +25,7 @@ import java.util.Map;
 
 public class JsMessageFlowMemberRunTO implements com.mobicage.rpc.IJSONable {
 
+    public String flow_params;
     public String hashed_tag;
     public String message_flow_run_id;
     public String parent_message_key;
@@ -35,6 +36,12 @@ public class JsMessageFlowMemberRunTO implements com.mobicage.rpc.IJSONable {
     }
 
     public JsMessageFlowMemberRunTO(Map<String, Object> json) throws IncompleteMessageException {
+        if (json.containsKey("flow_params")) {
+            Object val = json.get("flow_params");
+            this.flow_params = (String) val;
+        } else {
+            throw new IncompleteMessageException("com.mobicage.to.messaging.jsmfr.JsMessageFlowMemberRunTO object is missing field 'flow_params'");
+        }
         if (json.containsKey("hashed_tag")) {
             Object val = json.get("hashed_tag");
             this.hashed_tag = (String) val;
@@ -70,6 +77,7 @@ public class JsMessageFlowMemberRunTO implements com.mobicage.rpc.IJSONable {
     @Override
     public Map<String, Object> toJSONMap() {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
+        obj.put("flow_params", this.flow_params);
         obj.put("hashed_tag", this.hashed_tag);
         obj.put("message_flow_run_id", this.message_flow_run_id);
         obj.put("parent_message_key", this.parent_message_key);
