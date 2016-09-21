@@ -17,18 +17,6 @@
  */
 package com.mobicage.rogerthat.plugins.messaging;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-
-import thirdparty.nishantnair.FlowLayout;
-import thirdparty.nishantnair.FlowLayoutRTL;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -85,6 +73,19 @@ import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.to.messaging.ButtonTO;
 import com.mobicage.to.messaging.MemberStatusTO;
 import com.mobicage.to.messaging.MessageTO;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+import thirdparty.nishantnair.FlowLayout;
+import thirdparty.nishantnair.FlowLayoutRTL;
 
 public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
 
@@ -462,6 +463,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                     if (!attachmentFile.exists()
                         && mMessagingPlugin.getBrandingMgr().isAttachmentInBrandingQueue(attachment.threadKey,
                             attachment.messageKey, attachment.download_url)) {
+                        L.i("show spinner");
                         // Show spinner if in queue and disable click
                         ProgressBar spinner = (ProgressBar) view.findViewById(R.id.spinner);
                         spinner.setVisibility(View.VISIBLE); // todo ruben

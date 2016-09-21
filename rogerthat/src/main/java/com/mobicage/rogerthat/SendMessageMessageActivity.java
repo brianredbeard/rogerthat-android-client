@@ -18,79 +18,15 @@
 
 package com.mobicage.rogerthat;
 
-import android.Manifest;
-import android.app.Activity;
-import android.app.Dialog;
-import android.app.ProgressDialog;
-import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.RadioButton;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
-import com.mikepenz.fontawesome_typeface_library.FontAwesome;
-import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
-import com.mobicage.rogerthat.config.Configuration;
-import com.mobicage.rogerthat.plugins.messaging.AttachmentViewerActivity;
 import com.mobicage.rogerthat.plugins.messaging.Message;
-import com.mobicage.rogerthat.plugins.messaging.MessageStore;
-import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
-import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
-import com.mobicage.rogerthat.plugins.messaging.SendMessageResponseHandler;
-import com.mobicage.rogerthat.util.IOUtils;
-import com.mobicage.rogerthat.util.logging.L;
-import com.mobicage.rogerthat.util.pickle.PickleException;
-import com.mobicage.rogerthat.util.pickle.Pickler;
-import com.mobicage.rogerthat.util.system.SafeAsyncTask;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
-import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
-import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
-import com.mobicage.rogerthat.util.ui.ImageHelper;
 import com.mobicage.rogerthat.util.ui.SendMessageView;
-import com.mobicage.rogerthat.util.ui.UIUtils;
-import com.mobicage.to.messaging.AttachmentTO;
-import com.mobicage.to.messaging.ButtonTO;
-import com.mobicage.to.messaging.MemberStatusTO;
-import com.mobicage.to.messaging.MessageTO;
-import com.mobicage.to.messaging.SendMessageRequestTO;
-
-import org.jivesoftware.smack.util.Base64;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
 
 public class SendMessageMessageActivity extends ServiceBoundActivity {
 

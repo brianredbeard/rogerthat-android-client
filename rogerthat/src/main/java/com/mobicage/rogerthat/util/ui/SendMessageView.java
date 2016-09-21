@@ -21,7 +21,6 @@ package com.mobicage.rogerthat.util.ui;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -41,7 +40,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -58,18 +56,14 @@ import com.mobicage.rogerthat.CannedButtons;
 import com.mobicage.rogerthat.HomeActivity;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
-import com.mobicage.rogerthat.MyIdentity;
 import com.mobicage.rogerthat.SendMessageButtonActivity;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.config.Configuration;
-import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.messaging.AttachmentViewerActivity;
-import com.mobicage.rogerthat.plugins.messaging.FriendsThreadActivity;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessageStore;
 import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
-import com.mobicage.rogerthat.plugins.messaging.SendMessageResponseHandler;
 import com.mobicage.rogerthat.util.IOUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.pickle.PickleException;
@@ -79,11 +73,13 @@ import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
+import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.to.messaging.AttachmentTO;
 import com.mobicage.to.messaging.ButtonTO;
 import com.mobicage.to.messaging.MemberStatusTO;
 import com.mobicage.to.messaging.MessageTO;
 import com.mobicage.to.messaging.SendMessageRequestTO;
+import com.mobicage.to.messaging.SendMessageResponseTO;
 
 import org.jivesoftware.smack.util.Base64;
 
@@ -1099,14 +1095,6 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
             request.sender_reply = String.valueOf(selectedButton);
         }
 
-        SafeRunnable storeMessageRunnable = new SafeRunnable() {
-            @Override
-            protected void safeRun() throws Exception {
-                com.mobicage.rogerthat.util.system.T.BIZZ();
-                storeMessage(me, request);
-            }
-        };
-
         if (mHasImageSelected || mHasVideoSelected) {
             AttachmentTO att = new AttachmentTO();
             att.download_url = mKey;
@@ -1149,37 +1137,44 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
                 L.e("Failed to generate attachment thumbnail", e);
             }
 
-            mMainService.postAtFrontOfBIZZHandler(storeMessageRunnable);
+            mMainService.postAtFrontOfBIZZHandler(new SafeRunnable() {
+                @Override
+                protected void safeRun() throws Exception {
+                    storeMessage(me, request);
+                    mMessagingPlugin.getStore().insertAttachments(request.attachments, request.key);
+
+                    final Intent intent = new Intent(MessagingPlugin.MESSAGE_PROCESSED_INTENT);
+                    intent.putExtra("message", request.key);
+                    mMainService.sendBroadcast(intent);
+                }
+            });
+
             mMessagingPlugin.startUploadingFile(attachmentFile, mParentKey, mKey, null, 0, false,
                     mUploadFileExtenstion);
 
         } else {
             request.attachments = new AttachmentTO[0];
             sendMessage(request);
-            mMainService.postAtFrontOfBIZZHandler(storeMessageRunnable);
+            mMainService.postAtFrontOfBIZZHandler(new SafeRunnable() {
+                @Override
+                protected void safeRun() throws Exception {
+                    storeMessage(me, request);
+                }
+            });
         }
     }
 
     public void sendMessage(final SendMessageRequestTO request) throws Exception {
-        sendMessage(request, mParentKey, mKey, mMessagingPlugin, mMainService);
+        sendMessage(request, mMainService);
     }
 
-    public static void sendMessage(final SendMessageRequestTO request, final String parentKey,
-                                   final String key, final MessagingPlugin messagingPlugin,
-                                   final MainService mainService) throws Exception {
+    public static void sendMessage(final SendMessageRequestTO request, final MainService mainService) throws Exception {
         com.mobicage.rogerthat.util.system.T.dontCare();
 
         SafeRunnable sendMessageRunnable = new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
-                final SendMessageResponseHandler responseHandler = new SendMessageResponseHandler();
-                responseHandler.setKey(key);
-                responseHandler.setParentKey(parentKey);
-                boolean attachmentsUploaded = request.attachments != null && request.attachments.length > 0;
-                responseHandler.setAttachmentsUploaded(attachmentsUploaded);
-                if (attachmentsUploaded)
-                    messagingPlugin.getStore().insertAttachments(request.attachments, key);
-                com.mobicage.api.messaging.Rpc.sendMessage(responseHandler, request);
+                com.mobicage.api.messaging.Rpc.sendMessage(new ResponseHandler<SendMessageResponseTO>(), request);
             }
         };
 

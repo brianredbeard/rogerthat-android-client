@@ -1558,33 +1558,9 @@ public class MessagingPlugin implements MobicagePlugin {
                     return;
                 }
 
-                String tmpDownloadUrlHash = attachmentDownloadUrlHash(request.attachments[0].download_url);
-                String downloadUrlHash = attachmentDownloadUrlHash(resultUrl);
-                File attachmentsDir;
-                try {
-                    // todo ruben check if needed
-                    attachmentsDir = attachmentsDir(parentMessageKey == null ? messageKey : parentMessageKey,
-                            messageKey);
-                } catch (IOException e) {
-                    L.d("Unable to create attachment directory", e);
-                    UIUtils.showAlertDialog(mMainService, "", R.string.unable_to_read_write_sd_card);
-                    return;
-                }
-
-                File tmpAttachmentFile = new File(attachmentsDir, tmpDownloadUrlHash);
-                File dstAttachmentFile = new File(attachmentsDir, downloadUrlHash);
-                tmpAttachmentFile.renameTo(dstAttachmentFile);
-
-                File tmpThumbnailFile = new File(tmpAttachmentFile.getAbsoluteFile() + ".thumb");
-                if (tmpThumbnailFile.exists()) {
-                    File dstThumbnailFile = new File(dstAttachmentFile.getAbsoluteFile() + ".thumb");
-                    tmpThumbnailFile.renameTo(dstThumbnailFile);
-                }
-
                 request.attachments[0].download_url = resultUrl;
                 try {
-                    SendMessageView.sendMessage(request, parentMessageKey, messageKey, this,
-                        mMainService);
+                    SendMessageView.sendMessage(request, mMainService);
                 } catch (Exception e) {
                     L.bug("Failed to send message after transfer was complete", e);
                 }

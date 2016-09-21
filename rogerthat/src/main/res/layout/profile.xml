@@ -28,7 +28,10 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:layout_margin="5dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_marginBottom="14dp"
                 android:orientation="horizontal"
                 android:visibility="gone"
                 tools:visibility="visible">
@@ -40,6 +43,7 @@
                     android:layout_marginTop="5dp"
                     android:layout_marginLeft="5dp"
                     android:layout_marginRight="15dp"
+
                     app:elevation="4dp"
                     app:backgroundTint="@color/mc_primary_color"
                     android:clickable="true"/>
