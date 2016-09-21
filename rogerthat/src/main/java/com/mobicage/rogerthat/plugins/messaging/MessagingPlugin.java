@@ -18,27 +18,6 @@
 
 package com.mobicage.rogerthat.plugins.messaging;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.security.DigestInputStream;
-import java.security.MessageDigest;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
-
-import org.jivesoftware.smack.util.Base64;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.simple.JSONValue;
-
 import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -62,8 +41,6 @@ import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.HomeActivity;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
-import com.mobicage.rogerthat.SendMessageContactActivity;
-import com.mobicage.rogerthat.SendMessageMessageActivity;
 import com.mobicage.rogerthat.ServiceBound;
 import com.mobicage.rogerthat.config.Configuration;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
@@ -122,6 +99,27 @@ import com.mobicage.to.messaging.forms.UnicodeWidgetResultTO;
 import com.mobicage.to.messaging.jsmfr.FlowStartedRequestTO;
 import com.mobicage.to.news.NewsActionButtonTO;
 import com.mobicage.to.system.SettingsTO;
+
+import org.jivesoftware.smack.util.Base64;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.simple.JSONValue;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
 
 public class MessagingPlugin implements MobicagePlugin {
 
@@ -1442,6 +1440,7 @@ public class MessagingPlugin implements MobicagePlugin {
 
         Map<String, Object> tmpState = new HashMap<String, Object>();
         tmpState.put("message_flow_run_id", startFlow.message_flow_run_id);
+//        tmpState.put("flow_params", startFlow.flow_params);
         MessageFlowRun mfr = new MessageFlowRun();
         mfr.staticFlowHash = startFlow.static_flow_hash;
         mfr.state = JSONValue.toJSONString(tmpState);

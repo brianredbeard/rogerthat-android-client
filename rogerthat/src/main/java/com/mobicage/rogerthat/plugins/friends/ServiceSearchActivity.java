@@ -352,15 +352,8 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
     private TextView setCatorySelected(LinearLayout label, final boolean selected) {
         final View labelIndicatorView = label.findViewById(R.id.indicator);
         final TextView labelTextView = (TextView) label.findViewById(R.id.category);
-        if (selected) {
-            labelIndicatorView.setVisibility(View.VISIBLE);
-            labelTextView.setTypeface(Typeface.create(labelTextView.getTypeface(), Typeface.BOLD));
-            labelTextView.setTextColor(getResources().getColor(R.color.mc_blue2));
-        } else {
-            labelIndicatorView.setVisibility(View.INVISIBLE);
-            labelTextView.setTypeface(Typeface.create(labelTextView.getTypeface(), Typeface.NORMAL));
-            labelTextView.setTextColor(getResources().getColor(android.R.color.secondary_text_light));
-        }
+        labelIndicatorView.setVisibility(selected ? View.VISIBLE : View.INVISIBLE);
+        labelTextView.setTypeface(Typeface.create(labelTextView.getTypeface(), selected ? Typeface.BOLD : Typeface.NORMAL));
         return labelTextView;
     }
 

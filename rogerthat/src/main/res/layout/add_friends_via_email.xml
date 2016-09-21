@@ -21,18 +21,24 @@
             android:text="@string/add_via_email_description"
             android:textSize="16sp" />
 
-        <android.support.v7.widget.AppCompatAutoCompleteTextView
-            android:id="@+id/add_via_email_text_field"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/email"
-            android:imeOptions="actionDone"
-            android:inputType="textEmailAddress"
-            android:textSize="16sp" />
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/update_profile_name_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <android.support.v7.widget.AppCompatAutoCompleteTextView
+                android:id="@+id/add_via_email_text_field"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/email"
+                android:imeOptions="actionDone"
+                android:inputType="textEmailAddress"
+                android:textSize="16sp" />
+        </android.support.design.widget.TextInputLayout>
 
         <Button
             android:id="@+id/add_via_email_button"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="end"
             android:paddingLeft="20dp"
