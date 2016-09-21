@@ -18,18 +18,6 @@
 
 package com.mobicage.rogerthat.plugins.friends;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.jivesoftware.smack.util.Base64;
-
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -64,7 +52,22 @@ import com.mobicage.to.friends.GetUserInfoResponseTO;
 import com.mobicage.to.friends.ServiceMenuItemTO;
 import com.mobicage.to.friends.UpdateFriendResponseTO;
 import com.mobicage.to.service.GetMenuIconRequestTO;
-import com.mobicage.to.service.GetStaticFlowRequestTO;
+
+import org.jivesoftware.smack.util.Base64;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static com.mobicage.rogerthat.util.db.DBUtils.bindString;
 
 public class FriendStore implements Closeable {
 
@@ -781,8 +784,10 @@ public class FriendStore implements Closeable {
                     else
                         mUpdateFriendHTTP.bindString(32, friend.contentBrandingHash);
 
+                    bindString(mUpdateFriendHTTP, 33, getActions(friend));
+
                     // Where clause
-                    mUpdateFriendHTTP.bindString(33, friend.email);
+                    mUpdateFriendHTTP.bindString(34, friend.email);
                     mUpdateFriendHTTP.execute();
 
                     mFriendNameCache.put(friend.email, friendDisplayName);
@@ -946,6 +951,7 @@ public class FriendStore implements Closeable {
         smi.hashedTag = curs.getString(i++);
         smi.requiresWifi = curs.getLong(i++) == 1;
         smi.runInBackground = curs.getLong(i++) == 1;
+        smi.action = curs.getLong(i++);
         return smi;
     }
 
@@ -1119,6 +1125,7 @@ public class FriendStore implements Closeable {
                 mInsertServiceMenuHTTP.bindString(9, item.hashedTag);
             mInsertServiceMenuHTTP.bindLong(10, item.requiresWifi ? 1 : 0);
             mInsertServiceMenuHTTP.bindLong(11, item.runInBackground ? 1 : 0);
+            mInsertServiceMenuHTTP.bindLong(12, item.action);
             mInsertServiceMenuHTTP.execute();
 
             if (!isMenuIconAvailable(item.iconHash)) {
@@ -1284,15 +1291,16 @@ public class FriendStore implements Closeable {
             friend.flags = cursor.getLong(14);
             friend.profileData = cursor.getString(15);
             friend.contentBrandingHash = cursor.getString(16);
+            friend.actions = cursor.getString(17);
 
             if (hasCategoryId) {
-                final String emailOrCategoryId = cursor.getString(17);
+                final String emailOrCategoryId = cursor.getString(18);
                 if (!friend.email.equals(emailOrCategoryId)) {
                     friend.category = new FriendCategory();
                     friend.category.id = friend.category_id = emailOrCategoryId;
-                    friend.category.name = cursor.getString(18);
-                    friend.category.avatar = cursor.getBlob(19);
-                    friend.category.friendCount = cursor.getInt(20);
+                    friend.category.name = cursor.getString(19);
+                    friend.category.avatar = cursor.getBlob(20);
+                    friend.category.friendCount = cursor.getInt(21);
                 }
             }
 
@@ -1476,8 +1484,37 @@ public class FriendStore implements Closeable {
         else
             mInsertFriendHTTP.bindString(35, friend.contentBrandingHash);
 
+        bindString(mInsertFriendHTTP, 36, getActions(friend));
+
         mInsertFriendHTTP.execute();
     }
+
+    private String getActions(FriendTO friend) {
+        if (friend.actionMenu == null || friend.actionMenu.items == null)
+            return null;
+
+        List<ServiceMenuItemTO> order = new ArrayList<>();
+        for (ServiceMenuItemTO smi : friend.actionMenu.items) {
+            if (smi.action > 0) {
+                order.add(smi);
+            }
+        }
+        if (order.size() == 0)
+            return null;
+        Collections.sort(order, comparator);
+        List<String> actions = new ArrayList<>();
+        for (ServiceMenuItemTO smi : order) {
+            actions.add(smi.label);
+        }
+        return android.text.TextUtils.join(" - ", actions);
+    }
+
+    private final Comparator<ServiceMenuItemTO> comparator = new Comparator<ServiceMenuItemTO>() {
+        @Override
+        public int compare(ServiceMenuItemTO item1, ServiceMenuItemTO item2) {
+            return item1.action > item2.action ? -1 : 1;
+        }
+    };
 
     void updateFriendAvatar(final String friendEmail, final byte[] avatarBytes) {
         T.BIZZ();

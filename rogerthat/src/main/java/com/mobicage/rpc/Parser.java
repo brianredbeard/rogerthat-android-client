@@ -524,13 +524,6 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
-    public static com.mobicage.to.friends.ServiceActionTO ComMobicageToFriendsServiceActionTO(Object value) throws IncompleteMessageException {
-        if (value == null)
-            return null;
-        return new com.mobicage.to.friends.ServiceActionTO((Map<String, Object>) value);
-    }
-
-    @SuppressWarnings("unchecked")
     public static com.mobicage.to.friends.ServiceMenuItemTO ComMobicageToFriendsServiceMenuItemTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;

@@ -38,6 +38,7 @@ import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendStore;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.friends.PhoneContacts;
+import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.T;
 
@@ -154,7 +155,13 @@ class FriendListAdapter extends CursorAdapter implements SectionIndexer {
             } else {
                 image.setImageBitmap(mFriendsPlugin.toFriendBitmap(friend.avatar));
                 name.setText(friend.getDisplayName());
-                subtitle.setVisibility(View.GONE);
+
+                if (TextUtils.isEmptyOrWhitespace(friend.actions)) {
+                    subtitle.setVisibility(View.GONE);
+                } else {
+                    subtitle.setText(friend.actions);
+                    subtitle.setVisibility(View.VISIBLE);
+                }
             }
         }
         view.setTag(friend);

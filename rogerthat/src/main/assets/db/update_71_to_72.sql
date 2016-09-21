@@ -38,3 +38,6 @@ CREATE TABLE news_rogered_users (
     PRIMARY KEY (news_id, friend),
     FOREIGN KEY (news_id) REFERENCES news ("id")
 );
+
+ALTER TABLE friend ADD COLUMN actions TEXT;
+ALTER TABLE service_menu_item ADD COLUMN "action" INTEGER NOT NULL DEFAULT 0;
