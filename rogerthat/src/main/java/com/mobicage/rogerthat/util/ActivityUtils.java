@@ -18,7 +18,6 @@
 
 package com.mobicage.rogerthat.util;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
@@ -38,7 +37,6 @@ import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
 import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
 import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
 import com.mobicage.rogerthat.util.logging.L;
-import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.config.AppConstants;
 
 public class ActivityUtils {
@@ -51,7 +49,7 @@ public class ActivityUtils {
         context.startActivity(i);
     }
 
-    public static boolean goToActivity(Context context, String activityName, boolean clearStack) {
+    public static boolean goToActivity(ServiceBoundActivity context, String activityName, boolean clearStack) {
         // todo ruben implement collapse
         if ("news".equals(activityName)) {
             goToActivity(context, NewsActivity.class, clearStack);
@@ -81,6 +79,16 @@ public class ActivityUtils {
             goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_EMERGENCY, clearStack);
         } else if ("stream".equals(activityName)) {
             goToActivity(context, HistoryListActivity.class, false);
+        } else if ("qrcode".equals(activityName)) {
+            // todo ruben
+            //AppConstants.APP_EMAIL
+        } else if (activityName.startsWith("action")) {
+            // todo ruben order
+            String action = activityName.split("\\|", 2)[1];
+        } else if (activityName.startsWith("click")) {
+            String tag = activityName.split("\\|", 2)[1];
+            String hashedTag = Security.sha256(tag);
+            goToActivityBehindTag(context, AppConstants.APP_EMAIL, hashedTag);
         } else {
             L.bug("unknown goToActivity: " + activityName);
             return false;

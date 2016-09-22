@@ -47,10 +47,21 @@
 
             </LinearLayout>
 
+            <com.mobicage.rogerthat.widget.Resizable16by6ImageView
+                android:id="@+id/image"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/description"
+                android:visibility="gone"
+                tools:src="@drawable/mobicage"
+                tools:visibility="visible" />
+
             <LinearLayout
                 android:id="@+id/qr_code_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:visibility="gone"
+                tools:visibility="visible"
                 android:orientation="horizontal">
 
                 <com.mobicage.rogerthat.util.ui.ScaleImageView
@@ -68,22 +79,11 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
                     android:layout_weight="1"
-                    android:paddingBottom="15dp"
-                    android:paddingRight="35dp"
                     android:text="Use this coupon to get a free drink."
                     android:textSize="20sp"
                     android:textStyle="bold" />
 
             </LinearLayout>
-
-            <com.mobicage.rogerthat.widget.Resizable16by6ImageView
-                android:id="@+id/image"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/description"
-                android:visibility="gone"
-                tools:visibility="visible"
-                tools:src="@drawable/mobicage"/>
 
             <LinearLayout
                 android:layout_width="match_parent"

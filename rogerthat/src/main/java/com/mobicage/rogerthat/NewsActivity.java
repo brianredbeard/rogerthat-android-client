@@ -480,12 +480,33 @@ public class NewsActivity extends ServiceBoundActivity {
                 membersContainer.setVisibility(View.GONE);
             }
 
-
-            LinearLayout qrCodeContainer = (LinearLayout) view.findViewById(R.id.qr_code_container);
             Resizable16by6ImageView image = (Resizable16by6ImageView) view.findViewById(R.id.image);
 
-            if (newsItem.type == NewsItem.TYPE_QR_CODE) {
+            if (TextUtils.isEmptyOrWhitespace(newsItem.image_url)) {
                 image.setVisibility(View.GONE);
+            } else {
+                if (mCachedDownloader.isStorageAvailable()) {
+                    File cachedFile = mCachedDownloader.getCachedFilePath(newsItem.image_url);
+                    if (cachedFile != null) {
+                        Bitmap bm = BitmapFactory.decodeFile(cachedFile.getAbsolutePath());
+                        image.setImageBitmap(bm);
+                        image.setVisibility(View.VISIBLE);
+                    } else {
+                        if (!mImageViews.containsKey(newsItem.image_url)) {
+                            mImageViews.put(newsItem.image_url, new ArrayList<Resizable16by6ImageView>());
+                        }
+                        mImageViews.get(newsItem.image_url).add(image);
+                        // item started downloading intent when ready
+                    }
+                } else {
+                    new DownloadImageTask(image).execute(newsItem.image_url);
+                }
+            }
+
+            LinearLayout qrCodeContainer = (LinearLayout) view.findViewById(R.id.qr_code_container);
+
+
+            if (newsItem.type == NewsItem.TYPE_QR_CODE) {
                 ScaleImageView qrCode = (ScaleImageView) view.findViewById(R.id.qr_code);
                 TextView qrCodeCaption = (TextView) view.findViewById(R.id.qr_code_caption);
 
@@ -500,35 +521,18 @@ public class NewsActivity extends ServiceBoundActivity {
                     qrCode.setImageBitmap(bitmap);
                     qrCodeCaption.setText(newsItem.qr_code_caption);
                     qrCodeContainer.setVisibility(View.VISIBLE);
+
+                    if (newsItem.users_that_rogered.length == 0 && TextUtils.isEmptyOrWhitespace(newsItem.image_url)) {
+                        qrCodeCaption.setPadding(0, 0, UIUtils.convertDipToPixels(NewsActivity.this, 35), UIUtils.convertDipToPixels(NewsActivity.this, 15));
+                    }
+
                 } catch (WriterException e) {
                     qrCodeContainer.setVisibility(View.GONE);
                     L.e(e);
                 }
-
             } else {
                 qrCodeContainer.setVisibility(View.GONE);
-                if (TextUtils.isEmptyOrWhitespace(newsItem.image_url)) {
-                    image.setVisibility(View.GONE);
-                } else {
-                    if (mCachedDownloader.isStorageAvailable()) {
-                        File cachedFile = mCachedDownloader.getCachedFilePath(newsItem.image_url);
-                        if (cachedFile != null) {
-                            Bitmap bm = BitmapFactory.decodeFile(cachedFile.getAbsolutePath());
-                            image.setImageBitmap(bm);
-                            image.setVisibility(View.VISIBLE);
-                        } else {
-                            if (!mImageViews.containsKey(newsItem.image_url)) {
-                                mImageViews.put(newsItem.image_url, new ArrayList<Resizable16by6ImageView>());
-                            }
-                            mImageViews.get(newsItem.image_url).add(image);
-                            // item started downloading intent when ready
-                        }
-                    } else {
-                        new DownloadImageTask(image).execute(newsItem.image_url);
-                    }
-                }
             }
-
 
             ImageView serviceAvatar = (ImageView) view.findViewById(R.id.service_avatar);
             Bitmap avatar = mFriendsPlugin.getStore().getAvatarBitmap(newsItem.sender.email);
@@ -569,9 +573,11 @@ public class NewsActivity extends ServiceBoundActivity {
 
             TextView title = (TextView) view.findViewById(R.id.title);
             title.setText(newsItem.title);
-            if (newsItem.users_that_rogered.length == 0 && TextUtils.isEmptyOrWhitespace(newsItem.image_url)) {
+            if (newsItem.users_that_rogered.length == 0 &&
+                    TextUtils.isEmptyOrWhitespace(newsItem.image_url) &&
+                    qrCodeContainer.getVisibility() == View.GONE) {
                 LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) title.getLayoutParams();
-                lp.setMargins(0,0,70,0);
+                lp.setMargins(0, 0, UIUtils.convertDipToPixels(NewsActivity.this, 35), 0);
                 title.setLayoutParams(lp);
             }
 

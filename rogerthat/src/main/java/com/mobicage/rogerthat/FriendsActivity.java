@@ -19,7 +19,6 @@ package com.mobicage.rogerthat;
 
 import android.app.AlertDialog;
 import android.content.IntentFilter;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
@@ -50,6 +49,7 @@ public abstract class FriendsActivity extends ServiceBoundCursorListActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         T.UI();
+        super.onCreate(savedInstanceState);
         if (useAppBar()) {
             setContentView(getLayout());
         } else {
@@ -71,7 +71,6 @@ public abstract class FriendsActivity extends ServiceBoundCursorListActivity {
                 getListView().addHeaderView(headerView);
             }
         }
-        super.onCreate(savedInstanceState);
     }
 
     protected View getHeaderView() {

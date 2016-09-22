@@ -43,6 +43,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
@@ -401,11 +402,10 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
             public boolean onNavigationItemSelected(final MenuItem item) {
                 int order = item.getOrder();
                 String activityName = AppConstants.NAVIGATION_CLICKS[order];
-                if (activityName != mActivityName) {
+                if (!activityName.equals(mActivityName)) {
                     mService.postDelayedOnUIHandler(new SafeRunnable() {
                         @Override
                         protected void safeRun() throws Exception {
-                            //item.setChecked(false);
                             activateCurrentNavigationItem();
                         }
                     }, 250);
@@ -508,17 +508,41 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
     }
 
     private void activateCurrentNavigationItem() {
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        if (navigationView == null)
+            return;
+
+        Menu menu = navigationView.getMenu();
+        if (menu == null)
+            return;
+
         int order = Arrays.asList(AppConstants.NAVIGATION_CLICKS).indexOf(mActivityName);
         if (order >= 0) {
-            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-            if (navigationView == null)
-                return;
-
-            Menu menu = navigationView.getMenu();
-            if (menu == null)
-                return;
-
             menu.getItem(order).setChecked(true);
+        } else {
+            for (int i = 0; i < menu.size(); i++) {
+                menu.getItem(i).setChecked(false);
+            }
+        }
+
+        if (TextUtils.isEmptyOrWhitespace(mActivityName))
+            return;
+
+        LinearLayout navigationFooter = (LinearLayout) findViewById(R.id.nav_view_footer);
+        if (navigationFooter.getVisibility() == View.GONE)
+            return;
+
+        for (int i = 0; i < navigationFooter.getChildCount(); i++) {
+            View child = navigationFooter.getChildAt(i);
+            if (child instanceof ImageButton) {
+                String activityName = (String) child.getTag();
+                ImageButton ib = (ImageButton) child;
+                if (mActivityName.equals(activityName)) {
+                    ib.setBackgroundColor(getResources().getColor(R.color.mc_navigation_footer_active));
+                } else {
+                    ib.setBackground(null);
+                }
+            }
         }
     }
 

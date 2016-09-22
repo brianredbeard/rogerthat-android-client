@@ -21,6 +21,7 @@
     <color name="mc_about_blue">#3E3E3D</color>
     <color name="mc_white">#FFFFFF</color>
     <color name="mc_white_transparent">#88FFFFFF</color>
+    <color name="mc_navigation_footer_active">#33FFFFFF</color>
     <color name="mc_homescreen_background">#EBEBEB</color>
     <color name="mc_homescreen_text">#3E3E3D</color>
     <color name="mc_homescreen_divider">#3E3E3D</color>
