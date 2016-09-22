@@ -470,6 +470,7 @@ public class ProfileActivity extends ServiceBoundActivity {
             emailView.setVisibility(View.GONE);
             setTitle(R.string.complete_your_profile);
             setNavigationBarBurgerVisible(false);
+            setNavigationBarIcon(null);
         } else {
             setTitle(R.string.profile);
         }

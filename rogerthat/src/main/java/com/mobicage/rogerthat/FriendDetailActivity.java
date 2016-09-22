@@ -107,7 +107,8 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
     protected void onCreate(Bundle savedInstanceState) {
         T.UI();
         super.onCreate(savedInstanceState);
-        setContentViewWithoutNavigationBar(R.layout.friend_detail);
+        setContentView(R.layout.friend_detail);
+        setNavigationBarBurgerVisible(false, true);
 
         mTopArea = findViewById(R.id.friend_detail_layout);
         mServiceArea = (ViewGroup) findViewById(R.id.service_area);

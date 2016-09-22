@@ -17,8 +17,6 @@
  */
 package com.mobicage.rogerthat;
 
-import java.util.Map;
-
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -50,6 +48,8 @@ import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.to.friends.GetUserInfoRequestTO;
 
+import java.util.Map;
+
 public class FriendDetailOrInviteActivity extends ServiceBoundActivity {
 
     public final static String EMAIL = "email";
@@ -67,7 +67,8 @@ public class FriendDetailOrInviteActivity extends ServiceBoundActivity {
     protected void onCreate(Bundle savedInstanceState) {
         T.UI();
         super.onCreate(savedInstanceState);
-        setContentViewWithoutNavigationBar(R.layout.friend_detail_or_invite);
+        setContentView(R.layout.friend_detail_or_invite);
+        setNavigationBarBurgerVisible(false, true);
     }
 
     @Override

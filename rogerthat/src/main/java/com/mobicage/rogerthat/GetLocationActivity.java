@@ -17,10 +17,6 @@
  */
 package com.mobicage.rogerthat;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Locale;
-
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -49,6 +45,10 @@ import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
 
 public class GetLocationActivity extends ServiceBoundActivity {
 
@@ -96,7 +96,8 @@ public class GetLocationActivity extends ServiceBoundActivity {
     @Override
     protected void onServiceBound() {
         T.UI();
-        setContentViewWithoutNavigationBar(R.layout.get_location);
+        setContentView(R.layout.get_location);
+        setNavigationBarBurgerVisible(false, true);
         setTitle(R.string.get_location);
 
         mProgressDialog = new ProgressDialog(this);

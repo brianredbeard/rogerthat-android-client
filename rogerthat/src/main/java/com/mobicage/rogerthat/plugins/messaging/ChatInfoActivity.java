@@ -17,13 +17,6 @@
  */
 package com.mobicage.rogerthat.plugins.messaging;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -39,6 +32,13 @@ import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ChatInfoActivity extends ServiceBoundActivity {
 
@@ -57,7 +57,8 @@ public class ChatInfoActivity extends ServiceBoundActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mChatKey = getIntent().getStringExtra(CHAT_KEY);
-        setContentViewWithoutNavigationBar(R.layout.chat_info);
+        setContentView(R.layout.chat_info);
+        setNavigationBarBurgerVisible(false, true);
         setTitle(R.string.about);
     }
 

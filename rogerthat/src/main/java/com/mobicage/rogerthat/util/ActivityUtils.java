@@ -24,6 +24,9 @@ import android.content.Intent;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MoreActivity;
 import com.mobicage.rogerthat.NewsActivity;
+import com.mobicage.rogerthat.QRCodeActivity;
+import com.mobicage.rogerthat.ServiceActionsOfflineActivity;
+import com.mobicage.rogerthat.ServiceActionsOnlineActivity;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.ServiceFriendsActivity;
 import com.mobicage.rogerthat.SettingsActivity;
@@ -78,16 +81,29 @@ public class ActivityUtils {
         } else if ("emergency_services".equals(activityName)) {
             goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_EMERGENCY, clearStack);
         } else if ("stream".equals(activityName)) {
-            goToActivity(context, HistoryListActivity.class, false);
+            goToActivity(context, HistoryListActivity.class, clearStack);
         } else if ("qrcode".equals(activityName)) {
-            // todo ruben
-            //AppConstants.APP_EMAIL
+            goToActivity(context, QRCodeActivity.class, clearStack);
         } else if (activityName.startsWith("action")) {
-            // todo ruben order
             String action = activityName.split("\\|", 2)[1];
+            Class clazz;
+            if (context.getMainService().getNetworkConnectivityManager().isConnected()) {
+                clazz = ServiceActionsOnlineActivity.class;
+            } else {
+                clazz = ServiceActionsOfflineActivity.class;
+
+            }
+
+            final Intent i = new Intent(context, clazz);
+            i.putExtra(ServiceActionsOfflineActivity.ACTION, action);
+            if (clearStack) {
+                i.addFlags(MainActivity.FLAG_CLEAR_STACK);
+            }
+            context.startActivity(i);
+
         } else if (activityName.startsWith("click")) {
             String tag = activityName.split("\\|", 2)[1];
-            String hashedTag = Security.sha256(tag);
+            String hashedTag = Security.sha256Lower(tag);
             goToActivityBehindTag(context, AppConstants.APP_EMAIL, hashedTag);
         } else {
             L.bug("unknown goToActivity: " + activityName);

@@ -61,7 +61,8 @@ public class SendMessageContactActivity extends ServiceBoundActivity {
 
     @Override
     protected void onServiceBound() {
-        setContentViewWithoutNavigationBar(R.layout.send_message_contact);
+        setContentView(R.layout.send_message_contact);
+        setNavigationBarBurgerVisible(false, true);
         setActivityName("send_message_contact");
         final int text;
         switch (AppConstants.FRIENDS_CAPTION) {

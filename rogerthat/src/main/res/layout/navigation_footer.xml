@@ -36,7 +36,7 @@
         android:paddingTop="20dp"
         app:ico_color="@color/mc_white"
         app:ico_icon="@string/faw_shopping_cart"
-        android:tag="action|order"
+        android:tag="action|__sln__.order"
         app:ico_padding="5dp" />
 
     <ImageButton

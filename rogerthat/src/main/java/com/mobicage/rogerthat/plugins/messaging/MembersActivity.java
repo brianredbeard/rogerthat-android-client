@@ -39,7 +39,6 @@ import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
 
 import java.util.HashMap;
-
 import java.util.Map;
 
 public class MembersActivity extends ServiceBoundActivity {
@@ -55,7 +54,8 @@ public class MembersActivity extends ServiceBoundActivity {
 
     @Override
     protected void onServiceBound() {
-        setContentViewWithoutNavigationBar(R.layout.message_thread_members);
+        setContentView(R.layout.message_thread_members);
+        setNavigationBarBurgerVisible(false, true);
         setTitle(R.string.members);
 
         Intent intent = getIntent();

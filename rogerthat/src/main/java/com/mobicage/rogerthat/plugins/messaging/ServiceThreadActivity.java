@@ -111,7 +111,8 @@ public class ServiceThreadActivity extends ServiceBoundCursorListActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentViewWithoutNavigationBar(R.layout.service_thread);
+        setContentView(R.layout.service_thread);
+        setNavigationBarBurgerVisible(false, true);
         mParentMessageKey = getIntent().getStringExtra(PARENT_MESSAGE_KEY);
         setListView((ListView) findViewById(R.id.thread_messages));
 

@@ -177,7 +177,7 @@ public class ServiceFriendsActivity extends FriendsActivity {
         startActivity(serviceSearch);
     }
 
-     @Override
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         T.UI();
         super.onCreateOptionsMenu(menu);

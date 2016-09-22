@@ -27,10 +27,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
@@ -106,6 +108,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
 
     private CallbackManager mFBCallbackMgr;
 
+    private Toolbar mToolbar;
     private ActionBarDrawerToggle mDrawerToggle;
     private String mActivityName;
 
@@ -338,13 +341,36 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
     }
 
     public void setNavigationBarBurgerVisible(boolean isVisible) {
+        setNavigationBarBurgerVisible(isVisible, false);
+    }
+
+    public void setNavigationBarBurgerVisible(boolean isVisible, boolean clickable) {
         if (isVisible) {
             getDrawer().setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
             mDrawerToggle.setDrawerIndicatorEnabled(true);
+            mDrawerToggle.setToolbarNavigationClickListener(null);
         } else {
             getDrawer().setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
             mDrawerToggle.setDrawerIndicatorEnabled(false);
+            if (clickable) {
+                mDrawerToggle.setToolbarNavigationClickListener(new SafeViewOnClickListener() {
+                    @Override
+                    public void safeOnClick(View v) {
+                        onBackPressed();
+                    }
+                });
+            } else {
+                mDrawerToggle.setToolbarNavigationClickListener(null);
+            }
         }
+    }
+
+    public void setNavigationBarIcon(int resId) {
+        setNavigationBarIcon(getResources().getDrawable(resId));
+    }
+
+    public void setNavigationBarIcon(@Nullable Drawable icon) {
+        mToolbar.setNavigationIcon(icon);
     }
 
     public void setLastTimeClicked(final long ts) {
@@ -360,24 +386,13 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         TextUtils.overrideFonts(this, findViewById(android.R.id.content));
     }
 
-    public void setContentViewWithoutNavigationBar(View view) {
-        super.setContentView(view);
-        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
-    }
-
     @Override
     public void setContentView(int layoutResID) {
         setContentView(getLayoutInflater().inflate(R.layout.navigation_view, null));
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setNavigationIcon(getResources().getDrawable(R.drawable.more_id));
-        toolbar.setNavigationOnClickListener(new SafeViewOnClickListener() {
-            @Override
-            public void safeOnClick(View v) {
-                L.w("test toolbar");
-            }
-        });
-        setSupportActionBar(toolbar);
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+
+        setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
@@ -390,7 +405,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         item.addView(child, layoutParams);
 
         final DrawerLayout drawer = getDrawer();
-        mDrawerToggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string
+        mDrawerToggle = new ActionBarDrawerToggle(this, drawer, mToolbar, R.string
                 .navigation_drawer_open, R.string.navigation_drawer_close);
         mDrawerToggle.setDrawerIndicatorEnabled(true);
         drawer.addDrawerListener(mDrawerToggle);
@@ -428,7 +443,8 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         });
         navigationView.setItemIconTintList(null);
 
-        if (!CloudConstants.isCityApp()) {
+        // todo ruben
+        if (!CloudConstants.isCityApp() && false) {
             LinearLayout navigationFooter = (LinearLayout) findViewById(R.id.nav_view_footer);
             navigationFooter.setVisibility(View.GONE);
         }

@@ -45,7 +45,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.android.Contents;
 import com.google.zxing.client.android.Intents;
@@ -515,7 +514,6 @@ public class NewsActivity extends ServiceBoundActivity {
                     intent.setAction(Intents.Encode.ACTION);
                     intent.putExtra(Intents.Encode.TYPE, Contents.Type.TEXT);
                     intent.putExtra(Intents.Encode.DATA, newsItem.qr_code_content);
-                    intent.putExtra(Intents.Encode.FORMAT, BarcodeFormat.QR_CODE);
                     QRCodeEncoder qrCodeEncoder = new QRCodeEncoder(NewsActivity.this, intent, mDisplayWidth / 2, false);
                     Bitmap bitmap = qrCodeEncoder.encodeAsBitmap();
                     qrCode.setImageBitmap(bitmap);

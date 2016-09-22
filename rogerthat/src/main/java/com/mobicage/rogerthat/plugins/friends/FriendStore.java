@@ -1220,6 +1220,11 @@ public class FriendStore implements Closeable {
             new String[] { organizationType + "" });
     }
 
+    public Cursor getServiceActionsListCursor(String action) {
+        return mDb.rawQuery(mMainService.getString(R.string.sql_service_actions_list_cursor),
+                new String[]{action});
+    }
+
     public Cursor getUserFriendListCursor() {
         return mDb.rawQuery(mMainService.getString(R.string.sql_user_friend_list_cursor), null);
     }

@@ -294,7 +294,8 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
             setContentView(R.layout.messaging);
             setActivityName("messages");
         } else {
-            setContentViewWithoutNavigationBar(R.layout.messaging);
+            setContentView(R.layout.messaging);
+            setNavigationBarBurgerVisible(false, true);
             setActivityName("messages_filter");
         }
 

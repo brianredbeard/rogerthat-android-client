@@ -134,7 +134,8 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentViewWithoutNavigationBar(R.layout.message_thread);
+        setContentView(R.layout.message_thread);
+        setNavigationBarBurgerVisible(false, true);
 
         _1_DP_IN_PX = UIUtils.convertDipToPixels(this, 1);
         _3_DP_IN_PX = UIUtils.convertDipToPixels(this, 3);

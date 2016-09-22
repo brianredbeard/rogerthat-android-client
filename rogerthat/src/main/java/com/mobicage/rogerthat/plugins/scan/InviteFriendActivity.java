@@ -18,8 +18,6 @@
 
 package com.mobicage.rogerthat.plugins.scan;
 
-import org.jivesoftware.smack.util.Base64;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -47,6 +45,8 @@ import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
 import com.mobicage.rpc.config.AppConstants;
 
+import org.jivesoftware.smack.util.Base64;
+
 public class InviteFriendActivity extends ServiceBoundActivity {
 
     private String mEmailHash;
@@ -56,7 +56,8 @@ public class InviteFriendActivity extends ServiceBoundActivity {
     @Override
     protected void onServiceBound() {
         T.UI();
-        setContentViewWithoutNavigationBar(R.layout.friend_invite);
+        setContentView(R.layout.friend_invite);
+        setNavigationBarBurgerVisible(false, true);
         final int btnText;
         switch (AppConstants.FRIENDS_CAPTION) {
         case COLLEAGUES:

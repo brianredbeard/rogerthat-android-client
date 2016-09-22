@@ -45,7 +45,6 @@ import android.view.WindowManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.Button;
-import android.widget.CursorAdapter;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
@@ -241,7 +240,8 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity implement
 
         mStatusImage = (ImageView) activityView.findViewById(R.id.status_image);
 
-        setContentViewWithoutNavigationBar(activityView);
+        setContentView(activityView);
+        setNavigationBarBurgerVisible(false, true);
 
         final Intent intent = getIntent();
         String messageKey = intent.getStringExtra("message");

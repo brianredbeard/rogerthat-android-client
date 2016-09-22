@@ -118,7 +118,8 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity implements M
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         L.i("ServiceActionMenuActivity.onCreate");
-        setContentViewWithoutNavigationBar(R.layout.service_action_menu);
+        setContentView(R.layout.service_action_menu);
+        setNavigationBarBurgerVisible(false, true);
         Intent intent = getIntent();
         email = intent.getStringExtra(SERVICE_EMAIL);
         page = intent.getIntExtra(MENU_PAGE, 0);
@@ -401,7 +402,9 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity implements M
             p.setBackgroundDrawable(d);
         }
 
-        if (menuItemColor != null) {
+        if (page == 0) {
+            if (menuItemColor == null)
+                menuItemColor = getResources().getColor(R.color.mc_page_light);
             cells[0][0].icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_info).color(menuItemColor).sizeDp(24).paddingDp(2));
             cells[1][0].icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_envelope).color(menuItemColor).sizeDp(24).paddingDp(2));
             cells[2][0].icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_phone).color(menuItemColor).sizeDp(24).paddingDp(2));

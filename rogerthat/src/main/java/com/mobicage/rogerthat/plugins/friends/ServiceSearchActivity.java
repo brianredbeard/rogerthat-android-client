@@ -110,7 +110,8 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentViewWithoutNavigationBar(R.layout.service_search);
+        setContentView(R.layout.service_search);
+        setNavigationBarBurgerVisible(false, true);
         setTitle(R.string.discover_services_short);
 
         mSearchCategoryLabels = (LinearLayout) findViewById(R.id.search_category);

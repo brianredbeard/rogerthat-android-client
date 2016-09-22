@@ -31,6 +31,12 @@
         GROUP BY cat_id 
         ORDER BY cat_name COLLATE NOCASE
     </string>
+    <string name="sql_service_actions_list_cursor">
+        SELECT f.rowid as _id, f.email, f.name, f.share_location, f.shares_location, f.avatar, f.existence, f.type, f.description, f.description_branding, f.poke_description, f.qualified_identifier, f.organization_type, f.callbacks, f.flags, f.profile_data, f.content_branding_hash, f.actions
+        FROM service_menu_item smi INNER JOIN friend f ON smi.friend = f.email
+        WHERE smi.hashed_tag = ? AND f.existence = 0
+    </string>
+
     <string name="sql_friends_by_category_cursor">SELECT rowid as _id, email, name, share_location, shares_location, avatar, existence, \"type\", description, description_branding, poke_description, qualified_identifier, organization_type, callbacks, flags, profile_data, content_branding_hash, actions FROM friend WHERE category_id=? AND (existence = 0 OR existence = 4) ORDER BY name COLLATE NOCASE</string>
     <string name="sql_friend_get_existing_by_email">SELECT rowid as _id, email, name, share_location, shares_location, avatar, existence, \"type\", description, description_branding, poke_description, qualified_identifier, organization_type, callbacks, flags, profile_data, content_branding_hash, actions FROM friend WHERE email=? AND (existence = 0 OR existence = 4)</string>
     <string name="sql_friend_get_by_email">SELECT rowid as _id, email, name, share_location, shares_location, avatar, existence, \"type\", description, description_branding, poke_description, qualified_identifier, organization_type, callbacks, flags, profile_data, content_branding_hash, actions FROM friend WHERE email=?</string>

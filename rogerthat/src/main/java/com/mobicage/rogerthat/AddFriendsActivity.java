@@ -139,7 +139,8 @@ public class AddFriendsActivity extends ServiceBoundActivity {
     protected void onCreate(Bundle savedInstanceState) {
         T.UI();
         super.onCreate(savedInstanceState);
-        setContentViewWithoutNavigationBar(R.layout.add_friends);
+        setContentView(R.layout.add_friends);
+        setNavigationBarBurgerVisible(false, true);
 
         final int btnText;
         switch (AppConstants.FRIENDS_CAPTION) {

@@ -17,28 +17,6 @@
  */
 package com.mobicage.rogerthat.plugins.messaging;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.net.URLEncoder;
-import java.util.Map;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.params.HttpClientParams;
-import org.json.simple.JSONValue;
-
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
@@ -51,7 +29,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
-import android.view.View;
 import android.view.WindowManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceResponse;
@@ -59,7 +36,6 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.MediaController;
-import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
@@ -73,6 +49,24 @@ import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.params.HttpClientParams;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 
 public class AttachmentViewerActivity extends ServiceBoundActivity {
 
@@ -271,11 +265,11 @@ public class AttachmentViewerActivity extends ServiceBoundActivity {
         mGenerateThumbnail = intent.getBooleanExtra("generate_thumbnail", false);
 
         if (mContentType.toLowerCase(Locale.US).startsWith("video/")) {
-            setContentViewWithoutNavigationBar(R.layout.file_viewer_video);
+            setContentView(R.layout.file_viewer_video);
             mVideoview = (VideoView) findViewById(R.id.videoView);
         } else {
             getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-            setContentViewWithoutNavigationBar(R.layout.file_viewer);
+            setContentView(R.layout.file_viewer);
             mWebview = (WebView) findViewById(R.id.webview);
 
             mWebview.setWebChromeClient(new WebChromeClient() {
@@ -304,6 +298,7 @@ public class AttachmentViewerActivity extends ServiceBoundActivity {
                 setTitle(mName);
             }
         }
+        setNavigationBarBurgerVisible(false, true);
 
         try {
             mAttachmentsDir = mMessagingPlugin.attachmentsDir(mThreadKey, null);

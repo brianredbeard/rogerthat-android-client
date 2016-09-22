@@ -401,6 +401,7 @@
     <string name="scan_my_addressbook">Scan my address book</string>
     <string name="scan_my_qr">Or let someone scan yours.</string>
     <string name="scan_passport">Scan a %1$s id</string>
+    <string name="passport">%1$s id</string>
     <string name="scan_qr_code">Scan QR code</string>
     <string name="scanned_yourself">You successfully scanned your own %1$s id.</string>
     <string name="scanner_communication_failure">A failure happened while communicating to the server.</string>
