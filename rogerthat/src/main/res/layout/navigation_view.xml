@@ -25,11 +25,18 @@
         app:itemTextColor="@color/mc_black"
         app:menu="@menu/navigation_menu">
 
-        <include
-            layout="@layout/navigation_footer"
+
+        <LinearLayout
+            android:id="@+id/nav_view_footer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom" />
+            android:layout_gravity="bottom"
+            android:background="@drawable/vertical_gradient"
+            android:gravity="bottom"
+            android:minHeight="70dp"
+            android:orientation="horizontal">
+
+        </LinearLayout>
 
     </android.support.design.widget.NavigationView>
 

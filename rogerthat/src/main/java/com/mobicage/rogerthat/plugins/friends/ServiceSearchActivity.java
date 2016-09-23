@@ -57,6 +57,7 @@ import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.ServiceDetailActivity;
+import com.mobicage.rogerthat.util.Security;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
@@ -83,6 +84,8 @@ import java.util.Map;
 public class ServiceSearchActivity extends ServiceBoundActivity {
 
     public final static String ORGANIZATION_TYPE = "organization_type";
+    public final static String ACTION = "action";
+    public final static String TITLE = "title";
 
     public static final String SEARCH_RESULT = "SEARCH_RESULT";
     public static final String SEARCH_STRING = "SEARCH_STRING";
@@ -101,6 +104,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
     private String mSearchString = null;
     private FindServiceResponseTO mResponseTO;
     private int mOrganizationType;
+    private String mAction;
     private Map<String, SearchInfo> mSearchInfoByCategory;
     private Map<AbsListView, SearchInfo> mSearchInfoByListView;
 
@@ -112,7 +116,17 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
 
         setContentView(R.layout.service_search);
         setNavigationBarBurgerVisible(false, true);
-        setTitle(R.string.discover_services_short);
+
+        Intent intent = getIntent();
+        mOrganizationType = intent.getIntExtra(ORGANIZATION_TYPE,
+                FriendStore.SERVICE_ORGANIZATION_TYPE_UNSPECIFIED);
+
+        mAction = intent.getStringExtra(ACTION);
+        if (mAction == null) {
+            setTitle(R.string.discover_services_short);
+        } else {
+            setTitle(intent.getIntExtra(TITLE, 0));
+        }
 
         mSearchCategoryLabels = (LinearLayout) findViewById(R.id.search_category);
         mSearchCategoryViewFlipper = (SafeViewFlipper) findViewById(R.id.search_result_lists);
@@ -171,8 +185,6 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
     @Override
     protected void onServiceBound() {
         mFriendsPlugin = mService.getPlugin(FriendsPlugin.class);
-        mOrganizationType = getIntent().getIntExtra(ORGANIZATION_TYPE,
-                FriendStore.SERVICE_ORGANIZATION_TYPE_UNSPECIFIED);
 
         mBroadcastReceiver = getBroadCastReceiver();
 
@@ -396,7 +408,11 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
     }
 
     private void launchFindServiceCall(String cursor) {
-        if (mFriendsPlugin.searchService(mSearchString, mOrganizationType, cursor)) {
+        String hashedTag = null;
+        if (mAction != null) {
+            hashedTag = Security.sha256Lower(mAction);
+        }
+        if (mFriendsPlugin.searchService(mSearchString, mOrganizationType, cursor, hashedTag)) {
             if (cursor == null)
                 mProgressDialog = ProgressDialog.show(this, null, getString(R.string.searching), true, true);
         } else {

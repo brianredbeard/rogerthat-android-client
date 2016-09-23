@@ -18,18 +18,6 @@
 
 package com.mobicage.rogerthat.plugins.friends;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher;
-
-import org.jivesoftware.smack.util.Base64;
-import org.json.simple.JSONValue;
-
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -121,6 +109,18 @@ import com.mobicage.to.system.IdentityTO;
 import com.mobicage.to.system.SetSecureInfoRequestTO;
 import com.mobicage.to.system.SetSecureInfoResponseTO;
 import com.mobicage.to.system.SettingsTO;
+
+import org.jivesoftware.smack.util.Base64;
+import org.json.simple.JSONValue;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
 
 public class FriendsPlugin implements MobicagePlugin {
 
@@ -727,7 +727,7 @@ public class FriendsPlugin implements MobicagePlugin {
         return true;
     }
 
-    public boolean searchService(final String searchString, final int organizationType, final String cursor) {
+    public boolean searchService(final String searchString, final int organizationType, final String cursor, final String hashedTag) {
         FindServiceRequestTO request = new FindServiceRequestTO();
         request.search_string = searchString;
         request.geo_point = mMainService.isPermitted(Manifest.permission.ACCESS_FINE_LOCATION) ? mGeoProvider
@@ -735,6 +735,7 @@ public class FriendsPlugin implements MobicagePlugin {
         request.organization_type = organizationType;
         request.cursor = cursor;
         request.avatar_size = 50 * mMainService.getScreenScale();
+        request.hashed_tag = hashedTag;
 
         try {
             com.mobicage.api.services.Rpc.findService(new FindServiceResponseHandler(searchString), request);

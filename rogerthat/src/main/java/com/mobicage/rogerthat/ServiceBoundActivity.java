@@ -27,6 +27,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -41,6 +42,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -50,10 +52,14 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
 import com.facebook.CallbackManager;
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.iconics.context.IconicsLayoutInflater;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.MenuItemPressingActivity;
+import com.mobicage.rogerthat.plugins.friends.ServiceSearchActivity;
 import com.mobicage.rogerthat.util.ActivityUtils;
+import com.mobicage.rogerthat.util.Security;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
@@ -64,7 +70,7 @@ import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.Pausable;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.AppConstants;
-import com.mobicage.rpc.config.CloudConstants;
+import com.mobicage.rpc.config.NavigationConstants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -416,7 +422,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
             @Override
             public boolean onNavigationItemSelected(final MenuItem item) {
                 int order = item.getOrder();
-                String activityName = AppConstants.NAVIGATION_CLICKS[order];
+                String activityName = NavigationConstants.NAVIGATION_CLICKS[order];
                 if (!activityName.equals(mActivityName)) {
                     mService.postDelayedOnUIHandler(new SafeRunnable() {
                         @Override
@@ -426,14 +432,14 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
                     }, 250);
                 }
 
-                if (AppConstants.NAVIGATION_CLICKS.length <= order) {
+                if (NavigationConstants.NAVIGATION_CLICKS.length <= order) {
                     L.bug("ignoring navigation item clicked NAVIGATION_CLICKS.length <= order: " + order);
-                } else if (AppConstants.NAVIGATION_CLICKS[order] != null) {
+                } else if (NavigationConstants.NAVIGATION_CLICKS[order] != null) {
                     if (activityName != null && !activityName.equals(mActivityName)) {
                         ActivityUtils.goToActivity(ServiceBoundActivity.this, activityName, true);
                     }
-                } else if (AppConstants.NAVIGATION_TAGS[order] != null) {
-                    ActivityUtils.goToActivityBehindTag(ServiceBoundActivity.this, AppConstants.APP_EMAIL, AppConstants.NAVIGATION_TAGS[order]);
+                } else if (NavigationConstants.NAVIGATION_TAGS[order] != null) {
+                    ActivityUtils.goToActivityBehindTag(ServiceBoundActivity.this, AppConstants.APP_EMAIL, NavigationConstants.NAVIGATION_TAGS[order]);
                 } else {
                     L.bug("ignoring navigation item clicked for order: " + order);
                 }
@@ -443,10 +449,71 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         });
         navigationView.setItemIconTintList(null);
 
-        // todo ruben
-        if (!CloudConstants.isCityApp() && false) {
-            LinearLayout navigationFooter = (LinearLayout) findViewById(R.id.nav_view_footer);
+        LinearLayout navigationFooter = (LinearLayout) findViewById(R.id.nav_view_footer);
+        ServiceBoundActivity.NavigationItem[] navigationFooterItems = NavigationConstants.getNavigationFooterItems();
+        if (navigationFooterItems.length > 0) {
+            navigationFooter.removeAllViews();
+            LayoutInflater li = getLayoutInflater();
+            for (final NavigationItem ni : navigationFooterItems) {
+                ImageButton imageButton = (ImageButton) li.inflate(R.layout.navigation_footer_item, navigationFooter, false);
+                if (ni.actionType == null) {
+                    imageButton.setTag(ni.action);
+                } else {
+                    imageButton.setTag(ni.actionType + "|" + ni.action);
+                }
+                imageButton.setOnClickListener(new SafeViewOnClickListener() {
+                    @Override
+                    public void safeOnClick(View v) {
+                        closeNavigationView();
+                        simulateNavigationItemClick(ni);
+                    }
+                });
+                imageButton.setImageDrawable(new IconicsDrawable(this, ni.icon).color(Color.WHITE).sizeDp(20));
+                navigationFooter.addView(imageButton);
+            }
+
+            navigationFooter.setVisibility(View.VISIBLE);
+        } else {
             navigationFooter.setVisibility(View.GONE);
+        }
+    }
+
+    private void simulateNavigationItemClick(NavigationItem ni) {
+        if (ni.actionType == null) {
+            ActivityUtils.goToActivity(ServiceBoundActivity.this, ni.action, true);
+        } else if ("action".equals(ni.actionType)) {
+            Class clazz;
+            if (mService.getNetworkConnectivityManager().isConnected()) {
+                clazz = ServiceSearchActivity.class;
+            } else {
+                clazz = ServiceActionsOfflineActivity.class;
+
+            }
+
+            final Intent i = new Intent(ServiceBoundActivity.this, clazz);
+            i.putExtra(ServiceActionsOfflineActivity.ACTION, ni.action);
+            i.putExtra(ServiceActionsOfflineActivity.TITLE, ni.labelTextId);
+            i.addFlags(MainActivity.FLAG_CLEAR_STACK);
+            ServiceBoundActivity.this.startActivity(i);
+
+        } else if ("click".equals(ni.actionType)) {
+            String hashedTag = Security.sha256Lower(ni.action);
+            ActivityUtils.goToActivityBehindTag(ServiceBoundActivity.this, AppConstants.APP_EMAIL, hashedTag);
+        }
+    }
+
+    public static class NavigationItem {
+        public FontAwesome.Icon icon;
+        public String actionType;
+        public String action;
+        public int labelTextId;
+
+        public NavigationItem(FontAwesome.Icon icon, String actionType, String action, int labelTextId) {
+            super();
+            this.icon = icon;
+            this.actionType = actionType;
+            this.action = action;
+            this.labelTextId = labelTextId;
         }
     }
 
@@ -532,7 +599,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         if (menu == null)
             return;
 
-        int order = Arrays.asList(AppConstants.NAVIGATION_CLICKS).indexOf(mActivityName);
+        int order = Arrays.asList(NavigationConstants.NAVIGATION_CLICKS).indexOf(mActivityName);
         if (order >= 0) {
             menu.getItem(order).setChecked(true);
         } else {
@@ -583,10 +650,6 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
     }
 
     public void onOptionNavigationViewToolbarSelected(View v) {
-        String activityName = (String) v.getTag();
-        if (activityName != null && !activityName.equals(mActivityName)) {
-            ActivityUtils.goToActivity(this, activityName, true);
-        }
         closeNavigationView();
     }
 }

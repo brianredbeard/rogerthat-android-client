@@ -33,7 +33,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -48,7 +47,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
@@ -229,19 +227,17 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity implement
         mStore = mMessagingPlugin.getStore();
         mDisplayWidth = UIUtils.getDisplayWidth(this);
 
-        final View activityView = LayoutInflater.from(this).inflate(R.layout.message_detail, null);
+        setContentView(R.layout.message_detail);
+        setNavigationBarBurgerVisible(false, true);
 
-        ((ImageButton) activityView.findViewById(R.id.expand)).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.expand).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 expandDetails();
             }
         });
 
-        mStatusImage = (ImageView) activityView.findViewById(R.id.status_image);
-
-        setContentView(activityView);
-        setNavigationBarBurgerVisible(false, true);
+        mStatusImage = (ImageView) findViewById(R.id.status_image);
 
         final Intent intent = getIntent();
         String messageKey = intent.getStringExtra("message");

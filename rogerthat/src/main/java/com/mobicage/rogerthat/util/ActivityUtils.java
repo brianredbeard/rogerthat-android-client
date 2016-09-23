@@ -25,8 +25,6 @@ import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MoreActivity;
 import com.mobicage.rogerthat.NewsActivity;
 import com.mobicage.rogerthat.QRCodeActivity;
-import com.mobicage.rogerthat.ServiceActionsOfflineActivity;
-import com.mobicage.rogerthat.ServiceActionsOnlineActivity;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.ServiceFriendsActivity;
 import com.mobicage.rogerthat.SettingsActivity;
@@ -40,7 +38,6 @@ import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
 import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
 import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
 import com.mobicage.rogerthat.util.logging.L;
-import com.mobicage.rpc.config.AppConstants;
 
 public class ActivityUtils {
 
@@ -84,27 +81,6 @@ public class ActivityUtils {
             goToActivity(context, HistoryListActivity.class, clearStack);
         } else if ("qrcode".equals(activityName)) {
             goToActivity(context, QRCodeActivity.class, clearStack);
-        } else if (activityName.startsWith("action")) {
-            String action = activityName.split("\\|", 2)[1];
-            Class clazz;
-            if (context.getMainService().getNetworkConnectivityManager().isConnected()) {
-                clazz = ServiceActionsOnlineActivity.class;
-            } else {
-                clazz = ServiceActionsOfflineActivity.class;
-
-            }
-
-            final Intent i = new Intent(context, clazz);
-            i.putExtra(ServiceActionsOfflineActivity.ACTION, action);
-            if (clearStack) {
-                i.addFlags(MainActivity.FLAG_CLEAR_STACK);
-            }
-            context.startActivity(i);
-
-        } else if (activityName.startsWith("click")) {
-            String tag = activityName.split("\\|", 2)[1];
-            String hashedTag = Security.sha256Lower(tag);
-            goToActivityBehindTag(context, AppConstants.APP_EMAIL, hashedTag);
         } else {
             L.bug("unknown goToActivity: " + activityName);
             return false;
