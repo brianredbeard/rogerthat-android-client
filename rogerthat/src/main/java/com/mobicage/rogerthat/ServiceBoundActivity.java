@@ -73,7 +73,6 @@ import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.NavigationConstants;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -418,32 +417,20 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         mDrawerToggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        final Menu menu = navigationView.getMenu();
+
+        ServiceBoundActivity.NavigationItem[] navigationItems = NavigationConstants.getNavigationItems();
+        for (int i = 0; i < navigationItems.length; i++) {
+            final NavigationItem ni = navigationItems[i];
+            menu.add(i, i, i, ni.labelTextId).setIcon(ni.iconId).setCheckable(true);
+        }
+
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(final MenuItem item) {
                 int order = item.getOrder();
-                String activityName = NavigationConstants.NAVIGATION_CLICKS[order];
-                if (!activityName.equals(mActivityName)) {
-                    mService.postDelayedOnUIHandler(new SafeRunnable() {
-                        @Override
-                        protected void safeRun() throws Exception {
-                            activateCurrentNavigationItem();
-                        }
-                    }, 250);
-                }
-
-                if (NavigationConstants.NAVIGATION_CLICKS.length <= order) {
-                    L.bug("ignoring navigation item clicked NAVIGATION_CLICKS.length <= order: " + order);
-                } else if (NavigationConstants.NAVIGATION_CLICKS[order] != null) {
-                    if (activityName != null && !activityName.equals(mActivityName)) {
-                        ActivityUtils.goToActivity(ServiceBoundActivity.this, activityName, true);
-                    }
-                } else if (NavigationConstants.NAVIGATION_TAGS[order] != null) {
-                    ActivityUtils.goToActivityBehindTag(ServiceBoundActivity.this, AppConstants.APP_EMAIL, NavigationConstants.NAVIGATION_TAGS[order]);
-                } else {
-                    L.bug("ignoring navigation item clicked for order: " + order);
-                }
-                closeNavigationView();
+                final NavigationItem ni = NavigationConstants.getNavigationItems()[order];
+                simulateNavigationItemClick(ni);
                 return true;
             }
         });
@@ -464,7 +451,6 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
                 imageButton.setOnClickListener(new SafeViewOnClickListener() {
                     @Override
                     public void safeOnClick(View v) {
-                        closeNavigationView();
                         simulateNavigationItemClick(ni);
                     }
                 });
@@ -479,6 +465,21 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
     }
 
     private void simulateNavigationItemClick(NavigationItem ni) {
+        String activityName = ni.action;
+        if (ni.actionType != null) {
+            activityName = ni.actionType + "|" + ni.action;
+        }
+        if (!activityName.equals(mActivityName)) {
+            mService.postDelayedOnUIHandler(new SafeRunnable() {
+                @Override
+                protected void safeRun() throws Exception {
+                    activateCurrentNavigationItem();
+                }
+            }, 250);
+        }
+
+        closeNavigationView();
+
         if (ni.actionType == null) {
             ActivityUtils.goToActivity(ServiceBoundActivity.this, ni.action, true);
         } else if ("action".equals(ni.actionType)) {
@@ -487,7 +488,6 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
                 clazz = ServiceSearchActivity.class;
             } else {
                 clazz = ServiceActionsOfflineActivity.class;
-
             }
 
             final Intent i = new Intent(ServiceBoundActivity.this, clazz);
@@ -497,13 +497,20 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
             ServiceBoundActivity.this.startActivity(i);
 
         } else if ("click".equals(ni.actionType)) {
+            if (TextUtils.isEmptyOrWhitespace(AppConstants.APP_EMAIL)) {
+                L.bug("simulateNavigationItemClick click but app_email was nog set");
+                return;
+            }
             String hashedTag = Security.sha256Lower(ni.action);
             ActivityUtils.goToActivityBehindTag(ServiceBoundActivity.this, AppConstants.APP_EMAIL, hashedTag);
+        } else {
+            L.bug("ignoring simulateNavigationItemClick: " + ni.actionType + "|" + ni.action);
         }
     }
 
     public static class NavigationItem {
         public FontAwesome.Icon icon;
+        public int iconId;
         public String actionType;
         public String action;
         public int labelTextId;
@@ -511,6 +518,16 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         public NavigationItem(FontAwesome.Icon icon, String actionType, String action, int labelTextId) {
             super();
             this.icon = icon;
+            this.iconId = 0;
+            this.actionType = actionType;
+            this.action = action;
+            this.labelTextId = labelTextId;
+        }
+
+        public NavigationItem(int iconId, String actionType, String action, int labelTextId) {
+            super();
+            this.icon = null;
+            this.iconId = iconId;
             this.actionType = actionType;
             this.action = action;
             this.labelTextId = labelTextId;
@@ -599,7 +616,17 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         if (menu == null)
             return;
 
-        int order = Arrays.asList(NavigationConstants.NAVIGATION_CLICKS).indexOf(mActivityName);
+        int order = -1;
+        if (mActivityName != null) {
+            ServiceBoundActivity.NavigationItem[] navigationItems = NavigationConstants.getNavigationItems();
+            for (int i = 0; i < navigationItems.length; i++) {
+                final NavigationItem ni = navigationItems[i];
+                if (ni.actionType == null && ni.action.equals(mActivityName)) {
+                    order = i;
+                    break;
+                }
+            }
+        }
         if (order >= 0) {
             menu.getItem(order).setChecked(true);
         } else {

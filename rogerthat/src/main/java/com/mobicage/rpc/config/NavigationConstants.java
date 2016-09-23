@@ -19,17 +19,23 @@
 package com.mobicage.rpc.config;
 
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 
 public class NavigationConstants {
-    public static final String[] NAVIGATION_CLICKS = new String[]{"messages", "services", "friends", "scan", "profile", "settings", "stream"};
-    public static final String[] NAVIGATION_TAGS = new String[]{null, null, null, null, null, null, null};
 
-    public static final String[] NAVIGATION_FOOTER_TAGS = new String[]{"news", "action|__sln__.order", "click|agenda", "qrcode"};
-    // faw_newspaper_o
-    // faw_shopping_cart
-    // faw_calendar
-    // faw_credit_card
+    public static ServiceBoundActivity.NavigationItem[] getNavigationItems() {
+
+        return new ServiceBoundActivity.NavigationItem[]{
+                new ServiceBoundActivity.NavigationItem(R.drawable.menu_0, null, "messages", R.string.tab_messaging),
+                new ServiceBoundActivity.NavigationItem(R.drawable.menu_1, null, "services", R.string.tab_services),
+                new ServiceBoundActivity.NavigationItem(R.drawable.menu_2, null, "friends", R.string.tab_friends),
+                new ServiceBoundActivity.NavigationItem(R.drawable.menu_3, null, "scan", R.string.scan),
+                new ServiceBoundActivity.NavigationItem(R.drawable.menu_4, null, "profile", R.string.profile),
+                new ServiceBoundActivity.NavigationItem(R.drawable.menu_5, null, "settings", R.string.settings),
+                new ServiceBoundActivity.NavigationItem(R.drawable.menu_6, null, "stream", R.string.tab_stream)
+        };
+    }
 
 
     public static ServiceBoundActivity.NavigationItem[] getNavigationFooterItems() {
