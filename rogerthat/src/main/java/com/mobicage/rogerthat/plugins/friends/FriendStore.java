@@ -169,6 +169,7 @@ public class FriendStore implements Closeable {
     private final SQLiteStatement mInsertGroupAvatarHashBIZZ;
 
     private final SQLiteStatement mCountServicesByOrganizationType;
+    private final SQLiteStatement mCountServices;
 
     private final MultiThreadedSQLStatement mGetFriendName;
     private final PhoneContacts mPhoneContacts;
@@ -276,6 +277,8 @@ public class FriendStore implements Closeable {
 
         mCountServicesByOrganizationType = mDb.compileStatement(mMainService
             .getString(R.string.sql_services_count_by_organization_type));
+        mCountServices = mDb.compileStatement(mMainService
+                .getString(R.string.sql_services_count));
 
         mPhoneContacts = new PhoneContacts(mMainService.getContentResolver());
 
@@ -356,6 +359,7 @@ public class FriendStore implements Closeable {
         mInsertGroupAvatarHashBIZZ.close();
 
         mCountServicesByOrganizationType.close();
+        mCountServices.close();
     }
 
     @Override
@@ -1232,6 +1236,10 @@ public class FriendStore implements Closeable {
     public long countServicesByOrganizationType(int organizationType) {
         mCountServicesByOrganizationType.bindLong(1, organizationType);
         return mCountServicesByOrganizationType.simpleQueryForLong();
+    }
+
+    public long countServices() {
+        return mCountServices.simpleQueryForLong();
     }
 
     public SparseIntArray countServicesGroupedByOrganizationType() {

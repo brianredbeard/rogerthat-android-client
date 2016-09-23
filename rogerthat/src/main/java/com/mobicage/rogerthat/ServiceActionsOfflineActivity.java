@@ -56,7 +56,7 @@ public class ServiceActionsOfflineActivity extends FriendsActivity {
         mAction = intent.getStringExtra(ACTION);
 
         setActivityName("action|" + mAction);
-        setTitle(intent.getIntExtra(TITLE, 0)); // todo ruben name for the tag
+        setTitle(intent.getIntExtra(TITLE, 0));
 
         TextView noServicesTextView = (TextView) findViewById(R.id.no_services_text);
         noServicesTextView.setText(getString(R.string.no_services_found,

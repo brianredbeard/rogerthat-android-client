@@ -321,11 +321,12 @@ public class NavigationConstants {
             raise Exception("Unkown item click %s", i)
 
         output += '''
-            new ServiceBoundActivity.NavigationItem(R.drawable.menu_%(i)s, %(action_type)s, %(action)s, R.string.%(string_id)s),''' % dict(
+            new ServiceBoundActivity.NavigationItem(R.drawable.menu_%(i)s, %(action_type)s, %(action)s, R.string.%(string_id)s, %(collapse)s),''' % dict(
             i=i,
             action_type=action_type,
             action=action,
-            string_id=strings_map[item['text']])
+            string_id=strings_map[item['text']],
+            collapse=bool_str(item.get('collapse', False)))
 
     output += '''
         };
@@ -350,11 +351,12 @@ public class NavigationConstants {
         icon_name = item["icon"].replace("-", "_").replace("fa_", "faw_")
 
         output += '''
-            new ServiceBoundActivity.NavigationItem(FontAwesome.Icon.%(icon_name)s, %(action_type)s, %(action)s, R.string.%(string_id)s),''' % dict(
+            new ServiceBoundActivity.NavigationItem(FontAwesome.Icon.%(icon_name)s, %(action_type)s, %(action)s, R.string.%(string_id)s, %(collapse)s),''' % dict(
             icon_name=icon_name,
             action_type=action_type,
             action=action,
-            string_id=strings_map[item['text']] if item.get('text') else u"app_name")
+            string_id=strings_map[item['text']] if item.get('text') else u"app_name",
+            collapse=bool_str(item.get('collapse', False)))
 
     output += '''
         };

@@ -81,7 +81,7 @@ import com.mobicage.to.friends.ServiceMenuItemTO;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ServiceActionMenuActivity extends ServiceBoundActivity implements MenuItemPressingActivity {
+public class ServiceActionMenuActivity extends ServiceBoundActivity {
 
     public static final int MY_PERMISSIONS_REQUEST_CAMERA = 1;
     public static final String SERVICE_EMAIL = "email";

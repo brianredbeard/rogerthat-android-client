@@ -20,6 +20,7 @@ package com.mobicage.rogerthat.util;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MoreActivity;
@@ -31,8 +32,10 @@ import com.mobicage.rogerthat.SettingsActivity;
 import com.mobicage.rogerthat.UserFriendsActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendSearchActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendStore;
+import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.friends.MenuItemPresser;
 import com.mobicage.rogerthat.plugins.friends.MenuItemPressingActivity;
+import com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity;
 import com.mobicage.rogerthat.plugins.history.HistoryListActivity;
 import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
 import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
@@ -49,8 +52,7 @@ public class ActivityUtils {
         context.startActivity(i);
     }
 
-    public static boolean goToActivity(ServiceBoundActivity context, String activityName, boolean clearStack) {
-        // todo ruben implement collapse
+    public static boolean goToActivity(ServiceBoundActivity context, String activityName, boolean clearStack, boolean collapse) {
         if ("news".equals(activityName)) {
             goToActivity(context, NewsActivity.class, clearStack);
         } else if ("messages".equals(activityName)) {
@@ -58,7 +60,7 @@ public class ActivityUtils {
         } else if ("scan".equals(activityName)) {
             goToActivity(context, ScanTabActivity.class, clearStack);
         } else if ("services".equals(activityName)) {
-            goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_UNSPECIFIED, clearStack);
+            goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_UNSPECIFIED, clearStack, collapse);
         } else if ("friends".equals(activityName)) {
             goToUserFriendsActivity(context, clearStack);
         } else if ("directory".equals(activityName)) {
@@ -70,13 +72,13 @@ public class ActivityUtils {
         } else if ("settings".equals(activityName)) {
             goToActivity(context, SettingsActivity.class, clearStack);
         } else if ("community_services".equals(activityName)) {
-            goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_CITY, clearStack);
+            goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_CITY, clearStack, collapse);
         } else if ("merchants".equals(activityName)) {
-            goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_PROFIT, clearStack);
+            goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_PROFIT, clearStack, collapse);
         } else if ("associations".equals(activityName)) {
-            goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_NON_PROFIT, clearStack);
+            goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_NON_PROFIT, clearStack, collapse);
         } else if ("emergency_services".equals(activityName)) {
-            goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_EMERGENCY, clearStack);
+            goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_EMERGENCY, clearStack, collapse);
         } else if ("stream".equals(activityName)) {
             goToActivity(context, HistoryListActivity.class, clearStack);
         } else if ("qrcode".equals(activityName)) {
@@ -96,7 +98,28 @@ public class ActivityUtils {
         goToActivity(context, UserFriendsActivity.class, clearStack);
     }
 
-    public static void goToServicesActivity(Context context, int organizationType, boolean clearStack) {
+    public static void goToServicesActivity(final ServiceBoundActivity context, int organizationType, boolean clearStack, boolean collapse) {
+        if (collapse) {
+            FriendStore friendStore = context.getMainService().getPlugin(FriendsPlugin.class).getStore();
+            long count = 0;
+            if (organizationType == FriendStore.SERVICE_ORGANIZATION_TYPE_UNSPECIFIED) {
+                count = friendStore.countServices();
+            } else {
+                count = friendStore.countServicesByOrganizationType(organizationType);
+            }
+            if (count == 1) {
+                Cursor cursor = friendStore.getServiceFriendListCursor(organizationType);
+                if (cursor.moveToFirst()) {
+                    String serviceEmail = cursor.getString(1);
+                    Intent intent = new Intent(context, ServiceActionMenuActivity.class);
+                    intent.putExtra(ServiceActionMenuActivity.SERVICE_EMAIL, serviceEmail);
+                    intent.putExtra(ServiceActionMenuActivity.MENU_PAGE, 0);
+                    context.startActivity(intent);
+                    return;
+                }
+            }
+        }
+
         final Intent i = new Intent(context, ServiceFriendsActivity.class);
         i.putExtra(ServiceFriendsActivity.ORGANIZATION_TYPE, organizationType);
         if (clearStack) {
@@ -122,7 +145,6 @@ public class ActivityUtils {
     }
 
     public static void goToActivityBehindTag(final ServiceBoundActivity context, final String serviceEmail, final String tag) {
-        // todo ruben implements MenuItemPressingActivity
         L.d("goToActivityBehindTag called with context: " + context);
 
         if (context instanceof MenuItemPressingActivity) {

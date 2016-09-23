@@ -480,7 +480,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         closeNavigationView();
 
         if (ni.actionType == null) {
-            ActivityUtils.goToActivity(ServiceBoundActivity.this, ni.action, true);
+            ActivityUtils.goToActivity(ServiceBoundActivity.this, ni.action, true, ni.collapse);
         } else if ("action".equals(ni.actionType)) {
             Class clazz;
             if (mService.getNetworkConnectivityManager().isConnected()) {
@@ -513,23 +513,26 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         public String actionType;
         public String action;
         public int labelTextId;
+        public boolean collapse;
 
-        public NavigationItem(FontAwesome.Icon icon, String actionType, String action, int labelTextId) {
+        public NavigationItem(FontAwesome.Icon icon, String actionType, String action, int labelTextId, boolean collapse) {
             super();
             this.icon = icon;
             this.iconId = 0;
             this.actionType = actionType;
             this.action = action;
             this.labelTextId = labelTextId;
+            this.collapse = collapse;
         }
 
-        public NavigationItem(int iconId, String actionType, String action, int labelTextId) {
+        public NavigationItem(int iconId, String actionType, String action, int labelTextId, boolean collapse) {
             super();
             this.icon = null;
             this.iconId = iconId;
             this.actionType = actionType;
             this.action = action;
             this.labelTextId = labelTextId;
+            this.collapse = collapse;
         }
     }
 

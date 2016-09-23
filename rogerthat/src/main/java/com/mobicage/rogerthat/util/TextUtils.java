@@ -19,18 +19,7 @@
 package com.mobicage.rogerthat.util;
 
 import android.content.Context;
-import android.graphics.Typeface;
-import android.support.v4.content.ContextCompat;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
-
-import com.mobicage.rogerth.at.R;
 
 import java.math.BigInteger;
 
@@ -60,7 +49,6 @@ public class TextUtils {
 
     //Font
     public static void overrideFonts(final Context context, final View v) {
-        // todo ruben fonts
 //        try {
 //            if (v instanceof ViewGroup) {
 //                ViewGroup vg = (ViewGroup) v;

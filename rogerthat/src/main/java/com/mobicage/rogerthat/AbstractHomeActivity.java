@@ -40,7 +40,6 @@ import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendStore;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.friends.MenuItemPresser;
-import com.mobicage.rogerthat.plugins.friends.MenuItemPressingActivity;
 import com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity;
 import com.mobicage.rogerthat.plugins.friends.ServiceMenu;
 import com.mobicage.rogerthat.plugins.friends.ServiceMenuItem;
@@ -65,7 +64,7 @@ import fr.castorflex.android.verticalviewpager.VerticalViewPager;
 /**
  * Super class for HomeActivity | Only used in City & Enterprise Apps
  */
-public abstract class AbstractHomeActivity extends ServiceBoundActivity implements MenuItemPressingActivity {
+public abstract class AbstractHomeActivity extends ServiceBoundActivity {
 
     public static class ItemDef {
         public int iconId;
@@ -264,7 +263,7 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity implemen
             }
         }
 
-        ActivityUtils.goToServicesActivity(this, organizationType, false);
+        ActivityUtils.goToServicesActivity(this, organizationType, false, false);
     }
 
     protected void simulateMenuItemPress(String serviceEmail, long[] serviceCoords) {

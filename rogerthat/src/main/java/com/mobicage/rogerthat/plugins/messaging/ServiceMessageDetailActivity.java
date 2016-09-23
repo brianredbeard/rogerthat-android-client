@@ -66,7 +66,6 @@ import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.friends.MenuItemPresser;
-import com.mobicage.rogerthat.plugins.friends.MenuItemPressingActivity;
 import com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity;
 import com.mobicage.rogerthat.plugins.friends.ServiceMenuItemDetails;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr.BrandingResult;
@@ -103,7 +102,7 @@ import java.util.TreeSet;
 
 import thirdparty.nishantnair.FlowLayout;
 
-public class ServiceMessageDetailActivity extends ServiceBoundActivity implements MenuItemPressingActivity {
+public class ServiceMessageDetailActivity extends ServiceBoundActivity {
 
     private final static String HINT_BROADCAST = "com.mobicage.rogerthat.plugins.messaging.ServiceMessageDetailActivity.HINT_BROADCAST";
 
