@@ -9,4 +9,8 @@
     <!-- Allows changing locales -->
     <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <application>
+        <activity android:name="com.mobicage.rogerthat.test.screenshots.FakeNewsActivity" />
+    </application>
 </manifest>

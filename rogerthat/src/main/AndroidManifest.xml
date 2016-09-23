@@ -178,7 +178,6 @@
             android:name="com.mobicage.rogerthat.NewsActivity"
             android:screenOrientation="portrait">
         </activity>
-        <activity android:name="com.mobicage.rogerthat.test.screenshots.FakeNewsActivity" />
         <activity
             android:name="com.mobicage.rogerthat.plugins.messaging.FriendsThreadActivity"
             android:screenOrientation="portrait"

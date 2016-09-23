@@ -422,18 +422,17 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         ServiceBoundActivity.NavigationItem[] navigationItems = NavigationConstants.getNavigationItems();
         for (int i = 0; i < navigationItems.length; i++) {
             final NavigationItem ni = navigationItems[i];
-            menu.add(i, i, i, ni.labelTextId).setIcon(ni.iconId).setCheckable(true);
+            menu.add(i, i, i, ni.labelTextId).setIcon(ni.iconId).setCheckable(true).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    simulateNavigationItemClick(ni);
+                    return true;
+                }
+            });
         }
-
-        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(final MenuItem item) {
-                int order = item.getOrder();
-                final NavigationItem ni = NavigationConstants.getNavigationItems()[order];
-                simulateNavigationItemClick(ni);
-                return true;
-            }
-        });
+        // Adding 2 spacer items such that the footer view doesn't overlap the last item(s)
+        menu.add(navigationItems.length, navigationItems.length, navigationItems.length, "").setCheckable(false);
+        menu.add(navigationItems.length, navigationItems.length + 1, navigationItems.length + 1, "").setCheckable(false);
         navigationView.setItemIconTintList(null);
 
         LinearLayout navigationFooter = (LinearLayout) findViewById(R.id.nav_view_footer);

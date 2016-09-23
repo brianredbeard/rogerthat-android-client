@@ -278,57 +278,97 @@ def get_translation_strings():
 
 
 def generate_navigation_menu(doc, strings_map):
-    navigation_clicks = []
-    navigation_tags = []
-    with open(os.path.join(SRC_RES_DIR, 'menu', 'navigation_menu.xml'), 'w+') as f:
-        f.write('<?xml version="1.0" encoding="utf-8"?>\n')
-        f.write('<menu xmlns:android="http://schemas.android.com/apk/res/android">\n')
-        items = doc['HOMESCREEN']['items']
-        for i, item in enumerate(items):
-            navigation_clicks.append(quoted_str_or_null(item["click"]))
-            navigation_tags.append(quoted_str_or_null(sha256_hash(item["tag"])) if item.get("tag") else "null")
+    output = u'''%(LICENSE)s
 
-            icon_file_name = "menu_%s.png" % (i)
-            source_file = os.path.join(APP_DIR, "build", icon_file_name)
-            app_utils.download_icon(item["icon"], "#FFFFFF", 512, source_file)
-            foreground_image = Image.open(source_file)
+package com.mobicage.rpc.config;
 
-            background_image = Image.new('RGBA', (1024, 1024))
-            draw = ImageDraw.Draw(background_image)
-            draw.ellipse((124, 124, 900, 900), fill="#%s" % doc["HOMESCREEN"]["color"], outline="#%s" % doc["HOMESCREEN"]["color"])
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.ServiceBoundActivity;
 
-            background_image.paste(foreground_image, (262, 262), mask=foreground_image)
+public class NavigationConstants {
 
-            background_image.save(source_file)
+    public static ServiceBoundActivity.NavigationItem[] getNavigationItems() {
+        return new ServiceBoundActivity.NavigationItem[]{''' % dict(LICENSE=LICENSE)
 
-            generate_resource_images(source_file, 0.2, 1)
+    for i, item in enumerate(doc['HOMESCREEN']['items']):
+        icon_file_name = "menu_%s.png" % (i)
+        source_file = os.path.join(APP_DIR, "build", icon_file_name)
+        app_utils.download_icon(item["icon"], "#FFFFFF", 512, source_file)
+        foreground_image = Image.open(source_file)
 
-            f.write("""
-    <group
-        android:id="@+id/nav_group_%(i)s"
-        android:checkableBehavior="single">
-        <item
-            android:orderInCategory="%(i)s"
-            android:icon="@drawable/menu_%(i)s"
-            android:title="@string/%(title)s"/>""" % dict(i=i, title=strings_map[item['text']]))
-            if i == len(items) - 1:
-                f.write("""
-        <!-- Adding 2 spacer items such that the footer view doesn't overlap the last item(s) -->
-        <item
-            android:checkable="false"
-            android:enabled="false"
-            android:orderInCategory="200"
-            android:title=""/>
-        <item
-            android:checkable="false"
-            android:enabled="false"
-            android:orderInCategory="200"
-            android:title=""/>""")
-            f.write("""
-    </group>""")
+        background_image = Image.new('RGBA', (1024, 1024))
+        draw = ImageDraw.Draw(background_image)
+        draw.ellipse((124, 124, 900, 900), fill="#%s" % doc["HOMESCREEN"]["color"],
+                     outline="#%s" % doc["HOMESCREEN"]["color"])
 
-        f.write('\n</menu>')
-    return navigation_clicks, navigation_tags
+        background_image.paste(foreground_image, (262, 262), mask=foreground_image)
+
+        background_image.save(source_file)
+
+        generate_resource_images(source_file, 0.2, 1)
+
+        if item.get("click"):
+            action_type = "null"
+            action = quoted_str_or_null(item["click"])
+        elif item.get("tag"):
+            action_type = quoted_str_or_null("click")
+            action = quoted_str_or_null(item["tag"])
+        elif item.get("action"):
+            action_type = quoted_str_or_null("action")
+            action = quoted_str_or_null(item["action"])
+        else:
+            raise Exception("Unkown item click %s", i)
+
+        output += '''
+            new ServiceBoundActivity.NavigationItem(R.drawable.menu_%(i)s, %(action_type)s, %(action)s, R.string.%(string_id)s),''' % dict(
+            i=i,
+            action_type=action_type,
+            action=action,
+            string_id=strings_map[item['text']])
+
+    output += '''
+        };
+    }
+
+    public static ServiceBoundActivity.NavigationItem[] getNavigationFooterItems() {
+        return new ServiceBoundActivity.NavigationItem[]{'''
+
+    for i, item in enumerate(doc['TOOLBAR']['items']):
+        if item.get("click"):
+            action_type = quoted_str_or_null(None)
+            action = quoted_str_or_null(item["click"])
+        elif item.get("tag"):
+            action_type = quoted_str_or_null("click")
+            action = quoted_str_or_null(item["tag"])
+        elif item.get("action"):
+            action_type = quoted_str_or_null("action")
+            action = quoted_str_or_null(item["action"])
+        else:
+            raise Exception("Unkown item click %s", i)
+
+        icon_name = item["icon"].replace("-", "_").replace("fa_", "faw_")
+
+        output += '''
+            new ServiceBoundActivity.NavigationItem(FontAwesome.Icon.%(icon_name)s, %(action_type)s, %(action)s, R.string.%(string_id)s),''' % dict(
+            icon_name=icon_name,
+            action_type=action_type,
+            action=action,
+            string_id=strings_map[item['text']] if item.get('text') else u"app_name")
+
+    output += '''
+        };
+    }
+}
+'''
+
+    path = os.path.join(SRC_JAVA_DIR, "com", "mobicage", "rpc", "config")
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    with open(os.path.join(path, "NavigationConstants.java"), 'w+') as f:
+        f.write(output.encode('utf-8'))
+
 
 
 # This function is not executed in case the app is Rogerthat
@@ -675,9 +715,6 @@ public class AppConstants {
     public static final boolean SHOW_SCAN_IN_MORE = %(show_scan_in_more)s;
     public static final boolean FULL_WIDTH_HEADERS = %(full_width_headers)s;
 
-    public static final String[] NAVIGATION_CLICKS = new String[] { %(navigation_clicks)s };
-    public static final String[] NAVIGATION_TAGS = new String[] { %(navigation_tags)s };
-
     public static final boolean REGISTRATION_ASKS_LOCATION_PERMISSION = %(registration_asks_location_permission)s;
     public static final int[] SEARCH_SERVICES_IF_NONE_CONNECTED = new int[] {%(search_services_if_none_connected)s};
 
@@ -714,8 +751,6 @@ public class AppConstants {
            show_scan_in_more=show_scan_in_more,
            search_services_if_none_connected=search_services_if_none_connected,
            full_width_headers=full_width_headers,
-           navigation_clicks=','.join(navigation_clicks),
-           navigation_tags=','.join(navigation_tags),
            profile_data_fields=profile_data_fields,
            profile_show_gender_and_birthdate=profile_show_gender_and_birthdate,
            about_website=about_website,
@@ -969,7 +1004,7 @@ if __name__ == "__main__":
     logging.info(pprint.pformat(doc))
 
     strings_map = get_translation_strings()
-    navigation_clicks, navigation_tags = generate_navigation_menu(doc, strings_map)
+    generate_navigation_menu(doc, strings_map)
 
     if APP_ID != MAIN_APP_ID:
         #### MORE IMAGES ###################################
