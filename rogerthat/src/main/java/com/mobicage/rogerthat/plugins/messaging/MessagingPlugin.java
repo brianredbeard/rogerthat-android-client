@@ -1211,7 +1211,7 @@ public class MessagingPlugin implements MobicagePlugin {
                     } else {
                         UIUtils.doNotification(mMainService, title, notificationText,
                             R.integer.magic_message_newmessage, MainActivity.ACTION_NOTIFICATION_MESSAGE_UPDATES,
-                            false, false, true, true, R.drawable.notification_icon, 0, b, null,
+                            false, false, true, true, R.drawable.notification_icon, totalCount, b, null,
                             mMainService.currentTimeMillis());
                     }
 
