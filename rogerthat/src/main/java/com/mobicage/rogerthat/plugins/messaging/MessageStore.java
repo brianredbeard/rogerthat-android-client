@@ -17,21 +17,6 @@
  */
 package com.mobicage.rogerthat.plugins.messaging;
 
-import static com.mobicage.rogerthat.util.db.DBUtils.bindString;
-
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.jivesoftware.smack.util.Base64;
-import org.json.simple.JSONValue;
-
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -62,6 +47,21 @@ import com.mobicage.to.messaging.GetConversationAvatarRequestTO;
 import com.mobicage.to.messaging.MemberStatusTO;
 import com.mobicage.to.messaging.MemberStatusUpdateRequestTO;
 import com.mobicage.to.messaging.MessageTO;
+
+import org.jivesoftware.smack.util.Base64;
+import org.json.simple.JSONValue;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static com.mobicage.rogerthat.util.db.DBUtils.bindString;
 
 public class MessageStore implements Closeable {
 

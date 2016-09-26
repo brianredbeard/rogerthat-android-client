@@ -576,6 +576,8 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
 
             final ImageView avatarView = holder.avatarView;
 
+            boolean shouldShowStatusIcon = true;
+
             final Bitmap threadAvatar;
             if (message.thread_avatar_hash != null
                     && (threadAvatar = mMessagingPlugin.getStore().getThreadAvatar(message.thread_avatar_hash)) != null) {
@@ -584,6 +586,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
                 avatarView.setImageResource(R.drawable.group_60);
             } else if (FriendsPlugin.SYSTEM_FRIEND.equals(message.sender)
                     || mFriendsPlugin.getStore().getFriendType(message.sender) == FriendsPlugin.FRIEND_TYPE_SERVICE) {
+                shouldShowStatusIcon = false;
                 avatarView.setImageBitmap(mFriendsPlugin.getAvatarBitmap(message.sender));
 
             } else if (message.members.length == 2) {
@@ -729,31 +732,8 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
                 messageView.setTextColor(threadTextColor);
             }
 
-            // todo ruben
-//            if (!message.threadDirty) {
-//                messageView.setTypeface(null, Typeface.NORMAL);
-//                if (threadBackgroundColor == Integer.MAX_VALUE)
-//                    view.setBackgroundDrawable(getResources().getDrawable(R.drawable.mc_message_background));
-//                if (threadTextColor == Integer.MAX_VALUE) {
-//                    messageView.setTextColor(mResources.getColorStateList(android.R.color.secondary_text_light));
-//                }
-//            } else {
-//                if (message.threadNeedsMyAnswer)
-//                    messageView.setTypeface(null, Typeface.BOLD);
-//                else
-//                    messageView.setTypeface(null, Typeface.ITALIC);
-//                if (threadBackgroundColor == Integer.MAX_VALUE)
-//                    view.setBackgroundDrawable(getResources().getDrawable(R.drawable.mc_message_highlighted_background));
-//                if (threadTextColor == Integer.MAX_VALUE) {
-//                    messageView.setTextColor(mResources.getColorStateList(android.R.color.primary_text_light));
-//                }
-//            }
-
-//            messageView.setTextSize(18);
-//            recipientsView.setTextSize(14);
-
-//            if (threadBackgroundColor != Integer.MAX_VALUE)
-//                view.setBackgroundColor(threadBackgroundColor);
+            if (threadBackgroundColor != Integer.MAX_VALUE)
+                view.setBackgroundColor(threadBackgroundColor);
 
             holder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
@@ -773,12 +753,17 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
                     : View.GONE);
             boolean showMessageStatus = messageUnreadCount == 0;
             if (showMessageStatus) {
-                showMessageStatus = setStatusIcon(MessagingActivity.this, message, holder.statusView, dynamicChat);
+                if (shouldShowStatusIcon) {
+                    showMessageStatus = setStatusIcon(MessagingActivity.this, message, holder.statusView, dynamicChat);
+                } else {
+                    showMessageStatus = false;
+                }
             }
             holder.statusView.setVisibility(showMessageStatus ? View.VISIBLE : View.GONE);
         }
 
         private boolean setStatusIcon(Context context, Message message, ImageView statusView, boolean dynamicChat) {
+
             Resources resources = getResources();
             if (dynamicChat) {
                 if (message.priority == Message.PRIORITY_URGENT_WITH_ALARM) {
@@ -806,7 +791,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
                 } else {
                     // message is on server
                     int greyColor = resources.getColor(R.color.mc_gray_11);
-                    statusView.setImageDrawable(new IconicsDrawable(context, FontAwesome.Icon.faw_ellipsis_h).color(greyColor).sizeDp(15));
+                    statusView.setImageDrawable(new IconicsDrawable(context, FontAwesome.Icon.faw_paper_plane).color(greyColor).sizeDp(15));
                 }
                 return true;
             }

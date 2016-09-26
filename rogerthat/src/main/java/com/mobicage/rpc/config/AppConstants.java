@@ -54,9 +54,6 @@ public class AppConstants {
     public static final boolean SHOW_SCAN_IN_MORE = false;
     public static final boolean FULL_WIDTH_HEADERS = false;
 
-    public static final String[] NAVIGATION_CLICKS = new String[] {"messages", "services", "friends", "scan", "profile", "settings", "stream"};
-    public static final String[] NAVIGATION_TAGS = new String[] {null, null, null, null, null, null, null};
-
     public static final boolean REGISTRATION_ASKS_LOCATION_PERMISSION = true;
     public static final int[] SEARCH_SERVICES_IF_NONE_CONNECTED = new int[] { -1 };
 

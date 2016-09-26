@@ -1440,7 +1440,7 @@ public class MessagingPlugin implements MobicagePlugin {
 
         Map<String, Object> tmpState = new HashMap<String, Object>();
         tmpState.put("message_flow_run_id", startFlow.message_flow_run_id);
-//        tmpState.put("flow_params", startFlow.flow_params);
+        tmpState.put("flow_params", startFlow.flow_params);
         MessageFlowRun mfr = new MessageFlowRun();
         mfr.staticFlowHash = startFlow.static_flow_hash;
         mfr.state = JSONValue.toJSONString(tmpState);
