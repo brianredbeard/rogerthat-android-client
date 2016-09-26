@@ -753,11 +753,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
                     : View.GONE);
             boolean showMessageStatus = messageUnreadCount == 0;
             if (showMessageStatus) {
-                if (shouldShowStatusIcon) {
-                    showMessageStatus = setStatusIcon(MessagingActivity.this, message, holder.statusView, dynamicChat);
-                } else {
-                    showMessageStatus = false;
-                }
+                showMessageStatus = shouldShowStatusIcon && setStatusIcon(MessagingActivity.this, message, holder.statusView, dynamicChat);
             }
             holder.statusView.setVisibility(showMessageStatus ? View.VISIBLE : View.GONE);
         }

@@ -90,20 +90,33 @@
         android:indeterminate="true" >
     </ProgressBar>
 
+
+    <LinearLayout
+        android:id="@+id/read_friends_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/buttons"
+        android:layout_marginLeft="6dp"
+        android:layout_marginRight="6dp"
+        android:layout_marginTop="6dp"
+        android:gravity="end"
+        android:orientation="horizontal" />
+
     <Button
         android:id="@+id/rogerthat_button"
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_below="@id/buttons"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
         android:layout_marginBottom="5dp"
         android:layout_marginLeft="1dp"
         android:layout_marginRight="1dp"
+        android:layout_below="@id/read_friends_container"
         android:layout_marginTop="5dp"
         android:text="@string/rogerthat"
-        android:textColor="@android:color/primary_text_dark"
         android:textStyle="bold"
-        android:visibility="gone" >
-    </Button>
+        android:textColor="@color/mc_white"
+        android:visibility="gone" />
 
 </RelativeLayout>

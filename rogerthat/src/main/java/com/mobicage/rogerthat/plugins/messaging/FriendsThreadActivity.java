@@ -119,6 +119,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
     private int _1_DP_IN_PX;
     private int _3_DP_IN_PX;
     private int _4_DP_IN_PX;
+    private int _20_DP_IN_PX;
     private int _42_DP_IN_PX;
     private int _48_DP_IN_PX;
 
@@ -140,6 +141,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         _1_DP_IN_PX = UIUtils.convertDipToPixels(this, 1);
         _3_DP_IN_PX = UIUtils.convertDipToPixels(this, 3);
         _4_DP_IN_PX = UIUtils.convertDipToPixels(this, 4);
+        _20_DP_IN_PX = UIUtils.convertDipToPixels(this, 20);
         _42_DP_IN_PX = UIUtils.convertDipToPixels(this, 42);
         _48_DP_IN_PX = UIUtils.convertDipToPixels(this, 48);
 
@@ -419,6 +421,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             setSenderAvatar(context, view, c, message);
             setMessage(message, context, view);
             setAttachments(message, context, view);
+            setMemberStatuses(message, context, view);
             if (!isChat || allowChatButtons) {
                 boolean isLocked = SystemUtils.isFlagEnabled(message.flags, MessagingPlugin.FLAG_LOCKED);
                 boolean canEdit = isLocked;
@@ -433,6 +436,22 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             }
 
             return view;
+        }
+
+        private void setMemberStatuses(Message message, Context context, View view) {
+            LinearLayout container = (LinearLayout) view.findViewById(R.id.read_friends_container);
+            final boolean isChat = SystemUtils.isFlagEnabled(message.flags, MessagingPlugin.FLAG_DYNAMIC_CHAT);
+            boolean isOwnMessage = message.sender.equals(mMyEmail);
+            boolean shouldShowStatuses = false;
+            for (MemberStatusTO memberStatus : message.members) {
+                // TODO: we should only show this on the last acked message for every user
+                if (!isOwnMessage && SystemUtils.isFlagEnabled(memberStatus.status, MessagingPlugin.STATUS_ACKED)) {
+                    ImageView avatar = getMemberAvatar(memberStatus, isChat, false, _20_DP_IN_PX);
+                    shouldShowStatuses = true;
+                    container.addView(avatar);
+                }
+            }
+            container.setVisibility(shouldShowStatuses ? View.VISIBLE : View.GONE);
         }
 
         private void setAttachments(final Message message, final Context context, final View view) {
@@ -650,33 +669,37 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                     continue;
                 if ((button.id == null && member.button_id == null && !message.sender.equals(member.member))
                     || (button.id != null && button.id.equals(member.button_id))) {
-                    ImageView avatar = new ImageView(mContext);
-                    final SafeRunnable friendNotFoundRunnable;
-                    if (isChat) {
-                        friendNotFoundRunnable = new SafeRunnable() {
-                            @Override
-                            protected void safeRun() throws Exception {
-                                mFriendsPlugin.requestUserInfo(member.member, true);
-                            }
-                        };
-                    } else {
-                        friendNotFoundRunnable = null;
-                    }
-                    avatar.setImageBitmap(mFriendsPlugin
-                        .getAvatarBitmap(member.member, !isChat, friendNotFoundRunnable));
-                    avatar.setBackgroundResource(R.drawable.avatar_background_black);
-                    avatar.setPadding(_1_DP_IN_PX, _1_DP_IN_PX, _1_DP_IN_PX, _1_DP_IN_PX);
-                    configureAvatarOnClickListener(member.member, avatar, isChat);
-                    if (left) { // RTL
-                        avatar.setLayoutParams(new FlowLayout.LayoutParams(_42_DP_IN_PX, _42_DP_IN_PX, _4_DP_IN_PX,
-                            _4_DP_IN_PX));
-                    } else {
-                        avatar.setLayoutParams(new FlowLayoutRTL.LayoutParams(_42_DP_IN_PX, _42_DP_IN_PX, _4_DP_IN_PX,
-                            _4_DP_IN_PX));
-                    }
-                    members.addView(avatar);
+                    members.addView(getMemberAvatar(member, isChat, left, _42_DP_IN_PX));
                 }
             }
+        }
+
+        private ImageView getMemberAvatar(final MemberStatusTO memberStatus, boolean isChat, boolean rtl, int size) {
+            ImageView avatar = new ImageView(mContext);
+            final SafeRunnable friendNotFoundRunnable;
+            if (isChat) {
+                friendNotFoundRunnable = new SafeRunnable() {
+                    @Override
+                    protected void safeRun() throws Exception {
+                        mFriendsPlugin.requestUserInfo(memberStatus.member, true);
+                    }
+                };
+            } else {
+                friendNotFoundRunnable = null;
+            }
+            avatar.setImageBitmap(mFriendsPlugin
+                    .getAvatarBitmap(memberStatus.member, !isChat, friendNotFoundRunnable));
+            avatar.setBackgroundResource(R.drawable.avatar_background_black);
+            avatar.setPadding(_1_DP_IN_PX, _1_DP_IN_PX, _1_DP_IN_PX, _1_DP_IN_PX);
+            configureAvatarOnClickListener(memberStatus.member, avatar, isChat);
+            if (rtl) {
+                avatar.setLayoutParams(new FlowLayout.LayoutParams(size, size, _4_DP_IN_PX,
+                        _4_DP_IN_PX));
+            } else {
+                avatar.setLayoutParams(new FlowLayoutRTL.LayoutParams(size, size, _4_DP_IN_PX,
+                        _4_DP_IN_PX));
+            }
+            return avatar;
         }
 
         private void setMessage(MessageTO message, Context context, View view) {
