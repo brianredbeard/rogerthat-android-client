@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="72dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="?attr/selectableItemBackground"
     android:minHeight="72dp"
     android:orientation="horizontal"
@@ -100,7 +101,18 @@
                 android:textColor="@color/mc_white"
                 android:textSize="12sp"
                 android:visibility="visible"
-                tools:text="4" />
+                tools:text="4"
+                tools:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/message_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:paddingLeft="10dp"
+                app:ico_color="@color/mc_green"
+                app:ico_icon="@string/faw_check"
+                app:ico_size="15dp" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>
