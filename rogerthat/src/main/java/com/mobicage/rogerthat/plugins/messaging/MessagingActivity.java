@@ -727,31 +727,8 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
                 messageView.setTextColor(threadTextColor);
             }
 
-            // todo ruben
-//            if (!message.threadDirty) {
-//                messageView.setTypeface(null, Typeface.NORMAL);
-//                if (threadBackgroundColor == Integer.MAX_VALUE)
-//                    view.setBackgroundDrawable(getResources().getDrawable(R.drawable.mc_message_background));
-//                if (threadTextColor == Integer.MAX_VALUE) {
-//                    messageView.setTextColor(mResources.getColorStateList(android.R.color.secondary_text_light));
-//                }
-//            } else {
-//                if (message.threadNeedsMyAnswer)
-//                    messageView.setTypeface(null, Typeface.BOLD);
-//                else
-//                    messageView.setTypeface(null, Typeface.ITALIC);
-//                if (threadBackgroundColor == Integer.MAX_VALUE)
-//                    view.setBackgroundDrawable(getResources().getDrawable(R.drawable.mc_message_highlighted_background));
-//                if (threadTextColor == Integer.MAX_VALUE) {
-//                    messageView.setTextColor(mResources.getColorStateList(android.R.color.primary_text_light));
-//                }
-//            }
-
-//            messageView.setTextSize(18);
-//            recipientsView.setTextSize(14);
-
-//            if (threadBackgroundColor != Integer.MAX_VALUE)
-//                view.setBackgroundColor(threadBackgroundColor);
+            if (threadBackgroundColor != Integer.MAX_VALUE)
+                view.setBackgroundColor(threadBackgroundColor);
 
             holder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override

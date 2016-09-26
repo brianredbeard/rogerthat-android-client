@@ -17,44 +17,6 @@
  */
 package com.mobicage.rogerthat.plugins.messaging;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.Closeable;
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.security.DigestInputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.params.HttpClientParams;
-import org.jivesoftware.smack.util.Base64;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONValue;
-
 import android.annotation.SuppressLint;
 import android.app.DownloadManager;
 import android.app.DownloadManager.Query;
@@ -101,13 +63,50 @@ import com.mobicage.rpc.Credentials;
 import com.mobicage.rpc.IJSONable;
 import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.rpc.RpcCall;
-import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.to.friends.FriendTO;
 import com.mobicage.to.friends.ServiceMenuItemTO;
 import com.mobicage.to.js_embedding.JSEmbeddingItemTO;
 import com.mobicage.to.messaging.MessageTO;
 import com.soundcloud.android.crop.CropUtil;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.params.HttpClientParams;
+import org.jivesoftware.smack.util.Base64;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONValue;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 public class BrandingMgr implements Pickleable, Closeable {
 
@@ -667,6 +666,7 @@ public class BrandingMgr implements Pickleable, Closeable {
         if (item.usesDownloadManager()) {
             DownloadManager dwnlManager = getDownloadManager();
             DownloadManager.Request request = new DownloadManager.Request(Uri.parse(item.brandingKey));
+            request.setTitle(mMainService.getString(R.string.downloading));
             int flags = DownloadManager.Request.NETWORK_WIFI;
             if (!mMainService.getPlugin(SystemPlugin.class).getWifiOnlyDownloads()) {
                 flags |= DownloadManager.Request.NETWORK_MOBILE;
