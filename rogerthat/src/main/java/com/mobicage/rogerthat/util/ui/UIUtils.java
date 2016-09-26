@@ -18,12 +18,6 @@
 
 package com.mobicage.rogerthat.util.ui;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Notification;
@@ -66,6 +60,14 @@ import com.mobicage.rogerthat.config.ConfigurationProvider;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.T;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+import me.leolin.shortcutbadger.ShortcutBadger;
 
 public class UIUtils {
 
@@ -163,6 +165,7 @@ public class UIUtils {
         }
 
         builder.setNumber(notificationNumber);
+        ShortcutBadger.applyCount(pContext, notificationNumber);
 
         final NotificationManager nm = (NotificationManager) pContext.getSystemService(Context.NOTIFICATION_SERVICE);
         nm.notify(notificationId, builder.build());
