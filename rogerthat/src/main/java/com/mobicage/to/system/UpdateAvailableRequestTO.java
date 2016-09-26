@@ -42,13 +42,21 @@ public class UpdateAvailableRequestTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("majorVersion")) {
             Object val = json.get("majorVersion");
-            this.majorVersion = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.majorVersion = ((Integer) val).longValue();
+            } else {
+                this.majorVersion = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.system.UpdateAvailableRequestTO object is missing field 'majorVersion'");
         }
         if (json.containsKey("minorVersion")) {
             Object val = json.get("minorVersion");
-            this.minorVersion = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.minorVersion = ((Integer) val).longValue();
+            } else {
+                this.minorVersion = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.system.UpdateAvailableRequestTO object is missing field 'minorVersion'");
         }

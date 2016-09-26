@@ -37,7 +37,11 @@ public class TrackLocationRequestTO implements com.mobicage.rpc.IJSONable {
     public TrackLocationRequestTO(Map<String, Object> json) throws IncompleteMessageException {
         if (json.containsKey("distance_filter")) {
             Object val = json.get("distance_filter");
-            this.distance_filter = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.distance_filter = ((Integer) val).longValue();
+            } else {
+                this.distance_filter = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.location.TrackLocationRequestTO object is missing field 'distance_filter'");
         }
@@ -55,13 +59,21 @@ public class TrackLocationRequestTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("target")) {
             Object val = json.get("target");
-            this.target = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.target = ((Integer) val).longValue();
+            } else {
+                this.target = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.location.TrackLocationRequestTO object is missing field 'target'");
         }
         if (json.containsKey("until")) {
             Object val = json.get("until");
-            this.until = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.until = ((Integer) val).longValue();
+            } else {
+                this.until = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.location.TrackLocationRequestTO object is missing field 'until'");
         }

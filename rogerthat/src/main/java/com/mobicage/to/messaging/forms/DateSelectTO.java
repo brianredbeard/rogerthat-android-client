@@ -41,7 +41,11 @@ public class DateSelectTO implements com.mobicage.rpc.IJSONable {
     public DateSelectTO(Map<String, Object> json) throws IncompleteMessageException {
         if (json.containsKey("date")) {
             Object val = json.get("date");
-            this.date = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.date = ((Integer) val).longValue();
+            } else {
+                this.date = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.forms.DateSelectTO object is missing field 'date'");
         }
@@ -65,19 +69,31 @@ public class DateSelectTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("max_date")) {
             Object val = json.get("max_date");
-            this.max_date = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.max_date = ((Integer) val).longValue();
+            } else {
+                this.max_date = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.forms.DateSelectTO object is missing field 'max_date'");
         }
         if (json.containsKey("min_date")) {
             Object val = json.get("min_date");
-            this.min_date = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.min_date = ((Integer) val).longValue();
+            } else {
+                this.min_date = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.forms.DateSelectTO object is missing field 'min_date'");
         }
         if (json.containsKey("minute_interval")) {
             Object val = json.get("minute_interval");
-            this.minute_interval = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.minute_interval = ((Integer) val).longValue();
+            } else {
+                this.minute_interval = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.forms.DateSelectTO object is missing field 'minute_interval'");
         }

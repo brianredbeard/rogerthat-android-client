@@ -113,7 +113,8 @@ public class NewsStore implements Closeable {
             bindString(mInsertNewsButton, 2, button.id);
             mInsertNewsButton.bindString(3, button.caption);
             bindString(mInsertNewsButton, 4, button.action);
-            mInsertNewsButton.bindLong(5, i);
+            bindString(mInsertNewsButton, 5, button.flow_params);
+            mInsertNewsButton.bindLong(6, i);
             mInsertNewsButton.execute();
         }
     }
@@ -294,6 +295,7 @@ public class NewsStore implements Closeable {
         button.id = bcurs.getString(0);
         button.caption = bcurs.getString(1);
         button.action = bcurs.getString(2);
+        button.flow_params = bcurs.getString(3);
         return button;
     }
 

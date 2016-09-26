@@ -77,7 +77,11 @@ public class FriendTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("avatarId")) {
             Object val = json.get("avatarId");
-            this.avatarId = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.avatarId = ((Integer) val).longValue();
+            } else {
+                this.avatarId = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.friends.FriendTO object is missing field 'avatarId'");
         }
@@ -89,7 +93,11 @@ public class FriendTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("callbacks")) {
             Object val = json.get("callbacks");
-            this.callbacks = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.callbacks = ((Integer) val).longValue();
+            } else {
+                this.callbacks = ((Long) val).longValue();
+            }
         } else {
             this.callbacks = 0;
         }
@@ -125,19 +133,31 @@ public class FriendTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("existence")) {
             Object val = json.get("existence");
-            this.existence = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.existence = ((Integer) val).longValue();
+            } else {
+                this.existence = ((Long) val).longValue();
+            }
         } else {
             this.existence = 0;
         }
         if (json.containsKey("flags")) {
             Object val = json.get("flags");
-            this.flags = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.flags = ((Integer) val).longValue();
+            } else {
+                this.flags = ((Long) val).longValue();
+            }
         } else {
             this.flags = 0;
         }
         if (json.containsKey("generation")) {
             Object val = json.get("generation");
-            this.generation = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.generation = ((Integer) val).longValue();
+            } else {
+                this.generation = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.friends.FriendTO object is missing field 'generation'");
         }
@@ -155,7 +175,11 @@ public class FriendTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("organizationType")) {
             Object val = json.get("organizationType");
-            this.organizationType = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.organizationType = ((Integer) val).longValue();
+            } else {
+                this.organizationType = ((Long) val).longValue();
+            }
         } else {
             this.organizationType = 0;
         }
@@ -197,7 +221,11 @@ public class FriendTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("type")) {
             Object val = json.get("type");
-            this.type = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.type = ((Integer) val).longValue();
+            } else {
+                this.type = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.friends.FriendTO object is missing field 'type'");
         }

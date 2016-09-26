@@ -35,7 +35,11 @@ public class NewsSenderTO implements com.mobicage.rpc.IJSONable {
     public NewsSenderTO(Map<String, Object> json) throws IncompleteMessageException {
         if (json.containsKey("avatar_id")) {
             Object val = json.get("avatar_id");
-            this.avatar_id = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.avatar_id = ((Integer) val).longValue();
+            } else {
+                this.avatar_id = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.news.NewsSenderTO object is missing field 'avatar_id'");
         }

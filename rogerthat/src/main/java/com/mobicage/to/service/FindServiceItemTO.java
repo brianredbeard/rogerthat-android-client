@@ -46,7 +46,11 @@ public class FindServiceItemTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("avatar_id")) {
             Object val = json.get("avatar_id");
-            this.avatar_id = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.avatar_id = ((Integer) val).longValue();
+            } else {
+                this.avatar_id = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.service.FindServiceItemTO object is missing field 'avatar_id'");
         }

@@ -27,6 +27,7 @@ public class NewsActionButtonTO implements com.mobicage.rpc.IJSONable {
 
     public String action;
     public String caption;
+    public String flow_params;
     public String id;
 
     public NewsActionButtonTO() {
@@ -45,6 +46,12 @@ public class NewsActionButtonTO implements com.mobicage.rpc.IJSONable {
         } else {
             throw new IncompleteMessageException("com.mobicage.to.news.NewsActionButtonTO object is missing field 'caption'");
         }
+        if (json.containsKey("flow_params")) {
+            Object val = json.get("flow_params");
+            this.flow_params = (String) val;
+        } else {
+            throw new IncompleteMessageException("com.mobicage.to.news.NewsActionButtonTO object is missing field 'flow_params'");
+        }
         if (json.containsKey("id")) {
             Object val = json.get("id");
             this.id = (String) val;
@@ -58,6 +65,7 @@ public class NewsActionButtonTO implements com.mobicage.rpc.IJSONable {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
         obj.put("action", this.action);
         obj.put("caption", this.caption);
+        obj.put("flow_params", this.flow_params);
         obj.put("id", this.id);
         return obj;
     }

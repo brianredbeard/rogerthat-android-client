@@ -404,10 +404,10 @@ FROM member_status ms INNER JOIN (
     <string name="sql_news_insert_item">INSERT INTO news (id, \"timestamp\", sender_email, sender_name, sender_avatar_id, title, message, image_url, label, reach, qr_code_content, qr_code_caption, version, flags, type, dirty, pinned, rogered, deleted) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)</string>
     <string name="sql_news_update_item">UPDATE news set \"timestamp\" = ?, sender_email = ?, sender_name = ?, sender_avatar_id = ?, title = ?, message = ?, image_url = ?, label = ?, reach = ?, qr_code_content= ?, qr_code_caption = ?, version = ?, flags = ? WHERE id = ?</string>
     <string name="sql_news_list_item_versions">SELECT id, version, dirty, pinned, rogered, deleted FROM news</string>
-    <string name="sql_news_insert_button">INSERT OR REPLACE INTO news_buttons (news_id, id, caption, \"action\", \"index\") VALUES (?,?,?,?,?)</string>
+    <string name="sql_news_insert_button">INSERT OR REPLACE INTO news_buttons (news_id, id, caption, \"action\", flow_params, \"index\") VALUES (?,?,?,?,?,?)</string>
     <string name="sql_news_insert_rogered_user">INSERT OR REPLACE INTO news_rogered_users (news_id, friend) VALUES (?,?)</string>
     <string name="sql_news_get_item">SELECT timestamp, sender_email, sender_name, sender_avatar_id, title, message, image_url, label, reach, qr_code_content, qr_code_caption, version, flags, type, dirty, pinned, rogered, deleted FROM news WHERE id=?</string>
-    <string name="sql_news_get_buttons">SELECT id, caption, action FROM news_buttons WHERE news_id = ? ORDER BY \"index\"</string>
+    <string name="sql_news_get_buttons">SELECT id, caption, action, flow_params FROM news_buttons WHERE news_id = ? ORDER BY \"index\"</string>
     <string name="sql_news_get_rogered_users">SELECT friend FROM news_rogered_users WHERE news_id = ? LIMIT 2</string>
     <string name="sql_news_update_dirty">UPDATE news SET dirty = ? WHERE id = ?</string>
     <string name="sql_news_update_pinned">UPDATE news SET pinned = ? WHERE id = ?</string>

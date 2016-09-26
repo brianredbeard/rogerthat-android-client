@@ -29,6 +29,7 @@ public class ServiceMenuItemTO implements com.mobicage.rpc.IJSONable {
     public long[] coords;
     public String hashedTag;
     public String iconHash;
+    public String iconName;
     public String label;
     public boolean requiresWifi;
     public boolean runInBackground;
@@ -41,7 +42,11 @@ public class ServiceMenuItemTO implements com.mobicage.rpc.IJSONable {
     public ServiceMenuItemTO(Map<String, Object> json) throws IncompleteMessageException {
         if (json.containsKey("action")) {
             Object val = json.get("action");
-            this.action = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.action = ((Integer) val).longValue();
+            } else {
+                this.action = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.friends.ServiceMenuItemTO object is missing field 'action'");
         }
@@ -69,6 +74,12 @@ public class ServiceMenuItemTO implements com.mobicage.rpc.IJSONable {
             this.iconHash = (String) val;
         } else {
             throw new IncompleteMessageException("com.mobicage.to.friends.ServiceMenuItemTO object is missing field 'iconHash'");
+        }
+        if (json.containsKey("iconName")) {
+            Object val = json.get("iconName");
+            this.iconName = (String) val;
+        } else {
+            this.iconName = null;
         }
         if (json.containsKey("label")) {
             Object val = json.get("label");
@@ -118,6 +129,7 @@ public class ServiceMenuItemTO implements com.mobicage.rpc.IJSONable {
         }
         obj.put("hashedTag", this.hashedTag);
         obj.put("iconHash", this.iconHash);
+        obj.put("iconName", this.iconName);
         obj.put("label", this.label);
         obj.put("requiresWifi", this.requiresWifi);
         obj.put("runInBackground", this.runInBackground);

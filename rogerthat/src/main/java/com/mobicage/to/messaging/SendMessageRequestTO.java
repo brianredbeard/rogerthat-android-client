@@ -75,7 +75,11 @@ public class SendMessageRequestTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("flags")) {
             Object val = json.get("flags");
-            this.flags = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.flags = ((Integer) val).longValue();
+            } else {
+                this.flags = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.SendMessageRequestTO object is missing field 'flags'");
         }
@@ -112,7 +116,11 @@ public class SendMessageRequestTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("priority")) {
             Object val = json.get("priority");
-            this.priority = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.priority = ((Integer) val).longValue();
+            } else {
+                this.priority = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.SendMessageRequestTO object is missing field 'priority'");
         }
@@ -124,7 +132,11 @@ public class SendMessageRequestTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("timeout")) {
             Object val = json.get("timeout");
-            this.timeout = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.timeout = ((Integer) val).longValue();
+            } else {
+                this.timeout = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.SendMessageRequestTO object is missing field 'timeout'");
         }

@@ -33,7 +33,11 @@ public class DisableNewsRequestTO implements com.mobicage.rpc.IJSONable {
     public DisableNewsRequestTO(Map<String, Object> json) throws IncompleteMessageException {
         if (json.containsKey("news_id")) {
             Object val = json.get("news_id");
-            this.news_id = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.news_id = ((Integer) val).longValue();
+            } else {
+                this.news_id = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.news.DisableNewsRequestTO object is missing field 'news_id'");
         }

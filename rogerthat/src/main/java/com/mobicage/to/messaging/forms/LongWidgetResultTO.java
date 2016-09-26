@@ -33,7 +33,11 @@ public class LongWidgetResultTO implements com.mobicage.rpc.IJSONable {
     public LongWidgetResultTO(Map<String, Object> json) throws IncompleteMessageException {
         if (json.containsKey("value")) {
             Object val = json.get("value");
-            this.value = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.value = ((Integer) val).longValue();
+            } else {
+                this.value = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.forms.LongWidgetResultTO object is missing field 'value'");
         }

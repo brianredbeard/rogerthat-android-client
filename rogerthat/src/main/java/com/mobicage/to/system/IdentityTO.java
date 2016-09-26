@@ -41,13 +41,21 @@ public class IdentityTO implements com.mobicage.rpc.IJSONable {
     public IdentityTO(Map<String, Object> json) throws IncompleteMessageException {
         if (json.containsKey("avatarId")) {
             Object val = json.get("avatarId");
-            this.avatarId = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.avatarId = ((Integer) val).longValue();
+            } else {
+                this.avatarId = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.system.IdentityTO object is missing field 'avatarId'");
         }
         if (json.containsKey("birthdate")) {
             Object val = json.get("birthdate");
-            this.birthdate = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.birthdate = ((Integer) val).longValue();
+            } else {
+                this.birthdate = ((Long) val).longValue();
+            }
         } else {
             this.birthdate = 0;
         }
@@ -59,7 +67,11 @@ public class IdentityTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("gender")) {
             Object val = json.get("gender");
-            this.gender = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.gender = ((Integer) val).longValue();
+            } else {
+                this.gender = ((Long) val).longValue();
+            }
         } else {
             this.gender = 0;
         }

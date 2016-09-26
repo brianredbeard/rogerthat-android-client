@@ -42,13 +42,21 @@ public class UpdateFriendRequestTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("generation")) {
             Object val = json.get("generation");
-            this.generation = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.generation = ((Integer) val).longValue();
+            } else {
+                this.generation = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.friends.UpdateFriendRequestTO object is missing field 'generation'");
         }
         if (json.containsKey("status")) {
             Object val = json.get("status");
-            this.status = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.status = ((Integer) val).longValue();
+            } else {
+                this.status = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.friends.UpdateFriendRequestTO object is missing field 'status'");
         }

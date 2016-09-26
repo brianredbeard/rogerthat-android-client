@@ -25,6 +25,7 @@ CREATE TABLE news_buttons (
     id TEXT NOT NULL,
     caption TEXT NOT NULL,
     "action" TEXT,
+    flow_params TEXT,
     "index" INTEGER,
     PRIMARY KEY (news_id, id),
     FOREIGN KEY (news_id) REFERENCES news ("id")

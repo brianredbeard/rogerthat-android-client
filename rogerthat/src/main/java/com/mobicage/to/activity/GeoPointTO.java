@@ -35,19 +35,31 @@ public class GeoPointTO implements com.mobicage.rpc.IJSONable {
     public GeoPointTO(Map<String, Object> json) throws IncompleteMessageException {
         if (json.containsKey("accuracy")) {
             Object val = json.get("accuracy");
-            this.accuracy = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.accuracy = ((Integer) val).longValue();
+            } else {
+                this.accuracy = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.activity.GeoPointTO object is missing field 'accuracy'");
         }
         if (json.containsKey("latitude")) {
             Object val = json.get("latitude");
-            this.latitude = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.latitude = ((Integer) val).longValue();
+            } else {
+                this.latitude = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.activity.GeoPointTO object is missing field 'latitude'");
         }
         if (json.containsKey("longitude")) {
             Object val = json.get("longitude");
-            this.longitude = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.longitude = ((Integer) val).longValue();
+            } else {
+                this.longitude = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.activity.GeoPointTO object is missing field 'longitude'");
         }

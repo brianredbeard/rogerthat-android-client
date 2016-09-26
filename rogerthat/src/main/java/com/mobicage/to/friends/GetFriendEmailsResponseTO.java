@@ -48,13 +48,21 @@ public class GetFriendEmailsResponseTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("friend_set_version")) {
             Object val = json.get("friend_set_version");
-            this.friend_set_version = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.friend_set_version = ((Integer) val).longValue();
+            } else {
+                this.friend_set_version = ((Long) val).longValue();
+            }
         } else {
             this.friend_set_version = 0;
         }
         if (json.containsKey("generation")) {
             Object val = json.get("generation");
-            this.generation = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.generation = ((Integer) val).longValue();
+            } else {
+                this.generation = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.friends.GetFriendEmailsResponseTO object is missing field 'generation'");
         }

@@ -33,7 +33,11 @@ public class LogCallResponseTO implements com.mobicage.rpc.IJSONable {
     public LogCallResponseTO(Map<String, Object> json) throws IncompleteMessageException {
         if (json.containsKey("recordId")) {
             Object val = json.get("recordId");
-            this.recordId = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.recordId = ((Integer) val).longValue();
+            } else {
+                this.recordId = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.activity.LogCallResponseTO object is missing field 'recordId'");
         }

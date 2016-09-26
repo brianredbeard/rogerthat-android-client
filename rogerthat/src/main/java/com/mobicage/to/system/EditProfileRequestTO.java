@@ -52,7 +52,11 @@ public class EditProfileRequestTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("birthdate")) {
             Object val = json.get("birthdate");
-            this.birthdate = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.birthdate = ((Integer) val).longValue();
+            } else {
+                this.birthdate = ((Long) val).longValue();
+            }
         } else {
             this.birthdate = 0;
         }
@@ -64,7 +68,11 @@ public class EditProfileRequestTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("gender")) {
             Object val = json.get("gender");
-            this.gender = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.gender = ((Integer) val).longValue();
+            } else {
+                this.gender = ((Long) val).longValue();
+            }
         } else {
             this.gender = 0;
         }

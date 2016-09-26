@@ -33,7 +33,11 @@ public class SubmitPhotoUploadFormResponseTO implements com.mobicage.rpc.IJSONab
     public SubmitPhotoUploadFormResponseTO(Map<String, Object> json) throws IncompleteMessageException {
         if (json.containsKey("result")) {
             Object val = json.get("result");
-            this.result = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.result = ((Integer) val).longValue();
+            } else {
+                this.result = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.forms.SubmitPhotoUploadFormResponseTO object is missing field 'result'");
         }

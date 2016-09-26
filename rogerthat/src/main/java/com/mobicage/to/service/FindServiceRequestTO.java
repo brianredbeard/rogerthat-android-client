@@ -45,7 +45,11 @@ public class FindServiceRequestTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("avatar_size")) {
             Object val = json.get("avatar_size");
-            this.avatar_size = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.avatar_size = ((Integer) val).longValue();
+            } else {
+                this.avatar_size = ((Long) val).longValue();
+            }
         } else {
             this.avatar_size = 50;
         }
@@ -63,7 +67,11 @@ public class FindServiceRequestTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("organization_type")) {
             Object val = json.get("organization_type");
-            this.organization_type = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.organization_type = ((Integer) val).longValue();
+            } else {
+                this.organization_type = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.service.FindServiceRequestTO object is missing field 'organization_type'");
         }

@@ -58,7 +58,11 @@ public class AdvancedOrderTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("leap_time")) {
             Object val = json.get("leap_time");
-            this.leap_time = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.leap_time = ((Integer) val).longValue();
+            } else {
+                this.leap_time = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.forms.AdvancedOrderTO object is missing field 'leap_time'");
         }

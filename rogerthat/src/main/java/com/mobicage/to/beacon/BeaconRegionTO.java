@@ -49,13 +49,21 @@ public class BeaconRegionTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("major")) {
             Object val = json.get("major");
-            this.major = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.major = ((Integer) val).longValue();
+            } else {
+                this.major = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.beacon.BeaconRegionTO object is missing field 'major'");
         }
         if (json.containsKey("minor")) {
             Object val = json.get("minor");
-            this.minor = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.minor = ((Integer) val).longValue();
+            } else {
+                this.minor = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.beacon.BeaconRegionTO object is missing field 'minor'");
         }

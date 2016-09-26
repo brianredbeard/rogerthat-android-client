@@ -62,7 +62,11 @@ public class SubmitGPSLocationFormRequestTO implements com.mobicage.rpc.IJSONabl
         }
         if (json.containsKey("timestamp")) {
             Object val = json.get("timestamp");
-            this.timestamp = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.timestamp = ((Integer) val).longValue();
+            } else {
+                this.timestamp = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.forms.SubmitGPSLocationFormRequestTO object is missing field 'timestamp'");
         }

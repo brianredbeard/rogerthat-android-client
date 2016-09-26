@@ -41,7 +41,11 @@ public class MemberStatusUpdateRequestTO implements com.mobicage.rpc.IJSONable {
     public MemberStatusUpdateRequestTO(Map<String, Object> json) throws IncompleteMessageException {
         if (json.containsKey("acked_timestamp")) {
             Object val = json.get("acked_timestamp");
-            this.acked_timestamp = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.acked_timestamp = ((Integer) val).longValue();
+            } else {
+                this.acked_timestamp = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.MemberStatusUpdateRequestTO object is missing field 'acked_timestamp'");
         }
@@ -59,7 +63,11 @@ public class MemberStatusUpdateRequestTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("flags")) {
             Object val = json.get("flags");
-            this.flags = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.flags = ((Integer) val).longValue();
+            } else {
+                this.flags = ((Long) val).longValue();
+            }
         } else {
             this.flags = -1;
         }
@@ -83,13 +91,21 @@ public class MemberStatusUpdateRequestTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("received_timestamp")) {
             Object val = json.get("received_timestamp");
-            this.received_timestamp = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.received_timestamp = ((Integer) val).longValue();
+            } else {
+                this.received_timestamp = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.MemberStatusUpdateRequestTO object is missing field 'received_timestamp'");
         }
         if (json.containsKey("status")) {
             Object val = json.get("status");
-            this.status = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.status = ((Integer) val).longValue();
+            } else {
+                this.status = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.MemberStatusUpdateRequestTO object is missing field 'status'");
         }

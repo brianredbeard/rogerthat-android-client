@@ -40,7 +40,11 @@ public class GetGroupAvatarRequestTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("size")) {
             Object val = json.get("size");
-            this.size = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.size = ((Integer) val).longValue();
+            } else {
+                this.size = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.friends.GetGroupAvatarRequestTO object is missing field 'size'");
         }

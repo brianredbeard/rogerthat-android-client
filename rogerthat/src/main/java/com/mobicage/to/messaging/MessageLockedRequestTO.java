@@ -53,7 +53,11 @@ public class MessageLockedRequestTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("dirty_behavior")) {
             Object val = json.get("dirty_behavior");
-            this.dirty_behavior = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.dirty_behavior = ((Integer) val).longValue();
+            } else {
+                this.dirty_behavior = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.MessageLockedRequestTO object is missing field 'dirty_behavior'");
         }

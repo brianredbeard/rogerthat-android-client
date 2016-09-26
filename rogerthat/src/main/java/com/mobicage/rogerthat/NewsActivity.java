@@ -680,7 +680,7 @@ public class NewsActivity extends ServiceBoundActivity {
                                 @Override
                                 public void onTimeout() {
                                 }
-                            });
+                            }, button.flow_params);
                         } else {
                             if (buttonAction != null) {
                                 final Intent intent = new Intent(buttonAction, Uri.parse(buttonUrl));

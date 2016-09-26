@@ -73,7 +73,11 @@ public class AdvancedOrderItem implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("step")) {
             Object val = json.get("step");
-            this.step = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.step = ((Integer) val).longValue();
+            } else {
+                this.step = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.models.properties.forms.AdvancedOrderItem object is missing field 'step'");
         }
@@ -85,7 +89,11 @@ public class AdvancedOrderItem implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("step_unit_conversion")) {
             Object val = json.get("step_unit_conversion");
-            this.step_unit_conversion = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.step_unit_conversion = ((Integer) val).longValue();
+            } else {
+                this.step_unit_conversion = ((Long) val).longValue();
+            }
         } else {
             this.step_unit_conversion = 0;
         }
@@ -97,13 +105,21 @@ public class AdvancedOrderItem implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("unit_price")) {
             Object val = json.get("unit_price");
-            this.unit_price = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.unit_price = ((Integer) val).longValue();
+            } else {
+                this.unit_price = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.models.properties.forms.AdvancedOrderItem object is missing field 'unit_price'");
         }
         if (json.containsKey("value")) {
             Object val = json.get("value");
-            this.value = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.value = ((Integer) val).longValue();
+            } else {
+                this.value = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.models.properties.forms.AdvancedOrderItem object is missing field 'value'");
         }

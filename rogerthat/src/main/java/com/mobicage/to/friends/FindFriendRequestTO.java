@@ -35,7 +35,11 @@ public class FindFriendRequestTO implements com.mobicage.rpc.IJSONable {
     public FindFriendRequestTO(Map<String, Object> json) throws IncompleteMessageException {
         if (json.containsKey("avatar_size")) {
             Object val = json.get("avatar_size");
-            this.avatar_size = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.avatar_size = ((Integer) val).longValue();
+            } else {
+                this.avatar_size = ((Long) val).longValue();
+            }
         } else {
             this.avatar_size = 50;
         }

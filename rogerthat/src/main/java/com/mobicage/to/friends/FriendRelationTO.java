@@ -36,7 +36,11 @@ public class FriendRelationTO implements com.mobicage.rpc.IJSONable {
     public FriendRelationTO(Map<String, Object> json) throws IncompleteMessageException {
         if (json.containsKey("avatarId")) {
             Object val = json.get("avatarId");
-            this.avatarId = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.avatarId = ((Integer) val).longValue();
+            } else {
+                this.avatarId = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.friends.FriendRelationTO object is missing field 'avatarId'");
         }
@@ -54,7 +58,11 @@ public class FriendRelationTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("type")) {
             Object val = json.get("type");
-            this.type = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.type = ((Integer) val).longValue();
+            } else {
+                this.type = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.friends.FriendRelationTO object is missing field 'type'");
         }

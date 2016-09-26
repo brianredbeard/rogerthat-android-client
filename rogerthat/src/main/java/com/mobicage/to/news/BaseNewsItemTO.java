@@ -70,13 +70,21 @@ public class BaseNewsItemTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("flags")) {
             Object val = json.get("flags");
-            this.flags = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.flags = ((Integer) val).longValue();
+            } else {
+                this.flags = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.news.BaseNewsItemTO object is missing field 'flags'");
         }
         if (json.containsKey("id")) {
             Object val = json.get("id");
-            this.id = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.id = ((Integer) val).longValue();
+            } else {
+                this.id = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.news.BaseNewsItemTO object is missing field 'id'");
         }
@@ -112,13 +120,21 @@ public class BaseNewsItemTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("reach")) {
             Object val = json.get("reach");
-            this.reach = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.reach = ((Integer) val).longValue();
+            } else {
+                this.reach = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.news.BaseNewsItemTO object is missing field 'reach'");
         }
         if (json.containsKey("timestamp")) {
             Object val = json.get("timestamp");
-            this.timestamp = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.timestamp = ((Integer) val).longValue();
+            } else {
+                this.timestamp = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.news.BaseNewsItemTO object is missing field 'timestamp'");
         }
@@ -130,7 +146,11 @@ public class BaseNewsItemTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("type")) {
             Object val = json.get("type");
-            this.type = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.type = ((Integer) val).longValue();
+            } else {
+                this.type = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.news.BaseNewsItemTO object is missing field 'type'");
         }
@@ -149,7 +169,11 @@ public class BaseNewsItemTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("version")) {
             Object val = json.get("version");
-            this.version = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.version = ((Integer) val).longValue();
+            } else {
+                this.version = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.news.BaseNewsItemTO object is missing field 'version'");
         }

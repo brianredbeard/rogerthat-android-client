@@ -33,7 +33,11 @@ public class HeartBeatResponseTO implements com.mobicage.rpc.IJSONable {
     public HeartBeatResponseTO(Map<String, Object> json) throws IncompleteMessageException {
         if (json.containsKey("systemTime")) {
             Object val = json.get("systemTime");
-            this.systemTime = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.systemTime = ((Integer) val).longValue();
+            } else {
+                this.systemTime = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.system.HeartBeatResponseTO object is missing field 'systemTime'");
         }

@@ -64,7 +64,11 @@ public class MessageFlowErrorRequestTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("platform")) {
             Object val = json.get("platform");
-            this.platform = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.platform = ((Integer) val).longValue();
+            } else {
+                this.platform = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.jsmfr.MessageFlowErrorRequestTO object is missing field 'platform'");
         }
@@ -82,7 +86,11 @@ public class MessageFlowErrorRequestTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("timestamp")) {
             Object val = json.get("timestamp");
-            this.timestamp = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.timestamp = ((Integer) val).longValue();
+            } else {
+                this.timestamp = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.jsmfr.MessageFlowErrorRequestTO object is missing field 'timestamp'");
         }

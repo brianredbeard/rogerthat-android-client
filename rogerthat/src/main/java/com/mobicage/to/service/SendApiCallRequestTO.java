@@ -43,7 +43,11 @@ public class SendApiCallRequestTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("id")) {
             Object val = json.get("id");
-            this.id = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.id = ((Integer) val).longValue();
+            } else {
+                this.id = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.service.SendApiCallRequestTO object is missing field 'id'");
         }

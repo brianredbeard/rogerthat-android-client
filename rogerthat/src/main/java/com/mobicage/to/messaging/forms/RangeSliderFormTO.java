@@ -60,7 +60,11 @@ public class RangeSliderFormTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("negative_button_ui_flags")) {
             Object val = json.get("negative_button_ui_flags");
-            this.negative_button_ui_flags = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.negative_button_ui_flags = ((Integer) val).longValue();
+            } else {
+                this.negative_button_ui_flags = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.forms.RangeSliderFormTO object is missing field 'negative_button_ui_flags'");
         }
@@ -78,7 +82,11 @@ public class RangeSliderFormTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("positive_button_ui_flags")) {
             Object val = json.get("positive_button_ui_flags");
-            this.positive_button_ui_flags = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.positive_button_ui_flags = ((Integer) val).longValue();
+            } else {
+                this.positive_button_ui_flags = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.forms.RangeSliderFormTO object is missing field 'positive_button_ui_flags'");
         }
