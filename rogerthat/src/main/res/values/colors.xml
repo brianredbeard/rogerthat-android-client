@@ -37,6 +37,7 @@
     <color name="mc_priority_high_background">#77CEDE</color>
     <color name="mc_priority_urgent_text">#FFFFFF</color>
     <color name="mc_priority_urgent_background">#FF8481</color>
+    <color name="mc_error">#FF0000</color>
 
     <color name="mc_pin_gray">#3A3A3A</color>
     <color name="mc_pin_gray_light">#C8C6C7</color>

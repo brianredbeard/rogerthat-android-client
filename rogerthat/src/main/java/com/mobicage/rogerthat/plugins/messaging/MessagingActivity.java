@@ -444,6 +444,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
         TextView messageCountView;
         ImageView avatarView;
         CheckBox checkBox;
+        ImageView statusView;
     }
 
     private class MessageListAdapter extends CursorAdapter implements SectionIndexer {
@@ -558,6 +559,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
                 holder.messageView = (TextView) view.findViewById(R.id.message);
                 holder.messageCountView = (TextView) view.findViewById(R.id.message_count);
                 holder.checkBox = (CheckBox) view.findViewById(R.id.message_checkbox);
+                holder.statusView = (ImageView) view.findViewById(R.id.message_status);
                 view.setTag(holder);
             }
             holder.message = message;
@@ -679,12 +681,12 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
             if (dynamicChat)
                 replyCount--;
 
-            long messageCountText = message.unreadCount;
-            if (dynamicChat && replyCount < messageCountText) {
-                messageCountText--;
+            long messageUnreadCount = message.unreadCount;
+            if (dynamicChat && replyCount < messageUnreadCount) {
+                messageUnreadCount--;
             }
-            if (messageCountText >= 1) {
-                messageCountView.setText(String.valueOf(messageCountText));
+            if (messageUnreadCount >= 1) {
+                messageCountView.setText(String.valueOf(messageUnreadCount));
                 messageCountView.setVisibility(View.VISIBLE);
             } else {
                 messageCountView.setVisibility(View.GONE);
@@ -746,6 +748,45 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
             holder.checkBox.setVisibility(mEditing
                     && !SystemUtils.isFlagEnabled(message.flags, MessagingPlugin.FLAG_NOT_REMOVABLE) ? View.VISIBLE
                     : View.GONE);
+            boolean showMessageStatus = messageUnreadCount == 0;
+            if (showMessageStatus) {
+                showMessageStatus = setStatusIcon(MessagingActivity.this, message, holder.statusView, dynamicChat);
+            }
+            holder.statusView.setVisibility(showMessageStatus ? View.VISIBLE : View.GONE);
+        }
+
+        private boolean setStatusIcon(Context context, Message message, ImageView statusView, boolean dynamicChat) {
+            Resources resources = getResources();
+            if (dynamicChat) {
+                if (message.priority == Message.PRIORITY_URGENT_WITH_ALARM) {
+                    int primaryColor = resources.getColor(R.color.mc_gray_11);
+                    statusView.setImageDrawable(new IconicsDrawable(context, FontAwesome.Icon.faw_bell).color(primaryColor).sizeDp(15));
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                if (message.recipients_status == MessageMemberStatusSummaryEncoding.ERROR) {
+                    int errorColor = resources.getColor(R.color.mc_error);
+                    statusView.setImageDrawable(new IconicsDrawable(context, FontAwesome.Icon.faw_exclamation).color(errorColor).sizeDp(15));
+                } else if (message.alert_flags >= AlertManager.ALERT_FLAG_RING_5
+                        && !mMessagingPlugin.isMessageAckedByMe(message)) {
+                    int rogerthatColor = resources.getColor(R.color.mc_green);
+                    statusView.setImageDrawable(new IconicsDrawable(context, FontAwesome.Icon.faw_bell).color(rogerthatColor).sizeDp(15));
+                } else if (message.numAcked() != 0) {
+                    int rogerthatColor = resources.getColor(R.color.mc_green);
+                    statusView.setImageDrawable(new IconicsDrawable(context, FontAwesome.Icon.faw_check).color(rogerthatColor).sizeDp(15));
+                } else if (message.numRecipients() == message.numReceived()) {
+                    // Received by everyone
+                    int greyColor = resources.getColor(R.color.mc_gray_11);
+                    statusView.setImageDrawable(new IconicsDrawable(context, FontAwesome.Icon.faw_check).color(greyColor).sizeDp(15));
+                } else {
+                    // message is on server
+                    int greyColor = resources.getColor(R.color.mc_gray_11);
+                    statusView.setImageDrawable(new IconicsDrawable(context, FontAwesome.Icon.faw_ellipsis_h).color(greyColor).sizeDp(15));
+                }
+                return true;
+            }
         }
 
         @Override
