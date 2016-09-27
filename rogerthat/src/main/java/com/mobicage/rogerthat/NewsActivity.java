@@ -112,6 +112,8 @@ public class NewsActivity extends ServiceBoundActivity {
     private CachedDownloader mCachedDownloader;
 
     private int mDisplayWidth;
+    private String mMyEmail;
+    private String mMyName;
     private Map<Long, NewsItemDetails> mDBItems = new HashMap<>();
     private List<Long> mOrder = new ArrayList<>();
     private List<Long> mLiveOrder = new ArrayList<>();
@@ -310,6 +312,10 @@ public class NewsActivity extends ServiceBoundActivity {
         mFriendsPlugin = mService.getPlugin(FriendsPlugin.class);
         mCachedDownloader = CachedDownloader.getInstance(getMainService());
 
+        MyIdentity myIdentity = mService.getIdentityStore().getIdentity();
+        mMyEmail = myIdentity.getEmail();
+        mMyName = myIdentity.getDisplayName();
+
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setMessage(mService.getString(R.string.loading));
         mProgressDialog.setIndeterminate(true);
@@ -399,8 +405,65 @@ public class NewsActivity extends ServiceBoundActivity {
             return mItems.get(newsId);
         }
 
+        private void setRogeredUsers(final NewsItem newsItem, final View view) {
+            LinearLayout membersContainer = (LinearLayout) view.findViewById(R.id.members_container);
+            TextView members = (TextView) view.findViewById(R.id.members);
+
+            if (newsItem.users_that_rogered.length > 0) {
+                Map<String, String> namesMap = new HashMap<>();
+                for (String email : newsItem.users_that_rogered) {
+                    if (mMyEmail.equals(email)) {
+                        namesMap.put(email, mMyName);
+
+                    } else {
+                        String name = mFriendsPlugin.getStore().getName(email);
+                        if (name != null) {
+                            namesMap.put(email, name);
+                        }
+                    }
+                }
+
+                List<String> names = new ArrayList<>();
+                for (Map.Entry<String, String> entry : namesMap.entrySet()) {
+                    if (!mMyEmail.equals(entry.getKey())) {
+                        names.add(entry.getValue());
+                    }
+                }
+                if (namesMap.containsKey(mMyEmail)) {
+                    names.add(mMyName);
+                }
+
+                if (names.size() > 2) {
+                    final SpannableString text = new SpannableString(getString(R.string.news_members_and_x_others, names.get(0), names.size() - 1));
+                    text.setSpan(new StyleSpan(Typeface.BOLD), 0, names.get(0).length(),
+                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    members.setText(text);
+
+                } else {
+                    String namesPart = android.text.TextUtils.join(" & ", names);
+                    final SpannableString text = new SpannableString(getString(R.string.news_members, namesPart));
+                    text.setSpan(new StyleSpan(Typeface.BOLD), 0, namesPart.length(),
+                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    members.setText(text);
+                }
+
+                membersContainer.setVisibility(View.VISIBLE);
+                membersContainer.setOnClickListener(new SafeViewOnClickListener() {
+                    @Override
+                    public void safeOnClick(View v) {
+                        Intent intent = new Intent(NewsActivity.this, MembersActivity.class);
+                        intent.putExtra(MembersActivity.ME, mMyEmail);
+                        intent.putExtra(MembersActivity.MEMBERS, newsItem.users_that_rogered);
+                        startActivity(intent);
+                    }
+                });
+            } else {
+                membersContainer.setVisibility(View.GONE);
+            }
+        }
+
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(final int position, final View convertView, final ViewGroup parent) {
             T.UI();
             final View view;
 
@@ -439,45 +502,7 @@ public class NewsActivity extends ServiceBoundActivity {
                 }
             });
 
-            LinearLayout membersContainer = (LinearLayout) view.findViewById(R.id.members_container);
-            TextView members = (TextView) view.findViewById(R.id.members);
-
-            if (newsItem.users_that_rogered.length > 0) {
-                List<String> names = new ArrayList<>();
-                for (String email : newsItem.users_that_rogered) {
-                    String name = mFriendsPlugin.getStore().getName(email);
-                    if (name != null) {
-                        names.add(name);
-                    }
-                }
-
-                if (names.size() > 2) {
-                    final SpannableString text = new SpannableString(getString(R.string.news_members_and_x_others, names.get(0), names.size() - 1));
-                    text.setSpan(new StyleSpan(Typeface.BOLD), 0, names.get(0).length(),
-                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    members.setText(text);
-
-                } else {
-                    String namesPart = android.text.TextUtils.join(" & ", names);
-                    final SpannableString text = new SpannableString(getString(R.string.news_members, namesPart));
-                    text.setSpan(new StyleSpan(Typeface.BOLD), 0, namesPart.length(),
-                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    members.setText(text);
-                }
-
-                membersContainer.setVisibility(View.VISIBLE);
-                membersContainer.setOnClickListener(new SafeViewOnClickListener() {
-                    @Override
-                    public void safeOnClick(View v) {
-                        Intent intent = new Intent(NewsActivity.this, MembersActivity.class);
-                        intent.putExtra(MembersActivity.ME, mService.getIdentityStore().getIdentity().getEmail());
-                        intent.putExtra(MembersActivity.MEMBERS, newsItem.users_that_rogered);
-                        startActivity(intent);
-                    }
-                });
-            } else {
-                membersContainer.setVisibility(View.GONE);
-            }
+            setRogeredUsers(newsItem, view);
 
             Resizable16by6ImageView image = (Resizable16by6ImageView) view.findViewById(R.id.image);
 
@@ -605,13 +630,13 @@ public class NewsActivity extends ServiceBoundActivity {
                     btn.setOnClickListener(new SafeViewOnClickListener() {
                         @Override
                         public void safeOnClick(View v) {
-                            newsItem.rogered = true;
                             mDBItems.get(newsItem.id).rogered = true;
                             mNewsStore.setNewsItemRogered(newsItem.id);
+                            mNewsStore.addUser(newsItem.id, mMyEmail);
                             mNewsPlugin.newsRogered(newsItem.id);
+                            mItems.put(newsItem.id, mNewsStore.getNewsItem(newsItem.id));
 
-                            btn.setBackgroundColor(getResources().getColor(R.color.mc_divider_gray));
-                            btn.setOnClickListener(null);
+                            mListAdapter.getView(position, convertView, parent);
                         }
                     });
                 }

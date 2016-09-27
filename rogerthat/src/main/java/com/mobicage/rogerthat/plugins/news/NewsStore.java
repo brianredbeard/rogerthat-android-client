@@ -124,10 +124,14 @@ public class NewsStore implements Closeable {
         mDeleteNewsRogeredUsers.execute();
 
         for (int i = 0; i < item.users_that_rogered.length; i++) {
-            mInsertNewsRogeredUser.bindLong(1, item.id);
-            mInsertNewsRogeredUser.bindString(2, item.users_that_rogered[i]);
-            mInsertNewsRogeredUser.execute();
+            addUser(item.id, item.users_that_rogered[i]);
         }
+    }
+
+    public void addUser(final long newsId, final String email) {
+        mInsertNewsRogeredUser.bindLong(1, newsId);
+        mInsertNewsRogeredUser.bindString(2, email);
+        mInsertNewsRogeredUser.execute();
     }
 
     private void insertNewsItem(final BaseNewsItemTO item) {
