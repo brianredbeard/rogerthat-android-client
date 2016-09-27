@@ -34,9 +34,14 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.StyleSpan;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -102,8 +107,8 @@ public class NewsActivity extends ServiceBoundActivity {
 
     protected NewsListAdapter mListAdapter;
     protected ListView mListView;
-    private final static int FLAG_ACTION_ROGERTHAT = 1;
-    private final static int FLAG_ACTION_FOLLOW = 2;
+    protected final static int FLAG_ACTION_ROGERTHAT = 1;
+    protected final static int FLAG_ACTION_FOLLOW = 2;
 
     private SwipeRefreshLayout mSwipeContainer;
     private NewsPlugin mNewsPlugin;
@@ -118,6 +123,8 @@ public class NewsActivity extends ServiceBoundActivity {
     private Map<Long, NewsItemDetails> mDBItems = new HashMap<>();
     private List<Long> mOrder = new ArrayList<>();
     private List<Long> mLiveOrder = new ArrayList<>();
+    private boolean mShowPinnedOnly = false;
+    private List<Long> mPinnedItems = new ArrayList<>();
     private Map<Long, NewsItem> mItems = new HashMap<>();
     private Map<String, ArrayList<Resizable16by6ImageView>> mImageViews = new HashMap<>();
 
@@ -126,7 +133,6 @@ public class NewsActivity extends ServiceBoundActivity {
     private int mExistence;
     private String mExpectedEmailHash;
 
-    private boolean mIsLoadingMoreNews = false;
     private boolean mShouldLoadMoreNews = false;
     private String mUUID;
     private String mCursor;
@@ -172,22 +178,12 @@ public class NewsActivity extends ServiceBoundActivity {
                 if (mSwipeContainer.isRefreshing()) {
                     mOrder = new ArrayList<>();
                     mLiveOrder = new ArrayList<>();
-
-                    for (NewsItemDetails d : mDBItems.values()) {
-                        if (d.pinned && !d.deleted) {
-                            shouldUpdateLayout = true;
-                            mLiveOrder.add(d.id);
-                            mOrder.add(d.id);
-                        }
-                    }
                 }
 
                 Set<Long> idsToRequest = new LinkedHashSet<>();
                 Set<Long> updatedIds = new LinkedHashSet<>();
                 for (int i= 0 ; i < ids.length; i++) {
-                    if (!mLiveOrder.contains(ids[i])) {
-                        mLiveOrder.add(ids[i]);
-                    }
+                    mLiveOrder.add(ids[i]);
                     if (!mDBItems.containsKey(ids[i])) {
                         idsToRequest.add(ids[i]);
                     } else if (mDBItems.get(ids[i]).version < versions[i]){
@@ -212,7 +208,6 @@ public class NewsActivity extends ServiceBoundActivity {
                     mNewsPlugin.getNewsItems(primitiveIdsToRequest, updatedIds);
                 } else {
                     mSwipeContainer.setRefreshing(false);
-                    mIsLoadingMoreNews = false;
                     mShouldLoadMoreNews = ids.length > 0;
                 }
 
@@ -248,7 +243,6 @@ public class NewsActivity extends ServiceBoundActivity {
                 Collections.sort(mOrder, comparator);
                 mSwipeContainer.setRefreshing(false);
 
-                mIsLoadingMoreNews = false;
                 mShouldLoadMoreNews = true;
                 mListAdapter.notifyDataSetChanged();
 
@@ -260,6 +254,13 @@ public class NewsActivity extends ServiceBoundActivity {
                     }
                     if (mItems.containsKey(id)) {
                         mItems.get(id).deleted = true;
+                    }
+
+                    if (mPinnedItems.contains(id)) {
+                        mPinnedItems.remove(id);
+                        if (mPinnedItems.size() == 0) {
+                            invalidateOptionsMenu();
+                        }
                     }
 
                     mLiveOrder.remove(id);
@@ -324,6 +325,7 @@ public class NewsActivity extends ServiceBoundActivity {
         mProgressDialog.setIndeterminate(true);
         mProgressDialog.setCancelable(false);
 
+
         mSwipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
         mSwipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -342,19 +344,12 @@ public class NewsActivity extends ServiceBoundActivity {
         setListAdapter();
 
         mDBItems = mNewsStore.getNewsItemVersions();
-        boolean shouldUpdateLayout = false;
         for (NewsItemDetails d : mDBItems.values()) {
             if (d.pinned && !d.deleted) {
-                shouldUpdateLayout = true;
-                mLiveOrder.add(d.id);
-                mOrder.add(d.id);
-                mItems.put(d.id, mNewsStore.getNewsItem(d.id));
+                mPinnedItems.add(d.id);
             }
         }
-
-        if (shouldUpdateLayout) {
-            mListAdapter.notifyDataSetChanged();
-        }
+        invalidateOptionsMenu();
         requestMoreNews(true);
 
         final IntentFilter filter = new IntentFilter(CachedDownloader.CACHED_DOWNLOAD_AVAILABLE_INTENT);
@@ -376,26 +371,12 @@ public class NewsActivity extends ServiceBoundActivity {
     }
 
     private void requestMoreNews(boolean isRefresh) {
-        if (mIsLoadingMoreNews) {
-            L.e("requestMoreNews called when already loading news");
-        }
-        mIsLoadingMoreNews = true;
         mShouldLoadMoreNews = false;
         if (isRefresh) {
             mCursor = null;
         }
         mUUID = UUID.randomUUID().toString();
         mNewsPlugin.getNews(mCursor, mUUID);
-    }
-
-    private void updatedPinnedLayout(ImageButton pinned, boolean isPinned) {
-        if (isPinned) {
-            pinned.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_thumb_tack).color(getResources().getColor(R.color.mc_primary_color)).sizeDp(16));
-            pinned.setBackgroundResource(R.drawable.news_pin_background_pinned);
-        } else {
-            pinned.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_thumb_tack).color(Color.WHITE).sizeDp(16));
-            pinned.setBackgroundResource(R.drawable.news_pin_background_normal);
-        }
     }
 
     public class NewsListAdapter extends BaseAdapter {
@@ -410,8 +391,10 @@ public class NewsActivity extends ServiceBoundActivity {
         }
 
         protected NewsItem getNewsItem(int position) {
-            Long newsId = mOrder.get(position);
-            return mItems.get(newsId);
+            if (mShowPinnedOnly) {
+                return mItems.get(mPinnedItems.get(position));
+            }
+            return mItems.get(mOrder.get(position));
         }
 
         private void setRogeredUsers(final NewsItem newsItem, final View view) {
@@ -471,12 +454,34 @@ public class NewsActivity extends ServiceBoundActivity {
             }
         }
 
+        private void togglePinned(final NewsItem newsItem) {
+            boolean isPinned = !newsItem.pinned;
+            newsItem.pinned = isPinned;
+            mDBItems.get(newsItem.id).pinned = isPinned;
+            mNewsStore.setNewsItemPinned(newsItem.id, isPinned);
+
+            if (isPinned) {
+                mPinnedItems.add(newsItem.id);
+                if (mPinnedItems.size() == 1) {
+                    invalidateOptionsMenu();
+                }
+            } else {
+                mPinnedItems.remove(newsItem.id);
+                if (mShowPinnedOnly && mPinnedItems.size() > 0) {
+                    mListAdapter.notifyDataSetChanged();
+                } else if (mShowPinnedOnly && mPinnedItems.size() == 0) {
+                    toggleShowPinnedOnly();
+                } else if (mPinnedItems.size() == 0) {
+                    invalidateOptionsMenu();
+                }
+            }
+        }
+
         @Override
         public View getView(final int position, final View convertView, final ViewGroup parent) {
             T.UI();
             final View view;
-
-            if (position >= mOrder.size() - 10) {
+            if (!mShowPinnedOnly && position >= mOrder.size() - 10) {
                 if (mCursor != null && mShouldLoadMoreNews) {
                     requestMoreNews(false);
                 }
@@ -498,16 +503,68 @@ public class NewsActivity extends ServiceBoundActivity {
             }
 
             final ImageButton pinned = (ImageButton) view.findViewById(R.id.pinned);
-            updatedPinnedLayout(pinned, newsItem.pinned);
             pinned.setOnClickListener(new SafeViewOnClickListener() {
                 @Override
                 public void safeOnClick(View v) {
-                    boolean isPinned = !newsItem.pinned;
-                    newsItem.pinned = isPinned;
-                    mDBItems.get(newsItem.id).pinned = isPinned;
-                    mNewsStore.setNewsItemPinned(newsItem.id, isPinned);
+                    LayoutInflater layoutInflater = getLayoutInflater();
+                    final LinearLayout dialog = (LinearLayout) layoutInflater.inflate(R.layout.news_actions, null);
 
-                    updatedPinnedLayout(pinned, isPinned);
+                    final AlertDialog alertDialog = new AlertDialog.Builder(NewsActivity.this)
+                            .setView(dialog)
+                            .create();
+
+                    if (newsItem.pinned) {
+                        final View actionUnSave = layoutInflater.inflate(R.layout.news_actions_item, null);
+                        ((ImageView) actionUnSave.findViewById(R.id.icon)).setImageDrawable(new IconicsDrawable(NewsActivity.this, FontAwesome.Icon.faw_bookmark).color(getResources().getColor(R.color.mc_default_text)).sizeDp(15).paddingDp(2));
+                        ((TextView) actionUnSave.findViewById(R.id.title)).setText(R.string.unsave);
+                        ((TextView) actionUnSave.findViewById(R.id.subtitle)).setText(R.string.remove_this_from_your_saved_items);
+                        actionUnSave.setOnClickListener(new SafeViewOnClickListener() {
+                            @Override
+                            public void safeOnClick(View v) {
+                                alertDialog.dismiss();
+                                togglePinned(newsItem);
+                            }
+                        });
+                        dialog.addView(actionUnSave);
+                    } else {
+                        final View actionSave = layoutInflater.inflate(R.layout.news_actions_item, null);
+                        ((ImageView) actionSave.findViewById(R.id.icon)).setImageDrawable(new IconicsDrawable(NewsActivity.this, FontAwesome.Icon.faw_bookmark).color(getResources().getColor(R.color.mc_default_text)).sizeDp(15).paddingDp(2));
+                        ((TextView) actionSave.findViewById(R.id.title)).setText(R.string.save);
+                        ((TextView) actionSave.findViewById(R.id.subtitle)).setText(R.string.add_this_to_your_saved_items);
+                        actionSave.setOnClickListener(new SafeViewOnClickListener() {
+                            @Override
+                            public void safeOnClick(View v) {
+                                alertDialog.dismiss();
+                                togglePinned(newsItem);
+                            }
+                        });
+                        dialog.addView(actionSave);
+                    }
+
+                    final View actionHide = layoutInflater.inflate(R.layout.news_actions_item, null);
+                    ((ImageView) actionHide.findViewById(R.id.icon)).setImageDrawable(new IconicsDrawable(NewsActivity.this, FontAwesome.Icon.faw_times_circle).color(getResources().getColor(R.color.mc_default_text)).sizeDp(15).paddingDp(2));
+                    ((TextView) actionHide.findViewById(R.id.title)).setText(R.string.hide);
+                    ((TextView) actionHide.findViewById(R.id.subtitle)).setText(R.string.see_fewer_posts_like_this);
+                    actionHide.setOnClickListener(new SafeViewOnClickListener() {
+                        @Override
+                        public void safeOnClick(View v) {
+                            alertDialog.dismiss();
+                            L.i("todo ruben see fewer posts like this");
+                        }
+                    });
+                    dialog.addView(actionHide);
+
+
+                    alertDialog.setCanceledOnTouchOutside(true);
+                    alertDialog.show();
+
+                    WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+                    Window window = alertDialog.getWindow();
+                    lp.copyFrom(window.getAttributes());
+                    lp.gravity = Gravity.BOTTOM;
+                    lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+                    lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                    window.setAttributes(lp);
                 }
             });
 
@@ -754,16 +811,25 @@ public class NewsActivity extends ServiceBoundActivity {
 
         @Override
         public int getCount() {
+            if (mShowPinnedOnly) {
+                return mPinnedItems.size();
+            }
             return mOrder.size();
         }
 
         @Override
         public Object getItem(int position) {
+            if (mShowPinnedOnly) {
+                return mPinnedItems.get(position);
+            }
             return mOrder.get(position);
         }
 
         @Override
         public long getItemId(int position) {
+            if (mShowPinnedOnly) {
+                return mPinnedItems.get(position);
+            }
             return mOrder.get(position);
         }
     }
@@ -771,18 +837,18 @@ public class NewsActivity extends ServiceBoundActivity {
     private final Comparator<Long> comparator = new Comparator<Long>() {
         @Override
         public int compare(Long item1, Long item2) {
-            NewsItemDetails d1 = mDBItems.get(item1);
-            NewsItemDetails d2 = mDBItems.get(item2);
-
-            if (d1.pinned && !d2.pinned) {
-                return -1;
-            } else if (!d1.pinned && d2.pinned) {
-                return 1;
-            }
-
             int position1 = mLiveOrder.indexOf(item1);
             int position2 = mLiveOrder.indexOf(item2);
             return position1 > position2 ? 1 : -1;
+        }
+    };
+
+    private final Comparator<Long> comparatorPinned = new Comparator<Long>() {
+        @Override
+        public int compare(Long item1, Long item2) {
+            long timestamp1 = mItems.get(item1).timestamp;
+            long timestamp2 = mItems.get(item2).timestamp;
+            return timestamp1 < timestamp2 ? 1 : -1;
         }
     };
 
@@ -837,5 +903,74 @@ public class NewsActivity extends ServiceBoundActivity {
         } catch (Exception e) {
             mService.putInHistoryLog(getString(R.string.getuserinfo_failure), HistoryItem.ERROR);
         }
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        for (int i = 0; i < menu.size(); i++) {
+            MenuItem item = menu.getItem(i);
+            switch (item.getItemId()) {
+                case R.id.saved:
+                    item.setVisible(!mShowPinnedOnly && mPinnedItems.size() > 0);
+                    break;
+                case R.id.all:
+                    item.setVisible(mShowPinnedOnly);
+                    break;
+            }
+        }
+
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        T.UI();
+        super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.news_menu, menu);
+        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_bookmark).color(Color.DKGRAY).sizeDp(18));
+        menu.getItem(1).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_times).color(Color.DKGRAY).sizeDp(18));
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        T.UI();
+        switch (item.getItemId()) {
+            case R.id.saved:
+                toggleShowPinnedOnly();
+                return true;
+            case R.id.all:
+                toggleShowPinnedOnly();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mShowPinnedOnly) {
+            toggleShowPinnedOnly();
+            return;
+        }
+        super.onBackPressed();
+    }
+
+    private void toggleShowPinnedOnly() {
+        Collections.sort(mPinnedItems, comparatorPinned);
+
+        if (mShowPinnedOnly) {
+            mSwipeContainer.setEnabled(true);
+            mShowPinnedOnly = false;
+            setTitle(R.string.news);
+            mListAdapter.notifyDataSetChanged();
+        } else {
+            mSwipeContainer.setRefreshing(false);
+            mSwipeContainer.setEnabled(false);
+            mShowPinnedOnly = true;
+            setTitle(R.string.saved_items);
+            mListAdapter.notifyDataSetChanged();
+        }
+
+        invalidateOptionsMenu();
     }
 }
