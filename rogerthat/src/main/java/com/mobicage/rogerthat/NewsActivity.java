@@ -71,6 +71,7 @@ import com.mobicage.rogerthat.util.DownloadImageTask;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
+import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
@@ -294,6 +295,8 @@ public class NewsActivity extends ServiceBoundActivity {
                         showError(intent);
                     }
                 }
+            } else {
+                mListAdapter.notifyDataSetChanged();
             }
             return new String[] { action };
         }
@@ -359,6 +362,12 @@ public class NewsActivity extends ServiceBoundActivity {
         filter.addAction(NewsPlugin.GET_NEWS_ITEMS_RECEIVED_INTENT);
         filter.addAction(NewsPlugin.DELETE_NEWS_ITEM_INTENT);
         filter.addAction(FriendsPlugin.FRIEND_INFO_RECEIVED_INTENT);
+        filter.addAction(FriendsPlugin.FRIEND_UPDATE_INTENT);
+        filter.addAction(FriendsPlugin.FRIEND_AVATAR_CHANGED_INTENT);
+        filter.addAction(FriendsPlugin.FRIEND_REMOVED_INTENT);
+        filter.addAction(FriendsPlugin.FRIEND_MARKED_FOR_REMOVAL_INTENT);
+        filter.addAction(FriendsPlugin.FRIEND_ADDED_INTENT);
+        filter.addAction(FriendsPlugin.FRIENDS_LIST_REFRESHED);
         registerReceiver(mBroadcastReceiver, filter);
     }
 
@@ -565,10 +574,11 @@ public class NewsActivity extends ServiceBoundActivity {
                 serviceAvatar.setImageBitmap(avatar);
             }
 
+            final int existenceStatus = mFriendsPlugin.getStore().getExistence(newsItem.sender.email);
+
             serviceAvatar.setOnClickListener(new SafeViewOnClickListener() {
                 @Override
                 public void safeOnClick(View v) {
-                    int existenceStatus = mFriendsPlugin.getStore().getExistence(newsItem.sender.email);
                     if (existenceStatus == Friend.ACTIVE) {
                         Intent intent = new Intent(NewsActivity.this, ServiceActionMenuActivity.class);
                         intent.putExtra(ServiceActionMenuActivity.SERVICE_EMAIL, newsItem.sender.email);
@@ -652,7 +662,7 @@ public class NewsActivity extends ServiceBoundActivity {
                 final Button btn = (Button) mLayoutInflater.inflate(R.layout.news_list_item_action, parent, false);
                 btn.setText(getString(R.string.follow));
 
-                int existenceStatus = mFriendsPlugin.getStore().getExistence(newsItem.sender.email);
+
                 if (Friend.ACTIVE == existenceStatus) {
                     btn.setBackgroundColor(getResources().getColor(R.color.mc_divider_gray));
                 } else {
@@ -683,37 +693,53 @@ public class NewsActivity extends ServiceBoundActivity {
 
                 Button btn = (Button) mLayoutInflater.inflate(R.layout.news_list_item_action, parent, false);
                 btn.setText(button.caption);
-                btn.setOnClickListener(new SafeViewOnClickListener() {
-                    @Override
-                    public void safeOnClick(View v) {
-                        if (Message.MC_CONFIRM_PREFIX.equals(buttonAction)) {
-                            // ignore
-                        } else if (Message.MC_SMI_PREFIX.equals(buttonAction)) {
-                            MenuItemPresser menuItemPresser = new MenuItemPresser(NewsActivity.this, newsItem.sender.email);
 
-                            menuItemPresser.itemPressed(buttonUrl, new MenuItemPresser.ResultHandler() {
-                                @Override
-                                public void onSuccess() {
-                                    //overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_up);
-                                }
+                if (Friend.ACTIVE == existenceStatus) {
+                    btn.setOnClickListener(new SafeViewOnClickListener() {
+                        @Override
+                        public void safeOnClick(View v) {
+                            if (Message.MC_CONFIRM_PREFIX.equals(buttonAction)) {
+                                // ignore
+                            } else if (Message.MC_SMI_PREFIX.equals(buttonAction)) {
+                                MenuItemPresser menuItemPresser = new MenuItemPresser(NewsActivity.this, newsItem.sender.email);
+                                menuItemPresser.itemPressed(buttonUrl, new MenuItemPresser.ResultHandler() {
+                                    @Override
+                                    public void onSuccess() {
+                                        //overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_up);
+                                    }
 
-                                @Override
-                                public void onError() {
-                                    L.e("SMI with hash " + buttonUrl + " not found!"); // XXX: log error to message.sender
-                                }
+                                    @Override
+                                    public void onError() {
+                                        L.e("SMI with hash " + buttonUrl + " not found!"); // XXX: log error to message.sender
+                                    }
 
-                                @Override
-                                public void onTimeout() {
+                                    @Override
+                                    public void onTimeout() {
+                                    }
+                                }, button.flow_params);
+                            } else {
+                                if (buttonAction != null) {
+                                    final Intent intent = new Intent(buttonAction, Uri.parse(buttonUrl));
+                                    startActivity(intent);
                                 }
-                            }, button.flow_params);
-                        } else {
-                            if (buttonAction != null) {
-                                final Intent intent = new Intent(buttonAction, Uri.parse(buttonUrl));
-                                startActivity(intent);
                             }
                         }
-                    }
-                });
+                    });
+                } else {
+                    btn.setOnClickListener(new SafeViewOnClickListener() {
+                        @Override
+                        public void safeOnClick(View v) {
+                            new AlertDialog.Builder(NewsActivity.this)
+                                    .setMessage(getString(R.string.invite_as_friend, new Object[]{newsItem.sender.name}))
+                                    .setPositiveButton(R.string.yes, new SafeDialogInterfaceOnClickListener() {
+                                        @Override
+                                        public void safeOnClick(DialogInterface dialog, int which) {
+                                            mFriendsPlugin.inviteFriend(newsItem.sender.email, null, null, true);
+                                        }
+                                    }).setNegativeButton(R.string.no, null).create().show();
+                        }
+                    });
+                }
 
                 actions.addView(btn);
 
