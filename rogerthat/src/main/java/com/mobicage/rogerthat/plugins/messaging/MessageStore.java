@@ -745,15 +745,20 @@ public class MessageStore implements Closeable {
             if (!c.moveToFirst())
                 return result.values();
             do {
-                String sender = c.getString(0);
-                String member = c.getString(1);
-                long status = c.getLong(2);
-                long flags = c.getLong(3);
+                long receivedTimeStamp = c.getLong(1);
+                long ackedTimestamp = c.getLong(2);
+                String sender = c.getString(3);
+                String member = c.getString(4);
+                long status = c.getLong(5);
+                long flags = c.getLong(6);
+                long timestamp = c.getLong(7);
                 if (sender.equals(member) || (flags & MessagingPlugin.FLAG_LOCKED) == MessagingPlugin.FLAG_LOCKED)
                     status = MessagingPlugin.STATUS_ACKED;
                 MemberStatusTO mst = result.get(member);
                 if (mst == null) {
                     mst = new MemberStatusTO();
+                    mst.acked_timestamp = ackedTimestamp;
+                    mst.received_timestamp = receivedTimeStamp;
                     mst.member = member;
                     mst.status = status;
                     result.put(member, mst);

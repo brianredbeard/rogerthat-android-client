@@ -78,6 +78,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -115,13 +116,12 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
     private Set<String> mRenderedMessages;
 
     private SendMessageView mSendMessageView;
+    private Map<String, MemberStatusTO> memberStatusTOMap;
 
     private int _1_DP_IN_PX;
-    private int _3_DP_IN_PX;
     private int _4_DP_IN_PX;
     private int _20_DP_IN_PX;
     private int _42_DP_IN_PX;
-    private int _48_DP_IN_PX;
 
     public static Intent createIntent(Context context, String threadKey, long messageFlags, String memberFilter) {
         Intent intent = new Intent(context, FriendsThreadActivity.class);
@@ -139,11 +139,9 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         setNavigationBarBurgerVisible(false, true);
 
         _1_DP_IN_PX = UIUtils.convertDipToPixels(this, 1);
-        _3_DP_IN_PX = UIUtils.convertDipToPixels(this, 3);
         _4_DP_IN_PX = UIUtils.convertDipToPixels(this, 4);
         _20_DP_IN_PX = UIUtils.convertDipToPixels(this, 20);
         _42_DP_IN_PX = UIUtils.convertDipToPixels(this, 42);
-        _48_DP_IN_PX = UIUtils.convertDipToPixels(this, 48);
 
         mRenderedMessages = new HashSet<String>();
         final Intent intent = getIntent();
@@ -449,11 +447,13 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         private void setMemberStatuses(Message message, Context context, View view) {
             LinearLayout container = (LinearLayout) view.findViewById(R.id.read_friends_container);
             final boolean isChat = SystemUtils.isFlagEnabled(message.flags, MessagingPlugin.FLAG_DYNAMIC_CHAT);
-            boolean isOwnMessage = message.sender.equals(mMyEmail);
             boolean shouldShowStatuses = false;
             for (MemberStatusTO memberStatus : message.members) {
-                // TODO: we should only show this on the last acked message for every user
-                if (!isOwnMessage && SystemUtils.isFlagEnabled(memberStatus.status, MessagingPlugin.STATUS_ACKED)) {
+                boolean isOwnMessage = memberStatus.member.equals(mMyEmail);
+                boolean isAcked = SystemUtils.isFlagEnabled(memberStatus.status, MessagingPlugin.STATUS_ACKED);
+                MemberStatusTO lastMemberStatus = memberStatusTOMap.get(memberStatus.member);
+                boolean isSameTimeStamp = lastMemberStatus != null && lastMemberStatus.acked_timestamp == memberStatus.acked_timestamp;
+                if (isSameTimeStamp && !isOwnMessage && isAcked) {
                     ImageView avatar = getMemberAvatar(memberStatus, isChat, false, _20_DP_IN_PX);
                     shouldShowStatuses = true;
                     container.addView(avatar);
@@ -854,15 +854,6 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             lv.setSelection(position);
     }
 
-    private void setAvatarBackground(ImageView avatar, MemberStatusTO memberStatus) {
-        if ((memberStatus.status & MessagingPlugin.STATUS_ACKED) == MessagingPlugin.STATUS_ACKED)
-            avatar.setBackgroundResource(R.drawable.avatar_background_acknowledged);
-        else if ((memberStatus.status & MessagingPlugin.STATUS_RECEIVED) == MessagingPlugin.STATUS_RECEIVED)
-            avatar.setBackgroundResource(R.drawable.avatar_background_received);
-        else
-            avatar.setBackgroundResource(R.drawable.avatar_background_not_received);
-    }
-
     private void configureAvatarOnClickListener(final String friendEmail, final ImageView avatar, final boolean isChat) {
         avatar.setOnClickListener(new SafeViewOnClickListener() {
             @Override
@@ -910,27 +901,15 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         List<String> members = new ArrayList<>();
 
         Collection<MemberStatusTO> leastMemberStatusses = mMessageStore.getLeastMemberStatusses(mParentMessageKey);
-        MemberStatusTO senderStatus = null;
-        for (final MemberStatusTO ms : leastMemberStatusses) {
-            if (!ms.member.equals(mMyEmail)) {
-                members.add(ms.member);
+        memberStatusTOMap = new HashMap<>();
+        memberStatusTOMap.clear();
+        for (final MemberStatusTO memberStatus : leastMemberStatusses) {
+            if (!memberStatusTOMap.containsKey(memberStatus.member)) {
+                memberStatusTOMap.put(memberStatus.member, memberStatus);
             }
-
-            if (ms.member.equals(parentMessage.sender)) {
-                senderStatus = ms;
-            } else {
-                ImageView avatar = new ImageView(this);
-                avatar.setImageBitmap(mFriendsPlugin.getAvatarBitmap(ms.member, true));
-                avatar.setPadding(_3_DP_IN_PX, _3_DP_IN_PX, _3_DP_IN_PX, _3_DP_IN_PX);
-                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(_48_DP_IN_PX, _48_DP_IN_PX);
-                layoutParams.setMargins(0, 0, _3_DP_IN_PX, 0);
-                avatar.setLayoutParams(layoutParams);
-                setAvatarBackground(avatar, ms);
-                configureAvatarOnClickListener(ms.member, avatar, isChat);
+            if (!memberStatus.member.equals(mMyEmail)) {
+                members.add(memberStatus.member);
             }
-        }
-        if (senderStatus == null) {
-            L.bug("Sender status could not be determined!");
         }
 
         if (members.size() > 1) {

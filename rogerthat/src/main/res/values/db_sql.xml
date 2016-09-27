@@ -296,15 +296,35 @@ GROUP BY m1.day ORDER BY m1.day DESC
     <string name="sql_message_get_alert_flags_of_open_messages">SELECT alert_flags FROM message WHERE needs_my_answer = 1 AND timestamp > ? AND existence = 1</string>
     <string name="sql_message_update_form">UPDATE message SET form = ? WHERE \"key\" = ?</string>
     <string name="sql_message_get_least_member_statusses">
-SELECT m.sender as "sender", ms.member as "member", ms.status as "status", m.flags as "flags"
+SELECT
+  ms.message,
+  ms.received_timestamp,
+  ms.acked_timestamp,
+  subquery.sender AS sender,
+  ms.member       AS member,
+  ms.status       AS status,
+  subquery.flags  AS flags,
+  subquery.timestamp
 FROM member_status ms INNER JOIN (
-    SELECT m1.\"key\" as "thread_key", m1.sender as "sender", m1.flags as "flags"
-    FROM message m1
-    WHERE m1.\"key\" = ?
-    UNION
-    SELECT m2.\"key\" as "thread_key", m2.sender as "sender", m2.flags as "flags"
-    FROM message m2
-    WHERE m2.parent_key = ?) m ON ms.message = m.thread_key</string>
+                                   SELECT
+                                     msg1.key    AS thread_key,
+                                     msg1.sender AS sender,
+                                     msg1.flags  AS flags,
+                                     msg1.timestamp
+                                   FROM message AS msg1
+                                   WHERE msg1.key = ?
+                                   UNION
+                                   SELECT
+                                     parentMsg.key    AS thread_key,
+                                     parentMsg.sender AS sender,
+                                     parentMsg.flags  AS flags,
+                                     parentMsg.timestamp
+                                   FROM message AS parentMsg
+                                   WHERE parentMsg.parent_key = ?) AS subquery
+    ON ms.message = subquery.thread_key
+WHERE ms.status > 1
+ORDER BY ms.acked_timestamp DESC
+</string>
     <string name="sql_message_update_thread_existence">UPDATE message SET existence = ? WHERE \"key\" = ? OR parent_key = ?</string>
     <string name="sql_message_get_existence">SELECT existence FROM message WHERE \"key\" = ?</string>
     <string name="sql_message_update_thread_show_in_list">UPDATE message SET thread_show_in_list = ? WHERE \"key\" = ? OR parent_key = ?</string>
@@ -469,4 +489,5 @@ ORDER BY m.thread_dirty DESC, m.\"timestamp\" DESC;
     <string name="sql_configprovider_insert">INSERT OR REPLACE INTO ConfigurationProvider(category, valuetype, key, value) values (?, ?, ?, ?)</string>
     <string name="sql_configprovider_get">SELECT value FROM ConfigurationProvider WHERE category=? AND valuetype=? AND key=?</string>
     <string name="sql_configprovider_delete">DELETE FROM ConfigurationProvider WHERE category=? AND valuetype=? AND key=?</string>
+    <string name="sql_get_last_read_messsages">SELECT</string>
 </resources>
