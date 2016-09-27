@@ -770,6 +770,9 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
                     return false;
                 }
             } else {
+                if (!mMyEmail.equals(message.sender))
+                    return false;
+
                 if (message.recipients_status == MessageMemberStatusSummaryEncoding.ERROR) {
                     int errorColor = resources.getColor(R.color.mc_error);
                     statusView.setImageDrawable(new IconicsDrawable(context, FontAwesome.Icon.faw_exclamation).color(errorColor).sizeDp(15));
@@ -780,12 +783,10 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
                 } else if (message.numAcked() != 0) {
                     int rogerthatColor = resources.getColor(R.color.mc_green);
                     statusView.setImageDrawable(new IconicsDrawable(context, FontAwesome.Icon.faw_check).color(rogerthatColor).sizeDp(15));
-                } else if (message.numRecipients() == message.numReceived()) {
-                    // Received by everyone
-                    int greyColor = resources.getColor(R.color.mc_gray_11);
-                    statusView.setImageDrawable(new IconicsDrawable(context, FontAwesome.Icon.faw_check).color(greyColor).sizeDp(15));
+                } else if (message.numReceived() != 0) {
+                    int blueColor = resources.getColor(R.color.mc_timestamp_blue);
+                    statusView.setImageDrawable(new IconicsDrawable(context, FontAwesome.Icon.faw_check).color(blueColor).sizeDp(15));
                 } else {
-                    // message is on server
                     int greyColor = resources.getColor(R.color.mc_gray_11);
                     statusView.setImageDrawable(new IconicsDrawable(context, FontAwesome.Icon.faw_paper_plane).color(greyColor).sizeDp(15));
                 }

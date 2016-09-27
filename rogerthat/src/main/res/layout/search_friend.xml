@@ -55,7 +55,6 @@
         android:id="@+id/friend_existence_layout"
         android:layout_width="wrap_content"
         android:layout_height="40dp"
-        android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_marginLeft="16dp"
         android:layout_marginTop="16dp"
