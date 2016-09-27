@@ -33,8 +33,8 @@ import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.Friend;
-import com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity;
 import com.mobicage.rogerthat.plugins.friends.ServiceSearchActivity;
+import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.Security;
 import com.mobicage.rogerthat.util.system.T;
 
@@ -125,10 +125,8 @@ public class ServiceActionsOfflineActivity extends FriendsActivity {
     protected void onListItemClick(ListView listView, final View listItem, int position, long id) {
         T.UI();
         Friend friend = (Friend) listItem.getTag();
-        Intent intent = new Intent(this, ServiceActionMenuActivity.class);
-        intent.putExtra(ServiceActionMenuActivity.SERVICE_EMAIL, friend.email);
-        intent.putExtra(ServiceActionMenuActivity.MENU_PAGE, 0);
-        startActivity(intent);
+        String hashedTag = Security.sha256Lower(mAction);
+        ActivityUtils.goToActivityBehindTag(ServiceActionsOfflineActivity.this, friend.email, hashedTag);
     }
 
     @Override

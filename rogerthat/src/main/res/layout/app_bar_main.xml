@@ -3,11 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/mc_yellow"
+    android:background="@color/mc_background_color"
     android:fitsSystemWindows="true"
     tools:context="com.mobicage.rogerthat.MainActivity">
-
-    <!-- todo ruben remove background color -->
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -17,6 +15,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
+            android:foreground="?attr/selectableItemBackground"
             android:background="@color/mc_background_color" />
 
     </android.support.design.widget.AppBarLayout>

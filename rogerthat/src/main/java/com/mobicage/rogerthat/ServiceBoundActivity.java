@@ -401,6 +401,13 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
+        mToolbar.setOnClickListener(new SafeViewOnClickListener() {
+            @Override
+            public void safeOnClick(View v) {
+                onToolbarClicked();
+            }
+        });
+
         LinearLayout item = (LinearLayout) findViewById(R.id.linear_layout);
         View child = getLayoutInflater().inflate(layoutResID, null);
 
@@ -676,6 +683,10 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         } else {
             super.onBackPressed();
         }
+    }
+
+    public void onToolbarClicked() {
+        // override this method if you want to subscribe to this click
     }
 
     public void onOptionNavigationViewToolbarSelected(View v) {

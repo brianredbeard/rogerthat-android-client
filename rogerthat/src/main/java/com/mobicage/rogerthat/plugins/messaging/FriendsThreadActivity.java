@@ -318,14 +318,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         T.UI();
         switch (item.getItemId()) {
             case R.id.members:
-                Intent intent = new Intent(this, MembersActivity.class);
-                String[] members = new String[mParentMessage.members.length];
-                for (int i = 0; i < mParentMessage.members.length; i++) {
-                    members[i] = mParentMessage.members[i].member;
-                }
-                intent.putExtra(MembersActivity.ME, mMyEmail);
-                intent.putExtra(MembersActivity.MEMBERS, members);
-                startActivity(intent);
+                onToolbarClicked();
                 return true;
             case R.id.help:
                 new AlertDialog.Builder(FriendsThreadActivity.this).setTitle(R.string.help)
@@ -341,6 +334,21 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public void onToolbarClicked() {
+        if (SystemUtils.isFlagEnabled(mFlags, MessagingPlugin.FLAG_DYNAMIC_CHAT))
+            return;
+
+        Intent intent = new Intent(this, MembersActivity.class);
+        String[] members = new String[mParentMessage.members.length];
+        for (int i = 0; i < mParentMessage.members.length; i++) {
+            members[i] = mParentMessage.members[i].member;
+        }
+        intent.putExtra(MembersActivity.ME, mMyEmail);
+        intent.putExtra(MembersActivity.MEMBERS, members);
+        startActivity(intent);
     }
 
     private final BroadcastReceiver mReceiver = new SafeBroadcastReceiver() {

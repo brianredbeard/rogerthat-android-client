@@ -57,6 +57,7 @@ import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.ServiceDetailActivity;
+import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.Security;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
@@ -234,9 +235,15 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
                 int existence = (Integer) tag.get("existence");
                 FindServiceItemTO item = (FindServiceItemTO) tag.get("item");
                 if (existence == Friend.ACTIVE) {
-                    Intent intent = new Intent(ServiceSearchActivity.this, ServiceActionMenuActivity.class);
-                    intent.putExtra(ServiceActionMenuActivity.SERVICE_EMAIL, item.email);
-                    startActivity(intent);
+                    if (mAction != null) {
+                        String hashedTag = Security.sha256Lower(mAction);
+                        ActivityUtils.goToActivityBehindTag(ServiceSearchActivity.this, item.email, hashedTag);
+                    } else {
+                        Intent intent = new Intent(ServiceSearchActivity.this, ServiceActionMenuActivity.class);
+                        intent.putExtra(ServiceActionMenuActivity.SERVICE_EMAIL, item.email);
+                        startActivity(intent);
+                    }
+
                 } else {
                     Intent intent = new Intent(ServiceSearchActivity.this, ServiceDetailActivity.class);
                     if (existence == Friend.DELETED || existence == Friend.DELETION_PENDING) {

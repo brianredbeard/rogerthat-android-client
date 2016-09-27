@@ -18,11 +18,6 @@
 
 package com.mobicage.rogerthat;
 
-import java.util.Map;
-
-import org.jivesoftware.smack.util.Base64;
-import org.json.simple.JSONValue;
-
 import android.content.Intent;
 import android.graphics.Color;
 import android.view.Menu;
@@ -40,6 +35,11 @@ import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.to.friends.GetUserInfoResponseTO;
 import com.mobicage.to.service.FindServiceItemTO;
+
+import org.jivesoftware.smack.util.Base64;
+import org.json.simple.JSONValue;
+
+import java.util.Map;
 
 public class ServiceDetailActivity extends FriendDetailActivity {
 
@@ -75,6 +75,9 @@ public class ServiceDetailActivity extends FriendDetailActivity {
         if (mExistence == Friend.NOT_FOUND)
             return -1;
 
+        if (mFriend == null)
+            return -1;
+
         if (SystemUtils.isFlagEnabled(mFriend.flags, FriendsPlugin.FRIEND_NOT_REMOVABLE))
             return -1;
 
@@ -86,6 +89,9 @@ public class ServiceDetailActivity extends FriendDetailActivity {
         T.UI();
         boolean result = super.onCreateOptionsMenu(menu);
         if (mExistence == Friend.NOT_FOUND)
+            return result;
+
+        if (mFriend == null)
             return result;
 
         if (SystemUtils.isFlagEnabled(mFriend.flags, FriendsPlugin.FRIEND_NOT_REMOVABLE))
