@@ -177,6 +177,7 @@ public class UIUtils {
         T.dontCare();
         final NotificationManager nm = (NotificationManager) pContext.getSystemService(Context.NOTIFICATION_SERVICE);
         nm.cancel(pNotificationId);
+        ShortcutBadger.removeCount(pContext);
     }
 
     public static void cancelAllNotifications(final Context pContext) {
