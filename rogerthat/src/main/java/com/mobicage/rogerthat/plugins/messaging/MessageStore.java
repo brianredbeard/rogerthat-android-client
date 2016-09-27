@@ -374,6 +374,7 @@ public class MessageStore implements Closeable {
         TransactionHelper.runInTransaction(mDb, "storeNewMessage", new TransactionWithoutResult() {
             @Override
             protected void run() {
+                L.d("Storing new message with key " + message.key + " and parent key " + message.parent_key);
                 final boolean fetchThreadAvatar;
 
                 long sortid;
@@ -483,14 +484,20 @@ public class MessageStore implements Closeable {
                 for (MemberStatusTO memberStatus : message.members) {
                     mAddMemberStatusBIZZ.bindString(1, message.key);
                     mAddMemberStatusBIZZ.bindString(2, memberStatus.member);
+                    long ackedTimeStamp = memberStatus.acked_timestamp;
                     if (me.equals(memberStatus.member)) {
                         mAddMemberStatusBIZZ.bindLong(3, mMainService.currentTimeMillis() / 1000);
                         mAddMemberStatusBIZZ.bindLong(6, memberStatus.status | MessagingPlugin.STATUS_RECEIVED);
                     } else {
                         mAddMemberStatusBIZZ.bindLong(3, memberStatus.received_timestamp);
-                        mAddMemberStatusBIZZ.bindLong(6, memberStatus.status);
+                        long status = memberStatus.status;
+                        if (message.sender.equals(memberStatus.member)) {
+                            status |= MessagingPlugin.STATUS_ACKED | MessagingPlugin.STATUS_READ | MessagingPlugin.STATUS_RECEIVED;
+                            ackedTimeStamp = message.timestamp;
+                        }
+                        mAddMemberStatusBIZZ.bindLong(6, status);
                     }
-                    mAddMemberStatusBIZZ.bindLong(4, memberStatus.acked_timestamp);
+                    mAddMemberStatusBIZZ.bindLong(4, ackedTimeStamp);
                     if (memberStatus.button_id != null)
                         mAddMemberStatusBIZZ.bindString(5, memberStatus.button_id);
                     else
@@ -736,15 +743,16 @@ public class MessageStore implements Closeable {
         return senderIsMobileOwner;
     }
 
-    public Collection<MemberStatusTO> getLeastMemberStatusses(String parentMessageKey) {
+    public Collection<MessageMemberStatus> getLeastMemberStatusses(String parentMessageKey) {
         T.UI();
-        Map<String, MemberStatusTO> result = new HashMap<String, MemberStatusTO>();
+        Map<String, MessageMemberStatus> result = new HashMap<String, MessageMemberStatus>();
         final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_message_get_least_member_statusses),
             new String[] { parentMessageKey, parentMessageKey });
         try {
             if (!c.moveToFirst())
                 return result.values();
             do {
+                String messageKey = c.getString(0);
                 long receivedTimeStamp = c.getLong(1);
                 long ackedTimestamp = c.getLong(2);
                 String sender = c.getString(3);
@@ -753,14 +761,15 @@ public class MessageStore implements Closeable {
                 long flags = c.getLong(6);
                 long timestamp = c.getLong(7);
                 if (sender.equals(member) || (flags & MessagingPlugin.FLAG_LOCKED) == MessagingPlugin.FLAG_LOCKED)
-                    status = MessagingPlugin.STATUS_ACKED;
-                MemberStatusTO mst = result.get(member);
+                    status |= MessagingPlugin.STATUS_ACKED;
+                MessageMemberStatus mst = result.get(member);
                 if (mst == null) {
-                    mst = new MemberStatusTO();
+                    mst = new MessageMemberStatus();
                     mst.acked_timestamp = ackedTimestamp;
                     mst.received_timestamp = receivedTimeStamp;
                     mst.member = member;
                     mst.status = status;
+                    mst.messageKey = messageKey;
                     result.put(member, mst);
                 } else {
                     if (status < mst.status)

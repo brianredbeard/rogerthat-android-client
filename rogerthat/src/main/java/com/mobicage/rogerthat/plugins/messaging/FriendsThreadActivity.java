@@ -116,7 +116,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
     private Set<String> mRenderedMessages;
 
     private SendMessageView mSendMessageView;
-    private Map<String, MemberStatusTO> memberStatusTOMap;
+    private Map<String, MessageMemberStatus> memberStatusTOMap;
 
     private int _1_DP_IN_PX;
     private int _4_DP_IN_PX;
@@ -449,11 +449,11 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             final boolean isChat = SystemUtils.isFlagEnabled(message.flags, MessagingPlugin.FLAG_DYNAMIC_CHAT);
             boolean shouldShowStatuses = false;
             for (MemberStatusTO memberStatus : message.members) {
-                boolean isOwnMessage = memberStatus.member.equals(mMyEmail);
+                boolean isOwnStatus = memberStatus.member.equals(mMyEmail);
                 boolean isAcked = SystemUtils.isFlagEnabled(memberStatus.status, MessagingPlugin.STATUS_ACKED);
-                MemberStatusTO lastMemberStatus = memberStatusTOMap.get(memberStatus.member);
-                boolean isSameTimeStamp = lastMemberStatus != null && lastMemberStatus.acked_timestamp == memberStatus.acked_timestamp;
-                if (isSameTimeStamp && !isOwnMessage && isAcked) {
+                MessageMemberStatus lastMemberStatus = memberStatusTOMap.get(memberStatus.member);
+                boolean isSameTimeStamp = lastMemberStatus != null && message.key.equals(lastMemberStatus.messageKey);
+                if (isSameTimeStamp && !isOwnStatus && isAcked) {
                     ImageView avatar = getMemberAvatar(memberStatus, isChat, false, _20_DP_IN_PX);
                     shouldShowStatuses = true;
                     container.addView(avatar);
@@ -900,13 +900,16 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         }
         List<String> members = new ArrayList<>();
 
-        Collection<MemberStatusTO> leastMemberStatusses = mMessageStore.getLeastMemberStatusses(mParentMessageKey);
+        Collection<MessageMemberStatus> leastMemberStatusses = mMessageStore.getLeastMemberStatusses(mParentMessageKey);
         memberStatusTOMap = new HashMap<>();
         memberStatusTOMap.clear();
-        for (final MemberStatusTO memberStatus : leastMemberStatusses) {
+        for (final MessageMemberStatus memberStatus : leastMemberStatusses) {
             if (!memberStatusTOMap.containsKey(memberStatus.member)) {
                 memberStatusTOMap.put(memberStatus.member, memberStatus);
             }
+        }
+
+        for (MemberStatusTO memberStatus : parentMessage.members) {
             if (!memberStatus.member.equals(mMyEmail)) {
                 members.add(memberStatus.member);
             }
