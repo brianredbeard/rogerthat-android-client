@@ -457,7 +457,7 @@ public class MainActivity extends ServiceBoundActivity {
 
                 boolean hasMenuIconsToDownload = false;
                 for (ServiceMenuItemTO item : friend.actionMenu.items) {
-                    if (item.iconHash != null && !friendsPlugin.isMenuIconAvailable(item.iconHash)) {
+                    if (item.iconHash != null && !friendsPlugin.isMenuIconAvailable(item.iconHash) && !UIUtils.isSupportedFontawesomeIcon(item.iconName)) {
                         hasMenuIconsToDownload = true;
                         break;
                     }

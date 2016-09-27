@@ -44,6 +44,7 @@ import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
+import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.to.friends.FriendCategoryTO;
 import com.mobicage.to.friends.FriendTO;
 import com.mobicage.to.friends.GetAvatarRequestTO;
@@ -949,13 +950,17 @@ public class FriendStore implements Closeable {
         int i = 0;
         smi.coords = new long[]{curs.getInt(i++), curs.getInt(i++), page == null ? curs.getInt(i++) : page};
         smi.label = curs.getString(i++);
-        smi.icon = curs.getBlob(i++);
+        int blobIndex = i++;
         smi.screenBranding = curs.getString(i++);
         smi.staticFlowHash = curs.getString(i++);
         smi.hashedTag = curs.getString(i++);
         smi.requiresWifi = curs.getLong(i++) == 1;
         smi.runInBackground = curs.getLong(i++) == 1;
         smi.action = curs.getLong(i++);
+        smi.iconName = curs.getString(i++);
+        if (!UIUtils.isSupportedFontawesomeIcon(smi.iconName)) {
+            smi.icon = curs.getBlob(blobIndex);
+        }
         return smi;
     }
 
@@ -1115,24 +1120,16 @@ public class FriendStore implements Closeable {
             mInsertServiceMenuHTTP.bindLong(4, item.coords[2]);
             mInsertServiceMenuHTTP.bindString(5, item.label);
             mInsertServiceMenuHTTP.bindString(6, item.iconHash);
-            if (item.screenBranding == null)
-                mInsertServiceMenuHTTP.bindNull(7);
-            else
-                mInsertServiceMenuHTTP.bindString(7, item.screenBranding);
-            if (item.staticFlowHash == null)
-                mInsertServiceMenuHTTP.bindNull(8);
-            else
-                mInsertServiceMenuHTTP.bindString(8, item.staticFlowHash);
-            if (item.hashedTag == null)
-                mInsertServiceMenuHTTP.bindNull(9);
-            else
-                mInsertServiceMenuHTTP.bindString(9, item.hashedTag);
+            bindString(mInsertServiceMenuHTTP, 7, item.screenBranding);
+            bindString(mInsertServiceMenuHTTP, 8, item.staticFlowHash);
+            bindString(mInsertServiceMenuHTTP, 9, item.hashedTag);
             mInsertServiceMenuHTTP.bindLong(10, item.requiresWifi ? 1 : 0);
             mInsertServiceMenuHTTP.bindLong(11, item.runInBackground ? 1 : 0);
             mInsertServiceMenuHTTP.bindLong(12, item.action);
+            bindString(mInsertServiceMenuHTTP, 13, item.iconName);
             mInsertServiceMenuHTTP.execute();
 
-            if (!isMenuIconAvailable(item.iconHash)) {
+            if (!UIUtils.isSupportedFontawesomeIcon(item.iconName) && !isMenuIconAvailable(item.iconHash)) {
                 // Download menu icon
                 GetMenuIconRequestTO request = new GetMenuIconRequestTO();
                 request.service = friend.email;

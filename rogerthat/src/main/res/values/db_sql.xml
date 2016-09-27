@@ -62,8 +62,8 @@
     <string name="sql_friend_menu_icon_usage">SELECT smi.icon_hash, count(smii.icon_hash) FROM service_menu_icon smi LEFT OUTER JOIN service_menu_item smii ON smi.icon_hash = smii.icon_hash GROUP BY smi.icon_hash </string>
     <string name="sql_friend_get_menu">
         SELECT x, y, label, icon, screen_branding, static_flow_hash, hashed_tag, requires_wifi, run_in_background,
-        \"action\", icon_name FROM service_menu_icon smi
-        LET OUTER JOIN service_menu_item smii ON smi.icon_hash = smii.icon_hash
+        \"action\", icon_name
+        FROM service_menu_item smii LEFT OUTER JOIN service_menu_icon smi ON smi.icon_hash = smii.icon_hash
         WHERE friend = ? AND z = ?
     </string>
     <string name="sql_friend_delete_menu_icon">DELETE FROM service_menu_icon WHERE icon_hash = ?</string>

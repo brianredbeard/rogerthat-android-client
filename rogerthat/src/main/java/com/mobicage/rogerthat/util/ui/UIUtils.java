@@ -35,6 +35,7 @@ import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Point;
+import android.graphics.drawable.GradientDrawable;
 import android.media.ThumbnailUtils;
 import android.os.Bundle;
 import android.provider.MediaStore.Video.Thumbnails;
@@ -48,11 +49,14 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
@@ -450,4 +454,30 @@ public class UIUtils {
         showAlertDialog(context, null, R.string.error_please_try_again);
     }
 
+    public static boolean isSupportedFontawesomeIcon(String iconName) {
+        return iconName != null && getIcon(iconName) != null;
+    }
+
+    public static FontAwesome.Icon getIcon(String iconName) {
+        iconName = iconName.replace("fa-", "faw_").replace("-", "_");
+        try {
+            return FontAwesome.Icon.valueOf(iconName);
+        } catch (IllegalArgumentException exception) {
+            L.d("Unknown icon" + iconName);
+            return null;
+        }
+    }
+
+    public static IconicsDrawable getIconFromString(Context context, String iconName) {
+        FontAwesome.Icon icon = getIcon(iconName);
+        if (icon == null) {
+            icon = FontAwesome.Icon.faw_question;
+        }
+        return new IconicsDrawable(context, icon);
+    }
+
+    public static void setIconBackground(ImageView imageView, int backgroundColor) {
+        GradientDrawable background = (GradientDrawable) imageView.getBackground();
+        background.setColor(backgroundColor);
+    }
 }
