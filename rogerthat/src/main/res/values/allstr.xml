@@ -508,4 +508,11 @@
     <string name="news">News</string>
     <string name="news_members">%1$s Rogered this message.</string>
     <string name="news_members_and_x_others">%1$s and %2$s others Rogered this message.</string>
+    <string name="add_this_to_your_saved_items">Add this to your saved items</string>
+    <string name="hide">Hide</string>
+    <string name="see_fewer_posts_like_this">See fewer posts like this</string>
+    <string name="saved_items">Saved items</string>
+    <string name="all_items">All items</string>
+    <string name="unsave">Unsave</string>
+    <string name="remove_this_from_your_saved_items">Remove this from your saved items</string>
 </resources>

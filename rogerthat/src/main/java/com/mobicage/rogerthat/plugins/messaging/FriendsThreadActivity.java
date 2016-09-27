@@ -770,8 +770,8 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             } else {
                 senderAvatar.setOnLongClickListener(null);
                 senderAvatar.setTag(false);
-                configureAvatarOnClickListener(message.sender, senderAvatar, isChat);
             }
+            configureAvatarOnClickListener(message.sender, senderAvatar, isChat);
         }
 
         private String setMessageInfo(Context context, View view, boolean isSender, MessageTO message, boolean isChat) {

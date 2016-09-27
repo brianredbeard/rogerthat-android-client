@@ -257,11 +257,11 @@
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:padding="5dp"
-            android:background="@drawable/news_pin_background_normal"
+            android:background="@drawable/news_action_background"
             android:layout_gravity="top|right"
             app:ico_color="@color/mc_white"
-            app:ico_icon="@string/faw_thumb_tack"
-            app:ico_size="15dp"/>
+            app:ico_icon="@string/faw_angle_down"
+            app:ico_size="12dp" />
 
     </FrameLayout>
 </LinearLayout>
