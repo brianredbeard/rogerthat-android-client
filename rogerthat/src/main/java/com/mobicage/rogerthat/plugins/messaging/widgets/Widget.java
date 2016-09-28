@@ -18,9 +18,6 @@
 
 package com.mobicage.rogerthat.plugins.messaging.widgets;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import android.content.Context;
 import android.content.Intent;
 import android.util.AttributeSet;
@@ -34,6 +31,9 @@ import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.plugins.messaging.ServiceMessageDetailActivity;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rpc.IJSONable;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class Widget extends LinearLayout {
 
