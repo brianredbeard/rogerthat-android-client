@@ -515,4 +515,7 @@
     <string name="all_items">All items</string>
     <string name="unsave">Unsave</string>
     <string name="remove_this_from_your_saved_items">Remove this from your saved items</string>
+    <string name="reach">Reach:</string>
+    <string name="read_more">Read more…</string>
+    <string name="read_less">Read less…</string>
 </resources>

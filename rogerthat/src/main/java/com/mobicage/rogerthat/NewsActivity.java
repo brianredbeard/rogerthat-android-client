@@ -98,6 +98,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -128,6 +129,7 @@ public class NewsActivity extends ServiceBoundActivity {
     private List<Long> mPinnedItems = new ArrayList<>();
     private Map<Long, NewsItem> mItems = new HashMap<>();
     private Map<String, Bitmap> mQRCodes = new HashMap<>();
+    private Set<Long> mReadMoreItems = new HashSet<>();
     private Map<String, ArrayList<Resizable16by6ImageView>> mImageViews = new HashMap<>();
 
     private ProgressDialog mProgressDialog;
@@ -172,7 +174,7 @@ public class NewsActivity extends ServiceBoundActivity {
                 String uuid = intent.getStringExtra("uuid");
                 if (mUUID == null || !mUUID.equals(uuid)) {
                     L.i("Ignoring GET_NEWS_RECEIVED_INTENT uuid did not match");
-                    return new String[] { action };
+                    return new String[]{action};
                 }
 
                 long[] ids = intent.getLongArrayExtra("ids");
@@ -188,11 +190,11 @@ public class NewsActivity extends ServiceBoundActivity {
 
                 Set<Long> idsToRequest = new LinkedHashSet<>();
                 Set<Long> updatedIds = new LinkedHashSet<>();
-                for (int i= 0 ; i < ids.length; i++) {
+                for (int i = 0; i < ids.length; i++) {
                     mLiveOrder.add(ids[i]);
                     if (!mDBItems.containsKey(ids[i])) {
                         idsToRequest.add(ids[i]);
-                    } else if (mDBItems.get(ids[i]).version < versions[i]){
+                    } else if (mDBItems.get(ids[i]).version < versions[i]) {
                         idsToRequest.add(ids[i]);
                         updatedIds.add(ids[i]);
                     } else if (mDBItems.get(ids[i]).deleted) {
@@ -207,7 +209,7 @@ public class NewsActivity extends ServiceBoundActivity {
                 if (idsToRequest.size() > 0) {
                     long[] primitiveIdsToRequest = new long[idsToRequest.size()];
                     Long[] tmpArray1 = idsToRequest.toArray(new Long[idsToRequest.size()]);
-                    for (int i =0; i < tmpArray1.length; i++) {
+                    for (int i = 0; i < tmpArray1.length; i++) {
                         primitiveIdsToRequest[i] = tmpArray1[i].longValue();
                     }
 
@@ -224,7 +226,7 @@ public class NewsActivity extends ServiceBoundActivity {
             } else if (NewsPlugin.GET_NEWS_ITEMS_RECEIVED_INTENT.equals(action)) {
                 long[] ids = intent.getLongArrayExtra("ids");
 
-                for (int i= 0 ; i < ids.length; i++) {
+                for (int i = 0; i < ids.length; i++) {
                     NewsItem item = mNewsStore.getNewsItem(ids[i]);
 
                     NewsItemDetails d = new NewsItemDetails();
@@ -305,7 +307,7 @@ public class NewsActivity extends ServiceBoundActivity {
             } else {
                 mListAdapter.notifyDataSetChanged();
             }
-            return new String[] { action };
+            return new String[]{action};
         }
     };
 
@@ -531,7 +533,7 @@ public class NewsActivity extends ServiceBoundActivity {
                     }
                 });
 
-                mNewsPlugin.newsRead(new long[] { newsItem.id });
+                mNewsPlugin.newsRead(new long[]{newsItem.id});
             }
 
             final ImageButton pinned = (ImageButton) view.findViewById(R.id.pinned);
@@ -710,12 +712,47 @@ public class NewsActivity extends ServiceBoundActivity {
                 title.setLayoutParams(lp);
             }
 
-            TextView text = (TextView) view.findViewById(R.id.text);
+            final TextView text = (TextView) view.findViewById(R.id.text);
+            final TextView readmore = (TextView) view.findViewById(R.id.readmore);
             if (TextUtils.isEmptyOrWhitespace(newsItem.message)) {
                 text.setVisibility(View.GONE);
+                readmore.setVisibility(View.GONE);
             } else {
                 text.setVisibility(View.VISIBLE);
                 text.setText(newsItem.message);
+                mService.postOnUIHandler(new SafeRunnable() {
+                    @Override
+                    protected void safeRun() throws Exception {
+                        int lineCount = text.getLineCount();
+                        if (lineCount > 5) {
+                            readmore.setVisibility(View.VISIBLE);
+                            if (mReadMoreItems.contains(newsItem.id)) {
+                                text.setMaxLines(lineCount);
+                                readmore.setText(R.string.read_less);
+                            } else {
+                                text.setMaxLines(5);
+                                readmore.setText(R.string.read_more);
+                            }
+
+                            readmore.setOnClickListener(new SafeViewOnClickListener() {
+                                @Override
+                                public void safeOnClick(View v) {
+                                    if (mReadMoreItems.contains(newsItem.id)) {
+                                        mReadMoreItems.remove(newsItem.id);
+                                    } else {
+                                        mReadMoreItems.add(newsItem.id);
+                                    }
+                                    mListAdapter.notifyDataSetChanged();
+                                    if (!mReadMoreItems.contains(newsItem.id)) {
+                                        mListView.setSelection(position);
+                                    }
+                                }
+                            });
+                        } else {
+                            readmore.setVisibility(View.GONE);
+                        }
+                    }
+                });
             }
             TextView reach = (TextView) view.findViewById(R.id.reach);
             reach.setText(newsItem.reach + "");
@@ -851,7 +888,7 @@ public class NewsActivity extends ServiceBoundActivity {
 
                 actions.addView(btn);
 
-                if ( newsItem.buttons.length > i + 1) {
+                if (newsItem.buttons.length > i + 1) {
                     View spacer = mLayoutInflater.inflate(R.layout.news_list_item_action_spacer, parent, false);
                     actions.addView(spacer);
                 }
