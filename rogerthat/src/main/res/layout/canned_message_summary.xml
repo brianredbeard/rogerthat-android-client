@@ -13,7 +13,7 @@
         android:padding="5dp"
         android:text="@string/send_canned_message_dialog_title"
         android:textSize="20dp"
-        android:textStyle="bold" >
+        fontPath="fonts/lato_bold.ttf" >
     </TextView>
 
     <View style="@style/RogerThatThickDivider" >
@@ -64,7 +64,7 @@
                     android:text="@string/recipients"
                     android:textColor="@android:color/secondary_text_light"
                     android:textSize="20dp"
-                    android:textStyle="bold" >
+                    fontPath="fonts/lato_bold.ttf" >
                 </TextView>
 
                 <HorizontalScrollView

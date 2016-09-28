@@ -114,7 +114,7 @@
         android:layout_below="@id/read_friends_container"
         android:layout_marginTop="5dp"
         android:text="@string/rogerthat"
-        android:textStyle="bold"
+        fontPath="fonts/lato_bold.ttf"
         android:textColor="@color/mc_white"
         android:visibility="gone" />
 

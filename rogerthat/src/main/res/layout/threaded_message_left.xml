@@ -113,7 +113,7 @@
         android:layout_marginTop="5dp"
         android:text="@string/rogerthat"
         android:textColor="@color/mc_white"
-        android:textStyle="bold"
+        fontPath="fonts/lato_bold.ttf"
         android:visibility="gone" />
 
 </RelativeLayout>

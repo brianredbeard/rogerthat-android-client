@@ -62,7 +62,7 @@
             android:gravity="center_horizontal"
             android:text="@string/ibeacon_usage_used_for"
             android:textSize="16sp"
-            android:textStyle="bold"
+            fontPath="fonts/lato_bold.ttf"
             android:textColor="@color/mc_default_text" />
 
         <TextView
@@ -86,7 +86,7 @@
             android:gravity="center_horizontal"
             android:text="@string/ibeacon_usage_not_used_for"
             android:textSize="16sp"
-            android:textStyle="bold"
+            fontPath="fonts/lato_bold.ttf"
             android:textColor="@color/mc_default_text" />
 
         <TextView

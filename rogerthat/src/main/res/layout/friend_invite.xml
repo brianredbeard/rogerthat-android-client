@@ -36,7 +36,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
                 android:textSize="16dp"
-                android:textStyle="bold"
+                fontPath="fonts/lato_bold.ttf"
                 android:textColor="#ffffff">
             </TextView>
 
