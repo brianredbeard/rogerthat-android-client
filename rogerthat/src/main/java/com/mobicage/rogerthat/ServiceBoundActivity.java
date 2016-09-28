@@ -79,6 +79,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+
 public abstract class ServiceBoundActivity extends AppCompatActivity implements Pausable, ServiceBound, MenuItemPressingActivity {
 
     public static final long MAX_TRANSMIT = 10 * 1000;
@@ -141,6 +144,12 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
             }
         });
     }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
+
 
     @Override
     protected void onDestroy() {
@@ -388,7 +397,6 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
 
     public void setContentViewWithoutNavigationBar(int layoutResID) {
         super.setContentView(layoutResID);
-        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
     }
 
     @Override
@@ -546,13 +554,11 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
     @Override
     public void setContentView(View view) {
         super.setContentView(view);
-        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
     }
 
     @Override
     public void setContentView(View view, ViewGroup.LayoutParams params) {
         super.setContentView(view, params);
-        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
     }
 
     public boolean askPermissionIfNeeded(final String permission, final int requestCode, final SafeRunnable onGranted,

@@ -80,6 +80,7 @@ dependencies {
     compile 'com.mikepenz:fontawesome-typeface:4.6.0.3@aar'
     compile 'me.leolin:ShortcutBadger:1.1.9@aar'
     compile 'org.florescu.android.rangeseekbar:rangeseekbar-library:0.3.0'
+    compile 'uk.co.chrisjenx:calligraphy:2.2.0'
     androidTestCompile ('com.android.support.test:runner:0.5')
     androidTestCompile ('com.android.support.test:rules:0.5')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {

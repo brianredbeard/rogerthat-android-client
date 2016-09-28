@@ -58,6 +58,8 @@ import com.mobicage.rogerthat.util.ui.Pausable;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.AppConstants;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+
 public abstract class ServiceBoundFragmentActivity extends FragmentActivity implements Pausable, ServiceBound {
 
     public static final long MAX_TRANSMIT = 10 * 1000;
@@ -107,6 +109,11 @@ public abstract class ServiceBoundFragmentActivity extends FragmentActivity impl
                 completeTransmit(null);
             }
         });
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
     @Override
@@ -314,12 +321,10 @@ public abstract class ServiceBoundFragmentActivity extends FragmentActivity impl
     @Override
     public void setContentView(View view) {
         super.setContentView(view);
-        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
     }
 
     @Override
     public void setContentView(View view, ViewGroup.LayoutParams params) {
         super.setContentView(view, params);
-        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
     }
 }
