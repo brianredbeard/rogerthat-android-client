@@ -81,7 +81,7 @@
                     android:layout_weight="1"
                     tools:text="Use this coupon to get a free drink."
                     android:textSize="20sp"
-                    android:textStyle="bold" />
+                    fontPath="fonts/lato_bold.ttf" />
 
             </LinearLayout>
 
@@ -116,7 +116,7 @@
                             android:textColor="@color/mc_primary_color"
                             tools:text="Scan uw mobiele klantenkaart en maak kans op een diner voor 2 personen!"
                             android:textSize="16sp"
-                            android:textStyle="bold"/>
+                            fontPath="fonts/lato_bold.ttf"/>
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -193,7 +193,8 @@
                     android:layout_marginLeft="2dp"
                     tools:text="549"
                     android:textSize="10sp"
-                    android:textStyle="bold"/>
+                    fontPath="fonts/lato_bold.ttf"
+                    tools:ignore="MissingPrefix" />
 
                 <TextView
                     android:id="@+id/label"

@@ -13,7 +13,7 @@
         android:padding="5dp"
         android:textColor="@android:color/white"
         android:textSize="20sp"
-        android:textStyle="bold" >
+        fontPath="fonts/lato_bold.ttf" >
     </TextView>
 
     <View style="@style/RogerThatThickDivider" >
