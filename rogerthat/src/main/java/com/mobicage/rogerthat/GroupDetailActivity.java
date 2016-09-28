@@ -18,13 +18,6 @@
 
 package com.mobicage.rogerthat;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -40,7 +33,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -64,14 +56,19 @@ import com.mobicage.rogerthat.util.IOUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
-import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
 import com.mobicage.rogerthat.util.ui.SeparatedListAdapter;
 import com.mobicage.rogerthat.util.ui.UIUtils;
-import com.mobicage.rpc.config.AppConstants;
 import com.soundcloud.android.crop.Crop;
 import com.soundcloud.android.crop.CropUtil;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GroupDetailActivity extends ServiceBoundActivity {
 
@@ -557,7 +554,7 @@ public class GroupDetailActivity extends ServiceBoundActivity {
                     boolean selected = mGroup.members.contains(friend.email);
                     setViewColors(view, name, selected);
                 }
-            }, mFriendsPlugin, false, null);
+            }, mFriendsPlugin, false, null, false);
 
         mCursorGroups = mFriendsPlugin.getStore().getGroupMemberListCursor(mGroup.guid);
         startManagingCursor(mCursorGroups);

@@ -128,7 +128,7 @@ public abstract class FriendsActivity extends ServiceBoundCursorListActivity {
         createCursor();
         startManagingCursor(getCursor());
 
-        setListAdapter(new FriendListAdapter(this, getCursor(), mFriendsPlugin.getStore(), null, mFriendsPlugin, true, null));
+        setListAdapter(new FriendListAdapter(this, getCursor(), mFriendsPlugin.getStore(), null, mFriendsPlugin, true, null, false));
     }
 
     protected abstract void createCursor();

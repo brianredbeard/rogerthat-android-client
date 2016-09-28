@@ -112,7 +112,7 @@ public class UserFriendsActivity extends FriendsActivity {
         startManagingCursor(mCursorFriends);
 
         FriendListAdapter fla = new FriendListAdapter(this, mCursorFriends, mFriendsPlugin.getStore(), null,
-            mFriendsPlugin, false, null);
+                mFriendsPlugin, false, null, true);
         setListAdapter(fla);
     }
 
@@ -186,13 +186,17 @@ public class UserFriendsActivity extends FriendsActivity {
         if (tag == null) {
             return;
         } else if (tag instanceof Friend) {
-            if (mLastExpandedActionView != null)
-                mLastExpandedActionView.setVisibility(View.GONE);
+            if (mLastExpandedActionView != null) {
+                mLastExpandedActionView.findViewById(R.id.actions).setVisibility(View.GONE);
+                ImageView friendIndicator = (ImageView) mLastExpandedActionView.findViewById(R.id.friend_indicator);
+                friendIndicator.setImageDrawable(new IconicsDrawable(UserFriendsActivity.this).icon(FontAwesome.Icon.faw_angle_down).color(Color.DKGRAY).sizeDp(12));
+            }
 
-            LinearLayout actions = (LinearLayout) listItem.findViewById(R.id.actions);
-            if (mLastExpandedActionView == actions) {
+            if (mLastExpandedActionView == listItem) {
                 mLastExpandedActionView = null;
             } else {
+                LinearLayout actions = (LinearLayout) listItem.findViewById(R.id.actions);
+
                 if (position >= mFirstVisibleItem + mVisibleItemCount - 2) {
                     // item is the last visible one, scroll up
                     int x = position - mVisibleItemCount + 3;
@@ -201,13 +205,16 @@ public class UserFriendsActivity extends FriendsActivity {
                 }
 
                 actions.setVisibility(View.VISIBLE);
-                mLastExpandedActionView = actions;
+
+                ImageView friendIndicator = (ImageView) listItem.findViewById(R.id.friend_indicator);
+                friendIndicator.setImageDrawable(new IconicsDrawable(UserFriendsActivity.this).icon(FontAwesome.Icon.faw_angle_up).color(getResources().getColor(R.color.mc_primary_icon)).sizeDp(12));
+
+                mLastExpandedActionView = listItem;
 
                 final Friend friend = (Friend) tag;
                 handleLocation(listItem, friend);
                 handleHistory(listItem, friend);
                 handleSend(listItem, friend);
-
                 handleDetails(listItem);
             }
         }

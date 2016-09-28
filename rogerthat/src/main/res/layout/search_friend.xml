@@ -21,10 +21,8 @@
         android:layout_centerVertical="true"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
-        android:layout_toEndOf="@+id/friend_avatar"
         android:layout_toLeftOf="@id/friend_existence_layout"
         android:layout_toRightOf="@id/friend_avatar"
-        android:layout_toStartOf="@+id/friend_existence_layout"
         android:orientation="vertical"
         android:paddingBottom="16dp"
         android:paddingTop="16dp">

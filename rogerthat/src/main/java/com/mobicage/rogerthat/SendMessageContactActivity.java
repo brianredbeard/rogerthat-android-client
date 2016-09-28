@@ -138,7 +138,7 @@ public class SendMessageContactActivity extends ServiceBoundActivity {
 
         mCursorFriends = mFriendsPlugin.getStore().getUserFriendListCursor();
         startManagingCursor(mCursorFriends);
-        FriendListAdapter fla = new FriendListAdapter(this, mCursorFriends, mFriendsPlugin.getStore(), null, mFriendsPlugin, false, null);
+        FriendListAdapter fla = new FriendListAdapter(this, mCursorFriends, mFriendsPlugin.getStore(), null, mFriendsPlugin, false, null, false);
         mListView.setAdapter(fla);
     }
 

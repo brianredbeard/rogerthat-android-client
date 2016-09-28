@@ -89,7 +89,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_toRightOf="@+id/about_email_icon"
-                android:layout_toEndOf="@+id/about_email_icon"
                 tools:text="_info@mobicage.com_"
                 android:textColor="@color/mc_about_blue"
                 android:textSize="13sp" />
@@ -119,7 +118,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_toRightOf="@+id/about_twitter_icon"
-                android:layout_toEndOf="@+id/about_twitter_icon"
                 tools:text="_@rogerthat_"
                 android:textColor="@color/mc_about_blue"
                 android:textSize="13sp" />
@@ -150,7 +148,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_toRightOf="@+id/about_facebook_icon"
-                android:layout_toEndOf="@+id/about_facebook_icon"
                 tools:text="_/rogerthatplatform_"
                 android:textColor="@color/mc_about_blue"
                 android:textSize="13sp" />

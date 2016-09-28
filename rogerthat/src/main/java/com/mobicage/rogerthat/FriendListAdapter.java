@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,6 +33,8 @@ import android.widget.LinearLayout;
 import android.widget.SectionIndexer;
 import android.widget.TextView;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.Contact;
 import com.mobicage.rogerthat.plugins.friends.Friend;
@@ -64,9 +67,10 @@ class FriendListAdapter extends CursorAdapter implements SectionIndexer {
     private final Bitmap mNoAvatar;
     private final boolean mHasHeaderView;
     private final View mHeaderView;
+    private final boolean mShowIndicator;
 
     public FriendListAdapter(Context context, Cursor cursor, FriendStore store, ViewUpdater updater,
-        FriendsPlugin friendsPlugin, boolean hasHeaderView, View headerView) {
+                             FriendsPlugin friendsPlugin, boolean hasHeaderView, View headerView, boolean showIndicator) {
         super(context, cursor, false);
         T.UI();
         mContext = context;
@@ -78,6 +82,7 @@ class FriendListAdapter extends CursorAdapter implements SectionIndexer {
         mNoAvatar = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.unknown_avatar)).getBitmap();
         mHasHeaderView = hasHeaderView;
         mHeaderView = headerView;
+        mShowIndicator = showIndicator;
     }
 
     @Override
@@ -131,6 +136,15 @@ class FriendListAdapter extends CursorAdapter implements SectionIndexer {
         final View spinner = view.findViewById(R.id.friend_spinner);
         spinner.setVisibility(friend.existenceStatus == Friend.INVITE_PENDING ? View.VISIBLE : View.GONE);
         view.findViewById(R.id.friend_existence_layout).setVisibility(spinner.getVisibility());
+
+        View friendIndicatorLayout = view.findViewById(R.id.friend_indicator_layout);
+        if (friendIndicatorLayout != null) {
+            friendIndicatorLayout.setVisibility(mShowIndicator ? View.VISIBLE : View.GONE);
+            if (mShowIndicator) {
+                ImageView friendIndicator = (ImageView) view.findViewById(R.id.friend_indicator);
+                friendIndicator.setImageDrawable(new IconicsDrawable(mContext).icon(FontAwesome.Icon.faw_angle_down).color(Color.DKGRAY).sizeDp(12));
+            }
+        }
 
         final ImageView image = (ImageView) view.findViewById(R.id.friend_avatar);
         final TextView name = (TextView) view.findViewById(R.id.friend_name);
