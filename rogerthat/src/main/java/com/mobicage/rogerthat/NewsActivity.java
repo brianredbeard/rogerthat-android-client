@@ -77,6 +77,7 @@ import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
+import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
@@ -126,6 +127,7 @@ public class NewsActivity extends ServiceBoundActivity {
     private boolean mShowPinnedOnly = false;
     private List<Long> mPinnedItems = new ArrayList<>();
     private Map<Long, NewsItem> mItems = new HashMap<>();
+    private Map<String, Bitmap> mQRCodes = new HashMap<>();
     private Map<String, ArrayList<Resizable16by6ImageView>> mImageViews = new HashMap<>();
 
     private ProgressDialog mProgressDialog;
@@ -136,6 +138,9 @@ public class NewsActivity extends ServiceBoundActivity {
     private boolean mShouldLoadMoreNews = false;
     private String mUUID;
     private String mCursor;
+
+    private int mScrollPositionIndex = -1;
+    private int mScrollPositionTop = -1;
 
 
     @Override
@@ -173,6 +178,7 @@ public class NewsActivity extends ServiceBoundActivity {
                 long[] ids = intent.getLongArrayExtra("ids");
                 long[] versions = intent.getLongArrayExtra("versions");
                 mCursor = intent.getStringExtra("cursor");
+
                 boolean shouldUpdateLayout = false;
 
                 if (mSwipeContainer.isRefreshing()) {
@@ -343,13 +349,27 @@ public class NewsActivity extends ServiceBoundActivity {
         mListView = (ListView) findViewById(R.id.news_list);
         setListAdapter();
 
-        mDBItems = mNewsStore.getNewsItemVersions();
-        for (NewsItemDetails d : mDBItems.values()) {
-            if (d.pinned && !d.deleted) {
-                mPinnedItems.add(d.id);
+        mService.postAtFrontOfBIZZHandler(new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                final Map<Long, NewsItemDetails> dbItems = mNewsStore.getNewsItemVersions();
+                final List<Long> pinnedItems = new ArrayList<>();
+                for (NewsItemDetails d : dbItems.values()) {
+                    if (d.pinned && !d.deleted) {
+                        pinnedItems.add(d.id);
+                    }
+                }
+                mService.postAtFrontOfUIHandler(new SafeRunnable() {
+                    @Override
+                    protected void safeRun() throws Exception {
+                        mDBItems = dbItems;
+                        mPinnedItems = pinnedItems;
+                        invalidateOptionsMenu();
+                    }
+                });
             }
-        }
-        invalidateOptionsMenu();
+        });
+
         requestMoreNews(true);
 
         final IntentFilter filter = new IntentFilter(CachedDownloader.CACHED_DOWNLOAD_AVAILABLE_INTENT);
@@ -455,10 +475,16 @@ public class NewsActivity extends ServiceBoundActivity {
         }
 
         private void togglePinned(final NewsItem newsItem) {
-            boolean isPinned = !newsItem.pinned;
+            final boolean isPinned = !newsItem.pinned;
             newsItem.pinned = isPinned;
             mDBItems.get(newsItem.id).pinned = isPinned;
-            mNewsStore.setNewsItemPinned(newsItem.id, isPinned);
+
+            mService.postAtFrontOfBIZZHandler(new SafeRunnable() {
+                @Override
+                protected void safeRun() throws Exception {
+                    mNewsStore.setNewsItemPinned(newsItem.id, isPinned);
+                }
+            });
 
             if (isPinned) {
                 mPinnedItems.add(newsItem.id);
@@ -498,7 +524,13 @@ public class NewsActivity extends ServiceBoundActivity {
                 newsItem.dirty = true;
                 mDBItems.get(newsItem.id).dirty = true;
 
-                mNewsStore.setNewsItemDirty(newsItem.id);
+                mService.postAtFrontOfBIZZHandler(new SafeRunnable() {
+                    @Override
+                    protected void safeRun() throws Exception {
+                        mNewsStore.setNewsItemDirty(newsItem.id);
+                    }
+                });
+
                 mNewsPlugin.newsRead(new long[] { newsItem.id });
             }
 
@@ -595,30 +627,37 @@ public class NewsActivity extends ServiceBoundActivity {
 
             LinearLayout qrCodeContainer = (LinearLayout) view.findViewById(R.id.qr_code_container);
 
-
             if (newsItem.type == NewsItem.TYPE_QR_CODE) {
                 ScaleImageView qrCode = (ScaleImageView) view.findViewById(R.id.qr_code);
                 TextView qrCodeCaption = (TextView) view.findViewById(R.id.qr_code_caption);
 
-                try {
-                    Intent intent = new Intent();
-                    intent.setAction(Intents.Encode.ACTION);
-                    intent.putExtra(Intents.Encode.TYPE, Contents.Type.TEXT);
-                    intent.putExtra(Intents.Encode.DATA, newsItem.qr_code_content);
-                    QRCodeEncoder qrCodeEncoder = new QRCodeEncoder(NewsActivity.this, intent, mDisplayWidth / 2, false);
-                    Bitmap bitmap = qrCodeEncoder.encodeAsBitmap();
-                    qrCode.setImageBitmap(bitmap);
+                if (!mQRCodes.containsKey(newsItem.qr_code_content)) {
+                    try {
+                        Intent intent = new Intent();
+                        intent.setAction(Intents.Encode.ACTION);
+                        intent.putExtra(Intents.Encode.TYPE, Contents.Type.TEXT);
+                        intent.putExtra(Intents.Encode.DATA, newsItem.qr_code_content);
+                        QRCodeEncoder qrCodeEncoder = new QRCodeEncoder(NewsActivity.this, intent, mDisplayWidth / 2, false);
+                        Bitmap bitmap = qrCodeEncoder.encodeAsBitmap();
+                        mQRCodes.put(newsItem.qr_code_content, bitmap);
+
+                    } catch (WriterException e) {
+                        L.e(e);
+                    }
+                }
+
+                if (mQRCodes.containsKey(newsItem.qr_code_content)) {
+                    qrCode.setImageBitmap(mQRCodes.get(newsItem.qr_code_content));
                     qrCodeCaption.setText(newsItem.qr_code_caption);
                     qrCodeContainer.setVisibility(View.VISIBLE);
 
                     if (newsItem.users_that_rogered.length == 0 && TextUtils.isEmptyOrWhitespace(newsItem.image_url)) {
                         qrCodeCaption.setPadding(0, 0, UIUtils.convertDipToPixels(NewsActivity.this, 35), UIUtils.convertDipToPixels(NewsActivity.this, 15));
                     }
-
-                } catch (WriterException e) {
+                } else {
                     qrCodeContainer.setVisibility(View.GONE);
-                    L.e(e);
                 }
+
             } else {
                 qrCodeContainer.setVisibility(View.GONE);
             }
@@ -698,12 +737,24 @@ public class NewsActivity extends ServiceBoundActivity {
                         @Override
                         public void safeOnClick(View v) {
                             mDBItems.get(newsItem.id).rogered = true;
-                            mNewsStore.setNewsItemRogered(newsItem.id);
-                            mNewsStore.addUser(newsItem.id, mMyEmail);
                             mNewsPlugin.newsRogered(newsItem.id);
-                            mItems.put(newsItem.id, mNewsStore.getNewsItem(newsItem.id));
 
-                            mListAdapter.getView(position, convertView, parent);
+                            mService.postAtFrontOfBIZZHandler(new SafeRunnable() {
+                                @Override
+                                protected void safeRun() throws Exception {
+                                    mNewsStore.setNewsItemRogered(newsItem.id);
+                                    mNewsStore.addUser(newsItem.id, mMyEmail);
+
+                                    final NewsItem ni = mNewsStore.getNewsItem(newsItem.id);
+                                    mService.postAtFrontOfUIHandler(new SafeRunnable() {
+                                        @Override
+                                        protected void safeRun() throws Exception {
+                                            mItems.put(newsItem.id, ni);
+                                            mListAdapter.getView(position, convertView, parent);
+                                        }
+                                    });
+                                }
+                            });
                         }
                     });
                 }
@@ -963,12 +1014,21 @@ public class NewsActivity extends ServiceBoundActivity {
             mShowPinnedOnly = false;
             setTitle(R.string.news);
             mListAdapter.notifyDataSetChanged();
+
+            if (mScrollPositionIndex != -1)
+                mListView.setSelectionFromTop(mScrollPositionIndex, mScrollPositionTop);
         } else {
+            mScrollPositionIndex = mListView.getFirstVisiblePosition();
+            View v = mListView.getChildAt(0);
+            mScrollPositionTop = (v == null) ? 0 : v.getTop();
+
             mSwipeContainer.setRefreshing(false);
             mSwipeContainer.setEnabled(false);
             mShowPinnedOnly = true;
             setTitle(R.string.saved_items);
             mListAdapter.notifyDataSetChanged();
+
+            mListView.setSelection(0);
         }
 
         invalidateOptionsMenu();
