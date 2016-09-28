@@ -18,27 +18,29 @@
 
 package com.mobicage.rogerthat.plugins.messaging.widgets;
 
-import java.util.Map;
-import java.util.UnknownFormatConversionException;
-
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.TextView;
 
 import com.mobicage.api.messaging.Rpc;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
-import com.mobicage.rogerthat.plugins.messaging.widgets.RangeSeekBar.OnRangeSeekBarChangeListener;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.to.messaging.forms.FloatListWidgetResultTO;
 import com.mobicage.to.messaging.forms.SubmitRangeSliderFormRequestTO;
 import com.mobicage.to.messaging.forms.SubmitRangeSliderFormResponseTO;
 
-public class RangeSliderWidget extends Widget implements OnRangeSeekBarChangeListener<Double> {
+import org.florescu.android.rangeseekbar.RangeSeekBar;
 
-    private RangeSeekBar<Double> mSeekBar;
+import java.util.Map;
+import java.util.UnknownFormatConversionException;
+
+public class RangeSliderWidget extends Widget implements RangeSeekBar.OnRangeSeekBarChangeListener {
+
+    private org.florescu.android.rangeseekbar.RangeSeekBar mRangeSeekBar;
     private TextView mTextView;
     protected double mStep;
     protected long mPrecision;
@@ -64,21 +66,28 @@ public class RangeSliderWidget extends Widget implements OnRangeSeekBarChangeLis
             mStep = 1;
         mPrecision = (Long) mWidgetMap.get("precision");
         String unit = (String) mWidgetMap.get("unit");
-        if (unit == null)
-            unit = Message.UNIT_LOW_VALUE + " - " + Message.UNIT_HIGH_VALUE;
-        mFormat = unit.replace(Message.UNIT_LOW_VALUE, "%1$." + mPrecision + "f").replace(Message.UNIT_HIGH_VALUE,
-            "%2$." + mPrecision + "f");
-
         mTextView = (TextView) findViewById(R.id.slider_text);
         mTextView.setTextColor(mTextColor);
+        String defaultUnit = Message.UNIT_LOW_VALUE + " - " + Message.UNIT_HIGH_VALUE;
+        if (unit == null || defaultUnit.equals(unit)) {
+            unit = defaultUnit;
+            mRangeSeekBar = (org.florescu.android.rangeseekbar.RangeSeekBar) findViewById(R.id.range_slider_with_values);
+            mTextView.setVisibility(View.GONE);
+        } else {
+            mRangeSeekBar = (org.florescu.android.rangeseekbar.RangeSeekBar) findViewById(R.id.range_slider);
+            mTextView.setVisibility(View.VISIBLE);
+        }
+        mFormat = unit.replace(Message.UNIT_LOW_VALUE, "%1$." + mPrecision + "f")
+                .replace(Message.UNIT_HIGH_VALUE, "%2$." + mPrecision + "f");
 
-        mSeekBar = new RangeSeekBar<Double>(min, max, getContext());
-        mSeekBar.setNotifyWhileDragging(true);
-        mSeekBar.setOnRangeSeekBarChangeListener(this);
-        mSeekBar.setSelectedMinValue(low);
-        mSeekBar.setSelectedMaxValue(high);
-        this.addView(mSeekBar);
-        this.rangeSeekBarValuesChanged(low, high);
+        mRangeSeekBar.setTextAboveThumbsColor(mTextColor);
+        mRangeSeekBar.setVisibility(View.VISIBLE);
+        mRangeSeekBar.setNotifyWhileDragging(true);
+        mRangeSeekBar.setRangeValues(min, max);
+        mRangeSeekBar.setSelectedMaxValue(high);
+        mRangeSeekBar.setSelectedMinValue(low);
+        mRangeSeekBar.setOnRangeSeekBarChangeListener(this);
+        this.onRangeSeekBarValuesChanged(mRangeSeekBar, min, max);
     }
 
     private double rounded(Double value) {
@@ -87,8 +96,8 @@ public class RangeSliderWidget extends Widget implements OnRangeSeekBarChangeLis
 
     @Override
     public void putValue() {
-        mWidgetMap.put("low_value", rounded(mSeekBar.getSelectedMinValue()));
-        mWidgetMap.put("high_value", rounded(mSeekBar.getSelectedMaxValue()));
+        mWidgetMap.put("low_value", rounded((Double) mRangeSeekBar.getSelectedMinValue()));
+        mWidgetMap.put("high_value", rounded((Double) mRangeSeekBar.getSelectedMaxValue()));
     }
 
     @Override
@@ -112,19 +121,21 @@ public class RangeSliderWidget extends Widget implements OnRangeSeekBarChangeLis
         }
         if ((mMessage.flags & MessagingPlugin.FLAG_SENT_BY_JSMFR) == MessagingPlugin.FLAG_SENT_BY_JSMFR)
             mPlugin.answerJsMfrMessage(mMessage, request.toJSONMap(),
-                "com.mobicage.api.messaging.submitRangeSliderForm", mActivity, mParentView);
+                    "com.mobicage.api.messaging.submitRangeSliderForm", mActivity, mParentView);
         else
             Rpc.submitRangeSliderForm(new ResponseHandler<SubmitRangeSliderFormResponseTO>(), request);
     }
 
     @Override
-    public void rangeSeekBarValuesChanged(Double minValue, Double maxValue) {
+    public void onRangeSeekBarValuesChanged(RangeSeekBar bar, Object minValue, Object maxValue) {
+        Double min = rounded((Double) minValue);
+        Double max = rounded((Double) maxValue);
         try {
-            mTextView.setText(String.format(mFormat, rounded(minValue), rounded(maxValue)));
+            mTextView.setText(String.format(mFormat, min, max));
         } catch (UnknownFormatConversionException e) {
             L.e(e);
             mFormat = "%1$." + mPrecision + "f - %2$." + mPrecision + "f";
-            mTextView.setText(String.format(mFormat, rounded(minValue), rounded(maxValue)));
+            mTextView.setText(String.format(mFormat, min, max));
         }
     }
 
@@ -135,8 +146,8 @@ public class RangeSliderWidget extends Widget implements OnRangeSeekBarChangeLis
         String unit = (String) widget.get("unit");
         if (unit == null)
             unit = "<low_value/> - <high_value/>";
-        String format = unit.replace(Message.UNIT_LOW_VALUE, "%1$." + precision + "f").replace(Message.UNIT_HIGH_VALUE,
-            "%2$." + precision + "f");
+        String format = unit.replace(Message.UNIT_LOW_VALUE, "%1$." + precision + "f")
+                .replace(Message.UNIT_HIGH_VALUE, "%2$." + precision + "f");
 
         try {
             return String.format(format, lowValue, highValue);
