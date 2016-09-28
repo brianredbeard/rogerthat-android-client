@@ -41,6 +41,8 @@ import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+
 public abstract class ServiceBoundListActivity extends ListActivity implements ServiceBound {
 
     protected MainService mService; // Owned by UI thread
@@ -62,6 +64,11 @@ public abstract class ServiceBoundListActivity extends ListActivity implements S
         IntentFilter filter = new IntentFilter(MainService.CLOSE_ACTIVITY_INTENT);
         registerReceiver(closeActivityListener, filter);
         doBindService();
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
     @Override
@@ -147,12 +154,10 @@ public abstract class ServiceBoundListActivity extends ListActivity implements S
     @Override
     public void setContentView(View view) {
         super.setContentView(view);
-        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
     }
 
     @Override
     public void setContentView(View view, ViewGroup.LayoutParams params) {
         super.setContentView(view, params);
-        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
     }
 }

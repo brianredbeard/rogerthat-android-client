@@ -61,6 +61,8 @@ import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.Pausable;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+
 public abstract class ServiceBoundMapActivity extends MapActivity implements Pausable, ServiceBound {
 
     public static final long MAX_TRANSMIT = 10 * 1000;
@@ -115,6 +117,11 @@ public abstract class ServiceBoundMapActivity extends MapActivity implements Pau
                 completeTransmit(null);
             }
         });
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
     @Override
@@ -333,13 +340,11 @@ public abstract class ServiceBoundMapActivity extends MapActivity implements Pau
     @Override
     public void setContentView(View view) {
         super.setContentView(view);
-        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
     }
 
     @Override
     public void setContentView(View view, ViewGroup.LayoutParams params) {
         super.setContentView(view, params);
-        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
     }
 
     public boolean askPermissionIfNeeded(final String permission, final int requestCode, final SafeRunnable onGranted,

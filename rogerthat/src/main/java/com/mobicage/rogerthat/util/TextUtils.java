@@ -18,9 +18,6 @@
 
 package com.mobicage.rogerthat.util;
 
-import android.content.Context;
-import android.view.View;
-
 import java.math.BigInteger;
 
 public class TextUtils {
@@ -47,28 +44,5 @@ public class TextUtils {
         return s;
     }
 
-    //Font
-    public static void overrideFonts(final Context context, final View v) {
-//        try {
-//            if (v instanceof ViewGroup) {
-//                ViewGroup vg = (ViewGroup) v;
-//                for (int i = 0; i < vg.getChildCount(); i++) {
-//                    View child = vg.getChildAt(i);
-//                    overrideFonts(context, child);
-//                }
-//            } else if (v instanceof EditText) {
-//                ((EditText) v).setTypeface(Typeface.createFromAsset(context.getAssets(), "fonts/lato_light.ttf"));
-//                ((EditText) v).setTextColor(ContextCompat.getColor(context, R.color.mc_default_text));
-//            } else if (v instanceof Button) {
-//                ((Button) v).setTypeface(Typeface.createFromAsset(context.getAssets(), "fonts/lato_bold.ttf"));
-//                ((Button) v).setTextColor(ContextCompat.getColor(context, android.R.color.white));
-//            } else if (v instanceof TextView) {
-//                ((TextView) v).setTypeface(Typeface.createFromAsset(context.getAssets(), "fonts/lato_light.ttf"));
-//                ((TextView) v).setTextColor(ContextCompat.getColor(context, R.color.mc_default_text));
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-    }
 }
 

@@ -19,6 +19,7 @@
 package com.mobicage.rogerthat;
 
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
@@ -33,6 +34,8 @@ import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
+
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public abstract class ServiceBoundPreferenceActivity extends PreferenceActivity implements ServiceBound {
 
@@ -49,6 +52,12 @@ public abstract class ServiceBoundPreferenceActivity extends PreferenceActivity 
         SystemUtils.logIntentFlags(getIntent());
         doBindService();
     }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
+
 
     @Override
     protected void onDestroy() {
@@ -163,12 +172,10 @@ public abstract class ServiceBoundPreferenceActivity extends PreferenceActivity 
     @Override
     public void setContentView(View view) {
         super.setContentView(view);
-        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
     }
 
     @Override
     public void setContentView(View view, ViewGroup.LayoutParams params) {
         super.setContentView(view, params);
-        TextUtils.overrideFonts(this, findViewById(android.R.id.content));
     }
 }

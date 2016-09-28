@@ -18,13 +18,18 @@
 
 package com.mobicage.rogerthat;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
+import android.app.Application;
+import android.content.Context;
+
+import com.facebook.FacebookSdk;
+import com.facebook.appevents.AppEventsLogger;
+import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.util.http.HTTPUtil;
+import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.system.SafeAsyncTask;
+import com.mobicage.rogerthat.util.system.SystemUtils;
+import com.mobicage.rpc.Credentials;
+import com.mobicage.rpc.config.CloudConstants;
 
 import org.altbeacon.beacon.powersave.BackgroundPowerSaver;
 import org.apache.http.NameValuePair;
@@ -35,17 +40,15 @@ import org.apache.http.protocol.HTTP;
 import org.jivesoftware.smack.util.Base64;
 import org.json.simple.JSONObject;
 
-import android.app.Application;
-import android.content.Context;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
 
-import com.facebook.FacebookSdk;
-import com.facebook.appevents.AppEventsLogger;
-import com.mobicage.rogerthat.util.http.HTTPUtil;
-import com.mobicage.rogerthat.util.logging.L;
-import com.mobicage.rogerthat.util.system.SafeAsyncTask;
-import com.mobicage.rogerthat.util.system.SystemUtils;
-import com.mobicage.rpc.Credentials;
-import com.mobicage.rpc.config.CloudConstants;
+import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
 public class App extends Application implements Thread.UncaughtExceptionHandler {
 
@@ -57,6 +60,11 @@ public class App extends Application implements Thread.UncaughtExceptionHandler 
     @Override
     public void onCreate() {
         super.onCreate();
+        CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                .setDefaultFontPath("fonts/lato_regular.ttf")
+                .setFontAttrId(R.attr.fontPath)
+                .build()
+        );
         Thread.setDefaultUncaughtExceptionHandler(this);
         sContext = this;
 
