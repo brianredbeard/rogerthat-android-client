@@ -24,6 +24,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.view.KeyEvent;
@@ -690,8 +691,14 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
             }
             if (messageUnreadCount >= 1) {
                 messageCountView.setText(String.valueOf(messageUnreadCount));
+                Typeface boldFont = TextUtils.getFont(MessagingActivity.this);
+                holder.recipientsView.setTypeface(boldFont);
+                holder.messageView.setTypeface(boldFont);
                 messageCountView.setVisibility(View.VISIBLE);
             } else {
+                Typeface normalFont = TextUtils.getFont(MessagingActivity.this, "regular");
+                holder.recipientsView.setTypeface(normalFont);
+                holder.messageView.setTypeface(normalFont);
                 messageCountView.setVisibility(View.GONE);
             }
 
