@@ -86,9 +86,9 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
-                android:background="@+drawable/textballoon_right"
+                android:background="@drawable/textballoon_right"
                 android:textColor="@android:color/primary_text_light"
-                android:textSize="20dp" >
+                android:textSize="20dp">
             </TextView>
 
             <LinearLayout
