@@ -346,6 +346,29 @@ public class NewsStore implements Closeable {
         }
     }
 
+    public List<Long> searchPinnedNews(String qry) {
+        T.dontCare();
+
+        String query = "%" + qry + "%";
+
+        List<Long> newsIds = new ArrayList<>();
+        final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_news_search_pinned),
+                new String[]{query, query, query, query, query});
+
+        try {
+            if (!c.moveToFirst()) {
+                return newsIds;
+            }
+            newsIds.add(c.getLong(0));
+            while (c.moveToNext()) {
+                newsIds.add(c.getLong(0));
+            }
+            return newsIds;
+        } finally {
+            c.close();
+        }
+    }
+
     private NewsItemDetails readDetails(Cursor c) {
         NewsItemDetails d = new NewsItemDetails();
         d.id = c.getLong(0);

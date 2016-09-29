@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
@@ -27,19 +26,44 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <android.support.v4.widget.SwipeRefreshLayout
-            android:id="@+id/swipeContainer"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-            <ListView
-                android:id="@+id/news_list"
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:id="@+id/search_container"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/mc_background_color"
-                android:fastScrollEnabled="true" />
+                android:orientation="horizontal"
+                android:padding="5dp"
+                android:visibility="gone">
 
-        </android.support.v4.widget.SwipeRefreshLayout>
+                <EditText
+                    android:id="@+id/search_text"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="@string/enter_search_query"
+                    android:imeOptions="actionSearch"
+                    android:inputType="textEmailAddress" />
+            </LinearLayout>
+
+            <android.support.v4.widget.SwipeRefreshLayout
+                android:id="@+id/swipeContainer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ListView
+                    android:id="@+id/news_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/mc_background_color"
+                    android:fastScrollEnabled="true" />
+
+            </android.support.v4.widget.SwipeRefreshLayout>
+
+        </LinearLayout>
 
         <Button
             android:id="@+id/updates_available"
@@ -47,8 +71,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:text="@string/updates_available"
-            android:visibility="gone"
-            tools:visibility="visible" />
+            android:visibility="gone" />
 
     </FrameLayout>
 </LinearLayout>

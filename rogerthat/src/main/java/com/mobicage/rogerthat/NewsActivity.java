@@ -31,8 +31,10 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.TextWatcher;
 import android.text.style.StyleSpan;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -419,6 +421,28 @@ public class NewsActivity extends ServiceBoundActivity {
         if (mIsConnectedToInternet) {
             requestMoreNews(true);
         }
+
+        final LinearLayout searchContainer = (LinearLayout) findViewById(R.id.search_container);
+        final TextView searchTextField = (TextView) findViewById(R.id.search_text);
+        searchTextField.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (searchContainer.getVisibility() == View.VISIBLE) {
+                    mPinnedItems = mNewsStore.searchPinnedNews(searchTextField.getText().toString());
+                    mListAdapter.notifyDataSetChanged();
+                    mListView.setSelection(0);
+                }
+            }
+        });
 
 
         final IntentFilter filter = new IntentFilter(CachedDownloader.CACHED_DOWNLOAD_AVAILABLE_INTENT);
@@ -981,6 +1005,9 @@ public class NewsActivity extends ServiceBoundActivity {
         @Override
         public long getItemId(int position) {
             if (mShowPinnedOnly) {
+                if (mPinnedItems.size() == 0) {
+                    return -1;
+                }
                 return mPinnedItems.get(position);
             }
             return mOrder.get(position);
@@ -1109,15 +1136,30 @@ public class NewsActivity extends ServiceBoundActivity {
     }
 
     private void toggleShowPinnedOnly() {
+        final LinearLayout searchContainer = (LinearLayout) findViewById(R.id.search_container);
+        final TextView searchTextField = (TextView) findViewById(R.id.search_text);
+
         if (mShowPinnedOnly) {
+            mPinnedItems = new ArrayList<>();
+            for (NewsItemDetails d : mDBItems.values()) {
+                if (d.pinned && !d.deleted) {
+                    mPinnedItems.add(d.id);
+                }
+            }
+            UIUtils.hideKeyboard(NewsActivity.this, searchTextField);
+            searchContainer.setVisibility(View.GONE);
+
             mSwipeContainer.setEnabled(mIsConnectedToInternet ? true : false);
             mShowPinnedOnly = false;
             setTitle(R.string.news);
-            mListAdapter.notifyDataSetChanged();
 
+            mListAdapter.notifyDataSetChanged();
             if (mScrollPositionIndex != -1)
                 mListView.setSelectionFromTop(mScrollPositionIndex, mScrollPositionTop);
         } else {
+            searchTextField.setText("");
+            searchContainer.setVisibility(View.VISIBLE);
+
             Collections.sort(mPinnedItems, comparatorPinned);
             mScrollPositionIndex = mListView.getFirstVisiblePosition();
             View v = mListView.getChildAt(0);
@@ -1127,8 +1169,8 @@ public class NewsActivity extends ServiceBoundActivity {
             mSwipeContainer.setEnabled(false);
             mShowPinnedOnly = true;
             setTitle(R.string.saved_items);
-            mListAdapter.notifyDataSetChanged();
 
+            mListAdapter.notifyDataSetChanged();
             mListView.setSelection(0);
         }
 

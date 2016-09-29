@@ -443,6 +443,7 @@ ORDER BY ms.acked_timestamp DESC
     <string name="sql_news_update_deleted">UPDATE news SET deleted = ? WHERE id = ?</string>
     <string name="sql_news_delete_buttons">DELETE FROM news_buttons WHERE news_id = ?</string>
     <string name="sql_news_delete_rogerthat_users">DELETE FROM news_rogered_users WHERE news_id = ?</string>
+    <string name="sql_news_search_pinned">SELECT id FROM news WHERE pinned = 1 AND (sender_name LIKE ? OR title LIKE ? OR message LIKE ? OR label LIKE ? OR qr_code_caption LIKE ?) ORDER BY timestamp DESC</string>
 
     <!-- iOS-only queries -->
     <string name="sql_friend_count_by_type">SELECT COUNT(*) FROM friend WHERE (existence = 0 OR existence = 4) AND \"type\" = ?</string>

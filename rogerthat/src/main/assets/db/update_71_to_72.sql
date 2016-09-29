@@ -20,6 +20,8 @@ CREATE TABLE news (
     deleted INTEGER
 );
 
+CREATE INDEX ix_news_search ON news (sender_name, title, message, label, qr_code_caption);
+
 CREATE TABLE news_buttons (
     news_id INTEGER NOT NULL,
     id TEXT NOT NULL,
