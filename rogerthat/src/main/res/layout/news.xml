@@ -1,16 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.SwipeRefreshLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/swipeContainer"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-
-    <ListView
-        android:id="@+id/news_list"
+    <LinearLayout
+        android:id="@+id/internet_status_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/mc_background_color"
-        android:fastScrollEnabled="true" />
+        android:background="@color/mc_pin_red"
+        android:orientation="vertical">
 
-</android.support.v4.widget.SwipeRefreshLayout>
+        <TextView
+            android:id="@+id/internet_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="10dp"
+            android:text="@string/no_internet_connection"
+            android:textColor="@color/mc_white" />
+
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/swipeContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ListView
+                android:id="@+id/news_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/mc_background_color"
+                android:fastScrollEnabled="true" />
+
+        </android.support.v4.widget.SwipeRefreshLayout>
+
+        <Button
+            android:id="@+id/updates_available"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/updates_available"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+    </FrameLayout>
+</LinearLayout>
+
+

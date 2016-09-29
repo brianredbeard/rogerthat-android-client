@@ -18,33 +18,6 @@
 
 package com.mobicage.rogerthat;
 
-import java.io.File;
-import java.io.FileReader;
-import java.security.KeyFactory;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
-import org.altbeacon.beacon.BeaconConsumer;
-import org.jivesoftware.smack.util.Base64;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-
-import android.Manifest;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -69,7 +42,6 @@ import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.SparseIntArray;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.config.Configuration;
@@ -100,13 +72,11 @@ import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.CallReceiver;
 import com.mobicage.rpc.Credentials;
 import com.mobicage.rpc.DefaultRpcHandler;
-import com.mobicage.rpc.IJSONable;
 import com.mobicage.rpc.IRequestSubmitter;
 import com.mobicage.rpc.IResponseHandler;
 import com.mobicage.rpc.PriorityMap;
 import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.rpc.Rpc;
-import com.mobicage.rpc.RpcCall;
 import com.mobicage.rpc.SDCardLogger;
 import com.mobicage.rpc.SaveSettingsResponseHandler;
 import com.mobicage.rpc.config.AppConstants;
@@ -131,6 +101,26 @@ import com.mobicage.to.system.UpdateAvailableRequestTO;
 import com.mobicage.to.system.UpdateAvailableResponseTO;
 import com.mobicage.to.system.UpdateSettingsRequestTO;
 import com.mobicage.to.system.UpdateSettingsResponseTO;
+
+import org.altbeacon.beacon.BeaconConsumer;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
+import java.io.File;
+import java.io.FileReader;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class MainService extends Service implements TimeProvider, BeaconConsumer {
 
@@ -885,7 +875,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         mPlugins.put(MessagingPlugin.class.toString(), messagingPlugin);
 
         // operations on friends and friend lists
-        MobicagePlugin newsPlugin = new com.mobicage.rogerthat.plugins.news.NewsPlugin(this, mDatabaseManager);
+        MobicagePlugin newsPlugin = new com.mobicage.rogerthat.plugins.news.NewsPlugin(this, mConfigProvider, mDatabaseManager);
         mPlugins.put(NewsPlugin.class.toString(), newsPlugin);
 
         for (MobicagePlugin plugin : mPlugins.values())

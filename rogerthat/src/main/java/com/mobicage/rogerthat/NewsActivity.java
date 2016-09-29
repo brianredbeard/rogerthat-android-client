@@ -50,7 +50,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.google.zxing.WriterException;
 import com.google.zxing.client.android.Contents;
 import com.google.zxing.client.android.Intents;
 import com.google.zxing.client.android.encode.QRCodeEncoder;
@@ -75,6 +74,7 @@ import com.mobicage.rogerthat.util.CachedDownloader;
 import com.mobicage.rogerthat.util.DownloadImageTask;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.net.NetworkConnectivityManager;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
@@ -131,6 +131,7 @@ public class NewsActivity extends ServiceBoundActivity {
     private Map<String, Bitmap> mQRCodes = new HashMap<>();
     private Set<Long> mReadMoreItems = new HashSet<>();
     private Map<String, ArrayList<Resizable16by6ImageView>> mImageViews = new HashMap<>();
+    private boolean mIsConnectedToInternet = false;
 
     private ProgressDialog mProgressDialog;
 
@@ -164,7 +165,9 @@ public class NewsActivity extends ServiceBoundActivity {
                 File cachedFile = mCachedDownloader.getCachedFilePath(url);
                 if (cachedFile != null) {
                     Bitmap bm = BitmapFactory.decodeFile(cachedFile.getAbsolutePath());
-
+                    L.d("url: " + url);
+                    L.d("mImageViews.containsKey(url): " + mImageViews.containsKey(url));
+                    L.d("mImageViews.get(url).size(): " + mImageViews.get(url).size());
                     for (Resizable16by6ImageView image : mImageViews.get(url)) {
                         image.setImageBitmap(bm);
                         image.setVisibility(View.VISIBLE);
@@ -173,7 +176,6 @@ public class NewsActivity extends ServiceBoundActivity {
             } else if (NewsPlugin.GET_NEWS_RECEIVED_INTENT.equals(action)) {
                 String uuid = intent.getStringExtra("uuid");
                 if (mUUID == null || !mUUID.equals(uuid)) {
-                    L.i("Ignoring GET_NEWS_RECEIVED_INTENT uuid did not match");
                     return new String[]{action};
                 }
 
@@ -220,6 +222,7 @@ public class NewsActivity extends ServiceBoundActivity {
                 }
 
                 if (shouldUpdateLayout) {
+                    mNewsPlugin.putNewsInDB(mOrder);
                     mListAdapter.notifyDataSetChanged();
                 }
 
@@ -252,6 +255,7 @@ public class NewsActivity extends ServiceBoundActivity {
                 mSwipeContainer.setRefreshing(false);
 
                 mShouldLoadMoreNews = true;
+                mNewsPlugin.putNewsInDB(mOrder);
                 mListAdapter.notifyDataSetChanged();
 
             } else if (NewsPlugin.DELETE_NEWS_ITEM_INTENT.equals(action)) {
@@ -273,6 +277,7 @@ public class NewsActivity extends ServiceBoundActivity {
 
                     mLiveOrder.remove(id);
                     if (mOrder.remove(id)) {
+                        mNewsPlugin.putNewsInDB(mOrder);
                         mListAdapter.notifyDataSetChanged();
                     }
                 }
@@ -304,6 +309,35 @@ public class NewsActivity extends ServiceBoundActivity {
                         showError(intent);
                     }
                 }
+            } else if (NetworkConnectivityManager.INTENT_NETWORK_UP.equals(action)) {
+                if (!mIsConnectedToInternet) {
+                    L.i("todo ruben INTENT_NETWORK_UP");
+                    final Button updatesAvailable = (Button) findViewById(R.id.updates_available);
+                    updatesAvailable.setVisibility(View.VISIBLE);
+
+                    updatesAvailable.setOnClickListener(new SafeViewOnClickListener() {
+                        @Override
+                        public void safeOnClick(View v) {
+                            findViewById(R.id.internet_status_container).setVisibility(View.GONE);
+                            updatesAvailable.setVisibility(View.GONE);
+                            mIsConnectedToInternet = true;
+                            mSwipeContainer.setEnabled(true);
+                            mSwipeContainer.setRefreshing(true);
+                            requestMoreNews(true);
+                        }
+                    });
+                }
+            } else if (NetworkConnectivityManager.INTENT_NETWORK_DOWN.equals(action)) {
+                if (mIsConnectedToInternet) {
+                    L.i("todo ruben INTENT_NETWORK_DOWN");
+                    Button updatesAvailable = (Button) findViewById(R.id.updates_available);
+                    updatesAvailable.setVisibility(View.GONE);
+
+                    mIsConnectedToInternet = false;
+                    mSwipeContainer.setEnabled(false);
+                    mSwipeContainer.setRefreshing(false);
+                    findViewById(R.id.internet_status_container).setVisibility(View.VISIBLE);
+                }
             } else {
                 mListAdapter.notifyDataSetChanged();
             }
@@ -333,7 +367,6 @@ public class NewsActivity extends ServiceBoundActivity {
         mProgressDialog.setIndeterminate(true);
         mProgressDialog.setCancelable(false);
 
-
         mSwipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
         mSwipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -342,7 +375,12 @@ public class NewsActivity extends ServiceBoundActivity {
             }
         });
         mSwipeContainer.setColorSchemeResources(R.color.mc_primary_color, R.color.mc_secondary_color);
-        if (!TestUtils.isRunningTest()) {
+        mIsConnectedToInternet = mService.getNetworkConnectivityManager().isConnected();
+        if (mIsConnectedToInternet) {
+            findViewById(R.id.internet_status_container).setVisibility(View.GONE);
+        }
+        mSwipeContainer.setEnabled(mIsConnectedToInternet ? true : false);
+        if (!TestUtils.isRunningTest() && mIsConnectedToInternet) {
             mSwipeContainer.setRefreshing(true);
         }
 
@@ -367,12 +405,21 @@ public class NewsActivity extends ServiceBoundActivity {
                         mDBItems = dbItems;
                         mPinnedItems = pinnedItems;
                         invalidateOptionsMenu();
+
+                        if (!mIsConnectedToInternet) {
+                            mLiveOrder = mNewsPlugin.getNewsIdsFromDB();
+                            mOrder = mNewsPlugin.getNewsIdsFromDB();
+                            mListAdapter.notifyDataSetChanged();
+                        }
                     }
                 });
             }
         });
 
-        requestMoreNews(true);
+        if (mIsConnectedToInternet) {
+            requestMoreNews(true);
+        }
+
 
         final IntentFilter filter = new IntentFilter(CachedDownloader.CACHED_DOWNLOAD_AVAILABLE_INTENT);
         filter.addAction(NewsPlugin.GET_NEWS_RECEIVED_INTENT);
@@ -385,6 +432,8 @@ public class NewsActivity extends ServiceBoundActivity {
         filter.addAction(FriendsPlugin.FRIEND_MARKED_FOR_REMOVAL_INTENT);
         filter.addAction(FriendsPlugin.FRIEND_ADDED_INTENT);
         filter.addAction(FriendsPlugin.FRIENDS_LIST_REFRESHED);
+        filter.addAction(NetworkConnectivityManager.INTENT_NETWORK_UP);
+        filter.addAction(NetworkConnectivityManager.INTENT_NETWORK_DOWN);
         registerReceiver(mBroadcastReceiver, filter);
     }
 
@@ -401,6 +450,20 @@ public class NewsActivity extends ServiceBoundActivity {
         mNewsPlugin.getNews(mCursor, mUUID);
     }
 
+    private NewsItem getNewsItem(Long newsId) {
+        if (mItems.containsKey(newsId)) {
+            return mItems.get(newsId);
+        }
+        return mNewsStore.getNewsItem(newsId);
+    }
+
+    private NewsItem getNewsItem(int position) {
+        if (mShowPinnedOnly) {
+            return getNewsItem(mPinnedItems.get(position));
+        }
+        return getNewsItem(mOrder.get(position));
+    }
+
     public class NewsListAdapter extends BaseAdapter {
 
         protected LayoutInflater mLayoutInflater;
@@ -410,13 +473,6 @@ public class NewsActivity extends ServiceBoundActivity {
             T.UI();
             mContext = context;
             mLayoutInflater = LayoutInflater.from(mContext);
-        }
-
-        protected NewsItem getNewsItem(int position) {
-            if (mShowPinnedOnly) {
-                return mItems.get(mPinnedItems.get(position));
-            }
-            return mItems.get(mOrder.get(position));
         }
 
         private void setRogeredUsers(final NewsItem newsItem, final View view) {
@@ -505,11 +561,24 @@ public class NewsActivity extends ServiceBoundActivity {
             }
         }
 
+        private void setQRCode(final NewsItem newsItem, final View view, final LinearLayout qrCodeContainer) {
+            ScaleImageView qrCode = (ScaleImageView) view.findViewById(R.id.qr_code);
+            TextView qrCodeCaption = (TextView) view.findViewById(R.id.qr_code_caption);
+
+            qrCode.setImageBitmap(mQRCodes.get(newsItem.qr_code_content));
+            qrCodeCaption.setText(newsItem.qr_code_caption);
+            qrCodeContainer.setVisibility(View.VISIBLE);
+
+            if (newsItem.users_that_rogered.length == 0 && TextUtils.isEmptyOrWhitespace(newsItem.image_url)) {
+                qrCodeCaption.setPadding(0, 0, UIUtils.convertDipToPixels(NewsActivity.this, 35), UIUtils.convertDipToPixels(NewsActivity.this, 15));
+            }
+        }
+
         @Override
         public View getView(final int position, final View convertView, final ViewGroup parent) {
             T.UI();
             final View view;
-            if (!mShowPinnedOnly && position >= mOrder.size() - 10) {
+            if (!mShowPinnedOnly && mIsConnectedToInternet && position >= mOrder.size() - 10) {
                 if (mCursor != null && mShouldLoadMoreNews) {
                     requestMoreNews(false);
                 }
@@ -627,39 +696,34 @@ public class NewsActivity extends ServiceBoundActivity {
                 }
             }
 
-            LinearLayout qrCodeContainer = (LinearLayout) view.findViewById(R.id.qr_code_container);
-
+            final LinearLayout qrCodeContainer = (LinearLayout) view.findViewById(R.id.qr_code_container);
             if (newsItem.type == NewsItem.TYPE_QR_CODE) {
-                ScaleImageView qrCode = (ScaleImageView) view.findViewById(R.id.qr_code);
-                TextView qrCodeCaption = (TextView) view.findViewById(R.id.qr_code_caption);
-
-                if (!mQRCodes.containsKey(newsItem.qr_code_content)) {
-                    try {
-                        Intent intent = new Intent();
-                        intent.setAction(Intents.Encode.ACTION);
-                        intent.putExtra(Intents.Encode.TYPE, Contents.Type.TEXT);
-                        intent.putExtra(Intents.Encode.DATA, newsItem.qr_code_content);
-                        QRCodeEncoder qrCodeEncoder = new QRCodeEncoder(NewsActivity.this, intent, mDisplayWidth / 2, false);
-                        Bitmap bitmap = qrCodeEncoder.encodeAsBitmap();
-                        mQRCodes.put(newsItem.qr_code_content, bitmap);
-
-                    } catch (WriterException e) {
-                        L.e(e);
-                    }
-                }
-
                 if (mQRCodes.containsKey(newsItem.qr_code_content)) {
-                    qrCode.setImageBitmap(mQRCodes.get(newsItem.qr_code_content));
-                    qrCodeCaption.setText(newsItem.qr_code_caption);
-                    qrCodeContainer.setVisibility(View.VISIBLE);
-
-                    if (newsItem.users_that_rogered.length == 0 && TextUtils.isEmptyOrWhitespace(newsItem.image_url)) {
-                        qrCodeCaption.setPadding(0, 0, UIUtils.convertDipToPixels(NewsActivity.this, 35), UIUtils.convertDipToPixels(NewsActivity.this, 15));
-                    }
+                    setQRCode(newsItem, view, qrCodeContainer);
                 } else {
                     qrCodeContainer.setVisibility(View.GONE);
-                }
+                    mService.postAtFrontOfBIZZHandler(new SafeRunnable() {
+                        @Override
+                        protected void safeRun() throws Exception {
+                            Intent intent = new Intent();
+                            intent.setAction(Intents.Encode.ACTION);
+                            intent.putExtra(Intents.Encode.TYPE, Contents.Type.TEXT);
+                            intent.putExtra(Intents.Encode.DATA, newsItem.qr_code_content);
+                            QRCodeEncoder qrCodeEncoder = new QRCodeEncoder(NewsActivity.this, intent, mDisplayWidth / 2, false);
+                            final Bitmap bitmap = qrCodeEncoder.encodeAsBitmap();
 
+                            mService.postAtFrontOfUIHandler(new SafeRunnable() {
+                                @Override
+                                protected void safeRun() throws Exception {
+                                    mQRCodes.put(newsItem.qr_code_content, bitmap);
+                                    setQRCode(newsItem, view, qrCodeContainer);
+                                }
+                            });
+
+
+                        }
+                    });
+                }
             } else {
                 qrCodeContainer.setVisibility(View.GONE);
             }
@@ -689,6 +753,7 @@ public class NewsActivity extends ServiceBoundActivity {
                         startActivity(intent);
 
                     } else {
+                        mProgressDialog.show();
                         mExistence = existenceStatus;
                         mExpectedEmailHash = newsItem.sender.email;
                         requestFriendInfoByEmailHash(mExpectedEmailHash);
@@ -934,8 +999,8 @@ public class NewsActivity extends ServiceBoundActivity {
     private final Comparator<Long> comparatorPinned = new Comparator<Long>() {
         @Override
         public int compare(Long item1, Long item2) {
-            long timestamp1 = mItems.get(item1).timestamp;
-            long timestamp2 = mItems.get(item2).timestamp;
+            long timestamp1 = getNewsItem(item1).timestamp;
+            long timestamp2 = getNewsItem(item2).timestamp;
             return timestamp1 < timestamp2 ? 1 : -1;
         }
     };
@@ -1044,10 +1109,8 @@ public class NewsActivity extends ServiceBoundActivity {
     }
 
     private void toggleShowPinnedOnly() {
-        Collections.sort(mPinnedItems, comparatorPinned);
-
         if (mShowPinnedOnly) {
-            mSwipeContainer.setEnabled(true);
+            mSwipeContainer.setEnabled(mIsConnectedToInternet ? true : false);
             mShowPinnedOnly = false;
             setTitle(R.string.news);
             mListAdapter.notifyDataSetChanged();
@@ -1055,6 +1118,7 @@ public class NewsActivity extends ServiceBoundActivity {
             if (mScrollPositionIndex != -1)
                 mListView.setSelectionFromTop(mScrollPositionIndex, mScrollPositionTop);
         } else {
+            Collections.sort(mPinnedItems, comparatorPinned);
             mScrollPositionIndex = mListView.getFirstVisiblePosition();
             View v = mListView.getChildAt(0);
             mScrollPositionTop = (v == null) ? 0 : v.getTop();

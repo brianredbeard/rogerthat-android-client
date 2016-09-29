@@ -518,4 +518,6 @@
     <string name="reach">Reach:</string>
     <string name="read_more">Read more…</string>
     <string name="read_less">Read less…</string>
+    <string name="no_internet_connection">No internet connection.</string>
+    <string name="updates_available">Updates available</string>
 </resources>
