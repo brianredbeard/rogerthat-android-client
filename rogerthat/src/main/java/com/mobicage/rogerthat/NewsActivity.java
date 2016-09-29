@@ -628,6 +628,7 @@ public class NewsActivity extends ServiceBoundActivity {
             }
 
             final NewsItem newsItem = getNewsItem(position);
+            final int existenceStatus = mFriendsPlugin.getStore().getExistence(newsItem.sender.email);
             if (!newsItem.dirty) {
                 newsItem.dirty = true;
                 mDBItems.get(newsItem.id).dirty = true;
@@ -681,18 +682,22 @@ public class NewsActivity extends ServiceBoundActivity {
                         dialog.addView(actionSave);
                     }
 
-                    final View actionHide = layoutInflater.inflate(R.layout.news_actions_item, null);
-                    ((ImageView) actionHide.findViewById(R.id.icon)).setImageDrawable(new IconicsDrawable(NewsActivity.this, FontAwesome.Icon.faw_times_circle).color(getResources().getColor(R.color.mc_default_text)).sizeDp(15).paddingDp(2));
-                    ((TextView) actionHide.findViewById(R.id.title)).setText(R.string.hide);
-                    ((TextView) actionHide.findViewById(R.id.subtitle)).setText(R.string.see_fewer_posts_like_this);
-                    actionHide.setOnClickListener(new SafeViewOnClickListener() {
-                        @Override
-                        public void safeOnClick(View v) {
-                            alertDialog.dismiss();
-                            L.i("todo ruben see fewer posts like this");
-                        }
-                    });
-                    dialog.addView(actionHide);
+                    if (existenceStatus == Friend.ACTIVE) {
+                        // todo ruben should we show this for sticky items?
+                        final View actionHide = layoutInflater.inflate(R.layout.news_actions_item, null);
+                        ((ImageView) actionHide.findViewById(R.id.icon)).setImageDrawable(new IconicsDrawable(NewsActivity.this, FontAwesome.Icon.faw_times_circle).color(getResources().getColor(R.color.mc_default_text)).sizeDp(15).paddingDp(2));
+                        ((TextView) actionHide.findViewById(R.id.title)).setText(R.string.hide);
+                        ((TextView) actionHide.findViewById(R.id.subtitle)).setText(R.string.see_fewer_posts_like_this);
+                        actionHide.setOnClickListener(new SafeViewOnClickListener() {
+                            @Override
+                            public void safeOnClick(View v) {
+                                alertDialog.dismiss();
+                                L.i("todo ruben see fewer posts like this");
+                                mFriendsPlugin.disableBroadcastType(newsItem.sender.email, newsItem.label);
+                            }
+                        });
+                        dialog.addView(actionHide);
+                    }
 
 
                     alertDialog.setCanceledOnTouchOutside(true);
@@ -772,8 +777,6 @@ public class NewsActivity extends ServiceBoundActivity {
             } else {
                 serviceAvatar.setImageBitmap(avatar);
             }
-
-            final int existenceStatus = mFriendsPlugin.getStore().getExistence(newsItem.sender.email);
 
             serviceAvatar.setOnClickListener(new SafeViewOnClickListener() {
                 @Override

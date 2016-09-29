@@ -55,6 +55,8 @@ import com.mobicage.to.friends.UpdateFriendResponseTO;
 import com.mobicage.to.service.GetMenuIconRequestTO;
 
 import org.jivesoftware.smack.util.Base64;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONValue;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -2070,5 +2072,44 @@ public class FriendStore implements Closeable {
                 }
             }
         });
+    }
+
+    public String disableBroadcastType(final String serviceEmail, final String broadcastType) {
+        T.BIZZ();
+        String[] data = getServiceData(serviceEmail);
+        Map<String, Object> userData = data[0] == null ? new HashMap<String, Object>() : (Map<String, Object>) JSONValue.parse(data[0]);
+        Map<String, Object> appData = data[1] == null ? null : (Map<String, Object>) JSONValue.parse(data[1]);
+
+        if (appData == null) {
+            L.bug("disableBroadcastType failed appData was null");
+            return null;
+        }
+        if (!appData.containsKey("__rt__broadcastTypes")) {
+            L.bug("disableBroadcastType failed appData.__rt__broadcastTypes not found");
+            return null;
+        }
+
+        JSONArray availableBroadcastTypes = (JSONArray) appData.get("__rt__broadcastTypes");
+        if (!availableBroadcastTypes.contains(broadcastType)) {
+            L.bug("disableBroadcastType failed appData.__rt__broadcastTypes does not contain: " + broadcastType);
+            return null;
+        }
+
+        JSONArray disabledBroadcastTypes;
+        if (userData.containsKey("__rt__disabledBroadcastTypes")) {
+            disabledBroadcastTypes = (JSONArray) userData.get("__rt__disabledBroadcastTypes");
+        } else {
+            disabledBroadcastTypes = new JSONArray();
+        }
+
+        if (disabledBroadcastTypes.contains(broadcastType)) {
+            return null;
+        }
+
+        disabledBroadcastTypes.add(broadcastType);
+
+        String userDataJsonString = JSONValue.toJSONString(userData);
+        updateServiceData(serviceEmail, userDataJsonString, null, false);
+        return userDataJsonString;
     }
 }

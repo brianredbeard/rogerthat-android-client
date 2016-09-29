@@ -1355,6 +1355,33 @@ public class FriendsPlugin implements MobicagePlugin {
         }
     }
 
+    public void disableBroadcastType(final String serviceEmail, final String broadcastType) {
+        SafeRunnable handler = new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                T.BIZZ();
+                String userDataJsonString = mStore.disableBroadcastType(serviceEmail, broadcastType);
+                if (userDataJsonString != null) {
+                    UpdateUserDataRequestTO request = new UpdateUserDataRequestTO();
+                    request.user_data = userDataJsonString;
+                    request.service = serviceEmail;
+                    try {
+                        com.mobicage.api.services.Rpc.updateUserData(new ResponseHandler<UpdateUserDataResponseTO>(),
+                                request);
+                    } catch (Exception e) {
+                        L.bug("Failed to send " + request, e);
+                    }
+                }
+            }
+        };
+
+        if (T.getThreadType() == T.BIZZ) {
+            handler.run();
+        } else {
+            mMainService.postOnBIZZHandler(handler);
+        }
+    }
+
     public Bitmap toFriendBitmap(byte[] bitmapBytes) {
         if (bitmapBytes == null) {
             return getMissingFriendAvatarBitmap();
