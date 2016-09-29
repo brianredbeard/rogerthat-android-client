@@ -527,30 +527,43 @@ public class NewsActivity extends ServiceBoundActivity {
                     names.add(mMyName);
                 }
 
-                if (names.size() > 2) {
-                    final SpannableString text = new SpannableString(getString(R.string.news_members_and_x_others, names.get(0), names.size() - 1));
-                    text.setSpan(new StyleSpan(Typeface.BOLD), 0, names.get(0).length(),
-                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    members.setText(text);
+                if (names.size() > 0) {
+                    if (names.size() > 2) {
+                        final SpannableString text = new SpannableString(getString(R.string.news_members_and_x_others, names.get(0), names.size() - 1));
+                        text.setSpan(new StyleSpan(Typeface.BOLD), 0, names.get(0).length(),
+                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        members.setText(text);
 
-                } else {
-                    String namesPart = android.text.TextUtils.join(" & ", names);
-                    final SpannableString text = new SpannableString(getString(R.string.news_members, namesPart));
-                    text.setSpan(new StyleSpan(Typeface.BOLD), 0, namesPart.length(),
-                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    members.setText(text);
-                }
-
-                membersContainer.setVisibility(View.VISIBLE);
-                membersContainer.setOnClickListener(new SafeViewOnClickListener() {
-                    @Override
-                    public void safeOnClick(View v) {
-                        Intent intent = new Intent(NewsActivity.this, MembersActivity.class);
-                        intent.putExtra(MembersActivity.ME, mMyEmail);
-                        intent.putExtra(MembersActivity.MEMBERS, newsItem.users_that_rogered);
-                        startActivity(intent);
+                    } else if (names.size() > 1) {
+                        String namesPart = android.text.TextUtils.join(" & ", names);
+                        final SpannableString text = new SpannableString(getString(R.string.news_members_x, namesPart));
+                        int splitIndex = namesPart.indexOf(" & ");
+                        text.setSpan(new StyleSpan(Typeface.BOLD), 0, splitIndex,
+                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        text.setSpan(new StyleSpan(Typeface.BOLD), splitIndex + 3, namesPart.length(),
+                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        members.setText(text);
+                    } else {
+                        String namesPart = names.get(0);
+                        final SpannableString text = new SpannableString(getString(R.string.news_members_1, namesPart));
+                        text.setSpan(new StyleSpan(Typeface.BOLD), 0, namesPart.length(),
+                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        members.setText(text);
                     }
-                });
+
+                    membersContainer.setVisibility(View.VISIBLE);
+                    membersContainer.setOnClickListener(new SafeViewOnClickListener() {
+                        @Override
+                        public void safeOnClick(View v) {
+                            Intent intent = new Intent(NewsActivity.this, MembersActivity.class);
+                            intent.putExtra(MembersActivity.ME, mMyEmail);
+                            intent.putExtra(MembersActivity.MEMBERS, newsItem.users_that_rogered);
+                            startActivity(intent);
+                        }
+                    });
+                } else {
+                    membersContainer.setVisibility(View.GONE);
+                }
             } else {
                 membersContainer.setVisibility(View.GONE);
             }
