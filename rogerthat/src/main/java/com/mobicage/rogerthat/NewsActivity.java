@@ -465,6 +465,11 @@ public class NewsActivity extends ServiceBoundActivity {
     protected void onServiceUnbound() {
     }
 
+    @Override
+    public void onToolbarClicked() {
+        mListView.setSelection(0);
+    }
+
     private void requestMoreNews(boolean isRefresh) {
         mShouldLoadMoreNews = false;
         if (isRefresh) {
