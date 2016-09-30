@@ -94,10 +94,11 @@
     <string name="sql_friend_get_emails_by_type">SELECT email FROM friend WHERE type = ?</string>
 
     <string name="sql_friend_data_get">SELECT user_data, app_data FROM friend WHERE email = ?</string>
+    <string name="sql_friend_user_data_get">SELECT user_data FROM friend WHERE email = ?</string>
     <string name="sql_friend_set_user_data">UPDATE friend SET user_data=? WHERE email=?</string>
     <string name="sql_friend_set_app_data">UPDATE friend SET app_data=? WHERE email=?</string>
     <string name="sql_friend_set_data">UPDATE friend SET user_data=?, app_data=? WHERE email=?</string>
-    
+
     <string name="sql_friend_get_broadcast_flow_for_mfr">
         SELECT smi.x, smi.y, smi.z, smi.static_flow_hash, smi.hashed_tag, f.generation, smi.label FROM service_menu_item smi INNER JOIN friend f ON f.email=smi.friend WHERE smi.static_flow_hash=f.broadcast_flow_hash AND f.email=?
     </string>
@@ -117,7 +118,7 @@
     <string name="sql_friendset_delete_from">DELETE FROM friend_set WHERE email = ?</string>
     <string name="sql_friendset_contains">SELECT COUNT(*) FROM friend_set WHERE email = ?</string>
     <string name="sql_friendset_get">SELECT email FROM friend_set</string>
-    
+
     <!-- friend invitation secrets -->
     <string name="sql_friend_invitation_secret_insert">INSERT OR REPLACE INTO friend_invitation_secrets(secret) VALUES (?)</string>
     <string name="sql_friend_invitation_secret_get">SELECT secret FROM friend_invitation_secrets LIMIT 1</string>
@@ -234,7 +235,7 @@ WHERE m1.\"key\" = ?
        WHERE show_in_message_list = 1 AND existence = 1
        GROUP BY day
        ORDER BY day DESC
-    </string>   
+    </string>
     <string name="sql_message_cursor_query_filter_member">
 SELECT DISTINCT m1.\"key\", m1.parent_key, m1.sender, m1.message, m1.timestamp, m1.dirty, m1.recipients, m1.flags, m1.needs_my_answer, m1.recipients_status, m1.alert_flags, m1.rowid as _id, m1.sortid, 1 as mergeid, m1.thread_dirty, m1.last_thread_message, m1.reply_count, m1.thread_needs_my_answer, m1.thread_show_in_list, m1.thread_avatar_hash, m1.thread_background_color, m1.thread_text_color, m1.priority, m1.default_priority, m1.default_sticky, 0
 FROM message m1
@@ -351,7 +352,7 @@ ORDER BY ms.acked_timestamp DESC
     <string name="sql_thread_avatar_get">SELECT avatar FROM thread_avatar WHERE avatar_hash = ?</string>
     <string name="sql_thread_avatar_count">SELECT COUNT(*) FROM thread_avatar WHERE avatar_hash = ?</string>
     <string name="sql_message_message_get">SELECT message FROM message WHERE \"key\" = ?</string>
-    
+
     <!-- message flows -->
     <string name="sql_mf_run_save">INSERT OR REPLACE INTO message_flow_run (parent_message_key, state, static_flow_hash) VALUES (?, ?, ?)</string>
     <string name="sql_mf_run_get">SELECT state, static_flow_hash FROM message_flow_run WHERE parent_message_key = ?</string>
@@ -376,7 +377,7 @@ ORDER BY ms.acked_timestamp DESC
     <string name="sql_activity_cursor_important_only_query">SELECT timestamp, \"type\", reference, parameters, friend_reference, rowid AS _id FROM activity WHERE \"type\" &lt; 100 OR \"type\" &gt;= 200 ORDER BY timestamp DESC LIMIT 400</string>
     <string name="sql_activity_cursor_full_query">SELECT timestamp, \"type\", reference, parameters, friend_reference, rowid AS _id FROM activity ORDER BY timestamp DESC LIMIT 400</string>
     <string name="sql_activity_delete_for_message">DELETE FROM activity WHERE reference IN (SELECT key FROM message WHERE key=? OR parent_key=?)</string>
-    
+
     <!-- location -->
     <string name="sql_insert_beacon_discovery">INSERT INTO beacon_discovery(uuid, name, timestamp) VALUES (?, ?, ?)</string>
     <string name="sql_get_beacon_discovery">SELECT uuid, name, timestamp, friend_email FROM beacon_discovery WHERE uuid = ? AND name = ?</string>
@@ -385,12 +386,12 @@ ORDER BY ms.acked_timestamp DESC
     <string name="sql_delete_beacon_discovery_by_email">DELETE FROM beacon_discovery WHERE friend_email = ?</string>
     <string name="sql_delete_beacon_discovery_by_uuid_and_name">DELETE FROM beacon_discovery WHERE uuid = ? AND name = ?</string>
     <string name="sql_get_friend_connected_on_beacon_discovery">SELECT bd.friend_email, bd.tag, f.callbacks FROM beacon_discovery as bd INNER JOIN friend as f ON bd.friend_email=f.email WHERE bd.uuid = ? AND bd.name = ? AND (f.existence = 0 OR f.existence = 4)</string>
-    
+
     <!-- js embedding -->
     <string name="sql_get_js_embedding">SELECT name, hash, status FROM js_embedding</string>
     <string name="sql_insert_js_embedding">INSERT OR REPLACE INTO js_embedding(name, hash, status) values (?, ?, ?)</string>
-    <string name="sql_delete_js_embedding">DELETE FROM js_embedding WHERE name = ?</string>  
-    
+    <string name="sql_delete_js_embedding">DELETE FROM js_embedding WHERE name = ?</string>
+
     <!-- group -->
     <string name="sql_get_group">SELECT rg.id, rg.name, rg.avatar, rg.avatar_hash, rgm.email FROM recipients_group rg LEFT OUTER JOIN recipients_group_member rgm ON rg.id = rgm.group_id LEFT OUTER JOIN friend f ON rgm.email = f.email WHERE rg.id = ? ORDER BY f.name COLLATE NOCASE</string>
     <string name="sql_get_groups">SELECT id, name, avatar, avatar_hash FROM recipients_group ORDER BY name COLLATE NOCASE</string>
@@ -418,7 +419,7 @@ ORDER BY ms.acked_timestamp DESC
     <string name="sql_delete_group_member">DELETE FROM recipients_group_member WHERE group_id = ? AND email = ?</string>
     <string name="sql_clear_group_member">DELETE FROM recipients_group_member</string>
     <string name="sql_clear_group_member_by_email">DELETE FROM recipients_group_member WHERE email = ?</string>
-    
+
     <!-- beacon region -->
     <string name="sql_clear_beacon_regions">DELETE FROM beacon_region</string>
     <string name="sql_get_beacon_regions">SELECT uuid, major, minor FROM beacon_region</string>
@@ -429,15 +430,15 @@ ORDER BY ms.acked_timestamp DESC
     <string name="sql_services_count_by_organization_type">SELECT COUNT(*) FROM (SELECT IFNULL(category_id, email) AS category FROM friend WHERE type=2 AND (existence = 0 OR existence = 4) AND organization_type=? GROUP BY category)</string>
 
     <!-- news -->
-    <string name="sql_news_insert_item">INSERT INTO news (id, \"timestamp\", sender_email, sender_name, sender_avatar_id, title, message, image_url, label, reach, qr_code_content, qr_code_caption, version, flags, type, dirty, pinned, rogered, deleted) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)</string>
+    <string name="sql_news_insert_item">INSERT INTO news (id, \"timestamp\", sender_email, sender_name, sender_avatar_id, title, message, image_url, label, reach, qr_code_content, qr_code_caption, version, flags, type, read, pinned, rogered, deleted) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)</string>
     <string name="sql_news_update_item">UPDATE news set \"timestamp\" = ?, sender_email = ?, sender_name = ?, sender_avatar_id = ?, title = ?, message = ?, image_url = ?, label = ?, reach = ?, qr_code_content= ?, qr_code_caption = ?, version = ?, flags = ? WHERE id = ?</string>
-    <string name="sql_news_list_item_versions">SELECT id, version, dirty, pinned, rogered, deleted FROM news</string>
+    <string name="sql_news_list_item_versions">SELECT id, version, read, pinned, rogered, deleted FROM news</string>
     <string name="sql_news_insert_button">INSERT OR REPLACE INTO news_buttons (news_id, id, caption, \"action\", flow_params, \"index\") VALUES (?,?,?,?,?,?)</string>
     <string name="sql_news_insert_rogered_user">INSERT OR REPLACE INTO news_rogered_users (news_id, friend) VALUES (?,?)</string>
-    <string name="sql_news_get_item">SELECT timestamp, sender_email, sender_name, sender_avatar_id, title, message, image_url, label, reach, qr_code_content, qr_code_caption, version, flags, type, dirty, pinned, rogered, deleted FROM news WHERE id=?</string>
+    <string name="sql_news_get_item">SELECT timestamp, sender_email, sender_name, sender_avatar_id, title, message, image_url, label, reach, qr_code_content, qr_code_caption, version, flags, type, read, pinned, rogered, deleted FROM news WHERE id=?</string>
     <string name="sql_news_get_buttons">SELECT id, caption, action, flow_params FROM news_buttons WHERE news_id = ? ORDER BY \"index\"</string>
     <string name="sql_news_get_rogered_users">SELECT friend FROM news_rogered_users WHERE news_id = ? LIMIT 2</string>
-    <string name="sql_news_update_dirty">UPDATE news SET dirty = ? WHERE id = ?</string>
+    <string name="sql_news_update_read">UPDATE news SET read = ? WHERE id = ?</string>
     <string name="sql_news_update_pinned">UPDATE news SET pinned = ? WHERE id = ?</string>
     <string name="sql_news_update_rogered">UPDATE news SET rogered = ? WHERE id = ?</string>
     <string name="sql_news_update_deleted">UPDATE news SET deleted = ? WHERE id = ?</string>

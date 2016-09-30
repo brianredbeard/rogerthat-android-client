@@ -1028,5 +1028,5 @@ if __name__ == "__main__":
     else:
         logging.info('app_id was rogerthat, only limited prepare is needed')
     generate_custom_cloud_constants(doc)
-    generate_coloured_buttons(doc['COLORS']['primary_color'],
-                              doc['COLORS']['secondary_color'])
+    # generate_coloured_buttons(doc['COLORS']['primary_color'],
+    #                           doc['COLORS']['secondary_color'])
