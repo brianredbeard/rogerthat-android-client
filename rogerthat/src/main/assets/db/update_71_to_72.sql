@@ -7,20 +7,20 @@ CREATE TABLE news (
     title TEXT,
     message TEXT,
     image_url TEXT,
-    label TEXT,
+    broadcast_type TEXT,
     reach INTEGER,
     qr_code_content TEXT,
     qr_code_caption TEXT,
     version INTEGER,
     flags INTEGER,
     type INTEGER,
-    dirty INTEGER,
+    "read" INTEGER,
     pinned INTEGER,
     rogered INTEGER,
     deleted INTEGER
 );
 
-CREATE INDEX ix_news_search ON news (sender_name, title, message, label, qr_code_caption);
+CREATE INDEX ix_news_search ON news (sender_name, title, message, broadcast_type, qr_code_caption);
 
 CREATE TABLE news_buttons (
     news_id INTEGER NOT NULL,

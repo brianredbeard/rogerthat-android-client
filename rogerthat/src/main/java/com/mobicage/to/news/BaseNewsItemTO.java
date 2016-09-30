@@ -27,10 +27,10 @@ public class BaseNewsItemTO implements com.mobicage.rpc.IJSONable {
 
     public com.mobicage.to.news.NewsActionButtonTO[] buttons;
     public com.mobicage.to.news.NewsSenderTO sender;
+    public String broadcast_type;
     public long flags;
     public long id;
     public String image_url;
-    public String label;
     public String message;
     public String qr_code_caption;
     public String qr_code_content;
@@ -68,6 +68,12 @@ public class BaseNewsItemTO implements com.mobicage.rpc.IJSONable {
         } else {
             throw new IncompleteMessageException("com.mobicage.to.news.BaseNewsItemTO object is missing field 'sender'");
         }
+        if (json.containsKey("broadcast_type")) {
+            Object val = json.get("broadcast_type");
+            this.broadcast_type = (String) val;
+        } else {
+            throw new IncompleteMessageException("com.mobicage.to.news.BaseNewsItemTO object is missing field 'broadcast_type'");
+        }
         if (json.containsKey("flags")) {
             Object val = json.get("flags");
             if (val instanceof Integer) {
@@ -93,12 +99,6 @@ public class BaseNewsItemTO implements com.mobicage.rpc.IJSONable {
             this.image_url = (String) val;
         } else {
             throw new IncompleteMessageException("com.mobicage.to.news.BaseNewsItemTO object is missing field 'image_url'");
-        }
-        if (json.containsKey("label")) {
-            Object val = json.get("label");
-            this.label = (String) val;
-        } else {
-            throw new IncompleteMessageException("com.mobicage.to.news.BaseNewsItemTO object is missing field 'label'");
         }
         if (json.containsKey("message")) {
             Object val = json.get("message");
@@ -193,10 +193,10 @@ public class BaseNewsItemTO implements com.mobicage.rpc.IJSONable {
             obj.put("buttons", arr);
         }
         obj.put("sender", this.sender == null ? null : this.sender.toJSONMap());
+        obj.put("broadcast_type", this.broadcast_type);
         obj.put("flags", this.flags);
         obj.put("id", this.id);
         obj.put("image_url", this.image_url);
-        obj.put("label", this.label);
         obj.put("message", this.message);
         obj.put("qr_code_caption", this.qr_code_caption);
         obj.put("qr_code_content", this.qr_code_content);

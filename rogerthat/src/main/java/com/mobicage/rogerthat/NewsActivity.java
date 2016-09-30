@@ -126,6 +126,7 @@ public class NewsActivity extends ServiceBoundActivity {
     private String mMyName;
     private Map<Long, NewsItemDetails> mDBItems = new HashMap<>();
     private List<Long> mOrder = new ArrayList<>();
+    private List<Long> mFilteredOrder = new ArrayList<>();
     private List<Long> mLiveOrder = new ArrayList<>();
     private boolean mShowPinnedOnly = false;
     private List<Long> mPinnedItems = new ArrayList<>();
@@ -189,6 +190,7 @@ public class NewsActivity extends ServiceBoundActivity {
 
                 if (mSwipeContainer.isRefreshing()) {
                     mOrder = new ArrayList<>();
+                    mFilteredOrder = new ArrayList<>();
                     mLiveOrder = new ArrayList<>();
                 }
 
@@ -206,8 +208,9 @@ public class NewsActivity extends ServiceBoundActivity {
                     } else if (!mOrder.contains(ids[i])) {
                         NewsItem item = mNewsStore.getNewsItem(ids[i]);
                         mItems.put(ids[i], item);
-                        if (!mFriendsPlugin.isBroadcastTypeDisabled(item.sender.email, item.label)) {
-                            mOrder.add(ids[i]);
+                        mOrder.add(ids[i]);
+                        if (!mFriendsPlugin.isBroadcastTypeDisabled(item.sender.email, item.broadcast_type)) {
+                            mFilteredOrder.add(ids[i]);
                             shouldUpdateLayout = true;
                         }
                     }
@@ -246,14 +249,19 @@ public class NewsActivity extends ServiceBoundActivity {
                     d.deleted = item.deleted;
                     mDBItems.put(item.id, d);
 
-                    if (!mFriendsPlugin.isBroadcastTypeDisabled(item.sender.email, item.label)) {
+                    if (item.deleted) {
                         mOrder.remove(item.id);
-                    } else if (item.deleted) {
-                        mOrder.remove(item.id);
+                        mFilteredOrder.remove(item.id);
                     } else {
                         if (!mOrder.contains(item.id)) {
                             mOrder.add(item.id);
                         }
+                        if (mFriendsPlugin.isBroadcastTypeDisabled(item.sender.email, item.broadcast_type)) {
+                            mFilteredOrder.remove(item.id);
+                        } else if (!mFilteredOrder.contains(item.id)) {
+                            mFilteredOrder.add(item.id);
+                        }
+
                     }
                 }
                 Collections.sort(mOrder, comparator);
@@ -283,6 +291,8 @@ public class NewsActivity extends ServiceBoundActivity {
                     mLiveOrder.remove(id);
                     if (mOrder.remove(id)) {
                         mNewsPlugin.putNewsInDB(mOrder);
+                    }
+                    if (mFilteredOrder.remove(id)) {
                         mListAdapter.notifyDataSetChanged();
                     }
                 }
@@ -314,6 +324,16 @@ public class NewsActivity extends ServiceBoundActivity {
                         showError(intent);
                     }
                 }
+            } else if (FriendsPlugin.SERVICE_DATA_UPDATED.equals(action)) {
+                mFilteredOrder = new ArrayList<>();
+                for (Long newsId : mOrder) {
+                    NewsItem item = getNewsItem(newsId);
+                    if (!mFriendsPlugin.isBroadcastTypeDisabled(item.sender.email, item.broadcast_type)) {
+                        mFilteredOrder.add(newsId);
+                    }
+                }
+                mListAdapter.notifyDataSetChanged();
+
             } else if (NetworkConnectivityManager.INTENT_NETWORK_UP.equals(action)) {
                 if (!mIsConnectedToInternet) {
                     L.i("todo ruben INTENT_NETWORK_UP");
@@ -414,6 +434,14 @@ public class NewsActivity extends ServiceBoundActivity {
                         if (!mIsConnectedToInternet) {
                             mLiveOrder = mNewsPlugin.getNewsIdsFromDB();
                             mOrder = mNewsPlugin.getNewsIdsFromDB();
+
+                            for (Long newsId : mOrder) {
+                                NewsItem item = getNewsItem(newsId);
+                                if (!mFriendsPlugin.isBroadcastTypeDisabled(item.sender.email, item.broadcast_type)) {
+                                    mFilteredOrder.add(newsId);
+                                }
+                            }
+
                             mListAdapter.notifyDataSetChanged();
                         }
                     }
@@ -487,14 +515,16 @@ public class NewsActivity extends ServiceBoundActivity {
         if (mItems.containsKey(newsId)) {
             return mItems.get(newsId);
         }
-        return mNewsStore.getNewsItem(newsId);
+        NewsItem item = mNewsStore.getNewsItem(newsId);
+        mItems.put(newsId, item);
+        return item;
     }
 
     private NewsItem getNewsItem(int position) {
         if (mShowPinnedOnly) {
             return getNewsItem(mPinnedItems.get(position));
         }
-        return getNewsItem(mOrder.get(position));
+        return getNewsItem(mFilteredOrder.get(position));
     }
 
     public class NewsListAdapter extends BaseAdapter {
@@ -624,7 +654,7 @@ public class NewsActivity extends ServiceBoundActivity {
         public View getView(final int position, final View convertView, final ViewGroup parent) {
             T.UI();
             final View view;
-            if (!mShowPinnedOnly && mIsConnectedToInternet && position >= mOrder.size() - 10) {
+            if (!mShowPinnedOnly && mIsConnectedToInternet && position >= mFilteredOrder.size() - 10) {
                 if (mCursor != null && mShouldLoadMoreNews) {
                     requestMoreNews(false);
                 }
@@ -700,7 +730,16 @@ public class NewsActivity extends ServiceBoundActivity {
                             @Override
                             public void safeOnClick(View v) {
                                 alertDialog.dismiss();
-                                mFriendsPlugin.disableBroadcastType(newsItem.sender.email, newsItem.label);
+
+                                mFilteredOrder = new ArrayList<>();
+                                for (Long newsId : mOrder) {
+                                    NewsItem item = getNewsItem(newsId);
+                                    if (!item.broadcast_type.equals(newsItem.broadcast_type)) {
+                                        mFilteredOrder.add(item.id);
+                                    }
+                                }
+
+                                mFriendsPlugin.disableBroadcastType(newsItem.sender.email, newsItem.broadcast_type);
                                 mListAdapter.notifyDataSetChanged();
                             }
                         });
@@ -869,8 +908,8 @@ public class NewsActivity extends ServiceBoundActivity {
             }
             TextView reach = (TextView) view.findViewById(R.id.reach);
             reach.setText(newsItem.reach + "");
-            TextView label = (TextView) view.findViewById(R.id.label);
-            label.setText("[" + newsItem.label + "]");
+            TextView broadcastType = (TextView) view.findViewById(R.id.broadcast_type);
+            broadcastType.setText("[" + newsItem.broadcast_type + "]");
 
             LinearLayout actions = (LinearLayout) view.findViewById(R.id.actions);
             actions.removeAllViews();
@@ -1015,7 +1054,7 @@ public class NewsActivity extends ServiceBoundActivity {
             if (mShowPinnedOnly) {
                 return mPinnedItems.size();
             }
-            return mOrder.size();
+            return mFilteredOrder.size();
         }
 
         @Override
@@ -1023,7 +1062,7 @@ public class NewsActivity extends ServiceBoundActivity {
             if (mShowPinnedOnly) {
                 return mPinnedItems.get(position);
             }
-            return mOrder.get(position);
+            return mFilteredOrder.get(position);
         }
 
         @Override
@@ -1034,7 +1073,7 @@ public class NewsActivity extends ServiceBoundActivity {
                 }
                 return mPinnedItems.get(position);
             }
-            return mOrder.get(position);
+            return mFilteredOrder.get(position);
         }
     }
 

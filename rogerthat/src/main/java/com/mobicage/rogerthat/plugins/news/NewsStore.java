@@ -147,7 +147,7 @@ public class NewsStore implements Closeable {
                 bindString(mInsertNewsItem, 6, item.title);
                 bindString(mInsertNewsItem, 7, item.message);
                 bindString(mInsertNewsItem, 8, item.image_url);
-                bindString(mInsertNewsItem, 9, item.label);
+                bindString(mInsertNewsItem, 9, item.broadcast_type);
                 mInsertNewsItem.bindLong(10, item.reach);
                 bindString(mInsertNewsItem, 11, item.qr_code_content);
                 bindString(mInsertNewsItem, 12, item.qr_code_caption);
@@ -178,7 +178,7 @@ public class NewsStore implements Closeable {
                 bindString(mUpdateNewsItem, 5, item.title);
                 bindString(mUpdateNewsItem, 6, item.message);
                 bindString(mUpdateNewsItem, 7, item.image_url);
-                bindString(mUpdateNewsItem, 8, item.label);
+                bindString(mUpdateNewsItem, 8, item.broadcast_type);
                 mUpdateNewsItem.bindLong(9, item.reach);
                 bindString(mUpdateNewsItem, 10, item.qr_code_content);
                 bindString(mUpdateNewsItem, 11, item.qr_code_caption);
@@ -256,7 +256,7 @@ public class NewsStore implements Closeable {
             newsItem.title = c.getString(4);
             newsItem.message = c.getString(5);
             newsItem.image_url = c.getString(6);
-            newsItem.label = c.getString(7);
+            newsItem.broadcast_type = c.getString(7);
             newsItem.reach = c.getLong(8);
             newsItem.qr_code_content = c.getString(9);
             newsItem.qr_code_caption = c.getString(10);
