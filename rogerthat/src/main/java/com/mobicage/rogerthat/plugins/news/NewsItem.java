@@ -29,7 +29,7 @@ public class NewsItem extends BaseNewsItemTO {
     public static long TYPE_NORMAL = 1;
     public static long TYPE_QR_CODE = 2;
 
-    public boolean dirty;
+    public boolean read;
     public boolean pinned;
     public boolean rogered;
     public boolean deleted;
@@ -39,7 +39,7 @@ public class NewsItem extends BaseNewsItemTO {
 
     public NewsItem(Map<String, Object> json) throws IncompleteMessageException {
         super(json);
-        this.dirty =  (boolean) json.get("dirty");
+        this.read = (boolean) json.get("read");
         this.pinned = (boolean) json.get("pinned");
         this.rogered = (boolean) json.get("rogered");
         this.deleted = (boolean) json.get("deleted");
@@ -54,8 +54,10 @@ public class NewsItem extends BaseNewsItemTO {
     @Override
     public Map<String, Object> toJSONMap() {
         Map<String, Object> map = super.toJSONMap();
-        map.put("dirty", dirty);
+        map.put("read", read);
         map.put("pinned", pinned);
+        map.put("rogered", rogered);
+        map.put("deleted", deleted);
         return map;
     }
 

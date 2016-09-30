@@ -204,9 +204,12 @@ public class NewsActivity extends ServiceBoundActivity {
                     } else if (mDBItems.get(ids[i]).deleted) {
                         // news item was removed
                     } else if (!mOrder.contains(ids[i])) {
-                        mItems.put(ids[i], mNewsStore.getNewsItem(ids[i]));
-                        mOrder.add(ids[i]);
-                        shouldUpdateLayout = true;
+                        NewsItem item = mNewsStore.getNewsItem(ids[i]);
+                        mItems.put(ids[i], item);
+                        if (!mFriendsPlugin.isBroadcastTypeDisabled(item.sender.email, item.label)) {
+                            mOrder.add(ids[i]);
+                            shouldUpdateLayout = true;
+                        }
                     }
                 }
 
@@ -233,25 +236,25 @@ public class NewsActivity extends ServiceBoundActivity {
 
                 for (int i = 0; i < ids.length; i++) {
                     NewsItem item = mNewsStore.getNewsItem(ids[i]);
-
+                    mItems.put(item.id, item);
                     NewsItemDetails d = new NewsItemDetails();
                     d.id = item.id;
                     d.version = item.version;
-                    d.dirty = item.dirty;
+                    d.read = item.read;
                     d.pinned = item.pinned;
                     d.rogered = item.rogered;
                     d.deleted = item.deleted;
                     mDBItems.put(item.id, d);
 
-                    if (item.deleted) {
+                    if (!mFriendsPlugin.isBroadcastTypeDisabled(item.sender.email, item.label)) {
+                        mOrder.remove(item.id);
+                    } else if (item.deleted) {
                         mOrder.remove(item.id);
                     } else {
                         if (!mOrder.contains(item.id)) {
                             mOrder.add(item.id);
                         }
                     }
-
-                    mItems.put(item.id, item);
                 }
                 Collections.sort(mOrder, comparator);
                 mSwipeContainer.setRefreshing(false);
@@ -456,6 +459,7 @@ public class NewsActivity extends ServiceBoundActivity {
         filter.addAction(FriendsPlugin.FRIEND_MARKED_FOR_REMOVAL_INTENT);
         filter.addAction(FriendsPlugin.FRIEND_ADDED_INTENT);
         filter.addAction(FriendsPlugin.FRIENDS_LIST_REFRESHED);
+        filter.addAction(FriendsPlugin.SERVICE_DATA_UPDATED);
         filter.addAction(NetworkConnectivityManager.INTENT_NETWORK_UP);
         filter.addAction(NetworkConnectivityManager.INTENT_NETWORK_DOWN);
         registerReceiver(mBroadcastReceiver, filter);
@@ -634,14 +638,14 @@ public class NewsActivity extends ServiceBoundActivity {
 
             final NewsItem newsItem = getNewsItem(position);
             final int existenceStatus = mFriendsPlugin.getStore().getExistence(newsItem.sender.email);
-            if (!newsItem.dirty) {
-                newsItem.dirty = true;
-                mDBItems.get(newsItem.id).dirty = true;
+            if (!newsItem.read) {
+                newsItem.read = true;
+                mDBItems.get(newsItem.id).read = true;
 
                 mService.postAtFrontOfBIZZHandler(new SafeRunnable() {
                     @Override
                     protected void safeRun() throws Exception {
-                        mNewsStore.setNewsItemDirty(newsItem.id);
+                        mNewsStore.setNewsItemRead(newsItem.id);
                     }
                 });
 
@@ -688,7 +692,6 @@ public class NewsActivity extends ServiceBoundActivity {
                     }
 
                     if (existenceStatus == Friend.ACTIVE) {
-                        // todo ruben should we show this for sticky items?
                         final View actionHide = layoutInflater.inflate(R.layout.news_actions_item, null);
                         ((ImageView) actionHide.findViewById(R.id.icon)).setImageDrawable(new IconicsDrawable(NewsActivity.this, FontAwesome.Icon.faw_times_circle).color(getResources().getColor(R.color.mc_default_text)).sizeDp(15).paddingDp(2));
                         ((TextView) actionHide.findViewById(R.id.title)).setText(R.string.hide);
@@ -697,8 +700,8 @@ public class NewsActivity extends ServiceBoundActivity {
                             @Override
                             public void safeOnClick(View v) {
                                 alertDialog.dismiss();
-                                L.i("todo ruben see fewer posts like this");
                                 mFriendsPlugin.disableBroadcastType(newsItem.sender.email, newsItem.label);
+                                mListAdapter.notifyDataSetChanged();
                             }
                         });
                         dialog.addView(actionHide);

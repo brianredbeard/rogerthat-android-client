@@ -69,7 +69,7 @@ public class NewsStore implements Closeable {
         mInsertNewsRogeredUser = mDb.compileStatement(mMainService.getString(R.string.sql_news_insert_rogered_user));
 
         mUpdateNewsItem = mDb.compileStatement(mMainService.getString(R.string.sql_news_update_item));
-        mUpdateNewsDirty = mDb.compileStatement(mMainService.getString(R.string.sql_news_update_dirty));
+        mUpdateNewsDirty = mDb.compileStatement(mMainService.getString(R.string.sql_news_update_read));
         mUpdateNewsPinned = mDb.compileStatement(mMainService.getString(R.string.sql_news_update_pinned));
         mUpdateNewsRogered = mDb.compileStatement(mMainService.getString(R.string.sql_news_update_rogered));
         mUpdateNewsDeleted = mDb.compileStatement(mMainService.getString(R.string.sql_news_update_deleted));
@@ -193,8 +193,8 @@ public class NewsStore implements Closeable {
         });
     }
 
-    public void setNewsItemDirty(final long newsId) {
-        TransactionHelper.runInTransaction(mDb, "setNewsItemDirty", new TransactionWithoutResult() {
+    public void setNewsItemRead(final long newsId) {
+        TransactionHelper.runInTransaction(mDb, "setNewsItemRead", new TransactionWithoutResult() {
             @Override
             protected void run() {
                 mUpdateNewsDirty.bindLong(1, 1);
@@ -263,7 +263,7 @@ public class NewsStore implements Closeable {
             newsItem.version = c.getLong(11);
             newsItem.flags = c.getLong(12);
             newsItem.type = c.getLong(13);
-            newsItem.dirty = c.getLong(14) > 0;
+            newsItem.read = c.getLong(14) > 0;
             newsItem.pinned = c.getLong(15) > 0;
             newsItem.rogered = c.getLong(16) > 0;
             newsItem.deleted = c.getLong(17) > 0;
@@ -373,7 +373,7 @@ public class NewsStore implements Closeable {
         NewsItemDetails d = new NewsItemDetails();
         d.id = c.getLong(0);
         d.version = c.getLong(1);
-        d.dirty = c.getLong(2) > 0;
+        d.read = c.getLong(2) > 0;
         d.pinned = c.getLong(3) > 0;
         d.rogered = c.getLong(4) > 0;
         d.deleted = c.getLong(5) > 0;

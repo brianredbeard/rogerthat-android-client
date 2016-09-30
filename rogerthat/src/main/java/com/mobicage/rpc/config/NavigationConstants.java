@@ -26,22 +26,22 @@ public class NavigationConstants {
 
     public static ServiceBoundActivity.NavigationItem[] getNavigationItems() {
         return new ServiceBoundActivity.NavigationItem[]{
-                new ServiceBoundActivity.NavigationItem(R.drawable.menu_0, null, "messages", R.string.tab_messaging, false),
-                new ServiceBoundActivity.NavigationItem(R.drawable.menu_1, null, "services", R.string.tab_services, false),
-                new ServiceBoundActivity.NavigationItem(R.drawable.menu_2, null, "friends", R.string.tab_friends, false),
-                new ServiceBoundActivity.NavigationItem(R.drawable.menu_3, null, "scan", R.string.scan, false),
-                new ServiceBoundActivity.NavigationItem(R.drawable.menu_4, null, "profile", R.string.profile, false),
-                new ServiceBoundActivity.NavigationItem(R.drawable.menu_5, null, "settings", R.string.settings, false),
-                new ServiceBoundActivity.NavigationItem(R.drawable.menu_6, null, "stream", R.string.tab_stream, false),
+            new ServiceBoundActivity.NavigationItem(R.drawable.menu_0, null, "messages", R.string.tab_messaging, false),
+            new ServiceBoundActivity.NavigationItem(R.drawable.menu_1, null, "services", R.string.tab_services, false),
+            new ServiceBoundActivity.NavigationItem(R.drawable.menu_2, null, "friends", R.string.tab_friends, false),
+            new ServiceBoundActivity.NavigationItem(R.drawable.menu_3, null, "scan", R.string.scan, false),
+            new ServiceBoundActivity.NavigationItem(R.drawable.menu_4, null, "profile", R.string.profile, false),
+            new ServiceBoundActivity.NavigationItem(R.drawable.menu_5, null, "settings", R.string.settings, false),
+            new ServiceBoundActivity.NavigationItem(R.drawable.menu_6, null, "stream", R.string.tab_stream, false),
         };
     }
 
     public static ServiceBoundActivity.NavigationItem[] getNavigationFooterItems() {
         return new ServiceBoundActivity.NavigationItem[]{
-                new ServiceBoundActivity.NavigationItem(FontAwesome.Icon.faw_newspaper_o, null, "news", R.string.tab_messaging, false),
-                new ServiceBoundActivity.NavigationItem(FontAwesome.Icon.faw_shopping_cart, "action", "__sln__.order", R.string.order, false),
-                new ServiceBoundActivity.NavigationItem(FontAwesome.Icon.faw_calendar, "click", "agenda", R.string.agenda, false),
-                new ServiceBoundActivity.NavigationItem(FontAwesome.Icon.faw_credit_card, null, "qrcode", R.string.app_name, true),
+            new ServiceBoundActivity.NavigationItem(FontAwesome.Icon.faw_newspaper_o, null, "news", R.string.tab_messaging, false),
+            new ServiceBoundActivity.NavigationItem(FontAwesome.Icon.faw_shopping_cart, "action", "__sln__.order", R.string.order, false),
+            new ServiceBoundActivity.NavigationItem(FontAwesome.Icon.faw_calendar, "click", "agenda", R.string.agenda, false),
+            new ServiceBoundActivity.NavigationItem(FontAwesome.Icon.faw_credit_card, null, "qrcode", R.string.app_name, true),
         };
     }
 }

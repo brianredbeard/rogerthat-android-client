@@ -1101,6 +1101,20 @@ public class FriendStore implements Closeable {
         }
     }
 
+    public String getUserData(final String email) {
+        T.dontCare();
+        final Cursor curs = mDb.rawQuery(mMainService.getString(R.string.sql_friend_user_data_get), new String[]{email});
+
+        try {
+            if (!curs.moveToFirst())
+                return null;
+
+            return curs.getString(0);
+        } finally {
+            curs.close();
+        }
+    }
+
     private void deleteServiceMenuForFriend(final String email) {
         mDeleteServiceMenuHTTP.bindString(1, email);
         mDeleteServiceMenuHTTP.execute();
@@ -2076,24 +2090,8 @@ public class FriendStore implements Closeable {
 
     public String disableBroadcastType(final String serviceEmail, final String broadcastType) {
         T.BIZZ();
-        String[] data = getServiceData(serviceEmail);
-        Map<String, Object> userData = data[0] == null ? new HashMap<String, Object>() : (Map<String, Object>) JSONValue.parse(data[0]);
-        Map<String, Object> appData = data[1] == null ? null : (Map<String, Object>) JSONValue.parse(data[1]);
-
-        if (appData == null) {
-            L.bug("disableBroadcastType failed appData was null");
-            return null;
-        }
-        if (!appData.containsKey("__rt__broadcastTypes")) {
-            L.bug("disableBroadcastType failed appData.__rt__broadcastTypes not found");
-            return null;
-        }
-
-        JSONArray availableBroadcastTypes = (JSONArray) appData.get("__rt__broadcastTypes");
-        if (!availableBroadcastTypes.contains(broadcastType)) {
-            L.bug("disableBroadcastType failed appData.__rt__broadcastTypes does not contain: " + broadcastType);
-            return null;
-        }
+        String userDataString = getUserData(serviceEmail);
+        Map<String, Object> userData = userDataString == null ? new HashMap<String, Object>() : (Map<String, Object>) JSONValue.parse(userDataString);
 
         JSONArray disabledBroadcastTypes;
         if (userData.containsKey("__rt__disabledBroadcastTypes")) {
@@ -2111,5 +2109,15 @@ public class FriendStore implements Closeable {
         String userDataJsonString = JSONValue.toJSONString(userData);
         updateServiceData(serviceEmail, userDataJsonString, null, false);
         return userDataJsonString;
+    }
+
+    public JSONArray getDisabledBroadcastTypes(final String serviceEmail) {
+        T.dontCare(); // T.UI or T.BIZZ
+        String userDataString = getUserData(serviceEmail);
+        Map<String, Object> userData = userDataString == null ? new HashMap<String, Object>() : (Map<String, Object>) JSONValue.parse(userDataString);
+        if (userData.containsKey("__rt__disabledBroadcastTypes")) {
+            return (JSONArray) userData.get("__rt__disabledBroadcastTypes");
+        }
+        return new JSONArray();
     }
 }

@@ -17,16 +17,10 @@
  */
 package com.mobicage.rogerthat.plugins.news;
 
-import com.mobicage.rogerthat.util.logging.L;
-import com.mobicage.rpc.IncompleteMessageException;
-import com.mobicage.to.news.BaseNewsItemTO;
-
-import java.util.Map;
-
 public class NewsItemDetails {
     public long id;
     public long version;
-    public boolean dirty;
+    public boolean read;
     public boolean pinned;
     public boolean rogered;
     public boolean deleted;

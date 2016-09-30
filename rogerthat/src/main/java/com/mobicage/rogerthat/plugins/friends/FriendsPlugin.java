@@ -111,6 +111,7 @@ import com.mobicage.to.system.SetSecureInfoResponseTO;
 import com.mobicage.to.system.SettingsTO;
 
 import org.jivesoftware.smack.util.Base64;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONValue;
 
 import java.util.ArrayList;
@@ -207,6 +208,8 @@ public class FriendsPlugin implements MobicagePlugin {
     private final GeoLocationProvider mGeoProvider;
     private final TrackmePlugin mTrackmePlugin;
 
+    private final Map<String, JSONArray> mDisabledBroadcastTypesCache = new HashMap<>();
+
     public FriendsPlugin(final DatabaseManager pDatabaseManager, final ConfigurationProvider pConfigProvider,
         final MainService mainService, final NetworkConnectivityManager connectivityManager,
         final BrandingMgr brandingMgr, final GeoLocationProvider pGeoProvider) {
@@ -283,6 +286,7 @@ public class FriendsPlugin implements MobicagePlugin {
             public UpdateUserDataResponseTO updateUserData(UpdateUserDataRequestTO request) throws Exception {
                 T.BIZZ();
                 mStore.updateServiceData(request.service, request.user_data, request.app_data, true);
+                mDisabledBroadcastTypesCache.remove(request.service);
                 return new UpdateUserDataResponseTO();
             }
         };
@@ -1263,6 +1267,7 @@ public class FriendsPlugin implements MobicagePlugin {
             protected void safeRun() throws Exception {
                 T.BIZZ();
                 mStore.updateServiceData(serviceEmail, userDataJsonString, null, false);
+                mDisabledBroadcastTypesCache.remove(serviceEmail);
 
                 UpdateUserDataRequestTO request = new UpdateUserDataRequestTO();
                 request.user_data = userDataJsonString;
@@ -1362,6 +1367,7 @@ public class FriendsPlugin implements MobicagePlugin {
                 T.BIZZ();
                 String userDataJsonString = mStore.disableBroadcastType(serviceEmail, broadcastType);
                 if (userDataJsonString != null) {
+                    disableBroadcastTypeInCache(serviceEmail, broadcastType);
                     UpdateUserDataRequestTO request = new UpdateUserDataRequestTO();
                     request.user_data = userDataJsonString;
                     request.service = serviceEmail;
@@ -1436,5 +1442,18 @@ public class FriendsPlugin implements MobicagePlugin {
         info.put("service", serviceInfo);
         info.put("system", systemInfo);
         return info;
+    }
+
+    public boolean isBroadcastTypeDisabled(final String serviceEmail, final String broadcastType) {
+        if (!mDisabledBroadcastTypesCache.containsKey(serviceEmail)) {
+            mDisabledBroadcastTypesCache.put(serviceEmail, mStore.getDisabledBroadcastTypes(serviceEmail));
+        }
+        return mDisabledBroadcastTypesCache.get(serviceEmail).contains(broadcastType);
+    }
+
+    private void disableBroadcastTypeInCache(final String serviceEmail, final String broadcastType) {
+        if (!isBroadcastTypeDisabled(serviceEmail, broadcastType)) {
+            mDisabledBroadcastTypesCache.get(serviceEmail).add(broadcastType);
+        }
     }
 }
