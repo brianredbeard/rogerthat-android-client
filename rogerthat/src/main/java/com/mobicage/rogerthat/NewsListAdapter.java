@@ -150,7 +150,6 @@ class NewsListAdapter extends CursorAdapter {
             return mLayoutInflater.inflate(R.layout.news_list_item_hidden, parent, false);
         }
 
-
         final int existenceStatus = mFriendsPlugin.getStore().getExistence(newsItem.sender.email);
         if (!newsItem.read) {
             newsItem.read = true;
@@ -244,6 +243,17 @@ class NewsListAdapter extends CursorAdapter {
         broadcastType.setText("[" + newsItem.broadcast_type + "]");
 
         setupButtons(position, convertView, parent, view, newsItem, existenceStatus);
+
+        if (newsItem.disabled) {
+            view.findViewById(R.id.image).setAlpha(0.4f);
+            view.findViewById(R.id.qr_code_container).setAlpha(0.4f);
+            view.findViewById(R.id.details).setAlpha(0.4f);
+        } else {
+            view.findViewById(R.id.image).setAlpha(1f);
+            view.findViewById(R.id.qr_code_container).setAlpha(1f);
+            view.findViewById(R.id.details).setAlpha(1f);
+        }
+
         return view;
     }
 
@@ -621,8 +631,6 @@ class NewsListAdapter extends CursorAdapter {
         intent.putExtra("id", newsItem.id);
         intent.putExtra("pinned", newsItem.pinned);
         mMainService.sendBroadcast(intent);
-
-        mActivity.refreshCursor();
     }
 
     private void setQRCode(final NewsItem newsItem, final View view, final LinearLayout qrCodeContainer) {
