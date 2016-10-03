@@ -18,15 +18,15 @@
 
 package com.mobicage.rogerthat.util.db;
 
-import java.io.Closeable;
-import java.util.HashMap;
-import java.util.Map;
-
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
 import com.mobicage.rogerthat.util.system.T;
+
+import java.io.Closeable;
+import java.util.HashMap;
+import java.util.Map;
 
 //
 // Database with 4 columns

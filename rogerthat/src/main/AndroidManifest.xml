@@ -179,6 +179,15 @@
             android:screenOrientation="portrait">
         </activity>
         <activity
+            android:name="com.mobicage.rogerthat.NewsPinnedActivity"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity"
+            android:screenOrientation="portrait">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
+        </activity>
+        <activity
             android:name="com.mobicage.rogerthat.plugins.messaging.FriendsThreadActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize|stateHidden"

@@ -25,11 +25,10 @@ import com.mobicage.rogerthat.util.pickle.PickleException;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.IResponse;
 import com.mobicage.rpc.ResponseHandler;
+import com.mobicage.to.news.AppNewsItemTO;
 import com.mobicage.to.news.GetNewsItemsResponseTO;
-import com.mobicage.to.news.BaseNewsItemTO;
 
 import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import java.io.DataInput;
@@ -74,7 +73,7 @@ public class GetNewsItemsResponseHandler extends ResponseHandler<GetNewsItemsRes
             long[] ids = new long[resp.items.length];
             long[] versions = new long[resp.items.length];
             for (int i= 0 ; i < resp.items.length; i++) {
-                BaseNewsItemTO newsItem = resp.items[i];
+                AppNewsItemTO newsItem = resp.items[i];
                 newsStore.saveNewsItem(newsItem, mUpdatedIds.contains(newsItem.id));
                 ids[i] = newsItem.id;
                 versions[i] = newsItem.version;

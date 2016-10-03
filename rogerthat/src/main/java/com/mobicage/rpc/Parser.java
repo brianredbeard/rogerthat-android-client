@@ -2057,10 +2057,10 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
-    public static com.mobicage.to.news.BaseNewsItemTO ComMobicageToNewsBaseNewsItemTO(Object value) throws IncompleteMessageException {
+    public static com.mobicage.to.news.AppNewsItemTO ComMobicageToNewsAppNewsItemTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;
-        return new com.mobicage.to.news.BaseNewsItemTO((Map<String, Object>) value);
+        return new com.mobicage.to.news.AppNewsItemTO((Map<String, Object>) value);
     }
 
     @SuppressWarnings("unchecked")

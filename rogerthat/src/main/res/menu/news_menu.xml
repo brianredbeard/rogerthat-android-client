@@ -6,9 +6,4 @@
         android:title="@string/saved_items"
         app:showAsAction="ifRoom" />
 
-    <item
-        android:id="@+id/all"
-        android:title="@string/all_items"
-        app:showAsAction="ifRoom" />
-
 </menu>

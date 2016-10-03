@@ -17,14 +17,10 @@
  */
 package com.mobicage.rogerthat.plugins.news;
 
-import com.mobicage.rogerthat.util.logging.L;
-import com.mobicage.rpc.IncompleteMessageException;
-import com.mobicage.to.news.BaseNewsItemTO;
-
-import java.util.Map;
+import com.mobicage.to.news.AppNewsItemTO;
 
 @SuppressWarnings("unchecked")
-public class NewsItem extends BaseNewsItemTO {
+public class NewsItem extends AppNewsItemTO {
 
     public static long TYPE_NORMAL = 1;
     public static long TYPE_QR_CODE = 2;
@@ -32,33 +28,6 @@ public class NewsItem extends BaseNewsItemTO {
     public boolean read;
     public boolean pinned;
     public boolean rogered;
-    public boolean deleted;
-
-    public NewsItem() {
-    }
-
-    public NewsItem(Map<String, Object> json) throws IncompleteMessageException {
-        super(json);
-        this.read = (boolean) json.get("read");
-        this.pinned = (boolean) json.get("pinned");
-        this.rogered = (boolean) json.get("rogered");
-        this.deleted = (boolean) json.get("deleted");
-    }
-
-    public static NewsItem fromFormMessage(Map<String, Object> form) {
-        L.bug("NewsItem.fromFormMessage is not implemented");
-        return null;
-    }
-
-
-    @Override
-    public Map<String, Object> toJSONMap() {
-        Map<String, Object> map = super.toJSONMap();
-        map.put("read", read);
-        map.put("pinned", pinned);
-        map.put("rogered", rogered);
-        map.put("deleted", deleted);
-        return map;
-    }
+    public boolean disabled;
 
 }

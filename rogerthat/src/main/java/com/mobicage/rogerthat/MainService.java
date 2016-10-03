@@ -875,7 +875,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         mPlugins.put(MessagingPlugin.class.toString(), messagingPlugin);
 
         // operations on friends and friend lists
-        MobicagePlugin newsPlugin = new com.mobicage.rogerthat.plugins.news.NewsPlugin(this, mConfigProvider, mDatabaseManager);
+        MobicagePlugin newsPlugin = new com.mobicage.rogerthat.plugins.news.NewsPlugin(this, mDatabaseManager);
         mPlugins.put(NewsPlugin.class.toString(), newsPlugin);
 
         for (MobicagePlugin plugin : mPlugins.values())

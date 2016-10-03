@@ -25,7 +25,7 @@ import java.util.Map;
 
 public class GetNewsItemsResponseTO implements com.mobicage.rpc.IJSONable {
 
-    public com.mobicage.to.news.BaseNewsItemTO[] items;
+    public com.mobicage.to.news.AppNewsItemTO[] items;
 
     public GetNewsItemsResponseTO() {
     }
@@ -37,11 +37,11 @@ public class GetNewsItemsResponseTO implements com.mobicage.rpc.IJSONable {
             if (val_arr == null) {
                 this.items = null;
             } else {
-                this.items = new com.mobicage.to.news.BaseNewsItemTO[val_arr.size()];
+                this.items = new com.mobicage.to.news.AppNewsItemTO[val_arr.size()];
                 for (int i=0; i < val_arr.size(); i++) {
                     Object item = val_arr.get(i);
                     if (item != null) {
-                        this.items[i] = new com.mobicage.to.news.BaseNewsItemTO((Map<String, Object>) item);
+                        this.items[i] = new com.mobicage.to.news.AppNewsItemTO((Map<String, Object>) item);
                     }
                 }
             }

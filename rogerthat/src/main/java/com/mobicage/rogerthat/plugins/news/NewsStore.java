@@ -28,7 +28,7 @@ import com.mobicage.rogerthat.util.db.DatabaseManager;
 import com.mobicage.rogerthat.util.db.TransactionHelper;
 import com.mobicage.rogerthat.util.db.TransactionWithoutResult;
 import com.mobicage.rogerthat.util.system.T;
-import com.mobicage.to.news.BaseNewsItemTO;
+import com.mobicage.to.news.AppNewsItemTO;
 import com.mobicage.to.news.NewsActionButtonTO;
 import com.mobicage.to.news.NewsSenderTO;
 
@@ -48,13 +48,15 @@ public class NewsStore implements Closeable {
     private final SQLiteStatement mInsertNewsRogeredUser;
 
     private final SQLiteStatement mUpdateNewsItem;
-    private final SQLiteStatement mUpdateNewsDirty;
+    private final SQLiteStatement mUpdateNewsRead;
     private final SQLiteStatement mUpdateNewsPinned;
     private final SQLiteStatement mUpdateNewsRogered;
-    private final SQLiteStatement mUpdateNewsDeleted;
+    private final SQLiteStatement mUpdateNewsDisabled;
 
     private final SQLiteStatement mDeleteNewsButtons;
     private final SQLiteStatement mDeleteNewsRogeredUsers;
+
+    private final SQLiteStatement mCountNewsPinned;
 
     private final SQLiteDatabase mDb;
     private final MainService mMainService;
@@ -69,13 +71,15 @@ public class NewsStore implements Closeable {
         mInsertNewsRogeredUser = mDb.compileStatement(mMainService.getString(R.string.sql_news_insert_rogered_user));
 
         mUpdateNewsItem = mDb.compileStatement(mMainService.getString(R.string.sql_news_update_item));
-        mUpdateNewsDirty = mDb.compileStatement(mMainService.getString(R.string.sql_news_update_read));
+        mUpdateNewsRead = mDb.compileStatement(mMainService.getString(R.string.sql_news_update_read));
         mUpdateNewsPinned = mDb.compileStatement(mMainService.getString(R.string.sql_news_update_pinned));
         mUpdateNewsRogered = mDb.compileStatement(mMainService.getString(R.string.sql_news_update_rogered));
-        mUpdateNewsDeleted = mDb.compileStatement(mMainService.getString(R.string.sql_news_update_deleted));
+        mUpdateNewsDisabled = mDb.compileStatement(mMainService.getString(R.string.sql_news_update_disabled));
 
         mDeleteNewsButtons = mDb.compileStatement(mMainService.getString(R.string.sql_news_delete_buttons));
         mDeleteNewsRogeredUsers = mDb.compileStatement(mMainService.getString(R.string.sql_news_delete_rogerthat_users));
+
+        mCountNewsPinned = mDb.compileStatement(mMainService.getString(R.string.sql_news_count_pinned));
     }
 
     @Override
@@ -86,16 +90,18 @@ public class NewsStore implements Closeable {
         mInsertNewsRogeredUser.close();
 
         mUpdateNewsItem.close();
-        mUpdateNewsDirty.close();
+        mUpdateNewsRead.close();
         mUpdateNewsPinned.close();
         mUpdateNewsRogered.close();
-        mUpdateNewsDeleted.close();
+        mUpdateNewsDisabled.close();
 
         mDeleteNewsButtons.close();
         mDeleteNewsRogeredUsers.close();
+
+        mCountNewsPinned.close();
     }
 
-    public void saveNewsItem(final BaseNewsItemTO item, final boolean isUpdate) {
+    public void saveNewsItem(final AppNewsItemTO item, final boolean isUpdate) {
         if (isUpdate) {
             updateNewsItem(item);
         } else {
@@ -103,7 +109,7 @@ public class NewsStore implements Closeable {
         }
     }
 
-    private void insertButtons(final BaseNewsItemTO item) {
+    private void insertButtons(final AppNewsItemTO item) {
         mDeleteNewsButtons.bindLong(1, item.id);
         mDeleteNewsButtons.execute();
 
@@ -119,7 +125,7 @@ public class NewsStore implements Closeable {
         }
     }
 
-    private void insertUsers(final BaseNewsItemTO item) {
+    private void insertUsers(final AppNewsItemTO item) {
         mDeleteNewsRogeredUsers.bindLong(1, item.id);
         mDeleteNewsRogeredUsers.execute();
 
@@ -134,7 +140,7 @@ public class NewsStore implements Closeable {
         mInsertNewsRogeredUser.execute();
     }
 
-    private void insertNewsItem(final BaseNewsItemTO item) {
+    private void insertNewsItem(final AppNewsItemTO item) {
         T.BIZZ();
         TransactionHelper.runInTransaction(mDb, "insertNewsItem", new TransactionWithoutResult() {
             @Override
@@ -157,7 +163,9 @@ public class NewsStore implements Closeable {
                 mInsertNewsItem.bindLong(16, 0); // dirty
                 mInsertNewsItem.bindLong(17, 0); // pinned
                 mInsertNewsItem.bindLong(18, 0); // rogererd
-                mInsertNewsItem.bindLong(19, 0); // deleted
+                mInsertNewsItem.bindLong(19, 0); // disabled
+                mInsertNewsItem.bindLong(20, item.sort_timestamp);
+                mInsertNewsItem.bindLong(21, item.sort_priority);
                 mInsertNewsItem.execute();
 
                 insertButtons(item);
@@ -166,7 +174,7 @@ public class NewsStore implements Closeable {
         });
     }
 
-    private void updateNewsItem(final BaseNewsItemTO item) {
+    private void updateNewsItem(final AppNewsItemTO item) {
         T.BIZZ();
         TransactionHelper.runInTransaction(mDb, "updateNewsItem", new TransactionWithoutResult() {
             @Override
@@ -184,6 +192,7 @@ public class NewsStore implements Closeable {
                 bindString(mUpdateNewsItem, 11, item.qr_code_caption);
                 mUpdateNewsItem.bindLong(12, item.version);
                 mUpdateNewsItem.bindLong(13, item.flags);
+                // WHERE
                 mUpdateNewsItem.bindLong(14, item.id);
                 mUpdateNewsItem.execute();
 
@@ -197,9 +206,9 @@ public class NewsStore implements Closeable {
         TransactionHelper.runInTransaction(mDb, "setNewsItemRead", new TransactionWithoutResult() {
             @Override
             protected void run() {
-                mUpdateNewsDirty.bindLong(1, 1);
-                mUpdateNewsDirty.bindLong(2, newsId);
-                mUpdateNewsDirty.execute();
+                mUpdateNewsRead.bindLong(1, 1);
+                mUpdateNewsRead.bindLong(2, newsId);
+                mUpdateNewsRead.execute();
             }
         });
     }
@@ -226,13 +235,13 @@ public class NewsStore implements Closeable {
         });
     }
 
-    public void setNewsItemDeleted(final long newsId) {
-        TransactionHelper.runInTransaction(mDb, "setNewsItemDeleted", new TransactionWithoutResult() {
+    public void setNewsItemDisabled(final long newsId) {
+        TransactionHelper.runInTransaction(mDb, "setNewsItemDisabled", new TransactionWithoutResult() {
             @Override
             protected void run() {
-                mUpdateNewsDeleted.bindLong(1, 1);
-                mUpdateNewsDeleted.bindLong(2, newsId);
-                mUpdateNewsDeleted.execute();
+                mUpdateNewsDisabled.bindLong(1, 1);
+                mUpdateNewsDisabled.bindLong(2, newsId);
+                mUpdateNewsDisabled.execute();
             }
         });
     }
@@ -266,7 +275,7 @@ public class NewsStore implements Closeable {
             newsItem.read = c.getLong(14) > 0;
             newsItem.pinned = c.getLong(15) > 0;
             newsItem.rogered = c.getLong(16) > 0;
-            newsItem.deleted = c.getLong(17) > 0;
+            newsItem.disabled = c.getLong(17) > 0;
 
             addButtons(newsItem);
             addRogeredUsers(newsItem);
@@ -346,6 +355,49 @@ public class NewsStore implements Closeable {
         }
     }
 
+    public long countPinnedItems() {
+        return mCountNewsPinned.simpleQueryForLong();
+    }
+
+    public Cursor getNewsListCursor() {
+        return mDb.rawQuery(mMainService.getString(R.string.sql_news_list_cursor), null);
+    }
+
+    public Cursor getNewsPinnedCursor(String qry) {
+        String query = "%" + qry + "%";
+        return mDb.rawQuery(mMainService.getString(R.string.sql_news_pinned_cursor), new String[]{query, query, query, query, query});
+    }
+
+    public NewsItem readNewsItemFromCursor(Cursor c) {
+        T.dontCare();
+        NewsItem newsItem = new NewsItem();
+        newsItem.id = c.getLong(1);
+        newsItem.timestamp = c.getLong(2);
+        newsItem.sender = new NewsSenderTO();
+        newsItem.sender.email = c.getString(3);
+        newsItem.sender.name = c.getString(4);
+        newsItem.sender.avatar_id = c.getLong(5);
+        newsItem.title = c.getString(6);
+        newsItem.message = c.getString(7);
+        newsItem.image_url = c.getString(8);
+        newsItem.broadcast_type = c.getString(9);
+        newsItem.reach = c.getLong(10);
+        newsItem.qr_code_content = c.getString(11);
+        newsItem.qr_code_caption = c.getString(12);
+        newsItem.version = c.getLong(13);
+        newsItem.flags = c.getLong(14);
+        newsItem.type = c.getLong(15);
+        newsItem.read = c.getLong(16) > 0;
+        newsItem.pinned = c.getLong(17) > 0;
+        newsItem.rogered = c.getLong(18) > 0;
+        newsItem.disabled = c.getLong(19) > 0;
+
+        addButtons(newsItem);
+        addRogeredUsers(newsItem);
+
+        return newsItem;
+    }
+
     public List<Long> searchPinnedNews(String qry) {
         T.dontCare();
 
@@ -373,10 +425,6 @@ public class NewsStore implements Closeable {
         NewsItemDetails d = new NewsItemDetails();
         d.id = c.getLong(0);
         d.version = c.getLong(1);
-        d.read = c.getLong(2) > 0;
-        d.pinned = c.getLong(3) > 0;
-        d.rogered = c.getLong(4) > 0;
-        d.deleted = c.getLong(5) > 0;
         return d;
     }
 }

@@ -20,8 +20,4 @@ package com.mobicage.rogerthat.plugins.news;
 public class NewsItemDetails {
     public long id;
     public long version;
-    public boolean read;
-    public boolean pinned;
-    public boolean rogered;
-    public boolean deleted;
 }
