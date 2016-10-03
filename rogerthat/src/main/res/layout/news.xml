@@ -71,6 +71,11 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:text="@string/updates_available"
+            style="@style/LightFacebookButtonBackground"
+            android:layout_marginTop="10dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:textSize="16sp"
             android:visibility="gone" />
 
     </FrameLayout>

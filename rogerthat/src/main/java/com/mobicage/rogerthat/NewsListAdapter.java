@@ -139,19 +139,12 @@ class NewsListAdapter extends CursorAdapter {
 
         Cursor cursor = getCursor();
         if (!cursor.moveToPosition(position)) {
-            throw new IllegalStateException("couldn't move cursor to position " + position);
+            L.e("couldn't move cursor to position " + position);
+            return mLayoutInflater.inflate(R.layout.news_list_item_hidden, parent, false);
         }
 
         final ListView lv = mActivity.getListView();
         final NewsItem newsItem = mStore.readNewsItemFromCursor(cursor);
-
-        if (!(mActivity instanceof NewsPinnedActivity)) {
-            if (mActivity.isConnectedToInternet && position >= super.getCount() - 10) {
-                if (mActivity.cursor != null && mActivity.shouldLoadMoreNews) {
-                    mActivity.requestMoreNews(false);
-                }
-            }
-        }
 
         if (mFriendsPlugin.isBroadcastTypeDisabled(newsItem.sender.email, newsItem.broadcast_type)) {
             return mLayoutInflater.inflate(R.layout.news_list_item_hidden, parent, false);

@@ -56,6 +56,7 @@ import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.iconics.context.IconicsLayoutInflater;
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.plugins.friends.MenuItemPresser;
 import com.mobicage.rogerthat.plugins.friends.MenuItemPressingActivity;
 import com.mobicage.rogerthat.plugins.friends.ServiceSearchActivity;
 import com.mobicage.rogerthat.util.ActivityUtils;
@@ -79,7 +80,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
-import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public abstract class ServiceBoundActivity extends AppCompatActivity implements Pausable, ServiceBound, MenuItemPressingActivity {
@@ -119,6 +119,8 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
     private Toolbar mToolbar;
     private ActionBarDrawerToggle mDrawerToggle;
     private String mActivityName;
+
+    public MenuItemPresser menuItemPresser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -279,6 +281,11 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
     private void doUnbindService() {
         T.UI();
         if (mServiceIsBound) {
+            if (menuItemPresser != null) {
+                menuItemPresser.stop();
+                menuItemPresser = null;
+            }
+
             try {
                 onServiceUnbound();
             } catch (Exception e) {

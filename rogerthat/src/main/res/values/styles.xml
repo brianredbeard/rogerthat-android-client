@@ -68,6 +68,11 @@
         <item name="android:background">@color/mc_primary_color</item>
     </style>
 
+    <style name="LightFacebookButtonBackground" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/btn_facebook_light</item>
+        <item name="android:textColor">@color/mc_white</item>
+    </style>
+
     <style name="FacebookButtonBackground" parent="Widget.AppCompat.Button">
         <item name="android:background">@drawable/btn_facebook</item>
         <item name="android:textColor">@color/mc_white</item>

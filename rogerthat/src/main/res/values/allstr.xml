@@ -520,5 +520,6 @@
     <string name="read_more">Read more…</string>
     <string name="read_less">Read less…</string>
     <string name="no_internet_connection">No internet connection.</string>
-    <string name="updates_available">Updates available</string>
+    <string name="new_items_available">New items available</string>
+    <string name="x_new_items_available">%1$d new items available</string>
 </resources>

@@ -463,7 +463,7 @@ public class UIUtils {
         try {
             return FontAwesome.Icon.valueOf(iconName);
         } catch (IllegalArgumentException exception) {
-            L.d("Unknown icon" + iconName);
+            L.d("Unknown icon: " + iconName);
             return null;
         }
     }

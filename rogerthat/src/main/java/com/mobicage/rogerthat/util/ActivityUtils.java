@@ -145,11 +145,11 @@ public class ActivityUtils {
     }
 
     public static void goToActivityBehindTag(final ServiceBoundActivity context, final String serviceEmail, final String tag) {
-        L.d("goToActivityBehindTag called with context: " + context);
-
         if (context instanceof MenuItemPressingActivity) {
-            MenuItemPresser menuItemPresser = new MenuItemPresser(context, serviceEmail);
-            menuItemPresser.itemPressed(tag, new MenuItemPresser.ResultHandler() {
+            if (context.menuItemPresser == null) {
+                context.menuItemPresser = new MenuItemPresser(context, serviceEmail);
+            }
+            context.menuItemPresser.itemPressed(tag, new MenuItemPresser.ResultHandler() {
                 @Override
                 public void onError() {
                     L.e("SMI with tag " + tag + " not found!"); // XXX: log error to message.sender

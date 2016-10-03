@@ -33,6 +33,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
@@ -48,7 +49,6 @@ import com.mobicage.rogerthat.plugins.scan.GetUserInfoResponseHandler;
 import com.mobicage.rogerthat.plugins.scan.ProcessScanActivity;
 import com.mobicage.rogerthat.util.CachedDownloader;
 import com.mobicage.rogerthat.util.TextUtils;
-import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.net.NetworkConnectivityManager;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
@@ -79,10 +79,13 @@ public class NewsActivity extends ServiceBoundCursorListActivity {
     protected String expectedEmailHash;
     protected Cursor dbCursor = null;
 
-    protected boolean isConnectedToInternet = false;
-    protected boolean shouldLoadMoreNews = false;
-    protected String cursor;
+    private boolean mIsConnectedToInternet = false;
+    private String mCursor;
     private String mUUID;
+
+    private boolean mFirstUse = false;
+    private int mNewNewsCount = 0;
+    private boolean mShowNewNews = false;
 
     private Map<Long, NewsItemDetails> mDBItems = new HashMap<>();
     private ProgressDialog mProgressDialog;
@@ -101,6 +104,7 @@ public class NewsActivity extends ServiceBoundCursorListActivity {
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                mNewNewsCount = 0;
                 requestMoreNews(true);
             }
         });
@@ -116,7 +120,6 @@ public class NewsActivity extends ServiceBoundCursorListActivity {
         filter.addAction(NetworkConnectivityManager.INTENT_NETWORK_UP);
         filter.addAction(NetworkConnectivityManager.INTENT_NETWORK_DOWN);
         registerReceiver(mBroadcastReceiver, filter);
-
 
         IntentFilter filterCursorList = new IntentFilter();
         for (String action : getAllReceivingIntents())
@@ -140,15 +143,13 @@ public class NewsActivity extends ServiceBoundCursorListActivity {
 
                 long[] ids = intent.getLongArrayExtra("ids");
                 long[] versions = intent.getLongArrayExtra("versions");
-                long[] sortTimestamps = intent.getLongArrayExtra("sort_timestamps");
-                long[] sortPriorities = intent.getLongArrayExtra("sort_priorities");
-                // todo ruben smart update
-                cursor = intent.getStringExtra("cursor");
+                mCursor = intent.getStringExtra("cursor");
 
                 Set<Long> idsToRequest = new LinkedHashSet<>();
                 Set<Long> updatedIds = new LinkedHashSet<>();
                 for (int i = 0; i < ids.length; i++) {
                     if (!mDBItems.containsKey(ids[i])) {
+                        mNewNewsCount += 1;
                         idsToRequest.add(ids[i]);
                     } else if (mDBItems.get(ids[i]).version < versions[i]) {
                         idsToRequest.add(ids[i]);
@@ -157,6 +158,7 @@ public class NewsActivity extends ServiceBoundCursorListActivity {
                 }
 
                 if (idsToRequest.size() > 0) {
+                    mShowNewNews = true;
                     long[] primitiveIdsToRequest = new long[idsToRequest.size()];
                     Long[] tmpArray1 = idsToRequest.toArray(new Long[idsToRequest.size()]);
                     for (int i = 0; i < tmpArray1.length; i++) {
@@ -164,9 +166,35 @@ public class NewsActivity extends ServiceBoundCursorListActivity {
                     }
 
                     newsPlugin.getNewsItems(primitiveIdsToRequest, updatedIds);
+                } else if (ids.length > 0) {
+                    requestMoreNews(false);
                 } else {
+                    if (mShowNewNews) {
+                        if (mFirstUse || getListView().getFirstVisiblePosition() == 0) {
+                            mFirstUse = false;
+                            refreshCursor();
+                        } else {
+                            final Button updatesAvailable = (Button) findViewById(R.id.updates_available);
+                            if (mNewNewsCount > 0) {
+                                updatesAvailable.setText(getString(R.string.x_new_items_available, mNewNewsCount));
+                            } else {
+                                updatesAvailable.setText(R.string.new_items_available);
+                            }
+                            updatesAvailable.setVisibility(View.VISIBLE);
+
+                            updatesAvailable.setOnClickListener(new SafeViewOnClickListener() {
+                                @Override
+                                public void safeOnClick(View v) {
+                                    updatesAvailable.setVisibility(View.GONE);
+                                    mNewNewsCount = 0;
+                                    mListView.setSelection(0);
+                                    refreshCursor();
+                                }
+                            });
+                        }
+                    }
+
                     swipeContainer.setRefreshing(false);
-                    shouldLoadMoreNews = ids.length > 0;
                 }
 
             } else if (NewsPlugin.GET_NEWS_ITEMS_RECEIVED_INTENT.equals(action)) {
@@ -179,10 +207,8 @@ public class NewsActivity extends ServiceBoundCursorListActivity {
                     d.version = versions[i];
                     mDBItems.put(d.id, d);
                 }
-                swipeContainer.setRefreshing(false);
 
-                shouldLoadMoreNews = true;
-                refreshCursor();
+                requestMoreNews(false);
 
             } else if (FriendsPlugin.FRIEND_INFO_RECEIVED_INTENT.equals(action)) {
                 if (expectedEmailHash != null && expectedEmailHash.equals(intent.getStringExtra(ProcessScanActivity.EMAILHASH))) {
@@ -212,33 +238,14 @@ public class NewsActivity extends ServiceBoundCursorListActivity {
                     }
                 }
             } else if (NetworkConnectivityManager.INTENT_NETWORK_UP.equals(action)) {
-                if (!isConnectedToInternet) {
-                    L.i("todo ruben INTENT_NETWORK_UP");
-                    final Button updatesAvailable = (Button) findViewById(R.id.updates_available);
-                    updatesAvailable.setVisibility(View.VISIBLE);
-
-                    updatesAvailable.setOnClickListener(new SafeViewOnClickListener() {
-                        @Override
-                        public void safeOnClick(View v) {
-                            findViewById(R.id.internet_status_container).setVisibility(View.GONE);
-                            updatesAvailable.setVisibility(View.GONE);
-                            isConnectedToInternet = true;
-                            swipeContainer.setEnabled(true);
-                            swipeContainer.setRefreshing(true);
-                            requestMoreNews(true);
-                        }
-                    });
+                if (!mIsConnectedToInternet) {
+                    mIsConnectedToInternet = true;
+                    setupConnectedToInternet();
                 }
             } else if (NetworkConnectivityManager.INTENT_NETWORK_DOWN.equals(action)) {
-                if (isConnectedToInternet) {
-                    L.i("todo ruben INTENT_NETWORK_DOWN");
-                    Button updatesAvailable = (Button) findViewById(R.id.updates_available);
-                    updatesAvailable.setVisibility(View.GONE);
-
-                    isConnectedToInternet = false;
-                    swipeContainer.setEnabled(false);
-                    swipeContainer.setRefreshing(false);
-                    findViewById(R.id.internet_status_container).setVisibility(View.VISIBLE);
+                if (mIsConnectedToInternet) {
+                    mIsConnectedToInternet = false;
+                    setupConnectedToInternet();
                 }
             } else {
                 nla.handleIntent(context, intent);
@@ -247,6 +254,21 @@ public class NewsActivity extends ServiceBoundCursorListActivity {
             return new String[]{intent.getAction()};
         }
     };
+
+    private void setupConnectedToInternet() {
+        final LinearLayout ll = (LinearLayout) findViewById(R.id.internet_status_container);
+        if (mIsConnectedToInternet) {
+            ll.setVisibility(View.GONE);
+            swipeContainer.setEnabled(true);
+            swipeContainer.setRefreshing(true);
+            requestMoreNews(true);
+        } else {
+            ll.setVisibility(View.VISIBLE);
+            swipeContainer.setEnabled(false);
+            swipeContainer.setRefreshing(false);
+            mUUID = UUID.randomUUID().toString();
+        }
+    }
 
     @Override
     protected String[] getAllReceivingIntents() {
@@ -298,12 +320,12 @@ public class NewsActivity extends ServiceBoundCursorListActivity {
         newsStore = newsPlugin.getStore();
         friendsPlugin = mService.getPlugin(FriendsPlugin.class);
 
-        isConnectedToInternet = mService.getNetworkConnectivityManager().isConnected();
-        if (isConnectedToInternet) {
+        mIsConnectedToInternet = mService.getNetworkConnectivityManager().isConnected();
+        if (mIsConnectedToInternet) {
             findViewById(R.id.internet_status_container).setVisibility(View.GONE);
         }
-        swipeContainer.setEnabled(isConnectedToInternet ? true : false);
-        if (!TestUtils.isRunningTest() && isConnectedToInternet) {
+        swipeContainer.setEnabled(mIsConnectedToInternet ? true : false);
+        if (!TestUtils.isRunningTest() && mIsConnectedToInternet) {
             swipeContainer.setRefreshing(true);
         }
 
@@ -315,6 +337,9 @@ public class NewsActivity extends ServiceBoundCursorListActivity {
                     @Override
                     protected void safeRun() throws Exception {
                         mDBItems = dbItems;
+                        if (mDBItems.size() == 0) {
+                            mFirstUse = true;
+                        }
                     }
                 });
             }
@@ -323,7 +348,7 @@ public class NewsActivity extends ServiceBoundCursorListActivity {
         setListView((ListView) findViewById(R.id.news_list));
         loadCursorAndSetAdaptar();
 
-        if (isConnectedToInternet) {
+        if (mIsConnectedToInternet) {
             requestMoreNews(true);
         }
 
@@ -332,6 +357,8 @@ public class NewsActivity extends ServiceBoundCursorListActivity {
 
     @Override
     protected void onServiceUnbound() {
+        unregisterReceiver(mBroadcastReceiver);
+        unregisterReceiver(getDefaultBroadcastReceiver());
     }
 
     @Override
@@ -340,12 +367,11 @@ public class NewsActivity extends ServiceBoundCursorListActivity {
     }
 
     protected void requestMoreNews(boolean isRefresh) {
-        shouldLoadMoreNews = false;
         if (isRefresh) {
-            cursor = null;
+            mCursor = null;
         }
         mUUID = UUID.randomUUID().toString();
-        newsPlugin.getNews(cursor, mUUID);
+        newsPlugin.getNews(mCursor, mUUID);
     }
 
     private void showErrorToast() {

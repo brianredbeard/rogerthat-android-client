@@ -61,8 +61,6 @@ public class GetNewsResponseHandler extends ResponseHandler<GetNewsResponseTO> {
             Intent intent = new Intent(NewsPlugin.GET_NEWS_RECEIVED_INTENT);
             intent.putExtra("ids", resp.ids);
             intent.putExtra("versions", resp.versions);
-            intent.putExtra("sort_timestamps", resp.sort_timestamps);
-            intent.putExtra("sort_priorities", resp.sort_priorities);
             intent.putExtra("cursor", resp.cursor);
             intent.putExtra("uuid", this.mUUID);
             mMainService.sendBroadcast(intent);
