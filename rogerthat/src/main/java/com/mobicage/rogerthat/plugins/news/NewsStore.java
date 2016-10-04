@@ -44,7 +44,6 @@ import static com.mobicage.rogerthat.util.db.DBUtils.bindString;
 public class NewsStore implements Closeable {
 
     private final SQLiteStatement mInsertPartialNewsItem;
-    private final SQLiteStatement mInsertNewsItem;
     private final SQLiteStatement mInsertNewsButton;
     private final SQLiteStatement mInsertNewsRogeredUser;
 
@@ -71,7 +70,6 @@ public class NewsStore implements Closeable {
         mMainService = mainService;
 
         mInsertPartialNewsItem = mDb.compileStatement(mMainService.getString(R.string.sql_news_insert_partial_item));
-        mInsertNewsItem = mDb.compileStatement(mMainService.getString(R.string.sql_news_insert_item));
         mInsertNewsButton = mDb.compileStatement(mMainService.getString(R.string.sql_news_insert_button));
         mInsertNewsRogeredUser = mDb.compileStatement(mMainService.getString(R.string.sql_news_insert_rogered_user));
 
@@ -92,7 +90,6 @@ public class NewsStore implements Closeable {
     public void close() throws IOException {
         T.UI();
         mInsertPartialNewsItem.close();
-        mInsertNewsItem.close();
         mInsertNewsButton.close();
         mInsertNewsRogeredUser.close();
 
@@ -135,13 +132,32 @@ public class NewsStore implements Closeable {
         mUpdatePartialNewsItem.execute();
     }
 
-    public void saveNewsItem(final AppNewsItemTO item, final boolean isUpdate) {
+    public void saveNewsItem(final AppNewsItemTO item) {
         mNewsItemsCache.remove(item.id);
-        if (isUpdate) {
-            updateNewsItem(item);
-        } else {
-            insertNewsItem(item);
-        }
+        TransactionHelper.runInTransaction(mDb, "updateNewsItem", new TransactionWithoutResult() {
+            @Override
+            protected void run() {
+                mUpdateNewsItem.bindLong(1, item.timestamp);
+                mUpdateNewsItem.bindString(2, item.sender.email);
+                mUpdateNewsItem.bindString(3, item.sender.name);
+                mUpdateNewsItem.bindLong(4, item.sender.avatar_id);
+                bindString(mUpdateNewsItem, 5, item.title);
+                bindString(mUpdateNewsItem, 6, item.message);
+                bindString(mUpdateNewsItem, 7, item.image_url);
+                bindString(mUpdateNewsItem, 8, item.broadcast_type);
+                mUpdateNewsItem.bindLong(9, item.reach);
+                bindString(mUpdateNewsItem, 10, item.qr_code_content);
+                bindString(mUpdateNewsItem, 11, item.qr_code_caption);
+                mUpdateNewsItem.bindLong(12, item.version);
+                mUpdateNewsItem.bindLong(13, item.flags);
+                // WHERE
+                mUpdateNewsItem.bindLong(14, item.id);
+                mUpdateNewsItem.execute();
+
+                insertButtons(item);
+                insertUsers(item);
+            }
+        });
     }
 
     private void insertButtons(final AppNewsItemTO item) {
@@ -174,68 +190,6 @@ public class NewsStore implements Closeable {
         mInsertNewsRogeredUser.bindLong(1, newsId);
         mInsertNewsRogeredUser.bindString(2, email);
         mInsertNewsRogeredUser.execute();
-    }
-
-    private void insertNewsItem(final AppNewsItemTO item) {
-        T.BIZZ();
-        TransactionHelper.runInTransaction(mDb, "insertNewsItem", new TransactionWithoutResult() {
-            @Override
-            protected void run() {
-                mInsertNewsItem.bindLong(1, item.id);
-                mInsertNewsItem.bindLong(2, item.timestamp);
-                mInsertNewsItem.bindString(3, item.sender.email);
-                mInsertNewsItem.bindString(4, item.sender.name);
-                mInsertNewsItem.bindLong(5, item.sender.avatar_id);
-                bindString(mInsertNewsItem, 6, item.title);
-                bindString(mInsertNewsItem, 7, item.message);
-                bindString(mInsertNewsItem, 8, item.image_url);
-                bindString(mInsertNewsItem, 9, item.broadcast_type);
-                mInsertNewsItem.bindLong(10, item.reach);
-                bindString(mInsertNewsItem, 11, item.qr_code_content);
-                bindString(mInsertNewsItem, 12, item.qr_code_caption);
-                mInsertNewsItem.bindLong(13, item.version);
-                mInsertNewsItem.bindLong(14, item.flags);
-                mInsertNewsItem.bindLong(15, item.type);
-                mInsertNewsItem.bindLong(16, 0); // dirty
-                mInsertNewsItem.bindLong(17, 0); // pinned
-                mInsertNewsItem.bindLong(18, 0); // rogererd
-                mInsertNewsItem.bindLong(19, 0); // disabled
-                mInsertNewsItem.bindLong(20, item.sort_timestamp);
-                mInsertNewsItem.bindLong(21, item.sort_priority);
-                mInsertNewsItem.execute();
-
-                insertButtons(item);
-                insertUsers(item);
-            }
-        });
-    }
-
-    private void updateNewsItem(final AppNewsItemTO item) {
-        T.BIZZ();
-        TransactionHelper.runInTransaction(mDb, "updateNewsItem", new TransactionWithoutResult() {
-            @Override
-            protected void run() {
-                mUpdateNewsItem.bindLong(1, item.timestamp);
-                mUpdateNewsItem.bindString(2, item.sender.email);
-                mUpdateNewsItem.bindString(3, item.sender.name);
-                mUpdateNewsItem.bindLong(4, item.sender.avatar_id);
-                bindString(mUpdateNewsItem, 5, item.title);
-                bindString(mUpdateNewsItem, 6, item.message);
-                bindString(mUpdateNewsItem, 7, item.image_url);
-                bindString(mUpdateNewsItem, 8, item.broadcast_type);
-                mUpdateNewsItem.bindLong(9, item.reach);
-                bindString(mUpdateNewsItem, 10, item.qr_code_content);
-                bindString(mUpdateNewsItem, 11, item.qr_code_caption);
-                mUpdateNewsItem.bindLong(12, item.version);
-                mUpdateNewsItem.bindLong(13, item.flags);
-                // WHERE
-                mUpdateNewsItem.bindLong(14, item.id);
-                mUpdateNewsItem.execute();
-
-                insertButtons(item);
-                insertUsers(item);
-            }
-        });
     }
 
     public void setNewsItemRead(final long newsId) {
@@ -414,50 +368,36 @@ public class NewsStore implements Closeable {
         return mCountNewsPinned.simpleQueryForLong();
     }
 
-    public Cursor getNewsListCursor() {
-        return mDb.rawQuery(mMainService.getString(R.string.sql_news_list_cursor), null);
-    }
-
-    public Cursor getNewsPinnedCursor(String qry) {
-        String query = "%" + qry + "%";
-        return mDb.rawQuery(mMainService.getString(R.string.sql_news_pinned_cursor), new String[]{query, query, query, query, query});
-    }
-
-    public NewsItem readNewsItemFromCursor(Cursor c) {
+    public List<Long> searchPinnedNews(String qry) {
         T.dontCare();
-        NewsItem newsItem = new NewsItem();
-        newsItem.id = c.getLong(1);
-        newsItem.timestamp = c.getLong(2);
-        newsItem.sender = new NewsSenderTO();
-        newsItem.sender.email = c.getString(3);
-        newsItem.sender.name = c.getString(4);
-        newsItem.sender.avatar_id = c.getLong(5);
-        newsItem.title = c.getString(6);
-        newsItem.message = c.getString(7);
-        newsItem.image_url = c.getString(8);
-        newsItem.broadcast_type = c.getString(9);
-        newsItem.reach = c.getLong(10);
-        newsItem.qr_code_content = c.getString(11);
-        newsItem.qr_code_caption = c.getString(12);
-        newsItem.version = c.getLong(13);
-        newsItem.flags = c.getLong(14);
-        newsItem.type = c.getLong(15);
-        newsItem.read = c.getLong(16) > 0;
-        newsItem.pinned = c.getLong(17) > 0;
-        newsItem.rogered = c.getLong(18) > 0;
-        newsItem.disabled = c.getLong(19) > 0;
-        newsItem.isPartial = c.getLong(20) > 0;
 
-        addButtons(newsItem);
-        addRogeredUsers(newsItem);
+        String query = "%" + qry + "%";
 
-        return newsItem;
+        List<Long> newsIds = new ArrayList<>();
+        final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_news_search_pinned),
+                new String[]{query, query, query, query, query});
+
+        try {
+            if (!c.moveToFirst()) {
+                return newsIds;
+            }
+            newsIds.add(c.getLong(0));
+            while (c.moveToNext()) {
+                newsIds.add(c.getLong(0));
+            }
+            return newsIds;
+        } finally {
+            c.close();
+        }
     }
 
     private NewsItemDetails readDetails(Cursor c) {
         NewsItemDetails d = new NewsItemDetails();
         d.id = c.getLong(0);
         d.version = c.getLong(1);
+        d.sortTimestamp = c.getLong(2);
+        d.sortPriority = c.getLong(3);
+        d.isPartial = c.getLong(4) > 0;
         return d;
     }
 

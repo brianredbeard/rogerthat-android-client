@@ -26,6 +26,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.net.Uri;
+import android.support.v7.widget.RecyclerView;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.StyleSpan;
@@ -36,7 +37,6 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.CursorAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -56,6 +56,7 @@ import com.mobicage.rogerthat.plugins.messaging.MembersActivity;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.plugins.news.NewsItem;
+import com.mobicage.rogerthat.plugins.news.NewsItemDetails;
 import com.mobicage.rogerthat.plugins.news.NewsPlugin;
 import com.mobicage.rogerthat.plugins.news.NewsStore;
 import com.mobicage.rogerthat.util.CachedDownloader;
@@ -76,25 +77,20 @@ import com.mobicage.to.news.NewsActionButtonTO;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-// Adapter lives on UI thread
-// It can be temporarily out of date with respect to the
-// underlying database content:
-//   * we cache the retrieved item count, in order to avoid ANR
-//   * if a non-existing entry is retrieved from the db (e.g. item 5 of 4), we return an empty (non-null) view
-// When database is changed, code must call notifyDataSetChanged() to refresh the adapter
-
-class NewsListAdapter extends CursorAdapter {
+public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHolder> {
 
     protected final static int FLAG_ACTION_ROGERTHAT = 1;
     protected final static int FLAG_ACTION_FOLLOW = 2;
 
-    private final NewsActivity mActivity;
+    private NewsActivity mActivity;
     private final MainService mMainService;
     private final LayoutInflater mLayoutInflater;
     private final NewsPlugin mNewsPlugin;
@@ -108,15 +104,14 @@ class NewsListAdapter extends CursorAdapter {
     private Map<String, ArrayList<Resizable16by6ImageView>> mImageViews = new HashMap<>();
     private Set<Long> mReadMoreItems = new HashSet<>();
 
+    private Map<Long, NewsItemDetails> mItems = new HashMap<>();
+    private List<Long> mOrder = new ArrayList<>();
+
     private final String mMyEmail;
     private final String mMyName;
     private final int mDisplayWidth;
 
-    private Map<Long, Integer> mPositions = new HashMap<>();
-
-    public NewsListAdapter(NewsActivity activity, MainService mainService, Cursor cursor, NewsPlugin newsPlugin, NewsStore store, FriendsPlugin friendsPlugin) {
-        super(activity, cursor, false);
-        T.UI();
+    public NewsListAdapter(NewsActivity activity, MainService mainService, NewsPlugin newsPlugin, NewsStore store, FriendsPlugin friendsPlugin) {
         mActivity = activity;
         mMainService = mainService;
         mLayoutInflater = LayoutInflater.from(mActivity);
@@ -127,13 +122,213 @@ class NewsListAdapter extends CursorAdapter {
 
         mCachedDownloader = CachedDownloader.getInstance(mMainService);
 
-        MyIdentity myIdentity = mMainService.getIdentityStore().getIdentity();
+        MyIdentity myIdentity = mainService.getIdentityStore().getIdentity();
         mMyEmail = myIdentity.getEmail();
         mMyName = myIdentity.getDisplayName();
         mDisplayWidth = UIUtils.getDisplayWidth(mActivity);
     }
 
-    private void setupButtons(final int position, final View convertView, final ViewGroup parent, View view, final NewsItem newsItem, int existenceStatus) {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+        }
+    }
+
+    public void addNewsItem(NewsItemDetails item, boolean notify) {
+        if (!mOrder.contains(item.id)) {
+            mOrder.add(item.id);
+            mItems.put(item.id, item);
+
+            if (notify) {
+                notifyItemInserted(mItems.size());
+            }
+        }
+    }
+
+    public void setNewsItems(List<Long> items) {
+        mOrder = items;
+    }
+
+    public void refreshView() {
+        if (mItems.size() > 0) {
+            Collections.sort(mOrder, comparator);
+        }
+        notifyDataSetChanged();
+    }
+
+    private final Comparator<Long> comparator = new Comparator<Long>() {
+        @Override
+        public int compare(Long item1, Long item2) {
+            NewsItemDetails details1 = mItems.get(item1);
+            NewsItemDetails details2 = mItems.get(item2);
+            if (details1.sortPriority > details2.sortPriority) {
+                return 1;
+            } else if (details1.sortPriority < details2.sortPriority) {
+                return -1;
+            }
+
+            return details1.sortTimestamp < details2.sortTimestamp ? 1 : -1;
+        }
+    };
+
+    @Override
+    public int getItemCount() {
+        return mOrder.size();
+    }
+
+    @Override
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View v = mLayoutInflater.inflate(R.layout.news_list_item, parent, false);
+        return new ViewHolder(v);
+    }
+
+    @Override
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        mOrder.get(position);
+        holder.itemView.findViewById(R.id.partial_item).setVisibility(View.VISIBLE);
+        holder.itemView.findViewById(R.id.full_item).setVisibility(View.GONE);
+        populateView(holder.itemView, position);
+    }
+
+
+    public void changeCursor(Cursor cursor) {
+        L.i("todo ruben changeCursor");
+    }
+
+    public void updateView(long newsId) {
+        int position = mOrder.indexOf(newsId);
+        if (position >= 0) {
+            notifyItemChanged(position);
+        }
+    }
+
+    private void populateView(final View view, final int position) {
+        final NewsItem newsItem = mStore.getNewsItem(mOrder.get(position));
+        if (newsItem.isPartial) {
+            long[] ids = new long[1];
+            ids[0] = newsItem.id;
+            mNewsPlugin.getNewsItems(ids); // todo ruben we need to do this in bulk
+            view.findViewById(R.id.partial_item).setVisibility(View.VISIBLE);
+            view.findViewById(R.id.full_item).setVisibility(View.GONE);
+            return;
+        }
+
+        if (mFriendsPlugin.isBroadcastTypeDisabled(newsItem.sender.email, newsItem.broadcast_type)) {
+            view.findViewById(R.id.partial_item).setVisibility(View.GONE);
+            view.findViewById(R.id.full_item).setVisibility(View.GONE);
+            return;
+        }
+
+        view.findViewById(R.id.partial_item).setVisibility(View.GONE);
+        view.findViewById(R.id.full_item).setVisibility(View.VISIBLE);
+
+        final int existenceStatus = mFriendsPlugin.getStore().getExistence(newsItem.sender.email);
+        if (!newsItem.read) {
+            newsItem.read = true;
+
+            mMainService.postAtFrontOfBIZZHandler(new SafeRunnable() {
+                @Override
+                protected void safeRun() throws Exception {
+                    mStore.setNewsItemRead(newsItem.id);
+                }
+            });
+
+            mNewsPlugin.newsRead(new long[]{newsItem.id});
+        }
+
+        setupPinned(view, newsItem);
+        setupRogeredUsers(newsItem, view);
+        setupImage(view, newsItem);
+
+        final LinearLayout qrCodeContainer = (LinearLayout) view.findViewById(R.id.qr_code_container);
+        setupQRCode(view, newsItem, qrCodeContainer);
+
+        setupAvatar(view, newsItem);
+
+        TextView serviceName = (TextView) view.findViewById(R.id.service_name);
+        serviceName.setText(newsItem.sender.name);
+
+        TextView date = (TextView) view.findViewById(R.id.date);
+        date.setText(TimeUtils.getDayTimeStr(mActivity, newsItem.timestamp * 1000));
+
+        TextView title = (TextView) view.findViewById(R.id.title);
+        if (TextUtils.isEmptyOrWhitespace(newsItem.title)) {
+            title.setVisibility(View.GONE);
+        } else {
+            title.setText(newsItem.title);
+            title.setVisibility(View.VISIBLE);
+
+            if (newsItem.users_that_rogered.length == 0 &&
+                    TextUtils.isEmptyOrWhitespace(newsItem.image_url) &&
+                    qrCodeContainer.getVisibility() == View.GONE) {
+                LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) title.getLayoutParams();
+                lp.setMargins(0, 0, UIUtils.convertDipToPixels(mActivity, 35), 0);
+                title.setLayoutParams(lp);
+            }
+        }
+
+        final TextView text = (TextView) view.findViewById(R.id.text);
+        final TextView readmore = (TextView) view.findViewById(R.id.readmore);
+        if (TextUtils.isEmptyOrWhitespace(newsItem.message)) {
+            text.setVisibility(View.GONE);
+            readmore.setVisibility(View.GONE);
+        } else {
+            text.setVisibility(View.VISIBLE);
+            text.setText(newsItem.message);
+            mMainService.postOnUIHandler(new SafeRunnable() {
+                @Override
+                protected void safeRun() throws Exception {
+                    int lineCount = text.getLineCount();
+                    if (lineCount > 5) {
+                        readmore.setVisibility(View.VISIBLE);
+                        if (mReadMoreItems.contains(newsItem.id)) {
+                            text.setMaxLines(lineCount);
+                            readmore.setText(R.string.read_less);
+                        } else {
+                            text.setMaxLines(5);
+                            readmore.setText(R.string.read_more);
+                        }
+
+                        readmore.setOnClickListener(new SafeViewOnClickListener() {
+                            @Override
+                            public void safeOnClick(View v) {
+                                if (mReadMoreItems.contains(newsItem.id)) {
+                                    mReadMoreItems.remove(newsItem.id);
+                                } else {
+                                    mReadMoreItems.add(newsItem.id);
+                                }
+                                mActivity.refreshCursor();
+                                if (!mReadMoreItems.contains(newsItem.id)) {
+                                    mActivity.setSelection(position);
+                                }
+                            }
+                        });
+                    } else {
+                        readmore.setVisibility(View.GONE);
+                    }
+                }
+            });
+        }
+        TextView reach = (TextView) view.findViewById(R.id.reach);
+        reach.setText(newsItem.reach + "");
+        TextView broadcastType = (TextView) view.findViewById(R.id.broadcast_type);
+        broadcastType.setText("[" + newsItem.broadcast_type + "]");
+
+        setupButtons(position, view, newsItem, existenceStatus);
+
+        if (newsItem.disabled) {
+            view.findViewById(R.id.image).setAlpha(0.4f);
+            view.findViewById(R.id.qr_code_container).setAlpha(0.4f);
+            view.findViewById(R.id.details).setAlpha(0.4f);
+        } else {
+            view.findViewById(R.id.image).setAlpha(1f);
+            view.findViewById(R.id.qr_code_container).setAlpha(1f);
+            view.findViewById(R.id.details).setAlpha(1f);
+        }
+    }
+
+    private void setupButtons(final int position, View view, final NewsItem newsItem, int existenceStatus) {
         LinearLayout actions = (LinearLayout) view.findViewById(R.id.actions);
         actions.removeAllViews();
 
@@ -159,7 +354,7 @@ class NewsListAdapter extends CursorAdapter {
                                 mMainService.postAtFrontOfUIHandler(new SafeRunnable() {
                                     @Override
                                     protected void safeRun() throws Exception {
-                                        mActivity.getAdapter().notifyItemChanged(position);
+                                        notifyItemChanged(position);
                                     }
                                 });
                             }
@@ -184,15 +379,19 @@ class NewsListAdapter extends CursorAdapter {
                 btn.setBackgroundColor(mActivity.getResources().getColor(R.color.mc_divider_gray));
             } else {
                 btn.setBackgroundColor(mActivity.getResources().getColor(R.color.mc_primary_color));
-                btn.setOnClickListener(new SafeViewOnClickListener() {
-                    @Override
-                    public void safeOnClick(View v) {
-                        mFriendsPlugin.inviteFriend(newsItem.sender.email, null, null, false);
-                        btn.setBackgroundColor(mActivity.getResources().getColor(R.color.mc_divider_gray));
-                        btn.setOnClickListener(null);
-                    }
-                });
             }
+
+            btn.setOnClickListener(new SafeViewOnClickListener() {
+                @Override
+                public void safeOnClick(View v) {
+                    final int currentExistenceStatus = mFriendsPlugin.getStore().getExistence(newsItem.sender.email);
+                    if (currentExistenceStatus != Friend.ACTIVE) {
+                        mFriendsPlugin.inviteFriend(newsItem.sender.email, null, null, false);
+                    }
+                    btn.setBackgroundColor(mActivity.getResources().getColor(R.color.mc_divider_gray));
+                    btn.setOnClickListener(null);
+                }
+            });
             actions.addView(btn);
 
             if (newsItem.buttons.length > 0) {
@@ -211,10 +410,11 @@ class NewsListAdapter extends CursorAdapter {
             Button btn = (Button) mLayoutInflater.inflate(R.layout.news_list_item_action, mActivity.getRecyclerView(), false);
             btn.setText(button.caption);
 
-            if (Friend.ACTIVE == existenceStatus) {
-                btn.setOnClickListener(new SafeViewOnClickListener() {
-                    @Override
-                    public void safeOnClick(View v) {
+            btn.setOnClickListener(new SafeViewOnClickListener() {
+                @Override
+                public void safeOnClick(View v) {
+                    final int currentExistenceStatus = mFriendsPlugin.getStore().getExistence(newsItem.sender.email);
+                    if (Friend.ACTIVE == currentExistenceStatus) {
                         if (Message.MC_CONFIRM_PREFIX.equals(buttonAction)) {
                             // ignore
                         } else if (Message.MC_SMI_PREFIX.equals(buttonAction)) {
@@ -240,12 +440,7 @@ class NewsListAdapter extends CursorAdapter {
                                 mActivity.startActivity(intent);
                             }
                         }
-                    }
-                });
-            } else {
-                btn.setOnClickListener(new SafeViewOnClickListener() {
-                    @Override
-                    public void safeOnClick(View v) {
+                    } else {
                         new AlertDialog.Builder(mActivity)
                                 .setMessage(mActivity.getString(R.string.invite_as_friend, new Object[]{newsItem.sender.name}))
                                 .setPositiveButton(R.string.yes, new SafeDialogInterfaceOnClickListener() {
@@ -255,8 +450,9 @@ class NewsListAdapter extends CursorAdapter {
                                     }
                                 }).setNegativeButton(R.string.no, null).create().show();
                     }
-                });
-            }
+
+                }
+            });
 
             actions.addView(btn);
 
@@ -267,11 +463,11 @@ class NewsListAdapter extends CursorAdapter {
         }
     }
 
-    private void setupAvatar(View view, final NewsItem newsItem, final int existenceStatus) {
+    private void setupAvatar(View view, final NewsItem newsItem) {
         ImageView serviceAvatar = (ImageView) view.findViewById(R.id.service_avatar);
         Bitmap avatar = mFriendsPlugin.getStore().getAvatarBitmap(newsItem.sender.email);
         if (avatar == null) {
-            // todo ruben we should create a chache of avatars..
+            // todo ruben we should create a cache of avatars..
             new DownloadImageTask(serviceAvatar, true).execute(CloudConstants.CACHED_AVATAR_URL_PREFIX + newsItem.sender.avatar_id);
         } else {
             serviceAvatar.setImageBitmap(avatar);
@@ -280,6 +476,7 @@ class NewsListAdapter extends CursorAdapter {
         serviceAvatar.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
+                final int existenceStatus = mFriendsPlugin.getStore().getExistence(newsItem.sender.email);
                 if (existenceStatus == Friend.ACTIVE) {
                     Intent intent = new Intent(mActivity, ServiceActionMenuActivity.class);
                     intent.putExtra(ServiceActionMenuActivity.SERVICE_EMAIL, newsItem.sender.email);
@@ -357,11 +554,12 @@ class NewsListAdapter extends CursorAdapter {
         }
     }
 
-    private void setupPinned(View view, final NewsItem newsItem, final int existenceStatus) {
+    private void setupPinned(View view, final NewsItem newsItem) {
         final ImageButton pinned = (ImageButton) view.findViewById(R.id.pinned);
         pinned.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
+                final int existenceStatus = mFriendsPlugin.getStore().getExistence(newsItem.sender.email);
                 final LinearLayout dialog = (LinearLayout) mLayoutInflater.inflate(R.layout.news_actions, null);
 
                 final AlertDialog alertDialog = new AlertDialog.Builder(mActivity)
@@ -457,7 +655,7 @@ class NewsListAdapter extends CursorAdapter {
 
             if (names.size() > 0) {
                 if (names.size() > 2) {
-                    final SpannableString text = new SpannableString(mActivity.getString(R.string.news_members_and_x_others, names.get(0), names.size() - 1));
+                    final SpannableString text = new SpannableString(mActivity.getString(R.string.news_members_and_x_others, names.get(0), (names.size() - 1) + ""));
                     text.setSpan(new StyleSpan(Typeface.BOLD), 0, names.get(0).length(),
                             Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                     members.setText(text);
@@ -549,162 +747,8 @@ class NewsListAdapter extends CursorAdapter {
             } else {
                 mActivity.invalidateOptionsMenu();
             }
+        } else if (NewsPlugin.DISABLE_NEWS_ITEM_INTENT.equals(action)) {
+            updateView(intent.getLongExtra("id", -1));
         }
-    }
-
-    public int getPositionForNewsId(long newsId) {
-        if (mPositions.containsKey(newsId)) {
-            return mPositions.get(newsId);
-        }
-        return -1;
-    }
-
-    @Override
-    public void bindView(View view, Context context, Cursor cursor) {
-        populateView(context, cursor, view);
-    }
-
-    @Override
-    public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        View view = mLayoutInflater.inflate(R.layout.news_list_item, parent, false);
-        return view;
-    }
-
-    private void populateView(Context context, Cursor cursor, View view) {
-        final NewsItem ni = mStore.readNewsItemFromCursor(cursor);
-        final int position = cursor.getPosition();
-        view.setTag(ni.id);
-        mPositions.put(ni.id, position);
-
-        final NewsItem newsItem = mStore.getNewsItem(ni.id);
-
-        if (newsItem.isPartial) {
-            long[] ids = new long[1];
-            ids[0] = newsItem.id;
-            Set<Long> updatedIds = new HashSet<>();
-            updatedIds.add(newsItem.id);
-            mNewsPlugin.getNewsItems(ids, updatedIds);
-            view.findViewById(R.id.partial_item).setVisibility(View.VISIBLE);
-            view.findViewById(R.id.full_item).setVisibility(View.GONE);
-            return;
-        }
-
-        if (mFriendsPlugin.isBroadcastTypeDisabled(newsItem.sender.email, newsItem.broadcast_type)) {
-            view.findViewById(R.id.partial_item).setVisibility(View.GONE);
-            view.findViewById(R.id.full_item).setVisibility(View.GONE);
-            return;
-        }
-
-        view.findViewById(R.id.partial_item).setVisibility(View.GONE);
-        view.findViewById(R.id.full_item).setVisibility(View.VISIBLE);
-
-        final int existenceStatus = mFriendsPlugin.getStore().getExistence(newsItem.sender.email);
-        if (!newsItem.read) {
-            newsItem.read = true;
-
-            mMainService.postAtFrontOfBIZZHandler(new SafeRunnable() {
-                @Override
-                protected void safeRun() throws Exception {
-                    mStore.setNewsItemRead(newsItem.id);
-                }
-            });
-
-            mNewsPlugin.newsRead(new long[]{newsItem.id});
-        }
-
-        setupPinned(view, newsItem, existenceStatus);
-        setupRogeredUsers(newsItem, view);
-        setupImage(view, newsItem);
-
-        final LinearLayout qrCodeContainer = (LinearLayout) view.findViewById(R.id.qr_code_container);
-        setupQRCode(view, newsItem, qrCodeContainer);
-
-        setupAvatar(view, newsItem, existenceStatus);
-
-        TextView serviceName = (TextView) view.findViewById(R.id.service_name);
-        serviceName.setText(newsItem.sender.name);
-
-        TextView date = (TextView) view.findViewById(R.id.date);
-        date.setText(TimeUtils.getDayTimeStr(mActivity, newsItem.timestamp * 1000));
-
-        TextView title = (TextView) view.findViewById(R.id.title);
-        if (TextUtils.isEmptyOrWhitespace(newsItem.title)) {
-            title.setVisibility(View.GONE);
-        } else {
-            title.setText(newsItem.title);
-            title.setVisibility(View.VISIBLE);
-
-            if (newsItem.users_that_rogered.length == 0 &&
-                    TextUtils.isEmptyOrWhitespace(newsItem.image_url) &&
-                    qrCodeContainer.getVisibility() == View.GONE) {
-                LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) title.getLayoutParams();
-                lp.setMargins(0, 0, UIUtils.convertDipToPixels(mActivity, 35), 0);
-                title.setLayoutParams(lp);
-            }
-        }
-
-        final TextView text = (TextView) view.findViewById(R.id.text);
-        final TextView readmore = (TextView) view.findViewById(R.id.readmore);
-        if (TextUtils.isEmptyOrWhitespace(newsItem.message)) {
-            text.setVisibility(View.GONE);
-            readmore.setVisibility(View.GONE);
-        } else {
-            text.setVisibility(View.VISIBLE);
-            text.setText(newsItem.message);
-            mMainService.postOnUIHandler(new SafeRunnable() {
-                @Override
-                protected void safeRun() throws Exception {
-                    int lineCount = text.getLineCount();
-                    if (lineCount > 5) {
-                        readmore.setVisibility(View.VISIBLE);
-                        if (mReadMoreItems.contains(newsItem.id)) {
-                            text.setMaxLines(lineCount);
-                            readmore.setText(R.string.read_less);
-                        } else {
-                            text.setMaxLines(5);
-                            readmore.setText(R.string.read_more);
-                        }
-
-                        readmore.setOnClickListener(new SafeViewOnClickListener() {
-                            @Override
-                            public void safeOnClick(View v) {
-                                if (mReadMoreItems.contains(newsItem.id)) {
-                                    mReadMoreItems.remove(newsItem.id);
-                                } else {
-                                    mReadMoreItems.add(newsItem.id);
-                                }
-                                mActivity.refreshCursor();
-                                if (!mReadMoreItems.contains(newsItem.id)) {
-                                    mActivity.setSelection(position);
-                                }
-                            }
-                        });
-                    } else {
-                        readmore.setVisibility(View.GONE);
-                    }
-                }
-            });
-        }
-        TextView reach = (TextView) view.findViewById(R.id.reach);
-        reach.setText(newsItem.reach + "");
-        TextView broadcastType = (TextView) view.findViewById(R.id.broadcast_type);
-        broadcastType.setText("[" + newsItem.broadcast_type + "]");
-
-        setupButtons(position, null, null, view, newsItem, existenceStatus);
-
-        if (newsItem.disabled) {
-            view.findViewById(R.id.image).setAlpha(0.4f);
-            view.findViewById(R.id.qr_code_container).setAlpha(0.4f);
-            view.findViewById(R.id.details).setAlpha(0.4f);
-        } else {
-            view.findViewById(R.id.image).setAlpha(1f);
-            view.findViewById(R.id.qr_code_container).setAlpha(1f);
-            view.findViewById(R.id.details).setAlpha(1f);
-        }
-    }
-
-    @Override
-    public int getCount() {
-        return super.getCount();
     }
 }

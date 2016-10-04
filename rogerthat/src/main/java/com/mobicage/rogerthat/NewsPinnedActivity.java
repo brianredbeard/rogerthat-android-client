@@ -57,30 +57,17 @@ public class NewsPinnedActivity extends NewsActivity {
         return intents.toArray(new String[intents.size()]);
     }
 
-    protected void createCursor() {
-        if (dbCursor != null)
-            stopManagingCursor(dbCursor);
-        dbCursor = newsStore.getNewsPinnedCursor(mQry);
-    }
-
     @Override
     protected void changeCursor() {
         if (mServiceIsBound) {
-            NewsListRecyclerAdapter nla = ((NewsListRecyclerAdapter) getAdapter());
-            createCursor();
-            if (dbCursor != null) {
-                nla.changeCursor(dbCursor);
-            }
-            nla.notifyDataSetChanged();
+            updateView();
         }
     }
 
-    protected void loadCursorAndSetAdaptar() {
-        createCursor();
-        startManagingCursor(dbCursor);
-
-        NewsListRecyclerAdapter nla = new NewsListRecyclerAdapter(this, mService, dbCursor, newsPlugin, newsStore, friendsPlugin);
-        setAdapter(nla);
+    private void updateView() {
+        NewsListAdapter nla = ((NewsListAdapter) getAdapter());
+        nla.setNewsItems(newsStore.searchPinnedNews(mQry));
+        nla.refreshView();
     }
 
     @Override
@@ -117,7 +104,7 @@ public class NewsPinnedActivity extends NewsActivity {
             public void afterTextChanged(Editable s) {
                 if (searchContainer.getVisibility() == View.VISIBLE) {
                     mQry = searchTextField.getText().toString();
-                    changeCursor();
+                    updateView();
                     setSelection(0);
                 }
             }
@@ -125,6 +112,7 @@ public class NewsPinnedActivity extends NewsActivity {
         searchContainer.setVisibility(View.VISIBLE);
 
         setupIntentFilter();
+        updateView();
     }
 
     @Override

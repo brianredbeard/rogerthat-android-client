@@ -24,7 +24,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -77,13 +76,11 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
     protected SwipeRefreshLayout swipeContainer;
     protected int existence;
     protected String expectedEmailHash;
-    protected Cursor dbCursor = null;
 
     private boolean mIsConnectedToInternet = false;
     private String mCursor;
     private String mUUID;
 
-    private boolean mFirstUse = false;
     private int mNewNewsCount = 0;
     private boolean mShowNewNews = false;
 
@@ -117,6 +114,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
         filter.addAction(NewsPlugin.GET_NEWS_RECEIVED_INTENT);
         filter.addAction(NewsPlugin.GET_NEWS_ITEMS_RECEIVED_INTENT);
         filter.addAction(NewsPlugin.PINNED_NEWS_ITEM_INTENT);
+        filter.addAction(NewsPlugin.DISABLE_NEWS_ITEM_INTENT);
         filter.addAction(FriendsPlugin.FRIEND_INFO_RECEIVED_INTENT);
         filter.addAction(NetworkConnectivityManager.INTENT_NETWORK_UP);
         filter.addAction(NetworkConnectivityManager.INTENT_NETWORK_DOWN);
@@ -132,11 +130,11 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
         @Override
         public String[] onSafeReceive(Context context, Intent intent) {
             T.UI();
-            NewsListRecyclerAdapter nla = ((NewsListRecyclerAdapter) getAdapter());
+            NewsListAdapter nla = ((NewsListAdapter) getAdapter());
 
             String action = intent.getAction();
             if (NewsPlugin.GET_NEWS_RECEIVED_INTENT.equals(action)) {
-                String uuid = intent.getStringExtra("uuid");
+                final String uuid = intent.getStringExtra("uuid");
                 if (mUUID == null || !mUUID.equals(uuid)) {
                     return new String[]{action};
                 }
@@ -151,7 +149,6 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
                     @Override
                     protected void safeRun() throws Exception {
                         final Set<Long> idsToRequest = new LinkedHashSet<>();
-                        final Set<Long> updatedIds = new LinkedHashSet<>();
                         for (int i = 0; i < ids.length; i++) {
                             if (!mDBItems.containsKey(ids[i])) {
                                 mNewNewsCount += 1;
@@ -159,25 +156,37 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
                                 newsStore.savePartialNewsItem(ids[i], versions[i], sortTimestamps[i], sortPriorities[i], false);
                             } else if (mDBItems.get(ids[i]).version < versions[i]) {
                                 idsToRequest.add(ids[i]);
-                                updatedIds.add(ids[i]);
                                 newsStore.savePartialNewsItem(ids[i], versions[i], sortTimestamps[i], sortPriorities[i], true);
+                            } else if (mDBItems.get(ids[i]).isPartial) {
+                                idsToRequest.add(ids[i]);
                             }
                         }
 
                         mService.postAtFrontOfUIHandler(new SafeRunnable() {
                             @Override
                             protected void safeRun() throws Exception {
+                                if (swipeContainer.isRefreshing()) {
+                                    long[] primitiveIdsToRequest = new long[idsToRequest.size()];
+                                    Long[] tmpArray1 = idsToRequest.toArray(new Long[idsToRequest.size()]);
+                                    for (int i = 0; i < tmpArray1.length; i++) {
+                                        primitiveIdsToRequest[i] = tmpArray1[i].longValue();
+                                    }
+
+                                    newsPlugin.getNewsItems(primitiveIdsToRequest);
+                                }
+                                swipeContainer.setRefreshing(false);
+
+                                if (ids.length > 0) {
+                                    requestMoreNews(false);
+                                }
+
                                 if (idsToRequest.size() > 0) {
                                     mShowNewNews = true;
-                                    requestMoreNews(false);
                                 } else {
                                     if (mShowNewNews) {
                                         newsPlugin.putUpdatedSinceTimestamp(mNewUpdatedSinceTimestamp);
 
-                                        if (mFirstUse || getFirstVisiblePosition() == 0) {
-                                            mFirstUse = false;
-                                            refreshCursor();
-                                        } else {
+                                        if (getFirstVisiblePosition() > 0) {
                                             final Button updatesAvailable = (Button) findViewById(R.id.updates_available);
                                             if (mNewNewsCount > 0) {
                                                 updatesAvailable.setText(getString(R.string.x_new_items_available, mNewNewsCount));
@@ -196,70 +205,32 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
                                                     refreshCursor();
                                                 }
                                             });
+                                        } else {
+                                            refreshCursor();
                                         }
                                     }
-                                    swipeContainer.setRefreshing(false);
                                 }
                             }
                         });
                     }
                 });
 
-//                if (idsToRequest.size() > 0) {
-//                    mShowNewNews = true;
-//                    long[] primitiveIdsToRequest = new long[idsToRequest.size()];
-//                    Long[] tmpArray1 = idsToRequest.toArray(new Long[idsToRequest.size()]);
-//                    for (int i = 0; i < tmpArray1.length; i++) {
-//                        primitiveIdsToRequest[i] = tmpArray1[i].longValue();
-//                    }
-//
-//                    newsPlugin.getNewsItems(primitiveIdsToRequest, updatedIds);
-//                } else if (ids.length > 0) {
-//                    requestMoreNews(false);
-//                } else {
-//                    if (mShowNewNews) {
-//                        newsPlugin.putUpdatedSinceTimestamp(mNewUpdatedSinceTimestamp);
-//
-//                        if (mFirstUse || getListView().getFirstVisiblePosition() == 0) {
-//                            mFirstUse = false;
-//                            refreshCursor();
-//                        } else {
-//                            final Button updatesAvailable = (Button) findViewById(R.id.updates_available);
-//                            if (mNewNewsCount > 0) {
-//                                updatesAvailable.setText(getString(R.string.x_new_items_available, mNewNewsCount));
-//                            } else {
-//                                updatesAvailable.setText(R.string.new_items_available);
-//                            }
-//                            updatesAvailable.setVisibility(View.VISIBLE);
-//
-//                            updatesAvailable.setOnClickListener(new SafeViewOnClickListener() {
-//                                @Override
-//                                public void safeOnClick(View v) {
-//                                    updatesAvailable.setVisibility(View.GONE);
-//                                    mNewNewsCount = 0;
-//                                    mListView.setSelection(0);
-//                                    refreshCursor();
-//                                }
-//                            });
-//                        }
-//                    }
-
-//                    swipeContainer.setRefreshing(false);
-//                }
-
             } else if (NewsPlugin.GET_NEWS_ITEMS_RECEIVED_INTENT.equals(action)) {
                 long[] ids = intent.getLongArrayExtra("ids");
                 long[] versions = intent.getLongArrayExtra("versions");
+                long[] sortTimestamps = intent.getLongArrayExtra("sort_timestamps");
+                long[] sortPriorities = intent.getLongArrayExtra("sort_priorities");
 
                 for (int i = 0; i < ids.length; i++) {
                     NewsItemDetails d = new NewsItemDetails();
                     d.id = ids[i];
                     d.version = versions[i];
+                    d.sortTimestamp = sortTimestamps[i];
+                    d.sortPriority = sortPriorities[i];
+                    d.isPartial = false;
                     mDBItems.put(d.id, d);
                     nla.updateView(ids[i]);
                 }
-
-                // requestMoreNews(false);
 
             } else if (FriendsPlugin.FRIEND_INFO_RECEIVED_INTENT.equals(action)) {
                 if (expectedEmailHash != null && expectedEmailHash.equals(intent.getStringExtra(ProcessScanActivity.EMAILHASH))) {
@@ -324,43 +295,29 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
     @Override
     protected String[] getAllReceivingIntents() {
         Set<String> intents = new HashSet<>();
-        intents.add(NewsPlugin.DISABLE_NEWS_ITEM_INTENT);
-        intents.add(FriendsPlugin.FRIEND_UPDATE_INTENT);
-        intents.add(FriendsPlugin.FRIEND_AVATAR_CHANGED_INTENT);
-        intents.add(FriendsPlugin.FRIEND_REMOVED_INTENT);
-        intents.add(FriendsPlugin.FRIEND_MARKED_FOR_REMOVAL_INTENT);
-        intents.add(FriendsPlugin.FRIEND_ADDED_INTENT);
-        intents.add(FriendsPlugin.FRIENDS_LIST_REFRESHED);
+//        intents.add(FriendsPlugin.FRIEND_UPDATE_INTENT);
+//        intents.add(FriendsPlugin.FRIEND_AVATAR_CHANGED_INTENT);
+//        intents.add(FriendsPlugin.FRIEND_REMOVED_INTENT);
+//        intents.add(FriendsPlugin.FRIEND_MARKED_FOR_REMOVAL_INTENT);
+//        intents.add(FriendsPlugin.FRIEND_ADDED_INTENT);
+//        intents.add(FriendsPlugin.FRIENDS_LIST_REFRESHED);
         intents.add(FriendsPlugin.SERVICE_DATA_UPDATED);
         return intents.toArray(new String[intents.size()]);
     }
 
-    protected void createCursor() {
-        if (dbCursor != null)
-            stopManagingCursor(dbCursor);
-        dbCursor = newsStore.getNewsListCursor();
-    }
 
     @Override
     protected void changeCursor() {
         if (mServiceIsBound) {
-            NewsListRecyclerAdapter nla = ((NewsListRecyclerAdapter) getAdapter());
-            createCursor();
-            if (dbCursor != null) {
-                nla.changeCursor(dbCursor);
-            }
-            nla.notifyDataSetChanged();
+            NewsListAdapter nla = ((NewsListAdapter) getAdapter());
+            nla.refreshView();
         }
     }
 
     protected void loadCursorAndSetAdaptar() {
-        createCursor();
-        startManagingCursor(dbCursor);
-
-        NewsListRecyclerAdapter nla = new NewsListRecyclerAdapter(this, mService, dbCursor, newsPlugin, newsStore, friendsPlugin);
+        NewsListAdapter nla = new NewsListAdapter(this, mService, newsPlugin, newsStore, friendsPlugin);
         setAdapter(nla);
     }
-
 
     @Override
     protected void onServiceBound() {
@@ -388,8 +345,12 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
                     @Override
                     protected void safeRun() throws Exception {
                         mDBItems = dbItems;
-                        if (mDBItems.size() == 0) {
-                            mFirstUse = true;
+                        if (mDBItems.size() > 0) {
+                            NewsListAdapter nla = ((NewsListAdapter) getAdapter());
+                            for (NewsItemDetails item : mDBItems.values()) {
+                                nla.addNewsItem(item, false);
+                            }
+                            nla.refreshView();
                         }
                     }
                 });

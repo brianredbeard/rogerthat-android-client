@@ -21,7 +21,6 @@ package com.mobicage.rogerthat;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -47,8 +46,6 @@ public abstract class ServiceBoundCursorRecyclerActivity extends ServiceBoundAct
     protected RecyclerView getRecyclerView() {
         return mRecyclerView;
     }
-
-    private Cursor mCursor = null;
 
     protected void setRecyclerView(RecyclerView recyclerView) {
         this.mRecyclerView = recyclerView;
@@ -116,10 +113,6 @@ public abstract class ServiceBoundCursorRecyclerActivity extends ServiceBoundAct
         View v = mRecyclerView.getChildAt(0);
         mScrollPositionTop = (v == null) ? 0 : v.getTop();
         mIsVisible = false;
-
-        if (mCursor != null) {
-            stopManagingCursor(mCursor);
-        }
     }
 
     @Override
@@ -140,8 +133,6 @@ public abstract class ServiceBoundCursorRecyclerActivity extends ServiceBoundAct
             refreshView();
             if (mScrollPositionIndex != -1)
                 mLayoutManager.scrollToPositionWithOffset(mScrollPositionIndex, mScrollPositionTop);
-        } else if (getWasPaused() && mCursor != null) {
-            startManagingCursor(mCursor);
         }
     }
 
@@ -161,16 +152,4 @@ public abstract class ServiceBoundCursorRecyclerActivity extends ServiceBoundAct
         // to be overridden by code who has called setNeedsViewRefresh()
         // see example in HistoryListActivity
     }
-
-    public Cursor getCursor() {
-        return mCursor;
-    }
-
-    public void setCursor(Cursor cursor) {
-        if (mCursor != null) {
-            stopManagingCursor(mCursor);
-        }
-        mCursor = cursor;
-    }
-
 }

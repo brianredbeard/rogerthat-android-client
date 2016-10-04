@@ -20,4 +20,7 @@ package com.mobicage.rogerthat.plugins.news;
 public class NewsItemDetails {
     public long id;
     public long version;
+    public long sortTimestamp;
+    public long sortPriority;
+    public boolean isPartial;
 }

@@ -28,38 +28,23 @@ import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.to.news.AppNewsItemTO;
 import com.mobicage.to.news.GetNewsItemsResponseTO;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONValue;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 public class GetNewsItemsResponseHandler extends ResponseHandler<GetNewsItemsResponseTO> {
 
-    private Set<Long> mUpdatedIds = new LinkedHashSet<>();
-
-    public void setUpdatedIds(Set<Long> updatedIds) {
-        this.mUpdatedIds = updatedIds;
-    }
 
     @Override
     public void writePickle(DataOutput out) throws IOException {
         T.dontCare();
         super.writePickle(out);
-        out.writeUTF(JSONValue.toJSONString(mUpdatedIds));
     }
 
     @Override
     public void readFromPickle(int version, DataInput in) throws IOException, PickleException {
         T.dontCare();
         super.readFromPickle(version, in);
-        final JSONArray object = (JSONArray) JSONValue.parse(in.readUTF());
-        for (Object v : object) {
-            mUpdatedIds.add((Long) v);
-        }
     }
 
     @Override
@@ -72,16 +57,22 @@ public class GetNewsItemsResponseHandler extends ResponseHandler<GetNewsItemsRes
 
             long[] ids = new long[resp.items.length];
             long[] versions = new long[resp.items.length];
+            long[] sortTimestamps = new long[resp.items.length];
+            long[] sortPriorities = new long[resp.items.length];
             for (int i= 0 ; i < resp.items.length; i++) {
                 AppNewsItemTO newsItem = resp.items[i];
-                newsStore.saveNewsItem(newsItem, mUpdatedIds.contains(newsItem.id));
+                newsStore.saveNewsItem(newsItem);
                 ids[i] = newsItem.id;
                 versions[i] = newsItem.version;
+                sortTimestamps[i] = newsItem.sort_timestamp;
+                sortPriorities[i] = newsItem.sort_priority;
             }
 
             Intent intent = new Intent(NewsPlugin.GET_NEWS_ITEMS_RECEIVED_INTENT);
             intent.putExtra("ids", ids);
             intent.putExtra("versions", versions);
+            intent.putExtra("sort_timestamps", sortTimestamps);
+            intent.putExtra("sort_priorities", sortPriorities);
             mMainService.sendBroadcast(intent);
         } catch (Exception e) {
             L.e("Server responded with an error.", e);
