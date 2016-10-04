@@ -1828,7 +1828,7 @@ public class FriendStore implements Closeable {
     }
 
     public List<String> getFriendSet() {
-        T.BIZZ();
+        T.dontCare();
         List<String> emails = new ArrayList<String>();
 
         final Cursor cursor = mDb.rawQuery(mMainService.getString(R.string.sql_friendset_get), null);

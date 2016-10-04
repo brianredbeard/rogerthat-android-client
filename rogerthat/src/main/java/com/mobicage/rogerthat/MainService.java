@@ -237,6 +237,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
     private boolean mEnterPinActivityActive = false;
     private boolean mShouldClearPrivateKey = false;
 
+    private Credentials mCredentials;
     // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static MainService getInstance() {
@@ -1037,7 +1038,10 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
     }
 
     public Credentials getCredentials() {
-        return getCredentials(mConfigProvider);
+        if (mCredentials == null) {
+            mCredentials = getCredentials(mConfigProvider);
+        }
+        return mCredentials;
     }
 
     public static Credentials getCredentials(ConfigurationProvider configProvider) {
