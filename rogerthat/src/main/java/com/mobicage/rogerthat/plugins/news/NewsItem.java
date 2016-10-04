@@ -29,5 +29,6 @@ public class NewsItem extends AppNewsItemTO {
     public boolean pinned;
     public boolean rogered;
     public boolean disabled;
+    public boolean isPartial;
 
 }

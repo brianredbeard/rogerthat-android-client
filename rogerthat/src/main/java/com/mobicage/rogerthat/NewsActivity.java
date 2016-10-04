@@ -29,12 +29,12 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.iconics.IconicsDrawable;
@@ -68,7 +68,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-public class NewsActivity extends ServiceBoundCursorListActivity {
+public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
 
     protected NewsPlugin newsPlugin;
     protected NewsStore newsStore;
@@ -87,6 +87,7 @@ public class NewsActivity extends ServiceBoundCursorListActivity {
     private int mNewNewsCount = 0;
     private boolean mShowNewNews = false;
 
+    private long mNewUpdatedSinceTimestamp;
     private Map<Long, NewsItemDetails> mDBItems = new HashMap<>();
     private ProgressDialog mProgressDialog;
 
@@ -131,8 +132,7 @@ public class NewsActivity extends ServiceBoundCursorListActivity {
         @Override
         public String[] onSafeReceive(Context context, Intent intent) {
             T.UI();
-            NewsListAdapter nla = ((NewsListAdapter) getListAdapter());
-
+            NewsListRecyclerAdapter nla = ((NewsListRecyclerAdapter) getAdapter());
 
             String action = intent.getAction();
             if (NewsPlugin.GET_NEWS_RECEIVED_INTENT.equals(action)) {
@@ -141,61 +141,111 @@ public class NewsActivity extends ServiceBoundCursorListActivity {
                     return new String[]{action};
                 }
 
-                long[] ids = intent.getLongArrayExtra("ids");
-                long[] versions = intent.getLongArrayExtra("versions");
+                final long[] ids = intent.getLongArrayExtra("ids");
+                final long[] versions = intent.getLongArrayExtra("versions");
+                final long[] sortTimestamps = intent.getLongArrayExtra("sort_timestamps");
+                final long[] sortPriorities = intent.getLongArrayExtra("sort_priorities");
                 mCursor = intent.getStringExtra("cursor");
 
-                Set<Long> idsToRequest = new LinkedHashSet<>();
-                Set<Long> updatedIds = new LinkedHashSet<>();
-                for (int i = 0; i < ids.length; i++) {
-                    if (!mDBItems.containsKey(ids[i])) {
-                        mNewNewsCount += 1;
-                        idsToRequest.add(ids[i]);
-                    } else if (mDBItems.get(ids[i]).version < versions[i]) {
-                        idsToRequest.add(ids[i]);
-                        updatedIds.add(ids[i]);
-                    }
-                }
-
-                if (idsToRequest.size() > 0) {
-                    mShowNewNews = true;
-                    long[] primitiveIdsToRequest = new long[idsToRequest.size()];
-                    Long[] tmpArray1 = idsToRequest.toArray(new Long[idsToRequest.size()]);
-                    for (int i = 0; i < tmpArray1.length; i++) {
-                        primitiveIdsToRequest[i] = tmpArray1[i].longValue();
-                    }
-
-                    newsPlugin.getNewsItems(primitiveIdsToRequest, updatedIds);
-                } else if (ids.length > 0) {
-                    requestMoreNews(false);
-                } else {
-                    if (mShowNewNews) {
-                        if (mFirstUse || getListView().getFirstVisiblePosition() == 0) {
-                            mFirstUse = false;
-                            refreshCursor();
-                        } else {
-                            final Button updatesAvailable = (Button) findViewById(R.id.updates_available);
-                            if (mNewNewsCount > 0) {
-                                updatesAvailable.setText(getString(R.string.x_new_items_available, mNewNewsCount));
-                            } else {
-                                updatesAvailable.setText(R.string.new_items_available);
+                mService.postAtFrontOfBIZZHandler(new SafeRunnable() {
+                    @Override
+                    protected void safeRun() throws Exception {
+                        final Set<Long> idsToRequest = new LinkedHashSet<>();
+                        final Set<Long> updatedIds = new LinkedHashSet<>();
+                        for (int i = 0; i < ids.length; i++) {
+                            if (!mDBItems.containsKey(ids[i])) {
+                                mNewNewsCount += 1;
+                                idsToRequest.add(ids[i]);
+                                newsStore.savePartialNewsItem(ids[i], versions[i], sortTimestamps[i], sortPriorities[i], false);
+                            } else if (mDBItems.get(ids[i]).version < versions[i]) {
+                                idsToRequest.add(ids[i]);
+                                updatedIds.add(ids[i]);
+                                newsStore.savePartialNewsItem(ids[i], versions[i], sortTimestamps[i], sortPriorities[i], true);
                             }
-                            updatesAvailable.setVisibility(View.VISIBLE);
-
-                            updatesAvailable.setOnClickListener(new SafeViewOnClickListener() {
-                                @Override
-                                public void safeOnClick(View v) {
-                                    updatesAvailable.setVisibility(View.GONE);
-                                    mNewNewsCount = 0;
-                                    mListView.setSelection(0);
-                                    refreshCursor();
-                                }
-                            });
                         }
-                    }
 
-                    swipeContainer.setRefreshing(false);
-                }
+                        mService.postAtFrontOfUIHandler(new SafeRunnable() {
+                            @Override
+                            protected void safeRun() throws Exception {
+                                if (idsToRequest.size() > 0) {
+                                    mShowNewNews = true;
+                                    requestMoreNews(false);
+                                } else {
+                                    if (mShowNewNews) {
+                                        newsPlugin.putUpdatedSinceTimestamp(mNewUpdatedSinceTimestamp);
+
+                                        if (mFirstUse || getFirstVisiblePosition() == 0) {
+                                            mFirstUse = false;
+                                            refreshCursor();
+                                        } else {
+                                            final Button updatesAvailable = (Button) findViewById(R.id.updates_available);
+                                            if (mNewNewsCount > 0) {
+                                                updatesAvailable.setText(getString(R.string.x_new_items_available, mNewNewsCount));
+                                            } else {
+                                                updatesAvailable.setText(R.string.new_items_available);
+                                            }
+                                            updatesAvailable.setVisibility(View.VISIBLE);
+
+                                            updatesAvailable.setOnClickListener(new SafeViewOnClickListener() {
+                                                @Override
+                                                public void safeOnClick(View v) {
+                                                    mShowNewNews = false;
+                                                    updatesAvailable.setVisibility(View.GONE);
+                                                    mNewNewsCount = 0;
+                                                    setSelection(0);
+                                                    refreshCursor();
+                                                }
+                                            });
+                                        }
+                                    }
+                                    swipeContainer.setRefreshing(false);
+                                }
+                            }
+                        });
+                    }
+                });
+
+//                if (idsToRequest.size() > 0) {
+//                    mShowNewNews = true;
+//                    long[] primitiveIdsToRequest = new long[idsToRequest.size()];
+//                    Long[] tmpArray1 = idsToRequest.toArray(new Long[idsToRequest.size()]);
+//                    for (int i = 0; i < tmpArray1.length; i++) {
+//                        primitiveIdsToRequest[i] = tmpArray1[i].longValue();
+//                    }
+//
+//                    newsPlugin.getNewsItems(primitiveIdsToRequest, updatedIds);
+//                } else if (ids.length > 0) {
+//                    requestMoreNews(false);
+//                } else {
+//                    if (mShowNewNews) {
+//                        newsPlugin.putUpdatedSinceTimestamp(mNewUpdatedSinceTimestamp);
+//
+//                        if (mFirstUse || getListView().getFirstVisiblePosition() == 0) {
+//                            mFirstUse = false;
+//                            refreshCursor();
+//                        } else {
+//                            final Button updatesAvailable = (Button) findViewById(R.id.updates_available);
+//                            if (mNewNewsCount > 0) {
+//                                updatesAvailable.setText(getString(R.string.x_new_items_available, mNewNewsCount));
+//                            } else {
+//                                updatesAvailable.setText(R.string.new_items_available);
+//                            }
+//                            updatesAvailable.setVisibility(View.VISIBLE);
+//
+//                            updatesAvailable.setOnClickListener(new SafeViewOnClickListener() {
+//                                @Override
+//                                public void safeOnClick(View v) {
+//                                    updatesAvailable.setVisibility(View.GONE);
+//                                    mNewNewsCount = 0;
+//                                    mListView.setSelection(0);
+//                                    refreshCursor();
+//                                }
+//                            });
+//                        }
+//                    }
+
+//                    swipeContainer.setRefreshing(false);
+//                }
 
             } else if (NewsPlugin.GET_NEWS_ITEMS_RECEIVED_INTENT.equals(action)) {
                 long[] ids = intent.getLongArrayExtra("ids");
@@ -206,9 +256,10 @@ public class NewsActivity extends ServiceBoundCursorListActivity {
                     d.id = ids[i];
                     d.version = versions[i];
                     mDBItems.put(d.id, d);
+                    nla.updateView(ids[i]);
                 }
 
-                requestMoreNews(false);
+                // requestMoreNews(false);
 
             } else if (FriendsPlugin.FRIEND_INFO_RECEIVED_INTENT.equals(action)) {
                 if (expectedEmailHash != null && expectedEmailHash.equals(intent.getStringExtra(ProcessScanActivity.EMAILHASH))) {
@@ -293,7 +344,7 @@ public class NewsActivity extends ServiceBoundCursorListActivity {
     @Override
     protected void changeCursor() {
         if (mServiceIsBound) {
-            NewsListAdapter nla = ((NewsListAdapter) getListAdapter());
+            NewsListRecyclerAdapter nla = ((NewsListRecyclerAdapter) getAdapter());
             createCursor();
             if (dbCursor != null) {
                 nla.changeCursor(dbCursor);
@@ -306,8 +357,8 @@ public class NewsActivity extends ServiceBoundCursorListActivity {
         createCursor();
         startManagingCursor(dbCursor);
 
-        NewsListAdapter nla = new NewsListAdapter(this, mService, dbCursor, newsPlugin, newsStore, friendsPlugin);
-        setListAdapter(nla);
+        NewsListRecyclerAdapter nla = new NewsListRecyclerAdapter(this, mService, dbCursor, newsPlugin, newsStore, friendsPlugin);
+        setAdapter(nla);
     }
 
 
@@ -345,7 +396,7 @@ public class NewsActivity extends ServiceBoundCursorListActivity {
             }
         });
 
-        setListView((ListView) findViewById(R.id.news_list));
+        setRecyclerView((RecyclerView) findViewById(R.id.news_list));
         loadCursorAndSetAdaptar();
 
         if (mIsConnectedToInternet) {
@@ -357,18 +408,21 @@ public class NewsActivity extends ServiceBoundCursorListActivity {
 
     @Override
     protected void onServiceUnbound() {
+        newsStore.clearNewsItemsCache();
         unregisterReceiver(mBroadcastReceiver);
         unregisterReceiver(getDefaultBroadcastReceiver());
     }
 
     @Override
     public void onToolbarClicked() {
-        mListView.setSelection(0);
+        setSelection(0);
     }
 
     protected void requestMoreNews(boolean isRefresh) {
         if (isRefresh) {
             mCursor = null;
+            mShowNewNews = false;
+            mNewUpdatedSinceTimestamp = System.currentTimeMillis() / 1000;
         }
         mUUID = UUID.randomUUID().toString();
         newsPlugin.getNews(mCursor, mUUID);
@@ -427,15 +481,6 @@ public class NewsActivity extends ServiceBoundCursorListActivity {
         } catch (Exception e) {
             mService.putInHistoryLog(getString(R.string.getuserinfo_failure), HistoryItem.ERROR);
         }
-    }
-
-    @Override
-    protected void onListItemClick(ListView listView, final View listItem, int position, long id) {
-    }
-
-    @Override
-    protected boolean onListItemLongClick(ListView l, View v, int position, long id) {
-        return false;
     }
 
     @Override

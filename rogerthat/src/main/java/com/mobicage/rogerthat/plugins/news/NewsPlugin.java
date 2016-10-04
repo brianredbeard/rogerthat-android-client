@@ -19,6 +19,8 @@
 package com.mobicage.rogerthat.plugins.news;
 
 import com.mobicage.rogerthat.MainService;
+import com.mobicage.rogerthat.config.Configuration;
+import com.mobicage.rogerthat.config.ConfigurationProvider;
 import com.mobicage.rogerthat.plugins.MobicagePlugin;
 import com.mobicage.rogerthat.util.db.DatabaseManager;
 import com.mobicage.rogerthat.util.logging.L;
@@ -45,14 +47,24 @@ public class NewsPlugin implements MobicagePlugin {
     public static final String PINNED_NEWS_ITEM_INTENT = "com.mobicage.rogerthat.plugins.news.PINNED_NEWS_ITEM_INTENT";
     public static final String DISABLE_NEWS_ITEM_INTENT = "com.mobicage.rogerthat.plugins.news.DISABLE_NEWS_ITEM_INTENT";
 
+    private static final String CONFIGKEY = "com.mobicage.rogerthat.plugins.news";
+    private static final String UPDATED_SINCE = "updated_since";
+
     private final MainService mMainService;
     private final NewsStore mStore;
     private NewsCallReceiver mNewsCallReceiver;
+    private final ConfigurationProvider mConfigProvider;
 
-    public NewsPlugin(final MainService pMainService, final DatabaseManager pDatabaseManager) {
+    private long mUpdatedSince;
+
+    public NewsPlugin(final MainService pMainService, ConfigurationProvider pConfigProvider, final DatabaseManager pDatabaseManager) {
         T.UI();
         mMainService = pMainService;
+        mConfigProvider = pConfigProvider;
         mStore = new NewsStore(pDatabaseManager, pMainService);
+
+        Configuration cfg = mConfigProvider.getConfiguration(CONFIGKEY);
+        mUpdatedSince = cfg.get(UPDATED_SINCE, 0);
     }
 
     @Override
@@ -98,6 +110,7 @@ public class NewsPlugin implements MobicagePlugin {
 
                 GetNewsRequestTO request = new GetNewsRequestTO();
                 request.cursor = cursor;
+                request.updated_since = mUpdatedSince;
 
                 com.mobicage.api.news.Rpc.getNews(responseHandler, request);
             }
@@ -166,6 +179,15 @@ public class NewsPlugin implements MobicagePlugin {
             runnable.run();
         } else {
             mMainService.postAtFrontOfBIZZHandler(runnable);
+        }
+    }
+
+    public void putUpdatedSinceTimestamp(long updatedSince) {
+        if (updatedSince > mUpdatedSince) {
+            mUpdatedSince = updatedSince;
+            Configuration cfg = mConfigProvider.getConfiguration(CONFIGKEY);
+            cfg.put(UPDATED_SINCE, updatedSince);
+            mConfigProvider.updateConfigurationNow(CONFIGKEY, cfg);
         }
     }
 }

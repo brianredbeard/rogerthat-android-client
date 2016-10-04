@@ -27,6 +27,8 @@ public class GetNewsResponseTO implements com.mobicage.rpc.IJSONable {
 
     public String cursor;
     public long[] ids;
+    public long[] sort_priorities;
+    public long[] sort_timestamps;
     public long[] versions;
 
     public GetNewsResponseTO() {
@@ -51,6 +53,32 @@ public class GetNewsResponseTO implements com.mobicage.rpc.IJSONable {
             }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.news.GetNewsResponseTO object is missing field 'ids'");
+        }
+        if (json.containsKey("sort_priorities")) {
+            org.json.simple.JSONArray val_arr = (org.json.simple.JSONArray) json.get("sort_priorities");
+            if (val_arr == null) {
+                this.sort_priorities = null;
+            } else {
+                this.sort_priorities = new long[val_arr.size()];
+                for (int i=0; i < val_arr.size(); i++) {
+                    this.sort_priorities[i] = ((Long) val_arr.get(i)).longValue();
+                }
+            }
+        } else {
+            throw new IncompleteMessageException("com.mobicage.to.news.GetNewsResponseTO object is missing field 'sort_priorities'");
+        }
+        if (json.containsKey("sort_timestamps")) {
+            org.json.simple.JSONArray val_arr = (org.json.simple.JSONArray) json.get("sort_timestamps");
+            if (val_arr == null) {
+                this.sort_timestamps = null;
+            } else {
+                this.sort_timestamps = new long[val_arr.size()];
+                for (int i=0; i < val_arr.size(); i++) {
+                    this.sort_timestamps[i] = ((Long) val_arr.get(i)).longValue();
+                }
+            }
+        } else {
+            throw new IncompleteMessageException("com.mobicage.to.news.GetNewsResponseTO object is missing field 'sort_timestamps'");
         }
         if (json.containsKey("versions")) {
             org.json.simple.JSONArray val_arr = (org.json.simple.JSONArray) json.get("versions");
@@ -80,6 +108,24 @@ public class GetNewsResponseTO implements com.mobicage.rpc.IJSONable {
                 arr.add(this.ids[i]);
             }
             obj.put("ids", arr);
+        }
+        if (this.sort_priorities == null) {
+            obj.put("sort_priorities", null);
+        } else {
+            org.json.simple.JSONArray arr = new org.json.simple.JSONArray();
+            for (int i=0; i < this.sort_priorities.length; i++) {
+                arr.add(this.sort_priorities[i]);
+            }
+            obj.put("sort_priorities", arr);
+        }
+        if (this.sort_timestamps == null) {
+            obj.put("sort_timestamps", null);
+        } else {
+            org.json.simple.JSONArray arr = new org.json.simple.JSONArray();
+            for (int i=0; i < this.sort_timestamps.length; i++) {
+                arr.add(this.sort_timestamps[i]);
+            }
+            obj.put("sort_timestamps", arr);
         }
         if (this.versions == null) {
             obj.put("versions", null);

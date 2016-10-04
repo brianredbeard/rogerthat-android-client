@@ -43,10 +43,12 @@ import static com.mobicage.rogerthat.util.db.DBUtils.bindString;
 
 public class NewsStore implements Closeable {
 
+    private final SQLiteStatement mInsertPartialNewsItem;
     private final SQLiteStatement mInsertNewsItem;
     private final SQLiteStatement mInsertNewsButton;
     private final SQLiteStatement mInsertNewsRogeredUser;
 
+    private final SQLiteStatement mUpdatePartialNewsItem;
     private final SQLiteStatement mUpdateNewsItem;
     private final SQLiteStatement mUpdateNewsRead;
     private final SQLiteStatement mUpdateNewsPinned;
@@ -61,15 +63,19 @@ public class NewsStore implements Closeable {
     private final SQLiteDatabase mDb;
     private final MainService mMainService;
 
+    private Map<Long, NewsItem> mNewsItemsCache = new HashMap<>();
+
     public NewsStore(final DatabaseManager databaseManager, final MainService mainService) {
         T.UI();
         mDb = databaseManager.getDatabase();
         mMainService = mainService;
 
+        mInsertPartialNewsItem = mDb.compileStatement(mMainService.getString(R.string.sql_news_insert_partial_item));
         mInsertNewsItem = mDb.compileStatement(mMainService.getString(R.string.sql_news_insert_item));
         mInsertNewsButton = mDb.compileStatement(mMainService.getString(R.string.sql_news_insert_button));
         mInsertNewsRogeredUser = mDb.compileStatement(mMainService.getString(R.string.sql_news_insert_rogered_user));
 
+        mUpdatePartialNewsItem = mDb.compileStatement(mMainService.getString(R.string.sql_news_update_partial_item));
         mUpdateNewsItem = mDb.compileStatement(mMainService.getString(R.string.sql_news_update_item));
         mUpdateNewsRead = mDb.compileStatement(mMainService.getString(R.string.sql_news_update_read));
         mUpdateNewsPinned = mDb.compileStatement(mMainService.getString(R.string.sql_news_update_pinned));
@@ -85,10 +91,12 @@ public class NewsStore implements Closeable {
     @Override
     public void close() throws IOException {
         T.UI();
+        mInsertPartialNewsItem.close();
         mInsertNewsItem.close();
         mInsertNewsButton.close();
         mInsertNewsRogeredUser.close();
 
+        mUpdatePartialNewsItem.close();
         mUpdateNewsItem.close();
         mUpdateNewsRead.close();
         mUpdateNewsPinned.close();
@@ -101,7 +109,34 @@ public class NewsStore implements Closeable {
         mCountNewsPinned.close();
     }
 
+    public void savePartialNewsItem(final long id, final long version, final long sortTimestamp, final long sortPriority, final boolean isUpdate) {
+        mNewsItemsCache.remove(id);
+        if (isUpdate) {
+            updatePartialNewsItem(id, version, sortTimestamp, sortPriority);
+        } else {
+            insertPartialNewsItem(id, version, sortTimestamp, sortPriority);
+        }
+    }
+
+    public void insertPartialNewsItem(final long id, final long version, final long sortTimestamp, final long sortPriority) {
+        mInsertPartialNewsItem.bindLong(1, id);
+        mInsertPartialNewsItem.bindLong(2, version);
+        mInsertPartialNewsItem.bindLong(3, sortTimestamp);
+        mInsertPartialNewsItem.bindLong(4, sortPriority);
+        mInsertPartialNewsItem.execute();
+    }
+
+    public void updatePartialNewsItem(final long id, final long version, final long sortTimestamp, final long sortPriority) {
+        mUpdatePartialNewsItem.bindLong(1, version);
+        mUpdatePartialNewsItem.bindLong(2, sortTimestamp);
+        mUpdatePartialNewsItem.bindLong(3, sortPriority);
+        // WHERE
+        mUpdatePartialNewsItem.bindLong(44, id);
+        mUpdatePartialNewsItem.execute();
+    }
+
     public void saveNewsItem(final AppNewsItemTO item, final boolean isUpdate) {
+        mNewsItemsCache.remove(item.id);
         if (isUpdate) {
             updateNewsItem(item);
         } else {
@@ -135,6 +170,7 @@ public class NewsStore implements Closeable {
     }
 
     public void addUser(final long newsId, final String email) {
+        mNewsItemsCache.remove(newsId);
         mInsertNewsRogeredUser.bindLong(1, newsId);
         mInsertNewsRogeredUser.bindString(2, email);
         mInsertNewsRogeredUser.execute();
@@ -203,6 +239,9 @@ public class NewsStore implements Closeable {
     }
 
     public void setNewsItemRead(final long newsId) {
+        if (mNewsItemsCache.containsKey(newsId)) {
+            mNewsItemsCache.get(newsId).read = true;
+        }
         TransactionHelper.runInTransaction(mDb, "setNewsItemRead", new TransactionWithoutResult() {
             @Override
             protected void run() {
@@ -214,6 +253,9 @@ public class NewsStore implements Closeable {
     }
 
     public void setNewsItemPinned(final long newsId, final boolean pinned) {
+        if (mNewsItemsCache.containsKey(newsId)) {
+            mNewsItemsCache.get(newsId).pinned = pinned;
+        }
         TransactionHelper.runInTransaction(mDb, "setNewsItemPinned", new TransactionWithoutResult() {
             @Override
             protected void run() {
@@ -225,6 +267,9 @@ public class NewsStore implements Closeable {
     }
 
     public void setNewsItemRogered(final long newsId) {
+        if (mNewsItemsCache.containsKey(newsId)) {
+            mNewsItemsCache.get(newsId).rogered = true;
+        }
         TransactionHelper.runInTransaction(mDb, "setNewsItemRogered", new TransactionWithoutResult() {
             @Override
             protected void run() {
@@ -236,6 +281,9 @@ public class NewsStore implements Closeable {
     }
 
     public void setNewsItemDisabled(final long newsId) {
+        if (mNewsItemsCache.containsKey(newsId)) {
+            mNewsItemsCache.get(newsId).disabled = true;
+        }
         TransactionHelper.runInTransaction(mDb, "setNewsItemDisabled", new TransactionWithoutResult() {
             @Override
             protected void run() {
@@ -248,6 +296,10 @@ public class NewsStore implements Closeable {
 
     public NewsItem getNewsItem(long newsId) {
         T.dontCare();
+        if (mNewsItemsCache.containsKey(newsId)) {
+            return mNewsItemsCache.get(newsId);
+        }
+
         final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_news_get_item),
                 new String[] { "" + newsId });
 
@@ -276,9 +328,12 @@ public class NewsStore implements Closeable {
             newsItem.pinned = c.getLong(15) > 0;
             newsItem.rogered = c.getLong(16) > 0;
             newsItem.disabled = c.getLong(17) > 0;
+            newsItem.isPartial = c.getLong(18) > 0;
 
             addButtons(newsItem);
             addRogeredUsers(newsItem);
+
+            mNewsItemsCache.put(newsId, newsItem);
             return newsItem;
         } finally {
             c.close();
@@ -391,34 +446,12 @@ public class NewsStore implements Closeable {
         newsItem.pinned = c.getLong(17) > 0;
         newsItem.rogered = c.getLong(18) > 0;
         newsItem.disabled = c.getLong(19) > 0;
+        newsItem.isPartial = c.getLong(20) > 0;
 
         addButtons(newsItem);
         addRogeredUsers(newsItem);
 
         return newsItem;
-    }
-
-    public List<Long> searchPinnedNews(String qry) {
-        T.dontCare();
-
-        String query = "%" + qry + "%";
-
-        List<Long> newsIds = new ArrayList<>();
-        final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_news_search_pinned),
-                new String[]{query, query, query, query, query});
-
-        try {
-            if (!c.moveToFirst()) {
-                return newsIds;
-            }
-            newsIds.add(c.getLong(0));
-            while (c.moveToNext()) {
-                newsIds.add(c.getLong(0));
-            }
-            return newsIds;
-        } finally {
-            c.close();
-        }
     }
 
     private NewsItemDetails readDetails(Cursor c) {
@@ -427,4 +460,9 @@ public class NewsStore implements Closeable {
         d.version = c.getLong(1);
         return d;
     }
+
+    public void clearNewsItemsCache() {
+        mNewsItemsCache.clear();
+    }
+
 }

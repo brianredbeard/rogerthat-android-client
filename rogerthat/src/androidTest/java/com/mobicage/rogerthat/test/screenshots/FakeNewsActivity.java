@@ -59,7 +59,7 @@ public class FakeNewsActivity extends NewsActivity {
                 R.string.sample_news_item_message_2, R.string.news, "service@rogerthat.net",
                 R.string.sample_news_item_sender_2, buttons2, false, true));
 
-        mListAdapter = new NewsListAdapter(this) {
+        mAdapter = new NewsListAdapter(this) {
             @Override
             protected NewsItem getNewsItem(int position) {
                 return items.get(position);
@@ -75,6 +75,6 @@ public class FakeNewsActivity extends NewsActivity {
                 return items.size();
             }
         };
-        mListView.setAdapter(mListAdapter);
+        mListView.setAdapter(mAdapter);
     }
 }

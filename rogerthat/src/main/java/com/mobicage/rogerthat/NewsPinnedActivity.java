@@ -18,12 +18,12 @@
 package com.mobicage.rogerthat;
 
 import android.os.Bundle;
+import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.mobicage.rogerth.at.R;
@@ -66,7 +66,7 @@ public class NewsPinnedActivity extends NewsActivity {
     @Override
     protected void changeCursor() {
         if (mServiceIsBound) {
-            NewsListAdapter nla = ((NewsListAdapter) getListAdapter());
+            NewsListRecyclerAdapter nla = ((NewsListRecyclerAdapter) getAdapter());
             createCursor();
             if (dbCursor != null) {
                 nla.changeCursor(dbCursor);
@@ -79,8 +79,8 @@ public class NewsPinnedActivity extends NewsActivity {
         createCursor();
         startManagingCursor(dbCursor);
 
-        NewsListAdapter nla = new NewsListAdapter(this, mService, dbCursor, newsPlugin, newsStore, friendsPlugin);
-        setListAdapter(nla);
+        NewsListRecyclerAdapter nla = new NewsListRecyclerAdapter(this, mService, dbCursor, newsPlugin, newsStore, friendsPlugin);
+        setAdapter(nla);
     }
 
     @Override
@@ -97,7 +97,7 @@ public class NewsPinnedActivity extends NewsActivity {
         swipeContainer.setRefreshing(false);
         swipeContainer.setEnabled(false);
 
-        setListView((ListView) findViewById(R.id.news_list));
+        setRecyclerView((RecyclerView) findViewById(R.id.news_list));
         mQry = "";
         loadCursorAndSetAdaptar();
 
@@ -118,7 +118,7 @@ public class NewsPinnedActivity extends NewsActivity {
                 if (searchContainer.getVisibility() == View.VISIBLE) {
                     mQry = searchTextField.getText().toString();
                     changeCursor();
-                    mListView.setSelection(0);
+                    setSelection(0);
                 }
             }
         });

@@ -52,7 +52,7 @@ public class DownloadImageTask extends SafeAsyncTask<String, Void, Bitmap> {
             InputStream in = new java.net.URL(urldisplay).openStream();
             mIcon11 = BitmapFactory.decodeStream(in);
         } catch (Exception e) {
-            L.d("AdvancedOrder DownloadImageTask error", e);
+            L.d("DownloadImageTask error", e);
         }
         return mIcon11;
     }

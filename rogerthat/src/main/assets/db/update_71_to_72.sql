@@ -19,7 +19,8 @@ CREATE TABLE news (
     rogered INTEGER,
     disabled INTEGER,
     sort_timestamp INTEGER,
-    sort_priority INTEGER
+    sort_priority INTEGER,
+    is_partial INTEGER
 );
 
 CREATE INDEX ix_news_search ON news (sender_name, title, message, broadcast_type, qr_code_caption);

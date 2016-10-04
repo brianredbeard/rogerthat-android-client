@@ -26,6 +26,7 @@ import java.util.Map;
 public class GetNewsRequestTO implements com.mobicage.rpc.IJSONable {
 
     public String cursor;
+    public long updated_since;
 
     public GetNewsRequestTO() {
     }
@@ -37,12 +38,23 @@ public class GetNewsRequestTO implements com.mobicage.rpc.IJSONable {
         } else {
             throw new IncompleteMessageException("com.mobicage.to.news.GetNewsRequestTO object is missing field 'cursor'");
         }
+        if (json.containsKey("updated_since")) {
+            Object val = json.get("updated_since");
+            if (val instanceof Integer) {
+                this.updated_since = ((Integer) val).longValue();
+            } else {
+                this.updated_since = ((Long) val).longValue();
+            }
+        } else {
+            throw new IncompleteMessageException("com.mobicage.to.news.GetNewsRequestTO object is missing field 'updated_since'");
+        }
     }
 
     @Override
     public Map<String, Object> toJSONMap() {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
         obj.put("cursor", this.cursor);
+        obj.put("updated_since", this.updated_since);
         return obj;
     }
 
