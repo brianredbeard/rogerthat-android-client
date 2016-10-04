@@ -262,17 +262,37 @@ public class NewsActivity extends ServiceBoundCursorListActivity implements News
 
     private void setupConnectedToInternet() {
         final LinearLayout ll = (LinearLayout) findViewById(R.id.internet_status_container);
+        SafeRunnable newsRunnable;
         if (mIsConnectedToInternet) {
             ll.setVisibility(View.GONE);
             swipeContainer.setEnabled(true);
             swipeContainer.setRefreshing(true);
             requestMoreNews(true);
+            newsRunnable = new SafeRunnable() {
+                @Override
+                protected void safeRun() throws Exception {
+                    if (mNewsChannel != null) {
+                        mNewsChannel.internetConnected();
+                    }
+
+                }
+            };
         } else {
             ll.setVisibility(View.VISIBLE);
             swipeContainer.setEnabled(false);
             swipeContainer.setRefreshing(false);
             mUUID = UUID.randomUUID().toString();
+            newsRunnable = new SafeRunnable() {
+                @Override
+                protected void safeRun() throws Exception {
+                    if (mNewsChannel != null) {
+                        mNewsChannel.internetDisconnected();
+                    }
+
+                }
+            };
         }
+        mService.postAtFrontOfBIZZHandler(newsRunnable);
     }
 
     @Override

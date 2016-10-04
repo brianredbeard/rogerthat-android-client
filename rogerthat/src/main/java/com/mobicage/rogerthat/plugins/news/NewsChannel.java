@@ -10,7 +10,7 @@ import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.Credentials;
 import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.rpc.config.AppConstants;
-import com.mobicage.to.news.BaseNewsItemTO;
+import com.mobicage.to.news.AppNewsItemTO;
 
 import org.jivesoftware.smack.util.Base64;
 import org.jivesoftware.smack.util.DNSUtil;
@@ -25,6 +25,7 @@ import javax.net.ssl.SSLException;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -42,7 +43,9 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 
+@ChannelHandler.Sharable
 public class NewsChannel extends SimpleChannelInboundHandler<String> {
+    private final int KEEPALIVE_DELAY = 30;
     private final MainService mService;
     private NewsChannelCallbackHandler mNewsChannelCallbackHandler;
     public String host;
@@ -66,7 +69,9 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         NEWS_STATS_READ("NEWS STATS READ"),
         NEWS_READ_UPDATE("NEWS READ UPDATE"),
         NEWS_ROGER_UPDATE("NEWS ROGER UPDATE"),
-        NEWS_PUSH("NEWS PUSH");
+        NEWS_PUSH("NEWS PUSH"),
+        PING("PING"),
+        PONG("PONG");
 
         private final String name;
 
@@ -96,9 +101,19 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
 
         if (mService.getNetworkConnectivityManager().isConnected()) {
             getConfiguration();
-        } else {
-            delayGetConfiguration();
         }
+    }
+
+    public void internetConnected() {
+        T.BIZZ();
+        if (this.host == null || this.port == -1) {
+            getConfiguration();
+        }
+        connect();
+    }
+
+    public void internetDisconnected() {
+        disconnect();
     }
 
 
@@ -108,8 +123,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
             L.d("Already connected to news channel");
             return;
         } else if (!mService.getNetworkConnectivityManager().isConnected()) {
-            L.d("Cannot connect to news channel: no internet connection. Deferring...");
-            attemptToReconnect(10);
+            L.d("Cannot connect to news channel: no internet connection.");
             return;
         }
         if (this.host == null) {
@@ -159,6 +173,22 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         this.channel = b.connect(this.host, this.port).channel();
         this.connected = true;
         L.d("Connected to news channel.");
+        keepAlive();
+    }
+
+    private void keepAlive() {
+        new java.util.Timer().schedule(
+                new java.util.TimerTask() {
+                    @Override
+                    public void run() {
+                        if (connected) {
+                            sendLine(Command.PING.toString());
+                            keepAlive();
+                        }
+                    }
+                },
+                KEEPALIVE_DELAY * 1000
+        );
     }
 
     public void sendLine(String line) {
@@ -172,11 +202,13 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
 
     public void disconnect() {
         try {
-            if (!this.connected) {
+            if (this.channel == null || this.eventLoopGroup == null) {
                 return;
             }
             channel.closeFuture().sync();
-            this.eventLoopGroup.shutdownGracefully();
+            this.eventLoopGroup.shutdownGracefully().sync();
+            this.channel = null;
+            this.eventLoopGroup = null;
         } catch (InterruptedException e) {
             L.e(e);
         }
@@ -193,6 +225,13 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         L.d("News channel inactive");
         super.channelInactive(ctx);
+        this.connected = false;
+    }
+
+    @Override
+    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+        L.d("News channel unregistered");
+        super.channelUnregistered(ctx);
         this.connected = false;
     }
 
@@ -233,10 +272,8 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
                     new java.util.TimerTask() {
                         @Override
                         public void run() {
-                            if (NewsChannel.this.connected) {
+                            if (mService.getNetworkConnectivityManager().isConnected()) {
                                 connect();
-                            } else {
-                                attemptToReconnect(backoffTime);
                             }
                         }
                     },
@@ -248,6 +285,9 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
     @Override
     public void channelRead0(ChannelHandlerContext ctx, String msg) {
         L.d("[NEWS] << " + msg);
+        if (Command.PONG.toString().equals(msg)) {
+            return;
+        }
         String[] result = msg.split(": ", 2);
         if (result.length < 2) {
             L.d("Unknown command");
@@ -286,7 +326,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         JSONObject json = (JSONObject) JSONValue.parse(data);
         try {
             //noinspection unchecked
-            BaseNewsItemTO newsItem = new BaseNewsItemTO(json);
+            AppNewsItemTO newsItem = new AppNewsItemTO(json);
             mNewsChannelCallbackHandler.newsPush(newsItem);
         } catch (IncompleteMessageException e) {
             L.bug(String.format("Invalid news item received from update server (%s)\n: %s", e.getMessage(), data));
