@@ -1,20 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
-    android:background="@color/mc_background_color">
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_marginBottom="8dp"
+              android:layout_marginTop="8dp"
+              android:background="@color/mc_background_color"
+              android:orientation="vertical">
 
     <LinearLayout
         android:id="@+id/partial_item"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="5dp"
         android:background="@drawable/news_background"
         android:orientation="vertical"
         android:visibility="gone">
@@ -34,7 +32,7 @@
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:layout_margin="5dp"
-                    android:background="@color/mc_gray_11" />
+                    android:background="@color/mc_gray_11"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -45,7 +43,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="20dp"
-                        android:background="@color/mc_gray_11" />
+                        android:background="@color/mc_gray_11"/>
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -56,17 +54,17 @@
                         <View
                             android:layout_width="200dp"
                             android:layout_height="15dp"
-                            android:background="@color/mc_gray_11" />
+                            android:background="@color/mc_gray_11"/>
 
                         <View
                             android:layout_width="0dp"
                             android:layout_height="15dp"
-                            android:layout_weight="1" />
+                            android:layout_weight="1"/>
 
                         <View
                             android:layout_width="50dp"
                             android:layout_height="15dp"
-                            android:background="@color/mc_gray_11" />
+                            android:background="@color/mc_gray_11"/>
 
                     </LinearLayout>
                 </LinearLayout>
@@ -77,14 +75,14 @@
                 android:layout_height="15dp"
                 android:layout_marginLeft="5dp"
                 android:layout_marginTop="10dp"
-                android:background="@color/mc_gray_11" />
+                android:background="@color/mc_gray_11"/>
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="15dp"
                 android:layout_marginLeft="5dp"
                 android:layout_marginTop="5dp"
-                android:background="@color/mc_gray_11" />
+                android:background="@color/mc_gray_11"/>
 
         </LinearLayout>
     </LinearLayout>
@@ -93,12 +91,8 @@
         android:id="@+id/full_item"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:background="@drawable/news_background"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp">
+        android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -109,8 +103,8 @@
                 android:id="@+id/members_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/members"
@@ -118,15 +112,15 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="15dp"
                     android:layout_marginRight="35dp"
-                    android:paddingTop="5dp"
                     android:paddingBottom="5dp"
-                    tools:text="Bart Pede and Ruben Mattan Rogered this message"
-                    android:textSize="12sp"/>
+                    android:paddingTop="5dp"
+                    android:textSize="12sp"
+                    tools:text="Bart Pede and Ruben Mattan Rogered this message"/>
 
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="@color/mc_divider_gray" />
+                    android:background="@color/mc_divider_gray"/>
 
             </LinearLayout>
 
@@ -137,15 +131,15 @@
                 android:layout_below="@id/description"
                 android:visibility="gone"
                 tools:src="@drawable/mobicage"
-                tools:visibility="visible" />
+                tools:visibility="gone"/>
 
             <LinearLayout
                 android:id="@+id/qr_code_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:orientation="horizontal"
                 android:visibility="gone"
-                tools:visibility="visible"
-                android:orientation="horizontal">
+                tools:visibility="visible">
 
                 <com.mobicage.rogerthat.util.ui.ScaleImageView
                     android:id="@+id/qr_code"
@@ -154,17 +148,17 @@
                     android:layout_margin="1dp"
                     android:layout_weight="1"
                     android:adjustViewBounds="true"
-                    android:src="@drawable/unknown_avatar" />
+                    android:src="@drawable/unknown_avatar"/>
 
                 <TextView
                     android:id="@+id/qr_code_caption"
+                    fontPath="fonts/lato_bold.ttf"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_weight="1"
-                    tools:text="Use this coupon to get a free drink."
                     android:textSize="20sp"
-                    fontPath="fonts/lato_bold.ttf" />
+                    tools:text="Use this coupon to get a free drink."/>
 
             </LinearLayout>
 
@@ -185,22 +179,22 @@
                         android:layout_width="30dp"
                         android:layout_height="30dp"
                         android:layout_margin="5dp"
-                        android:src="@drawable/unknown_avatar" />
+                        android:src="@drawable/unknown_avatar"/>
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:layout_marginLeft="5dp">
+                        android:layout_marginLeft="5dp"
+                        android:orientation="vertical">
 
                         <TextView
                             android:id="@+id/title"
+                            fontPath="fonts/lato_bold.ttf"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textColor="@color/mc_primary_color"
-                            tools:text="Scan uw mobiele klantenkaart en maak kans op een diner voor 2 personen!"
                             android:textSize="16sp"
-                            fontPath="fonts/lato_bold.ttf"/>
+                            tools:text="Scan uw mobiele klantenkaart en maak kans op een diner voor 2 personen!"/>
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -212,18 +206,18 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                tools:text="Ma-Tu-Vu"
                                 android:textSize="12sp"
-                                android:textStyle="italic" />
+                                android:textStyle="italic"
+                                tools:text="Ma-Tu-Vu"/>
 
                             <TextView
                                 android:id="@+id/date"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                tools:text="12/01/2016"
                                 android:layout_marginLeft="5dp"
                                 android:textSize="12sp"
-                                android:textStyle="italic"  />
+                                android:textStyle="italic"
+                                tools:text="12/01/2016"/>
 
                         </LinearLayout>
                     </LinearLayout>
@@ -236,8 +230,8 @@
                     android:layout_marginLeft="5dp"
                     android:layout_marginTop="10dp"
                     android:maxLines="5"
-                    tools:text="Kom langs en scan uw mobile klantenkaart bij het afrekenen om zo kans te maken op een gratis 3-gangen etentje voor 2 personen."
-                    android:textSize="14sp"/>
+                    android:textSize="14sp"
+                    tools:text="Kom langs en scan uw mobile klantenkaart bij het afrekenen om zo kans te maken op een gratis 3-gangen etentje voor 2 personen."/>
 
                 <TextView
                     android:id="@+id/readmore"
@@ -247,103 +241,95 @@
                     android:layout_marginTop="10dp"
                     android:text="@string/read_more"
                     android:textSize="12sp"
-                    android:textStyle="italic" />
+                    android:textStyle="italic"/>
 
             </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/mc_divider_gray" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
                 android:minHeight="20dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:layout_marginRight="10dp"
+                android:gravity="end"
+                android:orientation="horizontal">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="15dp"
                     android:text="@string/reach"
-                    android:textSize="10sp" />
+                    android:textSize="12sp"/>
 
                 <TextView
                     android:id="@+id/reach"
+                    fontPath="fonts/lato_bold.ttf"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="2dp"
-                    tools:text="549"
-                    android:textSize="10sp"
-                    fontPath="fonts/lato_bold.ttf"
-                    tools:ignore="MissingPrefix" />
+                    android:textSize="12sp"
+                    tools:ignore="MissingPrefix"
+                    tools:text="549"/>
 
                 <TextView
                     android:id="@+id/broadcast_type"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
-                    tools:text="[nieuws]"
-                    android:textSize="10sp"/>
+                    android:textSize="12sp"
+                    tools:text="[nieuws]"/>
+            </LinearLayout>
 
-                <View
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/mc_divider_gray"/>
+
+            <LinearLayout
+                android:id="@+id/actions"
+                android:layout_width="match_parent"
+                android:layout_height="36dp">
+
+                <Button
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"></View>
+                    style="?attr/buttonBarButtonStyle"
+                    android:layout_weight="1"
+                    android:background="@color/mc_default_text"
+                    android:gravity="center"
+                    android:minWidth="0dp"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:textColor="@color/mc_white"
+                    android:textSize="16sp"
+                    tools:text="Rogerthat"/>
 
-                <LinearLayout
-                    android:id="@+id/actions"
-                    android:layout_width="wrap_content"
+                <Button
                     android:layout_height="match_parent"
-                    android:orientation="horizontal">
+                    style="?attr/buttonBarButtonStyle"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:background="@color/mc_divider_gray"
+                    android:gravity="center"
+                    android:minWidth="0dp"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:textColor="@color/mc_white"
+                    android:textSize="16sp"
+                    tools:text="Volgen"/>
 
-                    <Button
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:background="@color/mc_primary_color"
-                        android:textColor="@color/mc_white"
-                        android:gravity="center"
-                        android:paddingLeft="5dp"
-                        android:paddingRight="5dp"
-                        android:minWidth="0dp"
-                        tools:text="Rogerthat"
-                        android:textSize="10sp"/>
-
-                    <View android:layout_width="2dp"
-                        android:layout_height="match_parent"
-                        android:background="@color/mc_white" />
-
-                    <Button
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:background="@color/mc_divider_gray"
-                        android:textColor="@color/mc_white"
-                        android:gravity="center"
-                        android:paddingLeft="5dp"
-                        android:paddingRight="5dp"
-                        android:minWidth="0dp"
-                        tools:text="Volgen"
-                        android:textSize="10sp"/>
-
-                    <View android:layout_width="2dp"
-                        android:layout_height="match_parent"
-                        android:background="@color/mc_white" />
-
-                    <Button
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:background="@color/mc_primary_color"
-                        android:textColor="@color/mc_white"
-                        android:gravity="center"
-                        android:paddingLeft="5dp"
-                        android:paddingRight="5dp"
-                        android:minWidth="0dp"
-                        tools:text="Reserveren"
-                        android:textSize="10sp"/>
-
-                </LinearLayout>
+                <Button
+                    style="?attr/buttonBarButtonStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@color/mc_primary_color"
+                    android:gravity="center"
+                    android:minWidth="0dp"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:textColor="@color/mc_white"
+                    android:textSize="16sp"
+                    tools:text="Reserveren"/>
 
             </LinearLayout>
         </LinearLayout>
@@ -352,12 +338,12 @@
             android:id="@+id/pinned"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:padding="5dp"
-            android:background="@drawable/news_action_background"
             android:layout_gravity="top|right"
+            android:background="@drawable/news_action_background"
+            android:padding="5dp"
             app:ico_color="@color/mc_white"
             app:ico_icon="@string/faw_angle_down"
-            app:ico_size="12dp" />
+            app:ico_size="12dp"/>
 
     </FrameLayout>
 </LinearLayout>

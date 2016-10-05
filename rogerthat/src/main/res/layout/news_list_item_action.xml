@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Button
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    fontPath="fonts/lato_bold.ttf"
+    android:layout_width="0dp"
     android:layout_height="match_parent"
+    android:layout_weight="1"
     android:background="@color/mc_primary_color"
-    android:textColor="@color/mc_white"
+    android:foreground="?attr/selectableItemBackgroundBorderless"
     android:gravity="center"
+    android:minWidth="0dp"
     android:paddingLeft="5dp"
     android:paddingRight="5dp"
-    android:minWidth="0dp"
-    android:text="Rogerthat"
-    android:textSize="10sp"/>
+    android:textColor="@color/mc_white"
+    android:textSize="16sp"
+    tools:text="Rogerthat"/>

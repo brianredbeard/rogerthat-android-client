@@ -6,6 +6,7 @@
         android:width="1dp"
         android:color="@color/mc_divider_gray" />
 
+    <corners android:radius="15dip"/>
     <solid android:color="@color/mc_white" />
 
 </shape>

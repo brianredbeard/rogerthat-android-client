@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.text.Spannable;
@@ -89,6 +90,9 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     protected final static int FLAG_ACTION_ROGERTHAT = 1;
     protected final static int FLAG_ACTION_FOLLOW = 2;
 
+    private final int ONE_DP;
+    private final int FIFTEEN_DP;
+
     private NewsActivity mActivity;
     private final MainService mMainService;
     private final LayoutInflater mLayoutInflater;
@@ -113,6 +117,8 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     public NewsListAdapter(NewsActivity activity, MainService mainService) {
         mActivity = activity;
         mMainService = mainService;
+        ONE_DP = UIUtils.convertDipToPixels(mActivity, 1);
+        FIFTEEN_DP = UIUtils.convertDipToPixels(mActivity, 15);
         mLayoutInflater = LayoutInflater.from(mActivity);
         mMessagingPlugin = mMainService.getPlugin(MessagingPlugin.class);
 
@@ -374,21 +380,35 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     private void setupButtons(final int position, View view, final NewsItem newsItem, int existenceStatus) {
         LinearLayout actions = (LinearLayout) view.findViewById(R.id.actions);
         actions.removeAllViews();
+        int totalButtonCount = 0;
+        int currentButton = 0;
+        boolean rogerthatButtonEnabled = SystemUtils.isFlagEnabled(newsItem.flags, FLAG_ACTION_ROGERTHAT);
+        boolean followButtonEnabled = SystemUtils.isFlagEnabled(newsItem.flags, FLAG_ACTION_FOLLOW);
 
-        if (SystemUtils.isFlagEnabled(newsItem.flags, FLAG_ACTION_ROGERTHAT)) {
-            final Button btn = (Button) mLayoutInflater.inflate(R.layout.news_list_item_action, mActivity.getRecyclerView(), false);
-            btn.setText(mActivity.getString(R.string.rogerthat));
+        if (rogerthatButtonEnabled) {
+            totalButtonCount++;
+        }
+        if (followButtonEnabled) {
+            totalButtonCount++;
+        }
+        totalButtonCount += newsItem.buttons.length;
+        if (rogerthatButtonEnabled) {
+            currentButton++;
+            final Button rogerthatButton = (Button) mLayoutInflater.inflate(R.layout.news_list_item_action, actions, false);
+            actions.addView(rogerthatButton);
+            rogerthatButton.setText(mActivity.getString(R.string.rogerthat));
 
+            GradientDrawable background = new GradientDrawable();
+            int backgroundColor;
             if (newsItem.rogered) {
-                btn.setBackgroundColor(mActivity.getResources().getColor(R.color.mc_divider_gray));
+                backgroundColor = R.color.mc_divider_gray;
             } else {
-                btn.setBackgroundColor(mActivity.getResources().getColor(R.color.mc_default_text));
-                btn.setOnClickListener(new SafeViewOnClickListener() {
+                backgroundColor = R.color.mc_default_text;
+                rogerthatButton.setOnClickListener(new SafeViewOnClickListener() {
                     @Override
                     public void safeOnClick(View v) {
-                        btn.setOnClickListener(null);
+                        rogerthatButton.setOnClickListener(null);
                         mActivity.newsPlugin.newsRogered(newsItem.id);
-                        mActivity.newsChannel.rogerNews(newsItem.id);
                         mMainService.postAtFrontOfBIZZHandler(new SafeRunnable() {
                             @Override
                             protected void safeRun() throws Exception {
@@ -406,52 +426,56 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                     }
                 });
             }
+            background.setCornerRadii(getCorners(totalButtonCount, currentButton));
+            background.setColor(mActivity.getResources().getColor(backgroundColor));
+            rogerthatButton.setBackground(background);
 
-            actions.addView(btn);
             if (SystemUtils.isFlagEnabled(newsItem.flags, FLAG_ACTION_FOLLOW) || newsItem.buttons.length > 0) {
-                View spacer = mLayoutInflater.inflate(R.layout.news_list_item_action_spacer, mActivity.getRecyclerView(), false);
-                actions.addView(spacer);
+                ViewGroup.MarginLayoutParams marginParams = (ViewGroup.MarginLayoutParams) rogerthatButton.getLayoutParams();
+                marginParams.setMargins(0, 0, getMarginLeft(totalButtonCount, currentButton), 0);
             }
         }
 
-        if (SystemUtils.isFlagEnabled(newsItem.flags, FLAG_ACTION_FOLLOW)) {
-            final Button btn = (Button) mLayoutInflater.inflate(R.layout.news_list_item_action, mActivity.getRecyclerView(), false);
-            btn.setText(mActivity.getString(R.string.follow));
+        if (followButtonEnabled) {
+            currentButton++;
+            final Button followButton = (Button) mLayoutInflater.inflate(R.layout.news_list_item_action, actions, false);
+            actions.addView(followButton);
+            followButton.setText(mActivity.getString(R.string.follow));
 
 
-            if (Friend.ACTIVE == existenceStatus) {
-                btn.setBackgroundColor(mActivity.getResources().getColor(R.color.mc_divider_gray));
-            } else {
-                btn.setBackgroundColor(mActivity.getResources().getColor(R.color.mc_default_text));
-            }
-
-            btn.setOnClickListener(new SafeViewOnClickListener() {
+            int backgroundColor = Friend.ACTIVE == existenceStatus ? R.color.mc_divider_gray : R.color.mc_default_text;
+            GradientDrawable background = new GradientDrawable();
+            followButton.setOnClickListener(new SafeViewOnClickListener() {
                 @Override
                 public void safeOnClick(View v) {
-                    btn.setOnClickListener(null);
+                    followButton.setOnClickListener(null);
                     final int currentExistenceStatus = mActivity.friendsPlugin.getStore().getExistence(newsItem.sender.email);
                     if (currentExistenceStatus != Friend.ACTIVE) {
                         mActivity.friendsPlugin.inviteFriend(newsItem.sender.email, null, null, false);
                     }
-                    btn.setBackgroundColor(mActivity.getResources().getColor(R.color.mc_divider_gray));
+                    followButton.setBackgroundColor(mActivity.getResources().getColor(R.color.mc_divider_gray));
                 }
             });
-            actions.addView(btn);
 
             if (newsItem.buttons.length > 0) {
-                View spacer = mLayoutInflater.inflate(R.layout.news_list_item_action_spacer, mActivity.getRecyclerView(), false);
-                actions.addView(spacer);
+                ViewGroup.MarginLayoutParams marginParams = (ViewGroup.MarginLayoutParams) followButton.getLayoutParams();
+                marginParams.setMargins(0, 0, getMarginLeft(totalButtonCount, currentButton), 0);
             }
+            background.setColor(mActivity.getResources().getColor(backgroundColor));
+            background.setCornerRadii(getCorners(totalButtonCount, currentButton));
+            followButton.setBackground(background);
         }
 
         for (int i = 0; i < newsItem.buttons.length; i++) {
+            currentButton++;
             final NewsActionButtonTO button = newsItem.buttons[i];
 
             Map<String, String> actionInfo = mMessagingPlugin.getButtonActionInfo(button);
             final String buttonAction = actionInfo.get("androidAction");
             final String buttonUrl = actionInfo.get("androidUrl");
 
-            Button btn = (Button) mLayoutInflater.inflate(R.layout.news_list_item_action, mActivity.getRecyclerView(), false);
+            Button btn = (Button) mLayoutInflater.inflate(R.layout.news_list_item_action, actions, false);
+            actions.addView(btn);
             btn.setText(button.caption);
 
             btn.setOnClickListener(new SafeViewOnClickListener() {
@@ -497,15 +521,36 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
 
                 }
             });
-
-            actions.addView(btn);
-
-            if (newsItem.buttons.length > i + 1) {
-                View spacer = mLayoutInflater.inflate(R.layout.news_list_item_action_spacer, mActivity.getRecyclerView(), false);
-                actions.addView(spacer);
-            }
+            GradientDrawable background = new GradientDrawable();
+            background.setColor(mActivity.getResources().getColor(R.color.mc_primary_color));
+            background.setCornerRadii(getCorners(totalButtonCount, currentButton));
+            btn.setBackground(background);
+            ViewGroup.MarginLayoutParams marginParams = (ViewGroup.MarginLayoutParams) btn.getLayoutParams();
+            marginParams.setMargins(0, 0, getMarginLeft(totalButtonCount, currentButton), 0);
         }
     }
+
+    private float[] getCorners(int totalButtonCount, int currentButton) {
+        // top-left, top-right, bottom-right, bottom-left.
+        if (totalButtonCount == 1) {
+            return new float[]{0, 0, 0, 0, FIFTEEN_DP, FIFTEEN_DP, FIFTEEN_DP, FIFTEEN_DP};
+        }
+        if (currentButton == 1) {
+            return new float[]{0, 0, 0, 0, 0, 0, FIFTEEN_DP, FIFTEEN_DP};
+        }
+        if (currentButton == totalButtonCount) {
+            return new float[]{0, 0, 0, 0, FIFTEEN_DP, FIFTEEN_DP, 0, 0};
+        }
+        return new float[]{0, 0, 0, 0, 0, 0, 0, 0};
+    }
+
+    private int getMarginLeft(int totalButtonCount, int currentButton) {
+        if (currentButton < totalButtonCount) {
+            return ONE_DP;
+        }
+        return 0;
+    }
+
 
     private void setupAvatar(View view, final NewsItem newsItem) {
         ImageView serviceAvatar = (ImageView) view.findViewById(R.id.service_avatar);

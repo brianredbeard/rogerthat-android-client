@@ -39,14 +39,19 @@
                 android:padding="5dp"
                 android:visibility="gone">
 
-                <EditText
-                    android:id="@+id/search_text"
-                    android:layout_width="fill_parent"
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="@string/enter_search_query"
-                    android:imeOptions="actionSearch"
-                    android:inputType="textEmailAddress" />
+                    android:layout_weight="1">
+
+                    <EditText
+                        android:id="@+id/search_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/enter_search_query"
+                        android:imeOptions="actionSearch"
+                        android:inputType="textEmailAddress"/>
+                </android.support.design.widget.TextInputLayout>
             </LinearLayout>
 
             <android.support.v4.widget.SwipeRefreshLayout
@@ -58,7 +63,11 @@
                     android:id="@+id/news_list"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@color/mc_background_color" />
+                    android:background="@color/mc_background_color"
+                    android:paddingBottom="8dp"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:paddingTop="8dp"/>
 
             </android.support.v4.widget.SwipeRefreshLayout>
 
