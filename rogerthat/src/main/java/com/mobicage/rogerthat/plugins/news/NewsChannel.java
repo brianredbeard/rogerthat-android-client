@@ -6,6 +6,7 @@ import com.mobicage.rogerthat.config.ConfigurationProvider;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.net.NetworkConnectivityManager;
+import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.Credentials;
 import com.mobicage.rpc.IncompleteMessageException;
@@ -273,7 +274,13 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
                         @Override
                         public void run() {
                             if (mService.getNetworkConnectivityManager().isConnected()) {
-                                connect();
+                                SafeRunnable safeRunnable = new SafeRunnable() {
+                                    @Override
+                                    protected void safeRun() throws Exception {
+                                        connect();
+                                    }
+                                };
+                                mService.postAtFrontOfBIZZHandler(safeRunnable);
                             }
                         }
                     },
