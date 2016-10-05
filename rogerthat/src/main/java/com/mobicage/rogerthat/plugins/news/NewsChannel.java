@@ -356,6 +356,14 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         mNewsChannelCallbackHandler.newsReadUpdate(statsMap);
     }
 
+    public void readNews(Long newsId) {
+        sendCommand(Command.NEWS_READ, newsId.toString());
+    }
+
+    public void rogerNews(Long newsId) {
+        sendCommand(Command.NEWS_ROGER, newsId.toString());
+    }
+
     private void authenticate() {
         Credentials credentials = mService.getCredentials();
         String username = Base64.encodeBytes(credentials.getUsername().getBytes(), Base64.DONT_BREAK_LINES);
