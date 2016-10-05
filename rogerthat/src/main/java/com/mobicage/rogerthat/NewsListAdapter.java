@@ -139,9 +139,11 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         if (!mItems.contains(newsId)) {
             mItems.add(newsId);
 
-            NewsItem newsItem = mNewsStore.getNewsItem(newsId);
-            if (mFriendsPlugin.isBroadcastTypeDisabled(newsItem.sender.email, newsItem.broadcast_type)) {
-                return;
+            if (!mNewsStore.getNewsItemDetails(newsId).isPartial) {
+                NewsItem newsItem = mNewsStore.getNewsItem(newsId);
+                if (mFriendsPlugin.isBroadcastTypeDisabled(newsItem.sender.email, newsItem.broadcast_type)) {
+                    return;
+                }
             }
 
             mVisibleItems.add(newsId);
@@ -158,10 +160,13 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     public void refreshView() {
         mVisibleItems = new ArrayList<>();
         for (Long newsId : mItems) {
-            NewsItem newsItem = mNewsStore.getNewsItem(newsId);
-            if (mFriendsPlugin.isBroadcastTypeDisabled(newsItem.sender.email, newsItem.broadcast_type)) {
-                continue;
+            if (!mNewsStore.getNewsItemDetails(newsId).isPartial) {
+                NewsItem newsItem = mNewsStore.getNewsItem(newsId);
+                if (mFriendsPlugin.isBroadcastTypeDisabled(newsItem.sender.email, newsItem.broadcast_type)) {
+                    continue;
+                }
             }
+
             mVisibleItems.add(newsId);
         }
         if (mVisibleItems.size() > 0) {
@@ -175,7 +180,11 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         public int compare(Long item1, Long item2) {
             NewsItemDetails details1 = mNewsStore.getNewsItemDetails(item1);
             NewsItemDetails details2 = mNewsStore.getNewsItemDetails(item2);
-            if (details1.sortPriority > details2.sortPriority) {
+            if (!details1.read && details2.read) {
+                return -1;
+            } else if (details1.read && !details2.read) {
+                return 1;
+            } else if (details1.sortPriority > details2.sortPriority) {
                 return 1;
             } else if (details1.sortPriority < details2.sortPriority) {
                 return -1;
