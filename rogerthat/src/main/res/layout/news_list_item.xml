@@ -287,7 +287,7 @@
             <LinearLayout
                 android:id="@+id/actions"
                 android:layout_width="match_parent"
-                android:layout_height="36dp">
+                android:layout_height="32dp">
 
                 <Button
                     android:layout_width="0dp"
