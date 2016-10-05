@@ -436,7 +436,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                 } else {
                     canEdit = !isLocked && iAmMember(message);
                 }
-                addButtons(c, message, view, left, canEdit, senderName, isChat);
+                addButtons(c, message, view, left, canEdit, isChat);
             } else {
                 mMessagingPlugin.ackChat(message.getThreadKey());
             }
@@ -567,11 +567,11 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         }
 
         private void addButtons(final Cursor cursor, final Message message, View view, boolean left, boolean canEdit,
-            String senderName, boolean isChat) {
+                                boolean isChat) {
             LinearLayout buttons = (LinearLayout) view.findViewById(R.id.buttons);
             buttons.removeAllViews();
             for (ButtonTO button : message.buttons) {
-                addButton(cursor, message, left, canEdit, senderName, buttons, button, isChat);
+                addButton(message, left, canEdit, buttons, button, isChat);
             }
             if (!isChat) {
                 boolean addRogerthatButton = message.threadNeedsMyAnswer
@@ -591,9 +591,9 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             }
         }
 
-        private void addButton(final Cursor cursor, final MessageTO message, boolean left, boolean canEdit,
-            String senderName, final LinearLayout buttons, final ButtonTO button, final boolean isChat) {
-            RelativeLayout buttonContainer = (RelativeLayout) mInflator.inflate(
+        private void addButton(final MessageTO message, boolean left, boolean canEdit, final LinearLayout buttons,
+                               final ButtonTO button, final boolean isChat) {
+            LinearLayout buttonContainer = (LinearLayout) mInflator.inflate(
                 left ? R.layout.message_thread_member_detail_right : R.layout.message_thread_member_detail_left, null);
             buttons.addView(buttonContainer);
             Button buttonView = (Button) buttonContainer.findViewById(R.id.button);

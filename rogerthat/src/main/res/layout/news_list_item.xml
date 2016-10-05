@@ -94,6 +94,17 @@
         android:background="@drawable/news_background"
         android:orientation="vertical">
 
+        <ImageButton
+            android:id="@+id/pin_button"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="top|start"
+            android:background="@drawable/news_pin_background"
+            android:padding="5dp"
+            app:ico_color="@color/mc_primary_color"
+            app:ico_icon="@string/faw_thumb_tack"
+            app:ico_size="16dp"/>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -103,23 +114,27 @@
                 android:id="@+id/members_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="28dp"
+                android:layout_marginRight="28dp"
                 android:gravity="center_vertical"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                tools:visibility="visible">
 
                 <TextView
                     android:id="@+id/members"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="15dp"
-                    android:layout_marginRight="35dp"
+                    android:layout_marginRight="15dp"
                     android:paddingBottom="5dp"
+                    android:maxLines="1"
                     android:paddingTop="5dp"
                     android:textSize="12sp"
                     tools:text="Bart Pede and Ruben Mattan Rogered this message"/>
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
+                    android:layout_height="1px"
                     android:background="@color/mc_divider_gray"/>
 
             </LinearLayout>
@@ -139,7 +154,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:visibility="gone"
-                tools:visibility="visible">
+                tools:visibility="gone">
 
                 <com.mobicage.rogerthat.util.ui.ScaleImageView
                     android:id="@+id/qr_code"
@@ -166,11 +181,12 @@
                 android:id="@+id/details"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="10dp">
+                android:orientation="vertical">
 
                 <LinearLayout
+                    android:id="@+id/news_header"
                     android:layout_width="match_parent"
+                    android:padding="8dp"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
@@ -227,8 +243,7 @@
                     android:id="@+id/text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginTop="10dp"
+                    android:padding="8dp"
                     android:maxLines="5"
                     android:textSize="14sp"
                     tools:text="Kom langs en scan uw mobile klantenkaart bij het afrekenen om zo kans te maken op een gratis 3-gangen etentje voor 2 personen."/>
@@ -237,8 +252,7 @@
                     android:id="@+id/readmore"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginTop="10dp"
+                    android:padding="8dp"
                     android:text="@string/read_more"
                     android:textSize="12sp"
                     android:textStyle="italic"/>
@@ -281,13 +295,13 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="1dp"
+                android:layout_height="1px"
                 android:background="@color/mc_divider_gray"/>
 
             <LinearLayout
                 android:id="@+id/actions"
                 android:layout_width="match_parent"
-                android:layout_height="32dp">
+                android:layout_height="28dp">
 
                 <Button
                     android:layout_width="0dp"
@@ -336,14 +350,14 @@
 
         <ImageButton
             android:id="@+id/pinned"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_gravity="top|right"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="top|end"
             android:background="@drawable/news_action_background"
             android:padding="5dp"
-            app:ico_color="@color/mc_white"
+            app:ico_color="@color/mc_primary_color"
             app:ico_icon="@string/faw_angle_down"
-            app:ico_size="12dp"/>
+            app:ico_size="16dp"/>
 
     </FrameLayout>
 </LinearLayout>
