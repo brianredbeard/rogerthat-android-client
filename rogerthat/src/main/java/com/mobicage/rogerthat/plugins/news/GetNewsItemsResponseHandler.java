@@ -56,23 +56,15 @@ public class GetNewsItemsResponseHandler extends ResponseHandler<GetNewsItemsRes
             NewsStore newsStore = newsPlugin.getStore();
 
             long[] ids = new long[resp.items.length];
-            long[] versions = new long[resp.items.length];
-            long[] sortTimestamps = new long[resp.items.length];
-            long[] sortPriorities = new long[resp.items.length];
+            boolean[] reads = new boolean[resp.items.length];
             for (int i= 0 ; i < resp.items.length; i++) {
                 AppNewsItemTO newsItem = resp.items[i];
                 newsStore.saveNewsItem(newsItem);
                 ids[i] = newsItem.id;
-                versions[i] = newsItem.version;
-                sortTimestamps[i] = newsItem.sort_timestamp;
-                sortPriorities[i] = newsItem.sort_priority;
             }
 
             Intent intent = new Intent(NewsPlugin.GET_NEWS_ITEMS_RECEIVED_INTENT);
             intent.putExtra("ids", ids);
-            intent.putExtra("versions", versions);
-            intent.putExtra("sort_timestamps", sortTimestamps);
-            intent.putExtra("sort_priorities", sortPriorities);
             mMainService.sendBroadcast(intent);
         } catch (Exception e) {
             L.e("Server responded with an error.", e);

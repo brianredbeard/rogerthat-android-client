@@ -62,6 +62,7 @@ public class NewsStore implements Closeable {
     private final SQLiteDatabase mDb;
     private final MainService mMainService;
 
+    private Map<Long, NewsItemDetails> mNewsItemDetailsCache = new HashMap<>();
     private Map<Long, NewsItem> mNewsItemsCache = new HashMap<>();
 
     public NewsStore(final DatabaseManager databaseManager, final MainService mainService) {
@@ -116,24 +117,52 @@ public class NewsStore implements Closeable {
     }
 
     public void insertPartialNewsItem(final long id, final long version, final long sortTimestamp, final long sortPriority) {
-        mInsertPartialNewsItem.bindLong(1, id);
-        mInsertPartialNewsItem.bindLong(2, version);
-        mInsertPartialNewsItem.bindLong(3, sortTimestamp);
-        mInsertPartialNewsItem.bindLong(4, sortPriority);
-        mInsertPartialNewsItem.execute();
+        NewsItemDetails d = new NewsItemDetails();
+        d.id = id;
+        d.version = version;
+        d.sortTimestamp = sortTimestamp;
+        d.sortPriority = sortPriority;
+        d.isPartial = true;
+        d.read = false;
+        mNewsItemDetailsCache.put(id, d);
+
+        TransactionHelper.runInTransaction(mDb, "insertPartialNewsItem", new TransactionWithoutResult() {
+            @Override
+            protected void run() {
+                mInsertPartialNewsItem.bindLong(1, id);
+                mInsertPartialNewsItem.bindLong(2, version);
+                mInsertPartialNewsItem.bindLong(3, sortTimestamp);
+                mInsertPartialNewsItem.bindLong(4, sortPriority);
+                mInsertPartialNewsItem.execute();
+            }
+        });
     }
 
     public void updatePartialNewsItem(final long id, final long version, final long sortTimestamp, final long sortPriority) {
-        mUpdatePartialNewsItem.bindLong(1, version);
-        mUpdatePartialNewsItem.bindLong(2, sortTimestamp);
-        mUpdatePartialNewsItem.bindLong(3, sortPriority);
-        // WHERE
-        mUpdatePartialNewsItem.bindLong(44, id);
-        mUpdatePartialNewsItem.execute();
+        mNewsItemDetailsCache.get(id).version = version;
+        mNewsItemDetailsCache.get(id).sortTimestamp = sortTimestamp;
+        mNewsItemDetailsCache.get(id).sortPriority = sortPriority;
+        mNewsItemDetailsCache.get(id).isPartial = true;
+        TransactionHelper.runInTransaction(mDb, "updatePartialNewsItem", new TransactionWithoutResult() {
+            @Override
+            protected void run() {
+                mUpdatePartialNewsItem.bindLong(1, version);
+                mUpdatePartialNewsItem.bindLong(2, sortTimestamp);
+                mUpdatePartialNewsItem.bindLong(3, sortPriority);
+                // WHERE
+                mUpdatePartialNewsItem.bindLong(44, id);
+                mUpdatePartialNewsItem.execute();
+            }
+        });
     }
 
     public void saveNewsItem(final AppNewsItemTO item) {
         mNewsItemsCache.remove(item.id);
+        mNewsItemDetailsCache.get(item.id).version = item.version;
+        mNewsItemDetailsCache.get(item.id).sortTimestamp = item.sort_timestamp;
+        mNewsItemDetailsCache.get(item.id).sortPriority = item.sort_priority;
+        mNewsItemDetailsCache.get(item.id).isPartial = false;
+
         TransactionHelper.runInTransaction(mDb, "updateNewsItem", new TransactionWithoutResult() {
             @Override
             protected void run() {
@@ -193,6 +222,7 @@ public class NewsStore implements Closeable {
     }
 
     public void setNewsItemRead(final long newsId) {
+        mNewsItemDetailsCache.get(newsId).read = true;
         if (mNewsItemsCache.containsKey(newsId)) {
             mNewsItemsCache.get(newsId).read = true;
         }
@@ -340,28 +370,43 @@ public class NewsStore implements Closeable {
         }
     }
 
-    public Map<Long, NewsItemDetails> getNewsItemVersions() {
+    public void fillNewsItemsCache() {
         T.dontCare();
-        Map<Long, NewsItemDetails> dbVersions = new HashMap<>();
+        mNewsItemDetailsCache = new HashMap<>();
         final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_news_list_item_versions),
                 new String[]{});
 
         try {
             if (!c.moveToFirst()) {
-                return dbVersions;
+                return;
             }
 
             NewsItemDetails d = readDetails(c);
-            dbVersions.put(d.id, d);
+            mNewsItemDetailsCache.put(d.id, d);
             while (c.moveToNext()) {
                 NewsItemDetails d2 = readDetails(c);
-                dbVersions.put(d2.id, d2);
+                mNewsItemDetailsCache.put(d2.id, d2);
             }
 
-            return dbVersions;
+            return;
         } finally {
             c.close();
         }
+    }
+
+    public Map<Long, NewsItemDetails> getNewsItemDetailsCache() {
+        return mNewsItemDetailsCache;
+    }
+
+    public NewsItemDetails getNewsItemDetails(long newsId) {
+        if (mNewsItemDetailsCache.containsKey(newsId)) {
+            return mNewsItemDetailsCache.get(newsId);
+        }
+        return null;
+    }
+
+    public long countNewsItems() {
+        return mNewsItemDetailsCache.size();
     }
 
     public long countPinnedItems() {
@@ -398,10 +443,12 @@ public class NewsStore implements Closeable {
         d.sortTimestamp = c.getLong(2);
         d.sortPriority = c.getLong(3);
         d.isPartial = c.getLong(4) > 0;
+        d.read = c.getLong(5) > 0;
         return d;
     }
 
-    public void clearNewsItemsCache() {
+    public void clearCache() {
+        mNewsItemDetailsCache.clear();
         mNewsItemsCache.clear();
     }
 

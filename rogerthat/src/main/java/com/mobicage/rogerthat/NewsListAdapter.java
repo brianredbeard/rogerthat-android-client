@@ -94,7 +94,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     private final MainService mMainService;
     private final LayoutInflater mLayoutInflater;
     private final NewsPlugin mNewsPlugin;
-    private final NewsStore mStore;
+    private final NewsStore mNewsStore;
     private final FriendsPlugin mFriendsPlugin;
     private final MessagingPlugin mMessagingPlugin;
 
@@ -104,8 +104,8 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     private Map<String, ArrayList<Resizable16by6ImageView>> mImageViews = new HashMap<>();
     private Set<Long> mReadMoreItems = new HashSet<>();
 
-    private Map<Long, NewsItemDetails> mItems = new HashMap<>();
-    private List<Long> mOrder = new ArrayList<>();
+    private List<Long> mItems = new ArrayList<>();
+    private List<Long> mVisibleItems = new ArrayList<>();
 
     private final String mMyEmail;
     private final String mMyName;
@@ -116,7 +116,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         mMainService = mainService;
         mLayoutInflater = LayoutInflater.from(mActivity);
         mNewsPlugin = newsPlugin;
-        mStore = store;
+        mNewsStore = store;
         mFriendsPlugin = friendsPlugin;
         mMessagingPlugin = mMainService.getPlugin(MessagingPlugin.class);
 
@@ -135,24 +135,37 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         }
     }
 
-    public void addNewsItem(NewsItemDetails item, boolean notify) {
-        if (!mOrder.contains(item.id)) {
-            mOrder.add(item.id);
-            mItems.put(item.id, item);
+    public void addNewsItem(long newsId, boolean notify) {
+        if (!mItems.contains(newsId)) {
+            mItems.add(newsId);
 
+            NewsItem newsItem = mNewsStore.getNewsItem(newsId);
+            if (mFriendsPlugin.isBroadcastTypeDisabled(newsItem.sender.email, newsItem.broadcast_type)) {
+                return;
+            }
+
+            mVisibleItems.add(newsId);
             if (notify) {
-                notifyItemInserted(mItems.size());
+                notifyItemInserted(mVisibleItems.size());
             }
         }
     }
 
     public void setNewsItems(List<Long> items) {
-        mOrder = items;
+        mItems = items;
     }
 
     public void refreshView() {
-        if (mItems.size() > 0) {
-            Collections.sort(mOrder, comparator);
+        mVisibleItems = new ArrayList<>();
+        for (Long newsId : mItems) {
+            NewsItem newsItem = mNewsStore.getNewsItem(newsId);
+            if (mFriendsPlugin.isBroadcastTypeDisabled(newsItem.sender.email, newsItem.broadcast_type)) {
+                continue;
+            }
+            mVisibleItems.add(newsId);
+        }
+        if (mVisibleItems.size() > 0) {
+            Collections.sort(mVisibleItems, comparator);
         }
         notifyDataSetChanged();
     }
@@ -160,8 +173,8 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     private final Comparator<Long> comparator = new Comparator<Long>() {
         @Override
         public int compare(Long item1, Long item2) {
-            NewsItemDetails details1 = mItems.get(item1);
-            NewsItemDetails details2 = mItems.get(item2);
+            NewsItemDetails details1 = mNewsStore.getNewsItemDetails(item1);
+            NewsItemDetails details2 = mNewsStore.getNewsItemDetails(item2);
             if (details1.sortPriority > details2.sortPriority) {
                 return 1;
             } else if (details1.sortPriority < details2.sortPriority) {
@@ -174,7 +187,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
 
     @Override
     public int getItemCount() {
-        return mOrder.size();
+        return mVisibleItems.size();
     }
 
     @Override
@@ -185,7 +198,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        mOrder.get(position);
+        mVisibleItems.get(position);
         holder.itemView.findViewById(R.id.partial_item).setVisibility(View.VISIBLE);
         holder.itemView.findViewById(R.id.full_item).setVisibility(View.GONE);
         populateView(holder.itemView, position);
@@ -197,25 +210,19 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     }
 
     public void updateView(long newsId) {
-        int position = mOrder.indexOf(newsId);
+        int position = mVisibleItems.indexOf(newsId);
         if (position >= 0) {
             notifyItemChanged(position);
         }
     }
 
     private void populateView(final View view, final int position) {
-        final NewsItem newsItem = mStore.getNewsItem(mOrder.get(position));
+        final NewsItem newsItem = mNewsStore.getNewsItem(mVisibleItems.get(position));
         if (newsItem.isPartial) {
             long[] ids = new long[1];
             ids[0] = newsItem.id;
             mNewsPlugin.getNewsItems(ids); // todo ruben we need to do this in bulk
             view.findViewById(R.id.partial_item).setVisibility(View.VISIBLE);
-            view.findViewById(R.id.full_item).setVisibility(View.GONE);
-            return;
-        }
-
-        if (mFriendsPlugin.isBroadcastTypeDisabled(newsItem.sender.email, newsItem.broadcast_type)) {
-            view.findViewById(R.id.partial_item).setVisibility(View.GONE);
             view.findViewById(R.id.full_item).setVisibility(View.GONE);
             return;
         }
@@ -230,7 +237,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
             mMainService.postAtFrontOfBIZZHandler(new SafeRunnable() {
                 @Override
                 protected void safeRun() throws Exception {
-                    mStore.setNewsItemRead(newsItem.id);
+                    mNewsStore.setNewsItemRead(newsItem.id);
                 }
             });
 
@@ -298,10 +305,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                                 } else {
                                     mReadMoreItems.add(newsItem.id);
                                 }
-                                mActivity.refreshCursor();
-                                if (!mReadMoreItems.contains(newsItem.id)) {
-                                    mActivity.setSelection(position);
-                                }
+                                notifyItemChanged(position);
                             }
                         });
                     } else {
@@ -343,13 +347,13 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 btn.setOnClickListener(new SafeViewOnClickListener() {
                     @Override
                     public void safeOnClick(View v) {
+                        btn.setOnClickListener(null);
                         mNewsPlugin.newsRogered(newsItem.id);
-
                         mMainService.postAtFrontOfBIZZHandler(new SafeRunnable() {
                             @Override
                             protected void safeRun() throws Exception {
-                                mStore.setNewsItemRogered(newsItem.id);
-                                mStore.addUser(newsItem.id, mMyEmail);
+                                mNewsStore.setNewsItemRogered(newsItem.id);
+                                mNewsStore.addUser(newsItem.id, mMyEmail);
 
                                 mMainService.postAtFrontOfUIHandler(new SafeRunnable() {
                                     @Override
@@ -384,12 +388,12 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
             btn.setOnClickListener(new SafeViewOnClickListener() {
                 @Override
                 public void safeOnClick(View v) {
+                    btn.setOnClickListener(null);
                     final int currentExistenceStatus = mFriendsPlugin.getStore().getExistence(newsItem.sender.email);
                     if (currentExistenceStatus != Friend.ACTIVE) {
                         mFriendsPlugin.inviteFriend(newsItem.sender.email, null, null, false);
                     }
                     btn.setBackgroundColor(mActivity.getResources().getColor(R.color.mc_divider_gray));
-                    btn.setOnClickListener(null);
                 }
             });
             actions.addView(btn);
@@ -604,12 +608,11 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                         public void safeOnClick(View v) {
                             alertDialog.dismiss();
                             mFriendsPlugin.disableBroadcastType(newsItem.sender.email, newsItem.broadcast_type);
-                            mActivity.refreshCursor();
+                            refreshView();
                         }
                     });
                     dialog.addView(actionHide);
                 }
-
 
                 alertDialog.setCanceledOnTouchOutside(true);
                 alertDialog.show();
@@ -696,15 +699,22 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     }
 
     private void togglePinned(final NewsItem newsItem) {
-        final boolean isPinned = !newsItem.pinned;
-        newsItem.pinned = isPinned;
+        mNewsStore.setNewsItemPinned(newsItem.id, !newsItem.pinned);
 
-        mStore.setNewsItemPinned(newsItem.id, isPinned);
+        if (mActivity instanceof NewsPinnedActivity) {
+            if (mNewsStore.countPinnedItems() > 0) {
+                mItems.remove(newsItem.id);
+                int index = mVisibleItems.indexOf(newsItem.id);
+                mVisibleItems.remove(newsItem.id);
+                notifyItemRemoved(index);
+                notifyItemRangeChanged(index, 1);
 
-        Intent intent = new Intent(NewsPlugin.PINNED_NEWS_ITEM_INTENT);
-        intent.putExtra("id", newsItem.id);
-        intent.putExtra("pinned", newsItem.pinned);
-        mMainService.sendBroadcast(intent);
+            } else {
+                mActivity.finish();
+            }
+        } else {
+            mActivity.invalidateOptionsMenu();
+        }
     }
 
     private void setQRCode(final NewsItem newsItem, final View view, final LinearLayout qrCodeContainer) {
@@ -737,18 +747,10 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                     image.setVisibility(View.VISIBLE);
                 }
             }
-        } else if (NewsPlugin.PINNED_NEWS_ITEM_INTENT.equals(action)) {
-            if (mActivity instanceof NewsPinnedActivity) {
-                if (mStore.countPinnedItems() > 0) {
-                    mActivity.refreshCursor();
-                } else {
-                    mActivity.finish();
-                }
-            } else {
-                mActivity.invalidateOptionsMenu();
-            }
         } else if (NewsPlugin.DISABLE_NEWS_ITEM_INTENT.equals(action)) {
             updateView(intent.getLongExtra("id", -1));
+        } else if (FriendsPlugin.SERVICE_DATA_UPDATED.equals(action)) {
+            refreshView();
         }
     }
 }

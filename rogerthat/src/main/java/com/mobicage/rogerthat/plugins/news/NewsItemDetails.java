@@ -23,4 +23,5 @@ public class NewsItemDetails {
     public long sortTimestamp;
     public long sortPriority;
     public boolean isPartial;
+    public boolean read;
 }

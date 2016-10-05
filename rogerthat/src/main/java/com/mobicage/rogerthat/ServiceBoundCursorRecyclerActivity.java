@@ -94,10 +94,15 @@ public abstract class ServiceBoundCursorRecyclerActivity extends ServiceBoundAct
     }
 
     protected int getFirstVisiblePosition() {
-        super.onPause();
         if (mRecyclerView == null)
             return -1;
         return mLayoutManager.findFirstVisibleItemPosition();
+    }
+
+    protected int findFirstCompletelyVisibleItemPosition() {
+        if (mRecyclerView == null)
+            return -1;
+        return mLayoutManager.findFirstCompletelyVisibleItemPosition();
     }
 
     protected void setSelection(int position) {
