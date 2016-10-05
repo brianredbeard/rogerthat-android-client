@@ -203,17 +203,13 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
     }
 
     public void disconnect() {
-        try {
-            if (this.channel == null || this.eventLoopGroup == null) {
-                return;
-            }
-            channel.closeFuture().sync();
-            this.eventLoopGroup.shutdownGracefully().sync();
-            this.channel = null;
-            this.eventLoopGroup = null;
-        } catch (InterruptedException e) {
-            L.e(e);
+        if (this.channel == null || this.eventLoopGroup == null) {
+            return;
         }
+        channel.closeFuture();
+        this.eventLoopGroup.shutdownGracefully();
+        this.channel = null;
+        this.eventLoopGroup = null;
         this.connected = false;
     }
 
