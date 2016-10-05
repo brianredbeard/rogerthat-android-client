@@ -116,7 +116,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
     private Set<String> mRenderedMessages;
 
     private SendMessageView mSendMessageView;
-    private Map<String, MessageMemberStatus> memberStatusTOMap;
+    private Map<String, MessageMemberStatus> memberStatusTOMap = new HashMap<>();
 
     private int _1_DP_IN_PX;
     private int _4_DP_IN_PX;
@@ -901,7 +901,6 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         List<String> members = new ArrayList<>();
 
         Collection<MessageMemberStatus> leastMemberStatusses = mMessageStore.getLeastMemberStatusses(mParentMessageKey);
-        memberStatusTOMap = new HashMap<>();
         memberStatusTOMap.clear();
         for (final MessageMemberStatus memberStatus : leastMemberStatusses) {
             if (!memberStatusTOMap.containsKey(memberStatus.member)) {
