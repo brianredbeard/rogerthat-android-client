@@ -228,7 +228,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         mRequestMoreNewsPosition = position + 50;
 
         for (int i = position; i < mRequestMoreNewsPosition; i++) {
-            if (position >= mVisibleItems.size()) {
+            if (i >= mVisibleItems.size()) {
                 break;
             }
             long newsId = mVisibleItems.get(i);

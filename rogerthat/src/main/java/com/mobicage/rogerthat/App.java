@@ -18,8 +18,8 @@
 
 package com.mobicage.rogerthat;
 
-import android.app.Application;
 import android.content.Context;
+import android.support.multidex.MultiDexApplication;
 
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
@@ -50,7 +50,7 @@ import java.util.Locale;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
-public class App extends Application implements Thread.UncaughtExceptionHandler {
+public class App extends MultiDexApplication implements Thread.UncaughtExceptionHandler {
 
     private static Context sContext;
 
@@ -60,13 +60,15 @@ public class App extends Application implements Thread.UncaughtExceptionHandler 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        Thread.setDefaultUncaughtExceptionHandler(this);
+        sContext = this;
+
         CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
                 .setDefaultFontPath("fonts/lato_regular.ttf")
                 .setFontAttrId(R.attr.fontPath)
                 .build()
         );
-        Thread.setDefaultUncaughtExceptionHandler(this);
-        sContext = this;
 
         // Initialize the SDK before executing any other operations,
         FacebookSdk.sdkInitialize(getApplicationContext());
