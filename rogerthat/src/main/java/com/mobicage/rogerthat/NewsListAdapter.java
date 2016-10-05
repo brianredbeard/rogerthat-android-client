@@ -409,13 +409,13 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                     @Override
                     public void safeOnClick(View v) {
                         rogerthatButton.setOnClickListener(null);
-                        mActivity.newsPlugin.newsRogered(newsItem.id);
                         mMainService.postAtFrontOfBIZZHandler(new SafeRunnable() {
                             @Override
                             protected void safeRun() throws Exception {
+                                mActivity.newsPlugin.newsRogered(newsItem.id);
                                 mActivity.newsStore.setNewsItemRogered(newsItem.id);
                                 mActivity.newsStore.addUser(newsItem.id, mMyEmail);
-
+                                mActivity.newsChannel.rogerNews(newsItem.id);
                                 mMainService.postAtFrontOfUIHandler(new SafeRunnable() {
                                     @Override
                                     protected void safeRun() throws Exception {
@@ -787,20 +787,9 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     private void togglePinned(final NewsItem newsItem) {
         mActivity.newsStore.setNewsItemPinned(newsItem.id, !newsItem.pinned);
 
-        if (mActivity instanceof NewsPinnedActivity) {
-            if (mActivity.newsStore.countPinnedItems() > 0) {
-                mItems.remove(newsItem.id);
-                int index = mVisibleItems.indexOf(newsItem.id);
-                mVisibleItems.remove(newsItem.id);
-                notifyItemRemoved(index);
-                notifyItemRangeChanged(index, 1);
-
-            } else {
-                mActivity.finish();
-            }
-        } else {
-            mActivity.invalidateOptionsMenu();
-        }
+        Intent intent = new Intent(NewsPlugin.PINNED_NEWS_ITEM_INTENT);
+        intent.putExtra("id", newsItem.id);
+        mMainService.sendBroadcast(intent);
     }
 
     private void setQRCode(final NewsItem newsItem, final View view, final LinearLayout qrCodeContainer) {
@@ -832,6 +821,20 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                     image.setImageBitmap(bm);
                     image.setVisibility(View.VISIBLE);
                 }
+            }
+        } else if (NewsPlugin.PINNED_NEWS_ITEM_INTENT.equals(action)) {
+            if (mActivity instanceof NewsPinnedActivity) {
+                if (mActivity.newsStore.countPinnedItems() > 0) {
+                    long newsId = intent.getLongExtra("id", -1);
+                    mItems.remove(newsId);
+                    int index = mVisibleItems.indexOf(newsId);
+                    mVisibleItems.remove(newsId);
+                    notifyItemRemoved(index);
+                } else {
+                    mActivity.finish();
+                }
+            } else {
+                mActivity.invalidateOptionsMenu();
             }
         } else if (NewsPlugin.DISABLE_NEWS_ITEM_INTENT.equals(action)) {
             updateView(intent.getLongExtra("id", -1));

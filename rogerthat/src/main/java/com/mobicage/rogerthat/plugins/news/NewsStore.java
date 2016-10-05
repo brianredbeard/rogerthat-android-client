@@ -115,6 +115,7 @@ public class NewsStore implements Closeable {
     }
 
     public void savePartialNewsItem(final long id, final long version, final long sortTimestamp, final long sortPriority) {
+        T.BIZZ();
         mNewsItemsCache.remove(id);
         if (mNewsItemDetailsCache.containsKey(id)) {
             updatePartialNewsItem(id, version, sortTimestamp, sortPriority);
@@ -124,6 +125,7 @@ public class NewsStore implements Closeable {
     }
 
     public void insertPartialNewsItem(final long id, final long version, final long sortTimestamp, final long sortPriority) {
+        T.BIZZ();
         NewsItemDetails d = new NewsItemDetails();
         d.id = id;
         d.version = version;
@@ -146,6 +148,7 @@ public class NewsStore implements Closeable {
     }
 
     public void updatePartialNewsItem(final long id, final long version, final long sortTimestamp, final long sortPriority) {
+        T.BIZZ();
         if (mNewsItemDetailsCache.containsKey(id)) {
             mNewsItemDetailsCache.get(id).version = version;
             mNewsItemDetailsCache.get(id).sortTimestamp = sortTimestamp;
@@ -167,6 +170,7 @@ public class NewsStore implements Closeable {
     }
 
     public boolean insertNewsItem(final AppNewsItemTO item) {
+        T.BIZZ();
         if (mNewsItemDetailsCache.containsKey(item.id)) {
             L.bug("news channel send new item that i already have...");
             return false;
@@ -216,6 +220,7 @@ public class NewsStore implements Closeable {
     }
 
     public void saveNewsItem(final AppNewsItemTO item) {
+        T.BIZZ();
         mNewsItemsCache.remove(item.id);
         if (mNewsItemDetailsCache.containsKey(item.id)) {
             mNewsItemDetailsCache.get(item.id).version = item.version;
@@ -251,6 +256,7 @@ public class NewsStore implements Closeable {
     }
 
     private void insertButtons(final AppNewsItemTO item) {
+        T.BIZZ();
         mDeleteNewsButtons.bindLong(1, item.id);
         mDeleteNewsButtons.execute();
 
@@ -267,6 +273,7 @@ public class NewsStore implements Closeable {
     }
 
     private void insertUsers(final AppNewsItemTO item) {
+        T.BIZZ();
         mDeleteNewsRogeredUsers.bindLong(1, item.id);
         mDeleteNewsRogeredUsers.execute();
 
@@ -276,6 +283,7 @@ public class NewsStore implements Closeable {
     }
 
     public void addUser(final long newsId, final String email) {
+        T.BIZZ();
         mNewsItemsCache.remove(newsId);
         mInsertNewsRogeredUser.bindLong(1, newsId);
         mInsertNewsRogeredUser.bindString(2, email);
@@ -283,6 +291,7 @@ public class NewsStore implements Closeable {
     }
 
     public void setNewsItemRead(final long newsId) {
+        T.BIZZ();
         if (mNewsItemsCache.containsKey(newsId)) {
             mNewsItemsCache.get(newsId).read = true;
         }
@@ -301,6 +310,7 @@ public class NewsStore implements Closeable {
     }
 
     public void setNewsItemPinned(final long newsId, final boolean pinned) {
+        T.UI();
         if (mNewsItemsCache.containsKey(newsId)) {
             mNewsItemsCache.get(newsId).pinned = pinned;
         }
@@ -315,6 +325,7 @@ public class NewsStore implements Closeable {
     }
 
     public void setNewsItemRogered(final long newsId) {
+        T.BIZZ();
         if (mNewsItemsCache.containsKey(newsId)) {
             mNewsItemsCache.get(newsId).rogered = true;
         }
@@ -329,6 +340,7 @@ public class NewsStore implements Closeable {
     }
 
     public void setNewsItemDisabled(final long newsId) {
+        T.BIZZ();
         if (mNewsItemsCache.containsKey(newsId)) {
             mNewsItemsCache.get(newsId).disabled = true;
         }
@@ -343,6 +355,7 @@ public class NewsStore implements Closeable {
     }
 
     public void setNewsItemReach(final long newsId, final long reach) {
+        T.UI();
         if (mNewsItemsCache.containsKey(newsId)) {
             mNewsItemsCache.get(newsId).reach = reach;
         }
@@ -357,7 +370,7 @@ public class NewsStore implements Closeable {
     }
 
     public NewsItem getNewsItem(long newsId) {
-        T.dontCare();
+        T.UI();
         if (mNewsItemsCache.containsKey(newsId)) {
             return mNewsItemsCache.get(newsId);
         }
@@ -403,6 +416,7 @@ public class NewsStore implements Closeable {
     }
 
     private void addButtons(NewsItem newsItem) {
+        T.UI();
         final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_news_get_buttons),
                 new String[] { "" + newsItem.id });
         try {
@@ -421,6 +435,7 @@ public class NewsStore implements Closeable {
     }
 
     private NewsActionButtonTO readButton(Cursor bcurs) {
+        T.UI();
         NewsActionButtonTO button = new NewsActionButtonTO();
         button.id = bcurs.getString(0);
         button.caption = bcurs.getString(1);
@@ -430,6 +445,7 @@ public class NewsStore implements Closeable {
     }
 
     public void addRogeredUsers(NewsItem newsItem) {
+        T.UI();
         final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_news_get_rogered_users),
                 new String[] { "" + newsItem.id });
         try {
@@ -449,7 +465,7 @@ public class NewsStore implements Closeable {
     }
 
     public void fillNewsItemDetailsCache() {
-        T.dontCare();
+        T.BIZZ();
         mNewsItemDetailsCache = new HashMap<>();
         final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_news_list_item_versions),
                 new String[]{});
@@ -477,6 +493,7 @@ public class NewsStore implements Closeable {
     }
 
     public NewsItemDetails getNewsItemDetails(long newsId) {
+        T.dontCare(); // T.UI() or T.BIZZ()
         if (mNewsItemDetailsCache.containsKey(newsId)) {
             return mNewsItemDetailsCache.get(newsId);
         }
@@ -492,8 +509,7 @@ public class NewsStore implements Closeable {
     }
 
     public List<Long> searchPinnedNews(String qry) {
-        T.dontCare();
-
+        T.UI();
         String query = "%" + qry + "%";
 
         List<Long> newsIds = new ArrayList<>();
@@ -526,6 +542,7 @@ public class NewsStore implements Closeable {
     }
 
     public void clearCache() {
+        T.UI();
         mNewsItemDetailsCache.clear();
         mNewsItemsCache.clear();
     }

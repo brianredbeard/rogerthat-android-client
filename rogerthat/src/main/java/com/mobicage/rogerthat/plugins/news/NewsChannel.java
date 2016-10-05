@@ -334,8 +334,13 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         JSONObject json = (JSONObject) JSONValue.parse(data);
         try {
             //noinspection unchecked
-            AppNewsItemTO newsItem = new AppNewsItemTO(json);
-            mNewsChannelCallbackHandler.newsPush(newsItem);
+            final AppNewsItemTO newsItem = new AppNewsItemTO(json);
+            mService.postOnBIZZHandler(new SafeRunnable() {
+                @Override
+                protected void safeRun() throws Exception {
+                    mNewsChannelCallbackHandler.newsPush(newsItem);
+                }
+            });
         } catch (IncompleteMessageException e) {
             L.bug(String.format("Invalid news item received from update server (%s)\n: %s", e.getMessage(), data));
         }
@@ -343,18 +348,28 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
 
     private void newsRogerUpdate(String data) {
         String[] splitData = data.split(" ");
-        long newsId = Long.parseLong(splitData[0]);
-        String friendEmail = splitData[1];
-        mNewsChannelCallbackHandler.newsRogerUpdate(newsId, friendEmail);
+        final long newsId = Long.parseLong(splitData[0]);
+        final String friendEmail = splitData[1];
+        mService.postOnBIZZHandler(new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                mNewsChannelCallbackHandler.newsRogerUpdate(newsId, friendEmail);
+            }
+        });
     }
 
     private void newsReadUpdate(String data) {
         String[] stats = data.split(" "); // news_id1 read_count1 news_id2 read_count2
-        Map<Long, Long> statsMap = new HashMap<>();
+        final Map<Long, Long> statsMap = new HashMap<>();
         for (int i = 0; i < stats.length; i += 2) {
             statsMap.put(Long.parseLong(stats[i]), Long.parseLong(stats[i + 1]));
         }
-        mNewsChannelCallbackHandler.newsReadUpdate(statsMap);
+        mService.postOnBIZZHandler(new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                mNewsChannelCallbackHandler.newsReadUpdate(statsMap);
+            }
+        });
     }
 
     public void readNews(Long newsId) {

@@ -116,6 +116,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
         final IntentFilter filter = new IntentFilter(CachedDownloader.CACHED_DOWNLOAD_AVAILABLE_INTENT);
         filter.addAction(NewsPlugin.GET_NEWS_RECEIVED_INTENT);
         filter.addAction(NewsPlugin.GET_NEWS_ITEMS_RECEIVED_INTENT);
+        filter.addAction(NewsPlugin.PINNED_NEWS_ITEM_INTENT);
         filter.addAction(NewsPlugin.DISABLE_NEWS_ITEM_INTENT);
         filter.addAction(FriendsPlugin.FRIEND_INFO_RECEIVED_INTENT);
         filter.addAction(FriendsPlugin.SERVICE_DATA_UPDATED);
@@ -496,6 +497,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
 
     @Override
     public void newsRogerUpdate(final long newsId, String friendEmail) {
+        T.BIZZ();
         newsStore.addUser(newsId, friendEmail);
         mService.postAtFrontOfUIHandler(new SafeRunnable() {
             @Override
@@ -508,6 +510,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
 
     @Override
     public void newsPush(final AppNewsItemTO newsItem) {
+        T.BIZZ();
         if (newsStore.insertNewsItem(newsItem)) {
             mService.postAtFrontOfUIHandler(new SafeRunnable() {
                 @Override
@@ -521,6 +524,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
 
     @Override
     public void newsReadUpdate(final Map<Long, Long> statsMap) {
+        T.BIZZ();
         mService.postAtFrontOfUIHandler(new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
