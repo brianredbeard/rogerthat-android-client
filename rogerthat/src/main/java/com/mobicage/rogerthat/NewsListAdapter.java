@@ -102,10 +102,13 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
 
     private List<Long> mItems = new ArrayList<>();
     private List<Long> mVisibleItems = new ArrayList<>();
+    private List<Long> mRequestedPartialItems = new ArrayList<>();
 
     private final String mMyEmail;
     private final String mMyName;
     private final int mDisplayWidth;
+
+    private int mRequestMoreNewsPosition = 0;
 
     public NewsListAdapter(NewsActivity activity, MainService mainService) {
         mActivity = activity;
@@ -165,6 +168,8 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         if (mVisibleItems.size() > 0) {
             Collections.sort(mVisibleItems, comparator);
         }
+
+        getNewsItems(0);
         notifyDataSetChanged();
     }
 
@@ -210,15 +215,51 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         int position = mVisibleItems.indexOf(newsId);
         if (position >= 0) {
             notifyItemChanged(position);
+
+            if (!mActivity.newsStore.getNewsItemDetails(newsId).isPartial) {
+                mRequestedPartialItems.remove(newsId);
+            }
         }
+    }
+
+    private void getNewsItems(final int position) {
+        List<Long> itemsToRequest = new ArrayList<>();
+
+        mRequestMoreNewsPosition = position + 50;
+
+        for (int i = position; i < mRequestMoreNewsPosition; i++) {
+            if (position >= mVisibleItems.size()) {
+                break;
+            }
+            long newsId = mVisibleItems.get(i);
+            if (!mActivity.newsStore.getNewsItemDetails(newsId).isPartial)
+                continue;
+            ;
+            if (mRequestedPartialItems.contains(newsId))
+                continue;
+
+            itemsToRequest.add(newsId);
+        }
+
+        if (itemsToRequest.size() == 0)
+            return;
+
+        L.d("Requesting " + itemsToRequest.size() + " news items");
+        long[] ids = new long[itemsToRequest.size()];
+        for (int i = 0; i < itemsToRequest.size(); i++) {
+            ids[i] = itemsToRequest.get(i);
+        }
+        mActivity.newsPlugin.getNewsItems(ids, UUID.randomUUID().toString());
     }
 
     private void populateView(final View view, final int position) {
         final NewsItem newsItem = mActivity.newsStore.getNewsItem(mVisibleItems.get(position));
+
+        if (position >= (mRequestMoreNewsPosition - 10)) {
+            getNewsItems(position);
+        }
+
         if (newsItem.isPartial) {
-            long[] ids = new long[1];
-            ids[0] = newsItem.id;
-            mActivity.newsPlugin.getNewsItems(ids, UUID.randomUUID().toString()); // todo ruben we need to do this in bulk
             view.findViewById(R.id.partial_item).setVisibility(View.VISIBLE);
             view.findViewById(R.id.full_item).setVisibility(View.GONE);
             return;
