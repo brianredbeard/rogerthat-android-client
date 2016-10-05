@@ -184,6 +184,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         public int compare(Long item1, Long item2) {
             NewsItemDetails details1 = mActivity.newsStore.getNewsItemDetails(item1);
             NewsItemDetails details2 = mActivity.newsStore.getNewsItemDetails(item2);
+
             if (!details1.read && details2.read) {
                 return -1;
             } else if (details1.read && !details2.read) {
@@ -192,9 +193,12 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 return 1;
             } else if (details1.sortPriority < details2.sortPriority) {
                 return -1;
+            } else if (details1.sortTimestamp < details2.sortTimestamp) {
+                return 1;
+            } else if (details1.sortTimestamp > details2.sortTimestamp) {
+                return -1;
             }
-
-            return details1.sortTimestamp < details2.sortTimestamp ? 1 : -1;
+            return 0;
         }
     };
 

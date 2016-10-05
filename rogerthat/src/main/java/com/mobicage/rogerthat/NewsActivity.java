@@ -471,7 +471,9 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
 
     private void setupUpdatesAvailable() {
         final Button updatesAvailable = (Button) findViewById(R.id.updates_available);
-        if (mNewNewsItems.size() > 0 && mNewNewsItems.size() < 50) {
+        if (mNewNewsItems.size() == 1) {
+            updatesAvailable.setText(getString(R.string.new_item_available));
+        } else if (mNewNewsItems.size() > 0 && mNewNewsItems.size() < 50) {
             updatesAvailable.setText(getString(R.string.x_new_items_available, mNewNewsItems.size()));
         } else {
             updatesAvailable.setText(R.string.new_items_available);
