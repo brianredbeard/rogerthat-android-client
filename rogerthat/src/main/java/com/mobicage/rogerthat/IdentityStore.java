@@ -17,8 +17,6 @@
  */
 package com.mobicage.rogerthat;
 
-import java.io.Closeable;
-
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -32,6 +30,8 @@ import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.to.friends.GetAvatarRequestTO;
 import com.mobicage.to.system.GetIdentityQRCodeRequestTO;
 import com.mobicage.to.system.IdentityTO;
+
+import java.io.Closeable;
 
 public class IdentityStore implements Closeable {
 

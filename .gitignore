@@ -30,6 +30,8 @@ CustomCloudConstants.java
 .idea/misc.xml
 .idea/jsLibraryMappings.xml
 /.idea/runConfigurations.xml
+.idea/codeStyleSettings.xml
+.idea/inspectionProfiles
 
 # Gradle:
 .idea/gradle.xml

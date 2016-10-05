@@ -40,6 +40,7 @@ public class CloudConstants {
     // Non-customizable HTTP constants
     public final static String HEAD_URL = HTTPS_BASE_URL;
     public static final String HTTPS_LOAD_SRV_RECORDS = HTTPS_BASE_URL + "/mobi/rest/srv/load?email=";
+    public static final String HTTPS_LOAD_NEWS_CONFIG = HTTPS_BASE_URL + "/mobi/rest/news/config";
     public final static String JSON_RPC_URL = HTTPS_BASE_URL + "/json-rpc";
     public final static String BRANDING_URL_PREFIX = HTTPS_BASE_URL + "/unauthenticated/mobi/branding/";
     public final static String AVATAR_URL_PREFIX = HTTPS_BASE_URL + "/unauthenticated/mobi/avatar/";

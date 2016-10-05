@@ -38,9 +38,12 @@ import android.widget.LinearLayout;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.config.ConfigurationProvider;
 import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.history.HistoryItem;
+import com.mobicage.rogerthat.plugins.news.NewsChannel;
+import com.mobicage.rogerthat.plugins.news.NewsChannelCallbackHandler;
 import com.mobicage.rogerthat.plugins.news.NewsItemDetails;
 import com.mobicage.rogerthat.plugins.news.NewsPlugin;
 import com.mobicage.rogerthat.plugins.news.NewsStore;
@@ -57,15 +60,17 @@ import com.mobicage.rogerthat.util.ui.TestUtils;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.to.friends.GetUserInfoRequestTO;
 import com.mobicage.to.friends.GetUserInfoResponseTO;
+import com.mobicage.to.news.AppNewsItemTO;
 
 import org.json.simple.JSONValue;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
+public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements NewsChannelCallbackHandler {
 
     protected NewsPlugin newsPlugin;
     protected NewsStore newsStore;
@@ -81,6 +86,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
 
     private long mNewUpdatedSinceTimestamp;
     private ProgressDialog mProgressDialog;
+    private NewsChannel mNewsChannel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -282,17 +288,37 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
 
     private void setupConnectedToInternet() {
         final LinearLayout ll = (LinearLayout) findViewById(R.id.internet_status_container);
+        SafeRunnable newsRunnable;
         if (mIsConnectedToInternet) {
             ll.setVisibility(View.GONE);
             swipeContainer.setEnabled(true);
             swipeContainer.setRefreshing(true);
             requestMoreNews(true);
+            newsRunnable = new SafeRunnable() {
+                @Override
+                protected void safeRun() throws Exception {
+                    if (mNewsChannel != null) {
+                        mNewsChannel.internetConnected();
+                    }
+
+                }
+            };
         } else {
             ll.setVisibility(View.VISIBLE);
             swipeContainer.setEnabled(false);
             swipeContainer.setRefreshing(false);
             mUUID = UUID.randomUUID().toString();
+            newsRunnable = new SafeRunnable() {
+                @Override
+                protected void safeRun() throws Exception {
+                    if (mNewsChannel != null) {
+                        mNewsChannel.internetDisconnected();
+                    }
+
+                }
+            };
         }
+        mService.postAtFrontOfBIZZHandler(newsRunnable);
     }
 
     @Override
@@ -352,13 +378,53 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
             findViewById(R.id.internet_status_container).setVisibility(View.GONE);
         }
 
-        swipeContainer.setEnabled(mIsConnectedToInternet ? true : false);
+        swipeContainer.setEnabled(mIsConnectedToInternet);
         if (!TestUtils.isRunningTest() && mIsConnectedToInternet) {
             swipeContainer.setRefreshing(true);
             requestMoreNews(true);
         }
 
         setupIntentFilter();
+        final ConfigurationProvider configurationProvider = mService.getConfigurationProvider();
+        SafeRunnable runnable = new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                mNewsChannel = new NewsChannel(NewsActivity.this, configurationProvider);
+                if (!mNewsChannel.isConnected()) {
+                    mNewsChannel.connect();
+                }
+            }
+        };
+        mService.postAtFrontOfBIZZHandler(runnable);
+
+    }
+
+    private void connectToChannel() {
+        SafeRunnable runnable = new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                if (mNewsChannel != null && !mNewsChannel.isConnected()) {
+                    mNewsChannel.connect();
+                }
+            }
+        };
+        if (mService != null) {
+            mService.postAtFrontOfBIZZHandler(runnable);
+        }
+    }
+
+    private void disconnectChannel() {
+        SafeRunnable runnable = new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                if (mNewsChannel != null && mNewsChannel.isConnected()) {
+                    mNewsChannel.disconnect();
+                }
+            }
+        };
+        if (mService != null) {
+            mService.postAtFrontOfBIZZHandler(runnable);
+        }
     }
 
     @Override
@@ -366,6 +432,19 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
         newsStore.clearCache();
         unregisterReceiver(mBroadcastReceiver);
         unregisterReceiver(getDefaultBroadcastReceiver());
+        disconnectChannel();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        connectToChannel();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        disconnectChannel();
     }
 
     @Override
@@ -380,6 +459,22 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
         }
         mUUID = UUID.randomUUID().toString();
         newsPlugin.getNews(mCursor, mUUID);
+    }
+
+    @Override
+    public void newsRogerUpdate(long newsId, String friendEmail) {
+        // TODO: 04/10/16 implement
+    }
+
+    @Override
+    public void newsPush(AppNewsItemTO newsItem) {
+        // TODO: 04/10/16 implement
+    }
+
+    @Override
+    public void newsReadUpdate(Map<Long, Long> statsMap) {
+        // TODO: 04/10/16 implement
+
     }
 
     private void showErrorToast() {
