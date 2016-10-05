@@ -4,16 +4,13 @@
     <color name="mc_green">#ff99cc33</color>
     <color name="mc_red_divider">#ff0000</color>
     <color name="mc_divider">#4D4D4D</color>
-    <color name="mc_yellow">#FFEE00</color>
     <color name="mc_timestamp_blue">#00CEE0</color>
-    <color name="mc_secure_browser">#20B020</color>
     <color name="mc_black">#000000</color>
     <color name="mc_divider_green">#86C500</color>
     <color name="mc_divider_gray">#FF999999</color>
     <color name="mc_page_light">#646464</color>
     <color name="mc_page_dark">#FFFFFF</color>
     <color name="mc_highlight_light">#66FFFFFF</color>
-    <color name="mc_highlight_dark">#33000000</color>
     <color name="mc_gray_11">#BBBBBB</color>
     <color name="mc_default_text">#4D4D4D</color>
     <color name="mc_default_text_inverse">#FFFFFF</color>
@@ -28,9 +25,7 @@
 
     <color name="mc_primary_color">#84B53F</color>
     <color name="mc_secondary_color">#006536</color>
-    <color name="mc_border_color">#96006536</color>
     <color name="mc_background_color">#EBEBEB</color>
-    <color name="mc_background_color_light">#F5F5F5</color>
     <color name="mc_default_button">#989898</color>
 
     <color name="mc_priority_high_text">#FFFFFF</color>
