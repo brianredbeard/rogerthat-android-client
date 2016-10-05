@@ -351,6 +351,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                                     mReadMoreItems.add(newsItem.id);
                                 }
                                 notifyItemChanged(position);
+                                mActivity.setSelection(position);
                             }
                         });
                     } else {

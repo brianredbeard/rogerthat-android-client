@@ -90,9 +90,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
     private long mNewUpdatedSinceTimestamp;
     private ProgressDialog mProgressDialog;
 
-
     private Set<Long> mNewNewsItems = new HashSet<>();
-    private boolean mIsFirstRequest = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -196,30 +194,24 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
     private void processNewsItemsReceived(Intent intent, final NewsListAdapter nla) {
         final long[] ids = intent.getLongArrayExtra("ids");
 
-        if (swipeContainer.isRefreshing()) {
+        final String uuid = intent.getStringExtra("uuid");
+        if (mRequestNewsItemsUUID != null && mRequestNewsItemsUUID.equals(uuid)) {
             swipeContainer.setRefreshing(false);
 
             if (nla.getItemCount() == 0) {
-                mIsFirstRequest = false;
                 for (NewsItemDetails item : newsStore.getNewsItemDetailsCache().values()) {
                     nla.addNewsItem(item.id, false);
                 }
                 nla.refreshView();
-                return;
-            } else if (mIsFirstRequest) {
-                mIsFirstRequest = false;
-                final String uuid = intent.getStringExtra("uuid");
-                if (mRequestNewsItemsUUID != null && mRequestNewsItemsUUID.equals(uuid)) {
-                    mRequestNewsItemsUUID = null;
-                    setupUpdatesAvailable();
-                    requestMoreNews(false);
-                    return;
-                }
+            } else {
+                mRequestNewsItemsUUID = null;
+                setupUpdatesAvailable();
             }
-        }
-
-        for (int i = 0; i < ids.length; i++) {
-            nla.updateView(ids[i]);
+            requestMoreNews(false);
+        } else {
+            for (int i = 0; i < ids.length; i++) {
+                nla.updateView(ids[i]);
+            }
         }
     }
 
@@ -265,9 +257,12 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
                                 mRequestNewsItemsUUID = UUID.randomUUID().toString();
                                 newsPlugin.getNewsItems(primitiveIdsToRequest, mRequestNewsItemsUUID);
                             } else {
-                                mIsFirstRequest = false;
                                 swipeContainer.setRefreshing(false);
                                 nla.refreshView();
+
+                                if (ids.length > 0) {
+                                    requestMoreNews(false);
+                                }
                             }
                         } else {
                             swipeContainer.setRefreshing(false);

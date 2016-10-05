@@ -177,7 +177,7 @@ public class NewsStore implements Closeable {
         d.version = item.version;
         d.sortTimestamp = item.sort_timestamp;
         d.sortPriority = item.sort_priority;
-        d.isPartial = true;
+        d.isPartial = false;
         d.read = false;
         mNewsItemDetailsCache.put(item.id, d);
 
