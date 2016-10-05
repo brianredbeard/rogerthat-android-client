@@ -6,6 +6,7 @@ import com.mobicage.rogerthat.config.ConfigurationProvider;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.net.NetworkConnectivityManager;
+import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.Credentials;
 import com.mobicage.rpc.IncompleteMessageException;
@@ -55,6 +56,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
     private EventLoopGroup eventLoopGroup;
     private boolean connected;
     private ConfigurationProvider configurationProvider;
+    private boolean isRetryingToConnect = false;
 
     public boolean isConnected() {
         return connected;
@@ -243,8 +245,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
             DNSUtil.HostAddress hostAddress = configurationFactory.getSafeNewsConnectionHost(false);
             this.host = hostAddress.getHost();
             this.port = hostAddress.getPort();
-        } catch (NewsConfigurationConnectionException e) {
-            delayGetConfiguration();
+        } catch (NewsConfigurationConnectionException ignored) {
         } catch (NewsConfigurationException e) {
             L.bug(e);
         }
@@ -268,12 +269,23 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
 
     private void attemptToReconnect(final int backoffTime) {
         if (!this.connected) {
+            if (this.isRetryingToConnect) {
+                return;
+            }
+            this.isRetryingToConnect = true;
             new java.util.Timer().schedule(
                     new java.util.TimerTask() {
                         @Override
                         public void run() {
                             if (mService.getNetworkConnectivityManager().isConnected()) {
-                                connect();
+                                SafeRunnable safeRunnable = new SafeRunnable() {
+                                    @Override
+                                    protected void safeRun() throws Exception {
+                                        NewsChannel.this.isRetryingToConnect = false;
+                                        connect();
+                                    }
+                                };
+                                mService.postAtFrontOfBIZZHandler(safeRunnable);
                             }
                         }
                     },
@@ -347,6 +359,14 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
             statsMap.put(Long.parseLong(stats[i]), Long.parseLong(stats[i + 1]));
         }
         mNewsChannelCallbackHandler.newsReadUpdate(statsMap);
+    }
+
+    public void readNews(Long newsId) {
+        sendCommand(Command.NEWS_READ, newsId.toString());
+    }
+
+    public void rogerNews(Long newsId) {
+        sendCommand(Command.NEWS_ROGER, newsId.toString());
     }
 
     private void authenticate() {
