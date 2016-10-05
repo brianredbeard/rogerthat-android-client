@@ -63,6 +63,10 @@ public class NewsPlugin implements MobicagePlugin {
 
         Configuration cfg = mConfigProvider.getConfiguration(CONFIGKEY);
         mUpdatedSince = cfg.get(UPDATED_SINCE, 0);
+
+        mMainService.addHighPriorityIntent(GET_NEWS_RECEIVED_INTENT);
+        mMainService.addHighPriorityIntent(GET_NEWS_ITEMS_RECEIVED_INTENT);
+        mMainService.addHighPriorityIntent(DISABLE_NEWS_ITEM_INTENT);
     }
 
     @Override
@@ -121,14 +125,15 @@ public class NewsPlugin implements MobicagePlugin {
         }
     }
 
-    public void getNewsItems(final long[] ids) {
+    public void getNewsItems(final long[] ids, final String uuid) {
         SafeRunnable runnable = new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
                 final GetNewsItemsResponseHandler responseHandler = new GetNewsItemsResponseHandler();
+                responseHandler.setUUID(uuid);
+
                 GetNewsItemsRequestTO request = new GetNewsItemsRequestTO();
                 request.ids = ids;
-
                 com.mobicage.api.news.Rpc.getNewsItems(responseHandler, request);
             }
         };
@@ -147,7 +152,6 @@ public class NewsPlugin implements MobicagePlugin {
                 ResponseHandler<NewsReadResponseTO> responseHandler = new ResponseHandler<NewsReadResponseTO>();
                 NewsReadRequestTO request = new NewsReadRequestTO();
                 request.news_ids = ids;
-                L.d("newsRead: " + request.news_ids);
                 com.mobicage.api.news.Rpc.newsRead(responseHandler, request);
             }
         };
@@ -166,7 +170,6 @@ public class NewsPlugin implements MobicagePlugin {
                 ResponseHandler<NewsRogeredResponseTO> responseHandler = new ResponseHandler<NewsRogeredResponseTO>();
                 NewsRogeredRequestTO request = new NewsRogeredRequestTO();
                 request.news_id = id;
-                L.d("newsRogered: " + request.news_id);
                 com.mobicage.api.news.Rpc.newsRogered(responseHandler, request);
             }
         };

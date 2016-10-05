@@ -51,6 +51,7 @@ import com.mobicage.rogerthat.plugins.scan.GetUserInfoResponseHandler;
 import com.mobicage.rogerthat.plugins.scan.ProcessScanActivity;
 import com.mobicage.rogerthat.util.CachedDownloader;
 import com.mobicage.rogerthat.util.TextUtils;
+import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.net.NetworkConnectivityManager;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
@@ -82,11 +83,15 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
 
     private boolean mIsConnectedToInternet = false;
     private String mCursor;
-    private String mUUID;
+    private String mRequestNewsUUID;
+    private String mRequestNewsItemsUUID;
 
     private long mNewUpdatedSinceTimestamp;
     private ProgressDialog mProgressDialog;
     private NewsChannel mNewsChannel;
+
+    private Set<Long> mNewNewsItems = new HashSet<>();
+    private boolean mIsFirstRequest = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -188,35 +193,26 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
     }
 
     private void processNewsItemsReceived(Intent intent, final NewsListAdapter nla) {
+
+
         final long[] ids = intent.getLongArrayExtra("ids");
 
         if (swipeContainer.isRefreshing()) {
             swipeContainer.setRefreshing(false);
 
             if (nla.getItemCount() == 0) {
+                mIsFirstRequest = false;
                 for (NewsItemDetails item : newsStore.getNewsItemDetailsCache().values()) {
                     nla.addNewsItem(item.id, false);
                 }
                 nla.refreshView();
-            } else {
-                final Button updatesAvailable = (Button) findViewById(R.id.updates_available);
-                if (ids.length < 50) {
-                    updatesAvailable.setText(getString(R.string.x_new_items_available, ids.length));
-                } else {
-                    updatesAvailable.setText(R.string.new_items_available);
+            } else if (mIsFirstRequest) {
+                mIsFirstRequest = false;
+                final String uuid = intent.getStringExtra("uuid");
+                if (mRequestNewsItemsUUID != null && mRequestNewsItemsUUID.equals(uuid)) {
+                    mRequestNewsItemsUUID = null;
+                    setupUpdatesAvailable();
                 }
-                updatesAvailable.setVisibility(View.VISIBLE);
-
-                updatesAvailable.setOnClickListener(new SafeViewOnClickListener() {
-                    @Override
-                    public void safeOnClick(View v) {
-                        updatesAvailable.setVisibility(View.GONE);
-                        for (int i = 0; i < ids.length; i++) {
-                            nla.addNewsItem(ids[i], false);
-                        }
-                        nla.refreshView();
-                    }
-                });
             }
 
             requestMoreNews(false);
@@ -229,7 +225,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
 
     private void processNewsReceived(Intent intent, final NewsListAdapter nla) {
         final String uuid = intent.getStringExtra("uuid");
-        if (mUUID == null || !mUUID.equals(uuid)) {
+        if (mRequestNewsUUID == null || !mRequestNewsUUID.equals(uuid)) {
             return;
         }
 
@@ -246,10 +242,11 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
                 for (int i = 0; i < ids.length; i++) {
                     if (newsStore.getNewsItemDetails(ids[i]) == null) {
                         idsToRequest.add(ids[i]);
-                        newsStore.savePartialNewsItem(ids[i], versions[i], sortTimestamps[i], sortPriorities[i], false);
+                        mNewNewsItems.add(ids[i]);
+                        newsStore.savePartialNewsItem(ids[i], versions[i], sortTimestamps[i], sortPriorities[i]);
                     } else if (newsStore.getNewsItemDetails(ids[i]).version < versions[i]) {
                         idsToRequest.add(ids[i]);
-                        newsStore.savePartialNewsItem(ids[i], versions[i], sortTimestamps[i], sortPriorities[i], true);
+                        newsStore.savePartialNewsItem(ids[i], versions[i], sortTimestamps[i], sortPriorities[i]);
                     } else if (newsStore.getNewsItemDetails(ids[i]).isPartial) {
                         idsToRequest.add(ids[i]);
                     }
@@ -258,14 +255,20 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
                 mService.postAtFrontOfUIHandler(new SafeRunnable() {
                     @Override
                     protected void safeRun() throws Exception {
-                        if (swipeContainer.isRefreshing() && idsToRequest.size() > 0) {
-                            long[] primitiveIdsToRequest = new long[idsToRequest.size()];
-                            Long[] tmpArray1 = idsToRequest.toArray(new Long[idsToRequest.size()]);
-                            for (int i = 0; i < tmpArray1.length; i++) {
-                                primitiveIdsToRequest[i] = tmpArray1[i].longValue();
+                        if (swipeContainer.isRefreshing()) {
+                            if (idsToRequest.size() > 0) {
+                                long[] primitiveIdsToRequest = new long[idsToRequest.size()];
+                                Long[] tmpArray1 = idsToRequest.toArray(new Long[idsToRequest.size()]);
+                                for (int i = 0; i < tmpArray1.length; i++) {
+                                    primitiveIdsToRequest[i] = tmpArray1[i].longValue();
+                                }
+                                mRequestNewsItemsUUID = UUID.randomUUID().toString();
+                                newsPlugin.getNewsItems(primitiveIdsToRequest, mRequestNewsItemsUUID);
+                            } else {
+                                mIsFirstRequest = false;
+                                swipeContainer.setRefreshing(false);
+                                nla.refreshView();
                             }
-
-                            newsPlugin.getNewsItems(primitiveIdsToRequest);
                         } else {
                             swipeContainer.setRefreshing(false);
                             if (idsToRequest.size() > 0) {
@@ -300,21 +303,19 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
                     if (mNewsChannel != null) {
                         mNewsChannel.internetConnected();
                     }
-
                 }
             };
         } else {
             ll.setVisibility(View.VISIBLE);
             swipeContainer.setEnabled(false);
             swipeContainer.setRefreshing(false);
-            mUUID = UUID.randomUUID().toString();
+            mRequestNewsUUID = UUID.randomUUID().toString();
             newsRunnable = new SafeRunnable() {
                 @Override
                 protected void safeRun() throws Exception {
                     if (mNewsChannel != null) {
                         mNewsChannel.internetDisconnected();
                     }
-
                 }
             };
         }
@@ -324,7 +325,6 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
     @Override
     protected String[] getAllReceivingIntents() {
         Set<String> intents = new HashSet<>();
-        intents.add(FriendsPlugin.SERVICE_DATA_UPDATED); // todo ruben should we do this?
         return intents.toArray(new String[intents.size()]);
     }
 
@@ -357,7 +357,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
         mService.postAtFrontOfBIZZHandler(new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
-                newsStore.fillNewsItemsCache();
+                newsStore.fillNewsItemDetailsCache();
                 mService.postAtFrontOfUIHandler(new SafeRunnable() {
                     @Override
                     protected void safeRun() throws Exception {
@@ -385,18 +385,22 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
         }
 
         setupIntentFilter();
-        final ConfigurationProvider configurationProvider = mService.getConfigurationProvider();
-        SafeRunnable runnable = new SafeRunnable() {
-            @Override
-            protected void safeRun() throws Exception {
-                mNewsChannel = new NewsChannel(NewsActivity.this, configurationProvider);
-                if (!mNewsChannel.isConnected()) {
-                    mNewsChannel.connect();
-                }
-            }
-        };
-        mService.postAtFrontOfBIZZHandler(runnable);
 
+        if (this instanceof NewsPinnedActivity) {
+            L.d("not subscribing to news when in NewsPinnedActivity");
+        } else {
+            final ConfigurationProvider configurationProvider = mService.getConfigurationProvider();
+            SafeRunnable runnable = new SafeRunnable() {
+                @Override
+                protected void safeRun() throws Exception {
+                    mNewsChannel = new NewsChannel(NewsActivity.this, configurationProvider);
+                    if (!mNewsChannel.isConnected()) {
+                        mNewsChannel.connect();
+                    }
+                }
+            };
+            mService.postAtFrontOfBIZZHandler(runnable);
+        }
     }
 
     private void connectToChannel() {
@@ -429,7 +433,11 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
 
     @Override
     protected void onServiceUnbound() {
-        newsStore.clearCache();
+        if (this instanceof NewsPinnedActivity) {
+            L.d("not clearing cache when in NewsPinnedActivity");
+        } else {
+            newsStore.clearCache();
+        }
         unregisterReceiver(mBroadcastReceiver);
         unregisterReceiver(getDefaultBroadcastReceiver());
         disconnectChannel();
@@ -456,25 +464,63 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
         if (isRefresh) {
             mCursor = null;
             mNewUpdatedSinceTimestamp = System.currentTimeMillis() / 1000;
+
+            final Button updatesAvailable = (Button) findViewById(R.id.updates_available);
+            updatesAvailable.setVisibility(View.GONE);
+            mNewNewsItems = new HashSet<>();
         }
-        mUUID = UUID.randomUUID().toString();
-        newsPlugin.getNews(mCursor, mUUID);
+        mRequestNewsUUID = UUID.randomUUID().toString();
+        newsPlugin.getNews(mCursor, mRequestNewsUUID);
+    }
+
+    private void setupUpdatesAvailable() {
+        final Button updatesAvailable = (Button) findViewById(R.id.updates_available);
+        if (mNewNewsItems.size() > 0 && mNewNewsItems.size() < 50) {
+            updatesAvailable.setText(getString(R.string.x_new_items_available, mNewNewsItems.size()));
+        } else {
+            updatesAvailable.setText(R.string.new_items_available);
+        }
+
+        if (updatesAvailable.getVisibility() == View.GONE) {
+            updatesAvailable.setVisibility(View.VISIBLE);
+
+            updatesAvailable.setOnClickListener(new SafeViewOnClickListener() {
+                @Override
+                public void safeOnClick(View v) {
+                    NewsListAdapter nla = ((NewsListAdapter) getAdapter());
+                    updatesAvailable.setVisibility(View.GONE);
+                    for (Long id : mNewNewsItems) {
+                        nla.addNewsItem(id, false);
+                    }
+                    nla.refreshView();
+                    mNewNewsItems = new HashSet<>();
+                }
+            });
+        }
     }
 
     @Override
     public void newsRogerUpdate(long newsId, String friendEmail) {
-        // TODO: 04/10/16 implement
+        newsStore.addUser(newsId, friendEmail);
+        final NewsListAdapter nla = ((NewsListAdapter) getAdapter());
+        nla.updateView(newsId);
     }
 
     @Override
     public void newsPush(AppNewsItemTO newsItem) {
-        // TODO: 04/10/16 implement
+        if (newsStore.insertNewsItem(newsItem)) {
+            mNewNewsItems.add(newsItem.id);
+            setupUpdatesAvailable();
+        }
     }
 
     @Override
     public void newsReadUpdate(Map<Long, Long> statsMap) {
-        // TODO: 04/10/16 implement
-
+        final NewsListAdapter nla = ((NewsListAdapter) getAdapter());
+        for (Map.Entry<Long, Long> entry : statsMap.entrySet()) {
+            newsStore.setNewsItemReach(entry.getKey(), entry.getValue());
+            nla.updateView(entry.getKey());
+        }
     }
 
     private void showErrorToast() {

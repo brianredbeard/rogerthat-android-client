@@ -34,17 +34,24 @@ import java.io.IOException;
 
 public class GetNewsItemsResponseHandler extends ResponseHandler<GetNewsItemsResponseTO> {
 
+    private String mUUID = null;
+
+    public void setUUID(String uuid) {
+        this.mUUID = uuid;
+    }
 
     @Override
     public void writePickle(DataOutput out) throws IOException {
         T.dontCare();
         super.writePickle(out);
+        out.writeUTF(this.mUUID);
     }
 
     @Override
     public void readFromPickle(int version, DataInput in) throws IOException, PickleException {
         T.dontCare();
         super.readFromPickle(version, in);
+        this.mUUID = in.readUTF();
     }
 
     @Override
@@ -56,7 +63,6 @@ public class GetNewsItemsResponseHandler extends ResponseHandler<GetNewsItemsRes
             NewsStore newsStore = newsPlugin.getStore();
 
             long[] ids = new long[resp.items.length];
-            boolean[] reads = new boolean[resp.items.length];
             for (int i= 0 ; i < resp.items.length; i++) {
                 AppNewsItemTO newsItem = resp.items[i];
                 newsStore.saveNewsItem(newsItem);
@@ -65,6 +71,7 @@ public class GetNewsItemsResponseHandler extends ResponseHandler<GetNewsItemsRes
 
             Intent intent = new Intent(NewsPlugin.GET_NEWS_ITEMS_RECEIVED_INTENT);
             intent.putExtra("ids", ids);
+            intent.putExtra("uuid", this.mUUID);
             mMainService.sendBroadcast(intent);
         } catch (Exception e) {
             L.e("Server responded with an error.", e);

@@ -25,6 +25,7 @@ import com.mobicage.rogerthat.util.pickle.PickleException;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.IResponse;
 import com.mobicage.rpc.ResponseHandler;
+import com.mobicage.to.news.AppNewsInfoTO;
 import com.mobicage.to.news.GetNewsResponseTO;
 
 import java.io.DataInput;
@@ -59,10 +60,23 @@ public class GetNewsResponseHandler extends ResponseHandler<GetNewsResponseTO> {
         try {
             GetNewsResponseTO resp = response.getResponse();
             Intent intent = new Intent(NewsPlugin.GET_NEWS_RECEIVED_INTENT);
-            intent.putExtra("ids", resp.ids);
-            intent.putExtra("versions", resp.versions);
-            intent.putExtra("sort_timestamps", resp.sort_timestamps);
-            intent.putExtra("sort_priorities", resp.sort_priorities);
+
+            long[] ids = new long[resp.result.length];
+            long[] versions = new long[resp.result.length];
+            long[] sortTimestamps = new long[resp.result.length];
+            long[] sortPriorities = new long[resp.result.length];
+            for (int i = 0; i < resp.result.length; i++) {
+                AppNewsInfoTO newsItem = resp.result[i];
+                ids[i] = newsItem.id;
+                versions[i] = newsItem.version;
+                sortTimestamps[i] = newsItem.sort_timestamp;
+                sortPriorities[i] = newsItem.sort_priority;
+            }
+
+            intent.putExtra("ids", ids);
+            intent.putExtra("versions", versions);
+            intent.putExtra("sort_timestamps", sortTimestamps);
+            intent.putExtra("sort_priorities", sortPriorities);
             intent.putExtra("cursor", resp.cursor);
             intent.putExtra("uuid", this.mUUID);
             mMainService.sendBroadcast(intent);

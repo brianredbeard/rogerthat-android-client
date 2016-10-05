@@ -84,6 +84,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHolder> {
 
@@ -230,7 +231,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         if (newsItem.isPartial) {
             long[] ids = new long[1];
             ids[0] = newsItem.id;
-            mNewsPlugin.getNewsItems(ids); // todo ruben we need to do this in bulk
+            mNewsPlugin.getNewsItems(ids, UUID.randomUUID().toString()); // todo ruben we need to do this in bulk
             view.findViewById(R.id.partial_item).setVisibility(View.VISIBLE);
             view.findViewById(R.id.full_item).setVisibility(View.GONE);
             return;
@@ -352,7 +353,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
             if (newsItem.rogered) {
                 btn.setBackgroundColor(mActivity.getResources().getColor(R.color.mc_divider_gray));
             } else {
-                btn.setBackgroundColor(mActivity.getResources().getColor(R.color.mc_primary_color));
+                btn.setBackgroundColor(mActivity.getResources().getColor(R.color.mc_default_text));
                 btn.setOnClickListener(new SafeViewOnClickListener() {
                     @Override
                     public void safeOnClick(View v) {
@@ -391,7 +392,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
             if (Friend.ACTIVE == existenceStatus) {
                 btn.setBackgroundColor(mActivity.getResources().getColor(R.color.mc_divider_gray));
             } else {
-                btn.setBackgroundColor(mActivity.getResources().getColor(R.color.mc_primary_color));
+                btn.setBackgroundColor(mActivity.getResources().getColor(R.color.mc_default_text));
             }
 
             btn.setOnClickListener(new SafeViewOnClickListener() {

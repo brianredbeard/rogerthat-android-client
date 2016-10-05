@@ -27,6 +27,7 @@ import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.util.db.DatabaseManager;
 import com.mobicage.rogerthat.util.db.TransactionHelper;
 import com.mobicage.rogerthat.util.db.TransactionWithoutResult;
+import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.to.news.AppNewsItemTO;
 import com.mobicage.to.news.NewsActionButtonTO;
@@ -44,6 +45,7 @@ import static com.mobicage.rogerthat.util.db.DBUtils.bindString;
 public class NewsStore implements Closeable {
 
     private final SQLiteStatement mInsertPartialNewsItem;
+    private final SQLiteStatement mInsertNewsItem;
     private final SQLiteStatement mInsertNewsButton;
     private final SQLiteStatement mInsertNewsRogeredUser;
 
@@ -53,6 +55,7 @@ public class NewsStore implements Closeable {
     private final SQLiteStatement mUpdateNewsPinned;
     private final SQLiteStatement mUpdateNewsRogered;
     private final SQLiteStatement mUpdateNewsDisabled;
+    private final SQLiteStatement mUpdateNewsReach;
 
     private final SQLiteStatement mDeleteNewsButtons;
     private final SQLiteStatement mDeleteNewsRogeredUsers;
@@ -71,6 +74,7 @@ public class NewsStore implements Closeable {
         mMainService = mainService;
 
         mInsertPartialNewsItem = mDb.compileStatement(mMainService.getString(R.string.sql_news_insert_partial_item));
+        mInsertNewsItem = mDb.compileStatement(mMainService.getString(R.string.sql_news_insert_item));
         mInsertNewsButton = mDb.compileStatement(mMainService.getString(R.string.sql_news_insert_button));
         mInsertNewsRogeredUser = mDb.compileStatement(mMainService.getString(R.string.sql_news_insert_rogered_user));
 
@@ -80,6 +84,7 @@ public class NewsStore implements Closeable {
         mUpdateNewsPinned = mDb.compileStatement(mMainService.getString(R.string.sql_news_update_pinned));
         mUpdateNewsRogered = mDb.compileStatement(mMainService.getString(R.string.sql_news_update_rogered));
         mUpdateNewsDisabled = mDb.compileStatement(mMainService.getString(R.string.sql_news_update_disabled));
+        mUpdateNewsReach = mDb.compileStatement(mMainService.getString(R.string.sql_news_update_reach));
 
         mDeleteNewsButtons = mDb.compileStatement(mMainService.getString(R.string.sql_news_delete_buttons));
         mDeleteNewsRogeredUsers = mDb.compileStatement(mMainService.getString(R.string.sql_news_delete_rogerthat_users));
@@ -91,6 +96,7 @@ public class NewsStore implements Closeable {
     public void close() throws IOException {
         T.UI();
         mInsertPartialNewsItem.close();
+        mInsertNewsItem.close();
         mInsertNewsButton.close();
         mInsertNewsRogeredUser.close();
 
@@ -100,6 +106,7 @@ public class NewsStore implements Closeable {
         mUpdateNewsPinned.close();
         mUpdateNewsRogered.close();
         mUpdateNewsDisabled.close();
+        mUpdateNewsReach.close();
 
         mDeleteNewsButtons.close();
         mDeleteNewsRogeredUsers.close();
@@ -107,9 +114,9 @@ public class NewsStore implements Closeable {
         mCountNewsPinned.close();
     }
 
-    public void savePartialNewsItem(final long id, final long version, final long sortTimestamp, final long sortPriority, final boolean isUpdate) {
+    public void savePartialNewsItem(final long id, final long version, final long sortTimestamp, final long sortPriority) {
         mNewsItemsCache.remove(id);
-        if (isUpdate) {
+        if (mNewsItemDetailsCache.containsKey(id)) {
             updatePartialNewsItem(id, version, sortTimestamp, sortPriority);
         } else {
             insertPartialNewsItem(id, version, sortTimestamp, sortPriority);
@@ -139,10 +146,13 @@ public class NewsStore implements Closeable {
     }
 
     public void updatePartialNewsItem(final long id, final long version, final long sortTimestamp, final long sortPriority) {
-        mNewsItemDetailsCache.get(id).version = version;
-        mNewsItemDetailsCache.get(id).sortTimestamp = sortTimestamp;
-        mNewsItemDetailsCache.get(id).sortPriority = sortPriority;
-        mNewsItemDetailsCache.get(id).isPartial = true;
+        if (mNewsItemDetailsCache.containsKey(id)) {
+            mNewsItemDetailsCache.get(id).version = version;
+            mNewsItemDetailsCache.get(id).sortTimestamp = sortTimestamp;
+            mNewsItemDetailsCache.get(id).sortPriority = sortPriority;
+            mNewsItemDetailsCache.get(id).isPartial = true;
+        }
+
         TransactionHelper.runInTransaction(mDb, "updatePartialNewsItem", new TransactionWithoutResult() {
             @Override
             protected void run() {
@@ -156,12 +166,63 @@ public class NewsStore implements Closeable {
         });
     }
 
+    public boolean insertNewsItem(final AppNewsItemTO item) {
+        if (mNewsItemDetailsCache.containsKey(item.id)) {
+            L.bug("news channel send new item that i already have...");
+            return false;
+        }
+
+        NewsItemDetails d = new NewsItemDetails();
+        d.id = item.id;
+        d.version = item.version;
+        d.sortTimestamp = item.sort_timestamp;
+        d.sortPriority = item.sort_priority;
+        d.isPartial = true;
+        d.read = false;
+        mNewsItemDetailsCache.put(item.id, d);
+
+        TransactionHelper.runInTransaction(mDb, "insertNewsItem", new TransactionWithoutResult() {
+            @Override
+            protected void run() {
+                mInsertNewsItem.bindLong(1, item.id);
+                mInsertNewsItem.bindLong(2, item.timestamp);
+                mInsertNewsItem.bindString(3, item.sender.email);
+                mInsertNewsItem.bindString(4, item.sender.name);
+                mInsertNewsItem.bindLong(5, item.sender.avatar_id);
+                bindString(mInsertNewsItem, 6, item.title);
+                bindString(mInsertNewsItem, 7, item.message);
+                bindString(mInsertNewsItem, 8, item.image_url);
+                bindString(mInsertNewsItem, 9, item.broadcast_type);
+                mInsertNewsItem.bindLong(10, item.reach);
+                bindString(mInsertNewsItem, 11, item.qr_code_content);
+                bindString(mInsertNewsItem, 12, item.qr_code_caption);
+                mInsertNewsItem.bindLong(13, item.version);
+                mInsertNewsItem.bindLong(14, item.flags);
+                mInsertNewsItem.bindLong(15, item.type);
+                mInsertNewsItem.bindLong(16, 0); // dirty
+                mInsertNewsItem.bindLong(17, 0); // pinned
+                mInsertNewsItem.bindLong(18, 0); // rogererd
+                mInsertNewsItem.bindLong(19, 0); // deleted
+                mInsertNewsItem.bindLong(20, item.sort_timestamp);
+                mInsertNewsItem.bindLong(21, item.sort_priority);
+                mInsertNewsItem.execute();
+
+                insertButtons(item);
+                insertUsers(item);
+            }
+        });
+
+        return true;
+    }
+
     public void saveNewsItem(final AppNewsItemTO item) {
         mNewsItemsCache.remove(item.id);
-        mNewsItemDetailsCache.get(item.id).version = item.version;
-        mNewsItemDetailsCache.get(item.id).sortTimestamp = item.sort_timestamp;
-        mNewsItemDetailsCache.get(item.id).sortPriority = item.sort_priority;
-        mNewsItemDetailsCache.get(item.id).isPartial = false;
+        if (mNewsItemDetailsCache.containsKey(item.id)) {
+            mNewsItemDetailsCache.get(item.id).version = item.version;
+            mNewsItemDetailsCache.get(item.id).sortTimestamp = item.sort_timestamp;
+            mNewsItemDetailsCache.get(item.id).sortPriority = item.sort_priority;
+            mNewsItemDetailsCache.get(item.id).isPartial = false;
+        }
 
         TransactionHelper.runInTransaction(mDb, "updateNewsItem", new TransactionWithoutResult() {
             @Override
@@ -222,10 +283,13 @@ public class NewsStore implements Closeable {
     }
 
     public void setNewsItemRead(final long newsId) {
-        mNewsItemDetailsCache.get(newsId).read = true;
         if (mNewsItemsCache.containsKey(newsId)) {
             mNewsItemsCache.get(newsId).read = true;
         }
+        if (mNewsItemDetailsCache.containsKey(newsId)) {
+            mNewsItemDetailsCache.get(newsId).read = true;
+        }
+
         TransactionHelper.runInTransaction(mDb, "setNewsItemRead", new TransactionWithoutResult() {
             @Override
             protected void run() {
@@ -272,6 +336,20 @@ public class NewsStore implements Closeable {
             @Override
             protected void run() {
                 mUpdateNewsDisabled.bindLong(1, 1);
+                mUpdateNewsDisabled.bindLong(2, newsId);
+                mUpdateNewsDisabled.execute();
+            }
+        });
+    }
+
+    public void setNewsItemReach(final long newsId, final long reach) {
+        if (mNewsItemsCache.containsKey(newsId)) {
+            mNewsItemsCache.get(newsId).reach = reach;
+        }
+        TransactionHelper.runInTransaction(mDb, "setNewsItemReach", new TransactionWithoutResult() {
+            @Override
+            protected void run() {
+                mUpdateNewsDisabled.bindLong(1, reach);
                 mUpdateNewsDisabled.bindLong(2, newsId);
                 mUpdateNewsDisabled.execute();
             }
@@ -370,7 +448,7 @@ public class NewsStore implements Closeable {
         }
     }
 
-    public void fillNewsItemsCache() {
+    public void fillNewsItemDetailsCache() {
         T.dontCare();
         mNewsItemDetailsCache = new HashMap<>();
         final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_news_list_item_versions),

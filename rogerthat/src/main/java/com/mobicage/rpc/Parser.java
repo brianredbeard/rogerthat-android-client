@@ -2057,6 +2057,13 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
+    public static com.mobicage.to.news.AppNewsInfoTO ComMobicageToNewsAppNewsInfoTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.news.AppNewsInfoTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
     public static com.mobicage.to.news.AppNewsItemTO ComMobicageToNewsAppNewsItemTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;
