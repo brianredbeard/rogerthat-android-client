@@ -160,7 +160,7 @@ public class NewsStore implements Closeable {
                 mUpdatePartialNewsItem.bindLong(2, sortTimestamp);
                 mUpdatePartialNewsItem.bindLong(3, sortPriority);
                 // WHERE
-                mUpdatePartialNewsItem.bindLong(44, id);
+                mUpdatePartialNewsItem.bindLong(4, id);
                 mUpdatePartialNewsItem.execute();
             }
         });
