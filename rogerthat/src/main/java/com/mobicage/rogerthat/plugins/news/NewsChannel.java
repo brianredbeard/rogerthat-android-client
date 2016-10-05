@@ -56,6 +56,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
     private EventLoopGroup eventLoopGroup;
     private boolean connected;
     private ConfigurationProvider configurationProvider;
+    private boolean isRetryingToConnect = false;
 
     public boolean isConnected() {
         return connected;
@@ -244,8 +245,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
             DNSUtil.HostAddress hostAddress = configurationFactory.getSafeNewsConnectionHost(false);
             this.host = hostAddress.getHost();
             this.port = hostAddress.getPort();
-        } catch (NewsConfigurationConnectionException e) {
-            delayGetConfiguration();
+        } catch (NewsConfigurationConnectionException ignored) {
         } catch (NewsConfigurationException e) {
             L.bug(e);
         }
@@ -269,6 +269,10 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
 
     private void attemptToReconnect(final int backoffTime) {
         if (!this.connected) {
+            if (this.isRetryingToConnect) {
+                return;
+            }
+            this.isRetryingToConnect = true;
             new java.util.Timer().schedule(
                     new java.util.TimerTask() {
                         @Override
@@ -277,6 +281,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
                                 SafeRunnable safeRunnable = new SafeRunnable() {
                                     @Override
                                     protected void safeRun() throws Exception {
+                                        NewsChannel.this.isRetryingToConnect = false;
                                         connect();
                                     }
                                 };
