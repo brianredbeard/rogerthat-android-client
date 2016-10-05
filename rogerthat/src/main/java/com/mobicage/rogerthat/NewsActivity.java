@@ -76,6 +76,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
     protected NewsPlugin newsPlugin;
     protected NewsStore newsStore;
     protected FriendsPlugin friendsPlugin;
+    protected NewsChannel newsChannel;
 
     protected SwipeRefreshLayout swipeContainer;
     protected int existence;
@@ -88,7 +89,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
 
     private long mNewUpdatedSinceTimestamp;
     private ProgressDialog mProgressDialog;
-    private NewsChannel mNewsChannel;
+
 
     private Set<Long> mNewNewsItems = new HashSet<>();
     private boolean mIsFirstRequest = true;
@@ -193,8 +194,6 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
     }
 
     private void processNewsItemsReceived(Intent intent, final NewsListAdapter nla) {
-
-
         final long[] ids = intent.getLongArrayExtra("ids");
 
         if (swipeContainer.isRefreshing()) {
@@ -206,20 +205,21 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
                     nla.addNewsItem(item.id, false);
                 }
                 nla.refreshView();
+                return;
             } else if (mIsFirstRequest) {
                 mIsFirstRequest = false;
                 final String uuid = intent.getStringExtra("uuid");
                 if (mRequestNewsItemsUUID != null && mRequestNewsItemsUUID.equals(uuid)) {
                     mRequestNewsItemsUUID = null;
                     setupUpdatesAvailable();
+                    requestMoreNews(false);
+                    return;
                 }
             }
+        }
 
-            requestMoreNews(false);
-        } else {
-            for (int i = 0; i < ids.length; i++) {
-                nla.updateView(ids[i]);
-            }
+        for (int i = 0; i < ids.length; i++) {
+            nla.updateView(ids[i]);
         }
     }
 
@@ -300,8 +300,8 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
             newsRunnable = new SafeRunnable() {
                 @Override
                 protected void safeRun() throws Exception {
-                    if (mNewsChannel != null) {
-                        mNewsChannel.internetConnected();
+                    if (newsChannel != null) {
+                        newsChannel.internetConnected();
                     }
                 }
             };
@@ -313,8 +313,8 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
             newsRunnable = new SafeRunnable() {
                 @Override
                 protected void safeRun() throws Exception {
-                    if (mNewsChannel != null) {
-                        mNewsChannel.internetDisconnected();
+                    if (newsChannel != null) {
+                        newsChannel.internetDisconnected();
                     }
                 }
             };
@@ -338,7 +338,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
     }
 
     protected void loadCursorAndSetAdaptar() {
-        NewsListAdapter nla = new NewsListAdapter(this, mService, newsPlugin, newsStore, friendsPlugin);
+        NewsListAdapter nla = new NewsListAdapter(this, mService);
         setAdapter(nla);
     }
 
@@ -393,9 +393,9 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
             SafeRunnable runnable = new SafeRunnable() {
                 @Override
                 protected void safeRun() throws Exception {
-                    mNewsChannel = new NewsChannel(NewsActivity.this, configurationProvider);
-                    if (!mNewsChannel.isConnected()) {
-                        mNewsChannel.connect();
+                    newsChannel = new NewsChannel(NewsActivity.this, configurationProvider);
+                    if (!newsChannel.isConnected()) {
+                        newsChannel.connect();
                     }
                 }
             };
@@ -407,8 +407,8 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
         SafeRunnable runnable = new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
-                if (mNewsChannel != null && !mNewsChannel.isConnected()) {
-                    mNewsChannel.connect();
+                if (newsChannel != null && !newsChannel.isConnected()) {
+                    newsChannel.connect();
                 }
             }
         };
@@ -421,8 +421,8 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
         SafeRunnable runnable = new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
-                if (mNewsChannel != null && mNewsChannel.isConnected()) {
-                    mNewsChannel.disconnect();
+                if (newsChannel != null && newsChannel.isConnected()) {
+                    newsChannel.disconnect();
                 }
             }
         };
@@ -500,27 +500,42 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
     }
 
     @Override
-    public void newsRogerUpdate(long newsId, String friendEmail) {
+    public void newsRogerUpdate(final long newsId, String friendEmail) {
         newsStore.addUser(newsId, friendEmail);
-        final NewsListAdapter nla = ((NewsListAdapter) getAdapter());
-        nla.updateView(newsId);
+        mService.postAtFrontOfUIHandler(new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                final NewsListAdapter nla = ((NewsListAdapter) getAdapter());
+                nla.updateView(newsId);
+            }
+        });
     }
 
     @Override
-    public void newsPush(AppNewsItemTO newsItem) {
+    public void newsPush(final AppNewsItemTO newsItem) {
         if (newsStore.insertNewsItem(newsItem)) {
-            mNewNewsItems.add(newsItem.id);
-            setupUpdatesAvailable();
+            mService.postAtFrontOfUIHandler(new SafeRunnable() {
+                @Override
+                protected void safeRun() throws Exception {
+                    mNewNewsItems.add(newsItem.id);
+                    setupUpdatesAvailable();
+                }
+            });
         }
     }
 
     @Override
-    public void newsReadUpdate(Map<Long, Long> statsMap) {
-        final NewsListAdapter nla = ((NewsListAdapter) getAdapter());
-        for (Map.Entry<Long, Long> entry : statsMap.entrySet()) {
-            newsStore.setNewsItemReach(entry.getKey(), entry.getValue());
-            nla.updateView(entry.getKey());
-        }
+    public void newsReadUpdate(final Map<Long, Long> statsMap) {
+        mService.postAtFrontOfUIHandler(new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                final NewsListAdapter nla = ((NewsListAdapter) getAdapter());
+                for (Map.Entry<Long, Long> entry : statsMap.entrySet()) {
+                    newsStore.setNewsItemReach(entry.getKey(), entry.getValue());
+                    nla.updateView(entry.getKey());
+                }
+            }
+        });
     }
 
     private void showErrorToast() {

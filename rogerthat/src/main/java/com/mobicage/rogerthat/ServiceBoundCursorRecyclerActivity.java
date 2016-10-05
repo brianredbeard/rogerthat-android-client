@@ -33,7 +33,6 @@ public abstract class ServiceBoundCursorRecyclerActivity extends ServiceBoundAct
 
     private BroadcastReceiver mBroadcastReceiver;
     private boolean mNeedsCursorRefresh = false;
-    private boolean mNeedsViewRefresh = false;
 
     private boolean mIsVisible = false;
     private int mScrollPositionIndex = -1;
@@ -71,7 +70,6 @@ public abstract class ServiceBoundCursorRecyclerActivity extends ServiceBoundAct
     protected abstract void changeCursor();
 
     protected void refreshCursor() {
-        notifyContentChanged();
         if (mIsVisible)
             changeCursor();
         else
@@ -99,12 +97,6 @@ public abstract class ServiceBoundCursorRecyclerActivity extends ServiceBoundAct
         return mLayoutManager.findFirstVisibleItemPosition();
     }
 
-    protected int findFirstCompletelyVisibleItemPosition() {
-        if (mRecyclerView == null)
-            return -1;
-        return mLayoutManager.findFirstCompletelyVisibleItemPosition();
-    }
-
     protected void setSelection(int position) {
         mLayoutManager.scrollToPositionWithOffset(position, 0);
     }
@@ -126,16 +118,10 @@ public abstract class ServiceBoundCursorRecyclerActivity extends ServiceBoundAct
         mIsVisible = true;
         if (mNeedsCursorRefresh) {
             mNeedsCursorRefresh = false;
-            mNeedsViewRefresh = false;
 
             // XXX: doing cursor refresh here can make UI slow
             changeCursor();
 
-            if (mScrollPositionIndex != -1)
-                mLayoutManager.scrollToPositionWithOffset(mScrollPositionIndex, mScrollPositionTop);
-        } else if (mNeedsViewRefresh) {
-            mNeedsViewRefresh = false;
-            refreshView();
             if (mScrollPositionIndex != -1)
                 mLayoutManager.scrollToPositionWithOffset(mScrollPositionIndex, mScrollPositionTop);
         }
@@ -143,18 +129,5 @@ public abstract class ServiceBoundCursorRecyclerActivity extends ServiceBoundAct
 
     protected BroadcastReceiver getDefaultBroadcastReceiver() {
         return mBroadcastReceiver;
-    }
-
-    protected void setNeedsViewRefresh() {
-        mNeedsViewRefresh = true;
-    }
-
-    protected void notifyContentChanged() {
-        // do nothing
-    }
-
-    protected void refreshView() {
-        // to be overridden by code who has called setNeedsViewRefresh()
-        // see example in HistoryListActivity
     }
 }

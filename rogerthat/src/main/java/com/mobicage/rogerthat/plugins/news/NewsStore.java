@@ -202,7 +202,7 @@ public class NewsStore implements Closeable {
                 mInsertNewsItem.bindLong(16, 0); // dirty
                 mInsertNewsItem.bindLong(17, 0); // pinned
                 mInsertNewsItem.bindLong(18, 0); // rogererd
-                mInsertNewsItem.bindLong(19, 0); // deleted
+                mInsertNewsItem.bindLong(19, 0); // disabled
                 mInsertNewsItem.bindLong(20, item.sort_timestamp);
                 mInsertNewsItem.bindLong(21, item.sort_priority);
                 mInsertNewsItem.execute();
@@ -349,9 +349,9 @@ public class NewsStore implements Closeable {
         TransactionHelper.runInTransaction(mDb, "setNewsItemReach", new TransactionWithoutResult() {
             @Override
             protected void run() {
-                mUpdateNewsDisabled.bindLong(1, reach);
-                mUpdateNewsDisabled.bindLong(2, newsId);
-                mUpdateNewsDisabled.execute();
+                mUpdateNewsReach.bindLong(1, reach);
+                mUpdateNewsReach.bindLong(2, newsId);
+                mUpdateNewsReach.execute();
             }
         });
     }

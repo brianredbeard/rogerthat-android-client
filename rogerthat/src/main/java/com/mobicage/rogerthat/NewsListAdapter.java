@@ -21,7 +21,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
@@ -58,7 +57,6 @@ import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.plugins.news.NewsItem;
 import com.mobicage.rogerthat.plugins.news.NewsItemDetails;
 import com.mobicage.rogerthat.plugins.news.NewsPlugin;
-import com.mobicage.rogerthat.plugins.news.NewsStore;
 import com.mobicage.rogerthat.util.CachedDownloader;
 import com.mobicage.rogerthat.util.DownloadImageTask;
 import com.mobicage.rogerthat.util.TextUtils;
@@ -94,9 +92,6 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     private NewsActivity mActivity;
     private final MainService mMainService;
     private final LayoutInflater mLayoutInflater;
-    private final NewsPlugin mNewsPlugin;
-    private final NewsStore mNewsStore;
-    private final FriendsPlugin mFriendsPlugin;
     private final MessagingPlugin mMessagingPlugin;
 
     private CachedDownloader mCachedDownloader;
@@ -112,13 +107,10 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     private final String mMyName;
     private final int mDisplayWidth;
 
-    public NewsListAdapter(NewsActivity activity, MainService mainService, NewsPlugin newsPlugin, NewsStore store, FriendsPlugin friendsPlugin) {
+    public NewsListAdapter(NewsActivity activity, MainService mainService) {
         mActivity = activity;
         mMainService = mainService;
         mLayoutInflater = LayoutInflater.from(mActivity);
-        mNewsPlugin = newsPlugin;
-        mNewsStore = store;
-        mFriendsPlugin = friendsPlugin;
         mMessagingPlugin = mMainService.getPlugin(MessagingPlugin.class);
 
         mCachedDownloader = CachedDownloader.getInstance(mMainService);
@@ -140,9 +132,9 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         if (!mItems.contains(newsId)) {
             mItems.add(newsId);
 
-            if (!mNewsStore.getNewsItemDetails(newsId).isPartial) {
-                NewsItem newsItem = mNewsStore.getNewsItem(newsId);
-                if (mFriendsPlugin.isBroadcastTypeDisabled(newsItem.sender.email, newsItem.broadcast_type)) {
+            if (!mActivity.newsStore.getNewsItemDetails(newsId).isPartial) {
+                NewsItem newsItem = mActivity.newsStore.getNewsItem(newsId);
+                if (mActivity.friendsPlugin.isBroadcastTypeDisabled(newsItem.sender.email, newsItem.broadcast_type)) {
                     return;
                 }
             }
@@ -161,9 +153,9 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     public void refreshView() {
         mVisibleItems = new ArrayList<>();
         for (Long newsId : mItems) {
-            if (!mNewsStore.getNewsItemDetails(newsId).isPartial) {
-                NewsItem newsItem = mNewsStore.getNewsItem(newsId);
-                if (mFriendsPlugin.isBroadcastTypeDisabled(newsItem.sender.email, newsItem.broadcast_type)) {
+            if (!mActivity.newsStore.getNewsItemDetails(newsId).isPartial) {
+                NewsItem newsItem = mActivity.newsStore.getNewsItem(newsId);
+                if (mActivity.friendsPlugin.isBroadcastTypeDisabled(newsItem.sender.email, newsItem.broadcast_type)) {
                     continue;
                 }
             }
@@ -179,8 +171,8 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     private final Comparator<Long> comparator = new Comparator<Long>() {
         @Override
         public int compare(Long item1, Long item2) {
-            NewsItemDetails details1 = mNewsStore.getNewsItemDetails(item1);
-            NewsItemDetails details2 = mNewsStore.getNewsItemDetails(item2);
+            NewsItemDetails details1 = mActivity.newsStore.getNewsItemDetails(item1);
+            NewsItemDetails details2 = mActivity.newsStore.getNewsItemDetails(item2);
             if (!details1.read && details2.read) {
                 return -1;
             } else if (details1.read && !details2.read) {
@@ -214,11 +206,6 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         populateView(holder.itemView, position);
     }
 
-
-    public void changeCursor(Cursor cursor) {
-        L.i("todo ruben changeCursor");
-    }
-
     public void updateView(long newsId) {
         int position = mVisibleItems.indexOf(newsId);
         if (position >= 0) {
@@ -227,11 +214,11 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     }
 
     private void populateView(final View view, final int position) {
-        final NewsItem newsItem = mNewsStore.getNewsItem(mVisibleItems.get(position));
+        final NewsItem newsItem = mActivity.newsStore.getNewsItem(mVisibleItems.get(position));
         if (newsItem.isPartial) {
             long[] ids = new long[1];
             ids[0] = newsItem.id;
-            mNewsPlugin.getNewsItems(ids, UUID.randomUUID().toString()); // todo ruben we need to do this in bulk
+            mActivity.newsPlugin.getNewsItems(ids, UUID.randomUUID().toString()); // todo ruben we need to do this in bulk
             view.findViewById(R.id.partial_item).setVisibility(View.VISIBLE);
             view.findViewById(R.id.full_item).setVisibility(View.GONE);
             return;
@@ -240,18 +227,19 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         view.findViewById(R.id.partial_item).setVisibility(View.GONE);
         view.findViewById(R.id.full_item).setVisibility(View.VISIBLE);
 
-        final int existenceStatus = mFriendsPlugin.getStore().getExistence(newsItem.sender.email);
+        final int existenceStatus = mActivity.friendsPlugin.getStore().getExistence(newsItem.sender.email);
         if (!newsItem.read) {
             newsItem.read = true;
 
             mMainService.postAtFrontOfBIZZHandler(new SafeRunnable() {
                 @Override
                 protected void safeRun() throws Exception {
-                    mNewsStore.setNewsItemRead(newsItem.id);
+                    mActivity.newsStore.setNewsItemRead(newsItem.id);
+                    mActivity.newsChannel.readNews(newsItem.id);
                 }
             });
 
-            mNewsPlugin.newsRead(new long[]{newsItem.id});
+            mActivity.newsPlugin.newsRead(new long[]{newsItem.id});
         }
 
         setupPinned(view, newsItem);
@@ -358,12 +346,13 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                     @Override
                     public void safeOnClick(View v) {
                         btn.setOnClickListener(null);
-                        mNewsPlugin.newsRogered(newsItem.id);
+                        mActivity.newsPlugin.newsRogered(newsItem.id);
+                        mActivity.newsChannel.rogerNews(newsItem.id);
                         mMainService.postAtFrontOfBIZZHandler(new SafeRunnable() {
                             @Override
                             protected void safeRun() throws Exception {
-                                mNewsStore.setNewsItemRogered(newsItem.id);
-                                mNewsStore.addUser(newsItem.id, mMyEmail);
+                                mActivity.newsStore.setNewsItemRogered(newsItem.id);
+                                mActivity.newsStore.addUser(newsItem.id, mMyEmail);
 
                                 mMainService.postAtFrontOfUIHandler(new SafeRunnable() {
                                     @Override
@@ -399,9 +388,9 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 @Override
                 public void safeOnClick(View v) {
                     btn.setOnClickListener(null);
-                    final int currentExistenceStatus = mFriendsPlugin.getStore().getExistence(newsItem.sender.email);
+                    final int currentExistenceStatus = mActivity.friendsPlugin.getStore().getExistence(newsItem.sender.email);
                     if (currentExistenceStatus != Friend.ACTIVE) {
-                        mFriendsPlugin.inviteFriend(newsItem.sender.email, null, null, false);
+                        mActivity.friendsPlugin.inviteFriend(newsItem.sender.email, null, null, false);
                     }
                     btn.setBackgroundColor(mActivity.getResources().getColor(R.color.mc_divider_gray));
                 }
@@ -427,7 +416,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
             btn.setOnClickListener(new SafeViewOnClickListener() {
                 @Override
                 public void safeOnClick(View v) {
-                    final int currentExistenceStatus = mFriendsPlugin.getStore().getExistence(newsItem.sender.email);
+                    final int currentExistenceStatus = mActivity.friendsPlugin.getStore().getExistence(newsItem.sender.email);
                     if (Friend.ACTIVE == currentExistenceStatus) {
                         if (Message.MC_CONFIRM_PREFIX.equals(buttonAction)) {
                             // ignore
@@ -460,7 +449,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                                 .setPositiveButton(R.string.yes, new SafeDialogInterfaceOnClickListener() {
                                     @Override
                                     public void safeOnClick(DialogInterface dialog, int which) {
-                                        mFriendsPlugin.inviteFriend(newsItem.sender.email, null, null, true);
+                                        mActivity.friendsPlugin.inviteFriend(newsItem.sender.email, null, null, true);
                                     }
                                 }).setNegativeButton(R.string.no, null).create().show();
                     }
@@ -479,7 +468,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
 
     private void setupAvatar(View view, final NewsItem newsItem) {
         ImageView serviceAvatar = (ImageView) view.findViewById(R.id.service_avatar);
-        Bitmap avatar = mFriendsPlugin.getStore().getAvatarBitmap(newsItem.sender.email);
+        Bitmap avatar = mActivity.friendsPlugin.getStore().getAvatarBitmap(newsItem.sender.email);
         if (avatar == null) {
             // todo ruben we should create a cache of avatars..
             new DownloadImageTask(serviceAvatar, true).execute(CloudConstants.CACHED_AVATAR_URL_PREFIX + newsItem.sender.avatar_id);
@@ -490,7 +479,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         serviceAvatar.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
-                final int existenceStatus = mFriendsPlugin.getStore().getExistence(newsItem.sender.email);
+                final int existenceStatus = mActivity.friendsPlugin.getStore().getExistence(newsItem.sender.email);
                 if (existenceStatus == Friend.ACTIVE) {
                     Intent intent = new Intent(mActivity, ServiceActionMenuActivity.class);
                     intent.putExtra(ServiceActionMenuActivity.SERVICE_EMAIL, newsItem.sender.email);
@@ -573,7 +562,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         pinned.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
-                final int existenceStatus = mFriendsPlugin.getStore().getExistence(newsItem.sender.email);
+                final int existenceStatus = mActivity.friendsPlugin.getStore().getExistence(newsItem.sender.email);
                 final LinearLayout dialog = (LinearLayout) mLayoutInflater.inflate(R.layout.news_actions, null);
 
                 final AlertDialog alertDialog = new AlertDialog.Builder(mActivity)
@@ -617,7 +606,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                         @Override
                         public void safeOnClick(View v) {
                             alertDialog.dismiss();
-                            mFriendsPlugin.disableBroadcastType(newsItem.sender.email, newsItem.broadcast_type);
+                            mActivity.friendsPlugin.disableBroadcastType(newsItem.sender.email, newsItem.broadcast_type);
                             refreshView();
                         }
                     });
@@ -649,7 +638,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                     namesMap.put(email, mMyName);
 
                 } else {
-                    String name = mFriendsPlugin.getStore().getName(email);
+                    String name = mActivity.friendsPlugin.getStore().getName(email);
                     if (name != null) {
                         namesMap.put(email, name);
                     }
@@ -709,10 +698,10 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     }
 
     private void togglePinned(final NewsItem newsItem) {
-        mNewsStore.setNewsItemPinned(newsItem.id, !newsItem.pinned);
+        mActivity.newsStore.setNewsItemPinned(newsItem.id, !newsItem.pinned);
 
         if (mActivity instanceof NewsPinnedActivity) {
-            if (mNewsStore.countPinnedItems() > 0) {
+            if (mActivity.newsStore.countPinnedItems() > 0) {
                 mItems.remove(newsItem.id);
                 int index = mVisibleItems.indexOf(newsItem.id);
                 mVisibleItems.remove(newsItem.id);
