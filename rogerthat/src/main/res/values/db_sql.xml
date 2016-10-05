@@ -2,18 +2,24 @@
 <resources>
     <!-- backlog statements used by android and not yet ios-->
     <string name="sql_backlog_remove_previous_unsent_calls">DELETE FROM Backlog WHERE calltype = ? AND last_resend_timestamp = 0 AND function = ?</string>
+    <string name="sql_backlog_count">SELECT COUNT(*), calltype FROM Backlog GROUP BY calltype</string>
 
     <!--  backlog statements copied from ios -->
     <string name="sql_backlog_insert">INSERT INTO Backlog (callid, calltype, timestamp, callbody, has_priority, last_resend_timestamp, retention_timeout, response_handler, function, wifi_only) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)</string>
     <string name="sql_backlog_batch">SELECT callid, calltype, callbody, timestamp FROM Backlog WHERE last_resend_timestamp &lt; ? AND has_priority >= 0 AND calltype=0 ORDER BY has_priority DESC, last_resend_timestamp</string>
+    <string name="sql_backlog_batch_wifi_only">SELECT callid, calltype, callbody, timestamp FROM Backlog WHERE wifi_only=0 AND last_resend_timestamp &lt; ? AND has_priority >= 0 AND calltype=0 ORDER BY has_priority DESC, last_resend_timestamp</string>
     <string name="sql_backlog_get_body">SELECT callbody FROM Backlog WHERE callid = ?</string>
+    <string name="sql_backlog_update_last_resend">UPDATE Backlog SET last_resend_timestamp = ? WHERE callid = ?</string>
     <string name="sql_backlog_update_retention_timeout">UPDATE Backlog SET retention_timeout = ?, has_priority = -1 WHERE callid = ?</string>
     <string name="sql_backlog_run_retention">DELETE FROM Backlog WHERE has_priority = -1 AND retention_timeout &lt; ?</string>
+    <string name="sql_backlog_exists">SELECT count(*) FROM (SELECT \"x\" FROM Backlog WHERE last_resend_timestamp &lt; ? AND has_priority >= 0 LIMIT 1)</string>
     <string name="sql_backlog_has_body">SELECT count(*) FROM Backlog WHERE callid = ? and callbody is not null</string>
     <string name="sql_backlog_update_body">UPDATE Backlog SET callbody = ? WHERE callid = ?</string>
     <string name="sql_backlog_delete_item">DELETE FROM Backlog WHERE callid = ?</string>
     <string name="sql_backlog_get_response_handler">SELECT response_handler FROM Backlog WHERE callid = ?</string>
+    <string name="sql_backlog_delete_all">DELETE FROM Backlog;</string>
     <string name="sql_backlog_singlecall_body">SELECT callid, callbody FROM Backlog WHERE calltype=0 AND function = ?</string>
+    <string name="sql_backlog_item_exist">SELECT count(*) FROM Backlog WHERE callid = ?</string>
 
     <!-- friend -->
     <string name="sql_user_friend_list_cursor">SELECT rowid as _id, email, name, share_location, shares_location, avatar, existence, \"type\", description, description_branding, poke_description, qualified_identifier, organization_type, callbacks, flags, profile_data, content_branding_hash, actions FROM friend WHERE existence = 0 and \"type\" = 1 ORDER BY name COLLATE NOCASE</string>
@@ -43,6 +49,7 @@
     <string name="sql_friend_update_info">UPDATE friend SET name=?, avatar_id=?, avatar=?, \"type\"=?, description=?, description_branding=?, qualified_identifier=?, profile_data=? WHERE email = ?</string>
     <string name="sql_friend_count">SELECT count(*) FROM friend WHERE existence = 0</string>
     <string name="sql_friend_count_friends_sharing_location">SELECT COUNT(*) FROM friend WHERE existence = 0 AND shares_location = 1</string>
+    <string name="sql_friend_delete">DELETE FROM friend WHERE email = ?</string>
     <string name="sql_friend_clear_all_service_menu">DELETE FROM service_menu_item</string>
     <string name="sql_friend_delete_service_menu">DELETE FROM service_menu_item WHERE friend = ?</string>
     <string name="sql_friend_insert_service_menu">
@@ -386,6 +393,7 @@ ORDER BY ms.acked_timestamp DESC
 
     <!-- group -->
     <string name="sql_get_group">SELECT rg.id, rg.name, rg.avatar, rg.avatar_hash, rgm.email FROM recipients_group rg LEFT OUTER JOIN recipients_group_member rgm ON rg.id = rgm.group_id LEFT OUTER JOIN friend f ON rgm.email = f.email WHERE rg.id = ? ORDER BY f.name COLLATE NOCASE</string>
+    <string name="sql_get_groups">SELECT id, name, avatar, avatar_hash FROM recipients_group ORDER BY name COLLATE NOCASE</string>
     <string name="sql_group_list_cursor">SELECT rowid as _id, id, name, avatar, avatar_hash FROM recipients_group ORDER BY name COLLATE NOCASE</string>
     <string name="sql_group_member_list_group">SELECT rgm.rowid as _id, rg.id, rg.name, rg.avatar, rg.avatar_hash, rgm.email FROM recipients_group rg LEFT OUTER JOIN recipients_group_member rgm ON rg.id = rgm.group_id INNER JOIN friend f ON rgm.email = f.email WHERE rg.id = ? ORDER BY f.name COLLATE NOCASE</string>
     <string name="sql_insert_group">INSERT INTO recipients_group(id, name, avatar, avatar_hash) VALUES (?, ?, ?, ?)</string>
@@ -442,9 +450,19 @@ ORDER BY ms.acked_timestamp DESC
     <string name="sql_news_search_pinned">SELECT id FROM news WHERE pinned = 1 AND (sender_name LIKE ? OR title LIKE ? OR message LIKE ? OR broadcast_type LIKE ? OR qr_code_caption LIKE ?) ORDER BY timestamp DESC</string>
 
     <!-- iOS-only queries -->
+    <string name="sql_friend_count_by_type">SELECT COUNT(*) FROM friend WHERE (existence = 0 OR existence = 4) AND \"type\" = ?</string>
     <string name="sql_friend_update_email_hash">UPDATE friend SET email_hash = ? WHERE email = ?</string>
+    <string name="sql_friend_get_by_email_ios">SELECT email, name, share_location, shares_location, avatar, existence, \"type\", description, description_branding, poke_description, qualified_identifier, organization_type, callbacks, flags, profile_data, content_branding_hash FROM friend WHERE email = ?</string>
+    <string name="sql_friend_get_by_email_hash">SELECT email, name, share_location, shares_location, avatar, existence, \"type\", description, description_branding, poke_description, qualified_identifier, organization_type, callbacks, flags, profile_data, content_branding_hash FROM friend WHERE email_hash = ?</string>
+    <string name="sql_friend_get_by_index">SELECT email, name, share_location, shares_location, avatar, existence, \"type\", description, description_branding, poke_description, qualified_identifier, organization_type, callbacks, flags, profile_data, content_branding_hash FROM friend WHERE existence = 0 ORDER BY name COLLATE NOCASE LIMIT ?, 1</string>
+    <string name="sql_friend_get_by_type_and_index">SELECT email, name, share_location, shares_location, avatar, existence, \"type\", description, description_branding, poke_description, qualified_identifier, organization_type, callbacks, flags, profile_data, content_branding_hash FROM friend WHERE (existence = 0 OR existence = 4) AND \"type\" = ? ORDER BY name COLLATE NOCASE LIMIT ?, 1</string>
+    <string name="sql_friend_get_names">SELECT name FROM friend WHERE type = 1 and existence = 0 ORDER BY name COLLATE NOCASE;</string>
 
     <string name="sql_services_count">SELECT COUNT(*) FROM (SELECT IFNULL(category_id, email) AS cat_id FROM friend WHERE type=2 AND (existence = 0 OR existence = 4) GROUP BY cat_id)</string>
+    <string name="sql_services_get_by_index">SELECT f.email, f.name, f.share_location, f.shares_location, f.avatar, f.existence, f.type, f.description, f.description_branding, f.poke_description, f.qualified_identifier, f.organization_type, f.callbacks, f.flags, f.profile_data, f.content_branding_hash, IFNULL(c.id, f.email) AS cat_id, ifnull(c.name, f.name) AS cat_name, c.avatar, count(f.email) FROM friend f LEFT OUTER JOIN friend_category c ON c.id = f.category_id WHERE (f.existence = 0 OR f.existence = 4) AND f.type = 2 GROUP BY cat_id ORDER BY cat_name COLLATE NOCASE LIMIT ?, 1</string>
+    <string name="sql_friend_count_by_category">SELECT COUNT(*) FROM friend WHERE (existence = 0 OR existence = 4) AND category_id=?</string>
+    <string name="sql_friend_get_by_category_and_index">SELECT email, name, share_location, shares_location, avatar, existence, \"type\", description, description_branding, poke_description, qualified_identifier, organization_type, callbacks, flags, profile_data, content_branding_hash FROM friend WHERE category_id=? AND (existence = 0 OR existence = 4) ORDER BY name COLLATE NOCASE LIMIT ?, 1</string>
+    <string name="sql_services_get_by_index_and_organization_type">SELECT f.email, f.name, f.share_location, f.shares_location, f.avatar, f.existence, f.type, f.description, f.description_branding, f.poke_description, f.qualified_identifier, f.organization_type, f.callbacks, f.flags, f.profile_data, f.content_branding_hash, IFNULL(c.id, f.email) AS cat_id, IFNULL(c.name, f.name) AS cat_name, c.avatar, count(f.email) FROM friend f LEFT OUTER JOIN friend_category c ON c.id = f.category_id WHERE (f.existence = 0 OR f.existence = 4) AND f.type = 2 AND organization_type=? GROUP BY cat_id ORDER BY cat_name COLLATE NOCASE LIMIT ?, 1</string>
 
     <string name="sql_friend_get_full_menu">
         SELECT x, y, z, label, icon, screen_branding, static_flow_hash, hashed_tag, requires_wifi, run_in_background, \"action\", icon_name
@@ -452,4 +470,41 @@ ORDER BY ms.acked_timestamp DESC
         WHERE friend = ?
     </string>
 
+    <string name="sql_message_get_visible_count">SELECT count(*) FROM message WHERE show_in_message_list = 1 AND existence = 1</string>
+    <string name="sql_message_get_message_by_pkey_and_index">SELECT \"key\", parent_key, sender, message, timestamp, dirty, recipients, flags, needs_my_answer, reply_count, recipients_status, alert_flags, form, dismiss_button_ui_flags, thread_avatar_hash, thread_background_color, thread_text_color, priority, default_priority, default_sticky FROM message WHERE parent_key = ? or \"key\" = ? ORDER BY \"timestamp\" ASC LIMIT ?, 1</string>
+    <string name="sql_message_get_visible_message_by_pkey_and_index">SELECT \"key\", parent_key, sender, message, timestamp, dirty, recipients, flags, needs_my_answer, reply_count, recipients_status, alert_flags, form, dismiss_button_ui_flags, thread_avatar_hash, thread_background_color, thread_text_color, priority, default_priority, default_sticky FROM message WHERE show_in_message_list = 1 AND existence = 1 AND parent_key = ? or \"key\" = ? ORDER BY \"timestamp\" ASC LIMIT ?, 1</string>
+    <string name="sql_message_is_dirty">SELECT dirty FROM message WHERE \"key\" = ?</string>
+    <string name="sql_message_get_first_dirty_message">SELECT \"key\", parent_key, sender, message, \"timestamp\", flags, branding, needs_my_answer, reply_count, dirty FROM message WHERE needs_my_answer = 0 AND dirty = 1 AND existence = 1 ORDER BY timestamp DESC, ROWID ASC LIMIT 1</string>
+    <string name="sql_message_get_replies">SELECT \"key\" FROM message WHERE parent_key = ?</string>
+    <string name="sql_message_get_threads_by_member">
+SELECT DISTINCT m1.parent_key, m1.\"key\", m1.reply_count, m1.recipients, m1.thread_show_in_list, m1.flags
+FROM message m1
+    LEFT JOIN member_status ms ON m1.\"key\" = ms.message
+    LEFT JOIN message m2 ON m1.parent_key = m2.\"key\"
+WHERE (m1.show_in_message_list > 0) AND m1.existence = 1 AND (ms.member = ? OR m1.sender = ? OR m2.sender = ?)
+ORDER BY m1.thread_dirty DESC, m1.timestamp DESC
+    </string>
+    <string name="sql_message_get_threads">
+SELECT m.parent_key, m.\"key\", m.reply_count, m.recipients, m.thread_show_in_list, m.flags, f.priority, m.default_priority, m.default_sticky, f.unread_count
+FROM
+        (SELECT ifnull(parent_key,key) as fkey, parent_key, \"key\", reply_count, recipients, thread_show_in_list, flags, dirty, thread_dirty, timestamp, default_priority, default_sticky FROM message WHERE show_in_message_list = 1 AND existence = 1) m
+    LEFT OUTER JOIN
+        (SELECT ifnull(parent_key,key) as fkey, max(priority) as priority, COUNT(dirty) as unread_count FROM message WHERE dirty = 1 AND existence = 1 GROUP BY fkey) f
+    ON m.fkey = f.fkey
+ORDER BY m.thread_dirty DESC, m.\"timestamp\" DESC;
+    </string>
+    <string name="sql_message_get_thread_by_key">SELECT reply_count, recipients, last_thread_message, thread_show_in_list, flags, priority FROM message WHERE \"key\" = ? AND existence = 1</string>
+
+    <string name="sql_message_set_message_dirty_ios">UPDATE message SET dirty = ? WHERE \"key\" = ?</string>
+    <string name="sql_message_get_dirty_count_ios">SELECT count(*) FROM message WHERE needs_my_answer = 0 AND dirty = 1 AND existence = 1</string>
+
+    <string name="sql_get_identity_qr_code">SELECT qr_code FROM my_identity</string>
+
+    <string name="sql_activity_get_by_index">SELECT id, timestamp, \"type\", reference, parameters, friend_reference FROM activity ORDER BY id DESC LIMIT ?, 1</string>
+    <string name="sql_activity_get_by_id">SELECT timestamp, \"type\", reference, parameters, friend_reference FROM activity WHERE id = ?</string>
+
+    <string name="sql_configprovider_insert">INSERT OR REPLACE INTO ConfigurationProvider(category, valuetype, key, value) values (?, ?, ?, ?)</string>
+    <string name="sql_configprovider_get">SELECT value FROM ConfigurationProvider WHERE category=? AND valuetype=? AND key=?</string>
+    <string name="sql_configprovider_delete">DELETE FROM ConfigurationProvider WHERE category=? AND valuetype=? AND key=?</string>
+    <string name="sql_get_last_read_messsages">SELECT</string>
 </resources>
