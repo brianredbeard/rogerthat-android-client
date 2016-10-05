@@ -33,7 +33,7 @@ import com.mobicage.rogerthat.plugins.news.NewsPlugin;
 import java.util.HashSet;
 import java.util.Set;
 
-public class NewsPinnedActivity extends NewsActivity {
+public class NewsOptionsActivity extends NewsActivity {
 
     private String mQry = null;
 

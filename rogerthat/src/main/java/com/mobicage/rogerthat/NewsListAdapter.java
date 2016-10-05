@@ -90,8 +90,11 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     protected final static int FLAG_ACTION_ROGERTHAT = 1;
     protected final static int FLAG_ACTION_FOLLOW = 2;
 
-    private final int ONE_DP;
-    private final int FIFTEEN_DP;
+    private final int _1_DP;
+    private final int _15_DP;
+    private final int _20_DP;
+    private final int _24_DP;
+    private final int _35_DP;
 
     private NewsActivity mActivity;
     private final MainService mMainService;
@@ -117,8 +120,11 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     public NewsListAdapter(NewsActivity activity, MainService mainService) {
         mActivity = activity;
         mMainService = mainService;
-        ONE_DP = UIUtils.convertDipToPixels(mActivity, 1);
-        FIFTEEN_DP = UIUtils.convertDipToPixels(mActivity, 15);
+        _1_DP = UIUtils.convertDipToPixels(mActivity, 1);
+        _15_DP = UIUtils.convertDipToPixels(mActivity, 15);
+        _20_DP = UIUtils.convertDipToPixels(mActivity, 20);
+        _24_DP = UIUtils.convertDipToPixels(mActivity, 24);
+        _35_DP = UIUtils.convertDipToPixels(mActivity, 35);
         mLayoutInflater = LayoutInflater.from(mActivity);
         mMessagingPlugin = mMainService.getPlugin(MessagingPlugin.class);
 
@@ -290,11 +296,12 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         }
 
         setupPinned(view, newsItem);
+        setupPinButton(view, newsItem.pinned);
+        setupOptions(view, newsItem);
         setupRogeredUsers(newsItem, view);
-        setupImage(view, newsItem);
-
+        boolean isImageVisible = setupImage(view, newsItem);
         final LinearLayout qrCodeContainer = (LinearLayout) view.findViewById(R.id.qr_code_container);
-        setupQRCode(view, newsItem, qrCodeContainer);
+        boolean isQrCodeVisible = setupQRCode(view, newsItem, qrCodeContainer);
 
         setupAvatar(view, newsItem);
 
@@ -311,13 +318,11 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
             title.setText(newsItem.title);
             title.setVisibility(View.VISIBLE);
 
-            if (newsItem.users_that_rogered.length == 0 &&
-                    TextUtils.isEmptyOrWhitespace(newsItem.image_url) &&
-                    qrCodeContainer.getVisibility() == View.GONE) {
-                LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) title.getLayoutParams();
-                lp.setMargins(0, 0, UIUtils.convertDipToPixels(mActivity, 35), 0);
-                title.setLayoutParams(lp);
-            }
+        }
+        if (newsItem.users_that_rogered.length == 0 && !isImageVisible && !isQrCodeVisible) {
+            LinearLayout header = (LinearLayout) view.findViewById(R.id.news_header);
+            LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) header.getLayoutParams();
+            lp.setMargins(_24_DP, 0, _24_DP, 0);
         }
 
         final TextView text = (TextView) view.findViewById(R.id.text);
@@ -361,9 +366,9 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
             });
         }
         TextView reach = (TextView) view.findViewById(R.id.reach);
-        reach.setText(newsItem.reach + "");
+        reach.setText(String.valueOf(newsItem.reach));
         TextView broadcastType = (TextView) view.findViewById(R.id.broadcast_type);
-        broadcastType.setText("[" + newsItem.broadcast_type + "]");
+        broadcastType.setText(String.format("[%s]", newsItem.broadcast_type));
 
         setupButtons(position, view, newsItem, existenceStatus);
 
@@ -534,22 +539,19 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     private float[] getCorners(int totalButtonCount, int currentButton) {
         // top-left, top-right, bottom-right, bottom-left.
         if (totalButtonCount == 1) {
-            return new float[]{0, 0, 0, 0, FIFTEEN_DP, FIFTEEN_DP, FIFTEEN_DP, FIFTEEN_DP};
+            return new float[]{0, 0, 0, 0, _15_DP, _15_DP, _15_DP, _15_DP};
         }
         if (currentButton == 1) {
-            return new float[]{0, 0, 0, 0, 0, 0, FIFTEEN_DP, FIFTEEN_DP};
+            return new float[]{0, 0, 0, 0, 0, 0, _15_DP, _15_DP};
         }
         if (currentButton == totalButtonCount) {
-            return new float[]{0, 0, 0, 0, FIFTEEN_DP, FIFTEEN_DP, 0, 0};
+            return new float[]{0, 0, 0, 0, _15_DP, _15_DP, 0, 0};
         }
         return new float[]{0, 0, 0, 0, 0, 0, 0, 0};
     }
 
     private int getMarginLeft(int totalButtonCount, int currentButton) {
-        if (currentButton < totalButtonCount) {
-            return ONE_DP;
-        }
-        return 0;
+        return currentButton < totalButtonCount ? _1_DP : 0;
     }
 
 
@@ -587,7 +589,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         });
     }
 
-    private void setupQRCode(final View view, final NewsItem newsItem, final LinearLayout qrCodeContainer) {
+    private boolean setupQRCode(final View view, final NewsItem newsItem, final LinearLayout qrCodeContainer) {
         if (newsItem.type == NewsItem.TYPE_QR_CODE) {
             if (mQRCodes.containsKey(newsItem.qr_code_content)) {
                 setQRCode(newsItem, view, qrCodeContainer);
@@ -615,15 +617,18 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                     }
                 });
             }
+            return true;
         } else {
             qrCodeContainer.setVisibility(View.GONE);
+            return false;
         }
     }
 
-    private void setupImage(View view, NewsItem newsItem) {
+    private boolean setupImage(View view, NewsItem newsItem) {
         Resizable16by6ImageView image = (Resizable16by6ImageView) view.findViewById(R.id.image);
         if (TextUtils.isEmptyOrWhitespace(newsItem.image_url)) {
             image.setVisibility(View.GONE);
+            return false;
         } else {
             if (mCachedDownloader.isStorageAvailable()) {
                 File cachedFile = mCachedDownloader.getCachedFilePath(newsItem.image_url);
@@ -642,9 +647,10 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 new DownloadImageTask(image).execute(newsItem.image_url);
             }
         }
+        return true;
     }
 
-    private void setupPinned(View view, final NewsItem newsItem) {
+    private void setupOptions(final View view, final NewsItem newsItem) {
         final ImageButton pinned = (ImageButton) view.findViewById(R.id.pinned);
         pinned.setOnClickListener(new SafeViewOnClickListener() {
             @Override
@@ -665,7 +671,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                         @Override
                         public void safeOnClick(View v) {
                             alertDialog.dismiss();
-                            togglePinned(newsItem);
+                            togglePinned(view, newsItem);
                         }
                     });
                     dialog.addView(actionUnSave);
@@ -678,7 +684,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                         @Override
                         public void safeOnClick(View v) {
                             alertDialog.dismiss();
-                            togglePinned(newsItem);
+                            togglePinned(view, newsItem);
                         }
                     });
                     dialog.addView(actionSave);
@@ -710,6 +716,16 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 lp.width = WindowManager.LayoutParams.MATCH_PARENT;
                 lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
                 window.setAttributes(lp);
+            }
+        });
+    }
+
+    private void setupPinned(final View view, final NewsItem newsItem) {
+        ImageButton pinButton = (ImageButton) view.findViewById(R.id.pin_button);
+        pinButton.setOnClickListener(new SafeViewOnClickListener() {
+            @Override
+            public void safeOnClick(View v) {
+                togglePinned(view, newsItem);
             }
         });
     }
@@ -784,12 +800,21 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         }
     }
 
-    private void togglePinned(final NewsItem newsItem) {
+    private void togglePinned(View view, final NewsItem newsItem) {
         mActivity.newsStore.setNewsItemPinned(newsItem.id, !newsItem.pinned);
-
         Intent intent = new Intent(NewsPlugin.PINNED_NEWS_ITEM_INTENT);
         intent.putExtra("id", newsItem.id);
         mMainService.sendBroadcast(intent);
+        setupPinButton(view, !newsItem.pinned);
+    }
+
+    private void setupPinButton(View view, boolean pinned) {
+        ImageButton pinButton = (ImageButton) view.findViewById(R.id.pin_button);
+        int buttonColor = mActivity.getResources().getColor(pinned ? R.color.mc_white : R.color.mc_primary_color);
+        int backgroundColor = mActivity.getResources().getColor(pinned ? R.color.mc_primary_color : R.color.mc_white);
+        pinButton.setImageDrawable(new IconicsDrawable(mActivity).icon(FontAwesome.Icon.faw_thumb_tack).color(buttonColor).sizeDp(18));
+        GradientDrawable background = (GradientDrawable) pinButton.getBackground();
+        background.setColor(backgroundColor);
     }
 
     private void setQRCode(final NewsItem newsItem, final View view, final LinearLayout qrCodeContainer) {
@@ -801,7 +826,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         qrCodeContainer.setVisibility(View.VISIBLE);
 
         if (newsItem.users_that_rogered.length == 0 && TextUtils.isEmptyOrWhitespace(newsItem.image_url)) {
-            qrCodeCaption.setPadding(0, 0, UIUtils.convertDipToPixels(mActivity, 35), UIUtils.convertDipToPixels(mActivity, 15));
+            qrCodeCaption.setPadding(0, 0, _35_DP, _15_DP);
         }
     }
 
@@ -823,7 +848,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 }
             }
         } else if (NewsPlugin.PINNED_NEWS_ITEM_INTENT.equals(action)) {
-            if (mActivity instanceof NewsPinnedActivity) {
+            if (mActivity instanceof NewsOptionsActivity) {
                 if (mActivity.newsStore.countPinnedItems() > 0) {
                     long newsId = intent.getLongExtra("id", -1);
                     mItems.remove(newsId);

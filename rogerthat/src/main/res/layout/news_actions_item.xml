@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/mc_white"
-    android:clickable="true"
-    android:focusable="true"
-    android:foreground="?attr/selectableItemBackground"
-    android:orientation="horizontal"
-    android:padding="15dp">
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:background="@color/mc_white"
+              android:clickable="true"
+              android:focusable="true"
+              android:foreground="?attr/selectableItemBackground"
+              android:orientation="horizontal"
+              android:padding="15dp">
 
     <ImageView
         android:id="@+id/icon"
@@ -19,6 +20,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
         android:layout_weight="1"
         android:orientation="vertical">
 
@@ -27,7 +29,8 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/mc_default_text"
-            android:textSize="18dp"></TextView>
+            android:textSize="18sp"
+            tools:text="Action"/>
 
         <TextView
             android:id="@+id/subtitle"
@@ -36,7 +39,8 @@
             android:layout_marginBottom="10dp"
             android:layout_marginTop="5dp"
             android:textColor="@color/mc_divider_gray"
-            android:textSize="14dp"></TextView>
+            android:textSize="14sp"
+            tools:text="Description"/>
 
     </LinearLayout>
 </LinearLayout>
