@@ -529,7 +529,7 @@
         <!-- BEGIN FB -->
         <provider
             android:name="com.facebook.FacebookContentProvider"
-            android:authorities="com.facebook.app.FacebookContentProvider188033791211994"
+            android:authorities="@string/facebook_content_provider"
             android:exported="true"/>
         <!-- END FB -->
 

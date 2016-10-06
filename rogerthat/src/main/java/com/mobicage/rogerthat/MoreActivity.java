@@ -27,12 +27,13 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.history.HistoryListActivity;
 import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
 import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
 import com.mobicage.rogerthat.util.logging.L;
-import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.config.AppConstants;
 
@@ -164,8 +165,9 @@ public class MoreActivity extends ServiceBoundActivity {
     private void setItemsOnView(final View v, final ViewInfoHolder holder) {
         int position = rowForPosition(holder.position);
 
+        int primaryColor = getResources().getColor(R.color.mc_primary_color);
         if (position == MoreListAdapter.STREAM_ACTIVITY) {
-            holder.itemAvatar.setImageResource(R.drawable.more_network_monitor);
+            holder.itemAvatar.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_comment_o).color(primaryColor));
             holder.itemName.setText(R.string.stream_title);
 
             v.setOnClickListener(new View.OnClickListener() {
@@ -177,7 +179,7 @@ public class MoreActivity extends ServiceBoundActivity {
             });
 
         } else if (position == MoreListAdapter.SETTINGS_ACTIVITY) {
-            holder.itemAvatar.setImageResource(R.drawable.more_gear);
+            holder.itemAvatar.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_tachometer).color(primaryColor));
             holder.itemName.setText(R.string.settings);
 
             v.setOnClickListener(new View.OnClickListener() {
@@ -189,7 +191,7 @@ public class MoreActivity extends ServiceBoundActivity {
             });
 
         } else if (position == MoreListAdapter.ABOUT_ACTIVITY) {
-            holder.itemAvatar.setImageResource(R.drawable.more_info);
+            holder.itemAvatar.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_info).color(primaryColor));
             holder.itemName.setText(R.string.about);
 
             v.setOnClickListener(new View.OnClickListener() {
@@ -215,7 +217,7 @@ public class MoreActivity extends ServiceBoundActivity {
                 break;
             }
             holder.itemName.setText(text);
-            holder.itemAvatar.setImageResource(R.drawable.more_messenger);
+            holder.itemAvatar.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_users).color(primaryColor));
 
             v.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -226,7 +228,7 @@ public class MoreActivity extends ServiceBoundActivity {
             });
 
         } else if (position == MoreListAdapter.PROFILE_ACTIVITY) {
-            holder.itemAvatar.setImageResource(R.drawable.more_id);
+            holder.itemAvatar.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_user).color(primaryColor));
             holder.itemName.setText(R.string.profile);
 
             v.setOnClickListener(new View.OnClickListener() {
@@ -238,7 +240,7 @@ public class MoreActivity extends ServiceBoundActivity {
             });
 
         } else if (position == MoreListAdapter.SCAN_ACTIVITY) {
-            holder.itemAvatar.setImageResource(R.drawable.more_qrcode);
+            holder.itemAvatar.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_qrcode).color(primaryColor));
             holder.itemName.setText(R.string.scan);
 
             v.setOnClickListener(new View.OnClickListener() {

@@ -1,36 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    tools:ignore="UselessParent" >
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:id="@+id/frame"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:foreground="?attr/selectableItemBackground"
+              android:padding="5dp"
+              tools:ignore="UseCompoundDrawables">
 
-    <!-- We need this double RelativeLayout to make sure the padding works on android 1.5 as well -->
+    <ImageView
+        android:id="@+id/item_avatar"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:padding="10dp"
+        tools:src="@drawable/unknown_avatar">
+    </ImageView>
 
-    <RelativeLayout
-        android:id="@+id/frame"
+    <TextView
+        android:id="@+id/item_name"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:padding="5dp" >
-
-        <ImageView
-            android:id="@+id/item_avatar"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_alignParentTop="true"
-            android:layout_marginRight="5dp"
-            android:padding="1dp" >
-        </ImageView>
-
-            <TextView
-                android:id="@+id/item_name"
-                android:layout_width="fill_parent"
-                android:layout_height="50dp"
-                android:gravity="center|left"
-                android:layout_toRightOf="@id/item_avatar"
-                android:ellipsize="end"
-                android:singleLine="true" >
-            </TextView>
-    </RelativeLayout>
-
-</RelativeLayout>
+        android:layout_height="50dp"
+        android:ellipsize="end"
+        android:gravity="center|start"
+        android:singleLine="true"
+        tools:text="Item name goes here">
+    </TextView>
+</LinearLayout>

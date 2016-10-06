@@ -67,6 +67,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         SET_INFO("SET INFO"),
         NEWS_READ("NEWS READ"),
         NEWS_ROGER("NEWS ROGER"),
+        ACK_NEWS_ROGER("ACK NEWS ROGER"),
         ACK_NEWS_READ("ACK NEWS READ"),
         NEWS_STATS_READ("NEWS STATS READ"),
         NEWS_READ_UPDATE("NEWS READ UPDATE"),
@@ -320,6 +321,9 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
             case ACK_NEWS_READ:
                 ackNewsRead(data);
                 break;
+            case ACK_NEWS_ROGER:
+                ackNewsRoger(data);
+                break;
             case NEWS_READ_UPDATE:
                 newsReadUpdate(data);
                 break;
@@ -333,6 +337,10 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
                 newsPush(data);
                 break;
         }
+    }
+
+    private void ackNewsRoger(String data) {
+        L.d(String.format("News successfully rogered: %s", data));
     }
 
     private void newsPush(String data) {
