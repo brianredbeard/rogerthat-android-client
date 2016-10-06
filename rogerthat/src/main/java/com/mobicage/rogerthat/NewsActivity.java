@@ -440,6 +440,11 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
     @Override
     protected void onResume() {
         super.onResume();
+
+        if (!mIsConnectedToInternet && mService.getNetworkConnectivityManager().isConnected()) {
+            mIsConnectedToInternet = true;
+            setupConnectedToInternet();
+        }
         connectToChannel();
     }
 
