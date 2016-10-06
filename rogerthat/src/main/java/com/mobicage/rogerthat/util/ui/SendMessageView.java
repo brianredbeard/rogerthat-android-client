@@ -35,6 +35,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -492,7 +493,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
         });
 
         if (IMAGE_BUTTON_TEXT == imageButton) {
-            iv.setColorFilter(UIUtils.imageColorFilter(getResources().getColor(R.color.mc_divider_gray)));
+            iv.setColorFilter(UIUtils.imageColorFilter(ContextCompat.getColor(mActivity, R.color.mc_divider_gray)));
         }
 
         iv.setPadding(_5_DP_IN_PX, _5_DP_IN_PX, _5_DP_IN_PX, _5_DP_IN_PX);
@@ -864,7 +865,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
 
             TextView itemName = (TextView) itemView.findViewById(R.id.item_name);
             itemName.setText(item.title);
-            itemName.setTextColor(getResources().getColor(android.R.color.primary_text_light));
+            itemName.setTextColor(ContextCompat.getColor(mActivity, android.R.color.primary_text_light));
             itemView.setTag(item);
             return itemView;
         }

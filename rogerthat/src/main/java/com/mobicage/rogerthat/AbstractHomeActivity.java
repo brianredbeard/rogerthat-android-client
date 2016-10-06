@@ -25,6 +25,7 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.util.SparseIntArray;
 import android.view.KeyEvent;
@@ -124,7 +125,7 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity {
 
         if (AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.homescreen_3x3_with_qr_code) {
             if (AppConstants.SHOW_HOMESCREEN_FOOTER) {
-                ((TextView) findViewById(R.id.loyalty_text)).setTextColor(getResources().getColor(R.color
+                ((TextView) findViewById(R.id.loyalty_text)).setTextColor(ContextCompat.getColor(this, R.color
                         .mc_homescreen_background));
             }
 

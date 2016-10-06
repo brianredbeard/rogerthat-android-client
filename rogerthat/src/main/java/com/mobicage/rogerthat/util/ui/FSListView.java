@@ -17,8 +17,6 @@
  */
 package com.mobicage.rogerthat.util.ui;
 
-import java.lang.reflect.Field;
-
 import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -27,6 +25,8 @@ import android.widget.AbsListView;
 import android.widget.ListView;
 
 import com.mobicage.rogerthat.util.logging.L;
+
+import java.lang.reflect.Field;
 
 public class FSListView extends ListView {
 
@@ -76,7 +76,7 @@ public class FSListView extends ListView {
             // // Field paintField = fastScrollerClass.getDeclaredField("mPaint");
             // paintField.setAccessible(true);
             // Paint paint = (Paint) paintField.get(fastScroller);
-            // paint.setColor(getResources().getColor(R.color.mc_green));
+            // paint.setColor(ContextCompat.getColor(R.color.mc_green));
         } catch (IllegalArgumentException e) {
             L.bug(e);
         } catch (IllegalAccessException e) {

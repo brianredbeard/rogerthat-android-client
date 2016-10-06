@@ -29,6 +29,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.GestureDetector;
@@ -521,14 +522,14 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
             v.findViewById(R.id.friend_existence_layout).setVisibility(View.VISIBLE);
             ProgressBar spinnerView = (ProgressBar) v.findViewById(R.id.friend_spinner);
             ImageView statusView = (ImageView) v.findViewById(R.id.friend_existence);
-            int buttonColor = getColor(R.color.mc_default_text_inverse);
+            int buttonColor = ContextCompat.getColor(ServiceSearchActivity.this, R.color.mc_default_text_inverse);
 
             switch (existence) {
                 case Friend.ACTIVE:
                     spinnerView.setVisibility(View.GONE);
                     statusView.setVisibility(View.VISIBLE);
                     statusView.setImageDrawable(new IconicsDrawable(ServiceSearchActivity.this).icon(FontAwesome.Icon.faw_check).color(buttonColor).sizeDp(18));
-                    statusView.setBackgroundColor(getColor(R.color.mc_default_button));
+                    statusView.setBackgroundColor(ContextCompat.getColor(ServiceSearchActivity.this, R.color.mc_default_button));
 
                     break;
                 case Friend.DELETED:
@@ -537,7 +538,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
                     spinnerView.setVisibility(View.GONE);
                     statusView.setVisibility(View.VISIBLE);
                     statusView.setImageDrawable(new IconicsDrawable(ServiceSearchActivity.this).icon(FontAwesome.Icon.faw_plus).color(buttonColor).sizeDp(18));
-                    statusView.setBackgroundColor(getColor(R.color.mc_primary_color));
+                    statusView.setBackgroundColor(ContextCompat.getColor(ServiceSearchActivity.this, R.color.mc_primary_color));
 
                     break;
                 case Friend.INVITE_PENDING:

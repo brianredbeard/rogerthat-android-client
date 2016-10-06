@@ -211,8 +211,8 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
                 cell.icon = (ImageView) cellLayout.findViewById(R.id.icon);
                 cell.label = (TextView) cellLayout.findViewById(R.id.label);
                 cells[x][y] = cell;
-                int iconBackgroundColor = getResources().getColor(R.color.mc_page_light);
-                int iconColor = getResources().getColor(R.color.mc_white);
+                int iconBackgroundColor = ContextCompat.getColor(this, R.color.mc_page_light);
+                int iconColor = ContextCompat.getColor(this, R.color.mc_white);
                 if (y == 0) {
                     switch (x) {
                     case 0:
@@ -375,9 +375,9 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
             }
         }
         if (menuItemColor == null)
-            menuItemColor = getResources().getColor(R.color.mc_page_light);
+            menuItemColor = ContextCompat.getColor(this, R.color.mc_page_light);
         if (brandingBackgroundColor == null) {
-            brandingBackgroundColor = getResources().getColor(R.color.mc_page_light);
+            brandingBackgroundColor = ContextCompat.getColor(this, R.color.mc_page_light);
         }
         for (final ServiceMenuItem item : menu.itemList) {
             rows[(int) item.coords[1]] = true;

@@ -532,8 +532,10 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
             protected void safeRun() throws Exception {
                 final NewsListAdapter nla = ((NewsListAdapter) getAdapter());
                 for (Map.Entry<Long, Long> entry : statsMap.entrySet()) {
-                    newsStore.setNewsItemReach(entry.getKey(), entry.getValue());
-                    nla.updateView(entry.getKey());
+                    if (entry.getValue() > 0) {
+                        newsStore.setNewsItemReach(entry.getKey(), entry.getValue());
+                        nla.updateView(entry.getKey());
+                    }
                 }
             }
         });

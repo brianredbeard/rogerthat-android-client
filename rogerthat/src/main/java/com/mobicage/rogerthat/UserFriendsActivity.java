@@ -24,6 +24,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.support.v4.content.ContextCompat;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -207,7 +208,7 @@ public class UserFriendsActivity extends FriendsActivity {
                 actions.setVisibility(View.VISIBLE);
 
                 ImageView friendIndicator = (ImageView) listItem.findViewById(R.id.friend_indicator);
-                friendIndicator.setImageDrawable(new IconicsDrawable(UserFriendsActivity.this).icon(FontAwesome.Icon.faw_angle_up).color(getResources().getColor(R.color.mc_primary_icon)).sizeDp(12));
+                friendIndicator.setImageDrawable(new IconicsDrawable(UserFriendsActivity.this).icon(FontAwesome.Icon.faw_angle_up).color(ContextCompat.getColor(this, R.color.mc_primary_icon)).sizeDp(12));
 
                 mLastExpandedActionView = listItem;
 

@@ -26,6 +26,7 @@ import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -536,8 +537,8 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
         }
 
         int r = br.scheme == ColorScheme.LIGHT ? android.R.color.primary_text_light : android.R.color.primary_text_dark;
-        ((TextView) findViewById(R.id.friend_name)).setTextColor(getResources().getColor(r));
-        ((TextView) findViewById(R.id.email)).setTextColor(getResources().getColor(r));
+        ((TextView) findViewById(R.id.friend_name)).setTextColor(ContextCompat.getColor(this, r));
+        ((TextView) findViewById(R.id.email)).setTextColor(ContextCompat.getColor(this, r));
 
         findViewById(R.id.description).setVisibility(View.GONE);
     }
@@ -566,7 +567,7 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
         final TextView nameView = (TextView) findViewById(R.id.friend_name);
         mFriendName = friend.getDisplayName();
         nameView.setText(mFriendName);
-        nameView.setTextColor(getResources().getColor(android.R.color.primary_text_light));
+        nameView.setTextColor(ContextCompat.getColor(this, android.R.color.primary_text_light));
 
         final TextView emailView = (TextView) findViewById(R.id.email);
         emailView.setText(friend.getDisplayEmail());

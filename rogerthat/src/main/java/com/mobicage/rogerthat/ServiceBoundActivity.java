@@ -36,6 +36,7 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.LayoutInflaterCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -670,7 +671,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
                 String activityName = (String) child.getTag();
                 ImageButton ib = (ImageButton) child;
                 if (mActivityName.equals(activityName)) {
-                    ib.setBackgroundColor(getResources().getColor(R.color.mc_navigation_footer_active));
+                    ib.setBackgroundColor(ContextCompat.getColor(this, R.color.mc_navigation_footer_active));
                 } else {
                     ib.setBackground(null);
                 }

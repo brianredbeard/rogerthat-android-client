@@ -28,6 +28,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -185,7 +186,7 @@ public class FriendDetailOrInviteActivity extends ServiceBoundActivity {
 
         setTitle(mFriend.getDisplayName());
         nameView.setText(mFriend.getDisplayName());
-        nameView.setTextColor(getResources().getColor(android.R.color.primary_text_light));
+        nameView.setTextColor(ContextCompat.getColor(this, android.R.color.primary_text_light));
 
         final LinearLayout profileDataContainer = (LinearLayout) findViewById(R.id.profile_data);
         if (AppConstants.PROFILE_DATA_FIELDS.length > 0) {

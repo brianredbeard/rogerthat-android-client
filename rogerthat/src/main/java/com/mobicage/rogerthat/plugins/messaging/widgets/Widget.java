@@ -20,6 +20,7 @@ package com.mobicage.rogerthat.plugins.messaging.widgets;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -95,7 +96,7 @@ public abstract class Widget extends LinearLayout {
         if (colorScheme == BrandingMgr.ColorScheme.DARK)
             colorId = android.R.color.primary_text_dark;
 
-        mTextColor = getResources().getColor(colorId);
+        mTextColor = ContextCompat.getColor(mActivity, colorId);
     }
 
     @SuppressWarnings("unchecked")

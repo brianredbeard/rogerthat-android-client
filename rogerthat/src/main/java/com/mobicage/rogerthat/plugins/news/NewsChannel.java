@@ -321,6 +321,9 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
             case NEWS_READ_UPDATE:
                 newsReadUpdate(data);
                 break;
+            case NEWS_STATS_READ:
+                newsReadUpdate(data);
+                break;
             case NEWS_ROGER_UPDATE:
                 newsRogerUpdate(data);
                 break;
@@ -378,6 +381,10 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
 
     public void rogerNews(Long newsId) {
         sendCommand(Command.NEWS_ROGER, newsId.toString());
+    }
+
+    public void readStatsNews(List<Long> newsIds) {
+        sendCommand(Command.NEWS_STATS_READ, android.text.TextUtils.join(" ", newsIds));
     }
 
     private void authenticate() {

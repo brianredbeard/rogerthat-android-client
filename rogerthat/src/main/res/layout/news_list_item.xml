@@ -94,17 +94,6 @@
         android:background="@drawable/news_background"
         android:orientation="vertical">
 
-        <ImageButton
-            android:id="@+id/pin_button"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_gravity="top|start"
-            android:background="@drawable/news_pin_background"
-            android:padding="5dp"
-            app:ico_color="@color/mc_primary_color"
-            app:ico_icon="@string/faw_thumb_tack"
-            app:ico_size="16dp"/>
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -114,8 +103,6 @@
                 android:id="@+id/members_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="28dp"
-                android:layout_marginRight="28dp"
                 android:gravity="center_vertical"
                 android:orientation="vertical"
                 tools:visibility="visible">
@@ -124,10 +111,9 @@
                     android:id="@+id/members"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="15dp"
+                    android:layout_marginLeft="43dp"
+                    android:layout_marginRight="43dp"
                     android:paddingBottom="5dp"
-                    android:maxLines="1"
                     android:paddingTop="5dp"
                     android:textSize="12sp"
                     tools:text="Bart Pede and Ruben Mattan Rogered this message"/>
@@ -143,7 +129,6 @@
                 android:id="@+id/image"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/description"
                 android:visibility="gone"
                 tools:src="@drawable/mobicage"
                 tools:visibility="gone"/>
@@ -184,7 +169,6 @@
                 android:orientation="vertical">
 
                 <LinearLayout
-                    android:id="@+id/news_header"
                     android:layout_width="match_parent"
                     android:padding="8dp"
                     android:layout_height="wrap_content"
@@ -194,7 +178,9 @@
                         android:id="@+id/service_avatar"
                         android:layout_width="30dp"
                         android:layout_height="30dp"
-                        android:layout_margin="5dp"
+                        android:layout_marginBottom="5dp"
+                        android:layout_marginRight="5dp"
+                        android:layout_marginTop="5dp"
                         android:src="@drawable/unknown_avatar"/>
 
                     <LinearLayout
@@ -262,9 +248,8 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
                 android:minHeight="20dp"
-                android:layout_marginRight="10dp"
+                android:layout_marginRight="8dp"
                 android:gravity="end"
                 android:orientation="horizontal">
 
@@ -283,6 +268,15 @@
                     android:textSize="12sp"
                     tools:ignore="MissingPrefix"
                     tools:text="549"/>
+
+                <ProgressBar
+                    android:id="@+id/reach_spinner"
+                    android:layout_width="13dp"
+                    android:layout_height="13dp"
+                    android:layout_marginLeft="2dp"
+                    android:layout_marginTop="2dp"
+                    android:indeterminate="true"
+                    android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/broadcast_type"
@@ -314,7 +308,9 @@
                     android:paddingLeft="5dp"
                     android:paddingRight="5dp"
                     android:textColor="@color/mc_white"
-                    android:textSize="16sp"
+                    android:ellipsize="end"
+                    android:lines="1"
+                    android:textSize="14sp"
                     tools:text="Rogerthat"/>
 
                 <Button
@@ -328,7 +324,9 @@
                     android:paddingLeft="5dp"
                     android:paddingRight="5dp"
                     android:textColor="@color/mc_white"
-                    android:textSize="16sp"
+                    android:ellipsize="end"
+                    android:lines="1"
+                    android:textSize="14sp"
                     tools:text="Volgen"/>
 
                 <Button
@@ -342,11 +340,24 @@
                     android:paddingLeft="5dp"
                     android:paddingRight="5dp"
                     android:textColor="@color/mc_white"
-                    android:textSize="16sp"
+                    android:ellipsize="end"
+                    android:lines="1"
+                    android:textSize="14sp"
                     tools:text="Reserveren"/>
 
             </LinearLayout>
         </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/pin_button"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="top|start"
+            android:background="@drawable/news_pin_background"
+            android:padding="5dp"
+            app:ico_color="@color/mc_primary_color"
+            app:ico_icon="@string/faw_thumb_tack"
+            app:ico_size="16dp" />
 
         <ImageButton
             android:id="@+id/pinned"

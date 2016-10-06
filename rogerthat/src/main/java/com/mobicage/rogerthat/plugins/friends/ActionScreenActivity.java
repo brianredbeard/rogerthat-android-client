@@ -17,34 +17,15 @@
  */
 package com.mobicage.rogerthat.plugins.friends;
 
-import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
-
-import org.jivesoftware.smack.util.Base64;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
-import org.json.simple.JSONValue;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
-import android.content.res.Configuration;
-import android.support.v4.content.ContextCompat;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.hardware.Camera;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -56,6 +37,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.PowerManager;
+import android.support.v4.content.ContextCompat;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -114,6 +96,24 @@ import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.rpc.newxmpp.XMPPKickChannel;
 import com.mobicage.to.friends.GetUserInfoRequestTO;
+
+import org.jivesoftware.smack.util.Base64;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
+import org.json.simple.JSONValue;
+
+import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
 
 public class ActionScreenActivity extends ServiceBoundActivity {
 
@@ -708,7 +708,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         final ImageView brandingHeaderClose = (ImageView) findViewById(R.id.branding_header_close);
         final TextView brandingHeaderText = (TextView) findViewById(R.id.branding_header_text);
         brandingHeaderClose.setColorFilter(UIUtils
-            .imageColorFilter(getResources().getColor(R.color.mc_homescreen_text)));
+                .imageColorFilter(ContextCompat.getColor(this, R.color.mc_homescreen_text)));
 
         brandingHeaderClose.setOnClickListener(new OnClickListener() {
             @Override
@@ -730,7 +730,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             final ImageView brandingFooterClose = (ImageView) findViewById(R.id.branding_footer_close);
             final TextView brandingFooterText = (TextView) findViewById(R.id.branding_footer_text);
             brandingFooterText.setText(getString(R.string.back));
-            brandingFooterClose.setColorFilter(UIUtils.imageColorFilter(getResources().getColor(
+            brandingFooterClose.setColorFilter(UIUtils.imageColorFilter(ContextCompat.getColor(this,
                 R.color.mc_homescreen_text)));
 
             brandingFooter.setOnClickListener(new OnClickListener() {

@@ -21,6 +21,7 @@ package com.mobicage.rogerthat;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -64,7 +65,7 @@ public class ServiceActionsOfflineActivity extends FriendsActivity {
                 .string.click_magnifying_glass_to_search_services));
 
         ImageButton magnifyingGlass = (ImageButton) findViewById(R.id.ic_magnifying_glass);
-        magnifyingGlass.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_search).color(getResources().getColor(R.color.mc_primary_icon)).sizeDp(200).paddingDp(20));
+        magnifyingGlass.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_search).color(ContextCompat.getColor(this, R.color.mc_primary_icon)).sizeDp(200).paddingDp(20));
 
         magnifyingGlass.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -26,6 +26,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -40,6 +41,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.zxing.client.android.Contents;
@@ -92,8 +94,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
 
     private final int _1_DP;
     private final int _15_DP;
-    private final int _20_DP;
-    private final int _24_DP;
+    private final int _32_DP;
     private final int _35_DP;
 
     private NewsActivity mActivity;
@@ -122,8 +123,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         mMainService = mainService;
         _1_DP = UIUtils.convertDipToPixels(mActivity, 1);
         _15_DP = UIUtils.convertDipToPixels(mActivity, 15);
-        _20_DP = UIUtils.convertDipToPixels(mActivity, 20);
-        _24_DP = UIUtils.convertDipToPixels(mActivity, 24);
+        _32_DP = UIUtils.convertDipToPixels(mActivity, 32);
         _35_DP = UIUtils.convertDipToPixels(mActivity, 35);
         mLayoutInflater = LayoutInflater.from(mActivity);
         mMessagingPlugin = mMainService.getPlugin(MessagingPlugin.class);
@@ -239,6 +239,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     }
 
     private void getNewsItems(final int position) {
+        List<Long> statsToRequest = new ArrayList<>();
         List<Long> itemsToRequest = new ArrayList<>();
 
         mRequestMoreNewsPosition = position + 50;
@@ -248,6 +249,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 break;
             }
             long newsId = mVisibleItems.get(i);
+            statsToRequest.add(newsId);
             if (!mActivity.newsStore.getNewsItemDetails(newsId).isPartial)
                 continue;
             ;
@@ -255,6 +257,12 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 continue;
 
             itemsToRequest.add(newsId);
+        }
+
+        if (statsToRequest.size() > 0) {
+            if (mActivity.newsChannel != null) {
+                mActivity.newsChannel.readStatsNews(statsToRequest);
+            }
         }
 
         if (itemsToRequest.size() == 0)
@@ -323,10 +331,13 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
             title.setVisibility(View.VISIBLE);
 
         }
+
+        LinearLayout details = (LinearLayout) view.findViewById(R.id.details);
+        LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) details.getLayoutParams();
         if (newsItem.users_that_rogered.length == 0 && !isImageVisible && !isQrCodeVisible) {
-            LinearLayout header = (LinearLayout) view.findViewById(R.id.news_header);
-            LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) header.getLayoutParams();
-            lp.setMargins(_24_DP, 0, _24_DP, 0);
+            lp.setMargins(0, _32_DP, 0, 0);
+        } else {
+            lp.setMargins(0, 0, 0, 0);
         }
 
         final TextView text = (TextView) view.findViewById(R.id.text);
@@ -370,7 +381,16 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
             });
         }
         TextView reach = (TextView) view.findViewById(R.id.reach);
-        reach.setText(String.valueOf(newsItem.reach));
+        ProgressBar reachSpinner = (ProgressBar) view.findViewById(R.id.reach_spinner);
+
+        if (newsItem.reach >= 0) {
+            reach.setVisibility(View.VISIBLE);
+            reachSpinner.setVisibility(View.GONE);
+            reach.setText(String.valueOf(newsItem.reach));
+        } else {
+            reach.setVisibility(View.GONE);
+            reachSpinner.setVisibility(View.VISIBLE);
+        }
         TextView broadcastType = (TextView) view.findViewById(R.id.broadcast_type);
         broadcastType.setText(String.format("[%s]", newsItem.broadcast_type));
 
@@ -437,7 +457,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 });
             }
             background.setCornerRadii(getCorners(totalButtonCount, currentButton));
-            background.setColor(mActivity.getResources().getColor(backgroundColor));
+            background.setColor(ContextCompat.getColor(mActivity, backgroundColor));
             rogerthatButton.setBackground(background);
 
             if (SystemUtils.isFlagEnabled(newsItem.flags, FLAG_ACTION_FOLLOW) || newsItem.buttons.length > 0) {
@@ -463,7 +483,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                     if (currentExistenceStatus != Friend.ACTIVE) {
                         mActivity.friendsPlugin.inviteFriend(newsItem.sender.email, null, null, false);
                     }
-                    followButton.setBackgroundColor(mActivity.getResources().getColor(R.color.mc_divider_gray));
+                    followButton.setBackgroundColor(ContextCompat.getColor(mActivity, R.color.mc_divider_gray));
                 }
             });
 
@@ -471,7 +491,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 ViewGroup.MarginLayoutParams marginParams = (ViewGroup.MarginLayoutParams) followButton.getLayoutParams();
                 marginParams.setMargins(0, 0, getMarginLeft(totalButtonCount, currentButton), 0);
             }
-            background.setColor(mActivity.getResources().getColor(backgroundColor));
+            background.setColor(ContextCompat.getColor(mActivity, backgroundColor));
             background.setCornerRadii(getCorners(totalButtonCount, currentButton));
             followButton.setBackground(background);
         }
@@ -532,7 +552,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 }
             });
             GradientDrawable background = new GradientDrawable();
-            background.setColor(mActivity.getResources().getColor(R.color.mc_primary_color));
+            background.setColor(ContextCompat.getColor(mActivity, R.color.mc_primary_color));
             background.setCornerRadii(getCorners(totalButtonCount, currentButton));
             btn.setBackground(background);
             ViewGroup.MarginLayoutParams marginParams = (ViewGroup.MarginLayoutParams) btn.getLayoutParams();
@@ -668,7 +688,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
 
                 if (newsItem.pinned) {
                     final View actionUnSave = mLayoutInflater.inflate(R.layout.news_actions_item, null);
-                    ((ImageView) actionUnSave.findViewById(R.id.icon)).setImageDrawable(new IconicsDrawable(mActivity, FontAwesome.Icon.faw_bookmark).color(mActivity.getResources().getColor(R.color.mc_default_text)).sizeDp(15).paddingDp(2));
+                    ((ImageView) actionUnSave.findViewById(R.id.icon)).setImageDrawable(new IconicsDrawable(mActivity, FontAwesome.Icon.faw_bookmark).color(ContextCompat.getColor(mActivity, R.color.mc_default_text)).sizeDp(15).paddingDp(2));
                     ((TextView) actionUnSave.findViewById(R.id.title)).setText(R.string.unsave);
                     ((TextView) actionUnSave.findViewById(R.id.subtitle)).setText(R.string.remove_this_from_your_saved_items);
                     actionUnSave.setOnClickListener(new SafeViewOnClickListener() {
@@ -681,7 +701,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                     dialog.addView(actionUnSave);
                 } else {
                     final View actionSave = mLayoutInflater.inflate(R.layout.news_actions_item, null);
-                    ((ImageView) actionSave.findViewById(R.id.icon)).setImageDrawable(new IconicsDrawable(mActivity, FontAwesome.Icon.faw_bookmark).color(mActivity.getResources().getColor(R.color.mc_default_text)).sizeDp(15).paddingDp(2));
+                    ((ImageView) actionSave.findViewById(R.id.icon)).setImageDrawable(new IconicsDrawable(mActivity, FontAwesome.Icon.faw_bookmark).color(ContextCompat.getColor(mActivity, R.color.mc_default_text)).sizeDp(15).paddingDp(2));
                     ((TextView) actionSave.findViewById(R.id.title)).setText(R.string.save);
                     ((TextView) actionSave.findViewById(R.id.subtitle)).setText(R.string.add_this_to_your_saved_items);
                     actionSave.setOnClickListener(new SafeViewOnClickListener() {
@@ -696,7 +716,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
 
                 if (existenceStatus == Friend.ACTIVE) {
                     final View actionHide = mLayoutInflater.inflate(R.layout.news_actions_item, null);
-                    ((ImageView) actionHide.findViewById(R.id.icon)).setImageDrawable(new IconicsDrawable(mActivity, FontAwesome.Icon.faw_times_circle).color(mActivity.getResources().getColor(R.color.mc_default_text)).sizeDp(15).paddingDp(2));
+                    ((ImageView) actionHide.findViewById(R.id.icon)).setImageDrawable(new IconicsDrawable(mActivity, FontAwesome.Icon.faw_times_circle).color(ContextCompat.getColor(mActivity, R.color.mc_default_text)).sizeDp(15).paddingDp(2));
                     ((TextView) actionHide.findViewById(R.id.title)).setText(R.string.hide);
                     ((TextView) actionHide.findViewById(R.id.subtitle)).setText(R.string.see_fewer_posts_like_this);
                     actionHide.setOnClickListener(new SafeViewOnClickListener() {
@@ -809,13 +829,13 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         Intent intent = new Intent(NewsPlugin.PINNED_NEWS_ITEM_INTENT);
         intent.putExtra("id", newsItem.id);
         mMainService.sendBroadcast(intent);
-        setupPinButton(view, !newsItem.pinned);
+        setupPinButton(view, newsItem.pinned);
     }
 
     private void setupPinButton(View view, boolean pinned) {
         ImageButton pinButton = (ImageButton) view.findViewById(R.id.pin_button);
-        int buttonColor = mActivity.getResources().getColor(pinned ? R.color.mc_white : R.color.mc_primary_color);
-        int backgroundColor = mActivity.getResources().getColor(pinned ? R.color.mc_primary_color : R.color.mc_white);
+        int buttonColor = ContextCompat.getColor(mActivity, pinned ? R.color.mc_white : R.color.mc_primary_color);
+        int backgroundColor = ContextCompat.getColor(mActivity, pinned ? R.color.mc_primary_color : R.color.mc_white);
         pinButton.setImageDrawable(new IconicsDrawable(mActivity).icon(FontAwesome.Icon.faw_thumb_tack).color(buttonColor).sizeDp(18));
         GradientDrawable background = (GradientDrawable) pinButton.getBackground();
         background.setColor(backgroundColor);

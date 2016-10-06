@@ -32,6 +32,7 @@ import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.content.ContextCompat;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -947,7 +948,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
         final Button buttonView = new Button(this);
         buttonView.setMinWidth(UIUtils.convertDipToPixels(this, 100));
         buttonView.setText(button.caption);
-        buttonView.setTextColor(getResources().getColor(android.R.color.primary_text_dark));
+        buttonView.setTextColor(ContextCompat.getColor(this, android.R.color.primary_text_dark));
         if (somebodyAnswered)
             buttonView.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
         else {
