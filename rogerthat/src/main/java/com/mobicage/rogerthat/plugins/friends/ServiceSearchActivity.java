@@ -112,6 +112,8 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
 
     private GestureDetector mGestureScanner;
 
+    private String mLastFriendEmailClicked;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -235,6 +237,9 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
             if (tag != null) {
                 int existence = (Integer) tag.get("existence");
                 FindServiceItemTO item = (FindServiceItemTO) tag.get("item");
+                if (mAction != null) {
+                    mLastFriendEmailClicked = item.email;
+                }
                 if (existence == Friend.ACTIVE) {
                     if (mAction != null) {
                         String hashedTag = Security.sha256Lower(mAction);
@@ -356,6 +361,13 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
                         return new String[]{action};
                     }
                 } else {
+                    if (FriendsPlugin.FRIEND_ADDED_INTENT.equals(action)) {
+                        if (mLastFriendEmailClicked != null && mLastFriendEmailClicked.equals(intent.getStringExtra("email"))) {
+                            String hashedTag = Security.sha256Lower(mAction);
+                            ActivityUtils.goToActivityBehindTag(ServiceSearchActivity.this, mLastFriendEmailClicked, hashedTag);
+                        }
+                    }
+
                     L.d(ServiceSearchActivity.class.getName() + " received " + action + " intent");
                     for (SearchInfo si : mSearchInfoByCategory.values()) {
                         si.adapter.notifyDataSetChanged();
