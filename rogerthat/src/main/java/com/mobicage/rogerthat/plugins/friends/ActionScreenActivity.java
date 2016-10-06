@@ -64,6 +64,7 @@ import com.facebook.login.LoginResult;
 import com.facebook.share.Sharer;
 import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.widget.ShareDialog;
+import com.github.barteksc.pdfviewer.PDFView;
 import com.google.zxing.client.android.CaptureActivity;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainService;
@@ -1280,21 +1281,19 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             settings.setJavaScriptEnabled(true);
             settings.setBlockNetworkImage(false);
 
-            String fileOnDisk = "file://" + mBrandingResult.file.getAbsolutePath();
             if (mBrandingResult.contentType != null
                 && AttachmentViewerActivity.CONTENT_TYPE_PDF.equalsIgnoreCase(mBrandingResult.contentType)) {
-                mIsHtmlContent = false;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    settings.setAllowUniversalAccessFromFileURLs(true);
-                }
-                try {
-                    mBranding.loadUrl("file:///android_asset/pdfjs/web/viewer.html?file=" + URLEncoder.encode(fileOnDisk, "UTF-8"));
-                } catch (UnsupportedEncodingException uee) {
-                    L.bug(uee);
-                }
+
+                setContentView(R.layout.pdf_viewer);
+                PDFView viewer = (PDFView) findViewById(R.id.pdfView);
+                viewer.fromFile(new File(mBrandingResult.file.getAbsolutePath()))
+                        .enableSwipe(true)
+                        .enableDoubletap(true)
+                        .load();
+
             } else {
                 mIsHtmlContent = true;
-                mBranding.loadUrl(fileOnDisk);
+                mBranding.loadUrl("file://"+mBrandingResult.file.getAbsolutePath());
                 mBranding.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
                 if (mBrandingResult.color != null) {
                     mBranding.setBackgroundColor(mBrandingResult.color);

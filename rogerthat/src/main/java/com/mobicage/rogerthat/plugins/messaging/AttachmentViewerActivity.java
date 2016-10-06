@@ -39,6 +39,7 @@ import android.widget.MediaController;
 import android.widget.Toast;
 import android.widget.VideoView;
 
+import com.github.barteksc.pdfviewer.PDFView;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.util.TextUtils;
@@ -416,32 +417,12 @@ public class AttachmentViewerActivity extends ServiceBoundActivity {
             });
 
         } else if (CONTENT_TYPE_PDF.equalsIgnoreCase(mContentType)) {
-            WebSettings settings = mWebview.getSettings();
-            settings.setJavaScriptEnabled(true);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                settings.setAllowUniversalAccessFromFileURLs(true);
-            }
-
-            mWebview.setWebViewClient(new WebViewClient() {
-
-                @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-                @Override
-                public WebResourceResponse shouldInterceptRequest (WebView view, String url) {
-                    if (fileOnDisk.equals(url)) {
-                        return null;
-                    }
-                    if (url.startsWith("file:///android_asset/")) {
-                        return null;
-                    }
-                    L.d("404: Expected: '" + fileOnDisk + "'\n Received: '" + url+"'");
-                    return new WebResourceResponse("text/plain", "UTF-8", null);
-                }
-            });
-            try {
-                mWebview.loadUrl("file:///android_asset/pdfjs/web/viewer.html?file=" + URLEncoder.encode(fileOnDisk, "UTF-8"));
-            } catch (UnsupportedEncodingException uee) {
-                L.bug(uee);
-            }
+            setContentView(R.layout.pdf_viewer);
+            PDFView viewer = (PDFView) findViewById(R.id.pdfView);
+            viewer.fromFile(new File(fileOnDisk))
+                    .enableSwipe(true)
+                    .enableDoubletap(true)
+                    .load();
         } else {
             WebSettings settings = mWebview.getSettings();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
