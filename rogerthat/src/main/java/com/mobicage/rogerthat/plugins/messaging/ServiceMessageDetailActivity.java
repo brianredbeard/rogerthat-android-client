@@ -655,7 +655,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
 
         final Widget widget = (Widget) getLayoutInflater().inflate(Widget.RESOURCES.get(type), null, false);
         if (br != null) {
-            widget.setColorScheme(br.scheme);
+            widget.setColorScheme(this, br.scheme);
         }
         widget.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
         widget.setEnabled(widgetLayout.isEnabled());

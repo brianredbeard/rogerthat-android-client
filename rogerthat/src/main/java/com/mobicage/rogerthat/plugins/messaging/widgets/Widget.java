@@ -83,20 +83,20 @@ public abstract class Widget extends LinearLayout {
 
     public Widget(Context context, AttributeSet attrs) {
         super(context, attrs);
-        setColorScheme(BrandingMgr.ColorScheme.LIGHT);
+        setColorScheme(context, BrandingMgr.ColorScheme.LIGHT);
     }
 
     public Widget(Context context) {
         super(context);
-        setColorScheme(BrandingMgr.ColorScheme.LIGHT);
+        setColorScheme(context, BrandingMgr.ColorScheme.LIGHT);
     }
 
-    public void setColorScheme(BrandingMgr.ColorScheme colorScheme) {
+    public void setColorScheme(Context context, BrandingMgr.ColorScheme colorScheme) {
         int colorId = android.R.color.primary_text_light;
         if (colorScheme == BrandingMgr.ColorScheme.DARK)
             colorId = android.R.color.primary_text_dark;
 
-        mTextColor = ContextCompat.getColor(mActivity, colorId);
+        mTextColor = ContextCompat.getColor(context, colorId);
     }
 
     @SuppressWarnings("unchecked")
