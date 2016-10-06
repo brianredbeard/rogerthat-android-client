@@ -318,7 +318,8 @@ public class NavigationConstants {
             action_type = quoted_str_or_null("action")
             action = quoted_str_or_null(item["action"])
         else:
-            raise Exception("Unkown item click %s", i)
+            logging.error(item)
+            raise Exception('Unknown homescreen item')
 
         output += '''
             new ServiceBoundActivity.NavigationItem(R.drawable.menu_%(i)s, %(action_type)s, %(action)s, R.string.%(string_id)s, %(collapse)s),''' % dict(
@@ -335,28 +336,31 @@ public class NavigationConstants {
     public static ServiceBoundActivity.NavigationItem[] getNavigationFooterItems() {
         return new ServiceBoundActivity.NavigationItem[]{'''
 
-    for i, item in enumerate(doc['TOOLBAR']['items']):
-        if item.get("click"):
-            action_type = quoted_str_or_null(None)
-            action = quoted_str_or_null(item["click"])
-        elif item.get("tag"):
-            action_type = quoted_str_or_null("click")
-            action = quoted_str_or_null(item["tag"])
-        elif item.get("action"):
-            action_type = quoted_str_or_null("action")
-            action = quoted_str_or_null(item["action"])
-        else:
-            raise Exception("Unkown item click %s", i)
+    if 'TOOLBAR' not in doc and doc.get('APP_CONSTANTS').get('APP_TYPE') == 'cityapp':
+        raise Exception('The build.yaml for this app should be migrated first')
+    if doc.get('TOOLBAR') and doc['TOOLBAR'].get('items'):
+        for i, item in enumerate(doc['TOOLBAR']['items']):
+            if item.get("click"):
+                action_type = quoted_str_or_null(None)
+                action = quoted_str_or_null(item["click"])
+            elif item.get("tag"):
+                action_type = quoted_str_or_null("click")
+                action = quoted_str_or_null(item["tag"])
+            elif item.get("action"):
+                action_type = quoted_str_or_null("action")
+                action = quoted_str_or_null(item["action"])
+            else:
+                raise Exception("Unknown item click %s" % i)
 
-        icon_name = item["icon"].replace("-", "_").replace("fa_", "faw_")
+            icon_name = item["icon"].replace("-", "_").replace("fa_", "faw_")
 
-        output += '''
-            new ServiceBoundActivity.NavigationItem(FontAwesome.Icon.%(icon_name)s, %(action_type)s, %(action)s, R.string.%(string_id)s, %(collapse)s),''' % dict(
-            icon_name=icon_name,
-            action_type=action_type,
-            action=action,
-            string_id=strings_map[item['text']] if item.get('text') else u"app_name",
-            collapse=bool_str(item.get('collapse', False)))
+            output += '''
+                new ServiceBoundActivity.NavigationItem(FontAwesome.Icon.%(icon_name)s, %(action_type)s, %(action)s, R.string.%(string_id)s, %(collapse)s),''' % dict(
+                    icon_name=icon_name,
+                    action_type=action_type,
+                    action=action,
+                    string_id=strings_map[item['text']] if item.get('text') else u"app_name",
+                    collapse=bool_str(item.get('collapse', False)))
 
     output += '''
         };
@@ -1009,24 +1013,8 @@ if __name__ == "__main__":
     generate_navigation_menu(doc, strings_map)
 
     if APP_ID != MAIN_APP_ID:
-        #### MORE IMAGES ###################################
-
-        color = doc["MORE_ACTIVITY"]["color"]
-
-        for filename_in_app, icon_name in [('network_monitor', 'fa-commenting-o'),
-                                           ('gear', 'fa-tachometer'),
-                                           ('messenger', 'fa-users'),
-                                           ('id', 'fa-user'),
-                                           ('info', 'fa-info'),
-                                           ('qrcode', 'fa-qrcode')]:
-            app_utils.download_icon(icon_name, color, 512,
-                                    os.path.join(APP_DIR, "build", "%s.png" % filename_in_app))
-            resize_more_icon(os.path.join(APP_DIR, "build", "%s.png" % filename_in_app), filename_in_app)
-
         convert_config()
         rename_package()
     else:
         logging.info('app_id was rogerthat, only limited prepare is needed')
     generate_custom_cloud_constants(doc)
-    # generate_coloured_buttons(doc['COLORS']['primary_color'],
-    #                           doc['COLORS']['secondary_color'])
