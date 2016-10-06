@@ -219,7 +219,7 @@ public class NewsStore implements Closeable {
         return true;
     }
 
-    public void saveNewsItem(final AppNewsItemTO item) {
+    public void updateNewsItem(final AppNewsItemTO item) {
         T.BIZZ();
         mNewsItemsCache.remove(item.id);
         if (mNewsItemDetailsCache.containsKey(item.id)) {
@@ -245,8 +245,9 @@ public class NewsStore implements Closeable {
                 bindString(mUpdateNewsItem, 11, item.qr_code_caption);
                 mUpdateNewsItem.bindLong(12, item.version);
                 mUpdateNewsItem.bindLong(13, item.flags);
+                mUpdateNewsItem.bindLong(14, item.type);
                 // WHERE
-                mUpdateNewsItem.bindLong(14, item.id);
+                mUpdateNewsItem.bindLong(15, item.id);
                 mUpdateNewsItem.execute();
 
                 insertButtons(item);
@@ -357,6 +358,8 @@ public class NewsStore implements Closeable {
     public void setNewsItemReach(final long newsId, final long reach) {
         T.UI();
         if (mNewsItemsCache.containsKey(newsId)) {
+            if (mNewsItemsCache.get(newsId).reach == reach)
+                return;
             mNewsItemsCache.get(newsId).reach = reach;
         }
         TransactionHelper.runInTransaction(mDb, "setNewsItemReach", new TransactionWithoutResult() {

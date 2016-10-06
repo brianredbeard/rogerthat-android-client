@@ -65,7 +65,7 @@ public class GetNewsItemsResponseHandler extends ResponseHandler<GetNewsItemsRes
             long[] ids = new long[resp.items.length];
             for (int i= 0 ; i < resp.items.length; i++) {
                 AppNewsItemTO newsItem = resp.items[i];
-                newsStore.saveNewsItem(newsItem);
+                newsStore.updateNewsItem(newsItem);
                 ids[i] = newsItem.id;
             }
 

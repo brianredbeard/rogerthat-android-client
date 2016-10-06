@@ -195,6 +195,8 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
 
     public void sendLine(String line) {
         L.d("[NEWS] >> " + line);
+        if (channel == null || !connected)
+            return;
         channel.writeAndFlush(line + "\r\n");
     }
 

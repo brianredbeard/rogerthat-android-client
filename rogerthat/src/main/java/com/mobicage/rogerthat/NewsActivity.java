@@ -197,17 +197,15 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
 
         final String uuid = intent.getStringExtra("uuid");
         if (mRequestNewsItemsUUID != null && mRequestNewsItemsUUID.equals(uuid)) {
+            mRequestNewsItemsUUID = null;
             swipeContainer.setRefreshing(false);
 
             if (nla.getItemCount() == 0) {
                 for (NewsItemDetails item : newsStore.getNewsItemDetailsCache().values()) {
                     nla.addNewsItem(item.id, false);
                 }
-                nla.refreshView();
-            } else {
-                mRequestNewsItemsUUID = null;
-                setupUpdatesAvailable();
             }
+            resetUpdatesAvailable(nla, (Button) findViewById(R.id.updates_available));
             requestMoreNews(false);
         } else {
             for (int i = 0; i < ids.length; i++) {
@@ -259,7 +257,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
                                 newsPlugin.getNewsItems(primitiveIdsToRequest, mRequestNewsItemsUUID);
                             } else {
                                 swipeContainer.setRefreshing(false);
-                                nla.refreshView();
+                                resetUpdatesAvailable(nla, (Button) findViewById(R.id.updates_available));
 
                                 if (ids.length > 0) {
                                     requestMoreNews(false);
@@ -460,10 +458,6 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
         if (isRefresh) {
             mCursor = null;
             mNewUpdatedSinceTimestamp = System.currentTimeMillis() / 1000;
-
-            final Button updatesAvailable = (Button) findViewById(R.id.updates_available);
-            updatesAvailable.setVisibility(View.GONE);
-            mNewNewsItems = new HashSet<>();
         }
         mRequestNewsUUID = UUID.randomUUID().toString();
         newsPlugin.getNews(mCursor, mRequestNewsUUID);
@@ -485,16 +479,19 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
             updatesAvailable.setOnClickListener(new SafeViewOnClickListener() {
                 @Override
                 public void safeOnClick(View v) {
-                    NewsListAdapter nla = ((NewsListAdapter) getAdapter());
-                    updatesAvailable.setVisibility(View.GONE);
-                    for (Long id : mNewNewsItems) {
-                        nla.addNewsItem(id, false);
-                    }
-                    nla.refreshView();
-                    mNewNewsItems = new HashSet<>();
+                    resetUpdatesAvailable((NewsListAdapter) getAdapter(), updatesAvailable);
                 }
             });
         }
+    }
+
+    private void resetUpdatesAvailable(NewsListAdapter nla, Button updatesAvailable) {
+        updatesAvailable.setVisibility(View.GONE);
+        for (Long id : mNewNewsItems) {
+            nla.addNewsItem(id, false);
+        }
+        mNewNewsItems = new HashSet<>();
+        nla.refreshView();
     }
 
     @Override
