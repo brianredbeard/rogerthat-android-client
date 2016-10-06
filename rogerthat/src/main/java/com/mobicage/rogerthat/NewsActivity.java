@@ -615,7 +615,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
         T.UI();
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.news_menu, menu);
-        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_bookmark).color(Color.DKGRAY).sizeDp(18));
+        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_thumb_tack).color(Color.DKGRAY).sizeDp(18));
         return true;
     }
 

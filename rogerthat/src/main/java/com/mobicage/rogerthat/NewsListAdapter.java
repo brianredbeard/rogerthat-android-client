@@ -688,7 +688,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
 
                 if (newsItem.pinned) {
                     final View actionUnSave = mLayoutInflater.inflate(R.layout.news_actions_item, null);
-                    ((ImageView) actionUnSave.findViewById(R.id.icon)).setImageDrawable(new IconicsDrawable(mActivity, FontAwesome.Icon.faw_bookmark).color(ContextCompat.getColor(mActivity, R.color.mc_default_text)).sizeDp(15).paddingDp(2));
+                    ((ImageView) actionUnSave.findViewById(R.id.icon)).setImageDrawable(new IconicsDrawable(mActivity, FontAwesome.Icon.faw_thumb_tack).color(ContextCompat.getColor(mActivity, R.color.mc_default_text)).sizeDp(15).paddingDp(2));
                     ((TextView) actionUnSave.findViewById(R.id.title)).setText(R.string.unsave);
                     ((TextView) actionUnSave.findViewById(R.id.subtitle)).setText(R.string.remove_this_from_your_saved_items);
                     actionUnSave.setOnClickListener(new SafeViewOnClickListener() {
@@ -701,7 +701,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                     dialog.addView(actionUnSave);
                 } else {
                     final View actionSave = mLayoutInflater.inflate(R.layout.news_actions_item, null);
-                    ((ImageView) actionSave.findViewById(R.id.icon)).setImageDrawable(new IconicsDrawable(mActivity, FontAwesome.Icon.faw_bookmark).color(ContextCompat.getColor(mActivity, R.color.mc_default_text)).sizeDp(15).paddingDp(2));
+                    ((ImageView) actionSave.findViewById(R.id.icon)).setImageDrawable(new IconicsDrawable(mActivity, FontAwesome.Icon.faw_thumb_tack).color(ContextCompat.getColor(mActivity, R.color.mc_default_text)).sizeDp(15).paddingDp(2));
                     ((TextView) actionSave.findViewById(R.id.title)).setText(R.string.save);
                     ((TextView) actionSave.findViewById(R.id.subtitle)).setText(R.string.add_this_to_your_saved_items);
                     actionSave.setOnClickListener(new SafeViewOnClickListener() {
