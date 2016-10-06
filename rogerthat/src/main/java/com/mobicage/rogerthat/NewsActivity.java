@@ -441,7 +441,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
     protected void onResume() {
         super.onResume();
 
-        if (!mIsConnectedToInternet && mService.getNetworkConnectivityManager().isConnected()) {
+        if (!mIsConnectedToInternet && mService != null && mService.getNetworkConnectivityManager().isConnected()) {
             mIsConnectedToInternet = true;
             setupConnectedToInternet();
         }
