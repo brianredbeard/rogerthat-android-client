@@ -34,8 +34,12 @@ android {
                 checkReleaseBuilds false
                 abortOnError true
             }
+            applicationIdSuffix '.debug'
+            versionNameSuffix '-debug'
+            resValue "string", "facebook_content_provider", "com.facebook.app.debug.FacebookContentProvider638117819653440"
         }
         release {
+            applicationIdSuffix ''
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt')
             signingConfig signingConfigs.release
@@ -43,11 +47,12 @@ android {
                 checkReleaseBuilds false
                 abortOnError false
             }
+            resValue "string", "facebook_content_provider", "com.facebook.app.FacebookContentProvider638117819653440"
         }
     }
 
     dexOptions {
-        javaMaxHeapSize "4g"
+        javaMaxHeapSize "3g"
     }
 
     packagingOptions {

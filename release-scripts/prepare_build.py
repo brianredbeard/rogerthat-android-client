@@ -168,20 +168,20 @@ def quoted_str_or_null(s):
 
 
 def rename_package():
-    NEW_PACKAGE_NAME = "com.mobicage.rogerthat.%s" % APP_ID.replace("-", ".")
-
     rogerthat_build_gradle = os.path.join(ANDROID_SRC_DIR, '..', 'build.gradle')
+    facebook_app_id = doc["APP_CONSTANTS"].get("FACEBOOK_APP_ID")
     with open(rogerthat_build_gradle, 'r+') as f:
         s = f.read()
-        s = re.sub('applicationId ".*"', 'applicationId "%s"' % NEW_PACKAGE_NAME, s)
-
+        package_sufix = APP_ID.replace('-', '.')
+        s = s.replace("applicationIdSuffix '.debug'", "applicationIdSuffix '.%s.debug'" % package_sufix)
+        s = s.replace("applicationIdSuffix ''", "applicationIdSuffix '.%s'" % package_sufix)
+        if facebook_app_id:
+            s = s.replace('188033791211994', str(facebook_app_id))
         f.seek(0)
         f.write(s)
         f.truncate()
-
     with open(os.path.join(ANDROID_SRC_DIR, 'main', 'AndroidManifest.xml'), 'r+') as f:
         s = f.read()
-        OLD_PACKAGE_NAME = re.findall('package="(.*)"', s)[0]
 
         if doc['CLOUD_CONSTANTS'].get("USE_XMPP_KICK_CHANNEL", False):
             # remove GCM permissions
@@ -211,19 +211,10 @@ def rename_package():
         else:
             raise Exception("Could not apply DEVICE_TYPE '%s'" % device_type)
 
-        s = re.sub('package=".*"', 'package="%s"' % NEW_PACKAGE_NAME, s)
-        s = re.sub('<(permission|uses-permission) android:name="%s\\.(.*)"' % OLD_PACKAGE_NAME.replace('.', '\\.'),
-                   lambda m: '<%s android:name="%s.%s"' % (m.group(1), NEW_PACKAGE_NAME, m.group(2)),
-                   s)
         s = re.sub('mdp-rogerthat', 'mdp-%s' % APP_ID, s)
         s = re.sub('oauth-rogerthat', 'oauth-%s' % APP_ID, s)
 
-        facebook_app_id = doc["APP_CONSTANTS"].get("FACEBOOK_APP_ID")
-        if facebook_app_id:
-            s = re.sub('android:authorities="com.facebook.app.FacebookContentProvider.+"',
-                       'android:authorities="com.facebook.app.FacebookContentProvider%s"' % facebook_app_id,
-                       s)
-        else:
+        if not facebook_app_id:
             # remove FacebookProvider
             splitted = s.split('<!-- BEGIN FB -->')
             if len(splitted) != 1:
@@ -232,19 +223,6 @@ def rename_package():
         f.seek(0)
         f.write(s)
         f.truncate()
-
-    logging.info("old package name: %s" % OLD_PACKAGE_NAME)
-    logging.info("new package name: %s" % NEW_PACKAGE_NAME)
-
-    for d in (SRC_RES_DIR, SRC_JAVA_DIR, TEST_SRC_JAVA_DIR):
-        for dname, _, files in os.walk(d):
-            for fname in files:
-                fpath = os.path.join(dname, fname)
-                with open(fpath) as f:
-                    s = f.read()
-                s = s.replace(OLD_PACKAGE_NAME, NEW_PACKAGE_NAME)
-                with open(fpath, "w") as f:
-                    f.write(s)
 
 
 def create_notification_icon(android_icon_filename, android_notification_icon_filename):
@@ -350,7 +328,7 @@ public class NavigationConstants {
                 action_type = quoted_str_or_null("action")
                 action = quoted_str_or_null(item["action"])
             else:
-                raise Exception("Unknown item click %s" % i)
+                raise Exception("Unknown toolbar item property %s" % i)
 
             icon_name = item["icon"].replace("-", "_").replace("fa_", "faw_")
 
