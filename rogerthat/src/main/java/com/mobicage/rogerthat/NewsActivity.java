@@ -395,6 +395,24 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
             };
             mService.postAtFrontOfBIZZHandler(runnable);
         }
+        connectedToNewsChannelIfNotConnected();
+    }
+
+    private void connectedToNewsChannelIfNotConnected(){
+        // For when the server would be down
+        new java.util.Timer().schedule(
+                new java.util.TimerTask() {
+                    @Override
+                    public void run() {
+                        if (mIsConnectedToInternet && !newsChannel.isConnected() && !newsChannel.isTryingToReconnect()) {
+                            L.d("Reconnecting to channel since it is not connected and not retrying to reconnect");
+                            connectToChannel();
+                        }
+                        connectedToNewsChannelIfNotConnected();
+                    }
+                },
+                15000
+        );
     }
 
     private void connectToChannel() {
