@@ -721,7 +721,19 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         // override this method if you want to subscribe to this click
     }
 
-    public void onOptionNavigationViewToolbarSelected(View v) {
+    public void onNavigationHeaderBurgerClicked(View v) {
         closeNavigationView();
+    }
+
+    public void onNavigationHeaderImageClicked(View v) {
+        closeNavigationView();
+
+        Bundle extras = new Bundle();
+        extras.putBoolean("show_drawer_icon", true);
+        if (AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.messaging) {
+            ActivityUtils.goToActivity(ServiceBoundActivity.this, "messages", true, false, extras);
+        } else {
+            ActivityUtils.goToActivity(ServiceBoundActivity.this, "news", true, false, extras);
+        }
     }
 }
