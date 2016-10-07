@@ -21,6 +21,7 @@ import org.json.simple.JSONValue;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
 
 import javax.net.ssl.SSLException;
 
@@ -49,20 +50,22 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
     private final int KEEPALIVE_DELAY = 30;
     private final MainService mService;
     private NewsChannelCallbackHandler mNewsChannelCallbackHandler;
-    public String host;
-    public int port;
-    public boolean ssl;
+    private String host;
+    private int port;
+    private boolean ssl;
     private Channel channel;
     private EventLoopGroup eventLoopGroup;
     private boolean connected;
     private ConfigurationProvider configurationProvider;
     private boolean isRetryingToConnect = false;
+    private Timer mKeepAliveTimer;
+    private Timer mReconnectTimer;
 
     public boolean isConnected() {
         return connected;
     }
 
-    public enum Command {
+    private enum Command {
         AUTH("AUTH"),
         SET_INFO("SET INFO"),
         NEWS_READ("NEWS READ"),
@@ -176,32 +179,39 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         this.channel = b.connect(this.host, this.port).channel();
         this.connected = true;
         L.d("Connected to news channel.");
+        if(mReconnectTimer != null) {
+            mReconnectTimer.cancel();
+        }
         keepAlive();
     }
 
     private void keepAlive() {
-        new java.util.Timer().schedule(
+        if(mKeepAliveTimer != null){
+            mKeepAliveTimer.cancel();
+        }
+        mKeepAliveTimer = new Timer(true);
+        mKeepAliveTimer.scheduleAtFixedRate(
                 new java.util.TimerTask() {
                     @Override
                     public void run() {
                         if (connected) {
                             sendLine(Command.PING.toString());
-                            keepAlive();
                         }
                     }
                 },
+                0,
                 KEEPALIVE_DELAY * 1000
         );
     }
 
-    public void sendLine(String line) {
+    private void sendLine(String line) {
         L.d("[NEWS] >> " + line);
         if (channel == null || !connected)
             return;
         channel.writeAndFlush(line + "\r\n");
     }
 
-    public void sendCommand(Command command, String data) {
+    private void sendCommand(Command command, String data) {
         sendLine(String.format("%s: %s", command, data));
     }
 
@@ -250,29 +260,17 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         }
     }
 
-    private void delayGetConfiguration() {
-        new java.util.Timer().schedule(
-                new java.util.TimerTask() {
-                    @Override
-                    public void run() {
-                        if (mService.getNetworkConnectivityManager().isConnected()) {
-                            getConfiguration();
-                        } else {
-                            delayGetConfiguration();
-                        }
-                    }
-                },
-                5000
-        );
-    }
-
     private void attemptToReconnect(final int backoffTime) {
         if (!this.connected) {
             if (this.isRetryingToConnect) {
                 return;
             }
             this.isRetryingToConnect = true;
-            new java.util.Timer().schedule(
+            if(mReconnectTimer != null ){
+                mReconnectTimer.cancel();
+            }
+            mReconnectTimer = new Timer(true);
+            mReconnectTimer.scheduleAtFixedRate(
                     new java.util.TimerTask() {
                         @Override
                         public void run() {
@@ -288,6 +286,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
                             }
                         }
                     },
+                    0,
                     backoffTime * 1000
             );
         }
