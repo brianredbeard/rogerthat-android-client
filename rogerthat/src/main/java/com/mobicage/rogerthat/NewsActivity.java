@@ -69,6 +69,8 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements NewsChannelCallbackHandler {
@@ -91,6 +93,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
     private ProgressDialog mProgressDialog;
 
     private Set<Long> mNewNewsItems = new HashSet<>();
+    private Timer mChannelWatchTimer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -399,19 +402,22 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
     }
 
     private void connectedToNewsChannelIfNotConnected(){
-        // For when the server would be down
-        new java.util.Timer().schedule(
-                new java.util.TimerTask() {
-                    @Override
-                    public void run() {
-                        if (mIsConnectedToInternet && !newsChannel.isConnected() && !newsChannel.isTryingToReconnect()) {
-                            L.d("Reconnecting to channel since it is not connected and not retrying to reconnect");
-                            connectToChannel();
-                        }
-                        connectedToNewsChannelIfNotConnected();
+        if(mChannelWatchTimer != null){
+            mChannelWatchTimer.cancel();
+        }
+        mChannelWatchTimer = new Timer(true);
+        mChannelWatchTimer.scheduleAtFixedRate(
+            new TimerTask() {
+                @Override
+                public void run() {
+                    if (mIsConnectedToInternet && (newsChannel == null || !newsChannel.isConnected() && !newsChannel.isTryingToReconnect())) {
+                        L.d("Reconnecting to channel since it is not connected and not retrying to reconnect");
+                        connectToChannel();
                     }
-                },
-                15000
+                }
+            },
+            0,
+            15000
         );
     }
 
@@ -470,6 +476,9 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
     protected void onPause() {
         super.onPause();
         disconnectChannel();
+        if(mChannelWatchTimer != null){
+            mChannelWatchTimer.cancel();
+        }
     }
 
     @Override
