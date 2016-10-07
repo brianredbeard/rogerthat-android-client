@@ -293,6 +293,10 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         }
     }
 
+    public boolean isTryingToReconnect(){
+        return this.isRetryingToConnect;
+    }
+
     @Override
     public void channelRead0(ChannelHandlerContext ctx, String msg) {
         L.d("[NEWS] << " + msg);

@@ -445,7 +445,6 @@ public class AttachmentViewerActivity extends ServiceBoundActivity {
     private void downloadAttachment() {
         final DownloadTask downloadTask = new DownloadTask(AttachmentViewerActivity.this);
         downloadTask.execute(mDownloadUrl);
-
         mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialog) {

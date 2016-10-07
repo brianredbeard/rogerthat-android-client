@@ -147,6 +147,9 @@ public class ServiceFriendsActivity extends FriendsActivity {
                 findViewById(R.id.no_services).setVisibility(View.VISIBLE);
                 findViewById(R.id.friend_list).setVisibility(View.GONE);
             }
+        } else {
+            findViewById(R.id.no_services).setVisibility(View.GONE);
+            findViewById(R.id.friend_list).setVisibility(View.VISIBLE);
         }
     }
 
