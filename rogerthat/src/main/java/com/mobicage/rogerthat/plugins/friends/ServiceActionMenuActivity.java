@@ -303,9 +303,8 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
         if (menu.branding != null) {
             try {
                 BrandingMgr brandingMgr = messagingPlugin.getBrandingMgr();
-                Friend friend = store.getExistingFriend(email);
                 if (brandingMgr.isBrandingAvailable(menu.branding)) {
-                    BrandingResult br = brandingMgr.prepareBranding(menu.branding, friend, false);
+                    BrandingResult br = brandingMgr.prepareBranding(menu.branding, null, false);
                     WebSettings settings = branding.getSettings();
                     settings.setJavaScriptEnabled(false);
                     settings.setBlockNetworkImage(false);
@@ -366,6 +365,7 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
 
                     showBranded = true;
                 } else {
+                    Friend friend = store.getExistingFriend(email);
                     friend.actionMenu = menu;
                     friend.actionMenu.items = menu.itemList.toArray(new ServiceMenuItemTO[] {});
                     brandingMgr.queue(friend);
