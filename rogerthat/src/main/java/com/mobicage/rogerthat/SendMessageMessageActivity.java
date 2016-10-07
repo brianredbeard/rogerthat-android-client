@@ -103,7 +103,9 @@ public class SendMessageMessageActivity extends ServiceBoundActivity {
             return;
         }
 
-        mSendMessageView.onActivityResult(requestCode, resultCode, data);
+        if (mSendMessageView != null) {
+            mSendMessageView.onActivityResult(requestCode, resultCode, data);
+        }
     }
 
     @Override

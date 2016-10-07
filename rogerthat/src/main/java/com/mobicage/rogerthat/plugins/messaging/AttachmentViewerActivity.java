@@ -18,7 +18,6 @@
 package com.mobicage.rogerthat.plugins.messaging;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -31,7 +30,6 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.view.WindowManager;
 import android.webkit.WebChromeClient;
-import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -63,8 +61,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -419,7 +415,7 @@ public class AttachmentViewerActivity extends ServiceBoundActivity {
         } else if (CONTENT_TYPE_PDF.equalsIgnoreCase(mContentType)) {
             setContentView(R.layout.pdf_viewer);
             PDFView viewer = (PDFView) findViewById(R.id.pdfView);
-            viewer.fromFile(new File(fileOnDisk))
+            viewer.fromFile(mFile)
                     .enableSwipe(true)
                     .enableDoubletap(true)
                     .load();

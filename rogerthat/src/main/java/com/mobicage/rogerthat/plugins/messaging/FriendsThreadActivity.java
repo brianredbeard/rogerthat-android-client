@@ -231,7 +231,9 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             return;
         }
 
-        mSendMessageView.onActivityResult(requestCode, resultCode, data);
+        if (mSendMessageView != null) {
+            mSendMessageView.onActivityResult(requestCode, resultCode, data);
+        }
     }
 
     @Override
