@@ -396,7 +396,10 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
                 Drawable icon = UIUtils.getIconFromString(this, item.iconName).color(brandingBackgroundColor).sizeDp(24).paddingDp(5);
                 cell.icon.setImageDrawable(icon);
                 UIUtils.setIconBackground(cell.icon, menuItemColor);
-            } else {
+            } else if( item.icon == null) {
+                L.bug(String.format("Font awesome icon not set and icon content not found." +
+                        "\nService: %s, iconName: %s",email, item.iconName));
+            }else{
                 cell.icon.setImageBitmap(BitmapFactory.decodeByteArray(item.icon, 0, item.icon.length));
                 UIUtils.setIconBackground(cell.icon, brandingBackgroundColor);
             }
