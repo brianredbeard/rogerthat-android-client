@@ -791,11 +791,11 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
                     int rogerthatColor = resources.getColor(R.color.mc_green);
                     statusView.setImageDrawable(new IconicsDrawable(context, FontAwesome.Icon.faw_check).color(rogerthatColor).sizeDp(15));
                 } else if (message.numReceived() != 0) {
-                    int blueColor = resources.getColor(R.color.mc_timestamp_blue);
-                    statusView.setImageDrawable(new IconicsDrawable(context, FontAwesome.Icon.faw_check).color(blueColor).sizeDp(15));
+                    int grayColor = resources.getColor(R.color.mc_gray_11);
+                    statusView.setImageDrawable(new IconicsDrawable(context, FontAwesome.Icon.faw_check).color(grayColor).sizeDp(15));
                 } else {
-                    int greyColor = resources.getColor(R.color.mc_gray_11);
-                    statusView.setImageDrawable(new IconicsDrawable(context, FontAwesome.Icon.faw_paper_plane).color(greyColor).sizeDp(15));
+                    int grayColor = resources.getColor(R.color.mc_gray_11);
+                    statusView.setImageDrawable(new IconicsDrawable(context, FontAwesome.Icon.faw_paper_plane).color(grayColor).sizeDp(15));
                 }
                 return true;
             }

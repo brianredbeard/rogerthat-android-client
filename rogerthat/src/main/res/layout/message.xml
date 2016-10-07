@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="?attr/selectableItemBackground"
     android:minHeight="72dp"
     android:orientation="horizontal"
     android:paddingLeft="?attr/listPreferredItemPaddingLeft"
@@ -14,7 +13,6 @@
         android:id="@+id/message_checkbox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
         android:layout_gravity="center_vertical"
         android:checked="false"
         android:visibility="visible"
@@ -50,7 +48,7 @@
                 android:layout_toLeftOf="@+id/timestamp"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
-                android:singleLine="true"
+                android:maxLines="1"
                 android:textSize="16sp"
                 tools:text="Firstname Lastname or something else that is can be long" />
 
@@ -80,7 +78,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:ellipsize="end"
-                android:singleLine="true"
+                android:maxLines="1"
                 android:textSize="14sp"
                 tools:text="Message content goes here. Long text should not overlap"
                 tools:visibility="visible" />
@@ -109,7 +107,7 @@
                 android:paddingLeft="10dp"
                 app:ico_color="@color/mc_green"
                 app:ico_icon="@string/faw_check"
-                app:ico_size="15dp" />
+                app:ico_size="15dp"/>
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>
