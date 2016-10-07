@@ -70,6 +70,7 @@ import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.time.TimeUtils;
+import com.mobicage.rogerthat.util.ui.ImageHelper;
 import com.mobicage.rogerthat.util.ui.ScaleImageView;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rogerthat.widget.Resizable16by6ImageView;
@@ -682,11 +683,12 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
             viewHolder.image.setVisibility(View.GONE);
             return false;
         } else {
+            int corderRadius = UIUtils.convertDipToPixels(mActivity, 20);
             if (mCachedDownloader.isStorageAvailable()) {
                 File cachedFile = mCachedDownloader.getCachedFilePath(newsItem.image_url);
                 if (cachedFile != null) {
                     Bitmap bm = BitmapFactory.decodeFile(cachedFile.getAbsolutePath());
-                    viewHolder.image.setImageBitmap(bm);
+                    viewHolder.image.setImageBitmap(ImageHelper.getRoundTopCornerBitmap(bm, corderRadius));
                     viewHolder.image.setVisibility(View.VISIBLE);
                 } else {
                     if (!mImageViews.containsKey(newsItem.image_url)) {
@@ -696,7 +698,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                     // item started downloading intent when ready
                 }
             } else {
-                new DownloadImageTask(viewHolder.image).execute(newsItem.image_url);
+                new DownloadImageTask(viewHolder.image, true, corderRadius).execute(newsItem.image_url);
             }
         }
         return true;
@@ -882,9 +884,6 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
             File cachedFile = mCachedDownloader.getCachedFilePath(url);
             if (cachedFile != null) {
                 Bitmap bm = BitmapFactory.decodeFile(cachedFile.getAbsolutePath());
-                L.d("url: " + url);
-                L.d("mImageViews.containsKey(url): " + mImageViews.containsKey(url));
-                L.d("mImageViews.get(url).size(): " + mImageViews.get(url).size());
                 for (Resizable16by6ImageView image : mImageViews.get(url)) {
                     image.setImageBitmap(bm);
                     image.setVisibility(View.VISIBLE);

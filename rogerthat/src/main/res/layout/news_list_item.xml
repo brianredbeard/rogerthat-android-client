@@ -366,7 +366,7 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_gravity="top|end"
-            android:background="@drawable/news_action_background"
+            android:background="@drawable/news_dropdown_background"
             android:padding="5dp"
             app:ico_color="@color/mc_primary_color"
             app:ico_icon="@string/faw_angle_down"
