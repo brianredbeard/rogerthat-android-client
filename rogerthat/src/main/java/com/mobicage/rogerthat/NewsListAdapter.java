@@ -613,7 +613,6 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     private void setupAvatar(final ViewHolder viewHolder, final NewsItem newsItem) {
         Bitmap avatar = mActivity.friendsPlugin.getStore().getAvatarBitmap(newsItem.sender.email);
         if (avatar == null) {
-            // todo ruben we should create a cache of avatars..
             new DownloadImageTask(viewHolder.serviceAvatar, true).execute(CloudConstants.CACHED_AVATAR_URL_PREFIX + newsItem.sender.avatar_id);
         } else {
             viewHolder.serviceAvatar.setImageBitmap(avatar);
@@ -871,7 +870,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         viewHolder.qrCodeContainer.setVisibility(View.VISIBLE);
 
         if (newsItem.users_that_rogered.length == 0 && TextUtils.isEmptyOrWhitespace(newsItem.image_url)) {
-            viewHolder.qrCodeCaption.setPadding(0, 0, _35_DP, _15_DP);
+            viewHolder.qrCodeContainer.setPadding(0, _32_DP, 0, 0);
         }
     }
 
