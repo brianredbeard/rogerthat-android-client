@@ -119,7 +119,6 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
         super.onCreate(savedInstanceState);
         L.i("ServiceActionMenuActivity.onCreate");
         setContentView(R.layout.service_action_menu);
-        setNavigationBarBurgerVisible(false, true);
         Intent intent = getIntent();
         email = intent.getStringExtra(SERVICE_EMAIL);
         page = intent.getIntExtra(MENU_PAGE, 0);

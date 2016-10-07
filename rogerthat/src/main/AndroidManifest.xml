@@ -184,7 +184,7 @@
             android:screenOrientation="portrait">
         </activity>
         <activity
-            android:name="com.mobicage.rogerthat.NewsOptionsActivity"
+            android:name="com.mobicage.rogerthat.NewsPinnedActivity"
             android:parentActivityName="com.mobicage.rogerthat.MainActivity"
             android:screenOrientation="portrait">
         </activity>

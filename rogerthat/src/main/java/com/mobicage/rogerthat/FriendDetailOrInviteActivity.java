@@ -69,7 +69,6 @@ public class FriendDetailOrInviteActivity extends ServiceBoundActivity {
         T.UI();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.friend_detail_or_invite);
-        setNavigationBarBurgerVisible(false, true);
     }
 
     @Override

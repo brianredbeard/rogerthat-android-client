@@ -17,7 +17,6 @@
  */
 package com.mobicage.rogerthat;
 
-import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -33,15 +32,9 @@ import com.mobicage.rogerthat.plugins.news.NewsPlugin;
 import java.util.HashSet;
 import java.util.Set;
 
-public class NewsOptionsActivity extends NewsActivity {
+public class NewsPinnedActivity extends NewsActivity {
 
     private String mQry = null;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setNavigationBarBurgerVisible(false, true);
-    }
 
     @Override
     protected String[] getAllReceivingIntents() {

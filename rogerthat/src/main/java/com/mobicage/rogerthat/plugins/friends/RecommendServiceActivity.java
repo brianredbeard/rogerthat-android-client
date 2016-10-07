@@ -45,7 +45,6 @@ import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.SectionIndexer;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -115,7 +114,6 @@ public class RecommendServiceActivity extends ServiceBoundActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.recommend_service);
-        setNavigationBarBurgerVisible(false, true);
         setTitle(R.string.recommend_service);
 
         mViewFlipper = (ViewFlipper) findViewById(R.id.view_flipper);
@@ -124,7 +122,7 @@ public class RecommendServiceActivity extends ServiceBoundActivity {
             LinearLayout rtf = (LinearLayout) findViewById(R.id.recommend_to_friends);
             mViewFlipper.removeView(rtf);
 
-            RelativeLayout rl = (RelativeLayout) findViewById(R.id.rogerthat_layout);
+            LinearLayout rl = (LinearLayout) findViewById(R.id.rogerthat_layout);
             rl.setVisibility(View.GONE);
 
             View ci = findViewById(R.id.contacts_indicator);
@@ -135,7 +133,7 @@ public class RecommendServiceActivity extends ServiceBoundActivity {
             LinearLayout rof = (LinearLayout) findViewById(R.id.recommend_on_fb);
             mViewFlipper.removeView(rof);
 
-            RelativeLayout fl = (RelativeLayout) findViewById(R.id.facebook_layout);
+            LinearLayout fl = (LinearLayout) findViewById(R.id.facebook_layout);
             fl.setVisibility(View.GONE);
         }
 

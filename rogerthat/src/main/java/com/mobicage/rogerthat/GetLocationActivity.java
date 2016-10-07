@@ -97,7 +97,6 @@ public class GetLocationActivity extends ServiceBoundActivity {
     protected void onServiceBound() {
         T.UI();
         setContentView(R.layout.get_location);
-        setNavigationBarBurgerVisible(false, true);
         setTitle(R.string.get_location);
 
         mProgressDialog = new ProgressDialog(this);

@@ -57,7 +57,6 @@ public class InviteFriendActivity extends ServiceBoundActivity {
     protected void onServiceBound() {
         T.UI();
         setContentView(R.layout.friend_invite);
-        setNavigationBarBurgerVisible(false, true);
         final int btnText;
         switch (AppConstants.FRIENDS_CAPTION) {
         case COLLEAGUES:

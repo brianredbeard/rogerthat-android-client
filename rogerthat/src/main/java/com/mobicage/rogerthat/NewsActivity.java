@@ -69,6 +69,8 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements NewsChannelCallbackHandler {
@@ -91,6 +93,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
     private ProgressDialog mProgressDialog;
 
     private Set<Long> mNewNewsItems = new HashSet<>();
+    private Timer mChannelWatchTimer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -380,8 +383,8 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
 
         setupIntentFilter();
 
-        if (this instanceof NewsOptionsActivity) {
-            L.d("not subscribing to news when in NewsOptionsActivity");
+        if (this instanceof NewsPinnedActivity) {
+            L.d("not subscribing to news when in NewsPinnedActivity");
         } else {
             final ConfigurationProvider configurationProvider = mService.getConfigurationProvider();
             SafeRunnable runnable = new SafeRunnable() {
@@ -395,6 +398,27 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
             };
             mService.postAtFrontOfBIZZHandler(runnable);
         }
+        connectedToNewsChannelIfNotConnected();
+    }
+
+    private void connectedToNewsChannelIfNotConnected(){
+        if(mChannelWatchTimer != null){
+            mChannelWatchTimer.cancel();
+        }
+        mChannelWatchTimer = new Timer(true);
+        mChannelWatchTimer.scheduleAtFixedRate(
+            new TimerTask() {
+                @Override
+                public void run() {
+                    if (mIsConnectedToInternet && (newsChannel == null || !newsChannel.isConnected() && !newsChannel.isTryingToReconnect())) {
+                        L.d("Reconnecting to channel since it is not connected and not retrying to reconnect");
+                        connectToChannel();
+                    }
+                }
+            },
+            0,
+            15000
+        );
     }
 
     private void connectToChannel() {
@@ -427,8 +451,8 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
 
     @Override
     protected void onServiceUnbound() {
-        if (this instanceof NewsOptionsActivity) {
-            L.d("not clearing cache when in NewsOptionsActivity");
+        if (this instanceof NewsPinnedActivity) {
+            L.d("not clearing cache when in NewsPinnedActivity");
         } else {
             newsStore.clearCache();
         }
@@ -452,6 +476,9 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
     protected void onPause() {
         super.onPause();
         disconnectChannel();
+        if(mChannelWatchTimer != null){
+            mChannelWatchTimer.cancel();
+        }
     }
 
     @Override
@@ -626,7 +653,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
         T.UI();
         switch (item.getItemId()) {
             case R.id.saved:
-                Intent i = new Intent(this, NewsOptionsActivity.class);
+                Intent i = new Intent(this, NewsPinnedActivity.class);
                 this.startActivity(i);
                 return true;
         }

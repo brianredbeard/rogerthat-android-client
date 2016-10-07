@@ -122,6 +122,8 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
     private String mActivityName;
 
     public MenuItemPresser menuItemPresser;
+    public boolean mShowDrawer = false;
+    public boolean mShowDrawerIcon = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,6 +132,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         super.onCreate(savedInstanceState);
         logMethod("onCreate");
         SystemUtils.logIntentFlags(getIntent());
+
         IntentFilter filter = new IntentFilter(MainService.CLOSE_ACTIVITY_INTENT);
         registerReceiver(closeActivityListener, filter);
         doBindService();
@@ -439,6 +442,18 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         drawer.addDrawerListener(mDrawerToggle);
         mDrawerToggle.syncState();
 
+        Intent intent = getIntent();
+        mShowDrawer = intent.getBooleanExtra("show_drawer", false);
+        mShowDrawerIcon = intent.getBooleanExtra("show_drawer_icon", false);
+
+        if (mShowDrawer) {
+            openNavigationView();
+        }
+
+        if (!mShowDrawerIcon) {
+            setNavigationBarBurgerVisible(false, true);
+        }
+
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         final Menu menu = navigationView.getMenu();
 
@@ -503,7 +518,9 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         closeNavigationView();
 
         if (ni.actionType == null) {
-            ActivityUtils.goToActivity(ServiceBoundActivity.this, ni.action, true, ni.collapse);
+            Bundle extras = new Bundle();
+            extras.putBoolean("show_drawer_icon", true);
+            ActivityUtils.goToActivity(ServiceBoundActivity.this, ni.action, true, ni.collapse, extras);
         } else if ("action".equals(ni.actionType)) {
             Class clazz;
             if (mService.getNetworkConnectivityManager().isConnected()) {
@@ -515,6 +532,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
             final Intent i = new Intent(ServiceBoundActivity.this, clazz);
             i.putExtra(ServiceActionsOfflineActivity.ACTION, ni.action);
             i.putExtra(ServiceActionsOfflineActivity.TITLE, ni.labelTextId);
+            i.putExtra("show_drawer_icon", true);
             i.addFlags(MainActivity.FLAG_CLEAR_STACK);
             ServiceBoundActivity.this.startActivity(i);
 

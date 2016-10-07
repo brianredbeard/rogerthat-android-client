@@ -33,7 +33,6 @@ public class AbstractAboutActivity extends ServiceBoundActivity {
     @Override
     protected void onServiceBound() {
         setContentView(R.layout.about);
-        setNavigationBarBurgerVisible(false, true);
 
         Button visitRogerthat = (Button) findViewById(R.id.about_btn_visit_rogerthat);
         visitRogerthat.setText(AppConstants.ABOUT_WEBSITE);

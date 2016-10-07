@@ -54,7 +54,6 @@ public abstract class FriendsActivity extends ServiceBoundCursorListActivity {
             setContentView(getLayout());
         } else {
             setContentView(getLayout());
-            setNavigationBarBurgerVisible(false, true);
         }
 
         final ListView listView = (ListView) findViewById(R.id.friend_list);

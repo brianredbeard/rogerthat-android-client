@@ -204,7 +204,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
         if (intent.getBooleanExtra(HomeActivity.INTENT_PROCESSED, false))
             return;
         if (url != null) {
-            ActivityUtils.goToMessagingActivity(this, false);
+            ActivityUtils.goToMessagingActivity(this, false, null);
             processUrl(url);
         } else if (intent.hasExtra(HomeActivity.INTENT_KEY_LAUNCHINFO)) {
             String value = intent.getStringExtra(HomeActivity.INTENT_KEY_LAUNCHINFO);
@@ -212,14 +212,14 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
                 // goToUserFriendsActivity();
 
             } else if (HomeActivity.INTENT_VALUE_SHOW_MESSAGES.equals(value)) {
-                ActivityUtils.goToMessagingActivity(this, false);
+                ActivityUtils.goToMessagingActivity(this, false, null);
 
             } else if (HomeActivity.INTENT_VALUE_SHOW_NEW_MESSAGES.equals(value)) {
                 if (intent.hasExtra(HomeActivity.INTENT_KEY_MESSAGE)) {
                     String messageKey = intent.getStringExtra(HomeActivity.INTENT_KEY_MESSAGE);
                     goToMessageDetail(messageKey);
                 } else {
-                    ActivityUtils.goToMessagingActivity(this, false);
+                    ActivityUtils.goToMessagingActivity(this, false, null);
                 }
 
             } else if (HomeActivity.INTENT_VALUE_SHOW_UPDATED_MESSAGES.equals(value)) {
@@ -227,11 +227,11 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
                     String messageKey = intent.getStringExtra(HomeActivity.INTENT_KEY_MESSAGE);
                     goToMessageDetail(messageKey);
                 } else {
-                    ActivityUtils.goToMessagingActivity(this, false);
+                    ActivityUtils.goToMessagingActivity(this, false, null);
                 }
 
             } else if (HomeActivity.INTENT_VALUE_SHOW_SCANTAB.equals(value)) {
-                ActivityUtils.goToScanActivity(this, false);
+                ActivityUtils.goToScanActivity(this, false, null);
             } else {
                 L.bug("Unexpected (key, value) for HomeActivity intent: (" + HomeActivity.INTENT_KEY_LAUNCHINFO + ", " + value + ")");
             }
@@ -296,7 +296,6 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
             setActivityName("messages");
         } else {
             setContentView(R.layout.messaging);
-            setNavigationBarBurgerVisible(false, true);
             setActivityName("messages_filter");
         }
 

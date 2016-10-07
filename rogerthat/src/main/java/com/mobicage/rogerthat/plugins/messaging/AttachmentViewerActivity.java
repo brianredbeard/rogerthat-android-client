@@ -295,7 +295,6 @@ public class AttachmentViewerActivity extends ServiceBoundActivity {
                 setTitle(mName);
             }
         }
-        setNavigationBarBurgerVisible(false, true);
 
         try {
             mAttachmentsDir = mMessagingPlugin.attachmentsDir(mThreadKey, null);

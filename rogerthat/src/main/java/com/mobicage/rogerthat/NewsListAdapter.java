@@ -891,7 +891,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 }
             }
         } else if (NewsPlugin.PINNED_NEWS_ITEM_INTENT.equals(action)) {
-            if (mActivity instanceof NewsOptionsActivity) {
+            if (mActivity instanceof NewsPinnedActivity) {
                 if (mActivity.newsStore.countPinnedItems() > 0) {
                     long newsId = intent.getLongExtra("id", -1);
                     mItems.remove(newsId);

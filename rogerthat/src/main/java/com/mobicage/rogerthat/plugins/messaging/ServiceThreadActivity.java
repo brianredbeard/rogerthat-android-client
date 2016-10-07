@@ -112,7 +112,6 @@ public class ServiceThreadActivity extends ServiceBoundCursorListActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.service_thread);
-        setNavigationBarBurgerVisible(false, true);
         mParentMessageKey = getIntent().getStringExtra(PARENT_MESSAGE_KEY);
         setListView((ListView) findViewById(R.id.thread_messages));
 
