@@ -1155,7 +1155,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
             try {
                 // Try to generate a thumbnail
                 mMessagingPlugin.createAttachmentThumbnail(attachmentFile.getAbsolutePath(), mHasImageSelected,
-                        mHasImageSelected);
+                        mHasVideoSelected);
             } catch (Exception e) {
                 L.e("Failed to generate attachment thumbnail", e);
             }

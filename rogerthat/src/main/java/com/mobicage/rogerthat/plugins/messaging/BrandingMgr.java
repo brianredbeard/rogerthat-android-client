@@ -841,7 +841,6 @@ public class BrandingMgr implements Pickleable, Closeable {
                                 L.bug("Failed to rotate the attachment.", e);
                             }
                         }
-
                         try {
                             final MessagingPlugin messagingPlugin = mMainService.getPlugin(MessagingPlugin.class);
                             messagingPlugin.createAttachmentThumbnail(attachment);
