@@ -61,6 +61,11 @@
         <item name="android:background">@color/mc_primary_color</item>
     </style>
 
+    <style name="DarkGrayButtonBackground" parent="Widget.AppCompat.Button.Colored">
+        <item name="android:textColor">@color/mc_default_text_inverse</item>
+        <item name="android:background">@color/mc_dark_gray_button_color</item>
+    </style>
+
     <style name="LightFacebookButtonBackground" parent="Widget.AppCompat.Button">
         <item name="android:background">@drawable/btn_facebook_light</item>
         <item name="android:textColor">@color/mc_white</item>

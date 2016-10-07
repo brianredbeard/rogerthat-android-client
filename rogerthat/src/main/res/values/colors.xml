@@ -22,6 +22,7 @@
     <color name="mc_homescreen_background">#EBEBEB</color>
     <color name="mc_homescreen_text">#3E3E3D</color>
     <color name="mc_homescreen_divider">#3E3E3D</color>
+    <color name="mc_dark_gray_button_color">#6B6A6A</color>
 
     <color name="mc_primary_color">#84B53F</color>
     <color name="mc_secondary_color">#006536</color>

@@ -41,6 +41,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -135,6 +136,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
     private T mActivity;
     private FrameLayout mAttachmentContainer;
     private ImageView mAttachmentPreview;
+    private LinearLayout mButtonsContainer;
     private EditText mMessage;
 
     private String[] mFriendRecipients;
@@ -149,7 +151,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
     private Uri mUriSavedFile;
 
     private CannedButtons mCannedButtons = null;
-    private Set<Long> mButtons = new LinkedHashSet<Long>();
+    private Set<Long> mButtons = new LinkedHashSet<>();
     private long mSelectedButton = NO_BUTTON_SELECTED;
 
     private long mPriority = Message.PRIORITY_NORMAL;
@@ -202,6 +204,8 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
                 initImageButtonsNavigation();
             }
         });
+
+        mButtonsContainer = (LinearLayout) findViewById(R.id.button_container);
 
         submitButton.setOnClickListener(new SafeViewOnClickListener() {
             @Override
@@ -289,11 +293,12 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
 
         mMessage.setText("");
         mMessage.clearFocus();
-        mButtons = new LinkedHashSet<Long>();
+        mButtons = new LinkedHashSet<>();
         mSelectedButton = NO_BUTTON_SELECTED;
         mHasImageSelected = false;
         mHasVideoSelected = false;
         mAttachmentContainer.setVisibility(View.GONE);
+        mButtonsContainer.removeAllViews();
 
         final LinearLayout optionButtons = (LinearLayout) findViewById(R.id.imageButtons);
         optionButtons.setVisibility(View.GONE);
@@ -364,11 +369,28 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
                 if (resultCode == Activity.RESULT_OK) {
                     try {
                         mCannedButtons = (CannedButtons) Pickler.createObjectFromPickle(data.getByteArrayExtra(SendMessageButtonActivity.CANNED_BUTTONS));
-                        mButtons = new LinkedHashSet<Long>();
+                        mButtons = new LinkedHashSet<>();
+                        mButtonsContainer.removeAllViews();
                         long[] buttons = data.getLongArrayExtra(SendMessageButtonActivity.BUTTONS);
                         if (buttons != null) {
-                            for (long l : buttons) {
+                            for (final long l : buttons) {
                                 mButtons.add(l);
+
+                                CannedButton cannedButton = mCannedButtons.getById(l);
+                                if (cannedButton == null)
+                                    continue;
+
+                                final View previewButtonContainer = mActivity.getLayoutInflater().inflate(R.layout.chat_container_message_button, null);
+                                final Button previewButton = (Button) previewButtonContainer.findViewById(R.id.button);
+                                previewButton.setText(cannedButton.getCaption());
+                                previewButton.setOnClickListener(new SafeViewOnClickListener() {
+                                    @Override
+                                    public void safeOnClick(View v) {
+                                        mButtons.remove(l);
+                                        mButtonsContainer.removeView(previewButtonContainer);
+                                    }
+                                });
+                                mButtonsContainer.addView(previewButtonContainer);
                             }
                         }
                     } catch (Exception e) {
