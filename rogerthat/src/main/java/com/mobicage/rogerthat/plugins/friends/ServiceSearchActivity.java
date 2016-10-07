@@ -119,7 +119,6 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.service_search);
-        setNavigationBarBurgerVisible(false, true);
 
         Intent intent = getIntent();
         mOrganizationType = intent.getIntExtra(ORGANIZATION_TYPE,
@@ -128,15 +127,17 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
         mAction = intent.getStringExtra(ACTION);
         if (mAction == null) {
             setTitle(R.string.discover_services_short);
+//            setNavigationBarBurgerVisible(false, true); // todo ruben
         } else {
+            setActivityName("action|" + mAction);
             setTitle(intent.getIntExtra(TITLE, 0));
         }
 
         mSearchCategoryLabels = (LinearLayout) findViewById(R.id.search_category);
         mSearchCategoryViewFlipper = (SafeViewFlipper) findViewById(R.id.search_result_lists);
 
-        mSearchInfoByCategory = new HashMap<String, ServiceSearchActivity.SearchInfo>();
-        mSearchInfoByListView = new HashMap<AbsListView, ServiceSearchActivity.SearchInfo>();
+        mSearchInfoByCategory = new HashMap<>();
+        mSearchInfoByListView = new HashMap<>();
 
         mGestureScanner = new GestureDetector(new ViewFlipperSlider(mOnSwipeLeft, mOnSwipeRight));
 

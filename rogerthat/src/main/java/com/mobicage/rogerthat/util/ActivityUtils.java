@@ -21,6 +21,7 @@ package com.mobicage.rogerthat.util;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.Bundle;
 
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MoreActivity;
@@ -44,45 +45,48 @@ import com.mobicage.rogerthat.util.logging.L;
 
 public class ActivityUtils {
 
-    public static void goToActivity(Context context, Class clazz, boolean clearStack) {
+    public static void goToActivity(Context context, Class clazz, boolean clearStack, Bundle extras) {
         Intent i = new Intent(context, clazz);
         if (clearStack) {
             i.addFlags(MainActivity.FLAG_CLEAR_STACK);
         }
+        if (extras != null) {
+            i.putExtras(extras);
+        }
         context.startActivity(i);
     }
 
-    public static boolean goToActivity(ServiceBoundActivity context, String activityName, boolean clearStack, boolean collapse) {
+    public static boolean goToActivity(ServiceBoundActivity context, String activityName, boolean clearStack, boolean collapse, Bundle extras) {
         if ("news".equals(activityName)) {
-            goToActivity(context, NewsActivity.class, clearStack);
+            goToActivity(context, NewsActivity.class, clearStack, extras);
         } else if ("messages".equals(activityName)) {
-            goToActivity(context, MessagingActivity.class, clearStack);
+            goToActivity(context, MessagingActivity.class, clearStack, extras);
         } else if ("scan".equals(activityName)) {
-            goToActivity(context, ScanTabActivity.class, clearStack);
+            goToActivity(context, ScanTabActivity.class, clearStack, extras);
         } else if ("services".equals(activityName)) {
-            goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_UNSPECIFIED, clearStack, collapse);
+            goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_UNSPECIFIED, clearStack, collapse, extras);
         } else if ("friends".equals(activityName)) {
-            goToUserFriendsActivity(context, clearStack);
+            goToUserFriendsActivity(context, clearStack, extras);
         } else if ("directory".equals(activityName)) {
-            goToFriendSearchActivity(context, clearStack);
+            goToFriendSearchActivity(context, clearStack, extras);
         } else if ("profile".equals(activityName)) {
-            goToActivity(context, ProfileActivity.class, clearStack);
+            goToActivity(context, ProfileActivity.class, clearStack, extras);
         } else if ("more".equals(activityName)) {
-            goToActivity(context, MoreActivity.class, clearStack);
+            goToActivity(context, MoreActivity.class, clearStack, extras);
         } else if ("settings".equals(activityName)) {
-            goToActivity(context, SettingsActivity.class, clearStack);
+            goToActivity(context, SettingsActivity.class, clearStack, extras);
         } else if ("community_services".equals(activityName)) {
-            goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_CITY, clearStack, collapse);
+            goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_CITY, clearStack, collapse, extras);
         } else if ("merchants".equals(activityName)) {
-            goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_PROFIT, clearStack, collapse);
+            goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_PROFIT, clearStack, collapse, extras);
         } else if ("associations".equals(activityName)) {
-            goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_NON_PROFIT, clearStack, collapse);
+            goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_NON_PROFIT, clearStack, collapse, extras);
         } else if ("emergency_services".equals(activityName)) {
-            goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_EMERGENCY, clearStack, collapse);
+            goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_EMERGENCY, clearStack, collapse, extras);
         } else if ("stream".equals(activityName)) {
-            goToActivity(context, HistoryListActivity.class, clearStack);
+            goToActivity(context, HistoryListActivity.class, clearStack, extras);
         } else if ("qrcode".equals(activityName)) {
-            goToActivity(context, QRCodeActivity.class, clearStack);
+            goToActivity(context, QRCodeActivity.class, clearStack, extras);
         } else {
             L.bug("unknown goToActivity: " + activityName);
             return false;
@@ -90,15 +94,15 @@ public class ActivityUtils {
         return true;
     }
 
-    public static void goToMessagingActivity(Context context, boolean clearStack) {
-        goToActivity(context, MessagingActivity.class, clearStack);
+    public static void goToMessagingActivity(Context context, boolean clearStack, Bundle extras) {
+        goToActivity(context, MessagingActivity.class, clearStack, extras);
     }
 
-    public static void goToUserFriendsActivity(Context context, boolean clearStack) {
-        goToActivity(context, UserFriendsActivity.class, clearStack);
+    public static void goToUserFriendsActivity(Context context, boolean clearStack, Bundle extras) {
+        goToActivity(context, UserFriendsActivity.class, clearStack, extras);
     }
 
-    public static void goToServicesActivity(final ServiceBoundActivity context, int organizationType, boolean clearStack, boolean collapse) {
+    public static void goToServicesActivity(final ServiceBoundActivity context, int organizationType, boolean clearStack, boolean collapse, Bundle extras) {
         if (collapse) {
             FriendStore friendStore = context.getMainService().getPlugin(FriendsPlugin.class).getStore();
             long count = 0;
@@ -125,23 +129,26 @@ public class ActivityUtils {
         if (clearStack) {
             i.addFlags(MainActivity.FLAG_CLEAR_STACK);
         }
+        if (extras != null) {
+            i.putExtras(extras);
+        }
         context.startActivity(i);
     }
 
-    public static void goToScanActivity(Context context, boolean clearStack) {
-        goToActivity(context, ScanTabActivity.class, clearStack);
+    public static void goToScanActivity(Context context, boolean clearStack, Bundle extras) {
+        goToActivity(context, ScanTabActivity.class, clearStack, extras);
     }
 
-    public static void goToMoreActivity(Context context, boolean clearStack) {
-        goToActivity(context, MoreActivity.class, clearStack);
+    public static void goToMoreActivity(Context context, boolean clearStack, Bundle extras) {
+        goToActivity(context, MoreActivity.class, clearStack, extras);
     }
 
-    public static void goToProfileActivity(Context context, boolean clearStack) {
-        goToActivity(context, ProfileActivity.class, clearStack);
+    public static void goToProfileActivity(Context context, boolean clearStack, Bundle extras) {
+        goToActivity(context, ProfileActivity.class, clearStack, extras);
     }
 
-    public static void goToFriendSearchActivity(Context context, boolean clearStack) {
-        goToActivity(context, FriendSearchActivity.class, clearStack);
+    public static void goToFriendSearchActivity(Context context, boolean clearStack, Bundle extras) {
+        goToActivity(context, FriendSearchActivity.class, clearStack, extras);
     }
 
     public static void goToActivityBehindTag(final ServiceBoundActivity context, final String serviceEmail, final String tag) {

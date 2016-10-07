@@ -380,8 +380,8 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
 
         setupIntentFilter();
 
-        if (this instanceof NewsOptionsActivity) {
-            L.d("not subscribing to news when in NewsOptionsActivity");
+        if (this instanceof NewsPinnedActivity) {
+            L.d("not subscribing to news when in NewsPinnedActivity");
         } else {
             final ConfigurationProvider configurationProvider = mService.getConfigurationProvider();
             SafeRunnable runnable = new SafeRunnable() {
@@ -427,8 +427,8 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
 
     @Override
     protected void onServiceUnbound() {
-        if (this instanceof NewsOptionsActivity) {
-            L.d("not clearing cache when in NewsOptionsActivity");
+        if (this instanceof NewsPinnedActivity) {
+            L.d("not clearing cache when in NewsPinnedActivity");
         } else {
             newsStore.clearCache();
         }
@@ -626,7 +626,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
         T.UI();
         switch (item.getItemId()) {
             case R.id.saved:
-                Intent i = new Intent(this, NewsOptionsActivity.class);
+                Intent i = new Intent(this, NewsPinnedActivity.class);
                 this.startActivity(i);
                 return true;
         }

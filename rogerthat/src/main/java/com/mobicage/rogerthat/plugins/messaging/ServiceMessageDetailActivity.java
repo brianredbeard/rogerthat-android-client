@@ -228,7 +228,6 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
         mDisplayWidth = UIUtils.getDisplayWidth(this);
 
         setContentView(R.layout.message_detail);
-        setNavigationBarBurgerVisible(false, true);
 
         findViewById(R.id.expand).setOnClickListener(new View.OnClickListener() {
             @Override

@@ -82,7 +82,6 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
     @Override
     protected void onServiceBound() {
         setContentView(R.layout.send_message_button);
-        setNavigationBarBurgerVisible(false, true);
         setActivityName("send_message_button");
         setTitle(R.string.title_buttons);
 

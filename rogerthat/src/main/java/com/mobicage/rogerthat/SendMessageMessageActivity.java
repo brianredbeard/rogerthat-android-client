@@ -58,7 +58,6 @@ public class SendMessageMessageActivity extends ServiceBoundActivity {
         T.UI();
 
         setContentView(R.layout.send_message_message);
-        setNavigationBarBurgerVisible(false, true);
         setActivityName("send_message_message");
         setTitle(R.string.title_message);
 

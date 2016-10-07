@@ -58,7 +58,6 @@ public class ChatInfoActivity extends ServiceBoundActivity {
         super.onCreate(savedInstanceState);
         mChatKey = getIntent().getStringExtra(CHAT_KEY);
         setContentView(R.layout.chat_info);
-        setNavigationBarBurgerVisible(false, true);
         setTitle(R.string.about);
     }
 

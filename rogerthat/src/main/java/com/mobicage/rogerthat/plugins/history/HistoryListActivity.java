@@ -51,7 +51,6 @@ public class HistoryListActivity extends ServiceBoundCursorListActivity implemen
     protected void onCreate(Bundle savedInstanceState) {
         T.UI();
         setContentView(R.layout.activity);
-        setNavigationBarBurgerVisible(false, true);
         setListView((ListView) findViewById(R.id.activity_list));
         super.onCreate(savedInstanceState);
     }

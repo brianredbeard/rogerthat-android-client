@@ -113,7 +113,7 @@ public class QRCodeActivity extends ServiceBoundActivity {
 
         switch (item.getItemId()) {
             case R.id.scan:
-                ActivityUtils.goToScanActivity(QRCodeActivity.this, false);
+                ActivityUtils.goToScanActivity(QRCodeActivity.this, false, null);
                 return true;
         }
         return super.onOptionsItemSelected(item);

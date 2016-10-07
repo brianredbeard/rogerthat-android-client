@@ -55,7 +55,6 @@ public class MembersActivity extends ServiceBoundActivity {
     @Override
     protected void onServiceBound() {
         setContentView(R.layout.message_thread_members);
-        setNavigationBarBurgerVisible(false, true);
         setTitle(R.string.members);
 
         Intent intent = getIntent();

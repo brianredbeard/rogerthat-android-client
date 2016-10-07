@@ -617,8 +617,12 @@ public class MainActivity extends ServiceBoundActivity {
         final Intent homeActivityIntent;
         if (AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.messaging) {
             homeActivityIntent  = new Intent(this, MessagingActivity.class);
+            homeActivityIntent.putExtra("show_drawer", true);
+            homeActivityIntent.putExtra("show_drawer_icon", true);
         } else if (AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.news) {
             homeActivityIntent  = new Intent(this, NewsActivity.class);
+            homeActivityIntent.putExtra("show_drawer", true);
+            homeActivityIntent.putExtra("show_drawer_icon", true);
         } else {
             homeActivityIntent  = new Intent(this, HomeActivity.class);
         }

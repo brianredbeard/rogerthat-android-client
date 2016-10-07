@@ -668,7 +668,6 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.action_screen);
-        setNavigationBarBurgerVisible(false, true);
         mBranding = (WebView) findViewById(R.id.branding);
         WebSettings brandingSettings = mBranding.getSettings();
         brandingSettings.setJavaScriptEnabled(true);
