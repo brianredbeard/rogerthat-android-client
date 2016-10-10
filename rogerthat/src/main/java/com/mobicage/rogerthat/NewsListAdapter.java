@@ -109,6 +109,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     private Map<String, ArrayList<Resizable16by6ImageView>> mImageViews = new HashMap<>();
     private Set<Long> mReadMoreItems = new HashSet<>();
 
+    private Map<String, Set<Long>> mServiceItems = new HashMap<>();
     private List<Long> mItems = new ArrayList<>();
     private List<Long> mVisibleItems = new ArrayList<>();
     private List<Long> mRequestedPartialItems = new ArrayList<>();
@@ -118,6 +119,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     private final int mDisplayWidth;
 
     private int mRequestMoreNewsPosition = 0;
+    private Button mCurrentActionBtn;
 
     public NewsListAdapter(NewsActivity activity, MainService mainService) {
         mActivity = activity;
@@ -229,6 +231,14 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         notifyDataSetChanged();
     }
 
+    private void refreshItemsOfService(String email) {
+        if (mServiceItems.containsKey(email)) {
+            for (Long newsId : mServiceItems.get(email)) {
+                updateView(newsId);
+            }
+        }
+    }
+
     private final Comparator<Long> comparator = new Comparator<Long>() {
         @Override
         public int compare(Long item1, Long item2) {
@@ -320,6 +330,11 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
 
     private void populateView(final ViewHolder viewHolder, final int position) {
         final NewsItem newsItem = mActivity.newsStore.getNewsItem(mVisibleItems.get(position));
+
+        if (!mServiceItems.containsKey(newsItem.sender.email)) {
+            mServiceItems.put(newsItem.sender.email, new HashSet<Long>());
+        }
+        mServiceItems.get(newsItem.sender.email).add(newsItem.id);
 
         if (position >= (mRequestMoreNewsPosition - 10)) {
             getNewsItems(position);
@@ -535,10 +550,9 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
             final String buttonAction = actionInfo.get("androidAction");
             final String buttonUrl = actionInfo.get("androidUrl");
 
-            Button btn = (Button) mLayoutInflater.inflate(R.layout.news_list_item_action, viewHolder.actions, false);
+            final Button btn = (Button) mLayoutInflater.inflate(R.layout.news_list_item_action, viewHolder.actions, false);
             viewHolder.actions.addView(btn);
             btn.setText(button.caption);
-
             btn.setOnClickListener(new SafeViewOnClickListener() {
                 @Override
                 public void safeOnClick(View v) {
@@ -575,6 +589,9 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                                 .setPositiveButton(R.string.yes, new SafeDialogInterfaceOnClickListener() {
                                     @Override
                                     public void safeOnClick(DialogInterface dialog, int which) {
+                                        mActivity.progressDialog.show();
+                                        mActivity.expectedEmailHash = newsItem.sender.email;
+                                        mCurrentActionBtn = btn;
                                         mActivity.friendsPlugin.inviteFriend(newsItem.sender.email, null, null, true);
                                     }
                                 }).setNegativeButton(R.string.no, null).create().show();
@@ -906,6 +923,23 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
             updateView(intent.getLongExtra("id", -1));
         } else if (FriendsPlugin.SERVICE_DATA_UPDATED.equals(action)) {
             refreshView();
+        } else if (FriendsPlugin.FRIEND_REMOVED_INTENT.equals(action) || FriendsPlugin.FRIEND_MARKED_FOR_REMOVAL_INTENT.equals(action)) {
+            refreshItemsOfService(intent.getStringExtra("email"));
+        } else if (FriendsPlugin.FRIEND_ADDED_INTENT.equals(action)) {
+            String email = intent.getStringExtra("email"); // todo ruben
+
+            if (mActivity.expectedEmailHash != null && mActivity.expectedEmailHash.equals(email)) {
+                final int existence = mActivity.friendsPlugin.getStore().getExistence(email);
+                if (Friend.ACTIVE == existence) {
+                    mActivity.progressDialog.dismiss();
+                    mCurrentActionBtn.callOnClick();
+                }
+            }
+
+            refreshItemsOfService(email);
+
+        } else if (FriendsPlugin.FRIENDS_LIST_REFRESHED.equals(action)) {
+            notifyDataSetChanged();
         }
     }
 }
