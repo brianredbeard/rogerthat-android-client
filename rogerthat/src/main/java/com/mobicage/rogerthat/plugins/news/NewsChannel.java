@@ -13,6 +13,7 @@ import com.mobicage.rpc.Credentials;
 import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.to.news.AppNewsItemTO;
+import com.mobicage.to.news.NewsInfoTO;
 
 import org.jivesoftware.smack.util.Base64;
 import org.jivesoftware.smack.util.DNSUtil;
@@ -83,7 +84,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         NEWS_ROGER("NEWS ROGER"),
         ACK_NEWS_ROGER("ACK NEWS ROGER"),
         ACK_NEWS_READ("ACK NEWS READ"),
-        NEWS_STATS_READ("NEWS STATS READ"),
+        NEWS_STATS("NEWS STATS"),
         NEWS_READ_UPDATE("NEWS READ UPDATE"),
         NEWS_ROGER_UPDATE("NEWS ROGER UPDATE"),
         NEWS_PUSH("NEWS PUSH"),
@@ -344,8 +345,8 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
             case NEWS_READ_UPDATE:
                 newsReadUpdate(data);
                 break;
-            case NEWS_STATS_READ:
-                newsReadUpdate(data);
+            case NEWS_STATS:
+                newsStatsReceived(data);
                 break;
             case NEWS_ROGER_UPDATE:
                 newsRogerUpdate(data);
@@ -383,7 +384,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         mService.postOnBIZZHandler(new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
-                mNewsChannelCallbackHandler.newsRogerUpdate(newsId, friendEmail);
+                mNewsChannelCallbackHandler.newsRogerUpdate(newsId, new String[]{friendEmail});
             }
         });
     }
@@ -402,6 +403,33 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         });
     }
 
+    private void newsStatsReceived(String data) {
+        JSONObject jsonObject = (JSONObject) JSONValue.parse(data);
+        final Map<Long, Long> readCountMap = new HashMap<>();
+        final Map<Long, String[]> rogeredMap = new HashMap<>();
+        for (Object o : jsonObject.keySet()) {
+            String key = (String) o;
+            try {
+                Long newsId = Long.valueOf(key);
+                //noinspection unchecked
+                final NewsInfoTO newsInfo = new NewsInfoTO((Map<String, Object>) jsonObject.get(key));
+                readCountMap.put(newsId, newsInfo.reach);
+                rogeredMap.put(newsId, newsInfo.users_that_rogered);
+            } catch (IncompleteMessageException e) {
+                L.bug(e);
+            }
+        }
+        mService.postOnBIZZHandler(new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                for(Long newsId: rogeredMap.keySet()){
+                    mNewsChannelCallbackHandler.newsRogerUpdate(newsId, rogeredMap.get(newsId));
+                }
+                mNewsChannelCallbackHandler.newsReadUpdate(readCountMap);
+            }
+        });
+    }
+
     public void readNews(Long newsId) {
         addCallToDB(CONFIG_TYPE_READ, newsId);
         sendCommand(Command.NEWS_READ, newsId.toString());
@@ -413,7 +441,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
     }
 
     public void readStatsNews(List<Long> newsIds) {
-        sendCommand(Command.NEWS_STATS_READ, android.text.TextUtils.join(" ", newsIds));
+        sendCommand(Command.NEWS_STATS, android.text.TextUtils.join(" ", newsIds));
     }
 
     private void authenticate() {

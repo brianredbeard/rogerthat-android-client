@@ -531,9 +531,11 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
     }
 
     @Override
-    public void newsRogerUpdate(final long newsId, String friendEmail) {
+    public void newsRogerUpdate(final long newsId, String[] friendEmails) {
         T.BIZZ();
-        newsStore.addUser(newsId, friendEmail);
+        for(String friendEmail: friendEmails) {
+            newsStore.addUser(newsId, friendEmail);
+        }
         mService.postAtFrontOfUIHandler(new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
