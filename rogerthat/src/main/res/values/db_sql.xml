@@ -507,5 +507,11 @@ ORDER BY m.thread_dirty DESC, m.\"timestamp\" DESC;
     <string name="sql_configprovider_insert">INSERT OR REPLACE INTO ConfigurationProvider(category, valuetype, key, value) values (?, ?, ?, ?)</string>
     <string name="sql_configprovider_get">SELECT value FROM ConfigurationProvider WHERE category=? AND valuetype=? AND key=?</string>
     <string name="sql_configprovider_delete">DELETE FROM ConfigurationProvider WHERE category=? AND valuetype=? AND key=?</string>
-    <string name="sql_get_last_read_messsages">SELECT</string>
+
+    <string name="sql_pinned_news_by_index">
+        SELECT id, \"timestamp\", sender_email, sender_name, sender_avatar_id, title, message, image_url,
+        broadcast_type, reach, qr_code_content, qr_code_caption, version, flags, type, \"read\", pinned, rogered,
+        disabled, sort_timestamp, sort_priority
+        FROM news WHERE pinned = 1 ORDER BY "timestamp" DESC LIMIT ?, 1
+    </string>
 </resources>
