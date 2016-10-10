@@ -38,3 +38,4 @@ CustomCloudConstants.java
 .idea/libraries
 
 build
+.idea/gradle.xml

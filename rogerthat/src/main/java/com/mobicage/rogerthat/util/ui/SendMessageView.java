@@ -52,6 +52,12 @@ import android.widget.RadioButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.commonsware.cwac.cam2.AbstractCameraActivity;
+import com.commonsware.cwac.cam2.CameraActivity;
+import com.commonsware.cwac.cam2.Facing;
+import com.commonsware.cwac.cam2.FlashMode;
+import com.commonsware.cwac.cam2.VideoRecorderActivity;
+import com.commonsware.cwac.cam2.ZoomStyle;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.CannedButton;
 import com.mobicage.rogerthat.CannedButtons;
@@ -195,7 +201,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
         mAttachmentContainer = (FrameLayout) findViewById(R.id.attachment_container);
         mAttachmentPreview = (ImageView) findViewById(R.id.attachment_preview);
 
-        mAttachmentContainer.setOnClickListener(new SafeViewOnClickListener() {
+        findViewById(R.id.attachment_status).setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
                 mAttachmentContainer.setVisibility(View.GONE);
@@ -622,9 +628,14 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
 
         if (mActivity.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA) && mMainService.isPermitted(Manifest
                 .permission.CAMERA)) {
-            Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-            cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, mUriSavedFile);
-            cameraIntent.putExtra("outputFormat", Bitmap.CompressFormat.PNG.toString());
+            Intent cameraIntent = new CameraActivity.IntentBuilder(mActivity)
+                    .allowSwitchFlashMode()
+                    .facing(Facing.BACK)
+                    .to(mUriSavedFile)
+                    .flashModes(FlashMode.values())
+                    .confirmationQuality(0.5f)
+                    .updateMediaStore()
+                    .build();
             chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{cameraIntent});
         }
 
@@ -658,8 +669,12 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
         final Intent chooserIntent = Intent.createChooser(galleryIntent, mActivity.getString(R.string.select_source));
         if (mActivity.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA) && mMainService.isPermitted(Manifest
                 .permission.CAMERA)) {
-            Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_VIDEO_CAPTURE);
-            cameraIntent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 0);
+            Intent cameraIntent = new VideoRecorderActivity.IntentBuilder(mActivity)
+                    .facing(Facing.BACK)
+                    .to(mUriSavedFile)
+                    .updateMediaStore()
+                    .quality(AbstractCameraActivity.Quality.LOW)
+                    .build();
             chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{cameraIntent});
         }
 

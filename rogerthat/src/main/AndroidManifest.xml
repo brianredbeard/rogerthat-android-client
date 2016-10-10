@@ -494,6 +494,17 @@
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.NoTitleBar" >
         </activity>
+        <activity
+            android:name="com.commonsware.cwac.cam2.CameraActivity"
+            android:theme="@android:style/Theme.Holo.Light"
+            android:icon="@drawable/rogerthat_camera"
+            android:label="@string/camera" />
+        <activity
+            android:name="com.commonsware.cwac.cam2.VideoRecorderActivity"
+            android:theme="@android:style/Theme.Holo.Light"
+            android:icon="@drawable/rogerthat_camera"
+            android:label="@string/camera" />
+
         <receiver
             android:name="com.mobicage.rogerthat.widget.RogerthatWidgetProvider"
             android:exported="false"
