@@ -7,7 +7,7 @@ import java.util.Map;
 
 public interface NewsChannelCallbackHandler {
 
-    void newsRogerUpdate(long newsId, String friendEmail);
+    void newsRogerUpdate(long newsId, String[] friendEmails);
 
     MainService getMainService();
 

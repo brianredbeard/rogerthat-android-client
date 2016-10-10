@@ -142,7 +142,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         _20_DP_IN_PX = UIUtils.convertDipToPixels(this, 20);
         _42_DP_IN_PX = UIUtils.convertDipToPixels(this, 42);
 
-        mRenderedMessages = new HashSet<String>();
+        mRenderedMessages = new HashSet<>();
         final Intent intent = getIntent();
         mParentMessageKey = intent.getStringExtra(PARENT_MESSAGE_KEY);
         mFlags = intent.getLongExtra(MESSAGE_FLAGS, 0);
@@ -200,6 +200,15 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         Slider instance = new Slider(this, this,
             new LeftSwiper(this, mMessagingPlugin, mParentMessageKey, memberFilter), new RightSwiper(this,
                 mMessagingPlugin, mParentMessageKey, memberFilter));
+        instance.setOnDoubleTapListener(new Slider.OnDoubleTapListener() {
+            @Override
+            public boolean onDoubleTap(MotionEvent event) {
+                if (mSendMessageView.getVisibility() == View.VISIBLE) {
+                    mSendMessageView.showKeyboard();
+                }
+                return true;
+            }
+        });
         mGestureScanner = new GestureDetector(instance);
 
         UIUtils.showHint(this, mService, HINT_SWIPE, R.string.hint_swipe);
@@ -214,6 +223,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
 
     @Override
     protected void onServiceUnbound() {
+        mSendMessageView.hideKeyboard();
     }
 
     @Override
@@ -543,6 +553,13 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                 final File thumbnailFile = new File(attachmentFile.getAbsolutePath() + ".thumb");
                 if (thumbnailFile.exists()) {
                     thumbnail = ImageHelper.getBitmapFromFile(thumbnailFile.getAbsolutePath());
+                } else {
+                    try {
+                        mMessagingPlugin.createAttachmentThumbnail(attachmentFile.getAbsolutePath(), isImage,
+                                isVideo);
+                    } catch (Exception e) {
+                        L.e("Failed to generate attachment thumbnail", e);
+                    }
                 }
             }
 

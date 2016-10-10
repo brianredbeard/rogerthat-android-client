@@ -33,7 +33,7 @@ public class NewsConfigurationFactory {
     private final static long News_MAX_TRY_PREFERRED_PORT_MILLIS = 3 * 1000;
     private final static long NEWS_POLLING_INTERVAL_MILLIS = 2000;
 
-    private final static String NEWS_CONFIG_KEY = "news_config";
+    private final static String NEWS_CONFIG_KEY = "com.mobicage.rogerthat.plugins.news.config";
 
     private final SDCardLogger mLogger;
     private final NetworkConnectivityManager mConnectivityManager;
