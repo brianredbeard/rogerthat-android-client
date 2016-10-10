@@ -172,7 +172,7 @@ public class NewsStore implements Closeable {
     public boolean insertNewsItem(final AppNewsItemTO item) {
         T.BIZZ();
         if (mNewsItemDetailsCache.containsKey(item.id)) {
-            L.bug("news channel send new item that i already have...");
+            L.bug("news channel sent new item that I already have...");
             return false;
         }
 
