@@ -115,9 +115,9 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         mNewsChannelCallbackHandler = handler;
         mService = handler.getMainService();
         mConfigurationProvider = configurationProvider;
-        mIsSSL = false;
+        mIsSSL = false; // todo ruben const
 
-        loadCallFromDB();
+        loadCallsFromDB();
 
         if (mService.getNetworkConnectivityManager().isConnected()) {
             getConfiguration();
@@ -157,7 +157,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
             attemptToReconnect(10);
             return;
         }
-        
+
         L.d("Attemping to connect to news channel...");
         final SslContext sslCtx;
         if (mIsSSL) {
@@ -296,8 +296,10 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
                                 SafeRunnable safeRunnable = new SafeRunnable() {
                                     @Override
                                     protected void safeRun() throws Exception {
-                                        mIsRetryingToConnect = false;
-                                        connect();
+                                        if (mIsRetryingToConnect) {
+                                            mIsRetryingToConnect = false;
+                                            connect();
+                                        }
                                     }
                                 };
                                 mService.postAtFrontOfBIZZHandler(safeRunnable);
@@ -411,9 +413,13 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
             try {
                 Long newsId = Long.valueOf(key);
                 //noinspection unchecked
-                final NewsInfoTO newsInfo = new NewsInfoTO((Map<String, Object>) jsonObject.get(key));
-                readCountMap.put(newsId, newsInfo.reach);
-                rogeredMap.put(newsId, newsInfo.users_that_rogered);
+                Object v = jsonObject.get(key);
+                if (v != null) {
+                    final NewsInfoTO newsInfo = new NewsInfoTO((Map<String, Object>) jsonObject.get(key));
+                    readCountMap.put(newsId, newsInfo.reach);
+                    rogeredMap.put(newsId, newsInfo.users_that_rogered);
+                }
+
             } catch (IncompleteMessageException e) {
                 L.bug(e);
             }
@@ -481,7 +487,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         } else if (CONFIG_TYPE_ROGER.equals(type)) {
             mRogersToSend.add(newsId);
         } else {
-            L.e("saveCallInDB with unkown type: " + type);
+            L.e("addCallToDB with unkown type: " + type);
             return;
         }
 
@@ -494,7 +500,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         } else if (CONFIG_TYPE_ROGER.equals(type)) {
             mRogersToSend.remove(newsId);
         } else {
-            L.e("saveCallInDB with unkown type: " + type);
+            L.e("removeCallFromDB with unkown type: " + type);
             return;
         }
 
@@ -520,7 +526,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         mConfigurationProvider.updateConfigurationNow(CONFIGKEY, cfg);
     }
 
-    private void loadCallFromDB() {
+    private void loadCallsFromDB() {
         Configuration cfg = mConfigurationProvider.getConfiguration(CONFIGKEY);
         final String readNewsIdsJSON = cfg.get(CONFIG_TYPE_READ, null);
         if (readNewsIdsJSON != null) {
