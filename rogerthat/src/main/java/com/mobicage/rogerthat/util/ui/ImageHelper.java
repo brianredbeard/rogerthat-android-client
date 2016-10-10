@@ -24,6 +24,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
@@ -36,6 +37,40 @@ import com.soundcloud.android.crop.CropUtil;
 // Based on ideas from http://ruibm.com/?p=184
 
 public class ImageHelper {
+
+    public static Bitmap getRoundTopCornerBitmap(final Bitmap bitmap, int radius) {
+        if (SystemUtils.getAndroidVersion() <= 3) {
+            // burden on performance
+            return bitmap;
+        }
+
+        if (bitmap == null)
+            return null; // saw this once when phone complains about "not enough storage"
+
+        int w = bitmap.getWidth();
+        int h = bitmap.getHeight();
+        Bitmap output = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+
+        final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        final RectF rectF = new RectF(0, 0, w, h);
+
+        canvas.drawRoundRect(rectF, radius, radius, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, null, rectF, paint);
+
+        // draw the top corners
+        final Rect clipRect = new Rect(0, radius, w, h);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
+        canvas.drawRect(clipRect, paint);
+
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, null, rectF, paint);
+
+        bitmap.recycle();
+
+        return output;
+    }
 
     public static Bitmap getRoundedCornerAvatar(final Bitmap bitmap) {
         if (bitmap == null)

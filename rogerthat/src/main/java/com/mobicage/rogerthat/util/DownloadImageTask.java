@@ -32,16 +32,25 @@ import java.io.InputStream;
 
 public class DownloadImageTask extends SafeAsyncTask<String, Void, Bitmap> {
     boolean rounded;
+    int topRadius;
     ImageView bmImage;
 
     public DownloadImageTask(ImageView bmImage) {
         this.bmImage = bmImage;
         this.rounded = false;
+        this.topRadius = 0;
     }
 
     public DownloadImageTask(ImageView bmImage, boolean rounded) {
         this.bmImage = bmImage;
         this.rounded = rounded;
+        this.topRadius = 0;
+    }
+
+    public DownloadImageTask(ImageView bmImage, boolean rounded, int topRadius) {
+        this.bmImage = bmImage;
+        this.rounded = rounded;
+        this.topRadius = topRadius;
     }
 
     @Override
@@ -60,7 +69,9 @@ public class DownloadImageTask extends SafeAsyncTask<String, Void, Bitmap> {
     @Override
     protected void onPostExecute(Bitmap result) {
         if (result != null) {
-            if (rounded) {
+            if (rounded && topRadius > 0) {
+                bmImage.setImageBitmap(ImageHelper.getRoundTopCornerBitmap(result, topRadius));
+            } else if (rounded) {
                 bmImage.setImageBitmap(ImageHelper.getRoundedCornerAvatar(result));
             } else {
                 bmImage.setImageBitmap(result);

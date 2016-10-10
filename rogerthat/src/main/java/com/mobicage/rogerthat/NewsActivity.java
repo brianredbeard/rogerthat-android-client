@@ -90,7 +90,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
     private String mRequestNewsItemsUUID;
 
     private long mNewUpdatedSinceTimestamp;
-    private ProgressDialog mProgressDialog;
+    protected ProgressDialog progressDialog;
 
     private Set<Long> mNewNewsItems = new HashSet<>();
     private Timer mChannelWatchTimer;
@@ -100,10 +100,10 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.news);
 
-        mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setMessage(getString(R.string.loading));
-        mProgressDialog.setIndeterminate(true);
-        mProgressDialog.setCancelable(false);
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage(getString(R.string.loading));
+        progressDialog.setIndeterminate(true);
+        progressDialog.setCancelable(false);
 
         swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -123,6 +123,10 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
         filter.addAction(NewsPlugin.DISABLE_NEWS_ITEM_INTENT);
         filter.addAction(FriendsPlugin.FRIEND_INFO_RECEIVED_INTENT);
         filter.addAction(FriendsPlugin.SERVICE_DATA_UPDATED);
+        filter.addAction(FriendsPlugin.FRIEND_REMOVED_INTENT);
+        filter.addAction(FriendsPlugin.FRIEND_MARKED_FOR_REMOVAL_INTENT);
+        filter.addAction(FriendsPlugin.FRIEND_ADDED_INTENT);
+        filter.addAction(FriendsPlugin.FRIENDS_LIST_REFRESHED);
         filter.addAction(NetworkConnectivityManager.INTENT_NETWORK_UP);
         filter.addAction(NetworkConnectivityManager.INTENT_NETWORK_DOWN);
         registerReceiver(mBroadcastReceiver, filter);
@@ -168,7 +172,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
 
     private void processFriendInfoReceived(Intent intent) {
         if (expectedEmailHash != null && expectedEmailHash.equals(intent.getStringExtra(ProcessScanActivity.EMAILHASH))) {
-            mProgressDialog.dismiss();
+            progressDialog.dismiss();
 
             if (intent.getBooleanExtra(ProcessScanActivity.SUCCESS, true)) {
                 Intent launchIntent = new Intent(NewsActivity.this, ServiceDetailActivity.class);
@@ -609,7 +613,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
     }
 
     protected void requestFriendInfoByEmailHash(String emailHash) {
-        mProgressDialog.show();
+        progressDialog.show();
 
         final GetUserInfoRequestTO request = new GetUserInfoRequestTO();
         request.code = emailHash;
