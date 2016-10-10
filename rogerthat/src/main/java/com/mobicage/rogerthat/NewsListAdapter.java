@@ -93,8 +93,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
 
     private final int _1_DP;
     private final int _15_DP;
-    private final int _32_DP;
-    private final int _35_DP;
+    private final int _27_DP;
 
     private NewsActivity mActivity;
     private final MainService mMainService;
@@ -126,8 +125,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         mMainService = mainService;
         _1_DP = UIUtils.convertDipToPixels(mActivity, 1);
         _15_DP = UIUtils.convertDipToPixels(mActivity, 15);
-        _32_DP = UIUtils.convertDipToPixels(mActivity, 32);
-        _35_DP = UIUtils.convertDipToPixels(mActivity, 35);
+        _27_DP = UIUtils.convertDipToPixels(mActivity, 27);
         mLayoutInflater = LayoutInflater.from(mActivity);
         mMessagingPlugin = mMainService.getPlugin(MessagingPlugin.class);
 
@@ -243,6 +241,13 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     private final Comparator<Long> comparator = new Comparator<Long>() {
         @Override
         public int compare(Long item1, Long item2) {
+            if (mActivity.idToShowAtTop > 0) {
+                if (item1 == mActivity.idToShowAtTop) {
+                    return -1;
+                } else if (item2 == mActivity.idToShowAtTop) {
+                    return 1;
+                }
+            }
             NewsItemDetails details1 = mActivity.newsStore.getNewsItemDetails(item1);
             NewsItemDetails details2 = mActivity.newsStore.getNewsItemDetails(item2);
 
@@ -386,7 +391,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
 
         LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) viewHolder.details.getLayoutParams();
         if (newsItem.users_that_rogered.length == 0 && !isImageVisible && !isQrCodeVisible) {
-            lp.setMargins(0, _32_DP, 0, 0);
+            lp.setMargins(0, _27_DP, 0, 0);
         } else {
             lp.setMargins(0, 0, 0, 0);
         }
@@ -704,7 +709,9 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 File cachedFile = mCachedDownloader.getCachedFilePath(newsItem.image_url);
                 if (cachedFile != null) {
                     Bitmap bm = BitmapFactory.decodeFile(cachedFile.getAbsolutePath());
-                    viewHolder.image.setImageBitmap(ImageHelper.getRoundTopCornerBitmap(bm, corderRadius));
+                    if (newsItem.users_that_rogered.length == 0) {
+                        viewHolder.image.setImageBitmap(ImageHelper.getRoundTopCornerBitmap(bm, corderRadius));
+                    }
                     viewHolder.image.setVisibility(View.VISIBLE);
                 } else {
                     if (!mImageViews.containsKey(newsItem.image_url)) {
@@ -713,8 +720,10 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                     mImageViews.get(newsItem.image_url).add(viewHolder.image);
                     // item started downloading intent when ready
                 }
-            } else {
+            } else if (newsItem.users_that_rogered.length == 0) {
                 new DownloadImageTask(viewHolder.image, true, corderRadius).execute(newsItem.image_url);
+            } else {
+                new DownloadImageTask(viewHolder.image).execute(newsItem.image_url);
             }
         }
         return true;
@@ -877,7 +886,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         viewHolder.qrCodeContainer.setVisibility(View.VISIBLE);
 
         if (newsItem.users_that_rogered.length == 0 && TextUtils.isEmptyOrWhitespace(newsItem.image_url)) {
-            viewHolder.qrCodeContainer.setPadding(0, _32_DP, 0, 0);
+            viewHolder.qrCodeContainer.setPadding(0, _27_DP, 0, 0);
         }
     }
 

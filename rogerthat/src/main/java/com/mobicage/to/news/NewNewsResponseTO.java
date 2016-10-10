@@ -16,12 +16,26 @@
  * @@license_version:1.1@@
  */
 
-package com.mobicage.capi.news;
+package com.mobicage.to.news;
 
-public interface IClientRpc {
+import com.mobicage.rpc.IncompleteMessageException;
 
-    com.mobicage.to.news.DisableNewsResponseTO disableNews(com.mobicage.to.news.DisableNewsRequestTO request) throws java.lang.Exception;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-    com.mobicage.to.news.NewNewsResponseTO newNews(com.mobicage.to.news.NewNewsRequestTO request) throws java.lang.Exception;
+public class NewNewsResponseTO implements com.mobicage.rpc.IJSONable {
+
+
+    public NewNewsResponseTO() {
+    }
+
+    public NewNewsResponseTO(Map<String, Object> json) throws IncompleteMessageException {
+    }
+
+    @Override
+    public Map<String, Object> toJSONMap() {
+        Map<String, Object> obj = new LinkedHashMap<String, Object>();
+        return obj;
+    }
 
 }

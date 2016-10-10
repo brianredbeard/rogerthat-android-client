@@ -7,4 +7,5 @@
     <integer name="photo_upload_pending">116</integer>
     <integer name="transfer_complete_continue">118</integer>
     <integer name="forwarding_logs">120</integer>
+    <integer name="news_item">122</integer>
 </resources>

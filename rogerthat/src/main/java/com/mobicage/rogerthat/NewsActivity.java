@@ -95,6 +95,8 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
     private Set<Long> mNewNewsItems = new HashSet<>();
     private Timer mChannelWatchTimer;
 
+    protected long idToShowAtTop = -1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -113,6 +115,9 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
             }
         });
         swipeContainer.setColorSchemeResources(R.color.mc_primary_color, R.color.mc_secondary_color);
+
+        Intent i = getIntent();
+        idToShowAtTop = i.getLongExtra("id", -1);
     }
 
     protected void setupIntentFilter() {
@@ -120,6 +125,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
         filter.addAction(NewsPlugin.GET_NEWS_RECEIVED_INTENT);
         filter.addAction(NewsPlugin.GET_NEWS_ITEMS_RECEIVED_INTENT);
         filter.addAction(NewsPlugin.PINNED_NEWS_ITEM_INTENT);
+        filter.addAction(NewsPlugin.NEW_NEWS_ITEM_INTENT);
         filter.addAction(NewsPlugin.DISABLE_NEWS_ITEM_INTENT);
         filter.addAction(FriendsPlugin.FRIEND_INFO_RECEIVED_INTENT);
         filter.addAction(FriendsPlugin.SERVICE_DATA_UPDATED);
@@ -162,6 +168,9 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
                     mIsConnectedToInternet = false;
                     setupConnectedToInternet();
                 }
+            } else if (NewsPlugin.NEW_NEWS_ITEM_INTENT.equals(action)) {
+                mNewNewsItems.add(intent.getLongExtra("id", -1));
+                setupUpdatesAvailable();
             } else {
                 nla.handleIntent(context, intent);
             }

@@ -84,6 +84,7 @@ public class MainActivity extends ServiceBoundActivity {
     public static final String ACTION_NOTIFICATION_FACEBOOK_SCAN = "ROGERTHAT_ACTION_NOTIFICATION_SCAN_FB_RESULT ";
     public static final String ACTION_NOTIFICATION_PHOTO_UPLOAD_DONE = "ROGERTHAT_ACTION_NOTIFICATION_PHOTO_UPLOAD_DONE";
     public static final String ACTION_NOTIFICATION_OPEN_APP = "ROGERTHAT_ACTION_NOTIFICATION_OPEN_APP";
+    public static final String ACTION_NOTIFICATION_NEW_NEWS = "ROGERTHAT_ACTION_NOTIFICATION_NEW_NEWS";
 
     public static final String ACTION_REGISTERED = "ROGERTHAT_ACTION_REGISTERED";
     public static final String ACTION_COMPLETE_PROFILE = "ROGERTHAT_ACTION_COMPLETE_PROFILE";
@@ -186,6 +187,9 @@ public class MainActivity extends ServiceBoundActivity {
 
         } else if (ACTION_NOTIFICATION_MESSAGE_UPDATES.equals(intentAction)) {
             processMessageUpdatesIntent(intent, hasRegistered);
+
+        } else if (ACTION_NOTIFICATION_NEW_NEWS.equals(intentAction)) {
+            processNewNewsIntent(intent, hasRegistered);
 
         } else if (ACTION_REGISTERED.equals(intentAction)) {
             showRegistrationCompleteDialogAndGoToHomeActivity();
@@ -341,6 +345,18 @@ public class MainActivity extends ServiceBoundActivity {
                 startActivity(i);
                 finish();
             }
+        } else {
+            alertMustRegisterFirst();
+        }
+    }
+
+    private void processNewNewsIntent(Intent intent, boolean hasRegistered) {
+        if (hasRegistered) {
+            Intent i = new Intent(this, NewsActivity.class);
+            i.putExtra("show_drawer_icon", true);
+            i.putExtra("id", intent.getLongExtra("id", -1));
+            startActivity(i);
+            finish();
         } else {
             alertMustRegisterFirst();
         }

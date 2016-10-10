@@ -373,7 +373,7 @@ public class NewsStore implements Closeable {
     }
 
     public NewsItem getNewsItem(long newsId) {
-        T.UI();
+        T.dontCare(); // T.UI() or T.BIZZ();
         if (mNewsItemsCache.containsKey(newsId)) {
             return mNewsItemsCache.get(newsId);
         }
@@ -419,7 +419,7 @@ public class NewsStore implements Closeable {
     }
 
     private void addButtons(NewsItem newsItem) {
-        T.UI();
+        T.dontCare(); // T.UI() or T.BIZZ();
         final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_news_get_buttons),
                 new String[] { "" + newsItem.id });
         try {
@@ -438,7 +438,7 @@ public class NewsStore implements Closeable {
     }
 
     private NewsActionButtonTO readButton(Cursor bcurs) {
-        T.UI();
+        T.dontCare(); // T.UI() or T.BIZZ();
         NewsActionButtonTO button = new NewsActionButtonTO();
         button.id = bcurs.getString(0);
         button.caption = bcurs.getString(1);
@@ -448,7 +448,7 @@ public class NewsStore implements Closeable {
     }
 
     public void addRogeredUsers(NewsItem newsItem) {
-        T.UI();
+        T.dontCare(); // T.UI() or T.BIZZ();
         final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_news_get_rogered_users),
                 new String[] { "" + newsItem.id });
         try {

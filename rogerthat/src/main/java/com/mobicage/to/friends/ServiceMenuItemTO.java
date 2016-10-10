@@ -32,6 +32,7 @@ public class ServiceMenuItemTO implements com.mobicage.rpc.IJSONable {
     public String iconName;
     public String label;
     public boolean requiresWifi;
+    public long[] roles;
     public boolean runInBackground;
     public String screenBranding;
     public String staticFlowHash;
@@ -93,6 +94,19 @@ public class ServiceMenuItemTO implements com.mobicage.rpc.IJSONable {
         } else {
             this.requiresWifi = false;
         }
+        if (json.containsKey("roles")) {
+            org.json.simple.JSONArray val_arr = (org.json.simple.JSONArray) json.get("roles");
+            if (val_arr == null) {
+                this.roles = null;
+            } else {
+                this.roles = new long[val_arr.size()];
+                for (int i=0; i < val_arr.size(); i++) {
+                    this.roles[i] = ((Long) val_arr.get(i)).longValue();
+                }
+            }
+        } else {
+            throw new IncompleteMessageException("com.mobicage.to.friends.ServiceMenuItemTO object is missing field 'roles'");
+        }
         if (json.containsKey("runInBackground")) {
             Object val = json.get("runInBackground");
             this.runInBackground = ((Boolean) val).booleanValue();
@@ -132,6 +146,15 @@ public class ServiceMenuItemTO implements com.mobicage.rpc.IJSONable {
         obj.put("iconName", this.iconName);
         obj.put("label", this.label);
         obj.put("requiresWifi", this.requiresWifi);
+        if (this.roles == null) {
+            obj.put("roles", null);
+        } else {
+            org.json.simple.JSONArray arr = new org.json.simple.JSONArray();
+            for (int i=0; i < this.roles.length; i++) {
+                arr.add(this.roles[i]);
+            }
+            obj.put("roles", arr);
+        }
         obj.put("runInBackground", this.runInBackground);
         obj.put("screenBranding", this.screenBranding);
         obj.put("staticFlowHash", this.staticFlowHash);

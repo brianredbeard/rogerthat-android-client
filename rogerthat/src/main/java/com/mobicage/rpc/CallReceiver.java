@@ -167,6 +167,9 @@ public class CallReceiver {
         if ("com.mobicage.capi.news.disableNews".equals(function)) {
             return comMobicageCapiNewsIClientRpc.disableNews(Parser.ComMobicageToNewsDisableNewsRequestTO(call.arguments.get("request")));
         }
+        if ("com.mobicage.capi.news.newNews".equals(function)) {
+            return comMobicageCapiNewsIClientRpc.newNews(Parser.ComMobicageToNewsNewNewsRequestTO(call.arguments.get("request")));
+        }
         if ("com.mobicage.capi.services.receiveApiCallResult".equals(function)) {
             return comMobicageCapiServicesIClientRpc.receiveApiCallResult(Parser.ComMobicageToServiceReceiveApiCallResultRequestTO(call.arguments.get("request")));
         }
