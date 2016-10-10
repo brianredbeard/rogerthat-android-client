@@ -314,7 +314,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
 
         if (statsToRequest.size() > 0) {
             if (mActivity.newsChannel != null) {
-                mActivity.newsChannel.readStatsNews(statsToRequest);
+                mActivity.newsChannel.statsNews(statsToRequest);
             }
         }
 

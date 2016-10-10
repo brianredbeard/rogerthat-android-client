@@ -140,22 +140,22 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
     public void connect() {
         T.BIZZ();
         if (mIsConnected) {
-            L.d("Already connected to news mChannel");
+            L.d("Already connected to news channel");
             return;
         } else if (!mService.getNetworkConnectivityManager().isConnected()) {
-            L.d("Cannot connect to news mChannel: no internet connection.");
+            L.d("Cannot connect to news channel: no internet connection.");
             return;
         }
         if (mHost == null) {
-            L.d("Not connecting to news mChannel because no mHost was found");
+            L.d("Not connecting to news channel because no host was found");
             attemptToReconnect(10);
             return;
         } else if (mPort == -1) {
-            L.d("Not connecting to news mChannel because no mPort was found");
+            L.d("Not connecting to news channel because no port was found");
             attemptToReconnect(10);
             return;
         }
-        L.d("Attemping to connect to news mChannel...");
+        L.d("Attemping to connect to news channel...");
         final SslContext sslCtx;
         if (mIsSSL) {
             try {
@@ -249,14 +249,14 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        L.d("News mChannel inactive");
+        L.d("News channel inactive");
         super.channelInactive(ctx);
         mIsConnected = false;
     }
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-        L.d("News mChannel unregistered");
+        L.d("News channel unregistered");
         super.channelUnregistered(ctx);
         mIsConnected = false;
     }
@@ -357,10 +357,6 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         }
     }
 
-    private void ackNewsRoger(String data) {
-        L.d(String.format("News successfully rogered: %s", data));
-    }
-
     private void newsPush(String data) {
         JSONObject json = (JSONObject) JSONValue.parse(data);
         try {
@@ -440,7 +436,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         sendCommand(Command.NEWS_ROGER, newsId.toString());
     }
 
-    public void readStatsNews(List<Long> newsIds) {
+    public void statsNews(List<Long> newsIds) {
         sendCommand(Command.NEWS_STATS, android.text.TextUtils.join(" ", newsIds));
     }
 
@@ -460,7 +456,12 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
 
     private void ackNewsRead(String newsId) {
         L.d(String.format("News %s marked as read", newsId));
-        removeCallFromDB("READ", Long.parseLong(newsId));
+        removeCallFromDB(CONFIG_TYPE_READ, Long.parseLong(newsId));
+    }
+
+    private void ackNewsRoger(String newsId) {
+        L.d(String.format("News %s marked as rogered", newsId));
+        removeCallFromDB(CONFIG_TYPE_ROGER, Long.parseLong(newsId));
     }
 
     @Override
