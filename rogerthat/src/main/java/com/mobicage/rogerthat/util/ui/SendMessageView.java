@@ -313,11 +313,13 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
     }
 
     public void showKeyboard() {
+        mMessage.requestFocus();
         UIUtils.showKeyboard(mActivity);
     }
 
     public void hideKeyboard() {
         UIUtils.hideKeyboard(mActivity, mMessage);
+        mMessage.clearFocus();
     }
 
     public void onActivityResult(final int requestCode, final int resultCode, final Intent data) {

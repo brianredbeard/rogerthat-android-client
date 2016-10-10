@@ -200,6 +200,15 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         Slider instance = new Slider(this, this,
             new LeftSwiper(this, mMessagingPlugin, mParentMessageKey, memberFilter), new RightSwiper(this,
                 mMessagingPlugin, mParentMessageKey, memberFilter));
+        instance.setOnDoubleTapListener(new Slider.OnDoubleTapListener() {
+            @Override
+            public boolean onDoubleTap(MotionEvent event) {
+                if (mSendMessageView.getVisibility() == View.VISIBLE) {
+                    mSendMessageView.showKeyboard();
+                }
+                return true;
+            }
+        });
         mGestureScanner = new GestureDetector(instance);
 
         UIUtils.showHint(this, mService, HINT_SWIPE, R.string.hint_swipe);
@@ -214,6 +223,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
 
     @Override
     protected void onServiceUnbound() {
+        mSendMessageView.hideKeyboard();
     }
 
     @Override
