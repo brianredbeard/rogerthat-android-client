@@ -226,6 +226,9 @@ public class ProfileActivity extends ServiceBoundActivity {
                     Bitmap bm = BitmapFactory.decodeFile(mUriSavedImage.getPath(), null);
                     bm = ImageHelper.rotateBitmap(bm, mPhoneExifRotation);
 
+                    final ImageView avatar = (ImageView) findViewById(R.id.friend_avatar);
+                    avatar.setImageBitmap(ImageHelper.getRoundedCornerAvatar(bm));
+
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
                     bm.compress(Bitmap.CompressFormat.PNG, 100, stream);
                     byteArray = stream.toByteArray();
@@ -344,8 +347,6 @@ public class ProfileActivity extends ServiceBoundActivity {
                 mPhotoSelected = true;
                 final FloatingActionButton newProfileAvatar = ((FloatingActionButton) findViewById(R.id.update_profile_avatar_img));
                 newProfileAvatar.setImageBitmap(newAvatar);
-                final ImageView avatar = (ImageView) findViewById(R.id.friend_avatar);
-                avatar.setImageBitmap(ImageHelper.getRoundedCornerAvatar(newAvatar));
             }
         } else if (resultCode == Crop.RESULT_ERROR) {
             UIUtils.showLongToast(this, Crop.getError(result).getMessage());

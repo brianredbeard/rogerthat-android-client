@@ -142,11 +142,13 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         if (mIsConnected) {
             L.d("Already connected to news channel");
             return;
+        } else if (mIsRetryingToConnect) {
+            L.d("Already trying to reconnect to news channel");
+            return;
         } else if (!mService.getNetworkConnectivityManager().isConnected()) {
             L.d("Cannot connect to news channel: no internet connection.");
             return;
-        }
-        if (mHost == null) {
+        } else if (mHost == null) {
             L.d("Not connecting to news channel because no host was found");
             attemptToReconnect(10);
             return;
@@ -155,6 +157,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
             attemptToReconnect(10);
             return;
         }
+        
         L.d("Attemping to connect to news channel...");
         final SslContext sslCtx;
         if (mIsSSL) {

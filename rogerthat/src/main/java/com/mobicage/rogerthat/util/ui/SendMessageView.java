@@ -57,7 +57,6 @@ import com.commonsware.cwac.cam2.CameraActivity;
 import com.commonsware.cwac.cam2.Facing;
 import com.commonsware.cwac.cam2.FlashMode;
 import com.commonsware.cwac.cam2.VideoRecorderActivity;
-import com.commonsware.cwac.cam2.ZoomStyle;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.CannedButton;
 import com.mobicage.rogerthat.CannedButtons;
@@ -675,7 +674,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
                     .facing(Facing.BACK)
                     .to(mUriSavedFile)
                     .updateMediaStore()
-                    .quality(AbstractCameraActivity.Quality.LOW)
+                    .quality(AbstractCameraActivity.Quality.HIGH)
                     .build();
             chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{cameraIntent});
         }

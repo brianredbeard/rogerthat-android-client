@@ -395,14 +395,15 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
                 @Override
                 protected void safeRun() throws Exception {
                     newsChannel = new NewsChannel(NewsActivity.this, configurationProvider);
-                    if (!newsChannel.isConnected()) {
+                    if (!newsChannel.isConnected() && !newsChannel.isTryingToReconnect()) {
                         newsChannel.connect();
                     }
                 }
             };
             mService.postAtFrontOfBIZZHandler(runnable);
+
+            connectedToNewsChannelIfNotConnected();
         }
-        connectedToNewsChannelIfNotConnected();
     }
 
     private void connectedToNewsChannelIfNotConnected(){
@@ -414,7 +415,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
             new TimerTask() {
                 @Override
                 public void run() {
-                    if (mIsConnectedToInternet && (newsChannel == null || !newsChannel.isConnected() && !newsChannel.isTryingToReconnect())) {
+                    if (mIsConnectedToInternet && newsChannel != null && !newsChannel.isConnected() && !newsChannel.isTryingToReconnect()) {
                         L.d("Reconnecting to channel since it is not connected and not retrying to reconnect");
                         connectToChannel();
                     }
@@ -429,7 +430,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
         SafeRunnable runnable = new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
-                if (newsChannel != null && !newsChannel.isConnected()) {
+                if (newsChannel != null && !newsChannel.isConnected() && !newsChannel.isTryingToReconnect()) {
                     newsChannel.connect();
                 }
             }
