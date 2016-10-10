@@ -2,6 +2,7 @@ package com.mobicage.rogerthat.plugins.news;
 
 
 import com.mobicage.rogerthat.MainService;
+import com.mobicage.rogerthat.config.Configuration;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.util.logging.L;
@@ -15,12 +16,15 @@ import com.mobicage.to.news.AppNewsItemTO;
 
 import org.jivesoftware.smack.util.Base64;
 import org.jivesoftware.smack.util.DNSUtil;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 
 import javax.net.ssl.SSLException;
@@ -47,22 +51,29 @@ import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 
 @ChannelHandler.Sharable
 public class NewsChannel extends SimpleChannelInboundHandler<String> {
+    private static final String CONFIGKEY = "com.mobicage.rogerthat.plugins.news.channel";
+    private static final String CONFIG_TYPE_READ = "READ";
+    private static final String CONFIG_TYPE_ROGER = "ROGER";
     private final int KEEPALIVE_DELAY = 30;
+
     private final MainService mService;
     private NewsChannelCallbackHandler mNewsChannelCallbackHandler;
-    private String host;
-    private int port;
-    private boolean ssl;
-    private Channel channel;
-    private EventLoopGroup eventLoopGroup;
-    private boolean connected;
-    private ConfigurationProvider configurationProvider;
-    private boolean isRetryingToConnect = false;
+    private String mHost;
+    private int mPort;
+    private boolean mIsSSL;
+    private Channel mChannel;
+    private EventLoopGroup mEventLoopGroup;
+    private boolean mIsConnected;
+    private ConfigurationProvider mConfigurationProvider;
+    private boolean mIsRetryingToConnect = false;
     private Timer mKeepAliveTimer;
     private Timer mReconnectTimer;
 
+    private Set<Long> mReadsToSend = new HashSet<>();
+    private Set<Long> mRogersToSend = new HashSet<>();
+
     public boolean isConnected() {
-        return connected;
+        return mIsConnected;
     }
 
     private enum Command {
@@ -86,7 +97,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         }
 
         public String toString() {
-            return this.name;
+            return name;
         }
 
         private static Command fromValue(String value) {
@@ -100,10 +111,12 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
     }
 
     public NewsChannel(NewsChannelCallbackHandler handler, ConfigurationProvider configurationProvider) {
-        this.mNewsChannelCallbackHandler = handler;
-        this.mService = handler.getMainService();
-        this.configurationProvider = configurationProvider;
-        this.ssl = false;
+        mNewsChannelCallbackHandler = handler;
+        mService = handler.getMainService();
+        mConfigurationProvider = configurationProvider;
+        mIsSSL = false;
+
+        loadCallFromDB();
 
         if (mService.getNetworkConnectivityManager().isConnected()) {
             getConfiguration();
@@ -112,7 +125,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
 
     public void internetConnected() {
         T.BIZZ();
-        if (this.host == null || this.port == -1) {
+        if (mHost == null || mPort == -1) {
             getConfiguration();
         }
         connect();
@@ -125,25 +138,25 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
 
     public void connect() {
         T.BIZZ();
-        if (this.connected) {
-            L.d("Already connected to news channel");
+        if (mIsConnected) {
+            L.d("Already connected to news mChannel");
             return;
         } else if (!mService.getNetworkConnectivityManager().isConnected()) {
-            L.d("Cannot connect to news channel: no internet connection.");
+            L.d("Cannot connect to news mChannel: no internet connection.");
             return;
         }
-        if (this.host == null) {
-            L.d("Not connecting to news channel because no host was found");
+        if (mHost == null) {
+            L.d("Not connecting to news mChannel because no mHost was found");
             attemptToReconnect(10);
             return;
-        } else if (this.port == -1) {
-            L.d("Not connecting to news channel because no port was found");
+        } else if (mPort == -1) {
+            L.d("Not connecting to news mChannel because no mPort was found");
             attemptToReconnect(10);
             return;
         }
-        L.d("Attemping to connect to news channel...");
+        L.d("Attemping to connect to news mChannel...");
         final SslContext sslCtx;
-        if (this.ssl) {
+        if (mIsSSL) {
             try {
                 sslCtx = SslContextBuilder.forClient()
                         .trustManager(InsecureTrustManagerFactory.INSTANCE).build();
@@ -154,9 +167,9 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         } else {
             sslCtx = null;
         }
-        this.eventLoopGroup = new NioEventLoopGroup();
+        mEventLoopGroup = new NioEventLoopGroup();
         Bootstrap b = new Bootstrap();
-        b.group(eventLoopGroup)
+        b.group(mEventLoopGroup)
                 .channel(NioSocketChannel.class)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .handler(new ChannelInitializer<SocketChannel>() {
@@ -164,7 +177,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
                     public void initChannel(SocketChannel ch) throws Exception {
                         ChannelPipeline p = ch.pipeline();
                         if (sslCtx != null) {
-                            p.addLast(sslCtx.newHandler(ch.alloc(), host, port));
+                            p.addLast(sslCtx.newHandler(ch.alloc(), mHost, mPort));
                         }
                         // decoder
                         p.addLast(new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));
@@ -176,9 +189,10 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
                     }
                 });
         // Bind and start to accept incoming connections.
-        this.channel = b.connect(this.host, this.port).channel();
-        this.connected = true;
+        mChannel = b.connect(mHost, mPort).channel();
+        mIsConnected = true;
         L.d("Connected to news channel.");
+        resendUnsendItems();
         if(mReconnectTimer != null) {
             mReconnectTimer.cancel();
         }
@@ -194,7 +208,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
                 new java.util.TimerTask() {
                     @Override
                     public void run() {
-                        if (connected) {
+                        if (mIsConnected) {
                             sendLine(Command.PING.toString());
                         }
                     }
@@ -206,9 +220,9 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
 
     private void sendLine(String line) {
         L.d("[NEWS] >> " + line);
-        if (channel == null || !connected)
+        if (mChannel == null || !mIsConnected)
             return;
-        channel.writeAndFlush(line + "\r\n");
+        mChannel.writeAndFlush(line + "\r\n");
     }
 
     private void sendCommand(Command command, String data) {
@@ -216,44 +230,44 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
     }
 
     public void disconnect() {
-        if (this.channel == null || this.eventLoopGroup == null) {
+        if (mChannel == null || mEventLoopGroup == null) {
             return;
         }
-        channel.closeFuture();
-        this.eventLoopGroup.shutdownGracefully();
-        this.channel = null;
-        this.eventLoopGroup = null;
-        this.connected = false;
+        mChannel.closeFuture();
+        mEventLoopGroup.shutdownGracefully();
+        mChannel = null;
+        mEventLoopGroup = null;
+        mIsConnected = false;
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
-        this.authenticate();
+        authenticate();
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        L.d("News channel inactive");
+        L.d("News mChannel inactive");
         super.channelInactive(ctx);
-        this.connected = false;
+        mIsConnected = false;
     }
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-        L.d("News channel unregistered");
+        L.d("News mChannel unregistered");
         super.channelUnregistered(ctx);
-        this.connected = false;
+        mIsConnected = false;
     }
 
     private void getConfiguration() {
         NetworkConnectivityManager networkConnectivityManager = mService.getNetworkConnectivityManager();
-        NewsConfigurationFactory configurationFactory = new NewsConfigurationFactory(this.configurationProvider,
+        NewsConfigurationFactory configurationFactory = new NewsConfigurationFactory(mConfigurationProvider,
                 networkConnectivityManager, null);
         try {
             DNSUtil.HostAddress hostAddress = configurationFactory.getSafeNewsConnectionHost(false);
-            this.host = hostAddress.getHost();
-            this.port = hostAddress.getPort();
+            mHost = hostAddress.getHost();
+            mPort = hostAddress.getPort();
         } catch (NewsConfigurationConnectionException ignored) {
         } catch (NewsConfigurationException e) {
             L.bug(e);
@@ -261,11 +275,11 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
     }
 
     private void attemptToReconnect(final int backoffTime) {
-        if (!this.connected) {
-            if (this.isRetryingToConnect) {
+        if (!mIsConnected) {
+            if (mIsRetryingToConnect) {
                 return;
             }
-            this.isRetryingToConnect = true;
+            mIsRetryingToConnect = true;
             if(mReconnectTimer != null ){
                 mReconnectTimer.cancel();
             }
@@ -278,7 +292,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
                                 SafeRunnable safeRunnable = new SafeRunnable() {
                                     @Override
                                     protected void safeRun() throws Exception {
-                                        NewsChannel.this.isRetryingToConnect = false;
+                                        mIsRetryingToConnect = false;
                                         connect();
                                     }
                                 };
@@ -293,7 +307,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
     }
 
     public boolean isTryingToReconnect(){
-        return this.isRetryingToConnect;
+        return mIsRetryingToConnect;
     }
 
     @Override
@@ -389,10 +403,12 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
     }
 
     public void readNews(Long newsId) {
+        addCallToDB(CONFIG_TYPE_READ, newsId);
         sendCommand(Command.NEWS_READ, newsId.toString());
     }
 
     public void rogerNews(Long newsId) {
+        addCallToDB(CONFIG_TYPE_ROGER, newsId);
         sendCommand(Command.NEWS_ROGER, newsId.toString());
     }
 
@@ -416,6 +432,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
 
     private void ackNewsRead(String newsId) {
         L.d(String.format("News %s marked as read", newsId));
+        removeCallFromDB("READ", Long.parseLong(newsId));
     }
 
     @Override
@@ -423,6 +440,80 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         // Close the connection when an exception is raised.
         L.e(cause);
         ctx.close();
-        this.connected = false;  // Not sure if necessary
+        mIsConnected = false;  // Not sure if necessary
+    }
+
+    private void addCallToDB(String type, Long newsId) {
+        if (CONFIG_TYPE_READ.equals(type)) {
+            mReadsToSend.add(newsId);
+        } else if (CONFIG_TYPE_ROGER.equals(type)) {
+            mRogersToSend.add(newsId);
+        } else {
+            L.e("saveCallInDB with unkown type: " + type);
+            return;
+        }
+
+        saveCallInDB(type);
+    }
+
+    private void removeCallFromDB(String type, Long newsId) {
+        if (CONFIG_TYPE_READ.equals(type)) {
+            mReadsToSend.remove(newsId);
+        } else if (CONFIG_TYPE_ROGER.equals(type)) {
+            mRogersToSend.remove(newsId);
+        } else {
+            L.e("saveCallInDB with unkown type: " + type);
+            return;
+        }
+
+        saveCallInDB(type);
+    }
+
+    private void saveCallInDB(String type) {
+        JSONArray jsonNewsIds = new JSONArray();
+        if (CONFIG_TYPE_READ.equals(type)) {
+            for (Long readNewsId : mReadsToSend) {
+                jsonNewsIds.add(readNewsId);
+            }
+        } else if (CONFIG_TYPE_ROGER.equals(type)) {
+            for (Long rogerNewsId : mRogersToSend) {
+                jsonNewsIds.add(rogerNewsId);
+            }
+        } else {
+            L.e("saveCallInDB with unkown type: " + type);
+            return;
+        }
+        Configuration cfg = mConfigurationProvider.getConfiguration(CONFIGKEY);
+        cfg.put(type, JSONValue.toJSONString(jsonNewsIds));
+        mConfigurationProvider.updateConfigurationNow(CONFIGKEY, cfg);
+    }
+
+    private void loadCallFromDB() {
+        Configuration cfg = mConfigurationProvider.getConfiguration(CONFIGKEY);
+        final String readNewsIdsJSON = cfg.get(CONFIG_TYPE_READ, null);
+        if (readNewsIdsJSON != null) {
+            JSONArray jsonNewsIds = (JSONArray) JSONValue.parse(readNewsIdsJSON);
+            for (Object jsonNewsId : jsonNewsIds) {
+                mReadsToSend.add((Long) jsonNewsId);
+            }
+        }
+
+        final String rogerNewsIdsJSON = cfg.get(CONFIG_TYPE_ROGER, null);
+        if (rogerNewsIdsJSON != null) {
+            JSONArray jsonNewsIds = (JSONArray) JSONValue.parse(rogerNewsIdsJSON);
+            for (Object jsonNewsId : jsonNewsIds) {
+                mRogersToSend.add((Long) jsonNewsId);
+            }
+        }
+    }
+
+    private void resendUnsendItems() {
+        for (Long newsId : mReadsToSend) {
+            sendCommand(Command.NEWS_READ, newsId.toString());
+        }
+
+        for (Long newsId : mRogersToSend) {
+            sendCommand(Command.NEWS_ROGER, newsId.toString());
+        }
     }
 }
