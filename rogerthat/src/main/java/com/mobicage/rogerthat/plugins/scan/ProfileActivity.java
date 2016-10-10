@@ -45,6 +45,9 @@ import android.widget.RadioButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.commonsware.cwac.cam2.CameraActivity;
+import com.commonsware.cwac.cam2.Facing;
+import com.commonsware.cwac.cam2.FlashMode;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
@@ -97,6 +100,8 @@ public class ProfileActivity extends ServiceBoundActivity {
 
     private final int PERMISSION_REQUEST_CAMERA = 1;
 
+    public static final String ACTION_CAMERA = "rogerthat.ACTION_CAMERA";
+
     private void updateProfileForEdit(boolean shouldSave) {
         final RelativeLayout friendDetailHeader = ((RelativeLayout) findViewById(R.id.friend_detail_header));
         final LinearLayout updateProfileNameAndAvatar = ((LinearLayout) findViewById(R.id.update_profile_name_and_avatar));
@@ -116,6 +121,7 @@ public class ProfileActivity extends ServiceBoundActivity {
 
             updateProfileBirthdateIcon.setVisibility(View.VISIBLE);
             updateProfileGenderIcon.setVisibility(View.VISIBLE);
+
 
             updateProfileBirthdate.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -284,10 +290,6 @@ public class ProfileActivity extends ServiceBoundActivity {
         image.delete();
         mUriSavedImage = Uri.fromFile(image);
 
-        Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, mUriSavedImage);
-        cameraIntent.putExtra("outputFormat", Bitmap.CompressFormat.PNG.toString());
-
         Intent galleryIntent = new Intent(Intent.ACTION_PICK,
             android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         galleryIntent.putExtra(MediaStore.EXTRA_OUTPUT, mUriSavedImage);
@@ -297,11 +299,18 @@ public class ProfileActivity extends ServiceBoundActivity {
         PackageManager pm = getPackageManager();
         final Intent chooserIntent = Intent.createChooser(galleryIntent, getString(R.string.select_source));
         if (pm.hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
+            Intent cameraIntent = new CameraActivity.IntentBuilder(this)
+                    .allowSwitchFlashMode()
+                    .facing(Facing.FRONT)
+                    .to(mUriSavedImage)
+                    .flashModes(FlashMode.values())
+                    .confirmationQuality(0.5f)
+                    .updateMediaStore()
+                    .build();
             chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] { cameraIntent });
         }
 
         startActivityForResult(chooserIntent, PICK_IMAGE);
-
     }
 
     private Bitmap squeezeImage(Uri source) {
@@ -333,6 +342,10 @@ public class ProfileActivity extends ServiceBoundActivity {
             Bitmap newAvatar = squeezeImage(Crop.getOutput(result));
             if (newAvatar != null) {
                 mPhotoSelected = true;
+                final FloatingActionButton newProfileAvatar = ((FloatingActionButton) findViewById(R.id.update_profile_avatar_img));
+                newProfileAvatar.setImageBitmap(newAvatar);
+                final ImageView avatar = (ImageView) findViewById(R.id.friend_avatar);
+                avatar.setImageBitmap(ImageHelper.getRoundedCornerAvatar(newAvatar));
             }
         } else if (resultCode == Crop.RESULT_ERROR) {
             UIUtils.showLongToast(this, Crop.getError(result).getMessage());

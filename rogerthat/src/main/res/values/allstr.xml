@@ -522,4 +522,5 @@
     <string name="new_items_available">New items available</string>
     <string name="new_item_available">1 new item available</string>
     <string name="x_new_items_available">%1$d new items available</string>
+    <string name="camera">Camera</string>
 </resources>
