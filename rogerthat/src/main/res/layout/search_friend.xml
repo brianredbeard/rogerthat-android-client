@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:ellipsize="end"
-            android:singleLine="true"
+            android:maxLines="1"
             android:textSize="16sp"
             tools:text="Really long friend name that should be truncated" />
 
@@ -43,7 +43,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:ellipsize="end"
-            android:singleLine="true"
+            android:maxLines="1"
             android:textColor="@android:color/secondary_text_light"
             android:textSize="14sp"
             tools:text="Really long friend subtitle that should be truncated" />
