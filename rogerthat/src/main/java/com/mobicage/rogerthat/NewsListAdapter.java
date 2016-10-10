@@ -26,17 +26,15 @@ import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
+import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.StyleSpan;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -121,6 +119,8 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     private int mRequestMoreNewsPosition = 0;
     private Button mCurrentActionBtn;
 
+    private final BottomSheetDialog mBottomSheetDialog;
+
     public NewsListAdapter(NewsActivity activity, MainService mainService) {
         mActivity = activity;
         mMainService = mainService;
@@ -137,6 +137,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         mMyEmail = myIdentity.getEmail();
         mMyName = myIdentity.getDisplayName();
         mDisplayWidth = UIUtils.getDisplayWidth(mActivity);
+        mBottomSheetDialog = new BottomSheetDialog(mActivity);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -365,7 +366,6 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         }
 
         setupPinned(viewHolder, newsItem);
-        setupPinButton(viewHolder, newsItem.pinned);
         setupOptions(viewHolder, newsItem);
         setupRogeredUsers(viewHolder, newsItem);
         boolean isImageVisible = setupImage(viewHolder, newsItem);
@@ -721,70 +721,59 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     }
 
     private void setupOptions(final ViewHolder viewHolder, final NewsItem newsItem) {
+
         viewHolder.dropdownButton.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
                 final int existenceStatus = mActivity.friendsPlugin.getStore().getExistence(newsItem.sender.email);
-                final LinearLayout dialog = (LinearLayout) mLayoutInflater.inflate(R.layout.news_actions, null);
-
-                final AlertDialog alertDialog = new AlertDialog.Builder(mActivity)
-                        .setView(dialog)
-                        .create();
+                LinearLayout sheetView = (LinearLayout) mLayoutInflater.inflate(R.layout.news_options, null);
 
                 if (newsItem.pinned) {
-                    final View actionUnSave = mLayoutInflater.inflate(R.layout.news_actions_item, null);
-                    ((ImageView) actionUnSave.findViewById(R.id.icon)).setImageDrawable(new IconicsDrawable(mActivity, FontAwesome.Icon.faw_thumb_tack).color(ContextCompat.getColor(mActivity, R.color.mc_default_text)).sizeDp(15).paddingDp(2));
+                    final View actionUnSave = mLayoutInflater.inflate(R.layout.news_options_item, null);
+                    ((ImageView) actionUnSave.findViewById(R.id.icon)).setImageDrawable(new IconicsDrawable(mActivity, FontAwesome.Icon.faw_thumb_tack).color(ContextCompat.getColor(mActivity, R.color.mc_default_text)).sizeDp(20).paddingDp(2));
                     ((TextView) actionUnSave.findViewById(R.id.title)).setText(R.string.unsave);
                     ((TextView) actionUnSave.findViewById(R.id.subtitle)).setText(R.string.remove_this_from_your_saved_items);
                     actionUnSave.setOnClickListener(new SafeViewOnClickListener() {
                         @Override
                         public void safeOnClick(View v) {
-                            alertDialog.dismiss();
+                            mBottomSheetDialog.dismiss();
                             togglePinned(viewHolder, newsItem);
                         }
                     });
-                    dialog.addView(actionUnSave);
+                    sheetView.addView(actionUnSave);
                 } else {
-                    final View actionSave = mLayoutInflater.inflate(R.layout.news_actions_item, null);
-                    ((ImageView) actionSave.findViewById(R.id.icon)).setImageDrawable(new IconicsDrawable(mActivity, FontAwesome.Icon.faw_thumb_tack).color(ContextCompat.getColor(mActivity, R.color.mc_default_text)).sizeDp(15).paddingDp(2));
+                    final View actionSave = mLayoutInflater.inflate(R.layout.news_options_item, null);
+                    ((ImageView) actionSave.findViewById(R.id.icon)).setImageDrawable(new IconicsDrawable(mActivity, FontAwesome.Icon.faw_thumb_tack).color(ContextCompat.getColor(mActivity, R.color.mc_default_text)).sizeDp(20).paddingDp(2));
                     ((TextView) actionSave.findViewById(R.id.title)).setText(R.string.save);
                     ((TextView) actionSave.findViewById(R.id.subtitle)).setText(R.string.add_this_to_your_saved_items);
                     actionSave.setOnClickListener(new SafeViewOnClickListener() {
                         @Override
                         public void safeOnClick(View v) {
-                            alertDialog.dismiss();
+                            mBottomSheetDialog.dismiss();
                             togglePinned(viewHolder, newsItem);
                         }
                     });
-                    dialog.addView(actionSave);
+                    sheetView.addView(actionSave);
                 }
 
                 if (existenceStatus == Friend.ACTIVE) {
-                    final View actionHide = mLayoutInflater.inflate(R.layout.news_actions_item, null);
-                    ((ImageView) actionHide.findViewById(R.id.icon)).setImageDrawable(new IconicsDrawable(mActivity, FontAwesome.Icon.faw_times_circle).color(ContextCompat.getColor(mActivity, R.color.mc_default_text)).sizeDp(15).paddingDp(2));
+                    final View actionHide = mLayoutInflater.inflate(R.layout.news_options_item, null);
+                    ((ImageView) actionHide.findViewById(R.id.icon)).setImageDrawable(new IconicsDrawable(mActivity, FontAwesome.Icon.faw_times_circle).color(ContextCompat.getColor(mActivity, R.color.mc_default_text)).sizeDp(20).paddingDp(2));
                     ((TextView) actionHide.findViewById(R.id.title)).setText(R.string.hide);
-                    ((TextView) actionHide.findViewById(R.id.subtitle)).setText(R.string.see_fewer_posts_like_this);
+                    ((TextView) actionHide.findViewById(R.id.subtitle)).setText(mActivity.getString(R.string.hide_detail, newsItem.broadcast_type, newsItem.sender.name));
                     actionHide.setOnClickListener(new SafeViewOnClickListener() {
                         @Override
                         public void safeOnClick(View v) {
-                            alertDialog.dismiss();
+                            mBottomSheetDialog.dismiss();
                             mActivity.friendsPlugin.disableBroadcastType(newsItem.sender.email, newsItem.broadcast_type);
                             refreshView();
                         }
                     });
-                    dialog.addView(actionHide);
+                    sheetView.addView(actionHide);
                 }
 
-                alertDialog.setCanceledOnTouchOutside(true);
-                alertDialog.show();
-
-                WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-                Window window = alertDialog.getWindow();
-                lp.copyFrom(window.getAttributes());
-                lp.gravity = Gravity.BOTTOM;
-                lp.width = WindowManager.LayoutParams.MATCH_PARENT;
-                lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
-                window.setAttributes(lp);
+                mBottomSheetDialog.setContentView(sheetView);
+                mBottomSheetDialog.show();
             }
         });
     }
@@ -796,6 +785,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 togglePinned(viewHolder, newsItem);
             }
         });
+        setupPinButton(viewHolder, newsItem.pinned);
     }
 
     private void setupRogeredUsers(final ViewHolder viewHolder, final NewsItem newsItem) {
@@ -926,7 +916,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         } else if (FriendsPlugin.FRIEND_REMOVED_INTENT.equals(action) || FriendsPlugin.FRIEND_MARKED_FOR_REMOVAL_INTENT.equals(action)) {
             refreshItemsOfService(intent.getStringExtra("email"));
         } else if (FriendsPlugin.FRIEND_ADDED_INTENT.equals(action)) {
-            String email = intent.getStringExtra("email"); // todo ruben
+            String email = intent.getStringExtra("email");
 
             if (mActivity.expectedEmailHash != null && mActivity.expectedEmailHash.equals(email)) {
                 final int existence = mActivity.friendsPlugin.getStore().getExistence(email);

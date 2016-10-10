@@ -61,7 +61,6 @@
     <string name="authenticate_via_your_oauth_account">Authenticate using your \'%1$s\' account.</string>
     <string name="back">Back</string>
     <string name="birthdate">Day of birth</string>
-    <string name="broadcast_subscribed_to">You received this message because you are subscribed to: %1$s.</string>
     <string name="button_action">(Optional) Action URL</string>
     <string name="button_text">Button text</string>
     <string name="buttons">Buttons</string>
@@ -511,7 +510,7 @@
     <string name="news_members_and_x_others">%1$s and %2$s others Rogered this message.</string>
     <string name="add_this_to_your_saved_items">Add this to your saved items</string>
     <string name="hide">Hide</string>
-    <string name="see_fewer_posts_like_this">See fewer posts like this</string>
+    <string name="hide_detail">Hide \'%1$s\' items from %2$s</string>
     <string name="saved_items">Saved items</string>
     <string name="all_items">All items</string>
     <string name="unsave">Unsave</string>
