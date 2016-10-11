@@ -185,7 +185,7 @@
             android:id="@+id/recommend_to_email"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="start"
+            android:layout_gravity="left"
             android:layout_marginTop="10dp"
             android:orientation="vertical"
             android:padding="20dp">
@@ -212,7 +212,7 @@
                 android:theme="@style/ButtonBackground"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="end"
+                android:layout_gravity="right"
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
                 android:text="@string/recommend_service"
@@ -223,7 +223,7 @@
             android:id="@+id/recommend_on_fb"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="start"
+            android:layout_gravity="left"
             android:layout_marginTop="10dp"
             android:orientation="vertical"
             android:padding="10dp" >

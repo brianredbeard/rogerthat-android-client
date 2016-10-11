@@ -113,9 +113,11 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.UUID;
@@ -171,10 +173,13 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
     public final static String START_INTENT_GCM = "gcm";
 
     public final static String CLOSE_ACTIVITY_INTENT = "com.mobicage.rogerthat.CLOSE_ACTIVITY_INTENT";
+    public final static String UPDATE_BADGE_INTENT = "com.mobicage.rogerthat.UPDATE_BADGE_INTENT";
 
     private final static long WIPE_DELAY_MILLIS = 5 * 1000;
 
     private volatile static MainService current = null;
+
+    protected Map<String, Long> badges = new HashMap<>();
 
     // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // "FINAL" STATE DEFINED IN ONCREATE
@@ -1002,6 +1007,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         T.UI();
         createPlugins();
         setupSystemRPC();
+        restoreBadgeValues();
     }
 
     private void loadIdentity(String forceEmail) {
@@ -1771,5 +1777,10 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         s.initVerify(mPublicKey);
         s.update(payload);
         return s.verify(payloadSignature);
+    }
+
+    private void restoreBadgeValues() {
+        MessagingPlugin messagingPlugin = getPlugin(MessagingPlugin.class);
+        badges.put("messages", messagingPlugin.getBadgeCount());
     }
 }

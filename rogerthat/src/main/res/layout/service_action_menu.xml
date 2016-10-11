@@ -110,7 +110,7 @@
                             android:layout_alignParentTop="true"
                             android:layout_marginRight="8dp"
                             android:layout_marginTop="4dp"
-                            android:background="@drawable/badge"
+                            android:background="@drawable/badge_red"
                             android:gravity="center"
                             android:padding="2dp"
                             android:text="9+"

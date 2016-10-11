@@ -8,7 +8,7 @@
         android:id="@+id/add_via_facebook_0"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="start"
+        android:layout_gravity="left"
         android:layout_marginTop="10dp"
         android:orientation="vertical"
         android:padding="20dp">
