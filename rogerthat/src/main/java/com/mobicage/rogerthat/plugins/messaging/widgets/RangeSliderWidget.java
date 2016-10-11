@@ -40,7 +40,7 @@ import java.util.UnknownFormatConversionException;
 
 public class RangeSliderWidget extends Widget implements RangeSeekBar.OnRangeSeekBarChangeListener {
 
-    private org.florescu.android.rangeseekbar.RangeSeekBar mRangeSeekBar;
+    private RangeSeekBar mRangeSeekBar;
     private TextView mTextView;
     protected double mStep;
     protected long mPrecision;
@@ -71,10 +71,10 @@ public class RangeSliderWidget extends Widget implements RangeSeekBar.OnRangeSee
         String defaultUnit = Message.UNIT_LOW_VALUE + " - " + Message.UNIT_HIGH_VALUE;
         if (unit == null || defaultUnit.equals(unit)) {
             unit = defaultUnit;
-            mRangeSeekBar = (org.florescu.android.rangeseekbar.RangeSeekBar) findViewById(R.id.range_slider_with_values);
+            mRangeSeekBar = (RangeSeekBar) findViewById(R.id.range_slider_with_values);
             mTextView.setVisibility(View.GONE);
         } else {
-            mRangeSeekBar = (org.florescu.android.rangeseekbar.RangeSeekBar) findViewById(R.id.range_slider);
+            mRangeSeekBar = (RangeSeekBar) findViewById(R.id.range_slider);
             mTextView.setVisibility(View.VISIBLE);
         }
         mFormat = unit.replace(Message.UNIT_LOW_VALUE, "%1$." + mPrecision + "f")
