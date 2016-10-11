@@ -1171,10 +1171,10 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
                 protected void safeRun() throws Exception {
                     storeMessage(me, request);
                     mMessagingPlugin.getStore().insertAttachments(request.attachments, request.key);
-
                     final Intent intent = new Intent(MessagingPlugin.MESSAGE_PROCESSED_INTENT);
                     intent.putExtra("message", request.key);
                     mMainService.sendBroadcast(intent);
+                    mMessagingPlugin.updateBadge();
                 }
             });
 

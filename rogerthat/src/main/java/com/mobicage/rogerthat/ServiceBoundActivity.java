@@ -48,9 +48,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.facebook.CallbackManager;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
@@ -92,11 +94,19 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
     private boolean mPaused = false; // Owned by UI thread
     final private Queue<SafeRunnable> mWorkQueue = new LinkedList<SafeRunnable>();
 
-    private final BroadcastReceiver closeActivityListener = new SafeBroadcastReceiver() {
+    private final BroadcastReceiver intentListener = new SafeBroadcastReceiver() {
         @Override
         public String[] onSafeReceive(Context context, Intent intent) {
-            L.d("Received CLOSE_ACTIVITY_INTENT");
-            finish();
+            String action = intent.getAction();
+            if (MainService.CLOSE_ACTIVITY_INTENT.equals(action)) {
+                L.d("Received CLOSE_ACTIVITY_INTENT");
+                finish();
+            } else if (MainService.UPDATE_BADGE_INTENT.equals(action)) {
+                String key = intent.getStringExtra("key");
+                long count = intent.getLongExtra("count", 0);
+                updateBadgeCount(key, count);
+            }
+
             return null;
         }
     };
@@ -125,16 +135,39 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
     public boolean mShowDrawer = false;
     public boolean mShowDrawerIcon = false;
 
+    private Map<String, Integer> mBadgePositionsNavigationDrawer = new HashMap<>();
+    private Map<String, Integer> mBadgePositionsNavigationFooter = new HashMap<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         T.setUIThread("ServiceBoundActivity.onCreate()");
+
+        ServiceBoundActivity.NavigationItem[] navigationItems = NavigationConstants.getNavigationItems();
+        for (int i = 0; i < navigationItems.length; i++) {
+            if (navigationItems[i].actionType == null) {
+                mBadgePositionsNavigationDrawer.put(navigationItems[i].action, i);
+            } else {
+                mBadgePositionsNavigationDrawer.put(navigationItems[i].actionType + "|" + navigationItems[i].action, i);
+            }
+        }
+
+        ServiceBoundActivity.NavigationItem[] navigationFooterItems = NavigationConstants.getNavigationFooterItems();
+        for (int i = 0; i < navigationFooterItems.length; i++) {
+            if (navigationFooterItems[i].actionType == null) {
+                mBadgePositionsNavigationFooter.put(navigationFooterItems[i].action, i);
+            } else {
+                mBadgePositionsNavigationFooter.put(navigationFooterItems[i].actionType + "|" + navigationFooterItems[i].action, i);
+            }
+        }
+
         LayoutInflaterCompat.setFactory(getLayoutInflater(), new IconicsLayoutInflater(getDelegate()));
         super.onCreate(savedInstanceState);
         logMethod("onCreate");
         SystemUtils.logIntentFlags(getIntent());
 
         IntentFilter filter = new IntentFilter(MainService.CLOSE_ACTIVITY_INTENT);
-        registerReceiver(closeActivityListener, filter);
+        filter.addAction(MainService.UPDATE_BADGE_INTENT);
+        registerReceiver(intentListener, filter);
         doBindService();
 
         mConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -162,7 +195,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         T.UI();
         logMethod("onDestroy");
         super.onDestroy();
-        unregisterReceiver(closeActivityListener);
+        unregisterReceiver(intentListener);
         doUnbindService();
     }
 
@@ -249,6 +282,10 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         public void onServiceConnected(ComponentName className, IBinder service) {
             T.UI();
             mService = ((MainService.MainBinder) service).getService();
+            if (mShowDrawerIcon) {
+                setupBadges();
+            }
+
             try {
                 onServiceBound();
                 mServiceIsBound = true;
@@ -450,13 +487,8 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
             openNavigationView();
         }
 
-        if (!mShowDrawerIcon) {
-            setNavigationBarBurgerVisible(false, true);
-        }
-
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         final Menu menu = navigationView.getMenu();
-
         ServiceBoundActivity.NavigationItem[] navigationItems = NavigationConstants.getNavigationItems();
         for (int i = 0; i < navigationItems.length; i++) {
             final NavigationItem ni = navigationItems[i];
@@ -466,7 +498,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
                     simulateNavigationItemClick(ni);
                     return true;
                 }
-            });
+            }).setActionView(R.layout.navigation_menu_counter);
         }
         // Adding 2 spacer items such that the footer view doesn't overlap the last item(s)
         menu.add(navigationItems.length, navigationItems.length, navigationItems.length, "").setCheckable(false);
@@ -479,25 +511,33 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
             navigationFooter.removeAllViews();
             LayoutInflater li = getLayoutInflater();
             for (final NavigationItem ni : navigationFooterItems) {
-                ImageButton imageButton = (ImageButton) li.inflate(R.layout.navigation_footer_item, navigationFooter, false);
+                View footerItem = li.inflate(R.layout.navigation_footer_item, navigationFooter, false);
                 if (ni.actionType == null) {
-                    imageButton.setTag(ni.action);
+                    footerItem.setTag(ni.action);
                 } else {
-                    imageButton.setTag(ni.actionType + "|" + ni.action);
+                    footerItem.setTag(ni.actionType + "|" + ni.action);
                 }
+                ImageButton imageButton = (ImageButton) footerItem.findViewById(R.id.image);
                 imageButton.setOnClickListener(new SafeViewOnClickListener() {
                     @Override
                     public void safeOnClick(View v) {
                         simulateNavigationItemClick(ni);
                     }
                 });
+
                 imageButton.setImageDrawable(new IconicsDrawable(this, ni.icon).color(Color.WHITE).sizeDp(20));
-                navigationFooter.addView(imageButton);
+                navigationFooter.addView(footerItem);
             }
 
             navigationFooter.setVisibility(View.VISIBLE);
         } else {
             navigationFooter.setVisibility(View.GONE);
+        }
+
+        if (mShowDrawerIcon) {
+            setupBadges();
+        } else {
+            setNavigationBarBurgerVisible(false, true);
         }
     }
 
@@ -685,9 +725,9 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
 
         for (int i = 0; i < navigationFooter.getChildCount(); i++) {
             View child = navigationFooter.getChildAt(i);
-            if (child instanceof ImageButton) {
+            if (child instanceof FrameLayout) {
                 String activityName = (String) child.getTag();
-                ImageButton ib = (ImageButton) child;
+                FrameLayout ib = (FrameLayout) child;
                 if (mActivityName.equals(activityName)) {
                     ib.setBackgroundColor(ContextCompat.getColor(this, R.color.mc_navigation_footer_active));
                 } else {
@@ -734,6 +774,79 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
             ActivityUtils.goToActivity(ServiceBoundActivity.this, "messages", true, false, extras);
         } else {
             ActivityUtils.goToActivity(ServiceBoundActivity.this, "news", true, false, extras);
+        }
+    }
+
+    private void setupBadges() {
+        if (mService == null)
+            return;
+
+        for (Map.Entry<String, Long> entry : mService.badges.entrySet()) {
+            updateBadge(entry.getKey(), entry.getValue());
+        }
+    }
+
+    public void updateBadgeCount(String key, long count) {
+        if (mService == null) {
+            L.e("called updateBadgeCount to early service not ready yet");
+            return;
+        }
+        mService.badges.put(key, count);
+        updateBadge(key, count);
+    }
+
+    private void updateBadge(String key, long count) {
+        if (!mShowDrawerIcon)
+            return;
+
+        boolean foundBadge = false;
+        if (mBadgePositionsNavigationDrawer.containsKey(key)) {
+            foundBadge = true;
+
+            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+            if (navigationView == null)
+                return;
+
+            Menu menu = navigationView.getMenu();
+            if (menu == null)
+                return;
+
+            int index = mBadgePositionsNavigationDrawer.get(key);
+            if (menu.size() <= index)
+                return;
+
+            View v = menu.getItem(index).getActionView();
+            TextView badge = (TextView) v.findViewById(R.id.badge);
+            if (count > 0) {
+                badge.setText(count > 9 ? "9+" : String.valueOf(count));
+                badge.setVisibility(View.VISIBLE);
+            } else {
+                badge.setVisibility(View.GONE);
+            }
+        }
+
+        if (mBadgePositionsNavigationFooter.containsKey(key)) {
+            foundBadge = true;
+
+            LinearLayout navigationFooter = (LinearLayout) findViewById(R.id.nav_view_footer);
+            if (navigationFooter == null)
+                return;
+
+            int index = mBadgePositionsNavigationFooter.get(key);
+            if (navigationFooter.getChildCount() <= index)
+                return;
+
+            TextView badge = (TextView) navigationFooter.getChildAt(index).findViewById(R.id.badge);
+            if (count > 0) {
+                badge.setText(count > 9 ? "9+" : String.valueOf(count));
+                badge.setVisibility(View.VISIBLE);
+            } else {
+                badge.setVisibility(View.GONE);
+            }
+        }
+
+        if (!foundBadge) {
+            L.e("updateBadge failed for: " + key);
         }
     }
 }

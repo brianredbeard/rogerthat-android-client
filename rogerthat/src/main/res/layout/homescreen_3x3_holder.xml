@@ -102,7 +102,7 @@
                     android:layout_alignParentRight="true"
                     android:layout_alignParentTop="true"
                     android:layout_marginTop="20dp"
-                    android:background="@drawable/badge"
+                    android:background="@drawable/badge_red"
                     android:gravity="center"
                     android:text="9+"
                     android:textColor="#FFFFFF"

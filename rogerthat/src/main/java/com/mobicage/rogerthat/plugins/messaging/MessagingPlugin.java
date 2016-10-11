@@ -665,6 +665,7 @@ public class MessagingPlugin implements MobicagePlugin {
         broadcast.putExtra("context", message.context);
         broadcast.putExtra("flags", message.flags);
         mMainService.sendBroadcast(broadcast, sendUpdateIntentImmediatly, true);
+        updateBadge();
 
         if (!senderIsMobileOwner) {
             updateMessagesNotification(true, false, false);
@@ -701,6 +702,7 @@ public class MessagingPlugin implements MobicagePlugin {
             } else {
                 intent = new Intent(MESSAGE_PROCESSED_INTENT);
                 intent.putExtra("message", request.message_key);
+                updateBadge();
             }
             mMainService.sendBroadcast(intent);
         }
@@ -766,6 +768,7 @@ public class MessagingPlugin implements MobicagePlugin {
         final Intent intent = new Intent(MessagingPlugin.MESSAGE_MEMBER_STATUS_UPDATE_RECEIVED_INTENT);
         intent.putExtra("message", request.message);
         mMainService.sendBroadcast(intent);
+        updateBadge();
 
         if ((request.status & STATUS_ACKED) == STATUS_ACKED) {
             final String messageSender = mStore.getMessageSenderBIZZ(request.message);
@@ -795,6 +798,7 @@ public class MessagingPlugin implements MobicagePlugin {
                             final Intent intent = new Intent(MessagingPlugin.MESSAGE_PROCESSED_INTENT);
                             intent.putExtra("message", request.message);
                             mMainService.sendBroadcast(intent);
+                            updateBadge();
                             updateMessagesNotification(false, false, false);
                         }
                     });
@@ -875,6 +879,7 @@ public class MessagingPlugin implements MobicagePlugin {
         Intent intent = new Intent(MESSAGE_DIRTY_CLEANED_INTENT);
         intent.putExtra("message", messageKey);
         mMainService.sendBroadcast(intent);
+        updateBadge();
         updateMessagesNotification(false, false, false);
     }
 
@@ -884,6 +889,7 @@ public class MessagingPlugin implements MobicagePlugin {
         Intent intent = new Intent(MessagingPlugin.MESSAGE_DIRTY_CLEANED_INTENT);
         intent.putExtra("message", parentMessageKey);
         mMainService.sendBroadcast(intent);
+        updateBadge();
         updateMessagesNotification(false, false, false);
     }
 
@@ -928,6 +934,7 @@ public class MessagingPlugin implements MobicagePlugin {
                 intent.putExtra("message", message.key);
                 mMainService.sendBroadcast(intent);
                 mMessageHistory.putMessageAckInHistory(message.key, button);
+                updateBadge();
                 updateMessagesNotification(false, false, true);
             }
         });
@@ -964,6 +971,7 @@ public class MessagingPlugin implements MobicagePlugin {
                         Intent intent = new Intent(MessagingPlugin.MESSAGE_PROCESSED_INTENT);
                         intent.putExtra("message", key);
                         mMainService.sendBroadcast(intent);
+                        updateBadge();
                     }
                 } finally {
                     curs.close();
@@ -991,6 +999,7 @@ public class MessagingPlugin implements MobicagePlugin {
                         Intent intent = new Intent(MessagingPlugin.MESSAGE_PROCESSED_INTENT);
                         intent.putExtra("message", key);
                         mMainService.sendBroadcast(intent);
+                        updateBadge();
                     }
                 } finally {
                     curs.close();
@@ -1074,7 +1083,7 @@ public class MessagingPlugin implements MobicagePlugin {
         Intent intent = new Intent(THREAD_DELETED_INTENT);
         intent.putExtra("key", threadKey);
         mMainService.sendBroadcast(intent);
-
+        updateBadge();
         updateMessagesNotification(false, false, true);
 
         try {
@@ -1095,7 +1104,7 @@ public class MessagingPlugin implements MobicagePlugin {
         Intent intent = new Intent(THREAD_DELETED_INTENT);
         intent.putExtra("key", threadKey);
         mMainService.sendBroadcast(intent);
-
+        updateBadge();
         updateMessagesNotification(false, false, true);
 
         try {
@@ -1246,6 +1255,7 @@ public class MessagingPlugin implements MobicagePlugin {
                 Intent intent = new Intent(MessagingPlugin.MESSAGE_PROCESSED_INTENT);
                 intent.putExtra("message", message.key);
                 mMainService.sendBroadcast(intent);
+                updateBadge();
                 updateMessagesNotification(false, false, true);
             }
         });
@@ -1469,6 +1479,7 @@ public class MessagingPlugin implements MobicagePlugin {
         Intent intent = new Intent(MessagingPlugin.MESSAGE_PROCESSED_INTENT);
         intent.putExtra("message", message.key);
         mMainService.sendBroadcast(intent);
+        updateBadge();
     }
 
     public String validateFormResult(Message message, IJSONable formResult) {
@@ -1977,5 +1988,16 @@ public class MessagingPlugin implements MobicagePlugin {
         }
 
         return null;
+    }
+
+    public long getBadgeCount() {
+        return mStore.getDirtyThreadsCount();
+    }
+
+    public void updateBadge() {
+        Intent intent = new Intent(MainService.UPDATE_BADGE_INTENT);
+        intent.putExtra("key", "messages");
+        intent.putExtra("count", getBadgeCount());
+        mMainService.sendBroadcast(intent);
     }
 }
