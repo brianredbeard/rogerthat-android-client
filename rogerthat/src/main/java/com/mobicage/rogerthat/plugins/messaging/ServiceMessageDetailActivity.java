@@ -135,7 +135,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
     private FriendsPlugin mFriendsPlugin;
     private MessagingPlugin mMessagingPlugin;
     private MessageStore mStore;
-    private MenuItemPresser mMenuItemPresser;
+    private MenuItemPresser<ServiceMessageDetailActivity> mMenuItemPresser;
     private Message mCurrentMessage;
     private int mDisplayWidth;
     private BroadcastReceiver mBroadcastReceiver;
@@ -785,7 +785,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
             askConfirmation(button, buttonUrl, container);
         } else if (Message.MC_SMI_PREFIX.equals(buttonAction)) {
             if (mMenuItemPresser == null) {
-                mMenuItemPresser = new MenuItemPresser(this, mCurrentMessage.sender);
+                mMenuItemPresser = new MenuItemPresser<>(this, mCurrentMessage.sender);
             }
 
             mMenuItemPresser.itemPressed(buttonUrl, new MenuItemPresser.ResultHandler() {
@@ -821,7 +821,9 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
         if (!mTransfering)
             jumpToServiceHomeScreen(button, null);
 
-        if (buttonAction != null && !Message.MC_CONFIRM_PREFIX.equals(buttonAction)) {
+        // action "poke" is not allowed in message buttons and action "confirm" is already handled.
+        if (buttonAction != null && !Message.MC_CONFIRM_PREFIX.equals(buttonAction) && !Message.MC_POKE_PREFIX.equals
+                (buttonAction)) {
             final Intent intent = new Intent(buttonAction, Uri.parse(buttonUrl));
             startActivity(intent);
         }

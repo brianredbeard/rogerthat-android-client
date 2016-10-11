@@ -61,6 +61,7 @@ import com.mikepenz.iconics.context.IconicsLayoutInflater;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.MenuItemPresser;
 import com.mobicage.rogerthat.plugins.friends.MenuItemPressingActivity;
+import com.mobicage.rogerthat.plugins.friends.PokingActivity;
 import com.mobicage.rogerthat.plugins.friends.ServiceSearchActivity;
 import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.Security;
@@ -85,7 +86,8 @@ import java.util.Queue;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
-public abstract class ServiceBoundActivity extends AppCompatActivity implements Pausable, ServiceBound, MenuItemPressingActivity {
+public abstract class ServiceBoundActivity extends AppCompatActivity implements Pausable, ServiceBound,
+        MenuItemPressingActivity, PokingActivity {
 
     public static final long MAX_TRANSMIT = 10 * 1000;
 

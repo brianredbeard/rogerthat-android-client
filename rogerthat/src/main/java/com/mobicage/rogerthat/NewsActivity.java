@@ -338,7 +338,6 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
         return intents.toArray(new String[intents.size()]);
     }
 
-
     @Override
     protected void changeCursor() {
         if (mServiceIsBound) {
@@ -474,6 +473,17 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
         } else {
             newsStore.clearCache();
         }
+
+        final NewsListAdapter adapter = ((NewsListAdapter) getAdapter());
+        if (adapter != null) {
+            if (adapter.mMenuItemPresser != null) {
+                adapter.mMenuItemPresser.stop();
+            }
+            if (adapter.mPoker != null) {
+                adapter.mPoker.stop();
+            }
+        }
+
         unregisterReceiver(mBroadcastReceiver);
         unregisterReceiver(getDefaultBroadcastReceiver());
         disconnectChannel();

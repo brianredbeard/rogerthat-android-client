@@ -161,35 +161,36 @@ public class SystemUtils {
         if (!CloudConstants.DEBUG_LOGGING)
             return;
         L.d(intent.toString());
-        if ((intent.getFlags() & Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) == Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT)
+        final int flags = intent.getFlags();
+        if (isFlagEnabled(flags, Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT))
             L.d("FLAG_ACTIVITY_BROUGHT_TO_FRONT");
-        if ((intent.getFlags() & Intent.FLAG_ACTIVITY_CLEAR_TOP) == Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        if (isFlagEnabled(flags, Intent.FLAG_ACTIVITY_CLEAR_TOP))
             L.d("FLAG_ACTIVITY_CLEAR_TOP");
-        if ((intent.getFlags() & Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET) == Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET)
+        if (isFlagEnabled(flags, Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET))
             L.d("FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET");
-        if ((intent.getFlags() & Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) == Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+        if (isFlagEnabled(flags, Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS))
             L.d("FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS");
-        if ((intent.getFlags() & Intent.FLAG_ACTIVITY_FORWARD_RESULT) == Intent.FLAG_ACTIVITY_FORWARD_RESULT)
+        if (isFlagEnabled(flags, Intent.FLAG_ACTIVITY_FORWARD_RESULT))
             L.d("FLAG_ACTIVITY_FORWARD_RESULT");
-        if ((intent.getFlags() & Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) == Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY)
+        if (isFlagEnabled(flags, Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY))
             L.d("FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY");
-        if ((intent.getFlags() & Intent.FLAG_ACTIVITY_MULTIPLE_TASK) == Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
+        if (isFlagEnabled(flags, Intent.FLAG_ACTIVITY_MULTIPLE_TASK))
             L.d("FLAG_ACTIVITY_MULTIPLE_TASK");
-        if ((intent.getFlags() & Intent.FLAG_ACTIVITY_NEW_TASK) == Intent.FLAG_ACTIVITY_NEW_TASK)
+        if (isFlagEnabled(flags, Intent.FLAG_ACTIVITY_NEW_TASK))
             L.d("FLAG_ACTIVITY_NEW_TASK");
-        if ((intent.getFlags() & Intent.FLAG_ACTIVITY_NO_ANIMATION) == Intent.FLAG_ACTIVITY_NO_ANIMATION)
+        if (isFlagEnabled(flags, Intent.FLAG_ACTIVITY_NO_ANIMATION))
             L.d("FLAG_ACTIVITY_NO_ANIMATION");
-        if ((intent.getFlags() & Intent.FLAG_ACTIVITY_NO_HISTORY) == Intent.FLAG_ACTIVITY_NO_HISTORY)
+        if (isFlagEnabled(flags, Intent.FLAG_ACTIVITY_NO_HISTORY))
             L.d("FLAG_ACTIVITY_NO_HISTORY");
-        if ((intent.getFlags() & Intent.FLAG_ACTIVITY_NO_USER_ACTION) == Intent.FLAG_ACTIVITY_NO_USER_ACTION)
+        if (isFlagEnabled(flags, Intent.FLAG_ACTIVITY_NO_USER_ACTION))
             L.d("FLAG_ACTIVITY_NO_USER_ACTION");
-        if ((intent.getFlags() & Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP) == Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP)
+        if (isFlagEnabled(flags, Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP))
             L.d("FLAG_ACTIVITY_PREVIOUS_IS_TOP");
-        if ((intent.getFlags() & Intent.FLAG_ACTIVITY_REORDER_TO_FRONT) == Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+        if (isFlagEnabled(flags, Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
             L.d("FLAG_ACTIVITY_REORDER_TO_FRONT");
-        if ((intent.getFlags() & Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) == Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED)
+        if (isFlagEnabled(flags, Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED))
             L.d("FLAG_ACTIVITY_RESET_TASK_IF_NEEDED");
-        if ((intent.getFlags() & Intent.FLAG_ACTIVITY_SINGLE_TOP) == Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        if (isFlagEnabled(flags, Intent.FLAG_ACTIVITY_SINGLE_TOP))
             L.d("FLAG_ACTIVITY_SINGLE_TOP");
         L.d("Extras: " + intent.getExtras() + "\n\n\n");
     }
