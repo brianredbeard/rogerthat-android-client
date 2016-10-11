@@ -561,11 +561,11 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
             btn.setOnClickListener(new SafeViewOnClickListener() {
                 @Override
                 public void safeOnClick(View v) {
-                    final int currentExistenceStatus = mActivity.friendsPlugin.getStore().getExistence(newsItem.sender.email);
-                    if (Friend.ACTIVE == currentExistenceStatus) {
-                        if (Message.MC_CONFIRM_PREFIX.equals(buttonAction)) {
+                    if (Message.MC_CONFIRM_PREFIX.equals(buttonAction)) {
                             // ignore
-                        } else if (Message.MC_SMI_PREFIX.equals(buttonAction)) {
+                    } else if (Message.MC_SMI_PREFIX.equals(buttonAction)) {
+                        final int currentExistenceStatus = mActivity.friendsPlugin.getStore().getExistence(newsItem.sender.email);
+                        if (Friend.ACTIVE == currentExistenceStatus) {
                             MenuItemPresser menuItemPresser = new MenuItemPresser(mActivity, newsItem.sender.email);
                             menuItemPresser.itemPressed(buttonUrl, new MenuItemPresser.ResultHandler() {
                                 @Override
@@ -582,27 +582,27 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                                 public void onTimeout() {
                                 }
                             }, button.flow_params);
+
                         } else {
+                            new AlertDialog.Builder(mActivity)
+                                    .setMessage(mActivity.getString(R.string.invite_as_friend, new Object[]{newsItem.sender.name}))
+                                    .setPositiveButton(R.string.yes, new SafeDialogInterfaceOnClickListener() {
+                                        @Override
+                                        public void safeOnClick(DialogInterface dialog, int which) {
+                                            mActivity.progressDialog.show();
+                                            mActivity.expectedEmailHash = newsItem.sender.email;
+                                            mCurrentActionBtn = btn;
+                                            mActivity.friendsPlugin.inviteFriend(newsItem.sender.email, null, null, true);
+                                        }
+                                    }).setNegativeButton(R.string.no, null).create().show();
+                        }
+                    } else {
                             if (buttonAction != null) {
                                 final Intent intent = new Intent(buttonAction, Uri.parse(buttonUrl));
                                 mActivity.startActivity(intent);
                             }
                         }
-                    } else {
-                        new AlertDialog.Builder(mActivity)
-                                .setMessage(mActivity.getString(R.string.invite_as_friend, new Object[]{newsItem.sender.name}))
-                                .setPositiveButton(R.string.yes, new SafeDialogInterfaceOnClickListener() {
-                                    @Override
-                                    public void safeOnClick(DialogInterface dialog, int which) {
-                                        mActivity.progressDialog.show();
-                                        mActivity.expectedEmailHash = newsItem.sender.email;
-                                        mCurrentActionBtn = btn;
-                                        mActivity.friendsPlugin.inviteFriend(newsItem.sender.email, null, null, true);
-                                    }
-                                }).setNegativeButton(R.string.no, null).create().show();
                     }
-
-                }
             });
             GradientDrawable background = new GradientDrawable();
             background.setColor(ContextCompat.getColor(mActivity, R.color.mc_primary_color));
@@ -711,6 +711,8 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                     Bitmap bm = BitmapFactory.decodeFile(cachedFile.getAbsolutePath());
                     if (newsItem.users_that_rogered.length == 0) {
                         viewHolder.image.setImageBitmap(ImageHelper.getRoundTopCornerBitmap(bm, corderRadius));
+                    } else {
+                        viewHolder.image.setImageBitmap(bm);
                     }
                     viewHolder.image.setVisibility(View.VISIBLE);
                 } else {
