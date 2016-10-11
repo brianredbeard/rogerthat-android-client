@@ -151,14 +151,7 @@ public class DateSelectWidget extends Widget {
                     new DatePicker.OnDateChangedListener() {
                         @Override
                         public void onDateChanged(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                            if (mIgnoreDateOrTimeChanges)
-                                return;
-
-                            mCal.set(Calendar.YEAR, year);
-                            mCal.set(Calendar.MONTH, monthOfYear);
-                            mCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                            checkBoundaries();
-                            updateLabel();
+                            datePickerChanged(year, monthOfYear, dayOfMonth);
                         }
                     }
             );
@@ -167,6 +160,8 @@ public class DateSelectWidget extends Widget {
                     .setPositiveButton(mActivity.getString(R.string.ok), new SafeDialogInterfaceOnClickListener() {
                         @Override
                         public void safeOnClick(DialogInterface di, int which) {
+                            // Workaround for android 5.0 not triggering the changed listener
+                            datePickerChanged(mDatePicker.getYear(), mDatePicker.getMonth(), mDatePicker.getDayOfMonth());
 
                         }
                     }).setNegativeButton(mActivity.getString(R.string.cancel), new SafeDialogInterfaceOnClickListener() {
@@ -194,46 +189,7 @@ public class DateSelectWidget extends Widget {
             mTimePicker.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
                 @Override
                 public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
-                    if (mIgnoreDateOrTimeChanges)
-                        return;
-
-                    int oldMinute = mCal.get(Calendar.MINUTE);
-                    int oldHour = mCal.get(Calendar.HOUR_OF_DAY);
-                    if (oldMinute == minute && oldHour == hourOfDay)
-                        return;
-
-                    if (oldMinute != minute && mMinuteInterval > 1) {
-                        boolean hourOfDayModified = false;
-                        minute = (oldMinute > minute || oldMinute == 0 && minute == 59) ? oldMinute - mMinuteInterval
-                                : oldMinute + mMinuteInterval;
-                        if (minute >= 60) {
-                            minute -= 60;
-                            hourOfDay = (hourOfDay + 1) % 24;
-                            hourOfDayModified = true;
-                        } else if (minute < 0) {
-                            minute += 60;
-                            if (oldHour == hourOfDay) {
-                                // Only decrease if TimePicker did not do it itself (different behavior between APIs)
-                                hourOfDay = (hourOfDay - 1) % 24;
-                                hourOfDayModified = true;
-                            }
-                        }
-                        mCal.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                        mCal.set(Calendar.MINUTE, minute);
-                        mIgnoreDateOrTimeChanges = true;
-                        try {
-                            mTimePicker.setCurrentMinute(minute);
-                            if (hourOfDayModified)
-                                mTimePicker.setCurrentHour(hourOfDay);
-                        } finally {
-                            mIgnoreDateOrTimeChanges = false;
-                        }
-                    } else {
-                        mCal.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                        mCal.set(Calendar.MINUTE, minute);
-                    }
-                    checkBoundaries();
-                    updateLabel();
+                    timePickerChanged(hourOfDay, minute);
                 }
             });
 
@@ -242,7 +198,8 @@ public class DateSelectWidget extends Widget {
                     .setPositiveButton(mActivity.getString(R.string.ok), new SafeDialogInterfaceOnClickListener() {
                         @Override
                         public void safeOnClick(DialogInterface di, int which) {
-
+                            // Workaround for android 5.0 not triggering the changed listener
+                            timePickerChanged(mTimePicker.getCurrentHour(), mTimePicker.getCurrentMinute());
                         }
                     }).setNegativeButton(mActivity.getString(R.string.cancel), new SafeDialogInterfaceOnClickListener() {
                         @Override
@@ -259,6 +216,60 @@ public class DateSelectWidget extends Widget {
             });
         }
 
+        updateLabel();
+    }
+
+    private void timePickerChanged(int hourOfDay, int minute) {
+        if (mIgnoreDateOrTimeChanges)
+            return;
+
+        int oldMinute = mCal.get(Calendar.MINUTE);
+        int oldHour = mCal.get(Calendar.HOUR_OF_DAY);
+        if (oldMinute == minute && oldHour == hourOfDay)
+            return;
+
+        if (oldMinute != minute && mMinuteInterval > 1) {
+            boolean hourOfDayModified = false;
+            minute = (oldMinute > minute || oldMinute == 0 && minute == 59) ? oldMinute - mMinuteInterval
+                    : oldMinute + mMinuteInterval;
+            if (minute >= 60) {
+                minute -= 60;
+                hourOfDay = (hourOfDay + 1) % 24;
+                hourOfDayModified = true;
+            } else if (minute < 0) {
+                minute += 60;
+                if (oldHour == hourOfDay) {
+                    // Only decrease if TimePicker did not do it itself (different behavior between APIs)
+                    hourOfDay = (hourOfDay - 1) % 24;
+                    hourOfDayModified = true;
+                }
+            }
+            mCal.set(Calendar.HOUR_OF_DAY, hourOfDay);
+            mCal.set(Calendar.MINUTE, minute);
+            mIgnoreDateOrTimeChanges = true;
+            try {
+                mTimePicker.setCurrentMinute(minute);
+                if (hourOfDayModified)
+                    mTimePicker.setCurrentHour(hourOfDay);
+            } finally {
+                mIgnoreDateOrTimeChanges = false;
+            }
+        } else {
+            mCal.set(Calendar.HOUR_OF_DAY, hourOfDay);
+            mCal.set(Calendar.MINUTE, minute);
+        }
+        checkBoundaries();
+        updateLabel();
+    }
+
+    private void datePickerChanged(int year, int month, int dayOfMonth) {
+        if (mIgnoreDateOrTimeChanges)
+            return;
+
+        mCal.set(Calendar.YEAR, year);
+        mCal.set(Calendar.MONTH, month);
+        mCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+        checkBoundaries();
         updateLabel();
     }
 
