@@ -21,8 +21,15 @@ package com.mobicage.rogerthat.util;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.ResultReceiver;
 
+import com.commonsware.cwac.cam2.AbstractCameraActivity;
+import com.commonsware.cwac.cam2.CameraActivity;
+import com.commonsware.cwac.cam2.Facing;
+import com.commonsware.cwac.cam2.FlashMode;
+import com.commonsware.cwac.cam2.VideoRecorderActivity;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MoreActivity;
 import com.mobicage.rogerthat.NewsActivity;
@@ -166,5 +173,38 @@ public class ActivityUtils {
         } else {
             L.bug("goToActivityBehindTag called from wrong context: " + context);
         }
+    }
+
+    public static Intent buildTakePictureIntent(Context context, Uri saveTo, Facing facing) {
+        return new CameraActivity.IntentBuilder(context)
+                .allowSwitchFlashMode()
+                .facing(facing)
+                .to(saveTo)
+                .flashModes(FlashMode.values())
+                .updateMediaStore()
+                .onError(new ResultReceiver(null) {
+                    protected void onReceiveResult (int resultCode,
+                                                    Bundle resultData) {
+                        L.bug("Failure in CameraActivity.\nError: r" + resultData.toString());
+                    }
+                })
+                .skipOrientationNormalization()
+                .skipConfirm()
+                .build();
+    }
+
+    public static Intent buildMakeVideoIntent(Context context, Uri saveTo) {
+        return new VideoRecorderActivity.IntentBuilder(context)
+                .facing(Facing.BACK)
+                .to(saveTo)
+                .updateMediaStore()
+                .quality(AbstractCameraActivity.Quality.LOW)
+                .onError(new ResultReceiver(null) {
+                    protected void onReceiveResult (int resultCode,
+                                                    Bundle resultData) {
+                        L.bug("Failure in CameraActivity.\nError: r" + resultData.toString());
+                    }
+                })
+                .build();
     }
 }

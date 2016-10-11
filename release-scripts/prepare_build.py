@@ -293,7 +293,7 @@ public class NavigationConstants {
             action_type = quoted_str_or_null("click")
             action = quoted_str_or_null(item["tag"])
         elif item.get("action"):
-            action_type = quoted_str_or_null("action")
+            action_type = quoted_str_or_null(item['action_type'])
             action = quoted_str_or_null(item["action"])
         else:
             logging.error(item)
@@ -325,7 +325,7 @@ public class NavigationConstants {
                 action_type = quoted_str_or_null("click")
                 action = quoted_str_or_null(item["tag"])
             elif item.get("action"):
-                action_type = quoted_str_or_null("action")
+                action_type = quoted_str_or_null(item['action_type'])
                 action = quoted_str_or_null(item["action"])
             else:
                 raise Exception("Unknown toolbar item property %s" % i)

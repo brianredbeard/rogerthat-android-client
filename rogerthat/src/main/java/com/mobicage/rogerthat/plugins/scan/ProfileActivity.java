@@ -31,6 +31,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Bundle;
+import android.os.ResultReceiver;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.view.Menu;
@@ -56,6 +58,7 @@ import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MyIdentity;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
+import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.IOUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
@@ -302,14 +305,7 @@ public class ProfileActivity extends ServiceBoundActivity {
         PackageManager pm = getPackageManager();
         final Intent chooserIntent = Intent.createChooser(galleryIntent, getString(R.string.select_source));
         if (pm.hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
-            Intent cameraIntent = new CameraActivity.IntentBuilder(this)
-                    .allowSwitchFlashMode()
-                    .facing(Facing.FRONT)
-                    .to(mUriSavedImage)
-                    .flashModes(FlashMode.values())
-                    .confirmationQuality(0.5f)
-                    .updateMediaStore()
-                    .build();
+            Intent cameraIntent = ActivityUtils.buildTakePictureIntent(this, mUriSavedImage, Facing.FRONT);
             chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] { cameraIntent });
         }
 

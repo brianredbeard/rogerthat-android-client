@@ -39,10 +39,10 @@ public class NavigationConstants {
 
     public static ServiceBoundActivity.NavigationItem[] getNavigationFooterItems() {
         return new ServiceBoundActivity.NavigationItem[]{
-                new ServiceBoundActivity.NavigationItem(FontAwesome.Icon.faw_newspaper_o, "action", "news", R.string.news, false),
+                new ServiceBoundActivity.NavigationItem(FontAwesome.Icon.faw_newspaper_o, null, "news", R.string.news, false),
                 new ServiceBoundActivity.NavigationItem(FontAwesome.Icon.faw_shopping_cart, "action", "__sln__.order", R.string.order, false),
-                new ServiceBoundActivity.NavigationItem(FontAwesome.Icon.faw_calendar, "action", "reserve1", R.string.agenda, false),
-                new ServiceBoundActivity.NavigationItem(FontAwesome.Icon.faw_credit_card, "action", "qrcode", R.string.app_name, false),
+                new ServiceBoundActivity.NavigationItem(FontAwesome.Icon.faw_cutlery, "click", "reserve1", R.string.reserve, false),
+                new ServiceBoundActivity.NavigationItem(FontAwesome.Icon.faw_credit_card, null, "qrcode", R.string.app_name, false),
         };
     }
 }

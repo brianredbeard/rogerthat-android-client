@@ -73,6 +73,7 @@ import com.mobicage.rogerthat.plugins.messaging.AttachmentViewerActivity;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.plugins.messaging.ServiceMessageDetailActivity;
+import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.IOUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeAsyncTask;
@@ -169,14 +170,7 @@ public class PhotoUploadWidget extends Widget {
                 boolean hasCamera = mActivity.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA);
                 boolean hasCameraPermission = mActivity.getMainService().isPermitted(Manifest.permission.CAMERA);
                 if (hasCamera && hasCameraPermission) {
-                    cameraIntent = new CameraActivity.IntentBuilder(mActivity)
-                            .allowSwitchFlashMode()
-                            .facing(Facing.BACK)
-                            .to(mUriSavedImage)
-                            .flashModes(FlashMode.values())
-                            .confirmationQuality(0.5f)
-                            .updateMediaStore()
-                            .build();
+                    cameraIntent = ActivityUtils.buildTakePictureIntent(mActivity, mUriSavedImage, Facing.BACK);
                 }
 
                 Intent galleryIntent = new Intent(Intent.ACTION_PICK,
