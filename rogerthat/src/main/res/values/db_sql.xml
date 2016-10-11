@@ -255,13 +255,14 @@ WHERE parent_key = ? AND existence = 1
 ORDER BY \"timestamp\" ASC
     </string>
     <string name="sql_message_cursor_need_my_answer_message_from_thread">
-SELECT \"key\", parent_key
+SELECT \"key\", parent_key, "timestamp"
 FROM message
 WHERE \"key\" = ? AND needs_my_answer = 1
 UNION
-SELECT \"key\", parent_key
+SELECT \"key\", parent_key, "timestamp"
 FROM message
 WHERE parent_key = ? AND needs_my_answer = 1
+ORDER BY \"timestamp\" ASC
     </string>
     <string name="sql_message_select_children">SELECT \"key\" FROM message WHERE parent_key = ? ORDER BY \"timestamp\" ASC</string>
     <string name="sql_message_cursor_full_service_thread">

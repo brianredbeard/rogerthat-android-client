@@ -90,15 +90,8 @@ import thirdparty.nishantnair.FlowLayoutRTL;
 
 public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
 
-    public final static String ANDROID_TEL_PREFIX = "tel:";
-    public final static String ANDROID_HTTP_PREFIX = "http://";
-    public final static String ANDROID_HTTPS_PREFIX = "https://";
-    public final static String ANDROID_GEO_PREFIX = "geo:";
-
     public static final String PARENT_MESSAGE_KEY = "parent_message_key";
     public static final String MESSAGE_FLAGS = "message_flags";
-
-    public final static String BUTTON_INFO = "buttonInfo";
 
     private final static String HINT_SWIPE = "com.mobicage.rogerthat.plugins.messaging.FriendsThreadActivity.HINT_SWIPE";
 
@@ -664,6 +657,10 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                         mMessagingPlugin.getStore().insertMemberStatusBIZZ(message.parent_key, message.key, ms);
                     }
 
+                    if (message.parent_key != null) {
+                        // Ack the messages which were sent before this one
+                        mMessagingPlugin.ackThread(message.parent_key, message.timestamp);
+                    }
                     mMessagingPlugin.ackMessage(message, id, null, null, FriendsThreadActivity.this, buttons);
                 }
 

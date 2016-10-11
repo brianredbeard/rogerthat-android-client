@@ -70,6 +70,8 @@ import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.rpc.http.HttpCommunicator;
+import com.mobicage.to.messaging.AckMessageRequestTO;
+import com.mobicage.to.messaging.AckMessageResponseTO;
 import com.mobicage.to.messaging.AttachmentTO;
 import com.mobicage.to.messaging.ButtonTO;
 import com.mobicage.to.messaging.DeleteConversationRequestTO;
@@ -904,8 +906,8 @@ public class MessagingPlugin implements MobicagePlugin {
         }
 
         L.d("Ack message " + message.key + " with button [" + (button == null ? "" : button) + "]");
-        ResponseHandler<com.mobicage.to.messaging.AckMessageResponseTO> responseHandler = new ResponseHandler<com.mobicage.to.messaging.AckMessageResponseTO>();
-        com.mobicage.to.messaging.AckMessageRequestTO ack = new com.mobicage.to.messaging.AckMessageRequestTO();
+        ResponseHandler<AckMessageResponseTO> responseHandler = new ResponseHandler<>();
+        AckMessageRequestTO ack = new AckMessageRequestTO();
         ack.button_id = button;
         ack.message_key = message.key;
         ack.parent_message_key = message.parent_key;
@@ -943,6 +945,10 @@ public class MessagingPlugin implements MobicagePlugin {
     }
 
     public void ackThread(final String threadKey) {
+        ackThread(threadKey, null);
+    }
+
+    public void ackThread(final String threadKey, final Long untilTimestamp) {
         T.UI();
         mMainService.postOnBIZZHandler(new SafeRunnable() {
             @Override
@@ -952,13 +958,18 @@ public class MessagingPlugin implements MobicagePlugin {
                     boolean proceed = curs.moveToFirst();
                     while (proceed) {
                         String key = curs.getString(0);
-                        String parent_key = curs.getString(1);
+                        String parentKey = curs.getString(1);
+                        long timestamp = curs.getLong(2);
 
-                        ResponseHandler<com.mobicage.to.messaging.AckMessageResponseTO> responseHandler = new ResponseHandler<com.mobicage.to.messaging.AckMessageResponseTO>();
-                        com.mobicage.to.messaging.AckMessageRequestTO ack = new com.mobicage.to.messaging.AckMessageRequestTO();
+                        if (untilTimestamp != null && timestamp > untilTimestamp) {
+                            break;
+                        }
+
+                        ResponseHandler<AckMessageResponseTO> responseHandler = new ResponseHandler<>();
+                        AckMessageRequestTO ack = new AckMessageRequestTO();
                         ack.button_id = null;
                         ack.message_key = key;
-                        ack.parent_message_key = parent_key;
+                        ack.parent_message_key = parentKey;
                         ack.custom_reply = null;
                         ack.timestamp = mMainService.currentTimeMillis() / 1000;
                         try {
