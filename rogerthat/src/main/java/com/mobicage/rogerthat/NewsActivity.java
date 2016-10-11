@@ -424,9 +424,13 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
             new TimerTask() {
                 @Override
                 public void run() {
-                    if (mIsConnectedToInternet && newsChannel != null && !newsChannel.isConnected() && !newsChannel.isTryingToReconnect()) {
-                        L.d("Reconnecting to channel since it is not connected and not retrying to reconnect");
-                        connectToChannel();
+                    if (mIsConnectedToInternet
+                            && newsChannel != null
+                            && !newsChannel.isConnected()
+                            && !newsChannel.isTryingToReconnect()
+                            && newsChannel.hasValidConfiguration()) {
+                            L.d("Reconnecting to channel since it is not connected and not retrying to reconnect");
+                            connectToChannel();
                     }
                 }
             },
