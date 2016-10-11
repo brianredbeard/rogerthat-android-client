@@ -555,6 +555,7 @@ public class MainActivity extends ServiceBoundActivity {
             mDialog = new ProgressDialog(this);
             mDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
             mDialog.setMessage(getString(R.string.downloading));
+            mDialog.setIndeterminate(true);
             mDialog.setCancelable(false);
             mDialog.show();
         }

@@ -134,8 +134,8 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
     private String mActivityName;
 
     public MenuItemPresser menuItemPresser;
-    public boolean mShowDrawer = false;
-    public boolean mShowDrawerIcon = false;
+    private boolean mShowDrawer = false;
+    private boolean mShowDrawerIcon = false;
 
     private Map<String, Integer> mBadgePositionsNavigationDrawer = new HashMap<>();
     private Map<String, Integer> mBadgePositionsNavigationFooter = new HashMap<>();

@@ -21,6 +21,12 @@
         android:visibility="gone"
         rsb:absoluteMaxValue="100"
         rsb:absoluteMinValue="0"
+        rsb:thumbNormal="@drawable/range_slider_thumb"
+        rsb:thumbShadow="true"
+        rsb:thumbPressed="@drawable/range_slider_thumb"
+        rsb:thumbDisabled="@drawable/range_slider_thumb"
+        rsb:defaultColor="@color/mc_primary_color"
+        rsb:activeColor="@color/mc_primary_color"
         rsb:showLabels="false"
         rsb:valuesAboveThumbs="false" />
 
@@ -31,6 +37,12 @@
         android:visibility="gone"
         rsb:absoluteMaxValue="100"
         rsb:absoluteMinValue="0"
+        rsb:thumbNormal="@drawable/range_slider_thumb"
+        rsb:thumbPressed="@drawable/range_slider_thumb"
+        rsb:thumbShadow="true"
+        rsb:thumbDisabled="@drawable/range_slider_thumb"
+        rsb:defaultColor="@color/mc_primary_color"
+        rsb:activeColor="@color/mc_primary_color"
         rsb:showLabels="false"
         rsb:valuesAboveThumbs="true" />
 
