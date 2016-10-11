@@ -405,7 +405,6 @@
     <string name="scanned_yourself">You successfully scanned your own %1$s id.</string>
     <string name="scanner_communication_failure">A failure happened while communicating to the server.</string>
     <string name="scanner_failure">A failure happened.</string>
-    <string name="search_services_if_none_connected_message">Would you like to search for %1$s in your neighbourhood?</string>
     <string name="searching">Searching…</string>
     <string name="select_all">Select all</string>
     <string name="select_size">Select size</string>

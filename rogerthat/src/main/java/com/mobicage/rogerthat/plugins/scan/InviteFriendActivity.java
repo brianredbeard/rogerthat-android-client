@@ -158,11 +158,11 @@ public class InviteFriendActivity extends ServiceBoundActivity {
                 }
             });
 
+            TextView descriptionTextView = (TextView)findViewById(R.id.description);
             if (mFriend.description == null) {
-                findViewById(R.id.about_service).setVisibility(View.GONE);
-                findViewById(R.id.description).setVisibility(View.GONE);
+                descriptionTextView.setVisibility(View.GONE);
             } else {
-                ((TextView) findViewById(R.id.description)).setText(mFriend.description);
+                descriptionTextView.setText(mFriend.description);
             }
 
         } catch (Exception e) {

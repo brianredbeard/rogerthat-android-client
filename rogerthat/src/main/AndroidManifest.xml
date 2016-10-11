@@ -505,18 +505,19 @@
             android:icon="@drawable/rogerthat_camera"
             android:label="@string/camera" />
 
-        <receiver
-            android:name="com.mobicage.rogerthat.widget.RogerthatWidgetProvider"
-            android:exported="false"
-            android:label="@string/widget_name" >
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
+        <!--todo: Needs to be restyled-->
+        <!--<receiver-->
+            <!--android:name="com.mobicage.rogerthat.widget.RogerthatWidgetProvider"-->
+            <!--android:exported="false"-->
+            <!--android:label="@string/widget_name" >-->
+            <!--<intent-filter>-->
+                <!--<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />-->
+            <!--</intent-filter>-->
 
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/rogerthat_widget_provider" />
-        </receiver>
+            <!--<meta-data-->
+                <!--android:name="android.appwidget.provider"-->
+                <!--android:resource="@xml/rogerthat_widget_provider" />-->
+        <!--</receiver>-->
 
         <receiver
             android:name="com.mobicage.rogerthat.GCMReveiver"

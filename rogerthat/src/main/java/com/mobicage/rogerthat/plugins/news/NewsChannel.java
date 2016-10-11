@@ -77,6 +77,10 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         return mIsConnected;
     }
 
+    public boolean hasValidConfiguration() {
+        return this.mHost != null && this.mPort != -1;
+    }
+
     private enum Command {
         AUTH("AUTH"),
         SET_INFO("SET INFO"),
@@ -129,7 +133,6 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         if (mHost == null || mPort == -1) {
             getConfiguration();
         }
-        connect();
     }
 
     public void internetDisconnected() {
@@ -142,19 +145,14 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         if (mIsConnected) {
             L.d("Already connected to news channel");
             return;
-        } else if (mIsRetryingToConnect) {
-            L.d("Already trying to reconnect to news channel");
-            return;
         } else if (!mService.getNetworkConnectivityManager().isConnected()) {
             L.d("Cannot connect to news channel: no internet connection.");
             return;
         } else if (mHost == null) {
             L.d("Not connecting to news channel because no host was found");
-            attemptToReconnect(10);
             return;
         } else if (mPort == -1) {
             L.d("Not connecting to news channel because no port was found");
-            attemptToReconnect(10);
             return;
         }
 
@@ -195,6 +193,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         // Bind and start to accept incoming connections.
         mChannel = b.connect(mHost, mPort).channel();
         mIsConnected = true;
+        mIsRetryingToConnect = false;
         L.d("Connected to news channel.");
         resendUnsendItems();
         if(mReconnectTimer != null) {
@@ -272,6 +271,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
             DNSUtil.HostAddress hostAddress = configurationFactory.getSafeNewsConnectionHost(false);
             mHost = hostAddress.getHost();
             mPort = hostAddress.getPort();
+            connect();
         } catch (NewsConfigurationConnectionException ignored) {
         } catch (NewsConfigurationException e) {
             L.bug(e);
@@ -288,6 +288,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
                 mReconnectTimer.cancel();
             }
             mReconnectTimer = new Timer(true);
+            L.i(String.valueOf(backoffTime));
             mReconnectTimer.scheduleAtFixedRate(
                     new java.util.TimerTask() {
                         @Override
@@ -296,10 +297,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
                                 SafeRunnable safeRunnable = new SafeRunnable() {
                                     @Override
                                     protected void safeRun() throws Exception {
-                                        if (mIsRetryingToConnect) {
-                                            mIsRetryingToConnect = false;
-                                            connect();
-                                        }
+                                        connect();
                                     }
                                 };
                                 mService.postAtFrontOfBIZZHandler(safeRunnable);
@@ -308,6 +306,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
                     },
                     0,
                     backoffTime * 1000
+
             );
         }
     }

@@ -529,7 +529,6 @@ def convert_config():
         show_profile_in_more = "true"
         show_scan_in_more = "false"
         services_enabled = "true"
-        search_services_if_none_connected = "-1"
 
     elif doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_CITYPAPP:
         app_type = "APP_TYPE_CITYAPP"
@@ -537,7 +536,6 @@ def convert_config():
         show_profile_in_more = bool_str(not mainScreenContainsProfile)
         show_scan_in_more = bool_str(not mainScreenContainsScan)
         services_enabled = bool_str(mainScreenContainsServices)
-        search_services_if_none_connected = ",".join(map(str, doc['APP_CONSTANTS'].get('SEARCH_SERVICES_IF_NONE_CONNECTED', [])))
 
     elif doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_ENTERPRISE:
         app_type = "APP_TYPE_ENTERPRISE"
@@ -545,7 +543,6 @@ def convert_config():
         show_profile_in_more = bool_str(not mainScreenContainsProfile)
         show_scan_in_more = bool_str(not mainScreenContainsScan)
         services_enabled = bool_str(mainScreenContainsServices)
-        search_services_if_none_connected = ",".join(map(str, doc['APP_CONSTANTS'].get('SEARCH_SERVICES_IF_NONE_CONNECTED', [])))
 
     elif doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_CONTENT_BRANDING:
         app_type = "APP_TYPE_CONTENT_BRANDING"
@@ -553,7 +550,6 @@ def convert_config():
         show_profile_in_more = "true"
         show_scan_in_more = "true"
         services_enabled = "true"
-        search_services_if_none_connected = "-1"
 
         if not doc['CLOUD_CONSTANTS'].get("USE_XMPP_KICK_CHANNEL", False):
             raise Exception("XMPP_KICK_CHANNEL must be enabled for content_branding")
@@ -564,7 +560,6 @@ def convert_config():
         show_profile_in_more = "false"
         show_scan_in_more = "false"
         services_enabled = "true"
-        search_services_if_none_connected = "-1"
 
     else:
         raise Exception("There is no app_type defined")
@@ -700,7 +695,6 @@ public class AppConstants {
     public static final boolean FULL_WIDTH_HEADERS = %(full_width_headers)s;
 
     public static final boolean REGISTRATION_ASKS_LOCATION_PERMISSION = %(registration_asks_location_permission)s;
-    public static final int[] SEARCH_SERVICES_IF_NONE_CONNECTED = new int[] {%(search_services_if_none_connected)s};
 
     public static final String[] PROFILE_DATA_FIELDS = new String[] { %(profile_data_fields)s };
     public static final boolean PROFILE_SHOW_GENDER_AND_BIRTHDATE = %(profile_show_gender_and_birthdate)s;
@@ -733,7 +727,6 @@ public class AppConstants {
            show_friends_in_more=show_friends_in_more,
            show_profile_in_more=show_profile_in_more,
            show_scan_in_more=show_scan_in_more,
-           search_services_if_none_connected=search_services_if_none_connected,
            full_width_headers=full_width_headers,
            profile_data_fields=profile_data_fields,
            profile_show_gender_and_birthdate=profile_show_gender_and_birthdate,

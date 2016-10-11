@@ -135,22 +135,9 @@ public class ServiceFriendsActivity extends FriendsActivity {
     }
 
     private void updateVisibleItems() {
-        if (mListAdapter.getCount() == 0) {
-            boolean found = false;
-            for (int i = 0; i < AppConstants.SEARCH_SERVICES_IF_NONE_CONNECTED.length; i++) {
-                if (AppConstants.SEARCH_SERVICES_IF_NONE_CONNECTED[i] == mOrganizationType) {
-                    found = true;
-                    break;
-                }
-            }
-            if (found) {
-                findViewById(R.id.no_services).setVisibility(View.VISIBLE);
-                findViewById(R.id.friend_list).setVisibility(View.GONE);
-            }
-        } else {
-            findViewById(R.id.no_services).setVisibility(View.GONE);
-            findViewById(R.id.friend_list).setVisibility(View.VISIBLE);
-        }
+        boolean hasResults = mListAdapter.getCount() > 0;
+        findViewById(R.id.no_services).setVisibility(hasResults ? View.GONE : View.VISIBLE);
+        findViewById(R.id.friend_list).setVisibility(hasResults ? View.VISIBLE : View.GONE);
     }
 
     @Override
