@@ -34,6 +34,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.ResultReceiver;
 import android.provider.MediaStore;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
@@ -71,6 +72,7 @@ import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessageStore;
 import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
+import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.IOUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.pickle.PickleException;
@@ -629,14 +631,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
 
         if (mActivity.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA) && mMainService.isPermitted(Manifest
                 .permission.CAMERA)) {
-            Intent cameraIntent = new CameraActivity.IntentBuilder(mActivity)
-                    .allowSwitchFlashMode()
-                    .facing(Facing.BACK)
-                    .to(mUriSavedFile)
-                    .flashModes(FlashMode.values())
-                    .confirmationQuality(0.5f)
-                    .updateMediaStore()
-                    .build();
+            Intent cameraIntent = ActivityUtils.buildTakePictureIntent(mActivity, mUriSavedFile, Facing.BACK);
             chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{cameraIntent});
         }
 
@@ -670,12 +665,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
         final Intent chooserIntent = Intent.createChooser(galleryIntent, mActivity.getString(R.string.select_source));
         if (mActivity.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA) && mMainService.isPermitted(Manifest
                 .permission.CAMERA)) {
-            Intent cameraIntent = new VideoRecorderActivity.IntentBuilder(mActivity)
-                    .facing(Facing.BACK)
-                    .to(mUriSavedFile)
-                    .updateMediaStore()
-                    .quality(AbstractCameraActivity.Quality.HIGH)
-                    .build();
+            Intent cameraIntent = ActivityUtils.buildMakeVideoIntent(mActivity, mUriSavedFile);
             chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{cameraIntent});
         }
 
