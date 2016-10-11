@@ -158,6 +158,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
 
     private MessagingPlugin mMessagingPlugin;
     private FriendsPlugin mFriendsPlugin;
+    private Poker<ActionScreenActivity> mPoker;
 
     private MediaPlayer mSoundMediaPlayer = null;
     private HandlerThread mSoundThread = null;
@@ -1189,25 +1190,17 @@ public class ActionScreenActivity extends ServiceBoundActivity {
     }
 
     private void poke(String tag) {
-        showTransmitting(null);
-
-        mContextMatch = "SP_" + UUID.randomUUID().toString();
-        boolean success = mFriendsPlugin.pokeService(mServiceEmail, tag, mContextMatch);
-        if (!success) {
-            completeTransmit(new SafeRunnable() {
-                @Override
-                protected void safeRun() throws Exception {
-                    UIUtils.showAlertDialog(ActionScreenActivity.this, null, R.string.scanner_communication_failure);
-                }
-            });
+        if (mPoker == null) {
+            mPoker = new Poker<>(this, mServiceEmail);
         }
+
+        mPoker.poke(tag, null);
     }
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onServiceBound() {
-        final IntentFilter intentFilter = new IntentFilter(MessagingPlugin.NEW_MESSAGE_RECEIVED_INTENT);
-        intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
+        final IntentFilter intentFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
         intentFilter.addAction(FriendsPlugin.SERVICE_API_CALL_ANSWERED_INTENT);
         intentFilter.addAction(FriendsPlugin.SERVICE_DATA_UPDATED);
         intentFilter.addAction(FriendsPlugin.BEACON_IN_REACH);
@@ -1335,6 +1328,9 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         if (mIsListeningBacklogConnectivityChanged) {
             unregisterReceiver(mBroadcastReceiverBacklog);
         }
+        if (mPoker != null) {
+            mPoker.stop();
+        }
     }
 
     private BroadcastReceiver mBroadcastReceiverBacklog = new SafeBroadcastReceiver() {
@@ -1365,19 +1361,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         @Override
         public String[] onSafeReceive(final Context context, final Intent intent) {
             T.UI();
-            if (MessagingPlugin.NEW_MESSAGE_RECEIVED_INTENT.equals(intent.getAction())) {
-                if (mContextMatch.equals(intent.getStringExtra("context")) && isTransmitting()) {
-                    mContextMatch = "";
-                    completeTransmit(new SafeRunnable() {
-                        @Override
-                        protected void safeRun() throws Exception {
-                            final Intent i = new Intent(context, ServiceMessageDetailActivity.class);
-                            i.putExtra("message", intent.getStringExtra("message"));
-                            startActivity(i);
-                        }
-                    });
-                }
-            } else if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
+            if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
                 L.d("[BroadcastReceiver] Screen OFF");
                 if (!mRunInBackground) {
                     finish();

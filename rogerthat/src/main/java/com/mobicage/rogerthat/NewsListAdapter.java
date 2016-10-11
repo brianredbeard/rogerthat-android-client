@@ -51,6 +51,7 @@ import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.friends.MenuItemPresser;
+import com.mobicage.rogerthat.plugins.friends.Poker;
 import com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity;
 import com.mobicage.rogerthat.plugins.messaging.MembersActivity;
 import com.mobicage.rogerthat.plugins.messaging.Message;
@@ -88,12 +89,15 @@ import java.util.UUID;
 
 public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHolder> {
 
-    protected final static int FLAG_ACTION_ROGERTHAT = 1;
-    protected final static int FLAG_ACTION_FOLLOW = 2;
+    private final static int FLAG_ACTION_ROGERTHAT = 1;
+    private final static int FLAG_ACTION_FOLLOW = 2;
 
     private final int _1_DP;
     private final int _15_DP;
     private final int _27_DP;
+
+    MenuItemPresser<NewsActivity> mMenuItemPresser;
+    Poker<NewsActivity> mPoker;
 
     private NewsActivity mActivity;
     private final MainService mMainService;
@@ -562,30 +566,18 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 @Override
                 public void safeOnClick(View v) {
                     if (Message.MC_CONFIRM_PREFIX.equals(buttonAction)) {
-                            // ignore
+                        return; // ignore
                     } else if (Message.MC_SMI_PREFIX.equals(buttonAction)) {
                         final int currentExistenceStatus = mActivity.friendsPlugin.getStore().getExistence(newsItem.sender.email);
                         if (Friend.ACTIVE == currentExistenceStatus) {
-                            MenuItemPresser menuItemPresser = new MenuItemPresser(mActivity, newsItem.sender.email);
-                            menuItemPresser.itemPressed(buttonUrl, new MenuItemPresser.ResultHandler() {
-                                @Override
-                                public void onSuccess() {
-                                    //overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_up);
-                                }
-
-                                @Override
-                                public void onError() {
-                                    L.e("SMI with hash " + buttonUrl + " not found!"); // XXX: log error to message.sender
-                                }
-
-                                @Override
-                                public void onTimeout() {
-                                }
-                            }, button.flow_params);
-
+                            if (mMenuItemPresser != null) {
+                                mMenuItemPresser.stop();
+                            }
+                            mMenuItemPresser = new MenuItemPresser<>(mActivity, newsItem.sender.email);
+                            mMenuItemPresser.itemPressed(buttonUrl, button.flow_params, null);
                         } else {
                             new AlertDialog.Builder(mActivity)
-                                    .setMessage(mActivity.getString(R.string.invite_as_friend, new Object[]{newsItem.sender.name}))
+                                    .setMessage(mActivity.getString(R.string.invite_as_friend, newsItem.sender.name))
                                     .setPositiveButton(R.string.yes, new SafeDialogInterfaceOnClickListener() {
                                         @Override
                                         public void safeOnClick(DialogInterface dialog, int which) {
@@ -596,12 +588,16 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                                         }
                                     }).setNegativeButton(R.string.no, null).create().show();
                         }
-                    } else {
-                            if (buttonAction != null) {
-                                final Intent intent = new Intent(buttonAction, Uri.parse(buttonUrl));
-                                mActivity.startActivity(intent);
-                            }
+                    } else if (Message.MC_POKE_PREFIX.equals(buttonAction)) {
+                        if (mPoker != null) {
+                            mPoker.stop();
                         }
+                        mPoker = new Poker<>(mActivity, newsItem.sender.email);
+                        mPoker.poke(buttonUrl, null);
+                    } else if (buttonAction != null) {
+                        final Intent intent = new Intent(buttonAction, Uri.parse(buttonUrl));
+                        mActivity.startActivity(intent);
+                    }
                     }
             });
             GradientDrawable background = new GradientDrawable();

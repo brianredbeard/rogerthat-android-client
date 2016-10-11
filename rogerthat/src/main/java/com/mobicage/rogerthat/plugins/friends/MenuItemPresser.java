@@ -101,10 +101,10 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
     }
 
     public void itemPressed(final String tag, final ResultHandler resultHandler) {
-        itemPressed(tag, resultHandler, null);
+        itemPressed(tag, null, resultHandler);
     }
 
-    public void itemPressed(final String tag, final ResultHandler resultHandler, final String flowPararms) {
+    public void itemPressed(final String tag, final String flowParams, final ResultHandler resultHandler) {
         final FriendStore friendStore = mService.getPlugin(FriendsPlugin.class).getStore();
         final ServiceMenuItemDetails smi = friendStore.getMenuItem(mEmail, tag);
         if (smi == null) {
@@ -112,16 +112,16 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
                 resultHandler.onError();
             return;
         }
-        itemPressed(smi, smi.menuGeneration, resultHandler, flowPararms);
+        itemPressed(smi, smi.menuGeneration, flowParams, resultHandler);
     }
 
     public void itemPressed(final ServiceMenuItemTO item, final long menuGeneration, final ResultHandler
             resultHandler) {
-        itemPressed(item, menuGeneration, resultHandler, null);
+        itemPressed(item, menuGeneration, null, resultHandler);
     }
 
-    public void itemPressed(final ServiceMenuItemTO item, final long menuGeneration, final ResultHandler
-            resultHandler, final String flowParams) {
+    public void itemPressed(final ServiceMenuItemTO item, final long menuGeneration, final String flowParams,
+                            final ResultHandler resultHandler) {
         mItem = item;
         mResultHandler = resultHandler == null ? mDefaultResultHandler : resultHandler;
 

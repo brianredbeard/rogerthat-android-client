@@ -560,7 +560,8 @@ public class MessagingPlugin implements MobicagePlugin {
                 buttonUrl = ANDROID_MAILTO_PREFIX + action.substring(Message.MC_MAILTO_PREFIX.length());
 
             } else {
-                for (final String prefix : new String[]{Message.MC_CONFIRM_PREFIX, Message.MC_SMI_PREFIX}) {
+                for (final String prefix : new String[]{Message.MC_CONFIRM_PREFIX, Message.MC_SMI_PREFIX, Message
+                        .MC_POKE_PREFIX}) {
                     if (action.startsWith(prefix)) {
                         buttonAction = prefix;
                         buttonUrl = action.substring(prefix.length());
