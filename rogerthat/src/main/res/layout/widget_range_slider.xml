@@ -25,6 +25,7 @@
         rsb:thumbShadow="true"
         rsb:thumbPressed="@drawable/range_slider_thumb"
         rsb:thumbDisabled="@drawable/range_slider_thumb"
+        rsb:barHeight="2dp"
         rsb:defaultColor="@color/mc_primary_color"
         rsb:activeColor="@color/mc_primary_color"
         rsb:showLabels="false"
@@ -43,6 +44,7 @@
         rsb:thumbDisabled="@drawable/range_slider_thumb"
         rsb:defaultColor="@color/mc_primary_color"
         rsb:activeColor="@color/mc_primary_color"
+        rsb:barHeight="2dp"
         rsb:showLabels="false"
         rsb:valuesAboveThumbs="true" />
 
