@@ -100,7 +100,7 @@
         android:gravity="end"
         android:orientation="horizontal" />
 
-    <Button
+    <android.support.v7.widget.AppCompatButton
         android:id="@+id/rogerthat_button"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -110,6 +110,7 @@
         android:layout_below="@id/read_friends_container"
         android:layout_marginLeft="1dp"
         android:layout_marginRight="1dp"
+        style="@style/RogerthatButton"
         android:layout_marginTop="5dp"
         android:text="@string/rogerthat"
         android:textColor="@color/mc_white"

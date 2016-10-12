@@ -27,6 +27,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.ContextCompat;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -660,11 +661,11 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
             int tmpThreadBackgroundColor = Integer.MAX_VALUE;
             final long priority = message.priority;
             if (priority == Message.PRIORITY_HIGH) {
-                tmpThreadTextColor = mResources.getColor(R.color.mc_priority_high_text);
-                tmpThreadBackgroundColor = mResources.getColor(R.color.mc_priority_high_background);
+                tmpThreadTextColor = ContextCompat.getColor(mService, R.color.mc_priority_high_text);
+                tmpThreadBackgroundColor = ContextCompat.getColor(mService, R.color.mc_priority_high_background);
             } else if (priority == Message.PRIORITY_URGENT || priority == Message.PRIORITY_URGENT_WITH_ALARM) {
-                tmpThreadTextColor = mResources.getColor(R.color.mc_priority_urgent_text);
-                tmpThreadBackgroundColor = mResources.getColor(R.color.mc_priority_urgent_background);
+                tmpThreadTextColor = ContextCompat.getColor(mService, R.color.mc_priority_urgent_text);
+                tmpThreadBackgroundColor = ContextCompat.getColor(mService, R.color.mc_priority_urgent_background);
             }
             final int threadTextColor = message.thread_text_color != null ? Color.parseColor("#"
                     + message.thread_text_color) : tmpThreadTextColor;
@@ -769,7 +770,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
             Resources resources = getResources();
             if (dynamicChat) {
                 if (message.priority == Message.PRIORITY_URGENT_WITH_ALARM) {
-                    int primaryColor = resources.getColor(R.color.mc_gray_11);
+                    int primaryColor = ContextCompat.getColor(mService, R.color.mc_gray_11);
                     statusView.setImageDrawable(new IconicsDrawable(context, FontAwesome.Icon.faw_bell).color(primaryColor).sizeDp(15));
                     return true;
                 } else {
@@ -780,20 +781,20 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
                     return false;
 
                 if (message.recipients_status == MessageMemberStatusSummaryEncoding.ERROR) {
-                    int errorColor = resources.getColor(R.color.mc_error);
+                    int errorColor = ContextCompat.getColor(mService, R.color.mc_error);
                     statusView.setImageDrawable(new IconicsDrawable(context, FontAwesome.Icon.faw_exclamation).color(errorColor).sizeDp(15));
                 } else if (message.alert_flags >= AlertManager.ALERT_FLAG_RING_5
                         && !mMessagingPlugin.isMessageAckedByMe(message)) {
-                    int rogerthatColor = resources.getColor(R.color.mc_green);
+                    int rogerthatColor = ContextCompat.getColor(mService, R.color.mc_green);
                     statusView.setImageDrawable(new IconicsDrawable(context, FontAwesome.Icon.faw_bell).color(rogerthatColor).sizeDp(15));
                 } else if (message.numAcked() != 0) {
-                    int rogerthatColor = resources.getColor(R.color.mc_green);
+                    int rogerthatColor = ContextCompat.getColor(mService, R.color.mc_green);
                     statusView.setImageDrawable(new IconicsDrawable(context, FontAwesome.Icon.faw_check).color(rogerthatColor).sizeDp(15));
                 } else if (message.numReceived() != 0) {
-                    int grayColor = resources.getColor(R.color.mc_gray_11);
+                    int grayColor = ContextCompat.getColor(mService, R.color.mc_gray_11);
                     statusView.setImageDrawable(new IconicsDrawable(context, FontAwesome.Icon.faw_check).color(grayColor).sizeDp(15));
                 } else {
-                    int grayColor = resources.getColor(R.color.mc_gray_11);
+                    int grayColor = ContextCompat.getColor(mService, R.color.mc_gray_11);
                     statusView.setImageDrawable(new IconicsDrawable(context, FontAwesome.Icon.faw_paper_plane).color(grayColor).sizeDp(15));
                 }
                 return true;

@@ -56,14 +56,16 @@
         <item name="android:src">@drawable/selector_pin_entry</item>
     </style>
 
-    <style name="ButtonBackground" parent="Widget.AppCompat.Button.Colored">
+    <style name="BaseButton" parent="Widget.AppCompat.Button.Colored">
         <item name="android:textColor">@color/mc_default_text_inverse</item>
+    </style>
+
+    <style name="ButtonBackground" parent="BaseButton">
         <item name="colorButtonNormal">@color/mc_primary_color</item>
     </style>
 
-    <style name="DarkGrayButtonBackground" parent="Widget.AppCompat.Button.Colored">
-        <item name="android:textColor">@color/mc_default_text_inverse</item>
-        <item name="colorButtonNormal">@color/mc_dark_gray_button_color</item>
+    <style name="RogerthatButton" parent="BaseButton">
+        <item name="colorButtonNormal">@color/mc_green</item>
     </style>
 
     <style name="LightFacebookButtonBackground" parent="Widget.AppCompat.Button">
@@ -74,5 +76,14 @@
     <style name="FacebookButtonBackground" parent="Widget.AppCompat.Button">
         <item name="android:background">@drawable/btn_facebook</item>
         <item name="android:textColor">@color/mc_white</item>
+    </style>
+
+    <style name="DialogTheme" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:textColorPrimary">@color/mc_default_text</item>
+        <item name="android:background">@color/mc_white</item>
+        <item name="android:textColor">@color/mc_default_text</item>
+        <item name="colorAccent">@color/mc_secondary_color</item>
+        <item name="colorPrimary">@color/mc_primary_color</item>
+        <item name="colorPrimaryDark">@color/mc_primary_color</item>
     </style>
 </resources>

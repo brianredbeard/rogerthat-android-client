@@ -142,8 +142,8 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
 
         pages = (LinearLayout) findViewById(R.id.pages);
         Resources resources = getResources();
-        darkSchemeTextColor = resources.getColor(android.R.color.primary_text_dark);
-        lightSchemeTextColor = resources.getColor(android.R.color.primary_text_light);
+        darkSchemeTextColor = ContextCompat.getColor(mService, android.R.color.primary_text_dark);
+        lightSchemeTextColor = ContextCompat.getColor(mService, android.R.color.primary_text_light);
 
         if (intent.getBooleanExtra(SHOW_ERROR_POPUP, false))
             UIUtils.showAlertDialog(this, null, R.string.error_please_try_again);

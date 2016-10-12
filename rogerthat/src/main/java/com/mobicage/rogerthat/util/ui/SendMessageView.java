@@ -563,7 +563,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
         } else if (IMAGE_BUTTON_PADDING == key) {
             return 0;
         } else {
-            L.d("Could not find image resourse for key: " + key);
+            L.d("Could not find image resource for key: " + key);
             return 0;
         }
     }
