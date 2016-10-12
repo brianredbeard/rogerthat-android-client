@@ -34,6 +34,9 @@ class CustomCloudConstants {
     final static boolean XMPP_MUST_VALIDATE_SSL_CERTIFICATE = true;
     final static boolean XMPP_DEBUG = false;
 
+    final static boolean NEWS_CHANNEL_SSL = true;
+    final static boolean NEWS_CHANNEL_MUST_VALIDATE_SSL_CERTIFICATE = true;
+
     final static boolean DEBUG_LOGGING = false;
     final static String REGISTRATION_MAIN_SIGNATURE = "dummy_main_signature";
     final static String REGISTRATION_EMAIL_SIGNATURE = "dummy_email_signature";
