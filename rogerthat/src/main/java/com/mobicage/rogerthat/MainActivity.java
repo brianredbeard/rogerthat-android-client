@@ -71,8 +71,10 @@ public class MainActivity extends ServiceBoundActivity {
     public static final int FLAG_NEW_STACK = Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP
         | Intent.FLAG_ACTIVITY_CLEAR_TASK;
 
-    public static final int FLAG_CLEAR_STACK = Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP
+    public static final int FLAG_CLEAR_STACK_SINGLE_TOP = Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP
             | Intent.FLAG_ACTIVITY_SINGLE_TOP;
+
+    public static final int FLAG_CLEAR_STACK = Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP;
 
     public static final String ACTION_WIDGET_MAIN = "ROGERTHAT_ACTION_WIDGET_MAIN";
     public static final String ACTION_WIDGET_SCAN = "ROGERTHAT_ACTION_WIDGET_SCAN";
@@ -183,7 +185,7 @@ public class MainActivity extends ServiceBoundActivity {
             processPhotoUploadDoneIntent(intent, hasRegistered);
 
         } else if (ACTION_NOTIFICATION_ENTER_PIN.equals(intentAction)) {
-            launchRegistrationActivityAndFinish(null, FLAG_CLEAR_STACK);
+            launchRegistrationActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP);
 
         } else if (ACTION_NOTIFICATION_MESSAGE_UPDATES.equals(intentAction)) {
             processMessageUpdatesIntent(intent, hasRegistered);
@@ -195,13 +197,13 @@ public class MainActivity extends ServiceBoundActivity {
             showRegistrationCompleteDialogAndGoToHomeActivity();
 
         } else if (ACTION_COMPLETE_PROFILE.equals(intentAction)) {
-            launchProfileActivityAndFinish(null, FLAG_CLEAR_STACK, false);
+            launchProfileActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP, false);
 
         } else if (ACTION_COMPLETE_PROFILE_FINISHED.equals(intentAction)) {
             showRegistrationCompleteDialogAndGoToHomeActivity();
 
         } else if (ACTION_SHOW_DETECTED_BEACONS.equals(intentAction)) {
-            launchDetectedBeaconsAndFinish(null, FLAG_CLEAR_STACK,
+            launchDetectedBeaconsAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP,
                 intent.getStringExtra(DetectedBeaconActivity.EXTRA_DETECTED_BEACONS),
                 intent.getBooleanExtra(DetectedBeaconActivity.EXTRA_AGE_AND_GENDER_SET, true));
         } else {
@@ -216,7 +218,7 @@ public class MainActivity extends ServiceBoundActivity {
                 } else {
                     // Started via rogerthat://
                     qrUri = intent.getData();
-                    flags = FLAG_CLEAR_STACK;
+                    flags = FLAG_CLEAR_STACK_SINGLE_TOP;
                 }
 
             } else {
@@ -261,7 +263,7 @@ public class MainActivity extends ServiceBoundActivity {
 
     private void processWidgetIntent(Intent intent, boolean hasRegistered) {
         if (hasRegistered) {
-            launchHomeActivityAndFinish(null, FLAG_CLEAR_STACK);
+            launchHomeActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP);
 
             if (ACTION_WIDGET_SCAN.equals(intent.getAction())) {
                 startScanner();
@@ -277,7 +279,7 @@ public class MainActivity extends ServiceBoundActivity {
 
     private void processAddFriendsIntent(Intent intent, boolean hasRegistered) {
         if (hasRegistered) {
-            launchHomeActivityAndFinish(null, FLAG_CLEAR_STACK);
+            launchHomeActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP);
 
             Intent i = new Intent(this, AddFriendsActivity.class);
             i.putExtras(intent.getExtras());
@@ -290,7 +292,7 @@ public class MainActivity extends ServiceBoundActivity {
     private void processPhotoUploadDoneIntent(Intent intent, boolean hasRegistered) {
         if (hasRegistered) {
             UIUtils.cancelNotification(mService, R.integer.transfer_complete_continue);
-            launchHomeActivityAndFinish(null, FLAG_CLEAR_STACK);
+            launchHomeActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP);
 
             Intent i = new Intent(this, ServiceMessageDetailActivity.class);
             String jsonString = intent.getStringExtra("data");
@@ -325,7 +327,7 @@ public class MainActivity extends ServiceBoundActivity {
                 if (friends.size() == 1) {
                     Friend friend = friendStore.getFriend(friends.get(0));
                     Intent i = new Intent(this, ServiceActionMenuActivity.class);
-                    i.setFlags(FLAG_CLEAR_STACK);
+                    i.setFlags(FLAG_CLEAR_STACK_SINGLE_TOP);
                     intent.putExtra(ServiceActionMenuActivity.SERVICE_EMAIL, friend.email);
                     intent.putExtra(ServiceActionMenuActivity.MENU_PAGE, 0);
                     i.putExtras(intent.getExtras());
@@ -369,13 +371,13 @@ public class MainActivity extends ServiceBoundActivity {
         builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialog) {
-                launchRegistrationActivityAndFinish(null, FLAG_CLEAR_STACK);
+                launchRegistrationActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP);
             }
         });
         builder.setPositiveButton(R.string.rogerthat, new SafeDialogInterfaceOnClickListener() {
             @Override
             public void safeOnClick(DialogInterface dialog, int which) {
-                launchRegistrationActivityAndFinish(null, FLAG_CLEAR_STACK);
+                launchRegistrationActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP);
             }
         });
         builder.create().show();
@@ -525,7 +527,7 @@ public class MainActivity extends ServiceBoundActivity {
     private void launchContentBrandingMainActivityAndFinish() {
         T.UI();
         Intent intent = new Intent(this, ContentBrandingMainActivity.class);
-        intent.setFlags(MainActivity.FLAG_CLEAR_STACK);
+        intent.setFlags(MainActivity.FLAG_CLEAR_STACK_SINGLE_TOP);
         startActivity(intent);
         this.finish();
     }
@@ -540,7 +542,7 @@ public class MainActivity extends ServiceBoundActivity {
                 mDialog.dismiss();
 
             Intent intent = new Intent(this, ServiceActionMenuActivity.class);
-            intent.setFlags(FLAG_CLEAR_STACK);
+            intent.setFlags(FLAG_CLEAR_STACK_SINGLE_TOP);
             intent.putExtra(ServiceActionMenuActivity.SERVICE_EMAIL, f.email);
             intent.putExtra(ServiceActionMenuActivity.MENU_PAGE, 0);
             startActivity(intent);
@@ -597,7 +599,7 @@ public class MainActivity extends ServiceBoundActivity {
                     @Override
                     public void onCancel(DialogInterface dialog) {
                         try {
-                            launchHomeActivityAndFinish(null, FLAG_CLEAR_STACK);
+                            launchHomeActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP);
                         } catch (Exception e) {
                             L.bug(e);
                         }
@@ -610,21 +612,21 @@ public class MainActivity extends ServiceBoundActivity {
                 builder.setPositiveButton(R.string.rogerthat, new SafeDialogInterfaceOnClickListener() {
                     @Override
                     public void safeOnClick(DialogInterface dialog, int which) {
-                        launchHomeActivityAndFinish(null, FLAG_CLEAR_STACK);
+                        launchHomeActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP);
                     }
                 });
                 mRegistrationCompleteDialog = builder.create();
                 mRegistrationCompleteDialog.show();
             } else {
                 // All other cases
-                launchHomeActivityAndFinish(null, FLAG_CLEAR_STACK);
+                launchHomeActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP);
             }
         } else if (CloudConstants.isContentBrandingApp()) {
             launchContentBrandingMainActivityAndFinish();
         } else if (CloudConstants.isYSAAA()) {
             launchYSAAAActivityAndFinish();
         } else {
-            launchHomeActivityAndFinish(null, FLAG_CLEAR_STACK);
+            launchHomeActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP);
         }
     }
 

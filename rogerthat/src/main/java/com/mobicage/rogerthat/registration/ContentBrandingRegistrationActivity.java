@@ -467,7 +467,7 @@ public class ContentBrandingRegistrationActivity extends ServiceBoundActivity {
 
                             Intent intent = new Intent(ContentBrandingRegistrationActivity.this, ContentBrandingMainActivity.class);
                             intent.setAction(MainActivity.ACTION_REGISTERED);
-                            intent.setFlags(MainActivity.FLAG_CLEAR_STACK);
+                            intent.setFlags(MainActivity.FLAG_CLEAR_STACK_SINGLE_TOP);
                             startActivity(intent);
                             ContentBrandingRegistrationActivity.this.finish();
                         }

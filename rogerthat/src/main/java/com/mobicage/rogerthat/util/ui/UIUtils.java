@@ -155,7 +155,7 @@ public class UIUtils {
             builder.setTicker(tickerText);
             builder.setWhen(System.currentTimeMillis());
             final Intent intent = new Intent(action, null, pContext, MainActivity.class);
-            intent.addFlags(MainActivity.FLAG_CLEAR_STACK);
+            intent.addFlags(MainActivity.FLAG_CLEAR_STACK_SINGLE_TOP);
             if (extras != null)
                 intent.putExtras(extras);
             intent.putExtra(NOTIFICATION_TIMESTAMP, timestamp);

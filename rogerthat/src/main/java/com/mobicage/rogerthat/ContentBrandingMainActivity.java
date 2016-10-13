@@ -180,7 +180,7 @@ public class ContentBrandingMainActivity extends ServiceBoundActivity {
             mTimer.cancel();
 
             Intent intent = new Intent(ContentBrandingMainActivity.this, ContentBrandingActionScreenActivity.class);
-            intent.setFlags(MainActivity.FLAG_CLEAR_STACK);
+            intent.setFlags(MainActivity.FLAG_CLEAR_STACK_SINGLE_TOP);
             intent.putExtra(ActionScreenActivity.BRANDING_KEY, friend.contentBrandingHash);
             intent.putExtra(ActionScreenActivity.SERVICE_EMAIL, friend.email);
             intent.putExtra(ActionScreenActivity.ITEM_TAG_HASH, "");

@@ -490,7 +490,7 @@ public class YSAAARegistrationActivity extends ServiceBoundActivity {
                     T.UI();
                     Intent intent = new Intent(YSAAARegistrationActivity.this, MainActivity.class);
                     intent.setAction(MainActivity.ACTION_REGISTERED);
-                    intent.setFlags(MainActivity.FLAG_CLEAR_STACK);
+                    intent.setFlags(MainActivity.FLAG_CLEAR_STACK_SINGLE_TOP);
                     startActivity(intent);
                     YSAAARegistrationActivity.this.finish();
                 }

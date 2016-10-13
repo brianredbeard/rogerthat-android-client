@@ -25,7 +25,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
@@ -121,6 +120,7 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
         setContentView(R.layout.service_action_menu);
         Intent intent = getIntent();
         email = intent.getStringExtra(SERVICE_EMAIL);
+        setActivityName(email);
         page = intent.getIntExtra(MENU_PAGE, 0);
         activity = (RelativeLayout) findViewById(R.id.activity);
         title = (TextView) findViewById(R.id.title);
@@ -141,9 +141,8 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
         });
 
         pages = (LinearLayout) findViewById(R.id.pages);
-        Resources resources = getResources();
-        darkSchemeTextColor = ContextCompat.getColor(mService, android.R.color.primary_text_dark);
-        lightSchemeTextColor = ContextCompat.getColor(mService, android.R.color.primary_text_light);
+        darkSchemeTextColor = ContextCompat.getColor(this, android.R.color.primary_text_dark);
+        lightSchemeTextColor = ContextCompat.getColor(this, android.R.color.primary_text_light);
 
         if (intent.getBooleanExtra(SHOW_ERROR_POPUP, false))
             UIUtils.showAlertDialog(this, null, R.string.error_please_try_again);
