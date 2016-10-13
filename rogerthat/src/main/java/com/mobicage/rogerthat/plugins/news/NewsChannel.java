@@ -1,8 +1,6 @@
 package com.mobicage.rogerthat.plugins.news;
 
 
-import android.annotation.SuppressLint;
-
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.config.Configuration;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
@@ -25,7 +23,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import java.nio.charset.Charset;
-import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -36,12 +33,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
 import io.netty.bootstrap.Bootstrap;
@@ -175,20 +168,16 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         if (mIsSSL) {
             try {
                 if (!CloudConstants.NEWS_CHANNEL_MUST_VALIDATE_SSL_CERTIFICATE) {
-                    SSLContext sc = SSLContext.getInstance("TLS");
-                    sc.init(null, new TrustManager[]{new TrustAllX509TrustManager()}, new java.security.SecureRandom());
-                    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-                    HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
-                        @SuppressLint("BadHostnameVerifier")
-                        public boolean verify(String string, SSLSession ssls) {
-                            return true;
-                        }
-                    });
-                }
 
-                sslCtx = SslContextBuilder.forClient()
-                        .trustManager(InsecureTrustManagerFactory.INSTANCE).build();
-            } catch (SSLException | KeyManagementException | NoSuchAlgorithmException e) {
+                    sslCtx = SslContextBuilder.forClient()
+                            .trustManager(InsecureTrustManagerFactory.INSTANCE).build();
+                } else {
+                    TrustManagerFactory factory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                    sslCtx = SslContextBuilder.forClient()
+                            .trustManager(factory)
+                            .build();
+                }
+            } catch (SSLException | NoSuchAlgorithmException e) {
                 L.bug(e);
                 return;
             }

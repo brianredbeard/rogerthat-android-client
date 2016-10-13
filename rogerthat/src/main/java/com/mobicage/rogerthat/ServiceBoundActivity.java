@@ -548,16 +548,17 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         if (ni.actionType != null) {
             activityName = ni.actionType + "|" + ni.action;
         }
-        if (!activityName.equals(mActivityName)) {
-            mService.postDelayedOnUIHandler(new SafeRunnable() {
-                @Override
-                protected void safeRun() throws Exception {
-                    activateCurrentNavigationItem();
-                }
-            }, 250);
-        }
-
         closeNavigationView();
+        if (activityName.equals(mActivityName)) {
+            return;
+        }
+        mService.postDelayedOnUIHandler(new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                activateCurrentNavigationItem();
+            }
+        }, 250);
+
 
         if (ni.actionType == null) {
             Bundle extras = new Bundle();
