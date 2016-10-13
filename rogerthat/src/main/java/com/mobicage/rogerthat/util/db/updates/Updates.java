@@ -56,6 +56,7 @@ public class Updates {
         mUpdates.put(65, new Update65());
         mUpdates.put(69, new Update69());
         mUpdates.put(71, new RequestIdentityQRCodePostUpdate());
+        mUpdates.put(72, new RequestFriendSetPostUpdate());
     }
 
     public IDbUpdater getUpdater(int version) {
