@@ -1,6 +1,8 @@
 package com.mobicage.rogerthat.plugins.news;
 
 
+import android.annotation.SuppressLint;
+
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.config.Configuration;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
@@ -12,6 +14,7 @@ import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.Credentials;
 import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.rpc.config.AppConstants;
+import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.to.news.AppNewsItemTO;
 import com.mobicage.to.news.NewsInfoTO;
 
@@ -21,6 +24,11 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
+import java.nio.charset.Charset;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -28,7 +36,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -67,11 +81,12 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
     private boolean mIsConnected;
     private ConfigurationProvider mConfigurationProvider;
     private boolean mIsRetryingToConnect = false;
+    private boolean mAuthenticated = false;
     private Timer mKeepAliveTimer;
-    private Timer mReconnectTimer;
 
     private Set<Long> mReadsToSend = new HashSet<>();
     private Set<Long> mRogersToSend = new HashSet<>();
+    private List<String> mStashedCommands = new ArrayList<>();
 
     public boolean isConnected() {
         return mIsConnected;
@@ -119,7 +134,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         mNewsChannelCallbackHandler = handler;
         mService = handler.getMainService();
         mConfigurationProvider = configurationProvider;
-        mIsSSL = false; // todo ruben const
+        mIsSSL = CloudConstants.NEWS_CHANNEL_SSL;
 
         loadCallsFromDB();
 
@@ -138,7 +153,6 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
     public void internetDisconnected() {
         disconnect();
     }
-
 
     public void connect() {
         T.BIZZ();
@@ -160,10 +174,22 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         final SslContext sslCtx;
         if (mIsSSL) {
             try {
+                if (!CloudConstants.NEWS_CHANNEL_MUST_VALIDATE_SSL_CERTIFICATE) {
+                    SSLContext sc = SSLContext.getInstance("TLS");
+                    sc.init(null, new TrustManager[]{new TrustAllX509TrustManager()}, new java.security.SecureRandom());
+                    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+                    HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
+                        @SuppressLint("BadHostnameVerifier")
+                        public boolean verify(String string, SSLSession ssls) {
+                            return true;
+                        }
+                    });
+                }
+
                 sslCtx = SslContextBuilder.forClient()
                         .trustManager(InsecureTrustManagerFactory.INSTANCE).build();
-            } catch (SSLException e) {
-                L.e(e);
+            } catch (SSLException | KeyManagementException | NoSuchAlgorithmException e) {
+                L.bug(e);
                 return;
             }
         } else {
@@ -182,24 +208,23 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
                             p.addLast(sslCtx.newHandler(ch.alloc(), mHost, mPort));
                         }
                         // decoder
-                        p.addLast(new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));
-                        p.addLast(new StringDecoder());
+                        p.addLast(new DelimiterBasedFrameDecoder(102400, Delimiters.lineDelimiter()));
+                        p.addLast(new StringDecoder(Charset.forName("UTF-8")));
 
                         //encoder
-                        p.addLast(new StringEncoder());
+                        p.addLast(new StringEncoder(Charset.forName("UTF-8")));
                         p.addLast(NewsChannel.this);
                     }
                 });
         // Bind and start to accept incoming connections.
         mChannel = b.connect(mHost, mPort).channel();
-        mIsConnected = true;
-        mIsRetryingToConnect = false;
-        L.d("Connected to news channel.");
-        resendUnsendItems();
-        if(mReconnectTimer != null) {
-            mReconnectTimer.cancel();
-        }
-        keepAlive();
+    }
+
+    private void sendLine(String line) {
+        L.d("[NEWS] >> " + line);
+        if (mChannel == null || !mIsConnected)
+            return;
+        mChannel.writeAndFlush(line + "\r\n");
     }
 
     private void keepAlive() {
@@ -221,15 +246,25 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         );
     }
 
-    private void sendLine(String line) {
-        L.d("[NEWS] >> " + line);
-        if (mChannel == null || !mIsConnected)
-            return;
-        mChannel.writeAndFlush(line + "\r\n");
+    private void sendCommand(Command command, String data) {
+        String line = String.format("%s: %s", command, data);
+        if (mAuthenticated && mIsConnected) {
+            sendLine(line);
+        } else {
+            // Stash commands when not connected/authenticated. Will be send once authenticated.
+            mStashedCommands.add(line);
+        }
+
     }
 
-    private void sendCommand(Command command, String data) {
-        sendLine(String.format("%s: %s", command, data));
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        super.channelActive(ctx);
+        L.d("Connected to news channel.");
+        mIsConnected = true;
+        mIsRetryingToConnect = false;
+        mAuthenticated = false;
+        authenticate();
     }
 
     public void disconnect() {
@@ -244,9 +279,49 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
     }
 
     @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        super.channelActive(ctx);
-        authenticate();
+    public void channelRead0(ChannelHandlerContext ctx, String msg) {
+        L.d("[NEWS] << " + msg);
+        if (Command.PONG.toString().equals(msg)) {
+            return;
+        }
+        String[] result = msg.split(": ", 2);
+        if (result.length < 2) {
+            L.d("Unknown command");
+            return;
+        }
+        Command command = Command.fromValue(result[0]);
+        String data = result[1];
+        if (command == null) {
+            L.bug("Received unknown command: " + result[0]);
+            return;
+        }
+        switch (command) {
+            case AUTH:
+                if ("ERROR".equals(data)) {
+                    L.bug("Failed to authenticate user to kickserver.");
+                } else if ("OK".equals(data)) {
+                    userAuthenticated();
+                }
+                break;
+            case ACK_NEWS_READ:
+                ackNewsRead(data);
+                break;
+            case ACK_NEWS_ROGER:
+                ackNewsRoger(data);
+                break;
+            case NEWS_READ_UPDATE:
+                newsReadUpdate(data);
+                break;
+            case NEWS_STATS:
+                newsStatsReceived(data);
+                break;
+            case NEWS_ROGER_UPDATE:
+                newsRogerUpdate(data);
+                break;
+            case NEWS_PUSH:
+                newsPush(data);
+                break;
+        }
     }
 
     @Override
@@ -278,87 +353,23 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         }
     }
 
-    private void attemptToReconnect(final int backoffTime) {
-        if (!mIsConnected) {
-            if (mIsRetryingToConnect) {
-                return;
-            }
-            mIsRetryingToConnect = true;
-            if(mReconnectTimer != null ){
-                mReconnectTimer.cancel();
-            }
-            mReconnectTimer = new Timer(true);
-            L.i(String.valueOf(backoffTime));
-            mReconnectTimer.scheduleAtFixedRate(
-                    new java.util.TimerTask() {
-                        @Override
-                        public void run() {
-                            if (mService.getNetworkConnectivityManager().isConnected()) {
-                                SafeRunnable safeRunnable = new SafeRunnable() {
-                                    @Override
-                                    protected void safeRun() throws Exception {
-                                        connect();
-                                    }
-                                };
-                                mService.postAtFrontOfBIZZHandler(safeRunnable);
-                            }
-                        }
-                    },
-                    0,
-                    backoffTime * 1000
-
-            );
-        }
-    }
-
-    public boolean isTryingToReconnect(){
+    public boolean isTryingToReconnect() {
         return mIsRetryingToConnect;
     }
 
-    @Override
-    public void channelRead0(ChannelHandlerContext ctx, String msg) {
-        L.d("[NEWS] << " + msg);
-        if (Command.PONG.toString().equals(msg)) {
-            return;
+    private void userAuthenticated() {
+        mAuthenticated = true;
+        sendCommand(Command.SET_INFO, String.format("APP %s", AppConstants.APP_ID));
+        sendCommand(Command.SET_INFO, String.format("ACCOUNT %s", mService.getIdentityStore().getIdentity().getEmail()));
+        List<String> friendSet = mService.getPlugin(FriendsPlugin.class).getStore().getFriendSet();
+        sendCommand(Command.SET_INFO, String.format("FRIENDS %s", JSONValue.toJSONString(friendSet)));
+        keepAlive();
+        L.d(String.format("Sending %d stashed commands", mStashedCommands.size()));
+        for (String line : mStashedCommands) {
+            sendLine(line);
         }
-        String[] result = msg.split(": ", 2);
-        if (result.length < 2) {
-            L.d("Unknown command");
-            return;
-        }
-        Command command = Command.fromValue(result[0]);
-        String data = result[1];
-        if (command == null) {
-            L.bug("Received unknown command: " + result[0]);
-            return;
-        }
-        switch (command) {
-            case AUTH:
-                if ("ERROR".equals(data)) {
-                    L.bug("Failed to authenticate user to kickserver.");
-                } else if ("OK".equals(data)) {
-                    setInfo();
-                }
-                break;
-            case ACK_NEWS_READ:
-                ackNewsRead(data);
-                break;
-            case ACK_NEWS_ROGER:
-                ackNewsRoger(data);
-                break;
-            case NEWS_READ_UPDATE:
-                newsReadUpdate(data);
-                break;
-            case NEWS_STATS:
-                newsStatsReceived(data);
-                break;
-            case NEWS_ROGER_UPDATE:
-                newsRogerUpdate(data);
-                break;
-            case NEWS_PUSH:
-                newsPush(data);
-                break;
-        }
+        mStashedCommands.clear();
+        resendUnsendItems();
     }
 
     private void newsPush(String data) {
@@ -455,11 +466,17 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         sendLine(String.format("AUTH: %s %s", username, password));
     }
 
-    private void setInfo() {
-        sendCommand(Command.SET_INFO, String.format("APP %s", AppConstants.APP_ID));
-        sendCommand(Command.SET_INFO, String.format("ACCOUNT %s", mService.getIdentityStore().getIdentity().getEmail()));
-        List<String> friendSet = mService.getPlugin(FriendsPlugin.class).getStore().getFriendSet();
-        sendCommand(Command.SET_INFO, String.format("FRIENDS %s", JSONValue.toJSONString(friendSet)));
+    private void addCallToDB(String type, Long newsId) {
+        if (CONFIG_TYPE_READ.equals(type)) {
+            mReadsToSend.add(newsId);
+        } else if (CONFIG_TYPE_ROGER.equals(type)) {
+            mRogersToSend.add(newsId);
+        } else {
+            L.e("addCallToDB with unknown type: " + type);
+            return;
+        }
+
+        saveCallInDB(type);
     }
 
     private void ackNewsRead(String newsId) {
@@ -480,30 +497,31 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         mIsConnected = false;  // Not sure if necessary
     }
 
-    private void addCallToDB(String type, Long newsId) {
-        if (CONFIG_TYPE_READ.equals(type)) {
-            mReadsToSend.add(newsId);
-        } else if (CONFIG_TYPE_ROGER.equals(type)) {
-            mRogersToSend.add(newsId);
-        } else {
-            L.e("addCallToDB with unkown type: " + type);
-            return;
-        }
-
-        saveCallInDB(type);
-    }
-
     private void removeCallFromDB(String type, Long newsId) {
         if (CONFIG_TYPE_READ.equals(type)) {
             mReadsToSend.remove(newsId);
         } else if (CONFIG_TYPE_ROGER.equals(type)) {
             mRogersToSend.remove(newsId);
         } else {
-            L.e("removeCallFromDB with unkown type: " + type);
+            L.e("removeCallFromDB with unknown type: " + type);
             return;
         }
 
         saveCallInDB(type);
+    }
+
+    private class TrustAllX509TrustManager implements X509TrustManager {
+        public X509Certificate[] getAcceptedIssuers() {
+            return new X509Certificate[0];
+        }
+
+        public void checkClientTrusted(java.security.cert.X509Certificate[] certs,
+                                       String authType) {
+        }
+
+        public void checkServerTrusted(java.security.cert.X509Certificate[] certs,
+                                       String authType) {
+        }
     }
 
     private void saveCallInDB(String type) {

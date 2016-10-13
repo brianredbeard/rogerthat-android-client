@@ -44,13 +44,6 @@ public class Message extends MessageTO {
     public final static String MC_SMI_PREFIX = "smi://";
     public final static String MC_POKE_PREFIX = "poke://";
 
-    public static int BLUE_BUTTON_COLOR = 0xFF6B6A6A; // 0xFF6DB6F2
-    public static int GREEN_BUTTON_COLOR = 0xFFA4C14D;
-    public static int RED_BUTTON_COLOR = 0xFF989898; // 0xFFCC0000;
-    public static int BLUEGRAY_BUTTON_COLOR = 0xFF808099;
-    public static int REDGRAY_BUTTON_COLOR = 0xFFCCCCCC; // 0xFF998080;
-    public static int GREENGRAY_BUTTON_COLOR = 0xFF809980;
-
     public boolean dirty;
     public boolean needsMyAnswer;
     public String recipients;

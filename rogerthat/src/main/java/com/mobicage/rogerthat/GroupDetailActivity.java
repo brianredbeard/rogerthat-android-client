@@ -34,6 +34,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -527,12 +528,12 @@ public class GroupDetailActivity extends ServiceBoundActivity {
     private void setViewColors(View view, TextView name, boolean selected) {
         T.UI();
         Resources resources = getResources();
-        name.setTextColor(resources.getColor(android.R.color.primary_text_light));
+        name.setTextColor(ContextCompat.getColor(mService, android.R.color.primary_text_light));
         if (selected) {
-            view.setBackgroundColor(resources.getColor(R.color.mc_highlight_background));
+            view.setBackgroundColor(ContextCompat.getColor(mService, R.color.mc_highlight_background));
             name.setTypeface(Typeface.DEFAULT_BOLD);
         } else {
-            view.setBackgroundColor(resources.getColor(R.color.mc_background_color));
+            view.setBackgroundColor(ContextCompat.getColor(mService, R.color.mc_background_color));
             name.setTypeface(Typeface.DEFAULT);
         }
     }

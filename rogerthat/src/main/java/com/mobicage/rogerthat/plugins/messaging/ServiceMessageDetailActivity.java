@@ -25,14 +25,16 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
+import android.support.v7.widget.AppCompatButton;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -622,13 +624,13 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
         tableLayout.removeAllViews();
 
         for (final ButtonTO button : mCurrentMessage.buttons) {
-            addButton(senderName, myEmail, mSomebodyAnswered, canEdit, tableLayout, button);
+            addButton(myEmail, mSomebodyAnswered, canEdit, tableLayout, button);
         }
         if (mCurrentMessage.form == null
             && (mCurrentMessage.flags & MessagingPlugin.FLAG_ALLOW_DISMISS) == MessagingPlugin.FLAG_ALLOW_DISMISS) {
             ButtonTO button = new ButtonTO();
             button.caption = "Roger that!";
-            addButton(senderName, myEmail, mSomebodyAnswered, canEdit, tableLayout, button);
+            addButton(myEmail, mSomebodyAnswered, canEdit, tableLayout, button);
         }
 
         if (mCurrentMessage.broadcast_type != null) {
@@ -937,8 +939,8 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
         return true;
     }
 
-    private void addButton(final String senderName, String myEmail, boolean somebodyAnswered, boolean canEdit,
-        TableLayout tableLayout, final ButtonTO button) {
+    private void addButton(String myEmail, boolean somebodyAnswered, boolean canEdit,
+                           TableLayout tableLayout, final ButtonTO button) {
         TableRow row = new TableRow(this);
         tableLayout.addView(row);
         row.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT,
@@ -946,7 +948,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
 
         // XXX: inconsistent margin between 2 rows
 
-        final Button buttonView = new Button(this);
+        final AppCompatButton buttonView = new AppCompatButton(this);
         buttonView.setMinWidth(UIUtils.convertDipToPixels(this, 100));
         buttonView.setText(button.caption);
         buttonView.setTextColor(ContextCompat.getColor(this, android.R.color.primary_text_dark));
@@ -991,13 +993,14 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
 
         int color;
         if (button.id == null || mCurrentMessage.form != null && Message.POSITIVE.equals(button.id)) {
-            color = buttonIsEnabled ? Message.GREEN_BUTTON_COLOR : Message.GREENGRAY_BUTTON_COLOR;
+            color = buttonIsEnabled ? R.color.mc_positive_button : R.color.mc_positive_button_disabled;
         } else if (mCurrentMessage.form != null && Message.NEGATIVE.equals(button.id)) {
-            color = buttonIsEnabled ? Message.RED_BUTTON_COLOR : Message.REDGRAY_BUTTON_COLOR;
+            color = buttonIsEnabled ? R.color.mc_negative_button : R.color.mc_negative_button_disabled;
         } else {
-            color = buttonIsEnabled ? Message.BLUE_BUTTON_COLOR : Message.BLUEGRAY_BUTTON_COLOR;
+            color = buttonIsEnabled ? R.color.mc_default_button : R.color.mc_default_button_disabled;
         }
-        buttonView.getBackground().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
+        ColorStateList colorListState = ContextCompat.getColorStateList(mService, color);
+        ViewCompat.setBackgroundTintList(buttonView, colorListState);
 
         buttonView.setOnClickListener(new SafeViewOnClickListener() {
 

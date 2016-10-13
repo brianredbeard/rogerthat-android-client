@@ -575,7 +575,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
             i.putExtra(ServiceActionsOfflineActivity.ACTION, ni.action);
             i.putExtra(ServiceActionsOfflineActivity.TITLE, ni.labelTextId);
             i.putExtra("show_drawer_icon", true);
-            i.addFlags(MainActivity.FLAG_CLEAR_STACK);
+            i.addFlags(MainActivity.FLAG_CLEAR_STACK_SINGLE_TOP);
             ServiceBoundActivity.this.startActivity(i);
 
         } else if ("click".equals(ni.actionType)) {

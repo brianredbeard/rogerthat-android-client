@@ -24,14 +24,17 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
+import android.support.v7.widget.AppCompatButton;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -590,8 +593,6 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                 Button rogerThatButton = (Button) view.findViewById(R.id.rogerthat_button);
                 rogerThatButton.setVisibility(addRogerthatButton ? View.VISIBLE : View.GONE);
                 if (addRogerthatButton) {
-                    rogerThatButton.getBackground()
-                        .setColorFilter(Message.GREEN_BUTTON_COLOR, PorterDuff.Mode.MULTIPLY);
                     rogerThatButton.setOnClickListener(new SafeViewOnClickListener() {
                         @Override
                         public void safeOnClick(View v) {
@@ -602,19 +603,24 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             }
         }
 
+
         private void addButton(final MessageTO message, boolean left, boolean canEdit, final LinearLayout buttons,
                                final ButtonTO button, final boolean isChat) {
             LinearLayout buttonContainer = (LinearLayout) mInflator.inflate(
                 left ? R.layout.message_thread_member_detail_right : R.layout.message_thread_member_detail_left, null);
             buttons.addView(buttonContainer);
-            Button buttonView = (Button) buttonContainer.findViewById(R.id.button);
+            AppCompatButton buttonView = (AppCompatButton) buttonContainer.findViewById(R.id.button);
             buttonView.setText(button.caption);
-            if (button.id == null) {
-                buttonView.getBackground().setColorFilter(Message.GREEN_BUTTON_COLOR, PorterDuff.Mode.MULTIPLY);
+            int color;
+            if (canEdit) {
+                color = button.id == null ? R.color.mc_positive_button : R.color.mc_default_button;
             } else {
-                buttonView.getBackground().setColorFilter(Message.BLUE_BUTTON_COLOR, PorterDuff.Mode.MULTIPLY);
+                color = button.id == null ? R.color.mc_positive_button_disabled : R.color.mc_default_button_disabled;
             }
+            ColorStateList colorListState = ContextCompat.getColorStateList(mService, color);
+            ViewCompat.setBackgroundTintList(buttonView, colorListState);
             buttonView.setEnabled(canEdit);
+            buttonView.setTextColor(ContextCompat.getColor(mService, canEdit ? R.color.mc_white : R.color.mc_default_text));
 
             Map<String, String> actionInfo = mMessagingPlugin.getButtonActionInfo(button);
             final String buttonAction = actionInfo.get("androidAction");
@@ -624,7 +630,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                 @Override
                 public void safeOnClick(View v) {
                     T.UI();
-                    if (buttonAction == Message.MC_CONFIRM_PREFIX) {
+                    if (Message.MC_CONFIRM_PREFIX.equals(buttonAction)) {
                         askConfirmation(message, button, buttonUrl);
                     } else {
                         if (buttonAction != null) {

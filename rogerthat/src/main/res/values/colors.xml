@@ -22,12 +22,10 @@
     <color name="mc_homescreen_background">#EBEBEB</color>
     <color name="mc_homescreen_text">#3E3E3D</color>
     <color name="mc_homescreen_divider">#3E3E3D</color>
-    <color name="mc_dark_gray_button_color">#6B6A6A</color>
 
     <color name="mc_primary_color">#84B53F</color>
     <color name="mc_secondary_color">#006536</color>
     <color name="mc_background_color">#EBEBEB</color>
-    <color name="mc_default_button">#989898</color>
 
     <color name="mc_priority_high_text">#FFFFFF</color>
     <color name="mc_priority_high_background">#77CEDE</color>
@@ -40,6 +38,14 @@
     <color name="mc_pin_red">#FE6B00</color>
     <color name="mc_pin_yellow">#FFD900</color>
     <color name="mc_pin_green">#87CD03</color>
+
+    <!--buttons-->
+    <color name="mc_positive_button">#A4C14D</color>
+    <color name="mc_positive_button_disabled">#809980</color>
+    <color name="mc_negative_button">#4D4D4D</color>
+    <color name="mc_negative_button_disabled">#CCCCCC</color>
+    <color name="mc_default_button">#4D4D4D</color>
+    <color name="mc_default_button_disabled">#CCCCCC</color>
 
     <color name="mc_list_item_3_line">#757575</color>
     <color name="mc_primary_icon">#84B53F</color>

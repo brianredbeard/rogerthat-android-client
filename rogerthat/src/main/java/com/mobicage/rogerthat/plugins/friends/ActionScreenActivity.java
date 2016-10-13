@@ -37,12 +37,14 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.PowerManager;
+import android.support.customtabs.CustomTabsIntent;
 import android.support.v4.content.ContextCompat;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.ConsoleMessage;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceResponse;
@@ -76,7 +78,6 @@ import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr.BrandingResult;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
-import com.mobicage.rogerthat.plugins.messaging.ServiceMessageDetailActivity;
 import com.mobicage.rogerthat.plugins.scan.GetUserInfoResponseHandler;
 import com.mobicage.rogerthat.plugins.scan.ProcessScanActivity;
 import com.mobicage.rogerthat.plugins.scan.ScanCommunication;
@@ -105,10 +106,8 @@ import org.json.JSONTokener;
 import org.json.simple.JSONValue;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -142,7 +141,6 @@ public class ActionScreenActivity extends ServiceBoundActivity {
     private long mLasttimeBackPressed = 0;
 
     private WebView mBranding;
-    private WebView mBrandingHttp;
     private String mBrandingKey;
     private String mContextMatch = "";
     private String mServiceEmail;
@@ -661,7 +659,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         return wl;
     }
 
-    @SuppressLint({ "SetJavaScriptEnabled", "JavascriptInterface", "NewApi" })
+    @SuppressLint({"SetJavaScriptEnabled", "JavascriptInterface"})
     @Override
     public void onCreate(Bundle savedInstanceState) {
         if (CloudConstants.isContentBrandingApp()) {
@@ -676,11 +674,6 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             brandingSettings.setAllowFileAccessFromFileURLs(true);
         }
-        mBrandingHttp = (WebView) findViewById(R.id.branding_http);
-        mBrandingHttp.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
-        WebSettings brandingSettingsHttp = mBrandingHttp.getSettings();
-        brandingSettingsHttp.setJavaScriptEnabled(true);
-        brandingSettingsHttp.setCacheMode(WebSettings.LOAD_DEFAULT);
 
         if (CloudConstants.isContentBrandingApp()) {
             int cameraPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
@@ -695,39 +688,11 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                     initFullScreenForContentBranding();
                 }
             });
-
-            mBrandingHttp.getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
-                @Override
-                public void onGlobalLayout() {
-                    initFullScreenForContentBranding();
-                }
-            });
         }
-
-        final View brandingHeader = findViewById(R.id.branding_header_container);
-
-        final ImageView brandingHeaderClose = (ImageView) findViewById(R.id.branding_header_close);
-        final TextView brandingHeaderText = (TextView) findViewById(R.id.branding_header_text);
-        brandingHeaderClose.setColorFilter(UIUtils
-                .imageColorFilter(ContextCompat.getColor(this, R.color.mc_homescreen_text)));
-
-        brandingHeaderClose.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mQRCodeScanner != null) {
-                    mQRCodeScanner.onResume();
-                }
-                brandingHeader.setVisibility(View.GONE);
-                mBrandingHttp.setVisibility(View.GONE);
-                mBranding.setVisibility(View.VISIBLE);
-                mBrandingHttp.loadUrl("about:blank");
-            }
-        });
 
         final View brandingFooter = findViewById(R.id.branding_footer_container);
 
         if (CloudConstants.isContentBrandingApp()) {
-            brandingHeaderClose.setVisibility(View.GONE);
             final ImageView brandingFooterClose = (ImageView) findViewById(R.id.branding_footer_close);
             final TextView brandingFooterText = (TextView) findViewById(R.id.branding_footer_text);
             brandingFooterText.setText(getString(R.string.back));
@@ -740,11 +705,8 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                     if (mQRCodeScanner != null) {
                         mQRCodeScanner.onResume();
                     }
-                    brandingHeader.setVisibility(View.GONE);
                     brandingFooter.setVisibility(View.GONE);
-                    mBrandingHttp.setVisibility(View.GONE);
                     mBranding.setVisibility(View.VISIBLE);
-                    mBrandingHttp.loadUrl("about:blank");
                 }
             });
         }
@@ -763,7 +725,11 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         mBranding.addJavascriptInterface(new JSInterface(this), "__rogerthat__");
         mBranding.setWebChromeClient(new WebChromeClient() {
             @Override
-            public void onConsoleMessage(String message, int lineNumber, String sourceID) {
+            public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+                String message = consoleMessage.message();
+                int lineNumber = consoleMessage.lineNumber();
+                String sourceID = consoleMessage.sourceId();
+                String level = consoleMessage.messageLevel().toString();
                 if (sourceID != null) {
                     try {
                         sourceID = new File(sourceID).getName();
@@ -772,10 +738,11 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                     }
                 }
                 if (mIsHtmlContent) {
-                    L.i("[BRANDING] " + sourceID + ":" + lineNumber + " | " + message);
+                    L.i("[BRANDING] " + level + ": " + sourceID + ":" + lineNumber + " | " + message);
                 } else {
-                    L.d("[BRANDING] " + sourceID + ":" + lineNumber + " | " + message);
+                    L.d("[BRANDING] " + level + ": " + sourceID + ":" + lineNumber + " | " + message);
                 }
+                return true;
             }
         });
         mBranding.setWebViewClient(new WebViewClient() {
@@ -788,7 +755,6 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 return false;
             }
 
-            @SuppressLint("DefaultLocale")
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 L.i("Branding is loading url: " + url);
@@ -806,20 +772,10 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                     if (mQRCodeScanner != null) {
                         mQRCodeScanner.onPause();
                     }
-                    brandingHeaderText.setText(getString(R.string.loading));
-                    brandingHeader.setVisibility(View.VISIBLE);
-                    if (CloudConstants.isContentBrandingApp()) {
-                        brandingFooter.setVisibility(View.VISIBLE);
-                    }
-                    mBranding.setVisibility(View.GONE);
-                    mBrandingHttp.setVisibility(View.VISIBLE);
-                    mBrandingHttp.loadUrl(url);
+                    CustomTabsIntent.Builder customTabsBuilder = new CustomTabsIntent.Builder();
+                    CustomTabsIntent customTabsIntent = customTabsBuilder.build();
+                    customTabsIntent.launchUrl(ActionScreenActivity.this, uri);
                     return true;
-                } else {
-                    brandingHeader.setVisibility(View.GONE);
-                    brandingFooter.setVisibility(View.GONE);
-                    mBrandingHttp.setVisibility(View.GONE);
-                    mBranding.setVisibility(View.VISIBLE);
                 }
                 return false;
             }
@@ -864,21 +820,6 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 }
                 L.d("404: Webview tries to load outside its sandbox.");
                 return new WebResourceResponse("text/plain", "UTF-8", null);
-            }
-        });
-
-        mBrandingHttp.setWebViewClient(new WebViewClient() {
-            @SuppressLint("DefaultLocale")
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                L.i("BrandingHttp is loading url: " + url);
-                return false;
-            }
-
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                brandingHeaderText.setText(view.getTitle());
-                L.i("onPageFinished " + url);
             }
         });
 
@@ -938,12 +879,6 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
                 | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-
-            mBrandingHttp.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
-                    | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
-                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         }
     }
 
@@ -1263,7 +1198,6 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         super.onActivityResult(requestCode, resultCode, intent);
     }
 
-    @SuppressWarnings("deprecation")
     @SuppressLint({ "SetJavaScriptEnabled", "Wakelock" })
     private void displayBranding() {
         try {
@@ -1594,10 +1528,6 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         if (mBranding != null) {
             // Stop all javascript
             mBranding.loadUrl("about:blank");
-        }
-        if (mBrandingHttp != null) {
-            // Stop all javascript
-            mBrandingHttp.loadUrl("about:blank");
         }
         super.finish();
     }

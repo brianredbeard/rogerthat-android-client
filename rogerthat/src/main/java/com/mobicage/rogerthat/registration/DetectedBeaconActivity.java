@@ -134,7 +134,7 @@ public class DetectedBeaconActivity extends ServiceBoundActivity {
         } else {
             intent.setAction(MainActivity.ACTION_REGISTERED);
         }
-        intent.setFlags(MainActivity.FLAG_CLEAR_STACK);
+        intent.setFlags(MainActivity.FLAG_CLEAR_STACK_SINGLE_TOP);
         startActivity(intent);
         super.onStop();
     }
