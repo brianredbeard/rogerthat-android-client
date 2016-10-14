@@ -173,8 +173,8 @@ def rename_package():
     with open(rogerthat_build_gradle, 'r+') as f:
         s = f.read()
         package_sufix = APP_ID.replace('-', '.')
-        if APP_ID == 'rogerthat':
-            s = s.replace('com.mobicage.rogerthat', 'com.mobicage.rogerth.at')
+        if APP_ID != 'rogerthat':
+            s = s.replace('com.mobicage.rogerth.at', 'com.mobicage.rogerthat')
         s = s.replace("applicationIdSuffix '.debug'", "applicationIdSuffix '.%s.debug'" % package_sufix)
         s = s.replace("applicationIdSuffix ''", "applicationIdSuffix '.%s'" % package_sufix)
         if facebook_app_id:
