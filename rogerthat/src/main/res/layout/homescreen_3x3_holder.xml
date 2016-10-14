@@ -90,8 +90,6 @@
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentTop="true"
                     android:adjustViewBounds="true"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
                     android:src="@drawable/menu_0x0">
                 </ImageView>
 
@@ -124,8 +122,6 @@
                 android:layout_height="56dp"
                 android:layout_weight="15"
                 android:adjustViewBounds="true"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
                 android:src="@drawable/menu_0x1" />
 
             <View
@@ -139,8 +135,6 @@
                 android:layout_height="56dp"
                 android:layout_weight="15"
                 android:adjustViewBounds="true"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
                 android:src="@drawable/menu_0x2" />
 
             <View
@@ -232,8 +226,6 @@
                 android:layout_height="56dp"
                 android:layout_weight="15"
                 android:adjustViewBounds="true"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
                 android:src="@drawable/menu_1x0" />
 
             <View
@@ -247,8 +239,6 @@
                 android:layout_height="56dp"
                 android:layout_weight="15"
                 android:adjustViewBounds="true"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
                 android:src="@drawable/menu_1x1" />
 
             <View
@@ -262,8 +252,6 @@
                 android:layout_height="56dp"
                 android:layout_weight="15"
                 android:adjustViewBounds="true"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
                 android:src="@drawable/menu_1x2" />
 
             <View
@@ -355,8 +343,6 @@
                 android:layout_height="56dp"
                 android:layout_weight="15"
                 android:adjustViewBounds="true"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
                 android:src="@drawable/menu_2x0" />
 
             <View
@@ -370,8 +356,6 @@
                 android:layout_height="56dp"
                 android:layout_weight="15"
                 android:adjustViewBounds="true"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
                 android:src="@drawable/menu_2x1" />
 
             <View
@@ -385,8 +369,6 @@
                 android:layout_height="56dp"
                 android:layout_weight="15"
                 android:adjustViewBounds="true"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
                 android:src="@drawable/menu_2x2" />
 
             <View
