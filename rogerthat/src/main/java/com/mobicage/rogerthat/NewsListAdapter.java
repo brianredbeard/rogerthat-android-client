@@ -72,7 +72,6 @@ import com.mobicage.rogerthat.util.time.TimeUtils;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
 import com.mobicage.rogerthat.util.ui.ScaleImageView;
 import com.mobicage.rogerthat.util.ui.UIUtils;
-import com.mobicage.rogerthat.widget.Resizable16by6ImageView;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.to.news.NewsActionButtonTO;
 
@@ -107,7 +106,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     private CachedDownloader mCachedDownloader;
 
     private Map<String, Bitmap> mQRCodes = new HashMap<>();
-    private Map<String, ArrayList<Resizable16by6ImageView>> mImageViews = new HashMap<>();
+    private Map<String, ArrayList<ImageView>> mImageViews = new HashMap<>();
     private Set<Long> mReadMoreItems = new HashSet<>();
 
     private Map<String, Set<Long>> mServiceItems = new HashMap<>();
@@ -149,7 +148,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         public final ImageButton dropdownButton;
         public final LinearLayout membersContainer;
         public final TextView members;
-        public final Resizable16by6ImageView image;
+        public final ImageView image;
         public final View qrCodeContainer;
         public final ScaleImageView qrCode;
         public final TextView qrCodeCaption;
@@ -174,7 +173,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
             dropdownButton = (ImageButton) itemView.findViewById(R.id.dropdown_button);
             membersContainer = (LinearLayout) itemView.findViewById(R.id.members_container);
             members = (TextView) itemView.findViewById(R.id.members);
-            image = (Resizable16by6ImageView) itemView.findViewById(R.id.image);
+            image = (ImageView) itemView.findViewById(R.id.image);
             qrCodeContainer = itemView.findViewById(R.id.qr_code_container);
             qrCode = (ScaleImageView) itemView.findViewById(R.id.qr_code);
             qrCodeCaption = (TextView) itemView.findViewById(R.id.qr_code_caption);
@@ -713,7 +712,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                     viewHolder.image.setVisibility(View.VISIBLE);
                 } else {
                     if (!mImageViews.containsKey(newsItem.image_url)) {
-                        mImageViews.put(newsItem.image_url, new ArrayList<Resizable16by6ImageView>());
+                        mImageViews.put(newsItem.image_url, new ArrayList<ImageView>());
                     }
                     mImageViews.get(newsItem.image_url).add(viewHolder.image);
                     // item started downloading intent when ready
@@ -897,7 +896,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
             File cachedFile = mCachedDownloader.getCachedFilePath(url);
             if (cachedFile != null) {
                 Bitmap bm = BitmapFactory.decodeFile(cachedFile.getAbsolutePath());
-                for (Resizable16by6ImageView image : mImageViews.get(url)) {
+                for (ImageView image : mImageViews.get(url)) {
                     image.setImageBitmap(bm);
                     image.setVisibility(View.VISIBLE);
                 }

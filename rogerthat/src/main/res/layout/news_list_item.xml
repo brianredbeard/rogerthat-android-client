@@ -125,13 +125,15 @@
 
             </LinearLayout>
 
-            <com.mobicage.rogerthat.widget.Resizable16by6ImageView
+            <ImageView
                 android:id="@+id/image"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:scaleType="fitXY"
                 android:visibility="gone"
                 tools:src="@drawable/mobicage"
-                tools:visibility="gone"/>
+                tools:visibility="visible"/>
 
             <LinearLayout
                 android:id="@+id/qr_code_container"
