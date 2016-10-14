@@ -5,7 +5,7 @@ android {
     buildToolsVersion '24.0.1'
     useLibrary 'org.apache.http.legacy'
     defaultConfig {
-        applicationId "com.mobicage.rogerth.at"
+        applicationId "com.mobicage.rogerthat"
         minSdkVersion 16
         targetSdkVersion 24
         multiDexEnabled true
@@ -36,7 +36,7 @@ android {
             }
             applicationIdSuffix '.debug'
             versionNameSuffix '-debug'
-            resValue "string", "facebook_content_provider", "com.facebook.app.debug.FacebookContentProvider638117819653440"
+            resValue "string", "facebook_content_provider", "com.facebook.app.debug.FacebookContentProvider188033791211994"
         }
         release {
             applicationIdSuffix ''
@@ -47,7 +47,7 @@ android {
                 checkReleaseBuilds false
                 abortOnError false
             }
-            resValue "string", "facebook_content_provider", "com.facebook.app.FacebookContentProvider638117819653440"
+            resValue "string", "facebook_content_provider", "com.facebook.app.FacebookContentProvider188033791211994"
         }
     }
 
