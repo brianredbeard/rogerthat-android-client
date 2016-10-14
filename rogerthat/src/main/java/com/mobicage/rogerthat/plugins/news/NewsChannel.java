@@ -335,7 +335,6 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
             DNSUtil.HostAddress hostAddress = configurationFactory.getSafeNewsConnectionHost(false);
             mHost = hostAddress.getHost();
             mPort = hostAddress.getPort();
-            connect();
         } catch (NewsConfigurationConnectionException ignored) {
         } catch (NewsConfigurationException e) {
             L.bug(e);
