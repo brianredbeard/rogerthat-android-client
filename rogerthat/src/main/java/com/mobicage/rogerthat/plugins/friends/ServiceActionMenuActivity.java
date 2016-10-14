@@ -42,6 +42,7 @@ import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -72,6 +73,7 @@ import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
+import com.mobicage.rogerthat.util.ui.ServiceHeader;
 import com.mobicage.rogerthat.util.ui.Slider;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.CloudConstants;
@@ -92,8 +94,8 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
         TextView label;
     }
 
-    private TextView title;
-    private WebView branding;
+    private WebView brandingWebview;
+    private FrameLayout headerContainer;
     private LinearLayout pages;
     private final Cell[][] cells = new Cell[4][3];
     private final TableRow[] tableRows = new TableRow[3];
@@ -123,10 +125,10 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
         setActivityName(email);
         page = intent.getIntExtra(MENU_PAGE, 0);
         activity = (RelativeLayout) findViewById(R.id.activity);
-        title = (TextView) findViewById(R.id.title);
         badge = (TextView) findViewById(R.id.badge);
-        branding = (WebView) findViewById(R.id.branding);
-        branding.setWebViewClient(new WebViewClient() {
+        headerContainer = (FrameLayout) findViewById(R.id.header_container);
+        brandingWebview = (WebView) findViewById(R.id.branding);
+        brandingWebview.setWebViewClient(new WebViewClient() {
 
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -181,8 +183,8 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
         }
         pages.removeAllViews();
         pages.setVisibility(View.GONE);
-        title.setVisibility(View.GONE);
-        branding.setVisibility(View.GONE);
+        brandingWebview.setVisibility(View.GONE);
+        headerContainer.setVisibility(View.GONE);
         activity.setBackgroundResource(R.color.mc_background_color);
         for (TableRow row : tableRows) {
             row.setVisibility(View.VISIBLE);
@@ -263,9 +265,9 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
     }
 
     private void setBrandingHeight(int h) {
-        L.d("Setting branding height: " + h);
-        branding.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, h));
-        branding.setVisibility(View.VISIBLE);
+        L.d("Setting brandingWebview height: " + h);
+        brandingWebview.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, h));
+        brandingWebview.setVisibility(View.VISIBLE);
     }
 
     private void populateScreen() {
@@ -294,7 +296,6 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
         if (page == 0)
             rows[0] = true;
 
-        boolean showBranded = false;
         boolean useDarkScheme = false;
         Integer menuItemColor = null;
         Integer brandingBackgroundColor = null;
@@ -302,41 +303,18 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
             try {
                 BrandingMgr brandingMgr = messagingPlugin.getBrandingMgr();
                 if (brandingMgr.isBrandingAvailable(menu.branding)) {
-                    BrandingResult br = brandingMgr.prepareBranding(menu.branding, null, false);
-                    WebSettings settings = branding.getSettings();
-                    settings.setJavaScriptEnabled(false);
-                    settings.setBlockNetworkImage(false);
-                    branding.setVisibility(View.VISIBLE);
-                    branding.setVerticalScrollBarEnabled(false);
-
                     final int displayWidth = UIUtils.getDisplayWidth(this);
-                    final int calculatedHeight = BrandingMgr.calculateHeight(br, displayWidth);
-                    final long start = System.currentTimeMillis();
-                    branding.getViewTreeObserver().addOnPreDrawListener(new OnPreDrawListener() {
-                        @Override
-                        public boolean onPreDraw() {
-                            int height = branding.getMeasuredHeight();
-                            if (height > calculatedHeight * 90 / 100 || System.currentTimeMillis() - start > 3000) {
-                                if (calculatedHeight > 0) {
-                                    setBrandingHeight(height);
-                                } else {
-                                    mService.postDelayedOnUIHandler(new SafeRunnable() {
-                                        @Override
-                                        protected void safeRun() throws Exception {
-                                            setBrandingHeight(branding.getMeasuredHeight());
-                                        }
-                                    }, 100);
-                                }
-                                branding.getViewTreeObserver().removeOnPreDrawListener(this);
-                            }
-                            return false;
-                        }
-                    });
-                    branding.loadUrl("file://" + br.file.getAbsolutePath());
+                    BrandingResult br = brandingMgr.prepareBranding(menu.branding, null, false);
+                    brandingBackgroundColor = br.color;
+                    menuItemColor = br.menuItemColor;
+                    if (br.displayType.equals(BrandingMgr.DisplayType.NATIVE)) {
+                        ServiceHeader.setupNative(br, headerContainer);
+                    } else {
+                        setupWebView(br, displayWidth);
+                    }
 
                     if (br.color != null) {
-                        branding.setBackgroundColor(br.color);
-                        activity.setBackgroundColor(br.color);
+                        activity.setBackgroundColor(brandingBackgroundColor);
                     }
                     if (br.scheme == ColorScheme.DARK) {
                         for (Cell cell : usedCells) {
@@ -345,8 +323,6 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
                         }
                         useDarkScheme = true;
                     }
-                    menuItemColor = br.menuItemColor;
-                    brandingBackgroundColor = br.color;
 
                     final ImageView watermarkView = (ImageView) findViewById(R.id.watermark);
                     if (br.watermark != null) {
@@ -361,7 +337,6 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
                         watermarkView.setImageDrawable(null);
                     }
 
-                    showBranded = true;
                 } else {
                     Friend friend = store.getExistingFriend(email);
                     friend.actionMenu = menu;
@@ -417,10 +392,6 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
         }
 
         setTitle(menu.name);
-        if (!showBranded) {
-            title.setVisibility(View.GONE);
-            title.setText(menu.name);
-        }
 
         if (useDarkScheme) {
             for (final Cell cell : usedCells) {
@@ -482,6 +453,42 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
             }
         });
         mGestureScanner = new GestureDetector(this, instance);
+    }
+
+    private void setupWebView(BrandingResult brandingResult, int displayWidth) {
+        WebSettings settings = brandingWebview.getSettings();
+        settings.setJavaScriptEnabled(false);
+        settings.setBlockNetworkImage(false);
+        brandingWebview.setVerticalScrollBarEnabled(false);
+        brandingWebview.setVisibility(View.VISIBLE);
+        headerContainer.setVisibility(View.GONE);
+
+        final int calculatedHeight = BrandingMgr.calculateHeight(brandingResult, displayWidth);
+        final long start = System.currentTimeMillis();
+        brandingWebview.getViewTreeObserver().addOnPreDrawListener(new OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                int height = brandingWebview.getMeasuredHeight();
+                if (height > calculatedHeight * 90 / 100 || System.currentTimeMillis() - start > 3000) {
+                    if (calculatedHeight > 0) {
+                        setBrandingHeight(height);
+                    } else {
+                        mService.postDelayedOnUIHandler(new SafeRunnable() {
+                            @Override
+                            protected void safeRun() throws Exception {
+                                setBrandingHeight(brandingWebview.getMeasuredHeight());
+                            }
+                        }, 1000);
+                    }
+                    brandingWebview.getViewTreeObserver().removeOnPreDrawListener(this);
+                }
+                return false;
+            }
+        });
+        brandingWebview.loadUrl("file://" + brandingResult.file.getAbsolutePath());
+        if (brandingResult.color != null) {
+            brandingWebview.setBackgroundColor(brandingResult.color);
+        }
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new SafeBroadcastReceiver() {

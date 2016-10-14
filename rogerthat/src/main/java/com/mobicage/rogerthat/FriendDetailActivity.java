@@ -36,6 +36,7 @@ import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -60,6 +61,7 @@ import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
+import com.mobicage.rogerthat.util.ui.ServiceHeader;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.to.friends.FriendTO;
@@ -104,6 +106,10 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
 
     protected String mContextMatch;
 
+    private FrameLayout mHeaderContainer;
+    private WebView mWebview;
+    private TextView mDescriptionView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         T.UI();
@@ -115,6 +121,9 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
         mPokeArea = findViewById(R.id.poke_area);
         mFriendArea = findViewById(R.id.friend_area);
         mHeader = findViewById(R.id.friend_detail_header);
+        mHeaderContainer = (FrameLayout) findViewById(R.id.header_container);
+        mWebview = (WebView) findViewById(R.id.webview);
+        mDescriptionView = (TextView) mServiceArea.findViewById(R.id.description);
     }
 
     @Override
@@ -520,14 +529,18 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
             return;
         }
 
-        WebView webView = (WebView) findViewById(R.id.webview);
-        WebSettings settings = webView.getSettings();
-        settings.setJavaScriptEnabled(false);
-        settings.setBlockNetworkImage(false);
+        if (br.displayType == BrandingMgr.DisplayType.NATIVE) {
+            ServiceHeader.setupNative(br, mHeaderContainer);
+        } else {
+            WebSettings settings = mWebview.getSettings();
+            settings.setJavaScriptEnabled(false);
+            settings.setBlockNetworkImage(false);
 
-        webView.loadUrl("file://" + br.file.getAbsolutePath());
-        webView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
-        webView.setVisibility(View.VISIBLE);
+            mWebview.loadUrl("file://" + br.file.getAbsolutePath());
+            mWebview.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+            mWebview.setVisibility(View.VISIBLE);
+            mDescriptionView.setVisibility(View.GONE);
+        }
 
         if (br.color == null) {
             mTopArea.setBackgroundResource(R.color.mc_background_color);
@@ -539,9 +552,9 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
         ((TextView) findViewById(R.id.friend_name)).setTextColor(ContextCompat.getColor(this, r));
         ((TextView) findViewById(R.id.email)).setTextColor(ContextCompat.getColor(this, r));
 
-        findViewById(R.id.description).setVisibility(View.GONE);
     }
 
+    @SuppressWarnings("WrongConstant")
     private Friend showFriend(Intent intent) {
         T.UI();
 
@@ -598,8 +611,7 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
             });
         }
 
-        final TextView descriptionView = (TextView) mServiceArea.findViewById(R.id.description);
-        descriptionView.setText(friend.description);
+        mDescriptionView.setText(friend.description);
 
         if (friend.descriptionBranding != null) {
             boolean available = false;
@@ -614,7 +626,7 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
                 mFriendsPlugin.getBrandingMgr().queue(friend);
             }
         } else {
-            descriptionView.setVisibility(View.VISIBLE);
+            mDescriptionView.setVisibility(View.VISIBLE);
             mServiceArea.findViewById(R.id.webview).setVisibility(View.GONE);
             mTopArea.setBackgroundResource(R.color.mc_background_color);
         }

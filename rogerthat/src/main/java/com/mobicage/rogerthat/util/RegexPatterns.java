@@ -79,4 +79,9 @@ public class RegexPatterns {
 
     public static final Pattern IS_DASHBOARD_ACCOUNT = Pattern.compile("^dashboard.*@rogerth\\.at$",
         Pattern.CASE_INSENSITIVE);
+
+    public static final Pattern BRANDING_DISPLAY_TYPE = Pattern.compile(
+            "<\\s*meta\\s+property\\s*=\\s*\"rt:style:display-type\"\\s+content\\s*=\\s*\"(native|webview)\"\\s*/>",
+            Pattern.CASE_INSENSITIVE);
+
 }

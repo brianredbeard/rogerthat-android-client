@@ -2,8 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:background="@color/mc_background_color"
     android:gravity="center_horizontal" >
 
@@ -40,40 +40,33 @@
     </LinearLayout>
     
     <ScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_above="@+id/pages" >
 
         <LinearLayout
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical" >
 
-            <TextView
-                android:id="@+id/title"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="15dp"
-                android:padding="5dp"
-                android:textColor="@android:color/primary_text_light"
-                android:textSize="20dp" >
-            </TextView>
+            <include
+                layout="@layout/service_detail_header"
+                android:visibility="gone" />
 
             <WebView
                 android:id="@+id/branding"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content" >
-            </WebView>
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
 
             <TableLayout
                 android:id="@+id/menu_table"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:stretchColumns="0,1,2,3">
 
                 <TableRow
                     android:id="@+id/row0"
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content" >
 
                     <LinearLayout
@@ -92,8 +85,8 @@
                         android:layout_height="95dp" >
 
                         <LinearLayout
-                            android:layout_width="fill_parent"
-                            android:layout_height="fill_parent"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
                             android:layout_alignParentRight="true"
                             android:layout_alignParentTop="true"
                             android:gravity="center_horizontal"
@@ -144,7 +137,7 @@
 
                 <TableRow
                     android:id="@+id/row1"
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp" >
 
@@ -191,7 +184,7 @@
 
                 <TableRow
                     android:id="@+id/row2"
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp" >
 

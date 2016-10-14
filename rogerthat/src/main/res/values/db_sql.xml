@@ -204,9 +204,17 @@ WHERE
     <string name="sql_message_update_flags">UPDATE message SET flags = flags | ? WHERE \"key\" = ?</string>
     <string name="sql_message_get_flags">SELECT flags FROM message WHERE \"key\" = ?</string>
     <string name="sql_message_cursor_query">
-SELECT m.\"key\", m.parent_key, m.sender, m.message, m.timestamp, m.dirty, m.recipients, m.flags, m.needs_my_answer, m.recipients_status, m.alert_flags, m.rowid as _id, m.sortid, 1 as mergeid, m.thread_dirty, m.last_thread_message, m.reply_count, m.thread_needs_my_answer, m.thread_show_in_list, m.thread_avatar_hash, m.thread_background_color, m.thread_text_color, f.priority, m.default_priority, m.default_sticky, f.unread_count
+SELECT
+        m.key, m.parent_key, m.sender, m.message, m.timestamp, m.dirty, m.recipients, m.flags, m.needs_my_answer,
+        m.recipients_status, m.alert_flags, m.rowid as _id, m.sortid, 1 as mergeid, m.thread_dirty, m.last_thread_message,
+        m.reply_count, m.thread_needs_my_answer, m.thread_show_in_list, m.thread_avatar_hash, m.thread_background_color,
+        m.thread_text_color, f.priority, m.default_priority, m.default_sticky, f.unread_count
 FROM
-        (SELECT ifnull(parent_key,key) as fkey, key, parent_key, sender, message, timestamp, dirty, recipients, flags, needs_my_answer, recipients_status, alert_flags, rowid as _id, sortid, 1 as mergeid, thread_dirty, last_thread_message, reply_count, thread_needs_my_answer, thread_show_in_list, thread_avatar_hash, thread_background_color, thread_text_color, default_priority, default_sticky FROM message WHERE show_in_message_list = 1 AND existence = 1) m
+        (SELECT ifnull(parent_key,key) as fkey, key, parent_key, sender, message, timestamp, dirty, recipients, flags,
+        needs_my_answer, recipients_status, alert_flags, rowid as _id, sortid, 1 as mergeid, thread_dirty,
+        last_thread_message, reply_count, thread_needs_my_answer, thread_show_in_list, thread_avatar_hash,
+        thread_background_color, thread_text_color, default_priority, default_sticky
+        FROM message WHERE show_in_message_list = 1 AND existence = 1) m
     LEFT OUTER JOIN
         (SELECT ifnull(parent_key,key) as fkey, max(priority) as priority, COUNT(dirty) as unread_count FROM message WHERE dirty = 1 AND existence = 1 GROUP BY fkey) f
     ON m.fkey = f.fkey
@@ -236,8 +244,14 @@ WHERE m1.\"key\" = ?
        GROUP BY day
        ORDER BY day DESC
     </string>
+    <!--TODO: fix this query. Unread count should not be 0.-->
     <string name="sql_message_cursor_query_filter_member">
-SELECT DISTINCT m1.\"key\", m1.parent_key, m1.sender, m1.message, m1.timestamp, m1.dirty, m1.recipients, m1.flags, m1.needs_my_answer, m1.recipients_status, m1.alert_flags, m1.rowid as _id, m1.sortid, 1 as mergeid, m1.thread_dirty, m1.last_thread_message, m1.reply_count, m1.thread_needs_my_answer, m1.thread_show_in_list, m1.thread_avatar_hash, m1.thread_background_color, m1.thread_text_color, m1.priority, m1.default_priority, m1.default_sticky, 0
+SELECT DISTINCT
+        m1.\"key\", m1.parent_key, m1.sender, m1.message, m1.timestamp, m1.dirty, m1.recipients, m1.flags,
+        m1.needs_my_answer, m1.recipients_status, m1.alert_flags, m1.rowid as _id, m1.sortid, 1 as mergeid,
+        m1.thread_dirty, m1.last_thread_message, m1.reply_count, m1.thread_needs_my_answer, m1.thread_show_in_list,
+        m1.thread_avatar_hash, m1.thread_background_color, m1.thread_text_color, m1.priority,
+        m1.default_priority, m1.default_sticky, 0 as unread_count
 FROM message m1
     LEFT JOIN member_status ms1 ON m1.\"key\" = ms1.message
     LEFT JOIN message m2 ON m1.parent_key = m2.\"key\"

@@ -84,6 +84,7 @@ import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.time.TimeUtils;
+import com.mobicage.rogerthat.util.ui.ServiceHeader;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.IJSONable;
 import com.mobicage.rpc.config.AppConstants;
@@ -148,6 +149,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
     private boolean mTransfering = false;
 
     private ImageView mStatusImage;
+    private FrameLayout mHeaderContainer;
 
     public void setTransfering(boolean b) {
         mTransfering = b;
@@ -200,6 +202,8 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
         super.onCreate(savedInstanceState);
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        setContentView(R.layout.message_detail);
+        mHeaderContainer = (FrameLayout) findViewById(R.id.header_container);
     }
 
     @Override
@@ -228,8 +232,6 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
         mMessagingPlugin = mService.getPlugin(MessagingPlugin.class);
         mStore = mMessagingPlugin.getStore();
         mDisplayWidth = UIUtils.getDisplayWidth(this);
-
-        setContentView(R.layout.message_detail);
 
         findViewById(R.id.expand).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -357,11 +359,15 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
             try {
                 if (brandingAvailable) {
                     br = mMessagingPlugin.getBrandingMgr().prepareBranding(mCurrentMessage);
-                    WebSettings settings = web.getSettings();
-                    settings.setJavaScriptEnabled(false);
-                    settings.setBlockNetworkImage(false);
-                    web.loadUrl("file://" + br.file.getAbsolutePath());
-                    web.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+                    if (br.displayType == BrandingMgr.DisplayType.NATIVE) {
+                        ServiceHeader.setupNative(br, mHeaderContainer);
+                    } else {
+                        WebSettings settings = web.getSettings();
+                        settings.setJavaScriptEnabled(false);
+                        settings.setBlockNetworkImage(false);
+                        web.loadUrl("file://" + br.file.getAbsolutePath());
+                        web.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+                    }
                     if (br.color != null) {
                         flay.setBackgroundColor(br.color);
                     }

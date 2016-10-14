@@ -345,6 +345,10 @@ public class BrandingMgr implements Pickleable, Closeable {
         }
     }
 
+    public enum DisplayType {
+        NATIVE, WEBVIEW
+    }
+
     public static class BrandingResult {
         public final File dir;
         public final File file;
@@ -359,11 +363,14 @@ public class BrandingMgr implements Pickleable, Closeable {
         public final Orientation orientation;
         public final boolean wakelockEnabeld;
         public final List<String> externalUrlPatterns;
+        public final DisplayType displayType;
+        public final File avatar;
+        public final File logo;
 
         public BrandingResult(File dir, File file, File watermark, Integer color, Integer menuItemColor,
                               ColorScheme scheme, boolean showHeader, Dimension dimension1, Dimension dimension2,
                               String contentType, Orientation orientation, boolean wakelockEnabled, List<String>
-                                      externalUrlPatterns) {
+                                      externalUrlPatterns, DisplayType displayType, File avatar, File logo) {
             this.dir = dir;
             this.file = file;
             this.watermark = watermark;
@@ -377,6 +384,9 @@ public class BrandingMgr implements Pickleable, Closeable {
             this.orientation = orientation;
             this.wakelockEnabeld = wakelockEnabled;
             this.externalUrlPatterns = externalUrlPatterns;
+            this.displayType = displayType;
+            this.avatar = avatar;
+            this.logo = logo;
         }
     }
 
@@ -1019,6 +1029,10 @@ public class BrandingMgr implements Pickleable, Closeable {
             String contentType = null;
             boolean wakelockEnabled = false;
             ByteArrayOutputStream brandingBos = new ByteArrayOutputStream();
+            Bitmap avatarBitmap = null;
+            Bitmap logoBitmap = null;
+            File logoPath = null;
+            File avatarPath = null;
             try {
                 MessageDigest digester = MessageDigest.getInstance("SHA256");
                 DigestInputStream dis = new DigestInputStream(new BufferedInputStream(new FileInputStream(
@@ -1041,6 +1055,13 @@ public class BrandingMgr implements Pickleable, Closeable {
                                     continue;
                                 }
                                 File destination = new File(tmpBrandingDir, entry.getName());
+                                if (entry.getName().equals("avatar.jpg")) {
+//                                    avatarBitmap = BitmapFactory.decodeStream(zis);
+                                    avatarPath = destination;
+                                } else if (entry.getName().equals("logo.jpg")) {
+//                                    logoBitmap = BitmapFactory.decodeStream(zis);
+                                    logoPath = destination;
+                                }
                                 destination.getParentFile().mkdirs();
                                 if ("__watermark__".equals(entry.getName())) {
                                     watermarkFile = destination;
@@ -1054,6 +1075,7 @@ public class BrandingMgr implements Pickleable, Closeable {
                                 } finally {
                                     fos.close();
                                 }
+
                             }
                         }
                         while (dis.read(data) >= 0)
@@ -1208,6 +1230,16 @@ public class BrandingMgr implements Pickleable, Closeable {
                     externalUrlPatterns.add(matcher.group(1));
                 }
 
+
+                DisplayType displayType = DisplayType.WEBVIEW;
+                matcher = RegexPatterns.BRANDING_DISPLAY_TYPE.matcher(brandingHtml);
+                if (matcher.find()) {
+                    String type = matcher.group(1);
+                    if (type.toLowerCase().equals("native")) {
+                        displayType = DisplayType.NATIVE;
+                    }
+                }
+
                 FileOutputStream fos = new FileOutputStream(brandingFile);
 
                 try {
@@ -1220,7 +1252,7 @@ public class BrandingMgr implements Pickleable, Closeable {
                 }
                 return new BrandingResult(tmpBrandingDir, brandingFile, watermarkFile, backgroundColor, menuItemColor,
                         scheme, showHeader, dimension1, dimension2, contentType, orientation, wakelockEnabled,
-                        externalUrlPatterns);
+                        externalUrlPatterns, displayType, avatarPath, logoPath);
             } finally {
                 brandingBos.close();
             }

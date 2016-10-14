@@ -66,7 +66,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textColor="@android:color/primary_text_light"
-                            android:textSize="20dp" >
+                            android:textSize="20sp">
                         </TextView>
 
                         <TextView
@@ -86,7 +86,7 @@
                     android:background="@drawable/message_background"
                     android:padding="5dp"
                     android:textColor="@android:color/primary_text_light"
-                    android:textSize="20dp" >
+                    android:textSize="20sp">
                 </TextView>
 
                 <WebView
@@ -95,6 +95,10 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp" >
                 </WebView>
+
+                <include
+                    layout="@layout/service_detail_header"
+                    android:visibility="gone" />
     
                 <LinearLayout
                     android:id="@+id/attachment_layout"
