@@ -23,6 +23,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import java.nio.charset.Charset;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -173,11 +175,12 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
                             .trustManager(InsecureTrustManagerFactory.INSTANCE).build();
                 } else {
                     TrustManagerFactory factory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                    factory.init(KeyStore.getInstance(KeyStore.getDefaultType()));  // Gets the default system keystore
                     sslCtx = SslContextBuilder.forClient()
                             .trustManager(factory)
                             .build();
                 }
-            } catch (SSLException | NoSuchAlgorithmException e) {
+            } catch (SSLException | NoSuchAlgorithmException | KeyStoreException e) {
                 L.bug(e);
                 return;
             }
