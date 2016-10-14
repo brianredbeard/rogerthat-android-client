@@ -897,24 +897,6 @@ def validate_android_manifest():
                         "\n- ".join(missing_activities))
 
 
-def generate_coloured_buttons(primary_colour, secondary_colour):
-    logging.info('Generating button backgrounds...')
-    button_height = 2
-    for button_name, button_content in COLOURED_BUTTONS.iteritems():
-        if 'sizes' not in button_content:
-            file_path = os.path.join(SRC_RES_DIR, u'drawable', u'%s_button.png' % button_name)
-            primary, secondary = button_content
-            width = 1
-            app_utils.create_button(file_path, primary, secondary, width, button_height)
-        else:
-            for drawable_folder_name, screen_width in SCREEN_SIZES.iteritems():
-                file_path = os.path.join(SRC_RES_DIR, drawable_folder_name,
-                                         u'%s_button.png' % button_name)
-                primary, secondary = u'#%s' % primary_colour, u'#%s' % secondary_colour
-                width = COLOURED_BUTTONS[button_name]['sizes'][drawable_folder_name]
-                app_utils.create_button(file_path, primary, secondary, int(width), button_height)
-
-
 ##### START ########################################
 
 if __name__ == "__main__":
