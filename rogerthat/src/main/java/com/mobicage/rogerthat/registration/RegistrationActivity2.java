@@ -1719,9 +1719,8 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             int position = mWiz.getPosition();
-            // 3 == Choose login method
             // 4 == Enter activation code
-            if (position == 3 || position == 4) {
+            if (position == 4) {
                 mWiz.goBack();
                 return true;
             }
