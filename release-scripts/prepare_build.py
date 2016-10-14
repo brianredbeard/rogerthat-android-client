@@ -854,6 +854,9 @@ class CustomCloudConstants {
     final static boolean XMPP_DEBUG = false;
     final static boolean DEBUG_LOGGING = false;
 
+    final static boolean NEWS_CHANNEL_SSL = true;
+    final static boolean NEWS_CHANNEL_MUST_VALIDATE_SSL_CERTIFICATE = true;
+
     final static String REGISTRATION_MAIN_SIGNATURE = %(REGISTRATION_MAIN_SIGNATURE)s;
     final static String REGISTRATION_EMAIL_SIGNATURE = %(REGISTRATION_EMAIL_SIGNATURE)s;
     final static String REGISTRATION_PIN_SIGNATURE = %(REGISTRATION_PIN_SIGNATURE)s;
