@@ -23,6 +23,8 @@ import android.support.multidex.MultiDexApplication;
 
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.Iconics;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
@@ -79,6 +81,7 @@ public class App extends MultiDexApplication implements Thread.UncaughtException
         if (android.os.Build.VERSION.SDK_INT >= 18) {
             mBackgroundPowerSaver = new BackgroundPowerSaver(this);
         }
+        Iconics.registerFont(new FontAwesome());
     }
 
     public static Context getContext() {
