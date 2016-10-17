@@ -39,11 +39,6 @@ import com.soundcloud.android.crop.CropUtil;
 public class ImageHelper {
 
     public static Bitmap getRoundTopCornerBitmap(final Bitmap bitmap, int radius) {
-        if (SystemUtils.getAndroidVersion() <= 3) {
-            // burden on performance
-            return bitmap;
-        }
-
         if (bitmap == null)
             return null; // saw this once when phone complains about "not enough storage"
 

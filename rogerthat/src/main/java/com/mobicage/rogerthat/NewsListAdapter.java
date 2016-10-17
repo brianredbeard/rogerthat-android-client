@@ -699,7 +699,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
             viewHolder.image.setVisibility(View.GONE);
             return false;
         } else {
-            int corderRadius = UIUtils.convertDipToPixels(mActivity, 20);
+            int corderRadius = UIUtils.convertDipToPixels(mActivity, 30);
             if (mCachedDownloader.isStorageAvailable()) {
                 File cachedFile = mCachedDownloader.getCachedFilePath(newsItem.image_url);
                 if (cachedFile != null) {
