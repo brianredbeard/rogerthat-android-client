@@ -116,8 +116,12 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:scheme="rogerthat" />
-                <data android:scheme="mdp-rogerthat" android:host="x-callback-url" />
-                <data android:scheme="oauth-rogerthat" android:host="x-callback-url" />
+                <data
+                    android:host="x-callback-url"
+                    android:scheme="mdp-${app_id}"/>
+                <data
+                    android:host="x-callback-url"
+                    android:scheme="oauth-{app_id}"/>
             </intent-filter>
         </activity-alias>
 
@@ -546,7 +550,7 @@
         <!-- BEGIN FB -->
         <provider
             android:name="com.facebook.FacebookContentProvider"
-            android:authorities="@string/facebook_content_provider"
+            android:authorities="com.facebook.app.FacebookContentProvider${facebook_content_provider_id}"
             android:exported="true"/>
         <!-- END FB -->
 

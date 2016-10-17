@@ -14,6 +14,10 @@ android {
             abortOnError false
         }
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders = [
+                "app_id": "rogerthat",
+                "facebook_content_provider_id": "188033791211994"
+        ]
     }
 
     signingConfigs {
@@ -36,7 +40,6 @@ android {
             }
             applicationIdSuffix '.debug'
             versionNameSuffix '-debug'
-            resValue "string", "facebook_content_provider", "com.facebook.app.debug.FacebookContentProvider188033791211994"
         }
         release {
             applicationIdSuffix ''
@@ -47,7 +50,6 @@ android {
                 checkReleaseBuilds false
                 abortOnError false
             }
-            resValue "string", "facebook_content_provider", "com.facebook.app.FacebookContentProvider188033791211994"
         }
     }
 

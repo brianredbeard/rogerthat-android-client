@@ -177,6 +177,7 @@ def rename_package():
             s = s.replace('com.mobicage.rogerth.at', 'com.mobicage.rogerthat')
         s = s.replace("applicationIdSuffix '.debug'", "applicationIdSuffix '.%s.debug'" % package_sufix)
         s = s.replace("applicationIdSuffix ''", "applicationIdSuffix '.%s'" % package_sufix)
+        s = s.replace('"app_id", "rogerthat"', '"app_id", "%s"' % APP_ID)
         if facebook_app_id:
             s = s.replace('188033791211994', str(facebook_app_id))
         f.seek(0)
@@ -212,9 +213,6 @@ def rename_package():
             s = splitted[0].strip() + supports_screens + splitted[1].split('<!-- END supports-screens -->')[1]
         else:
             raise Exception("Could not apply DEVICE_TYPE '%s'" % device_type)
-
-        s = re.sub('mdp-rogerthat', 'mdp-%s' % APP_ID, s)
-        s = re.sub('oauth-rogerthat', 'oauth-%s' % APP_ID, s)
 
         if not facebook_app_id:
             # remove FacebookProvider
