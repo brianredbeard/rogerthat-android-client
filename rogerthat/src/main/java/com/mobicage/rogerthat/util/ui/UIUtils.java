@@ -67,11 +67,8 @@ import com.mobicage.rogerthat.util.system.T;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
-import me.leolin.shortcutbadger.ShortcutBadger;
 
 public class UIUtils {
 
@@ -117,21 +114,26 @@ public class UIUtils {
     }
 
     public static void doNotification(Context pContext, String title, String message, int notificationId,
-        String action, boolean withSound, boolean withVibration, boolean withLight, boolean autoCancel, int icon,
-        int notificationNumber, String extra, String extraData, String tickerText, long timestamp) {
+                                      String action, boolean withSound, boolean withVibration, boolean withLight,
+                                      boolean autoCancel, int icon, int notificationNumber, String extra,
+                                      String extraData, String tickerText, long timestamp, int priority,
+                                      List<NotificationCompat.Action> actionButtons,
+                                      String longNotificationText, Bitmap largeIcon, String category) {
         Bundle b = null;
         if (extra != null) {
             b = new Bundle();
             b.putString(extra, extraData);
         }
         doNotification(pContext, title, message, notificationId, action, withSound, withVibration, withLight,
-            autoCancel, icon, notificationNumber, b, tickerText, timestamp);
-
+                autoCancel, icon, notificationNumber, b, tickerText, timestamp, priority, actionButtons,
+                longNotificationText, largeIcon, category);
     }
 
-    public static void doNotification(Context pContext, String title, String message, int notificationId,
-        String action, boolean withSound, boolean withVibration, boolean withLight, boolean autoCancel, int icon,
-        int notificationNumber, Bundle extras, String tickerText, long timestamp) {
+    public static void doNotification(Context pContext, String title, String message, int notificationId, String action,
+                                      boolean withSound, boolean withVibration, boolean withLight, boolean autoCancel,
+                                      int icon, int notificationNumber, Bundle extras, String tickerText,
+                                      long timestamp, int priority, List<NotificationCompat.Action> actionButtons,
+                                      String longNotificationText, Bitmap largeIcon, String category) {
         T.dontCare();
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(pContext);
         int defaults = 0;
@@ -149,10 +151,16 @@ public class UIUtils {
 
         builder.setAutoCancel(autoCancel);
         builder.setOngoing(!autoCancel);
+        builder.setCategory(category);
 
         if (message != null) {
             builder.setSmallIcon(icon);
-            builder.setTicker(tickerText);
+            if (largeIcon != null) {
+                builder.setLargeIcon(largeIcon);
+            }
+            if (tickerText != null) {
+                builder.setTicker(tickerText);
+            }
             builder.setWhen(System.currentTimeMillis());
             final Intent intent = new Intent(action, null, pContext, MainActivity.class);
             intent.addFlags(MainActivity.FLAG_CLEAR_STACK_SINGLE_TOP);
@@ -166,14 +174,21 @@ public class UIUtils {
             builder.setContentIntent(pi);
             builder.setContentText(message);
             builder.setContentTitle(title);
+            if (longNotificationText != null) {
+                builder.setStyle(new NotificationCompat.BigTextStyle().bigText(longNotificationText));
+            }
+            builder.setPriority(priority);
+            if (actionButtons != null) {
+                for (NotificationCompat.Action actionButton : actionButtons) {
+                    builder.addAction(actionButton);
+                }
+            }
         }
 
         builder.setNumber(notificationNumber);
-        ShortcutBadger.applyCount(pContext, notificationNumber);
 
         final NotificationManager nm = (NotificationManager) pContext.getSystemService(Context.NOTIFICATION_SERVICE);
         nm.notify(notificationId, builder.build());
-
         sNotificationIDs.add(notificationId);
     }
 
@@ -181,16 +196,6 @@ public class UIUtils {
         T.dontCare();
         final NotificationManager nm = (NotificationManager) pContext.getSystemService(Context.NOTIFICATION_SERVICE);
         nm.cancel(pNotificationId);
-        ShortcutBadger.removeCount(pContext);
-    }
-
-    public static void cancelAllNotifications(final Context pContext) {
-        T.dontCare();
-        final NotificationManager nm = (NotificationManager) pContext.getSystemService(Context.NOTIFICATION_SERVICE);
-        for (final Iterator<Integer> it = sNotificationIDs.iterator(); it.hasNext();) {
-            nm.cancel(it.next());
-            it.remove();
-        }
     }
 
     public static boolean hasHardKeyboard(Context pContext) {

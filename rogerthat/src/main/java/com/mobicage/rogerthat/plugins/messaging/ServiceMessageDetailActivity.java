@@ -360,8 +360,10 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
                 if (brandingAvailable) {
                     br = mMessagingPlugin.getBrandingMgr().prepareBranding(mCurrentMessage);
                     if (br.displayType == BrandingMgr.DisplayType.NATIVE) {
+                        web.setVisibility(View.GONE);
                         ServiceHeader.setupNative(br, mHeaderContainer);
                     } else {
+                        web.setVisibility(View.VISIBLE);
                         WebSettings settings = web.getSettings();
                         settings.setJavaScriptEnabled(false);
                         settings.setBlockNetworkImage(false);
@@ -390,10 +392,8 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
         }
 
         if (showBranded) {
-            web.setVisibility(View.VISIBLE);
             messageView.setVisibility(View.GONE);
         } else {
-            web.setVisibility(View.GONE);
             messageView.setVisibility(View.VISIBLE);
             messageView.setText(mCurrentMessage.message);
         }
@@ -1089,7 +1089,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
         if (FriendsPlugin.SYSTEM_FRIEND.equals(email)) {
             imageView.setImageResource(R.drawable.ic_dashboard);
         } else {
-            imageView.setImageBitmap(mFriendsPlugin.getAvatarBitmap(email, true));
+            imageView.setImageBitmap(mFriendsPlugin.getAvatarBitmap(email, true, -1));
             final SafeViewOnClickListener listener = getFriendDetailOnClickListener(email);
             if (listener != null)
                 imageView.setOnClickListener(listener);

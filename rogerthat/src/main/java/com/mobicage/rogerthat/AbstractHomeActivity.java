@@ -361,7 +361,6 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity {
                 L.bug("Unexpected (key, value) for HomeActivity intent: (" + INTENT_KEY_LAUNCHINFO + ", " + value + ")");
             }
             if (mMessagingPlugin != null) {
-                mMessagingPlugin.updateMessagesNotification(false, false, false);
                 handleBadgeMessages();
             }
         }
@@ -460,7 +459,6 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity {
 
     @Override
     protected void onServiceUnbound() {
-        mMessagingPlugin.updateMessagesNotification(false, false, false);
         handleBadgeMessages();
         unregisterReceiver(mBroadcastReceiver);
 

@@ -18,6 +18,7 @@
 
 package com.mobicage.rogerthat.plugins.messaging;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -31,9 +32,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.NotificationCompat;
+import android.support.v7.app.NotificationCompat;
 import android.view.ViewGroup;
 
 import com.mobicage.api.messaging.Rpc;
@@ -41,6 +43,7 @@ import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.HomeActivity;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
+import com.mobicage.rogerthat.QuickReplyActivity;
 import com.mobicage.rogerthat.ServiceBound;
 import com.mobicage.rogerthat.config.Configuration;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
@@ -68,7 +71,6 @@ import com.mobicage.rpc.CallReceiver;
 import com.mobicage.rpc.IJSONable;
 import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.rpc.ResponseHandler;
-import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.rpc.http.HttpCommunicator;
 import com.mobicage.to.messaging.AckMessageRequestTO;
 import com.mobicage.to.messaging.AckMessageResponseTO;
@@ -117,11 +119,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+
+import me.leolin.shortcutbadger.ShortcutBadger;
 
 public class MessagingPlugin implements MobicagePlugin {
 
@@ -224,6 +230,57 @@ public class MessagingPlugin implements MobicagePlugin {
 
     private volatile long mUpdateNotificationFlags = 0;
 
+    public MessageTO storeMessage(final String me, final SendMessageRequestTO request, String selectedButtonId) {
+        T.BIZZ();
+        final MessageTO message = new MessageTO();
+        message.key = request.key;
+        message.sender = me;
+        message.flags = request.flags;
+        message.timeout = request.timeout;
+        long currentTimeMillis = mMainService.currentTimeMillis();
+        message.timestamp = currentTimeMillis / 1000;
+        String parent_key = request.parent_key;
+        message.parent_key = parent_key;
+        message.message = request.message;
+        message.buttons = request.buttons;
+        String[] members;
+        if (parent_key == null)
+            members = request.members;
+        else {
+            MessageStore store = getStore();
+            Set<String> memberList = store.getMessageMembers(parent_key);
+            members = memberList.toArray(new String[memberList.size()]);
+        }
+        message.members = new MemberStatusTO[members.length];
+        for (int i = 0; i < members.length; i++) {
+            String member = members[i];
+            MemberStatusTO ms = new MemberStatusTO();
+            if (me.equals(member)) {
+                ms.status = STATUS_ACKED | STATUS_RECEIVED;
+                ms.received_timestamp = currentTimeMillis / 1000;
+                ms.acked_timestamp = currentTimeMillis / 1000;
+                ms.button_id = selectedButtonId;
+            } else {
+                ms.status = 0;
+                ms.received_timestamp = 0;
+                ms.acked_timestamp = 0;
+                ms.button_id = null;
+            }
+            ms.custom_reply = null;
+            ms.member = member;
+            message.members[i] = ms;
+        }
+        message.branding = null;
+        message.timestamp = currentTimeMillis / 1000;
+        message.priority = request.priority;
+
+        message.default_priority = Message.PRIORITY_NORMAL;
+        message.default_sticky = false;
+
+        newMessage(message, true, true);
+        return message;
+    }
+
     private interface IFormResultProcessor {
         public void processResult(final Message message);
     }
@@ -304,15 +361,6 @@ public class MessagingPlugin implements MobicagePlugin {
         mMessagingCallReceiver = new MessagingCallReceiver(mMainService, this);
         CallReceiver.comMobicageCapiMessagingIClientRpc = mMessagingCallReceiver;
         mConfigProvider.registerListener(CONFIGKEY, this);
-
-        mMainService.postOnUIHandler(new SafeRunnable() {
-            @Override
-            protected void safeRun() throws Exception {
-                // Requires friends plugin; therefore cannot invoke it directly
-                // from initialize() method
-                updateMessagesNotification(false, false, false);
-            }
-        });
     }
 
     @Override
@@ -351,13 +399,13 @@ public class MessagingPlugin implements MobicagePlugin {
     public void inboxOpened() {
         T.UI();
         mStore.setInboxOpenedAt(mMainService.currentTimeMillis() / 1000);
-        updateMessagesNotification(false, false, false);
     }
 
+    /**
+     * I sent this msg or a human user sent this msg or a human started the thread, let's show the person thread view
+     */
     private boolean isHumanThread(Message message, int friendType, FriendsPlugin friendsPlugin) {
-        // I sent this msg or a human user sent this msg or a human started the
-        // thread
-        // Let's show the person threadview
+
         if (message.sender.equals(mMyEmail))
             return true;
 
@@ -374,6 +422,8 @@ public class MessagingPlugin implements MobicagePlugin {
 
     public void showMessage(Context context, Message message, String memberFilter) {
         showMessage(context, message, false, memberFilter);
+        String parentKey = message.parent_key != null ? message.parent_key : message.key;
+        UIUtils.cancelNotification(context, getMessageNotificationId(parentKey));
     }
 
     public void showMessage(Context context, Message message, boolean detail, String memberFilter) {
@@ -670,9 +720,193 @@ public class MessagingPlugin implements MobicagePlugin {
         mMainService.sendBroadcast(broadcast, sendUpdateIntentImmediatly, true);
         updateBadge();
 
-        if (!senderIsMobileOwner) {
-            updateMessagesNotification(true, false, false);
+        String parentKey = message.parent_key != null ? message.parent_key : message.key;
+        if (senderIsMobileOwner) {
+            removeNotificationForThread(parentKey);
+        } else {
+            int unreadInThreadCount = mStore.getUnreadMessageCountInThread(parentKey);
+            ArrayList<UnreadMessage> olderMessages = mStore.getLastUnreadMessagesInThread(parentKey);
+            updateNotificationForThread(parentKey, message.key, olderMessages, unreadInThreadCount);
         }
+    }
+
+    public static long getNewMessageFlags(long parentMessageFlags) {
+        long flags = MessagingPlugin.FLAG_ALLOW_DISMISS
+                | MessagingPlugin.FLAG_ALLOW_CUSTOM_REPLY
+                | MessagingPlugin.FLAG_ALLOW_REPLY
+                | MessagingPlugin.FLAG_ALLOW_REPLY_ALL
+                | MessagingPlugin.FLAG_SHARED_MEMBERS;
+        flags |= (parentMessageFlags & MessagingPlugin.FLAG_DYNAMIC_CHAT)
+                | (parentMessageFlags & MessagingPlugin.FLAG_NOT_REMOVABLE)
+                | (parentMessageFlags & MessagingPlugin.FLAG_ALLOW_CHAT_BUTTONS)
+                | (parentMessageFlags & MessagingPlugin.FLAG_ALLOW_CHAT_PICTURE)
+                | (parentMessageFlags & MessagingPlugin.FLAG_ALLOW_CHAT_VIDEO)
+                | (parentMessageFlags & MessagingPlugin.FLAG_ALLOW_CHAT_PRIORITY)
+                | (parentMessageFlags & MessagingPlugin.FLAG_ALLOW_CHAT_STICKY);
+        return flags;
+    }
+
+    /**
+     * Updates a notification for a thread.
+     * <p/>
+     * thread between 2 people only:
+     * title -> friend name
+     * message -> message
+     * long message -> message
+     * icon -> friend avatar
+     * <p/>
+     * Multiple people:
+     * title -> All the people who said something
+     * message -> x new messages
+     * long message ->
+     * - only one friend: message1\n message2\n...
+     * - multiple friends friend1: message1 \n friend2: message2
+     * icon -> thread avatar
+     */
+    private void updateNotificationForThread(String parentKey, String messageKey, ArrayList<UnreadMessage> olderMessages,
+                                             int unreadInThreadCount) {
+        T.BIZZ();
+        FriendsPlugin friendsPlugin = mMainService.getPlugin(FriendsPlugin.class);
+        Bitmap largeIcon;
+        // Don't create notification when the currently opened message thread is the same as the thread from the notification
+        Activity currentActivity = UIUtils.getTopActivity(mMainService);
+        if (currentActivity instanceof FriendsThreadActivity) {
+            FriendsThreadActivity friendsThreadActivity = (FriendsThreadActivity) currentActivity;
+            if (parentKey.equals(friendsThreadActivity.getParentMessageKey())) {
+                return;
+            }
+        }
+        Message parentMessage = mMainService.getPlugin(MessagingPlugin.class).getStore().getFullMessageByKey(parentKey);
+        boolean canAnswerToMessage = SystemUtils.isFlagEnabled(parentMessage.flags, MessagingPlugin.FLAG_ALLOW_REPLY);
+        int priority = Notification.PRIORITY_HIGH;  // Causes the notification to show up as a heads-up notification
+        String notificationText;
+        StringBuilder longNotificationText = new StringBuilder();
+
+        if (parentMessage.dirty) {
+            unreadInThreadCount++;
+            UnreadMessage unreadMessage = new UnreadMessage(parentMessage.key, parentMessage.message,
+                    friendsPlugin.getName(parentMessage.sender),
+                    parentMessage.sender);
+            olderMessages.add(0, unreadMessage);
+        }
+
+        List<String> friendNames = new ArrayList<>();
+        for (UnreadMessage msg : olderMessages) {
+            if (msg.friendEmail != null && !msg.friendEmail.equals(mMyEmail)) {
+                String displayName = msg.friendName != null ? msg.friendName : msg.friendEmail;
+                if (!friendNames.contains(displayName)) {
+                    friendNames.add(displayName);
+                }
+            }
+        }
+        String notificationTitle = android.text.TextUtils.join(", ", friendNames);
+        boolean isFromOneFriend = friendNames.size() == 1;
+        String lastSender = null;
+        if (unreadInThreadCount > 1) {
+            notificationText = mMainService.getString(R.string.message_notification_n_new_messages, unreadInThreadCount);
+            for (UnreadMessage msg : olderMessages) {
+                if (msg.friendEmail != null) {
+                    lastSender = msg.friendEmail;
+                }
+                if (!isFromOneFriend) {
+                    longNotificationText.append(msg.friendName);
+                    longNotificationText.append(": ");
+                }
+                String text = msg.message;
+                if (TextUtils.isEmptyOrWhitespace(text)) {
+                    Message fullMessage = mMainService.getPlugin(MessagingPlugin.class).getStore().getFullMessageByKey(msg.key);
+                    text = getMessageTextFromButtonsOrAttachments(fullMessage);
+                }
+                longNotificationText.append(text);
+                longNotificationText.append("\n");
+            }
+        } else {
+            UnreadMessage lastMessage = olderMessages.get(0);
+            notificationText = lastMessage.message;
+            longNotificationText.append(notificationText);
+            if (TextUtils.isEmptyOrWhitespace(notificationText)) {
+                Message fullMessage = mMainService.getPlugin(MessagingPlugin.class).getStore().getFullMessageByKey(lastMessage.key);
+                notificationText = getMessageTextFromButtonsOrAttachments(fullMessage);
+            }
+            lastSender = lastMessage.friendEmail;
+        }
+
+        List<NotificationCompat.Action> actionButtons = new ArrayList<>();
+
+        if (canAnswerToMessage) {
+            // add 'reply' button
+            Intent intent = new Intent(mMainService, QuickReplyActivity.class);
+            intent.addCategory(Intent.CATEGORY_LAUNCHER);
+            intent.putExtra(QuickReplyActivity.TITLE, notificationTitle);
+            intent.putExtra(QuickReplyActivity.MESSAGE, unreadInThreadCount > 1 ? longNotificationText.toString() : notificationText);
+            intent.putExtra(QuickReplyActivity.SENDER, lastSender);
+            intent.putExtra(QuickReplyActivity.MESSAGE_KEY, messageKey);
+            PendingIntent pendingIntent = PendingIntent.getActivity(mMainService, (int) System.currentTimeMillis(), intent, 0);
+            int replyIcon = R.drawable.fa_mail_reply;
+            String replyString = mMainService.getString(R.string.reply);
+            NotificationCompat.Action replyAction = new NotificationCompat.Action.Builder(replyIcon, replyString, pendingIntent)
+                    .build();
+            actionButtons.add(replyAction);
+        }
+
+        int notificationId = getMessageNotificationId(parentKey);
+
+        if (isFromOneFriend) {
+            largeIcon = friendsPlugin.getAvatarBitmap(lastSender, false, getNotificationIconSize());
+        } else {
+            BitmapDrawable groupAvatar = (BitmapDrawable) mMainService.getResources().getDrawable(R.drawable.group_60);
+            largeIcon = groupAvatar.getBitmap();
+        }
+        Bundle extras = new Bundle();
+        extras.putString(HomeActivity.INTENT_KEY_LAUNCHINFO, HomeActivity.INTENT_VALUE_SHOW_NEW_MESSAGES);
+        extras.putString(HomeActivity.INTENT_KEY_MESSAGE, parentKey);
+        UIUtils.doNotification(mMainService, notificationTitle, notificationText, notificationId,
+                MainActivity.ACTION_NOTIFICATION_MESSAGE_RECEIVED, false, true, true, true,
+                R.drawable.notification_icon, unreadInThreadCount, extras, null, mMainService.currentTimeMillis(),
+                priority, actionButtons, longNotificationText.toString(), largeIcon,
+                NotificationCompat.CATEGORY_MESSAGE);
+        updateUnreadCountBadge();
+    }
+
+    private int getNotificationIconSize() {
+        float density = mMainService.getResources().getDisplayMetrics().density;
+        if (density == 0.75f) {
+            // LDPI
+            return 48 - 9;
+        } else if (density >= 1.0f && density < 1.5f) {
+            // MDPI
+            return 64 - 12;
+        } else if (density == 1.5f) {
+            // HDPI
+            return 96 - 18;
+        } else if (density > 1.5f && density <= 2.0f) {
+            // XHDPI
+            return 128 - 24;
+        } else if (density > 2.0f && density <= 3.0f) {
+            // XXHDPI
+            return 192 - 36;
+        } else {
+            // XXXHDPI
+            return 256 - 50;
+        }
+    }
+
+    public int getMessageNotificationId(String parentKey) {
+        Long messageKeyLong = UUID.fromString(parentKey).getMostSignificantBits();
+        String messageKeyString = messageKeyLong.toString();
+        if (messageKeyString.length() > 10) {
+            messageKeyString = messageKeyString.substring(11);
+        }
+        return Integer.parseInt(messageKeyString);
+    }
+
+    /**
+     * Updates the badge shown on the app icon to reflect the total amount of messages that the user didn't see(not read) yet.
+     */
+    private void updateUnreadCountBadge() {
+        final int lastInboxOpenedTimestamp = (int) mStore.getLastInboxOpenedTimestamp();
+        final int totalUnreadCount = mStore.getTotalUnreadCount(lastInboxOpenedTimestamp);
+        ShortcutBadger.applyCount(mMainService, totalUnreadCount);
     }
 
     public void updateMessage(UpdateMessageRequestTO request) throws MessageUpdateNotAllowedException {
@@ -773,24 +1007,22 @@ public class MessagingPlugin implements MobicagePlugin {
         mMainService.sendBroadcast(intent);
         updateBadge();
 
+        boolean shouldUpdateNotification = false;
         if ((request.status & STATUS_ACKED) == STATUS_ACKED) {
             final String messageSender = mStore.getMessageSenderBIZZ(request.message);
             if (!updateSenderIsMobileOwner && messageSender.equals(myEmail)) {
                 if (request.button_id != null) {
                     // Someone gave a quick reply to a question I posed
-                    updateMessagesNotification(false, true, false);
+                    shouldUpdateNotification = true;
                 } else {
                     // Someone dismissed a question I posed
-                    updateMessagesNotification(false, false, false);
                 }
             } else if (!updateSenderIsMobileOwner && messageSender.equals(request.member)) {
                 // Some time ago, user X sent a message to me. Now he updates
                 // his own button choice
-                updateMessagesNotification(false, true, false);
             } else if (!updateSenderIsMobileOwner) {
                 // Some time ago, user X sent a message to me and user Y...
                 // Now user Y updates his choice or dismisses
-                updateMessagesNotification(false, false, false);
             } else if (updateSenderIsMobileOwner) {
                 // I chose a button on a message I sent myself
                 mStore.setMessageProcessed(request.message, request.button_id, request.custom_reply,
@@ -802,9 +1034,11 @@ public class MessagingPlugin implements MobicagePlugin {
                             intent.putExtra("message", request.message);
                             mMainService.sendBroadcast(intent);
                             updateBadge();
-                            updateMessagesNotification(false, false, false);
                         }
                     });
+            }
+            if (shouldUpdateNotification) {
+                // xxx: we could show which button the user pressed in a notification
             }
         }
     }
@@ -870,8 +1104,6 @@ public class MessagingPlugin implements MobicagePlugin {
                         mMessageHistory.putQuickReplyUndoneInHistory(message, newStatus);
                     }
                 }
-
-                updateMessagesNotification(false, false, false);
             }
         });
     }
@@ -882,8 +1114,6 @@ public class MessagingPlugin implements MobicagePlugin {
         Intent intent = new Intent(MESSAGE_DIRTY_CLEANED_INTENT);
         intent.putExtra("message", messageKey);
         mMainService.sendBroadcast(intent);
-        updateBadge();
-        updateMessagesNotification(false, false, false);
     }
 
     public void cleanThreadDirtyFlags(final String parentMessageKey) {
@@ -893,7 +1123,6 @@ public class MessagingPlugin implements MobicagePlugin {
         intent.putExtra("message", parentMessageKey);
         mMainService.sendBroadcast(intent);
         updateBadge();
-        updateMessagesNotification(false, false, false);
     }
 
     public void ackMessage(final MessageTO message, final String button, final String custom_reply,
@@ -938,7 +1167,6 @@ public class MessagingPlugin implements MobicagePlugin {
                 mMainService.sendBroadcast(intent);
                 mMessageHistory.putMessageAckInHistory(message.key, button);
                 updateBadge();
-                updateMessagesNotification(false, false, true);
             }
         });
 
@@ -988,7 +1216,6 @@ public class MessagingPlugin implements MobicagePlugin {
                 } finally {
                     curs.close();
                 }
-                updateMessagesNotification(false, false, true);
             }
         });
     }
@@ -1003,10 +1230,8 @@ public class MessagingPlugin implements MobicagePlugin {
                     boolean proceed = curs.moveToFirst();
                     while (proceed) {
                         String key = curs.getString(0);
-                        // String parent_key = curs.getString(1);
 
                         mStore.setChatMessageProcessedBizz(key);
-                        // mStore.setDirty(key, false);
                         proceed = curs.moveToNext();
                         Intent intent = new Intent(MessagingPlugin.MESSAGE_PROCESSED_INTENT);
                         intent.putExtra("message", key);
@@ -1016,7 +1241,6 @@ public class MessagingPlugin implements MobicagePlugin {
                 } finally {
                     curs.close();
                 }
-                updateMessagesNotification(false, false, true);
             }
         });
 
@@ -1096,15 +1320,20 @@ public class MessagingPlugin implements MobicagePlugin {
         intent.putExtra("key", threadKey);
         mMainService.sendBroadcast(intent);
         updateBadge();
-        updateMessagesNotification(false, false, true);
 
+        removeNotificationForThread(threadKey);
         try {
             deleteThreadAttachments(threadKey);
         } catch (IOException e) {
-            L.d("Failed to remove attchments when thead was removed", e);
+            L.d("Failed to remove attachments when thread was removed", e);
         }
 
         return true;
+    }
+
+    public void removeNotificationForThread(String threadKey) {
+        UIUtils.cancelNotification(mMainService, getMessageNotificationId(threadKey));
+        updateUnreadCountBadge();
     }
 
     public void conversationDeleted(final String threadKey) {
@@ -1117,12 +1346,11 @@ public class MessagingPlugin implements MobicagePlugin {
         intent.putExtra("key", threadKey);
         mMainService.sendBroadcast(intent);
         updateBadge();
-        updateMessagesNotification(false, false, true);
-
+        removeNotificationForThread(threadKey);
         try {
             deleteThreadAttachments(threadKey);
         } catch (IOException e) {
-            L.d("Failed to remove attchments when conversation was deleted", e);
+            L.d("Failed to remove attachments when conversation was deleted", e);
         }
     }
 
@@ -1155,109 +1383,6 @@ public class MessagingPlugin implements MobicagePlugin {
         return true;
     }
 
-    public void updateMessagesNotification(boolean incomming, boolean updates4me, boolean scheduleImmediatly) {
-        T.dontCare();
-
-        if (CloudConstants.isContentBrandingApp()) {
-            return;
-        }
-
-        mUpdateNotificationFlags |= FLAG_UPDATE_NOTIFICATIONS;
-        if (incomming)
-            mUpdateNotificationFlags |= FLAG_UPDATE_NOTIFICATIONS_NEW_INCOMMING;
-        if (updates4me)
-            mUpdateNotificationFlags |= FLAG_UPDATE_NOTIFICATIONS_UPDATES_FOR_ME;
-
-        SafeRunnable updater = new SafeRunnable() {
-
-            @Override
-            protected void safeRun() throws Exception {
-                T.UI();
-
-                if ((mUpdateNotificationFlags & FLAG_UPDATE_NOTIFICATIONS) != FLAG_UPDATE_NOTIFICATIONS)
-                    return;
-                final boolean alertNow = (mUpdateNotificationFlags & FLAG_UPDATE_NOTIFICATIONS_NEW_INCOMMING) == FLAG_UPDATE_NOTIFICATIONS_NEW_INCOMMING;
-                final boolean updates4me = (mUpdateNotificationFlags & FLAG_UPDATE_NOTIFICATIONS_UPDATES_FOR_ME) == FLAG_UPDATE_NOTIFICATIONS_UPDATES_FOR_ME;
-
-                mUpdateNotificationFlags = 0;
-
-                final int lastInboxOpenedTimestamp = (int) mStore.getLastInboxOpenedTimestamp();
-                final List<String> unProcessedMessageKeys = mStore
-                    .getUnprocessedMessageKeysAfterTimestamp(lastInboxOpenedTimestamp);
-                final List<String> dirtyMessageKeys = mStore.getDirtyMessageKeys(lastInboxOpenedTimestamp);
-
-                final int unProcessedMessageCount = unProcessedMessageKeys.size();
-                final int dirtyCount = dirtyMessageKeys.size();
-                final int totalCount = unProcessedMessageCount + dirtyCount;
-
-                if (totalCount != 0) {
-                    final String title = mMainService.getString(R.string.app_name);
-                    Bundle b = new Bundle();
-                    String notificationText = null;
-
-                    if (unProcessedMessageCount != 0) {
-                        if (dirtyCount != 0) {
-                            b.putString(HomeActivity.INTENT_KEY_LAUNCHINFO, HomeActivity.INTENT_VALUE_SHOW_MESSAGES);
-                            notificationText = mMainService.getString(R.string.message_notification_n_new_n_updated,
-                                unProcessedMessageCount, dirtyCount);
-                        } else {
-                            b.putString(HomeActivity.INTENT_KEY_LAUNCHINFO, HomeActivity.INTENT_VALUE_SHOW_NEW_MESSAGES);
-                            if (unProcessedMessageCount != 1) {
-                                notificationText = mMainService.getString(R.string.message_notification_n_new_messages,
-                                    unProcessedMessageCount);
-                            } else {
-                                MessageTO msg = mStore.getFullMessageByUnprocessedMessageIndex(0);
-                                if (msg != null) {
-                                    b.putString(HomeActivity.INTENT_KEY_MESSAGE, msg.key);
-                                    notificationText = mMainService.getString(
-                                        R.string.message_notification_one_message_from,
-                                        mMainService.getPlugin(FriendsPlugin.class).getName(msg.sender));
-                                }
-                            }
-                        }
-                    } else {
-                        b.putString(HomeActivity.INTENT_KEY_LAUNCHINFO, HomeActivity.INTENT_VALUE_SHOW_UPDATED_MESSAGES);
-                        if (dirtyCount != 1) {
-                            notificationText = mMainService.getString(R.string.n_updated_messages, dirtyCount);
-                        } else {
-                            b.putString(HomeActivity.INTENT_KEY_MESSAGE, dirtyMessageKeys.get(0));
-                            notificationText = mMainService.getString(R.string.one_updated_message);
-                        }
-                    }
-
-                    if (notificationText == null) {
-                        // Message has been answered while this runnable was running
-                        UIUtils.cancelNotification(mMainService, R.integer.magic_message_newmessage);
-
-                    } else {
-                        UIUtils.doNotification(mMainService, title, notificationText,
-                            R.integer.magic_message_newmessage, MainActivity.ACTION_NOTIFICATION_MESSAGE_UPDATES,
-                            false, false, true, true, R.drawable.notification_icon, totalCount, b, null,
-                            mMainService.currentTimeMillis());
-                    }
-
-                } else {
-                    UIUtils.cancelNotification(mMainService, R.integer.magic_message_newmessage);
-                }
-
-                mAlertMgr.analyze(alertNow, updates4me);
-            }
-        };
-        if (scheduleImmediatly) {
-            mMainService.postOnUIHandler(updater);
-        } else {
-            mMainService.postOnUIHandlerWhenBacklogIsReady(updater);
-        }
-
-    }
-
-    protected void setMessageFailed(final String messageKey) {
-        T.BIZZ();
-        mStore.setMessageSummaryFailed(messageKey);
-        final Intent intent = new Intent(MESSAGE_FAILURE);
-        mMainService.sendBroadcast(intent);
-    }
-
     public void formSubmitted(final Message message, final String button) {
         mStore.updateForm(message);
         mStore.setMessageProcessed(message.key, button, null, new SafeRunnable() {
@@ -1268,7 +1393,6 @@ public class MessagingPlugin implements MobicagePlugin {
                 intent.putExtra("message", message.key);
                 mMainService.sendBroadcast(intent);
                 updateBadge();
-                updateMessagesNotification(false, false, true);
             }
         });
     }
@@ -1660,8 +1784,9 @@ public class MessagingPlugin implements MobicagePlugin {
                                 long timestamp = mMainService.currentTimeMillis();
 
                                 UIUtils.doNotification(mMainService, title, n_message, notificationId,
-                                    MainActivity.ACTION_NOTIFICATION_PHOTO_UPLOAD_DONE, withSound, withVibration,
-                                    withLight, autoCancel, icon, notificationNumber, b, tickerText, timestamp);
+                                        MainActivity.ACTION_NOTIFICATION_PHOTO_UPLOAD_DONE, withSound, withVibration,
+                                        withLight, autoCancel, icon, notificationNumber, b, tickerText, timestamp,
+                                        Notification.PRIORITY_LOW, null, null, null, NotificationCompat.CATEGORY_EVENT);
                             }
                         });
                     }
@@ -1685,22 +1810,21 @@ public class MessagingPlugin implements MobicagePlugin {
 
     private void showTransferPendingNotification(String notificationMessage) {
         T.dontCare();
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(mMainService)
-            .setContentTitle(mMainService.getString(R.string.app_name)).setContentText(notificationMessage)
-            .setSmallIcon(R.drawable.ic_menu_upload)
-            .setStyle(new NotificationCompat.BigTextStyle().bigText(notificationMessage)).setAutoCancel(false);
+        NotificationCompat.Builder mBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(mMainService)
+                .setContentTitle(mMainService.getString(R.string.app_name))
+                .setContentText(notificationMessage)
+                .setSmallIcon(R.drawable.notification_icon)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(notificationMessage))
+                .setAutoCancel(false);
 
-        final NotificationManager nm = (NotificationManager) mMainService
-            .getSystemService(Context.NOTIFICATION_SERVICE);
+        final NotificationManager nm = (NotificationManager) mMainService.getSystemService(Context.NOTIFICATION_SERVICE);
         Notification notification = mBuilder.build();
-        notification.flags |= Notification.FLAG_ONGOING_EVENT;
-        notification.flags &= ~Notification.FLAG_AUTO_CANCEL;
+        notification.flags |= NotificationCompat.FLAG_ONGOING_EVENT;
+        notification.flags &= ~NotificationCompat.FLAG_AUTO_CANCEL;
 
         Intent i = new Intent(MainActivity.ACTION_NOTIFICATION_OPEN_APP, null, mMainService, MainActivity.class);
         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        PendingIntent pi = PendingIntent.getActivity(mMainService, 1000, i, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        notification.contentIntent = pi;
+        notification.contentIntent = PendingIntent.getActivity(mMainService, 1000, i, PendingIntent.FLAG_UPDATE_CURRENT);
 
         nm.notify(R.integer.photo_upload_pending, notification);
     }
@@ -2011,5 +2135,33 @@ public class MessagingPlugin implements MobicagePlugin {
         intent.putExtra("key", "messages");
         intent.putExtra("count", getBadgeCount());
         mMainService.sendBroadcast(intent);
+    }
+
+    public String getMessageTextFromButtonsOrAttachments(Message message) {
+        String messageText = "";
+        if (message.buttons != null && message.buttons.length > 0) {
+            List<String> buttons = new ArrayList<>();
+            for (ButtonTO bt : message.buttons) {
+                buttons.add(bt.caption);
+            }
+            messageText = android.text.TextUtils.join(" / ", buttons);
+        } else if (message.attachments != null && message.attachments.length > 0) {
+            Set<String> attachments = new HashSet<>();
+            for (AttachmentTO at : message.attachments) {
+                if (!TextUtils.isEmptyOrWhitespace(at.name)) {
+                    attachments.add(at.name);
+                } else if (at.content_type.toLowerCase(Locale.US).startsWith("video/")) {
+                    attachments.add(mMainService.getString(R.string.attachment_name_video));
+                } else if (at.content_type.toLowerCase(Locale.US).startsWith("image/")) {
+                    attachments.add(mMainService.getString(R.string.attachment_name_image));
+                } else {
+                    L.d("Not added attachment with type '" + at.content_type + "' because no translation found");
+                }
+            }
+            if (attachments.size() > 0) {
+                messageText = android.text.TextUtils.join(", ", attachments);
+            }
+        }
+        return messageText;
     }
 }

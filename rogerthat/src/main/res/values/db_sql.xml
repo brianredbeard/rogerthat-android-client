@@ -367,7 +367,30 @@ ORDER BY ms.acked_timestamp DESC
     <string name="sql_thread_avatar_get">SELECT avatar FROM thread_avatar WHERE avatar_hash = ?</string>
     <string name="sql_thread_avatar_count">SELECT COUNT(*) FROM thread_avatar WHERE avatar_hash = ?</string>
     <string name="sql_message_message_get">SELECT message FROM message WHERE \"key\" = ?</string>
-
+    <string name="sql_get_unread_count_in_thread">SELECT COUNT(*) as unread_count FROM message WHERE parent_key = ? AND dirty = 1 AND existence = 1</string>
+    <string name="sql_get_total_unread_count">
+    SELECT count(*)
+    FROM message
+    WHERE
+        show_in_message_list = 1
+        AND (dirty = 1 OR thread_dirty = 1)
+        AND last_updated_on > ?
+        AND existence = 1
+    </string>
+    <string name="sql_get_last_unread_messages_in_thread">
+    SELECT
+      message.key,
+      message.message,
+      friend.name AS friendName,
+      friend.email AS friendEmail
+    FROM message
+      LEFT OUTER JOIN friend ON friend.email = message.sender
+    WHERE
+      parent_key = ?
+      AND (dirty = 1 or thread_dirty = 1)
+    ORDER BY timestamp DESC
+    LIMIT 5
+    </string>
     <!-- message flows -->
     <string name="sql_mf_run_save">INSERT OR REPLACE INTO message_flow_run (parent_message_key, state, static_flow_hash) VALUES (?, ?, ?)</string>
     <string name="sql_mf_run_get">SELECT state, static_flow_hash FROM message_flow_run WHERE parent_message_key = ?</string>

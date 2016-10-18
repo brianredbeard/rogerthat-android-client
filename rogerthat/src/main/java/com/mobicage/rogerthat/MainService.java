@@ -19,6 +19,7 @@
 package com.mobicage.rogerthat;
 
 import android.app.AlarmManager;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -40,6 +41,7 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.NotificationCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
@@ -739,8 +741,6 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
 
         teardownConfiguration();
 
-        UIUtils.cancelNotification(MainService.this, R.integer.magic_message_newmessage);
-
         if (mMustWipePersistenceInOnDestroy) {
             L.d("Wiping database and SharedPreferences in MainService.onDestroy");
             mDatabaseManager.wipeAndClose();
@@ -1210,7 +1210,8 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         long timestamp = currentTimeMillis();
 
         UIUtils.doNotification(MainService.this, title, message, notificationId, action, withSound, withVibration,
-            withLight, autoCancel, icon, notificationNumber, extra, extraData, tickerText, timestamp);
+                withLight, autoCancel, icon, notificationNumber, extra, extraData, tickerText, timestamp,
+                Notification.PRIORITY_DEFAULT, null, null, null, NotificationCompat.CATEGORY_PROGRESS);
     }
 
     private void hideLogForwardNotification() {

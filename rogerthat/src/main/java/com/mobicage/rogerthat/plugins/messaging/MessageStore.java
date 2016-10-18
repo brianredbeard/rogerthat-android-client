@@ -133,6 +133,9 @@ public class MessageStore implements Closeable {
 
     private final SQLiteStatement mGetMessageMessage;
 
+    private final SQLiteStatement mGetUnreadMessageCountInThread;
+    private final SQLiteStatement mGetTotalDirtyMessagecount;
+
     public MessageStore(final DatabaseManager databaseManager, final MainService mainService) {
         T.UI();
         mDatabaseManager = databaseManager;
@@ -213,6 +216,8 @@ public class MessageStore implements Closeable {
         mThreadAvatarCountByHash = mDb.compileStatement(mMainService.getString(R.string.sql_thread_avatar_count));
         mStoreThreadAvatar = mDb.compileStatement(mMainService.getString(R.string.sql_thread_avatar_insert));
         mGetMessageMessage = mDb.compileStatement(mMainService.getString(R.string.sql_message_message_get));
+        mGetUnreadMessageCountInThread = mDb.compileStatement(mMainService.getString(R.string.sql_get_unread_count_in_thread));
+        mGetTotalDirtyMessagecount = mDb.compileStatement(mMainService.getString(R.string.sql_get_total_unread_count));
     }
 
     public CursorSet getMessagesCursor(String memberFilter) {
@@ -899,7 +904,7 @@ public class MessageStore implements Closeable {
     }
 
     public long getLastInboxOpenedTimestamp() {
-        T.UI();
+        T.dontCare();
         return mGetLastInboxOpenTime.simpleQueryForLong();
     }
 
@@ -1055,32 +1060,6 @@ public class MessageStore implements Closeable {
             @Override
             protected void safeRun() throws Exception {
                 setMessageProcessedBizz(message, buttonId, customReply, updateDoneHandler);
-            }
-        });
-    }
-
-    public void replaceTmpKeyAndTimestamp(final String tmpKey, final String key, final long timestamp) {
-        T.BIZZ();
-        TransactionHelper.runInTransaction(mDb, "replaceTmpKeyAndTimestamp", new TransactionWithoutResult() {
-
-            @Override
-            protected void run() {
-                mUpdateMessageKeyAndTimestampBIZZ.bindString(1, key);
-                mUpdateMessageKeyAndTimestampBIZZ.bindLong(2, timestamp);
-                mUpdateMessageKeyAndTimestampBIZZ.bindString(3, tmpKey);
-                mUpdateMessageKeyAndTimestampBIZZ.execute();
-                mUpdateMessageLastThreadMessageBIZZ.bindString(1, key);
-                mUpdateMessageLastThreadMessageBIZZ.bindString(2, tmpKey);
-                mUpdateMessageLastThreadMessageBIZZ.execute();
-                mUpdateMessageButtonKeyBIZZ.bindString(1, key);
-                mUpdateMessageButtonKeyBIZZ.bindString(2, tmpKey);
-                mUpdateMessageButtonKeyBIZZ.execute();
-                mUpdateMessageMemberKeyBIZZ.bindString(1, key);
-                mUpdateMessageMemberKeyBIZZ.bindString(2, tmpKey);
-                mUpdateMessageMemberKeyBIZZ.execute();
-                mUpdateMessageAttachmentKeyBIZZ.bindString(1, key);
-                mUpdateMessageAttachmentKeyBIZZ.bindString(2, tmpKey);
-                mUpdateMessageAttachmentKeyBIZZ.execute();
             }
         });
     }
@@ -1650,6 +1629,40 @@ public class MessageStore implements Closeable {
 
     public long getDirtyThreadsCount() {
         return mGetDirtyThreadsCount.simpleQueryForLong();
+    }
+
+    public ArrayList<UnreadMessage> getLastUnreadMessagesInThread(String parentKey) {
+        ArrayList<UnreadMessage> messages = new ArrayList<>();
+
+        final Cursor cursor = mDb.rawQuery(mMainService.getString(R.string.sql_get_last_unread_messages_in_thread),
+                new String[]{parentKey});
+        try {
+            if (!cursor.moveToFirst()) {
+                return new ArrayList<>();
+            }
+            do {
+                messages.add(readUnreadMessage(cursor));
+            } while (cursor.moveToNext());
+        } finally {
+            cursor.close();
+        }
+        return messages;
+    }
+
+    public UnreadMessage readUnreadMessage(Cursor cursor) {
+        return new UnreadMessage(cursor.getString(0), cursor.getString(1), cursor.getString(2), cursor.getString(3));
+    }
+
+    public int getUnreadMessageCountInThread(String parentKey) {
+        mGetUnreadMessageCountInThread.bindString(1, parentKey);
+        return (int) mGetUnreadMessageCountInThread.simpleQueryForLong();
+    }
+
+
+    public int getTotalUnreadCount(long timestamp) {
+        T.BIZZ();
+        mGetTotalDirtyMessagecount.bindLong(1, timestamp);
+        return (int) mGetTotalDirtyMessagecount.simpleQueryForLong();
     }
 
 }

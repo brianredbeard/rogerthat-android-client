@@ -717,7 +717,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                 friendNotFoundRunnable = null;
             }
             avatar.setImageBitmap(mFriendsPlugin
-                    .getAvatarBitmap(memberStatus.member, !isChat, friendNotFoundRunnable));
+                    .getAvatarBitmap(memberStatus.member, !isChat, friendNotFoundRunnable, -1));
             avatar.setBackgroundResource(R.drawable.avatar_background_black);
             avatar.setPadding(_1_DP_IN_PX, _1_DP_IN_PX, _1_DP_IN_PX, _1_DP_IN_PX);
             configureAvatarOnClickListener(memberStatus.member, avatar, isChat);
@@ -757,7 +757,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                 friendNotFoundRunnable = null;
             }
             senderAvatar
-                .setImageBitmap(mFriendsPlugin.getAvatarBitmap(message.sender, !isChat, friendNotFoundRunnable));
+                    .setImageBitmap(mFriendsPlugin.getAvatarBitmap(message.sender, !isChat, friendNotFoundRunnable, -1));
 
             spinner.setVisibility(View.GONE); // todo ruben
 
@@ -980,6 +980,10 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             }
         }
         return isMember;
+    }
+
+    public String getParentMessageKey() {
+        return mParentMessageKey;
     }
 
 }

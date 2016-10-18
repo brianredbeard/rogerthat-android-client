@@ -30,7 +30,6 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 
-import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.soundcloud.android.crop.CropUtil;
 
 // Copied from http://stackoverflow.com/questions/2459916/how-to-make-an-imageview-to-have-rounded-corners
@@ -75,12 +74,6 @@ public class ImageHelper {
     }
 
     public static Bitmap getRoundedCornerBitmap(final Bitmap bitmap, final int roundingPixels) {
-
-        if (SystemUtils.getAndroidVersion() <= 3) {
-            // burden on performance
-            return bitmap;
-        }
-
         if (bitmap == null)
             return null; // saw this once when phone complains about "not enough storage"
 

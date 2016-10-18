@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:minHeight="200dp"
+                android:orientation="horizontal">
+
+    <LinearLayout
+        android:id="@+id/quick_reply_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/mc_primary_color"
+        android:padding="15dp">
+
+        <ImageView
+            android:id="@+id/quick_reply_avatar"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            tools:src="@drawable/unknown_avatar"/>
+
+        <TextView
+            android:id="@+id/quick_reply_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:maxLines="1"
+            android:paddingLeft="15dp"
+            android:paddingStart="15dp"
+            android:textColor="@color/mc_white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            tools:text="Message sender should go here"/>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/quick_reply_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/quick_reply_header"
+        android:maxLines="5"
+        android:padding="15dp"
+        android:textSize="18sp"
+        tools:text="Here goes a message that the user gets while he is using another app and he can reply to immediately using this neat popup"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/quick_reply_message"
+        android:gravity="bottom"
+        android:orientation="horizontal"
+        android:padding="15dp">
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/update_profile_name_container"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/reply_text"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:hint="@string/message"
+                android:inputType="text"
+                tools:text="Reply msg goes here and it is too long to fit"/>
+        </android.support.design.widget.TextInputLayout>
+
+        <ImageButton
+            android:id="@+id/reply_button"
+            style="@style/ButtonBackground"
+            android:layout_width="50dp"
+            android:layout_height="40dp"
+            android:imeOptions="actionDone"
+            android:onClick="sendMessage"
+            app:ico_color="@color/mc_white"
+            app:ico_icon="@string/faw_paper_plane"
+            app:ico_padding="1dp"
+            tools:ignore="MissingPrefix"/>
+    </LinearLayout>
+
+</RelativeLayout>

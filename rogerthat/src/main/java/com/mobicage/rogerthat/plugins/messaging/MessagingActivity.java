@@ -65,18 +65,13 @@ import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.time.TimeUtils;
 import com.mobicage.rpc.config.AppConstants;
-import com.mobicage.to.messaging.AttachmentTO;
-import com.mobicage.to.messaging.ButtonTO;
 import com.mobicage.to.messaging.MemberStatusTO;
 
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -215,15 +210,8 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
             } else if (HomeActivity.INTENT_VALUE_SHOW_MESSAGES.equals(value)) {
                 ActivityUtils.goToMessagingActivity(this, false, null);
 
-            } else if (HomeActivity.INTENT_VALUE_SHOW_NEW_MESSAGES.equals(value)) {
-                if (intent.hasExtra(HomeActivity.INTENT_KEY_MESSAGE)) {
-                    String messageKey = intent.getStringExtra(HomeActivity.INTENT_KEY_MESSAGE);
-                    goToMessageDetail(messageKey);
-                } else {
-                    ActivityUtils.goToMessagingActivity(this, false, null);
-                }
-
-            } else if (HomeActivity.INTENT_VALUE_SHOW_UPDATED_MESSAGES.equals(value)) {
+            } else if (HomeActivity.INTENT_VALUE_SHOW_NEW_MESSAGES.equals(value)
+                    || HomeActivity.INTENT_VALUE_SHOW_UPDATED_MESSAGES.equals(value)) {
                 if (intent.hasExtra(HomeActivity.INTENT_KEY_MESSAGE)) {
                     String messageKey = intent.getStringExtra(HomeActivity.INTENT_KEY_MESSAGE);
                     goToMessageDetail(messageKey);
@@ -281,7 +269,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
         Intent intent = getIntent();
         if (intent != null) {
             final String intentAction = intent.getAction();
-            if (MainActivity.ACTION_NOTIFICATION_MESSAGE_UPDATES.equals(intentAction)) {
+            if (MainActivity.ACTION_NOTIFICATION_MESSAGE_RECEIVED.equals(intentAction)) {
                 processMessageUpdatesIntent(intent);
             } else {
                 Bundle extras = intent.getExtras();
@@ -632,29 +620,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
                 messageText = message.message;
             }
             if (TextUtils.isEmptyOrWhitespace(messageText)) {
-                if (message.buttons != null && message.buttons.length > 0) {
-                    List<String> buttons = new ArrayList<String>();
-                    for (ButtonTO bt : message.buttons) {
-                        buttons.add(bt.caption);
-                    }
-                    messageText = android.text.TextUtils.join(" / ", buttons);
-                } else if (message.attachments != null && message.attachments.length > 0) {
-                    Set<String> attachments = new HashSet<String>();
-                    for (AttachmentTO at : message.attachments) {
-                        if (!TextUtils.isEmptyOrWhitespace(at.name)) {
-                            attachments.add(at.name);
-                        } else if (at.content_type.toLowerCase(Locale.US).startsWith("video/")) {
-                            attachments.add(getString(R.string.attachment_name_video));
-                        } else if (at.content_type.toLowerCase(Locale.US).startsWith("image/")) {
-                            attachments.add(getString(R.string.attachment_name_image));
-                        } else {
-                            L.d("Not added attachment with type '" + at.content_type + "' because no translation found");
-                        }
-                    }
-                    if (attachments.size() > 0) {
-                        messageText = android.text.TextUtils.join(", ", attachments);
-                    }
-                }
+                messageText = mMessagingPlugin.getMessageTextFromButtonsOrAttachments(message);
             }
 
             int tmpThreadTextColor = Integer.MAX_VALUE;
@@ -766,8 +732,6 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
         }
 
         private boolean setStatusIcon(Context context, Message message, ImageView statusView, boolean dynamicChat) {
-
-            Resources resources = getResources();
             if (dynamicChat) {
                 if (message.priority == Message.PRIORITY_URGENT_WITH_ALARM) {
                     int primaryColor = ContextCompat.getColor(mService, R.color.mc_gray_11);

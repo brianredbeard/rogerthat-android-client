@@ -174,9 +174,9 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
 
         mConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 
-        View progressDialg = getLayoutInflater().inflate(R.layout.progressdialog, null);
-        mTransmitProgressDialog = new AlertDialog.Builder(this).setTitle(R.string.transmitting).setView(progressDialg).create();
-        mTransmitProgressBar = (ProgressBar) progressDialg.findViewById(R.id.progress_bar);
+        View progressDialog = getLayoutInflater().inflate(R.layout.progressdialog, null);
+        mTransmitProgressDialog = new AlertDialog.Builder(this).setTitle(R.string.transmitting).setView(progressDialog).create();
+        mTransmitProgressBar = (ProgressBar) progressDialog.findViewById(R.id.progress_bar);
         mTransmitProgressDialog.setCancelable(true);
         mTransmitProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
             @Override
@@ -576,7 +576,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
             i.putExtra(ServiceActionsOfflineActivity.ACTION, ni.action);
             i.putExtra(ServiceActionsOfflineActivity.TITLE, ni.labelTextId);
             i.putExtra("show_drawer_icon", true);
-            i.addFlags(MainActivity.FLAG_CLEAR_STACK_SINGLE_TOP);
+            i.addFlags(MainActivity.FLAG_CLEAR_STACK);
             ServiceBoundActivity.this.startActivity(i);
 
         } else if ("click".equals(ni.actionType)) {

@@ -80,10 +80,15 @@
 
     <style name="DialogTheme" parent="Theme.AppCompat.Light.Dialog">
         <item name="android:textColorPrimary">@color/mc_default_text</item>
-        <item name="android:background">@color/mc_white</item>
+        <item name="android:colorBackground">@color/mc_white</item>
         <item name="android:textColor">@color/mc_default_text</item>
         <item name="colorAccent">@color/mc_secondary_color</item>
         <item name="colorPrimary">@color/mc_primary_color</item>
         <item name="colorPrimaryDark">@color/mc_primary_color</item>
+    </style>
+
+    <style name="NoTitleDialogTheme" parent="DialogTheme">
+        <item name="windowNoTitle">true</item>
+        <item name="android:colorBackground">?attr/colorBackgroundFloating</item>
     </style>
 </resources>

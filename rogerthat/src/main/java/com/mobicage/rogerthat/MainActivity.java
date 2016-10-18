@@ -81,7 +81,7 @@ public class MainActivity extends ServiceBoundActivity {
     public static final String ACTION_WIDGET_COMPOSE = "ROGERTHAT_ACTION_WIDGET_COMPOSE";
 
     public static final String ACTION_NOTIFICATION_ENTER_PIN = "ROGERTHAT_ACTION_NOTIFICATION_ENTER_PIN";
-    public static final String ACTION_NOTIFICATION_MESSAGE_UPDATES = "ROGERTHAT_ACTION_NOTIFICATION_MESSAGE_UPDATES";
+    public static final String ACTION_NOTIFICATION_MESSAGE_RECEIVED = "ROGERTHAT_ACTION_NOTIFICATION_MESSAGE_UPDATES";
     public static final String ACTION_NOTIFICATION_ADDRESSBOOK_SCAN = "ROGERTHAT_ACTION_NOTIFICATION_SCAN_AB_RESULT ";
     public static final String ACTION_NOTIFICATION_FACEBOOK_SCAN = "ROGERTHAT_ACTION_NOTIFICATION_SCAN_FB_RESULT ";
     public static final String ACTION_NOTIFICATION_PHOTO_UPLOAD_DONE = "ROGERTHAT_ACTION_NOTIFICATION_PHOTO_UPLOAD_DONE";
@@ -187,7 +187,7 @@ public class MainActivity extends ServiceBoundActivity {
         } else if (ACTION_NOTIFICATION_ENTER_PIN.equals(intentAction)) {
             launchRegistrationActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP);
 
-        } else if (ACTION_NOTIFICATION_MESSAGE_UPDATES.equals(intentAction)) {
+        } else if (ACTION_NOTIFICATION_MESSAGE_RECEIVED.equals(intentAction)) {
             processMessageUpdatesIntent(intent, hasRegistered);
 
         } else if (ACTION_NOTIFICATION_NEW_NEWS.equals(intentAction)) {
@@ -342,7 +342,7 @@ public class MainActivity extends ServiceBoundActivity {
                     i  = new Intent(this, HomeActivity.class);
                 }
                 i.setFlags(FLAG_NEW_STACK);
-                i.setAction(ACTION_NOTIFICATION_MESSAGE_UPDATES);
+                i.setAction(ACTION_NOTIFICATION_MESSAGE_RECEIVED);
                 i.putExtras(intent.getExtras());
                 startActivity(i);
                 finish();

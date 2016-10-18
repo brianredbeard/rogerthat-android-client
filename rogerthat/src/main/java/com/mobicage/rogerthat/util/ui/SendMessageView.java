@@ -34,7 +34,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.ResultReceiver;
 import android.provider.MediaStore;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
@@ -53,11 +52,7 @@ import android.widget.RadioButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.commonsware.cwac.cam2.AbstractCameraActivity;
-import com.commonsware.cwac.cam2.CameraActivity;
 import com.commonsware.cwac.cam2.Facing;
-import com.commonsware.cwac.cam2.FlashMode;
-import com.commonsware.cwac.cam2.VideoRecorderActivity;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.CannedButton;
 import com.mobicage.rogerthat.CannedButtons;
@@ -85,7 +80,6 @@ import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.to.messaging.AttachmentTO;
 import com.mobicage.to.messaging.ButtonTO;
-import com.mobicage.to.messaging.MemberStatusTO;
 import com.mobicage.to.messaging.MessageTO;
 import com.mobicage.to.messaging.SendMessageRequestTO;
 import com.mobicage.to.messaging.SendMessageResponseTO;
@@ -163,8 +157,6 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
 
     private long mPriority = Message.PRIORITY_NORMAL;
     private boolean mIsSticky = false;
-
-    private int mRecipientStyle = TO;
 
     public SendMessageView(Context context) {
         super(context);
@@ -257,7 +249,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
 
 
                         Intent intent = new Intent(mActivity, MessagingActivity.class);
-                        intent.setAction(MainActivity.ACTION_NOTIFICATION_MESSAGE_UPDATES);
+                        intent.setAction(MainActivity.ACTION_NOTIFICATION_MESSAGE_RECEIVED);
                         intent.putExtras(b);
                         intent.setFlags(MainActivity.FLAG_NEW_STACK);
                         mActivity.startActivity(intent);
@@ -1067,28 +1059,13 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
 
         com.mobicage.rogerthat.util.system.T.UI();
         final SendMessageRequestTO request = new SendMessageRequestTO();
-        request.flags = MessagingPlugin.FLAG_ALLOW_DISMISS | MessagingPlugin.FLAG_ALLOW_CUSTOM_REPLY
-                | MessagingPlugin.FLAG_ALLOW_REPLY;
-
-        if (mParentFlags != 0) {
-            // The following flags need to be copied from the parent message.
-            request.flags |= (mParentFlags & MessagingPlugin.FLAG_DYNAMIC_CHAT)
-                    | (mParentFlags & MessagingPlugin.FLAG_NOT_REMOVABLE)
-                    | (mParentFlags & MessagingPlugin.FLAG_ALLOW_CHAT_BUTTONS)
-                    | (mParentFlags & MessagingPlugin.FLAG_ALLOW_CHAT_PICTURE)
-                    | (mParentFlags & MessagingPlugin.FLAG_ALLOW_CHAT_VIDEO)
-                    | (mParentFlags & MessagingPlugin.FLAG_ALLOW_CHAT_PRIORITY)
-                    | (mParentFlags & MessagingPlugin.FLAG_ALLOW_CHAT_STICKY);
-        }
+        request.flags = MessagingPlugin.getNewMessageFlags(mParentFlags);
 
         if (SystemUtils.isFlagEnabled(request.flags, MessagingPlugin.FLAG_DYNAMIC_CHAT)) {
             if (mIsSticky) {
                 request.flags |= MessagingPlugin.FLAG_CHAT_STICKY;
             }
         }
-
-        if (mRecipientStyle == TO)
-            request.flags |= MessagingPlugin.FLAG_ALLOW_REPLY_ALL | MessagingPlugin.FLAG_SHARED_MEMBERS;
 
         request.timeout = 0;
         request.key = mKey;
@@ -1124,6 +1101,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
             request.sender_reply = String.valueOf(selectedButton);
         }
 
+        final String selectedButtonId = mSelectedButton == NO_BUTTON_SELECTED ? null : String.valueOf(mSelectedButton);
         if (mHasImageSelected || mHasVideoSelected) {
             AttachmentTO att = new AttachmentTO();
             att.download_url = mKey;
@@ -1169,7 +1147,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
             mMainService.postAtFrontOfBIZZHandler(new SafeRunnable() {
                 @Override
                 protected void safeRun() throws Exception {
-                    storeMessage(me, request);
+                    mMessagingPlugin.storeMessage(me, request, selectedButtonId);
                     mMessagingPlugin.getStore().insertAttachments(request.attachments, request.key);
                     final Intent intent = new Intent(MessagingPlugin.MESSAGE_PROCESSED_INTENT);
                     intent.putExtra("message", request.key);
@@ -1187,7 +1165,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
             mMainService.postAtFrontOfBIZZHandler(new SafeRunnable() {
                 @Override
                 protected void safeRun() throws Exception {
-                    storeMessage(me, request);
+                    mMessagingPlugin.storeMessage(me, request, selectedButtonId);
                 }
             });
         }
@@ -1212,58 +1190,6 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
         } else {
             mainService.postAtFrontOfUIHandler(sendMessageRunnable);
         }
-    }
-
-    public MessageTO storeMessage(final String me, final SendMessageRequestTO request) {
-        com.mobicage.rogerthat.util.system.T.BIZZ();
-        final MessageTO message = new MessageTO();
-        message.key = mKey;
-        message.sender = me;
-        message.flags = request.flags;
-        message.timeout = request.timeout;
-        long currentTimeMillis = mMainService.currentTimeMillis();
-        message.timestamp = currentTimeMillis / 1000;
-        String parent_key = request.parent_key;
-        message.parent_key = parent_key;
-        message.message = request.message;
-        message.buttons = request.buttons;
-        String[] members;
-        if (parent_key == null)
-            members = request.members;
-        else {
-            MessageStore store = mMessagingPlugin.getStore();
-            Set<String> memberList = store.getMessageMembers(parent_key);
-            members = memberList.toArray(new String[memberList.size()]);
-        }
-        message.members = new MemberStatusTO[members.length];
-        for (int i = 0; i < members.length; i++) {
-            String member = members[i];
-            MemberStatusTO ms = new MemberStatusTO();
-            if (me.equals(member)) {
-                ms.status = MessagingPlugin.STATUS_ACKED | MessagingPlugin.STATUS_RECEIVED;
-                ms.received_timestamp = currentTimeMillis / 1000;
-                ms.acked_timestamp = currentTimeMillis / 1000;
-                final long button = mSelectedButton;
-                ms.button_id = button == -1 ? null : String.valueOf(button);
-            } else {
-                ms.status = 0;
-                ms.received_timestamp = 0;
-                ms.acked_timestamp = 0;
-                ms.button_id = null;
-            }
-            ms.custom_reply = null;
-            ms.member = member;
-            message.members[i] = ms;
-        }
-        message.branding = null;
-        message.timestamp = currentTimeMillis / 1000;
-        message.priority = request.priority;
-
-        message.default_priority = Message.PRIORITY_NORMAL;
-        message.default_sticky = false;
-
-        mMessagingPlugin.newMessage(message, true, true);
-        return message;
     }
 
     private void dismissMessageOnReply(final String repliedToKey) {

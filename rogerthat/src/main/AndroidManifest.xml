@@ -509,6 +509,12 @@
             android:icon="@drawable/rogerthat_camera"
             android:label="@string/camera" />
 
+        <activity
+            android:name="com.mobicage.rogerthat.QuickReplyActivity"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
+            android:taskAffinity=""
+            android:theme="@style/NoTitleDialogTheme"/>
         <!--todo: Needs to be restyled-->
         <!--<receiver-->
             <!--android:name="com.mobicage.rogerthat.widget.RogerthatWidgetProvider"-->

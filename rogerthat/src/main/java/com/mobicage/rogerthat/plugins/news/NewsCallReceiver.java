@@ -19,11 +19,14 @@
 package com.mobicage.rogerthat.plugins.news;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.v7.app.NotificationCompat;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
+import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
@@ -70,10 +73,16 @@ public class NewsCallReceiver implements com.mobicage.capi.news.IClientRpc {
         Bundle b = new Bundle();
         b.putLong("id", request.news_item.id);
 
-        UIUtils.doNotification(mMainService, mMainService.getString(R.string.app_name),
-                message, R.integer.news_item,
-                MainActivity.ACTION_NOTIFICATION_NEW_NEWS, false, false, true, true,
-                R.drawable.notification_icon, 0, b, null, System.currentTimeMillis());
+        String notificationTitle = request.news_item.sender.name;
+        String notificationText = message;
+        String longNotificationText = request.news_item.qr_code_caption != null ? request.news_item.qr_code_caption : request.news_item.message;
+        int notificationId = (int) request.news_item.id;
+        int count = 1;
+        Bitmap largeIcon = mMainService.getPlugin(FriendsPlugin.class).getAvatarBitmap(request.news_item.sender.email);
+        UIUtils.doNotification(mMainService, notificationTitle, notificationText, notificationId,
+                MainActivity.ACTION_NOTIFICATION_NEW_NEWS, false, false, true, true, R.drawable.notification_icon,
+                count, null, null, mMainService.currentTimeMillis(), NotificationCompat.PRIORITY_DEFAULT, null,
+                longNotificationText, largeIcon, NotificationCompat.CATEGORY_PROMO);
 
 
         return response;

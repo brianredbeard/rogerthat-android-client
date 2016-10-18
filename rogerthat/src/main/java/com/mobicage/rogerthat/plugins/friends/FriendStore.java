@@ -482,9 +482,11 @@ public class FriendStore implements Closeable {
     }
 
     public Bitmap getAvatarBitmap(String email) {
-        T.UI();
+        return getAvatarBitmap(email, -1);
+    }
 
-        final BitmapHolder bitmapHolder = mAvatarBitmapCacheUI.get(email);
+    public Bitmap getAvatarBitmap(String email, int size) {
+        final BitmapHolder bitmapHolder = mAvatarBitmapCacheUI.get(email + size);
         if (bitmapHolder != null)
             return bitmapHolder.bitmap; // Possibly returns null (e.g. for FRIEND_WITHOUT_AVATAR)
 
@@ -494,10 +496,13 @@ public class FriendStore implements Closeable {
             return null;
         }
 
-        final Bitmap bitmap = ImageHelper.getRoundedCornerAvatar(BitmapFactory.decodeByteArray(bitmapBytes, 0,
-            bitmapBytes.length));
+        Bitmap avatarBitmap = BitmapFactory.decodeByteArray(bitmapBytes, 0, bitmapBytes.length);
+        if (size != -1) {
+            avatarBitmap = Bitmap.createScaledBitmap(avatarBitmap, size, size, false);
+        }
+        final Bitmap bitmap = ImageHelper.getRoundedCornerAvatar(avatarBitmap);
 
-        mAvatarBitmapCacheUI.put(email, new BitmapHolder(bitmap));
+        mAvatarBitmapCacheUI.put(email + size, new BitmapHolder(bitmap));
 
         return bitmap;
     }

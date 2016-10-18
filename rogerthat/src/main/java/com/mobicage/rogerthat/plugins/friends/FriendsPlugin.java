@@ -870,15 +870,19 @@ public class FriendsPlugin implements MobicagePlugin {
     }
 
     public Bitmap getAvatarBitmap(String email) {
-        return getAvatarBitmap(email, false);
+        return getAvatarBitmap(email, false, -1);
     }
 
-    public Bitmap getAvatarBitmap(String email, boolean showAddFriendIfNotFriend) {
-        return getAvatarBitmap(email, showAddFriendIfNotFriend, null);
+    public Bitmap getAvatarBitmap(String email, int size) {
+        return getAvatarBitmap(email, false, size);
     }
 
-    public Bitmap getAvatarBitmap(String email, boolean showAddFriendIfNotFriend, SafeRunnable friendNotFoundRunnable) {
-        T.UI();
+    public Bitmap getAvatarBitmap(String email, boolean showAddFriendIfNotFriend, int size) {
+        return getAvatarBitmap(email, showAddFriendIfNotFriend, null, size);
+    }
+
+    public Bitmap getAvatarBitmap(String email, boolean showAddFriendIfNotFriend, SafeRunnable friendNotFoundRunnable, int size) {
+        T.dontCare();
         MyIdentity identity = mMainService.getIdentityStore().getIdentity();
         if (identity.getEmail().equals(email))
             return identity.getAvatarBitmap();
@@ -886,7 +890,7 @@ public class FriendsPlugin implements MobicagePlugin {
         if (SYSTEM_FRIEND.equals(email)) {
             return mSystemFriendAvatar;
         } else {
-            final Bitmap avatarBitmap = mStore.getAvatarBitmap(email);
+            final Bitmap avatarBitmap = mStore.getAvatarBitmap(email, size);
             if (avatarBitmap == null) {
                 if (friendNotFoundRunnable != null) {
                     friendNotFoundRunnable.run();
