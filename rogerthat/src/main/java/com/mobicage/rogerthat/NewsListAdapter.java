@@ -26,6 +26,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
+import android.support.customtabs.CustomTabsIntent;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
@@ -565,7 +566,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 @Override
                 public void safeOnClick(View v) {
                     if (Message.MC_CONFIRM_PREFIX.equals(buttonAction)) {
-                        return; // ignore
+                        // ignore
                     } else if (Message.MC_SMI_PREFIX.equals(buttonAction)) {
                         final int currentExistenceStatus = mActivity.friendsPlugin.getStore().getExistence(newsItem.sender.email);
                         if (Friend.ACTIVE == currentExistenceStatus) {
@@ -594,8 +595,15 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                         mPoker = new Poker<>(mActivity, newsItem.sender.email);
                         mPoker.poke(buttonUrl, null);
                     } else if (buttonAction != null) {
-                        final Intent intent = new Intent(buttonAction, Uri.parse(buttonUrl));
-                        mActivity.startActivity(intent);
+                        Uri uri = Uri.parse(buttonUrl);
+                        if (buttonUrl.startsWith("http")) {
+                            CustomTabsIntent.Builder customTabsBuilder = new CustomTabsIntent.Builder();
+                            CustomTabsIntent customTabsIntent = customTabsBuilder.build();
+                            customTabsIntent.launchUrl(mActivity, uri);
+                        } else {
+                            final Intent intent = new Intent(buttonAction, uri);
+                            mActivity.startActivity(intent);
+                        }
                     }
                     }
             });
