@@ -127,7 +127,6 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
         mAction = intent.getStringExtra(ACTION);
         if (mAction == null) {
             setTitle(R.string.discover_services_short);
-//            setNavigationBarBurgerVisible(false, true); // todo ruben
         } else {
             setActivityName("action|" + mAction);
             setTitle(intent.getIntExtra(TITLE, 0));
@@ -235,36 +234,57 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             @SuppressWarnings("unchecked")
             Map<String, Object> tag = (Map<String, Object>) view.getTag();
-            if (tag != null) {
-                int existence = (Integer) tag.get("existence");
-                FindServiceItemTO item = (FindServiceItemTO) tag.get("item");
-                if (mAction != null) {
-                    mLastFriendEmailClicked = item.email;
-                }
-                if (existence == Friend.ACTIVE) {
-                    if (mAction != null) {
-                        String hashedTag = Security.sha256Lower(mAction);
-                        ActivityUtils.goToActivityBehindTag(ServiceSearchActivity.this, item.email, hashedTag);
-                    } else {
-                        Intent intent = new Intent(ServiceSearchActivity.this, ServiceActionMenuActivity.class);
-                        intent.putExtra(ServiceActionMenuActivity.SERVICE_EMAIL, item.email);
-                        startActivity(intent);
-                    }
-
-                } else {
-                    Intent intent = new Intent(ServiceSearchActivity.this, ServiceDetailActivity.class);
-                    if (existence == Friend.DELETED || existence == Friend.DELETION_PENDING) {
-                        intent.putExtra(ServiceDetailActivity.EXISTENCE, Friend.NOT_FOUND);
-                    } else {
-                        intent.putExtra(ServiceDetailActivity.EXISTENCE, existence);
-                    }
-                    intent
-                            .putExtra(ServiceDetailActivity.FIND_SERVICE_RESULT, JSONValue.toJSONString(item.toJSONMap()));
-                    startActivity(intent);
-                }
-            }
+            connectWithService(tag, false);
         }
     };
+
+    private void connectWithService(Map<String, Object> tag, boolean autoConnect) {
+        if (tag != null) {
+            int existence = (Integer) tag.get("existence");
+            FindServiceItemTO item = (FindServiceItemTO) tag.get("item");
+            if (mAction != null) {
+                mLastFriendEmailClicked = item.email;
+            }
+            if (existence == Friend.ACTIVE) {
+                if (mAction != null) {
+                    String hashedTag = Security.sha256Lower(mAction);
+                    ActivityUtils.goToActivityBehindTag(ServiceSearchActivity.this, item.email, hashedTag);
+                } else {
+                    Intent intent = new Intent(ServiceSearchActivity.this, ServiceActionMenuActivity.class);
+                    intent.putExtra(ServiceActionMenuActivity.SERVICE_EMAIL, item.email);
+                    startActivity(intent);
+                }
+
+            } else if (autoConnect) {
+                if (existence == Friend.DELETED || existence == Friend.DELETION_PENDING) {
+                    existence = Friend.NOT_FOUND;
+                }
+                Friend service = new Friend();
+                service.avatar = Base64.decode(item.avatar);
+                service.avatarId = 0;
+                service.description = item.description;
+                service.descriptionBranding = TextUtils.isEmptyOrWhitespace(item.description_branding) ? null
+                        : item.description_branding;
+                service.email = item.email;
+                service.existenceStatus = existence;
+                service.name = item.name;
+                service.type = FriendsPlugin.FRIEND_TYPE_SERVICE;
+                service.qualifiedIdentifier = item.qualified_identifier;
+
+                mFriendsPlugin.inviteService(service);
+            } else {
+                Intent intent = new Intent(ServiceSearchActivity.this, ServiceDetailActivity.class);
+                if (existence == Friend.DELETED || existence == Friend.DELETION_PENDING) {
+                    intent.putExtra(ServiceDetailActivity.EXISTENCE, Friend.NOT_FOUND);
+                } else {
+                    intent.putExtra(ServiceDetailActivity.EXISTENCE, existence);
+                }
+                intent
+                        .putExtra(ServiceDetailActivity.FIND_SERVICE_RESULT, JSONValue.toJSONString(item.toJSONMap()));
+                startActivity(intent);
+            }
+        }
+    }
 
     final AbsListView.OnScrollListener mListViewScrollListener = new AbsListView.OnScrollListener() {
         @Override
@@ -513,7 +533,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
                 v = getLayoutInflater().inflate(R.layout.search_friend, null);
             }
 
-            Map<String, Object> tag = new HashMap<String, Object>();
+            final Map<String, Object> tag = new HashMap<String, Object>();
             tag.put("item", item);
             tag.put("existence", existence);
             v.setTag(tag);
@@ -534,7 +554,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
             // Set status icon
             v.findViewById(R.id.friend_existence_layout).setVisibility(View.VISIBLE);
             ProgressBar spinnerView = (ProgressBar) v.findViewById(R.id.friend_spinner);
-            ImageView statusView = (ImageView) v.findViewById(R.id.friend_existence);
+            final ImageView statusView = (ImageView) v.findViewById(R.id.friend_existence);
             int buttonColor = ContextCompat.getColor(ServiceSearchActivity.this, R.color.mc_default_text_inverse);
 
             switch (existence) {
@@ -552,6 +572,14 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
                     statusView.setVisibility(View.VISIBLE);
                     statusView.setImageDrawable(new IconicsDrawable(ServiceSearchActivity.this).icon(FontAwesome.Icon.faw_plus).color(buttonColor).sizeDp(18));
                     statusView.setBackgroundColor(ContextCompat.getColor(ServiceSearchActivity.this, R.color.mc_primary_color));
+
+                    statusView.setOnClickListener(new SafeViewOnClickListener() {
+                        @Override
+                        public void safeOnClick(View v) {
+                            statusView.setOnClickListener(null);
+                            ServiceSearchActivity.this.connectWithService(tag, true);
+                        }
+                    });
 
                     break;
                 case Friend.INVITE_PENDING:
