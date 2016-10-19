@@ -26,6 +26,8 @@ import java.nio.charset.Charset;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Provider;
+import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,6 +43,8 @@ import javax.net.ssl.X509TrustManager;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
@@ -57,7 +61,10 @@ import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 
 @ChannelHandler.Sharable
 public class NewsChannel extends SimpleChannelInboundHandler<String> {
@@ -90,6 +97,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
     public boolean hasValidConfiguration() {
         return this.mHost != null && this.mPort != -1;
     }
+
 
     private enum Command {
         AUTH("AUTH"),
@@ -175,7 +183,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
                             .trustManager(InsecureTrustManagerFactory.INSTANCE).build();
                 } else {
                     TrustManagerFactory factory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-                    factory.init(KeyStore.getInstance(KeyStore.getDefaultType()));  // Gets the default system keystore
+                    factory.init(KeyStore.getInstance("AndroidCAStore"));  // Gets the default system keystore
                     sslCtx = SslContextBuilder.forClient()
                             .trustManager(factory)
                             .build();
@@ -197,7 +205,15 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
                     public void initChannel(SocketChannel ch) throws Exception {
                         ChannelPipeline p = ch.pipeline();
                         if (sslCtx != null) {
-                            p.addLast(sslCtx.newHandler(ch.alloc(), mHost, mPort));
+                            SslHandler sslHandler = sslCtx.newHandler(ch.alloc(), mHost, mPort);
+                            Future<Channel> handshakeDone = sslHandler.handshakeFuture();
+                            handshakeDone.addListener(new GenericFutureListener<Future<? super Channel>>() {
+                                                          @Override
+                                                          public void operationComplete(Future<? super Channel> future) throws Exception {
+                                                              authenticate();
+                                                          }
+                                                      });
+                                    p.addLast(sslHandler);
                         }
                         // decoder
                         p.addLast(new DelimiterBasedFrameDecoder(102400, Delimiters.lineDelimiter()));
@@ -256,7 +272,8 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         mIsConnected = true;
         mIsRetryingToConnect = false;
         mAuthenticated = false;
-        authenticate();
+        if (!mIsSSL)
+            authenticate();
     }
 
     public void disconnect() {
@@ -452,8 +469,8 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
 
     private void authenticate() {
         Credentials credentials = mService.getCredentials();
-        String username = Base64.encodeBytes(credentials.getUsername().getBytes(), Base64.DONT_BREAK_LINES);
-        String password = Base64.encodeBytes(credentials.getPassword().getBytes(), Base64.DONT_BREAK_LINES);
+        String username = credentials.getUsername();
+        String password = Base64.encodeBytes(credentials.getPassword().getBytes(Charset.forName("utf-8")), Base64.DONT_BREAK_LINES);
         sendLine(String.format("AUTH: %s %s", username, password));
     }
 
