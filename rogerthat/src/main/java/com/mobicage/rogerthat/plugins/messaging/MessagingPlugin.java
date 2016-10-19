@@ -1114,6 +1114,7 @@ public class MessagingPlugin implements MobicagePlugin {
         Intent intent = new Intent(MESSAGE_DIRTY_CLEANED_INTENT);
         intent.putExtra("message", messageKey);
         mMainService.sendBroadcast(intent);
+        updateBadge();
     }
 
     public void cleanThreadDirtyFlags(final String parentMessageKey) {
@@ -1169,7 +1170,6 @@ public class MessagingPlugin implements MobicagePlugin {
                 updateBadge();
             }
         });
-
     }
 
     public void ackThread(final String threadKey) {
