@@ -1009,6 +1009,9 @@ if __name__ == "__main__":
     logging.info(pprint.pformat(doc))
 
     strings_map = get_translation_strings()
+    if doc.get('TRANSLATIONS'):
+        for entry in doc['TRANSLATIONS']['en']:
+            strings_map[entry['value']] = entry['name']
     generate_navigation_menu(doc, strings_map)
 
     if APP_ID != MAIN_APP_ID:
