@@ -263,7 +263,21 @@ public class UIUtils {
     }
 
     public static boolean showHint(final Activity activity, final MainService mainService,
-        final SafeRunnable onDismissHandler, final String hintCode, final int hintResource, final Object... args) {
+                                   final SafeRunnable onDismissHandler, final String hintCode,
+                                   final int hintResource, final Object... args) {
+        return UIUtils.showHintWithImage(activity, mainService, null, hintCode, null, hintResource, args);
+    }
+
+    public static boolean showHintWithImage(final Activity activity, final MainService mainService,
+                                            final String hintCode, final FontAwesome.Icon hintIcon,
+                                            final int hintResource, final Object... args) {
+
+        return UIUtils.showHintWithImage(activity, mainService, null, hintCode, hintIcon, hintResource, args);
+    }
+
+    public static boolean showHintWithImage(final Activity activity, final MainService mainService,
+                                            final SafeRunnable onDismissHandler, final String hintCode,
+                                            final FontAwesome.Icon hintIcon, final int hintResource, final Object... args) {
         final ConfigurationProvider configurationProvider = mainService.getConfigurationProvider();
         final String configkey = "HINT_REPOSITORY";
         final com.mobicage.rogerthat.config.Configuration config = configurationProvider.getConfiguration(configkey);
@@ -274,6 +288,11 @@ public class UIUtils {
         final View checkboxLayout = inflater.inflate(R.layout.hint, null);
         final TextView message = (TextView) checkboxLayout.findViewById(R.id.message);
         final CheckBox checkBox = (CheckBox) checkboxLayout.findViewById(R.id.checkBox);
+        if (hintIcon != null) {
+            final ImageView icon = (ImageView) checkboxLayout.findViewById(R.id.icon);
+            icon.setImageDrawable(new IconicsDrawable(activity, hintIcon).color(Color.DKGRAY).sizeDp(30));
+            icon.setVisibility(View.VISIBLE);
+        }
         Resources resources = activity.getResources();
         message.setText(resources.getString(hintResource, args));
 

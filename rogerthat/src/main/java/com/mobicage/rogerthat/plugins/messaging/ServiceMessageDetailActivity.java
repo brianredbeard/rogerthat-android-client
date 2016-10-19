@@ -647,8 +647,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
                 return;
             }
 
-            UIUtils.showHint(this, mService, HINT_BROADCAST, R.string.hint_broadcast, mCurrentMessage.broadcast_type,
-                mFriendsPlugin.getName(mCurrentMessage.sender));
+            UIUtils.showHintWithImage(this, mService, HINT_BROADCAST, FontAwesome.Icon.faw_bell, R.string.hint_broadcast_icon, mFriendsPlugin.getName(mCurrentMessage.sender));
         }
 
         if (!isUpdate)

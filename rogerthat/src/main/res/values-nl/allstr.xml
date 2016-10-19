@@ -152,6 +152,7 @@
     <string name="help">Help</string>
     <string name="high">Hoog</string>
     <string name="hint_broadcast">Controleer de onderstaande balk om te zien waarom u dit bericht ontvangen heeft.\n\nOpmerking: U kunt zich afmelden met behulp van \'Notificatie instellingen\' als je geen \'%1$s\' berichten van %2$s meer wilt.</string>
+    <string name="hint_broadcast_icon">Druk op dit icoon rechtsboven om the kiezen welke berichten van %1$s al dan niet wil ontvangen.</string>
     <string name="hint_swipe">Swipe naar een andere conversatie</string>
     <string name="ibeacon_usage_augment_experience">De %1$s app maakt gebruik van iBeacons om uw gebruiksgemak te vergroten.</string>
     <string name="ibeacon_usage_discover_services_automatically">Automatisch ontdekken van mobiele diensten</string>
