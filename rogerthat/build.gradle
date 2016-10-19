@@ -53,19 +53,6 @@ android {
         }
     }
 
-    productFlavors {
-        rogerthat {
-            applicationId "com.mobicage.rogerth.at"
-        }
-        secure {
-            applicationId 'com.mobicage.rogerthat'
-            minSdkVersion 23
-        }
-        other {
-            applicationId 'com.mobicage.rogerthat'
-        }
-    }
-
     dexOptions {
         javaMaxHeapSize "3g"
     }
