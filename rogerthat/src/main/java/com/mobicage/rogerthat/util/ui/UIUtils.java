@@ -61,6 +61,7 @@ import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
+import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.T;
@@ -174,7 +175,7 @@ public class UIUtils {
             builder.setContentIntent(pi);
             builder.setContentText(message);
             builder.setContentTitle(title);
-            if (longNotificationText != null) {
+            if (!TextUtils.isEmptyOrWhitespace(longNotificationText)) {
                 builder.setStyle(new NotificationCompat.BigTextStyle().bigText(longNotificationText));
             }
             builder.setPriority(priority);
