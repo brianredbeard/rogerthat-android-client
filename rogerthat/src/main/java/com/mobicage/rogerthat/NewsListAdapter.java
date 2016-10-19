@@ -107,7 +107,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     private CachedDownloader mCachedDownloader;
 
     private Map<String, Bitmap> mQRCodes = new HashMap<>();
-    private Map<String, ArrayList<ImageView>> mImageViews = new HashMap<>();
+    private Map<String, Map<Long, ImageView>> mImageViews = new HashMap<>();
     private Set<Long> mReadMoreItems = new HashSet<>();
 
     private Map<String, Set<Long>> mServiceItems = new HashMap<>();
@@ -720,9 +720,9 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                     viewHolder.image.setVisibility(View.VISIBLE);
                 } else {
                     if (!mImageViews.containsKey(newsItem.image_url)) {
-                        mImageViews.put(newsItem.image_url, new ArrayList<ImageView>());
+                        mImageViews.put(newsItem.image_url, new HashMap<Long, ImageView>());
                     }
-                    mImageViews.get(newsItem.image_url).add(viewHolder.image);
+                    mImageViews.get(newsItem.image_url).put(newsItem.id, viewHolder.image);
                     // item started downloading intent when ready
                 }
             } else if (newsItem.users_that_rogered.length == 0) {
@@ -903,10 +903,18 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
 
             File cachedFile = mCachedDownloader.getCachedFilePath(url);
             if (cachedFile != null) {
+                int topRadius = UIUtils.convertDipToPixels(mActivity, 30);
                 Bitmap bm = BitmapFactory.decodeFile(cachedFile.getAbsolutePath());
-                for (ImageView image : mImageViews.get(url)) {
-                    image.setImageBitmap(bm);
-                    image.setVisibility(View.VISIBLE);
+                for (Map.Entry<Long, ImageView> imageMap : mImageViews.get(url).entrySet()) {
+                    long newsId = imageMap.getKey();
+                    NewsItem newsItem = mActivity.newsStore.getNewsItem(newsId);
+                    Bitmap image = bm;
+                    if (newsItem.users_that_rogered.length == 0) {
+                        image = ImageHelper.getRoundTopCornerBitmap(bm, topRadius);
+                    }
+                    ImageView imageView = imageMap.getValue();
+                    imageView.setImageBitmap(image);
+                    imageView.setVisibility(View.VISIBLE);
                 }
             }
         } else if (NewsPlugin.PINNED_NEWS_ITEM_INTENT.equals(action)) {
