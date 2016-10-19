@@ -150,10 +150,10 @@ public class L {
             try {
                 throw new Exception();
             } catch (final Exception e) {
-                sMainService.postOnUIHandler(new SafeRunnable() {
-                    @Override
-                    protected void safeRun() throws Exception {
-                        if (sMainService.getRegisteredFromConfig()) {
+                if (sMainService.getRegisteredFromConfig()) {
+                    sMainService.postOnUIHandler(new SafeRunnable() {
+                        @Override
+                        protected void safeRun() throws Exception {
                             if (sMainService == null)
                                 return;
                             LogErrorRequestTO request = new LogErrorRequestTO();
@@ -161,51 +161,51 @@ public class L {
                             request.platform = 1;
                             request.timestamp = currentTimeMillis / 1000;
                             request.mobicageVersion = (sMainService.isDebug() ? "-" : "")
-                                    + sMainService.getMajorVersion() + "." + sMainService.getMinorVersion();
+                                + sMainService.getMajorVersion() + "." + sMainService.getMinorVersion();
                             request.platformVersion = Build.FINGERPRINT + " (-) " + SystemUtils.getAndroidVersion()
-                                    + " (-) " + Build.MODEL;
+                                + " (-) " + Build.MODEL;
                             setErrorMessageOnLogErrorRequest(t == null ? e : t, request);
                             Rpc.logError(new ResponseHandler<LogErrorResponseTO>(), request);
-                        } else {
-                            new AsyncTask<Object, Object, Object>() {
-                                @Override
-                                protected Object doInBackground(Object... params) {
-                                    if (sMainService == null)
-                                        return null;
-                                    try {
-                                        HttpPost httpPostRequest = new HttpPost(CloudConstants.LOG_ERROR_URL);
-                                        httpPostRequest.setHeader("Content-Type", "application/x-www-form-urlencoded");
-
-                                        RegistrationWizard2 wiz = RegistrationWizard2.getWizard(sMainService);
-
-                                        List<NameValuePair> formParams = new ArrayList<NameValuePair>();
-                                        formParams.add(new BasicNameValuePair("install_id", wiz.getInstallationId()));
-                                        formParams.add(new BasicNameValuePair("device_id", wiz.getDeviceId()));
-                                        formParams.add(new BasicNameValuePair("language", Locale.getDefault().getLanguage()));
-                                        formParams.add(new BasicNameValuePair("country", Locale.getDefault().getCountry()));
-                                        formParams.add(new BasicNameValuePair("description", s));
-                                        formParams.add(new BasicNameValuePair("platform", "1"));
-                                        formParams.add(new BasicNameValuePair("platform_version", ""
-                                                + SystemUtils.getAndroidVersion()));
-                                        formParams.add(new BasicNameValuePair("timestamp", "" + System.currentTimeMillis()
-                                                / 1000));
-                                        formParams.add(new BasicNameValuePair("mobicage_version", MainService
-                                                .getVersion(sMainService)));
-                                        formParams.add(new BasicNameValuePair("error_message",
-                                                getStackTraceString(t == null ? e : t)));
-
-                                        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formParams, HTTP.UTF_8);
-                                        httpPostRequest.setEntity(entity);
-                                        HTTPUtil.getHttpClient().execute(httpPostRequest);
-                                    } catch (Exception e1) {
-                                        L.d("Error while posting error to server", e1);
-                                    }
-                                    return null;
-                                }
-                            }.execute();
                         }
-                    }
-                });
+                    });
+                } else {
+                    new AsyncTask<Object, Object, Object>() {
+                        @Override
+                        protected Object doInBackground(Object... params) {
+                            if (sMainService == null)
+                                return null;
+                            try {
+                                HttpPost httpPostRequest = new HttpPost(CloudConstants.LOG_ERROR_URL);
+                                httpPostRequest.setHeader("Content-Type", "application/x-www-form-urlencoded");
+
+                                RegistrationWizard2 wiz = RegistrationWizard2.getWizard(sMainService);
+
+                                List<NameValuePair> formParams = new ArrayList<NameValuePair>();
+                                formParams.add(new BasicNameValuePair("install_id", wiz.getInstallationId()));
+                                formParams.add(new BasicNameValuePair("device_id", wiz.getDeviceId()));
+                                formParams.add(new BasicNameValuePair("language", Locale.getDefault().getLanguage()));
+                                formParams.add(new BasicNameValuePair("country", Locale.getDefault().getCountry()));
+                                formParams.add(new BasicNameValuePair("description", s));
+                                formParams.add(new BasicNameValuePair("platform", "1"));
+                                formParams.add(new BasicNameValuePair("platform_version", ""
+                                    + SystemUtils.getAndroidVersion()));
+                                formParams.add(new BasicNameValuePair("timestamp", "" + System.currentTimeMillis()
+                                    / 1000));
+                                formParams.add(new BasicNameValuePair("mobicage_version", MainService
+                                    .getVersion(sMainService)));
+                                formParams.add(new BasicNameValuePair("error_message",
+                                    getStackTraceString(t == null ? e : t)));
+
+                                UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formParams, HTTP.UTF_8);
+                                httpPostRequest.setEntity(entity);
+                                HTTPUtil.getHttpClient().execute(httpPostRequest);
+                            } catch (Exception e1) {
+                                L.d("Error while posting error to server", e1);
+                            }
+                            return null;
+                        }
+                    }.execute();
+                }
             }
         } catch (Exception e) {
             L.d("Error while posting error to server", e);
