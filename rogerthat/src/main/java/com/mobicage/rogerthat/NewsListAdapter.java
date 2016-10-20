@@ -929,6 +929,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                     mActivity.finish();
                 }
             } else {
+                updateView(intent.getLongExtra("id", -1));
                 mActivity.invalidateOptionsMenu();
             }
         } else if (NewsPlugin.DISABLE_NEWS_ITEM_INTENT.equals(action)) {
