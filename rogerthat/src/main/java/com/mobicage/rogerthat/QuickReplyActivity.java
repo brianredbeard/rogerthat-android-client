@@ -18,6 +18,7 @@ import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
+import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.to.messaging.AttachmentTO;
 import com.mobicage.to.messaging.ButtonTO;
@@ -105,24 +106,32 @@ public class QuickReplyActivity extends ServiceBoundActivity {
     }
 
     public void sendMessage(View view) {
-        final Message message = mMessagingPlugin.getStore().getMessageByKey(mMessageKey);
-        long parentMessageFlags;
-        if (message.parent_key == null) {
-            parentMessageFlags = message.flags;
-        } else {
-            parentMessageFlags = mMessagingPlugin.getStore().getMessageFlagsUI(message.parent_key);
+        T.UI();
+        String message = mReplyEditText.getText().toString().trim();
+        if ("".equals(message)) {
+            finish();
+            return;
         }
+
+        final Message parentMessage = mMessagingPlugin.getStore().getMessageByKey(mMessageKey);
         final SendMessageRequestTO request = new SendMessageRequestTO();
-        request.message = mReplyEditText.getText().toString();
-        request.parent_key = message.parent_key;
-        request.flags = parentMessageFlags;
+        request.message = message;
         request.timeout = 0;
         request.key = UUID.randomUUID().toString();
         request.priority = Message.PRIORITY_NORMAL;
         request.buttons = new ButtonTO[0];
-        request.members = new String[0];  // Server will take care of this
+        request.members = new String[0];  // Server calculates members in case of reply
         request.sender_reply = null;
         request.attachments = new AttachmentTO[0];
+
+        if (parentMessage.parent_key == null) {
+            request.flags = parentMessage.flags;
+            request.parent_key = parentMessage.key;
+        } else {
+            request.flags = mMessagingPlugin.getStore().getMessageFlagsUI(parentMessage.parent_key);
+            request.parent_key = parentMessage.parent_key;
+        }
+
         try {
             com.mobicage.api.messaging.Rpc.sendMessage(new ResponseHandler<SendMessageResponseTO>(), request);
         } catch (Exception e) {
