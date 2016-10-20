@@ -1029,8 +1029,6 @@ public class BrandingMgr implements Pickleable, Closeable {
             String contentType = null;
             boolean wakelockEnabled = false;
             ByteArrayOutputStream brandingBos = new ByteArrayOutputStream();
-            Bitmap avatarBitmap = null;
-            Bitmap logoBitmap = null;
             File logoPath = null;
             File avatarPath = null;
             try {
@@ -1056,10 +1054,8 @@ public class BrandingMgr implements Pickleable, Closeable {
                                 }
                                 File destination = new File(tmpBrandingDir, entry.getName());
                                 if (entry.getName().equals("avatar.jpg")) {
-//                                    avatarBitmap = BitmapFactory.decodeStream(zis);
                                     avatarPath = destination;
                                 } else if (entry.getName().equals("logo.jpg")) {
-//                                    logoBitmap = BitmapFactory.decodeStream(zis);
                                     logoPath = destination;
                                 }
                                 destination.getParentFile().mkdirs();
@@ -1241,7 +1237,6 @@ public class BrandingMgr implements Pickleable, Closeable {
                 }
 
                 FileOutputStream fos = new FileOutputStream(brandingFile);
-
                 try {
                     fos.write(brandingHtml.getBytes("UTF8"));
                 } finally {
