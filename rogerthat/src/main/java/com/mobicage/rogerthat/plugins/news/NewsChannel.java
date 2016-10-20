@@ -26,8 +26,6 @@ import java.nio.charset.Charset;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.Provider;
-import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,8 +41,6 @@ import javax.net.ssl.X509TrustManager;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
@@ -469,7 +465,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
 
     private void authenticate() {
         Credentials credentials = mService.getCredentials();
-        String username = credentials.getUsername();
+        String username = Base64.encodeBytes(credentials.getUsername().getBytes(Charset.forName("utf-8")), Base64.DONT_BREAK_LINES);
         String password = Base64.encodeBytes(credentials.getPassword().getBytes(Charset.forName("utf-8")), Base64.DONT_BREAK_LINES);
         sendLine(String.format("AUTH: %s %s", username, password));
     }

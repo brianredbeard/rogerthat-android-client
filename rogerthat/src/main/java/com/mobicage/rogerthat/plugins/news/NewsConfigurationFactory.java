@@ -308,10 +308,10 @@ public class NewsConfigurationFactory {
         }
     }
 
-    private void updateNewsConfig(final String NewsConfig) {
-        if (NewsConfig != null) {
+    private void updateNewsConfig(final String newsConfig) {
+        if (newsConfig != null) {
             Configuration cfg = new Configuration();
-            cfg.put(NEWS_CONFIG_KEY, NewsConfig);
+            cfg.put(NEWS_CONFIG_KEY, newsConfig);
             mConfigurationProvider.updateConfigurationNow(NEWS_CONFIG_KEY, cfg);
         }
     }

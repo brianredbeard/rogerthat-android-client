@@ -1,8 +1,8 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 'Google Apis:Google Apis:23'
-    buildToolsVersion '24.0.3'
+    compileSdkVersion 'Google Inc.:Google APIs:23'
+    buildToolsVersion '24.0.1'
     useLibrary 'org.apache.http.legacy'
     defaultConfig {
         applicationId "com.mobicage.rogerth.at"

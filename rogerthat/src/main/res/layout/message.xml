@@ -84,19 +84,15 @@
 
             <TextView
                 android:id="@+id/message_count"
-                android:layout_width="wrap_content"
-                android:layout_height="18dp"
-                android:background="@drawable/reply_count"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:layout_gravity="bottom"
                 android:layout_marginLeft="16dp"
+                android:background="@drawable/reply_count"
                 android:gravity="center"
-                android:paddingLeft="6dp"
-                android:paddingRight="6dp"
                 android:textColor="@color/mc_white"
-                android:textSize="12sp"
-                android:visibility="visible"
-                tools:text="4"
-                tools:visibility="gone" />
+                android:textSize="10sp"
+                tools:text="9+" />
 
             <ImageView
                 android:id="@+id/message_status"

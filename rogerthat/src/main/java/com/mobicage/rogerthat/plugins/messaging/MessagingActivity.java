@@ -656,7 +656,6 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
                 messageUnreadCount--;
             }
             if (messageUnreadCount >= 1) {
-                messageCountView.setText(String.valueOf(messageUnreadCount));
                 Typeface boldFont = TextUtils.getFont(MessagingActivity.this);
                 holder.recipientsView.setTypeface(boldFont);
                 holder.messageView.setTypeface(boldFont);
@@ -666,6 +665,21 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
                 holder.recipientsView.setTypeface(normalFont);
                 holder.messageView.setTypeface(normalFont);
                 messageCountView.setVisibility(View.GONE);
+            }
+
+            if (messageCountView.getVisibility() == View.VISIBLE) {
+                long count = 0;
+                if (messageUnreadCount >= 1) {
+                    count = messageUnreadCount;
+                } else {
+                    count = replyCount;
+                }
+
+                if (count < 10) {
+                    messageCountView.setText(String.valueOf(count));
+                } else {
+                    messageCountView.setText("9+");
+                }
             }
 
             final TextView timestamp = holder.timestampView;

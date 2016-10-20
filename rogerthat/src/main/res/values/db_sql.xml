@@ -244,19 +244,20 @@ WHERE m1.\"key\" = ?
        GROUP BY day
        ORDER BY day DESC
     </string>
-    <!--TODO: fix this query. Unread count should not be 0.-->
     <string name="sql_message_cursor_query_filter_member">
 SELECT DISTINCT
-        m1.\"key\", m1.parent_key, m1.sender, m1.message, m1.timestamp, m1.dirty, m1.recipients, m1.flags,
-        m1.needs_my_answer, m1.recipients_status, m1.alert_flags, m1.rowid as _id, m1.sortid, 1 as mergeid,
-        m1.thread_dirty, m1.last_thread_message, m1.reply_count, m1.thread_needs_my_answer, m1.thread_show_in_list,
-        m1.thread_avatar_hash, m1.thread_background_color, m1.thread_text_color, m1.priority,
-        m1.default_priority, m1.default_sticky, 0 as unread_count
+        m1.key, m1.parent_key, m1.sender, m1.message, m1.timestamp, m1.dirty, m1.recipients, m1.flags, m1.needs_my_answer,
+        m1.recipients_status, m1.alert_flags, m1.rowid as _id, m1.sortid, 1 as mergeid, m1.thread_dirty, m1.last_thread_message,
+        m1.reply_count, m1.thread_needs_my_answer, m1.thread_show_in_list, m1.thread_avatar_hash, m1.thread_background_color,
+        m1.thread_text_color, f.priority, m1.default_priority, m1.default_sticky, f.unread_count
 FROM message m1
-    LEFT JOIN member_status ms1 ON m1.\"key\" = ms1.message
-    LEFT JOIN message m2 ON m1.parent_key = m2.\"key\"
+    LEFT JOIN member_status ms1 ON m1.key = ms1.message
+    LEFT JOIN message m2 ON m1.parent_key = m2.key
+    LEFT OUTER JOIN
+        (SELECT ifnull(parent_key,key) as fkey, max(priority) as priority, COUNT(dirty) as unread_count FROM message WHERE dirty = 1 AND existence = 1 GROUP BY fkey) f
+    ON ifnull(m1.parent_key, m1.key) = f.fkey
 WHERE (m1.show_in_message_list > 0) AND m1.existence = 1 AND (ms1.member = ? or m1.sender = ? or m2.sender = ?)
-ORDER BY m1.thread_dirty DESC, m1.\"timestamp\" DESC
+ORDER BY m1.thread_dirty DESC, m1.\"timestamp\" DESC;
 </string>
     <string name="sql_message_cursor_full_thread">
 SELECT \"key\", parent_key, sender, message, \"timestamp\", flags, branding, alert_flags, priority, default_priority, default_sticky, needs_my_answer, reply_count, dirty, recipients_status, recipients, form, rowid as "_id", thread_needs_my_answer
