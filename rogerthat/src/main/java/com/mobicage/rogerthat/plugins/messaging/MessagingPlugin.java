@@ -782,11 +782,15 @@ public class MessagingPlugin implements MobicagePlugin {
         }
 
         boolean canAnswerToMessage = SystemUtils.isFlagEnabled(parentMessage.flags, MessagingPlugin.FLAG_ALLOW_REPLY);
+        if (canAnswerToMessage && !SystemUtils.isFlagEnabled(parentMessage.flags, FLAG_ALLOW_REPLY)) {
+            canAnswerToMessage = false;
+        }
+
         int priority = Notification.PRIORITY_HIGH;  // Causes the notification to show up as a heads-up notification
         String notificationText;
         StringBuilder longNotificationText = new StringBuilder();
 
-        if (parentMessage.dirty) {
+        if (parentMessage.dirty && !SystemUtils.isFlagEnabled(parentMessage.flags, FLAG_DYNAMIC_CHAT)) {
             unreadInThreadCount++;
             UnreadMessage unreadMessage = new UnreadMessage(parentMessage.key, parentMessage.message,
                     friendsPlugin.getName(parentMessage.sender),
