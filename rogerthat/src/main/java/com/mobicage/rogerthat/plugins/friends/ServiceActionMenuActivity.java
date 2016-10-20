@@ -173,9 +173,9 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
         for (int x = 0; x < 4; x++) {
             for (int y = 0; y < 3; y++) {
                 Cell cell = cells[x][y];
-                ((View) cell.icon.getParent()).setOnClickListener(null);
-                cell.icon.setVisibility(View.INVISIBLE);
-                cell.label.setVisibility(View.INVISIBLE);
+                View p = (View) cell.icon.getParent();
+                p.setOnClickListener(null);
+                p.setVisibility(View.INVISIBLE);
                 cell.label.setTextColor(lightSchemeTextColor);
                 cell.label.setShadowLayer(2, 1, 1, Color.WHITE);
                 cells[x][y] = cell;
@@ -228,7 +228,8 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
                         UIUtils.setIconBackground(cell.icon, iconBackgroundColor);
                         break;
                     case 3:
-                        cell.icon.setVisibility(View.INVISIBLE);
+                        View p = (View) cell.icon.getParent();
+                        p.setVisibility(View.INVISIBLE);
                         FontAwesome.Icon iconName = FontAwesome.Icon.faw_thumbs_up;
                         if (CloudConstants.isYSAAA()) {
                             iconName = FontAwesome.Icon.faw_qrcode;
@@ -355,6 +356,8 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
         for (final ServiceMenuItem item : menu.itemList) {
             rows[(int) item.coords[1]] = true;
             final Cell cell = cells[(int) item.coords[0]][(int) item.coords[1]];
+            View p = (View) cell.icon.getParent();
+
             View.OnClickListener onClickListener = new SafeViewOnClickListener() {
                 @Override
                 public void safeOnClick(View v) {
@@ -364,7 +367,7 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
                     mMenuItemPresser.itemPressed(item, menu.generation, null);
                 }
             };
-            ((View) cell.icon.getParent()).setOnClickListener(onClickListener);
+            p.setOnClickListener(onClickListener);
             if (UIUtils.isSupportedFontawesomeIcon(item.iconName)) {
                 Drawable icon = UIUtils.getIconFromString(this, item.iconName).color(brandingBackgroundColor).sizeDp(24).paddingDp(5);
                 cell.icon.setImageDrawable(icon);
@@ -376,13 +379,12 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
                 cell.icon.setImageBitmap(BitmapFactory.decodeByteArray(item.icon, 0, item.icon.length));
                 UIUtils.setIconBackground(cell.icon, brandingBackgroundColor);
             }
-            cell.icon.setVisibility(View.VISIBLE);
+            p.setVisibility(View.VISIBLE);
             cell.label.setText(item.label);
             if (useDarkScheme) {
                 cell.label.setTextColor(darkSchemeTextColor);
                 cell.label.setShadowLayer(2, 1, 1, Color.BLACK);
             }
-            cell.label.setVisibility(View.VISIBLE);
             usedCells.add(cell);
         }
         for (int i = 2; i >= 0; i--) {
@@ -546,6 +548,7 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
 
     private void addAboutHandler(final List<Cell> usedCells, final String aboutLabel) {
         final Cell cell = cells[0][0];
+        View p = (View) cell.icon.getParent();
         cell.label.setText(TextUtils.isEmptyOrWhitespace(aboutLabel) ? getString(R.string.about) : aboutLabel);
 
         final View.OnClickListener onClickListener = new SafeViewOnClickListener() {
@@ -564,14 +567,14 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
                 startActivity(friendDetails);
             }
         };
-        ((View) cell.icon.getParent()).setOnClickListener(onClickListener);
-        cell.icon.setVisibility(View.VISIBLE);
-        cell.label.setVisibility(View.VISIBLE);
+        p.setOnClickListener(onClickListener);
+        p.setVisibility(View.VISIBLE);
         usedCells.add(cell);
     }
 
     private void addHistoryHandler(final List<Cell> usedCells, final FriendStore friendStore, final String messagesLabel) {
         final Cell cell = cells[1][0];
+        View p = (View) cell.icon.getParent();
         cell.label.setText(TextUtils.isEmptyOrWhitespace(messagesLabel) ? getString(R.string.message_history)
             : messagesLabel);
         final View.OnClickListener onClickListener = new SafeViewOnClickListener() {
@@ -589,9 +592,8 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
                 startActivity(viewMessages);
             }
         };
-        ((View) cell.icon.getParent()).setOnClickListener(onClickListener);
-        cell.icon.setVisibility(View.VISIBLE);
-        cell.label.setVisibility(View.VISIBLE);
+        p.setOnClickListener(onClickListener);
+        p.setVisibility(View.VISIBLE);
         usedCells.add(cell);
         handleBadge(friendStore);
     }
@@ -616,6 +618,7 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
     private void addCallHandler(final ServiceMenu menu, final List<Cell> usedCells, final String callLabel) {
         if (menu.phoneNumber != null) {
             final Cell cell = cells[2][0];
+            View p = (View) cell.icon.getParent();
             cell.label.setText(TextUtils.isEmptyOrWhitespace(callLabel) ? getString(R.string.call_service) : callLabel);
             final View.OnClickListener onClickListener = new SafeViewOnClickListener() {
                 @Override
@@ -648,9 +651,8 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
                     }
                 }
             };
-            ((View) cell.icon.getParent()).setOnClickListener(onClickListener);
-            cell.icon.setVisibility(View.VISIBLE);
-            cell.label.setVisibility(View.VISIBLE);
+            p.setOnClickListener(onClickListener);
+            p.setVisibility(View.VISIBLE);
             usedCells.add(cell);
         }
     }
@@ -658,6 +660,7 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
     private void addShareHandler(final ServiceMenu menu, final List<Cell> usedCells, final String shareLabel) {
         if (menu.share) {
             final Cell cell = cells[3][0];
+            View p = (View) cell.icon.getParent();
             cell.label.setText(TextUtils.isEmptyOrWhitespace(shareLabel) ? getString(R.string.recommend_service)
                 : shareLabel);
             final View.OnClickListener onClickListener = new SafeViewOnClickListener() {
@@ -679,15 +682,15 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
                     startActivity(intent);
                 }
             };
-            ((View) cell.icon.getParent()).setOnClickListener(onClickListener);
-            cell.icon.setVisibility(View.VISIBLE);
-            cell.label.setVisibility(View.VISIBLE);
+            p.setOnClickListener(onClickListener);
+            p.setVisibility(View.VISIBLE);
             usedCells.add(cell);
         }
     }
 
     private void addScanHandler(final ServiceMenu menu, final List<Cell> usedCells, final String scanLabel) {
         final Cell cell = cells[3][0];
+        View p = (View) cell.icon.getParent();
         cell.label.setText(TextUtils.isEmptyOrWhitespace(scanLabel) ? getString(R.string.scan) : scanLabel);
 
         int cameraPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
@@ -703,9 +706,8 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
                     ScanTabActivity.ZXING_SCAN_RESULT);
             }
         };
-        ((View) cell.icon.getParent()).setOnClickListener(onClickListener);
-        cell.icon.setVisibility(View.VISIBLE);
-        cell.label.setVisibility(View.VISIBLE);
+        p.setOnClickListener(onClickListener);
+        p.setVisibility(View.VISIBLE);
         usedCells.add(cell);
     }
 
