@@ -343,6 +343,7 @@ public class MainActivity extends ServiceBoundActivity {
                 }
                 i.setFlags(FLAG_NEW_STACK);
                 i.setAction(ACTION_NOTIFICATION_MESSAGE_RECEIVED);
+                i.putExtra("show_drawer_icon", true);
                 i.putExtras(intent.getExtras());
                 startActivity(i);
                 finish();

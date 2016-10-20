@@ -777,6 +777,10 @@ public class MessagingPlugin implements MobicagePlugin {
             }
         }
         Message parentMessage = mMainService.getPlugin(MessagingPlugin.class).getStore().getFullMessageByKey(parentKey);
+        if (SystemUtils.isFlagEnabled(parentMessage.alert_flags, AlertManager.ALERT_FLAG_SILENT)) {
+            return;
+        }
+
         boolean canAnswerToMessage = SystemUtils.isFlagEnabled(parentMessage.flags, MessagingPlugin.FLAG_ALLOW_REPLY);
         int priority = Notification.PRIORITY_HIGH;  // Causes the notification to show up as a heads-up notification
         String notificationText;
