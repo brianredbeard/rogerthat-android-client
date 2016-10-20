@@ -378,7 +378,7 @@ ORDER BY ms.acked_timestamp DESC
         AND last_updated_on > ?
         AND existence = 1
     </string>
-    <string name="sql_get_last_unread_messages_in_thread">
+    <string name="sql_get_first_unread_messages_in_thread">
     SELECT
       message.key,
       message.message,
@@ -389,7 +389,7 @@ ORDER BY ms.acked_timestamp DESC
     WHERE
       parent_key = ?
       AND (dirty = 1 or thread_dirty = 1)
-    ORDER BY timestamp DESC
+    ORDER BY timestamp ASC
     LIMIT 5
     </string>
     <!-- message flows -->

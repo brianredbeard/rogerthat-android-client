@@ -725,8 +725,8 @@ public class MessagingPlugin implements MobicagePlugin {
             removeNotificationForThread(parentKey);
         } else {
             int unreadInThreadCount = mStore.getUnreadMessageCountInThread(parentKey);
-            ArrayList<UnreadMessage> olderMessages = mStore.getLastUnreadMessagesInThread(parentKey);
-            updateNotificationForThread(parentKey, message.key, olderMessages, unreadInThreadCount);
+            ArrayList<UnreadMessage> unreadMessages = mStore.getFirstUnreadMessagesInThread(parentKey);
+            updateNotificationForThread(parentKey, message.key, unreadMessages, unreadInThreadCount);
         }
     }
 
@@ -763,7 +763,7 @@ public class MessagingPlugin implements MobicagePlugin {
      * - multiple friends friend1: message1 \n friend2: message2
      * icon -> thread avatar
      */
-    private void updateNotificationForThread(String parentKey, String messageKey, ArrayList<UnreadMessage> olderMessages,
+    private void updateNotificationForThread(String parentKey, String messageKey, ArrayList<UnreadMessage> unreadMessages,
                                              int unreadInThreadCount) {
         T.BIZZ();
         FriendsPlugin friendsPlugin = mMainService.getPlugin(FriendsPlugin.class);
@@ -791,11 +791,15 @@ public class MessagingPlugin implements MobicagePlugin {
             UnreadMessage unreadMessage = new UnreadMessage(parentMessage.key, parentMessage.message,
                     friendsPlugin.getName(parentMessage.sender),
                     parentMessage.sender);
-            olderMessages.add(0, unreadMessage);
+            unreadMessages.add(0, unreadMessage);
+        }
+
+        if (unreadInThreadCount == 0 || unreadMessages.size() == 0) {
+            return;
         }
 
         List<String> friendNames = new ArrayList<>();
-        for (UnreadMessage msg : olderMessages) {
+        for (UnreadMessage msg : unreadMessages) {
             if (msg.friendEmail != null && !msg.friendEmail.equals(mMyEmail)) {
                 String displayName = msg.friendName != null ? msg.friendName : msg.friendEmail;
                 if (!friendNames.contains(displayName)) {
@@ -808,7 +812,7 @@ public class MessagingPlugin implements MobicagePlugin {
         String lastSender = null;
         if (unreadInThreadCount > 1) {
             notificationText = mMainService.getString(R.string.message_notification_n_new_messages, unreadInThreadCount);
-            for (UnreadMessage msg : olderMessages) {
+            for (UnreadMessage msg : unreadMessages) {
                 if (msg.friendEmail != null) {
                     lastSender = msg.friendEmail;
                 }
@@ -825,7 +829,7 @@ public class MessagingPlugin implements MobicagePlugin {
                 longNotificationText.append("\n");
             }
         } else {
-            UnreadMessage lastMessage = olderMessages.get(0);
+            UnreadMessage lastMessage = unreadMessages.get(0);
             notificationText = lastMessage.message;
             longNotificationText.append(notificationText);
             if (TextUtils.isEmptyOrWhitespace(notificationText)) {

@@ -1631,10 +1631,10 @@ public class MessageStore implements Closeable {
         return mGetDirtyThreadsCount.simpleQueryForLong();
     }
 
-    public ArrayList<UnreadMessage> getLastUnreadMessagesInThread(String parentKey) {
+    public ArrayList<UnreadMessage> getFirstUnreadMessagesInThread(String parentKey) {
         ArrayList<UnreadMessage> messages = new ArrayList<>();
 
-        final Cursor cursor = mDb.rawQuery(mMainService.getString(R.string.sql_get_last_unread_messages_in_thread),
+        final Cursor cursor = mDb.rawQuery(mMainService.getString(R.string.sql_get_first_unread_messages_in_thread),
                 new String[]{parentKey});
         try {
             if (!cursor.moveToFirst()) {
