@@ -423,7 +423,7 @@ public class MessagingPlugin implements MobicagePlugin {
     public void showMessage(Context context, Message message, String memberFilter) {
         showMessage(context, message, false, memberFilter);
         String parentKey = message.parent_key != null ? message.parent_key : message.key;
-        UIUtils.cancelNotification(context, getMessageNotificationId(parentKey));
+        UIUtils.cancelNotification(context, parentKey);
     }
 
     public void showMessage(Context context, Message message, boolean detail, String memberFilter) {
@@ -849,7 +849,7 @@ public class MessagingPlugin implements MobicagePlugin {
             actionButtons.add(replyAction);
         }
 
-        int notificationId = getMessageNotificationId(parentKey);
+        int notificationId = UIUtils.getNotificationId(parentKey, true);
 
         if (isFromOneFriend) {
             largeIcon = friendsPlugin.getAvatarBitmap(lastSender, false, getNotificationIconSize());
@@ -889,15 +889,6 @@ public class MessagingPlugin implements MobicagePlugin {
             // XXXHDPI
             return 256 - 50;
         }
-    }
-
-    public int getMessageNotificationId(String parentKey) {
-        Long messageKeyLong = UUID.fromString(parentKey).getMostSignificantBits();
-        String messageKeyString = messageKeyLong.toString();
-        if (messageKeyString.length() > 10) {
-            messageKeyString = messageKeyString.substring(11);
-        }
-        return Integer.parseInt(messageKeyString);
     }
 
     /**
@@ -1332,7 +1323,7 @@ public class MessagingPlugin implements MobicagePlugin {
     }
 
     public void removeNotificationForThread(String threadKey) {
-        UIUtils.cancelNotification(mMainService, getMessageNotificationId(threadKey));
+        UIUtils.cancelNotification(mMainService, threadKey);
         updateUnreadCountBadge();
     }
 

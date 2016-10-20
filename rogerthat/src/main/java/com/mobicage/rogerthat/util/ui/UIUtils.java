@@ -67,9 +67,12 @@ import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.T;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class UIUtils {
 
@@ -84,6 +87,7 @@ public class UIUtils {
     public static final String NOTIFICATION_TIMESTAMP = "NOTIFICATION_TIMESTAMP";
 
     private static List<Activity> sActivities = new ArrayList<Activity>();
+    private static Map<String, Integer> notificationIds = new HashMap<>();
 
     public static void onActivityStart(final Activity activity) {
         if (T.getThreadType() != T.UI) {
@@ -193,10 +197,31 @@ public class UIUtils {
         sNotificationIDs.add(notificationId);
     }
 
+    public static int getNotificationId(final String notificationKey, boolean create) {
+        for (Map.Entry<String, Integer> notification : notificationIds.entrySet()) {
+            if (notification.getKey().equals(notificationKey)) {
+                return notification.getValue();
+            }
+        }
+        if (!create) {
+            return -1;
+        }
+        int notificationID = NotificationID.next();
+        notificationIds.put(notificationKey, notificationID);
+        return notificationID;
+    }
+
     public static void cancelNotification(final Context pContext, final int pNotificationId) {
         T.dontCare();
         final NotificationManager nm = (NotificationManager) pContext.getSystemService(Context.NOTIFICATION_SERVICE);
         nm.cancel(pNotificationId);
+    }
+
+    public static void cancelNotification(final Context context, final String notificationString) {
+        int notificationId = getNotificationId(notificationString, false);
+        if (notificationId != -1) {
+            cancelNotification(context, notificationId);
+        }
     }
 
     public static boolean hasHardKeyboard(Context pContext) {
@@ -504,5 +529,13 @@ public class UIUtils {
     public static void setIconBackground(ImageView imageView, int backgroundColor) {
         GradientDrawable background = (GradientDrawable) imageView.getBackground();
         background.setColor(backgroundColor);
+    }
+}
+
+class NotificationID {
+    private final static AtomicInteger c = new AtomicInteger(1000);
+
+    public static int next() {
+        return c.incrementAndGet();
     }
 }
