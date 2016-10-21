@@ -531,6 +531,7 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
 
         if (br.displayType == BrandingMgr.DisplayType.NATIVE) {
             ServiceHeader.setupNative(br, mHeaderContainer);
+            mWebview.setVisibility(View.GONE);
         } else {
             WebSettings settings = mWebview.getSettings();
             settings.setJavaScriptEnabled(false);
