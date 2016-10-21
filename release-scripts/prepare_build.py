@@ -837,7 +837,7 @@ def encode_translation(s):
         .replace('"', '\\"') \
         .replace("&", "&amp;") \
         .replace("<", "&lt;") \
-        .replace(">", "&gt;")
+        .replace(">", "&gt;").encode('utf-8')
 
 
 def add_translations(doc):
