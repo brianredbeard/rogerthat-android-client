@@ -38,7 +38,7 @@
     <string name="add_via_contacts_description">Encontrar contactos que ya usen %1$s desde la agenda de su teléfono</string>
     <string name="add_via_contacts_notification">Resultado de la búsqueda de contactos mediante %1$s.</string>
     <string name="add_via_contacts_waiting">Recibirás una notificación cuando tu libreta de direcciones sea comprobada.</string>
-    <string name="add_via_email_description">Escriba la dirección de correo electrónico del usuario con el que desea conectarse</string>
+    <string name="add_via_email_description">Escribe la dirección de correo electrónico del usuario con el que deseas conectarse</string>
     <string name="add_via_facebook_description">Encontrar contactos de Facebook a través de %1$s</string>
     <string name="add_via_facebook_notification">Resultado de la búsqueda de contactos de Facebook mediante %1$s.</string>
     <string name="add_via_facebook_waiting">Recibirás una notificación cuando tus contactos de Facebook sean comprobados.</string>
@@ -60,7 +60,7 @@
     <string name="back">Espalda</string>
     <string name="birthdate">Día de nacimiento</string>
     <string name="broadcast_subscribed_to">Ha recibido esta mensaje porque usted está suscrito a: %1$s.</string>
-    <string name="button_action">Escriba una URL (opcional)</string>
+    <string name="button_action">Escribe una URL (opcional)</string>
     <string name="button_text">Texto del botón</string>
     <string name="buttons">Botones</string>
     <string name="calculate_location">Localizar</string>
@@ -175,7 +175,7 @@
     <string name="groups">Grupos</string>
     <string name="help">Ayuda</string>
     <string name="high">Alto</string>
-    <string name="hint_broadcast">Compruebe la barra inferior para ver por qué recibió este mensaje.\n\nNota: Usted puede darse de baja usando \'Ajustes de notificación\' si no desea que los mensajes \'%1$s\' de%2$s más.</string>
+    <string name="hint_broadcast">Comprueba la barra inferior para ver por qué recibiste este mensaje.\n\nNota: Puedea darte de baja usando \'Ajustes de notificación\' si no deseas los mensajes \'%1$s\' de%2$s más.</string>
     <string name="hint_double_tap">Haga doble click para responder</string>
     <string name="hint_swipe">Arrastre con el dedo para cambiar a otra conversación</string>
     <string name="ibeacon_usage_augment_experience">%1$s utiliza iBeacons para aumentar su experiencia de usuario</string>
@@ -313,7 +313,7 @@
     <string name="read_more">Leer más...</string>
     <string name="received_at">Recibido %1$s.</string>
     <string name="recipients">Para:</string>
-    <string name="recommend_email_description">Escriba la dirección electrónica de la persona a quién desea recomendar este servicio</string>
+    <string name="recommend_email_description">Escribe la dirección electrónica de la persona a quién deseas recomendar este servicio</string>
     <string name="recommend_on_fb">Recomendar en tu muro de Facebook</string>
     <string name="recommend_on_fb_description">Permita que sus contactos de Facebook conozcan este formidable servicio.</string>
     <string name="recommend_service">Recomendar</string>
@@ -323,9 +323,9 @@
     <string name="register_first">Por favor, completa tu registro ahora</string>
     <string name="registration_activating_account">Activando su cuenta %1$s…</string>
     <string name="registration_agree_tos">Aceptar y continuar</string>
-    <string name="registration_email_not_valid">Escriba una dirección de correo electrónico válida</string>
+    <string name="registration_email_not_valid">Escribe una dirección de correo electrónico válida</string>
     <string name="registration_enter_email_hint_enterprise">Dirección de correo electrónico de la empresa</string>
-    <string name="registration_enter_pin">Escriba el código de activación para completar el registro</string>
+    <string name="registration_enter_pin">Escribe el código de activación para completar el registro</string>
     <string name="registration_enter_pin_hint">Código de activación</string>
     <string name="registration_error">Se ha producido un error durante el registro. Por favor, inténtelo de nuevo.</string>
     <string name="registration_establish_connection">Intentando establecer una conexión para %1$s con %2$s.\nIntento</string>
@@ -437,7 +437,7 @@
     <string name="tab_stream">Actividad</string>
     <string name="this_screen_is_not_yet_downloaded_check_network">Esta pantalla aún no ha sido descargada. Compruebe su conexión de red.</string>
     <string name="title_buttons">Añadir botones de acceso rápido de respuesta</string>
-    <string name="title_message">Escriba su mensaje</string>
+    <string name="title_message">Escribe tu mensaje</string>
     <string name="title_new_message_image">Añadir imagen</string>
     <string name="title_new_message_video">Añadir vídeo</string>
     <string name="title_recipients">Seleccionar destinatario</string>
