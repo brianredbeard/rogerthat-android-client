@@ -55,6 +55,7 @@ public class NewsCallReceiver implements com.mobicage.capi.news.IClientRpc {
 
         if (newsPlugin.getStore().getNewsItem(request.news_item.id) == null) {
             newsPlugin.getStore().insertNewsItem(request.news_item);
+            newsPlugin.increaseBadgeCount();
         }
 
         Intent intent = new Intent(NewsPlugin.NEW_NEWS_ITEM_INTENT);

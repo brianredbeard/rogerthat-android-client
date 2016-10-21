@@ -358,6 +358,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
 
         newsPlugin = mService.getPlugin(NewsPlugin.class);
         newsStore = newsPlugin.getStore();
+        newsPlugin.resetBadgeCount();
         friendsPlugin = mService.getPlugin(FriendsPlugin.class);
 
         setRecyclerView((RecyclerView) findViewById(R.id.news_list));
@@ -498,6 +499,10 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
             setupConnectedToInternet();
         }
         connectToChannel();
+
+        if (newsPlugin != null) {
+            newsPlugin.resetBadgeCount();
+        }
     }
 
     @Override

@@ -18,7 +18,12 @@
 
 package com.mobicage.rogerthat.plugins.news;
 
+import android.app.Activity;
+import android.content.Intent;
+
 import com.mobicage.rogerthat.MainService;
+import com.mobicage.rogerthat.NewsActivity;
+import com.mobicage.rogerthat.NewsPinnedActivity;
 import com.mobicage.rogerthat.config.Configuration;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
 import com.mobicage.rogerthat.plugins.MobicagePlugin;
@@ -26,6 +31,7 @@ import com.mobicage.rogerthat.util.db.DatabaseManager;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.T;
+import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.CallReceiver;
 import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.to.news.GetNewsItemsRequestTO;
@@ -49,6 +55,7 @@ public class NewsPlugin implements MobicagePlugin {
 
     private static final String CONFIGKEY = "com.mobicage.rogerthat.plugins.news";
     private static final String UPDATED_SINCE = "updated_since";
+    private static final String BADGE_COUNT = "badge_count";
 
     private final MainService mMainService;
     private final NewsStore mStore;
@@ -56,6 +63,7 @@ public class NewsPlugin implements MobicagePlugin {
     private final ConfigurationProvider mConfigProvider;
 
     private long mUpdatedSince;
+    private long mBadgeCount;
 
     public NewsPlugin(final MainService pMainService, ConfigurationProvider pConfigProvider, final DatabaseManager pDatabaseManager) {
         T.UI();
@@ -65,6 +73,7 @@ public class NewsPlugin implements MobicagePlugin {
 
         Configuration cfg = mConfigProvider.getConfiguration(CONFIGKEY);
         mUpdatedSince = cfg.get(UPDATED_SINCE, 0);
+        mBadgeCount = cfg.get(BADGE_COUNT, 0);
 
         mMainService.addHighPriorityIntent(GET_NEWS_RECEIVED_INTENT);
         mMainService.addHighPriorityIntent(GET_NEWS_ITEMS_RECEIVED_INTENT);
@@ -190,5 +199,41 @@ public class NewsPlugin implements MobicagePlugin {
             cfg.put(UPDATED_SINCE, updatedSince);
             mConfigProvider.updateConfigurationNow(CONFIGKEY, cfg);
         }
+    }
+
+    public void resetBadgeCount() {
+        if (mBadgeCount > 0) {
+            mBadgeCount = 0;
+            storeBadgeCount();
+            updateBadge();
+        }
+    }
+
+    public void increaseBadgeCount() {
+        Activity currentActivity = UIUtils.getTopActivity(mMainService);
+        if (currentActivity instanceof NewsActivity || currentActivity instanceof NewsPinnedActivity) {
+            return;
+        }
+
+        mBadgeCount += 1;
+        storeBadgeCount();
+        updateBadge();
+    }
+
+    private void storeBadgeCount() {
+        Configuration cfg = mConfigProvider.getConfiguration(CONFIGKEY);
+        cfg.put(BADGE_COUNT, mBadgeCount);
+        mConfigProvider.updateConfigurationNow(CONFIGKEY, cfg);
+    }
+
+    private void updateBadge() {
+        Intent intent = new Intent(MainService.UPDATE_BADGE_INTENT);
+        intent.putExtra("key", "news");
+        intent.putExtra("count", getBadgeCount());
+        mMainService.sendBroadcast(intent);
+    }
+
+    public long getBadgeCount() {
+        return mBadgeCount;
     }
 }

@@ -1783,5 +1783,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
     private void restoreBadgeValues() {
         MessagingPlugin messagingPlugin = getPlugin(MessagingPlugin.class);
         badges.put("messages", messagingPlugin.getBadgeCount());
+        NewsPlugin newsPlugin = getPlugin(NewsPlugin.class);
+        badges.put("news", newsPlugin.getBadgeCount());
     }
 }
