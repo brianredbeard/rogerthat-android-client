@@ -32,6 +32,9 @@ public class IdentityTO implements com.mobicage.rpc.IJSONable {
     public boolean hasBirthdate;
     public boolean hasGender;
     public String name;
+    public String owncloudPassword;
+    public String owncloudUri;
+    public String owncloudUsername;
     public String profileData;
     public String qualifiedIdentifier;
 
@@ -93,6 +96,24 @@ public class IdentityTO implements com.mobicage.rpc.IJSONable {
         } else {
             throw new IncompleteMessageException("com.mobicage.to.system.IdentityTO object is missing field 'name'");
         }
+        if (json.containsKey("owncloudPassword")) {
+            Object val = json.get("owncloudPassword");
+            this.owncloudPassword = (String) val;
+        } else {
+            throw new IncompleteMessageException("com.mobicage.to.system.IdentityTO object is missing field 'owncloudPassword'");
+        }
+        if (json.containsKey("owncloudUri")) {
+            Object val = json.get("owncloudUri");
+            this.owncloudUri = (String) val;
+        } else {
+            throw new IncompleteMessageException("com.mobicage.to.system.IdentityTO object is missing field 'owncloudUri'");
+        }
+        if (json.containsKey("owncloudUsername")) {
+            Object val = json.get("owncloudUsername");
+            this.owncloudUsername = (String) val;
+        } else {
+            throw new IncompleteMessageException("com.mobicage.to.system.IdentityTO object is missing field 'owncloudUsername'");
+        }
         if (json.containsKey("profileData")) {
             Object val = json.get("profileData");
             this.profileData = (String) val;
@@ -117,6 +138,9 @@ public class IdentityTO implements com.mobicage.rpc.IJSONable {
         obj.put("hasBirthdate", this.hasBirthdate);
         obj.put("hasGender", this.hasGender);
         obj.put("name", this.name);
+        obj.put("owncloudPassword", this.owncloudPassword);
+        obj.put("owncloudUri", this.owncloudUri);
+        obj.put("owncloudUsername", this.owncloudUsername);
         obj.put("profileData", this.profileData);
         obj.put("qualifiedIdentifier", this.qualifiedIdentifier);
         return obj;
