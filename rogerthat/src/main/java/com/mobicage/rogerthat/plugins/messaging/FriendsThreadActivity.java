@@ -77,6 +77,9 @@ import com.mobicage.to.messaging.ButtonTO;
 import com.mobicage.to.messaging.MemberStatusTO;
 import com.mobicage.to.messaging.MessageTO;
 
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -917,10 +920,11 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         final boolean isChat = SystemUtils.isFlagEnabled(mFlags, MessagingPlugin.FLAG_DYNAMIC_CHAT);
         if (isChat) {
             setTitle(R.string.group_chat);
+            JSONObject json = (JSONObject) JSONValue.parse(parentMessage.message);
+            getSupportActionBar().setSubtitle((String) json.get("t"));
             return;
         }
         List<String> members = new ArrayList<>();
-
         Collection<MessageMemberStatus> leastMemberStatusses = mMessageStore.getLeastMemberStatusses(mParentMessageKey);
         memberStatusTOMap.clear();
         for (final MessageMemberStatus memberStatus : leastMemberStatusses) {
