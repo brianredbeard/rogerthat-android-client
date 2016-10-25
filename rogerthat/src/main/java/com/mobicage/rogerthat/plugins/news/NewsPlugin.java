@@ -159,7 +159,7 @@ public class NewsPlugin implements MobicagePlugin {
         }
     }
 
-    public void saveNewsStatistic(final long[] newsIds, final String type) {
+    public void saveNewsStatistics(final long[] newsIds, final String type) {
         SafeRunnable runnable = new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
@@ -167,7 +167,7 @@ public class NewsPlugin implements MobicagePlugin {
                 SaveNewsStatisticsRequestTO request = new SaveNewsStatisticsRequestTO();
                 request.news_ids = newsIds;
                 request.type = type;
-                com.mobicage.api.news.Rpc.saveNewsStatistic(responseHandler, request);
+                com.mobicage.api.news.Rpc.saveNewsStatistics(responseHandler, request);
             }
         };
 

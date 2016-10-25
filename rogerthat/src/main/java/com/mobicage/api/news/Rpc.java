@@ -42,7 +42,7 @@ public class Rpc {
         com.mobicage.rpc.Rpc.call("com.mobicage.api.news.getNewsItems", arguments, responseHandler);
     }
 
-    public static void saveNewsStatistic(com.mobicage.rpc.IResponseHandler<com.mobicage.to.news.SaveNewsStatisticsResponseTO> responseHandler,
+    public static void saveNewsStatistics(com.mobicage.rpc.IResponseHandler<com.mobicage.to.news.SaveNewsStatisticsResponseTO> responseHandler,
             com.mobicage.to.news.SaveNewsStatisticsRequestTO request) throws Exception {
         java.util.Map<java.lang.String, java.lang.Object> arguments = new java.util.LinkedHashMap<java.lang.String, java.lang.Object>();
         if (request == null) {
