@@ -36,8 +36,8 @@ import com.mobicage.rpc.CallReceiver;
 import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.to.news.GetNewsItemsRequestTO;
 import com.mobicage.to.news.GetNewsRequestTO;
-import com.mobicage.to.news.NewsStatisticsRequestTO;
-import com.mobicage.to.news.NewsStatisticsResponseTO;
+import com.mobicage.to.news.SaveNewsStatisticsRequestTO;
+import com.mobicage.to.news.SaveNewsStatisticsResponseTO;
 import com.mobicage.to.system.SettingsTO;
 
 import java.io.IOException;
@@ -163,8 +163,8 @@ public class NewsPlugin implements MobicagePlugin {
         SafeRunnable runnable = new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
-                ResponseHandler<NewsStatisticsResponseTO> responseHandler = new ResponseHandler<>();
-                NewsStatisticsRequestTO request = new NewsStatisticsRequestTO();
+                ResponseHandler<SaveNewsStatisticsResponseTO> responseHandler = new ResponseHandler<>();
+                SaveNewsStatisticsRequestTO request = new SaveNewsStatisticsRequestTO();
                 request.news_ids = newsIds;
                 request.type = type;
                 com.mobicage.api.news.Rpc.saveNewsStatistic(responseHandler, request);

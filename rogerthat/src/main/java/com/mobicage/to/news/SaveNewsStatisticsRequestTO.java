@@ -23,15 +23,15 @@ import com.mobicage.rpc.IncompleteMessageException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class NewsStatisticsRequestTO implements com.mobicage.rpc.IJSONable {
+public class SaveNewsStatisticsRequestTO implements com.mobicage.rpc.IJSONable {
 
     public long[] news_ids;
     public String type;
 
-    public NewsStatisticsRequestTO() {
+    public SaveNewsStatisticsRequestTO() {
     }
 
-    public NewsStatisticsRequestTO(Map<String, Object> json) throws IncompleteMessageException {
+    public SaveNewsStatisticsRequestTO(Map<String, Object> json) throws IncompleteMessageException {
         if (json.containsKey("news_ids")) {
             org.json.simple.JSONArray val_arr = (org.json.simple.JSONArray) json.get("news_ids");
             if (val_arr == null) {
@@ -43,13 +43,13 @@ public class NewsStatisticsRequestTO implements com.mobicage.rpc.IJSONable {
                 }
             }
         } else {
-            throw new IncompleteMessageException("com.mobicage.to.news.NewsStatisticsRequestTO object is missing field 'news_ids'");
+            throw new IncompleteMessageException("com.mobicage.to.news.SaveNewsStatisticsRequestTO object is missing field 'news_ids'");
         }
         if (json.containsKey("type")) {
             Object val = json.get("type");
             this.type = (String) val;
         } else {
-            throw new IncompleteMessageException("com.mobicage.to.news.NewsStatisticsRequestTO object is missing field 'type'");
+            throw new IncompleteMessageException("com.mobicage.to.news.SaveNewsStatisticsRequestTO object is missing field 'type'");
         }
     }
 
