@@ -50,7 +50,7 @@ public class Rpc {
         } else {
             arguments.put("request", request.toJSONMap());
         }
-        com.mobicage.rpc.Rpc.call("com.mobicage.api.news.saveNewsStatistic", arguments, responseHandler);
+        com.mobicage.rpc.Rpc.call("com.mobicage.api.news.saveNewsStatistics", arguments, responseHandler);
     }
 
 }
