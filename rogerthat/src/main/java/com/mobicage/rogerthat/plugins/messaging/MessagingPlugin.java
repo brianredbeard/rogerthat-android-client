@@ -434,7 +434,6 @@ public class MessagingPlugin implements MobicagePlugin {
             jumpToServiceHomeScreenWhenFinished) {
         FriendsPlugin friendsPlugin = mMainService.getPlugin(FriendsPlugin.class);
         int friendType = friendsPlugin.getStore().getFriendType(message.sender);
-
         String threadKey = message.parent_key != null ? message.parent_key : message.key;
         if (SystemUtils.isFlagEnabled(message.flags, FLAG_DYNAMIC_CHAT)
             || isHumanThread(message, friendType, friendsPlugin)) {

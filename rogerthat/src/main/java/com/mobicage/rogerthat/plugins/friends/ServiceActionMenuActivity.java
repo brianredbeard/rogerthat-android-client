@@ -42,7 +42,6 @@ import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -95,7 +94,7 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
     }
 
     private WebView brandingWebview;
-    private FrameLayout headerContainer;
+    private LinearLayout mHeaderContainer;
     private LinearLayout pages;
     private final Cell[][] cells = new Cell[4][3];
     private final TableRow[] tableRows = new TableRow[3];
@@ -126,7 +125,7 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
         page = intent.getIntExtra(MENU_PAGE, 0);
         activity = (RelativeLayout) findViewById(R.id.activity);
         badge = (TextView) findViewById(R.id.badge);
-        headerContainer = (FrameLayout) findViewById(R.id.header_container);
+        mHeaderContainer = (LinearLayout) findViewById(R.id.header_container);
         brandingWebview = (WebView) findViewById(R.id.branding);
         brandingWebview.setWebViewClient(new WebViewClient() {
 
@@ -184,7 +183,7 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
         pages.removeAllViews();
         pages.setVisibility(View.GONE);
         brandingWebview.setVisibility(View.GONE);
-        headerContainer.setVisibility(View.GONE);
+        mHeaderContainer.setVisibility(View.GONE);
         activity.setBackgroundResource(R.color.mc_background_color);
         for (TableRow row : tableRows) {
             row.setVisibility(View.VISIBLE);
@@ -309,7 +308,7 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
                     brandingBackgroundColor = br.color;
                     menuItemColor = br.menuItemColor;
                     if (br.displayType.equals(BrandingMgr.DisplayType.NATIVE)) {
-                        ServiceHeader.setupNative(br, headerContainer);
+                        ServiceHeader.setupNative(br, mHeaderContainer);
                         brandingWebview.setVisibility(View.GONE);
                     } else {
                         setupWebView(br, displayWidth);
@@ -464,7 +463,7 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
         settings.setBlockNetworkImage(false);
         brandingWebview.setVerticalScrollBarEnabled(false);
         brandingWebview.setVisibility(View.VISIBLE);
-        headerContainer.setVisibility(View.GONE);
+        mHeaderContainer.setVisibility(View.GONE);
 
         final int calculatedHeight = BrandingMgr.calculateHeight(brandingResult, displayWidth);
         final long start = System.currentTimeMillis();

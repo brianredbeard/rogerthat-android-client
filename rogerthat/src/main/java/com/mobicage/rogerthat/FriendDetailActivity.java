@@ -36,8 +36,8 @@ import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.mobicage.rogerth.at.R;
@@ -106,7 +106,7 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
 
     protected String mContextMatch;
 
-    private FrameLayout mHeaderContainer;
+    private LinearLayout mHeaderContainer;
     private WebView mWebview;
     private TextView mDescriptionView;
 
@@ -121,7 +121,7 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
         mPokeArea = findViewById(R.id.poke_area);
         mFriendArea = findViewById(R.id.friend_area);
         mHeader = findViewById(R.id.friend_detail_header);
-        mHeaderContainer = (FrameLayout) findViewById(R.id.header_container);
+        mHeaderContainer = (LinearLayout) findViewById(R.id.header_container);
         mWebview = (WebView) findViewById(R.id.webview);
         mDescriptionView = (TextView) mServiceArea.findViewById(R.id.description);
     }

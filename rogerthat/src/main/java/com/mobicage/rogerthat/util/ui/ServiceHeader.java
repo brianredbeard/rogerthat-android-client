@@ -6,19 +6,37 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
+import com.mobicage.rogerthat.util.TextUtils;
 
 import static com.mobicage.rogerthat.util.ui.ImageHelper.getRoundedCornerAvatar;
 
 public class ServiceHeader {
 
-    public static void setupNative(final BrandingMgr.BrandingResult brandingResult, final FrameLayout headerContainer) {
+    public static void setupNative(final BrandingMgr.BrandingResult brandingResult, final LinearLayout headerContainer) {
+        final FrameLayout imagesContainer = (FrameLayout) headerContainer.findViewById(R.id.images_container);
         final ImageView logoImage = (ImageView) headerContainer.findViewById(R.id.logo_image);
         final ImageView avatarImage = (ImageView) headerContainer.findViewById(R.id.avatar_image);
+        final TextView senderNameView = (TextView) headerContainer.findViewById(R.id.sender_name);
+        final TextView messageView = (TextView) headerContainer.findViewById(R.id.message);
         final Bitmap logo = BitmapFactory.decodeFile(brandingResult.logo.getAbsolutePath());
         headerContainer.setVisibility(View.VISIBLE);
+        if (TextUtils.isEmptyOrWhitespace(brandingResult.senderName)) {
+            senderNameView.setVisibility(View.GONE);
+        } else {
+            senderNameView.setText(brandingResult.senderName);
+            senderNameView.setVisibility(View.VISIBLE);
+        }
+        if (TextUtils.isEmptyOrWhitespace(brandingResult.message)) {
+            messageView.setVisibility(View.GONE);
+        } else {
+            messageView.setVisibility(View.VISIBLE);
+            messageView.setText(brandingResult.message);
+        }
         logoImage.setVisibility(View.VISIBLE);
         logoImage.setImageBitmap(logo);
         if (brandingResult.avatar != null) {
@@ -38,7 +56,7 @@ public class ServiceHeader {
                     }
                     int avatarHeight = logoImage.getHeight();
                     int halfAvatarHeight = Math.round(avatarHeight / 2);
-                    headerContainer.getLayoutParams().height = avatarHeight + halfAvatarHeight;
+                    imagesContainer.getLayoutParams().height = avatarHeight + halfAvatarHeight;
                     ViewGroup.MarginLayoutParams avatarMarginLayoutParams = (ViewGroup.MarginLayoutParams) avatarImage.getLayoutParams();
                     //noinspection SuspiciousNameCombination
                     avatarMarginLayoutParams.width = avatarHeight;

@@ -149,7 +149,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
     private boolean mTransfering = false;
 
     private ImageView mStatusImage;
-    private FrameLayout mHeaderContainer;
+    private LinearLayout mHeaderContainer;
 
     public void setTransfering(boolean b) {
         mTransfering = b;
@@ -203,7 +203,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         setContentView(R.layout.message_detail);
-        mHeaderContainer = (FrameLayout) findViewById(R.id.header_container);
+        mHeaderContainer = (LinearLayout) findViewById(R.id.header_container);
     }
 
     @Override

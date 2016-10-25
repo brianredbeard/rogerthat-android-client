@@ -366,11 +366,14 @@ public class BrandingMgr implements Pickleable, Closeable {
         public final DisplayType displayType;
         public final File avatar;
         public final File logo;
+        public final String message;
+        public final String senderName;
 
         public BrandingResult(File dir, File file, File watermark, Integer color, Integer menuItemColor,
                               ColorScheme scheme, boolean showHeader, Dimension dimension1, Dimension dimension2,
                               String contentType, Orientation orientation, boolean wakelockEnabled, List<String>
-                                      externalUrlPatterns, DisplayType displayType, File avatar, File logo) {
+                                      externalUrlPatterns, DisplayType displayType, File avatar, File logo,
+                              String message, String senderName) {
             this.dir = dir;
             this.file = file;
             this.watermark = watermark;
@@ -387,6 +390,8 @@ public class BrandingMgr implements Pickleable, Closeable {
             this.displayType = displayType;
             this.avatar = avatar;
             this.logo = logo;
+            this.message = message;
+            this.senderName = senderName;
         }
     }
 
@@ -1031,6 +1036,8 @@ public class BrandingMgr implements Pickleable, Closeable {
             ByteArrayOutputStream brandingBos = new ByteArrayOutputStream();
             File logoPath = null;
             File avatarPath = null;
+            String message = "";
+            String senderName = "";
             try {
                 MessageDigest digester = MessageDigest.getInstance("SHA256");
                 DigestInputStream dis = new DigestInputStream(new BufferedInputStream(new FileInputStream(
@@ -1099,16 +1106,17 @@ public class BrandingMgr implements Pickleable, Closeable {
 
                 switch (item.type) {
                 case BrandedItem.TYPE_MESSAGE:
-                    MessageTO message = (MessageTO) item.object;
+                    MessageTO messageTO = (MessageTO) item.object;
+                    message = messageTO.message;
                     brandingHtml = brandingHtml.replace(NUNTIUZ_MESSAGE,
-                        TextUtils.htmlEncode(message.message).replace("\r", "").replace("\n", "<br>"));
+                            TextUtils.htmlEncode(message).replace("\r", "").replace("\n", "<br>"));
 
                     brandingHtml = brandingHtml.replace(NUNTIUZ_TIMESTAMP,
-                        TimeUtils.getDayTimeStr(mContext, message.timestamp * 1000));
+                            TimeUtils.getDayTimeStr(mContext, messageTO.timestamp * 1000));
 
                     FriendsPlugin friendsPlugin = mMainService.getPlugin(FriendsPlugin.class);
-                    brandingHtml = brandingHtml.replace(NUNTIUZ_IDENTITY_NAME,
-                        TextUtils.htmlEncode(friendsPlugin.getName(message.sender)));
+                    senderName = friendsPlugin.getName(messageTO.sender);
+                    brandingHtml = brandingHtml.replace(NUNTIUZ_IDENTITY_NAME, TextUtils.htmlEncode(senderName));
                     break;
                 case BrandedItem.TYPE_FRIEND:
                     FriendTO friend = (FriendTO) item.object;
@@ -1117,7 +1125,8 @@ public class BrandingMgr implements Pickleable, Closeable {
                         .replace("\r", "").replace("\n", "<br>"));
 
                     brandingHtml = brandingHtml.replace(NUNTIUZ_IDENTITY_NAME, TextUtils.htmlEncode(friend.name));
-
+                    message = friend.description;
+                    senderName = friend.name;
                     break;
                 case BrandedItem.TYPE_GENERIC:
                     if (item.object instanceof FriendTO) {
@@ -1247,7 +1256,7 @@ public class BrandingMgr implements Pickleable, Closeable {
                 }
                 return new BrandingResult(tmpBrandingDir, brandingFile, watermarkFile, backgroundColor, menuItemColor,
                         scheme, showHeader, dimension1, dimension2, contentType, orientation, wakelockEnabled,
-                        externalUrlPatterns, displayType, avatarPath, logoPath);
+                        externalUrlPatterns, displayType, avatarPath, logoPath, message, senderName);
             } finally {
                 brandingBos.close();
             }
