@@ -545,7 +545,7 @@ public class ResponseReceiverHandler {
                 resp.setResult(Parser.ComMobicageToNewsGetNewsItemsResponseTO(rpcr.result));
             ((IResponseHandler<com.mobicage.to.news.GetNewsItemsResponseTO>) responseHandler).handle(resp);
         }
-        if ("com.mobicage.api.news.newsStatistics".equals(function)) {
+        if ("com.mobicage.api.news.saveNewsStatistic".equals(function)) {
             final Response<com.mobicage.to.news.NewsStatisticsResponseTO> resp = new Response<com.mobicage.to.news.NewsStatisticsResponseTO>();
             resp.setError(rpcr.error);
             resp.setSuccess(rpcr.success);

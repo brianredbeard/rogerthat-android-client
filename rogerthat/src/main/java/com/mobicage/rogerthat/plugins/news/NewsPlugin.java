@@ -36,10 +36,8 @@ import com.mobicage.rpc.CallReceiver;
 import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.to.news.GetNewsItemsRequestTO;
 import com.mobicage.to.news.GetNewsRequestTO;
-import com.mobicage.to.news.NewsReadRequestTO;
-import com.mobicage.to.news.NewsReadResponseTO;
-import com.mobicage.to.news.NewsRogeredRequestTO;
-import com.mobicage.to.news.NewsRogeredResponseTO;
+import com.mobicage.to.news.NewsStatisticsRequestTO;
+import com.mobicage.to.news.NewsStatisticsResponseTO;
 import com.mobicage.to.system.SettingsTO;
 
 import java.io.IOException;
@@ -52,6 +50,11 @@ public class NewsPlugin implements MobicagePlugin {
     public static final String PINNED_NEWS_ITEM_INTENT = "com.mobicage.rogerthat.plugins.news.PINNED_NEWS_ITEM_INTENT";
     public static final String NEW_NEWS_ITEM_INTENT = "com.mobicage.rogerthat.plugins.news.NEW_NEWS_ITEM_INTENT";
     public static final String DISABLE_NEWS_ITEM_INTENT = "com.mobicage.rogerthat.plugins.news.DISABLE_NEWS_ITEM_INTENT";
+
+    public static final String STATISTIC_REACH = "news.reached";
+    public static final String STATISTIC_ROGERED = "news.rogered";
+    public static final String STATISTIC_FOLLOWED = "news.followed";
+    public static final String STATISTIC_ACTION = "news.action";
 
     private static final String CONFIGKEY = "com.mobicage.rogerthat.plugins.news";
     private static final String UPDATED_SINCE = "updated_since";
@@ -156,32 +159,15 @@ public class NewsPlugin implements MobicagePlugin {
         }
     }
 
-    public void newsRead(final long[] ids) {
+    public void saveNewsStatistic(final long[] newsIds, final String type) {
         SafeRunnable runnable = new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
-                ResponseHandler<NewsReadResponseTO> responseHandler = new ResponseHandler<NewsReadResponseTO>();
-                NewsReadRequestTO request = new NewsReadRequestTO();
-                request.news_ids = ids;
-                com.mobicage.api.news.Rpc.newsRead(responseHandler, request);
-            }
-        };
-
-        if (com.mobicage.rogerthat.util.system.T.getThreadType() == com.mobicage.rogerthat.util.system.T.BIZZ) {
-            runnable.run();
-        } else {
-            mMainService.postAtFrontOfBIZZHandler(runnable);
-        }
-    }
-
-    public void newsRogered(final long id) {
-        SafeRunnable runnable = new SafeRunnable() {
-            @Override
-            protected void safeRun() throws Exception {
-                ResponseHandler<NewsRogeredResponseTO> responseHandler = new ResponseHandler<NewsRogeredResponseTO>();
-                NewsRogeredRequestTO request = new NewsRogeredRequestTO();
-                request.news_id = id;
-                com.mobicage.api.news.Rpc.newsRogered(responseHandler, request);
+                ResponseHandler<NewsStatisticsResponseTO> responseHandler = new ResponseHandler<>();
+                NewsStatisticsRequestTO request = new NewsStatisticsRequestTO();
+                request.news_ids = newsIds;
+                request.type = type;
+                com.mobicage.api.news.Rpc.saveNewsStatistic(responseHandler, request);
             }
         };
 

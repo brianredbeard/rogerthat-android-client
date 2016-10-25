@@ -370,8 +370,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                     mActivity.newsChannel.readNews(newsItem.id);
                 }
             });
-
-            mActivity.newsPlugin.newsRead(new long[]{newsItem.id});
+            mActivity.newsPlugin.saveNewsStatistic(new long[]{newsItem.id}, NewsPlugin.STATISTIC_REACH);
         }
 
         setupPinned(viewHolder, newsItem);
@@ -496,7 +495,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                         mMainService.postAtFrontOfBIZZHandler(new SafeRunnable() {
                             @Override
                             protected void safeRun() throws Exception {
-                                mActivity.newsPlugin.newsRogered(newsItem.id);
+                                mActivity.newsPlugin.saveNewsStatistic(new long[]{newsItem.id}, NewsPlugin.STATISTIC_ROGERED);
                                 mActivity.newsStore.setNewsItemRogered(newsItem.id);
                                 mActivity.newsStore.addUser(newsItem.id, mMyEmail);
                                 mActivity.newsChannel.rogerNews(newsItem.id);
@@ -537,6 +536,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                     final int currentExistenceStatus = mActivity.friendsPlugin.getStore().getExistence(newsItem.sender.email);
                     if (currentExistenceStatus != Friend.ACTIVE) {
                         mActivity.friendsPlugin.inviteFriend(newsItem.sender.email, null, null, false);
+                        mActivity.newsPlugin.saveNewsStatistic(new long[]{newsItem.id}, NewsPlugin.STATISTIC_FOLLOWED);
                     }
                     followButton.setBackgroundColor(ContextCompat.getColor(mActivity, R.color.mc_divider_gray));
                 }
@@ -566,8 +566,10 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 @Override
                 public void safeOnClick(View v) {
                     if (Message.MC_CONFIRM_PREFIX.equals(buttonAction)) {
-                        // ignore
-                    } else if (Message.MC_SMI_PREFIX.equals(buttonAction)) {
+                        return;
+                    }
+                    mActivity.newsPlugin.saveNewsStatistic(new long[]{newsItem.id}, NewsPlugin.STATISTIC_ACTION);
+                    if (Message.MC_SMI_PREFIX.equals(buttonAction)) {
                         final int currentExistenceStatus = mActivity.friendsPlugin.getStore().getExistence(newsItem.sender.email);
                         if (Friend.ACTIVE == currentExistenceStatus) {
                             if (mMenuItemPresser != null) {
