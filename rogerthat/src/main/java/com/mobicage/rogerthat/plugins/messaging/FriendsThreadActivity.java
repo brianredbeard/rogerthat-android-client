@@ -433,11 +433,11 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             final boolean isChat = SystemUtils.isFlagEnabled(message.flags, MessagingPlugin.FLAG_DYNAMIC_CHAT);
             final boolean allowChatButtons = SystemUtils.isFlagEnabled(message.flags,
                 MessagingPlugin.FLAG_ALLOW_CHAT_BUTTONS);
-            String senderName = setMessageInfo(context, view, isSender, message, isChat);
-            setSenderAvatar(context, view, c, message);
-            setMessage(message, context, view);
-            setAttachments(message, context, view);
-            setMemberStatuses(message, context, view);
+            String senderName = setMessageInfo(view, isSender, message, isChat);
+            setSenderAvatar(view, c, message);
+            setMessage(message, view);
+            setAttachments(message, view);
+            setMemberStatuses(message, isChat, view);
             if (!isChat || allowChatButtons) {
                 boolean isLocked = SystemUtils.isFlagEnabled(message.flags, MessagingPlugin.FLAG_LOCKED);
                 boolean canEdit = isLocked;
@@ -454,25 +454,29 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             return view;
         }
 
-        private void setMemberStatuses(Message message, Context context, View view) {
+        private void setMemberStatuses(Message message, boolean isChat, View view) {
             LinearLayout container = (LinearLayout) view.findViewById(R.id.read_friends_container);
-            final boolean isChat = SystemUtils.isFlagEnabled(message.flags, MessagingPlugin.FLAG_DYNAMIC_CHAT);
             boolean shouldShowStatuses = false;
-            for (MemberStatusTO memberStatus : message.members) {
-                boolean isOwnStatus = memberStatus.member.equals(mMyEmail);
-                boolean isAcked = SystemUtils.isFlagEnabled(memberStatus.status, MessagingPlugin.STATUS_ACKED);
-                MessageMemberStatus lastMemberStatus = memberStatusTOMap.get(memberStatus.member);
-                boolean isSameTimeStamp = lastMemberStatus != null && message.key.equals(lastMemberStatus.messageKey);
-                if (isSameTimeStamp && !isOwnStatus && isAcked) {
-                    ImageView avatar = getMemberAvatar(memberStatus, isChat, false, _20_DP_IN_PX);
-                    shouldShowStatuses = true;
-                    container.addView(avatar);
+            if (!isChat) {
+                for (MemberStatusTO memberStatus : message.members) {
+                    if (memberStatus.member.equals(mMyEmail)) {
+                        continue;
+                    }
+                    if (!SystemUtils.isFlagEnabled(memberStatus.status, MessagingPlugin.STATUS_ACKED)) {
+                        continue;
+                    }
+                    MessageMemberStatus lastMemberStatus = memberStatusTOMap.get(memberStatus.member);
+                    if (message.key.equals(lastMemberStatus.messageKey)) {
+                        ImageView avatar = getMemberAvatar(memberStatus, false, false, _20_DP_IN_PX);
+                        shouldShowStatuses = true;
+                        container.addView(avatar);
+                    }
                 }
             }
             container.setVisibility(shouldShowStatuses ? View.VISIBLE : View.GONE);
         }
 
-        private void setAttachments(final Message message, final Context context, final View view) {
+        private void setAttachments(final Message message, final View view) {
             if (message.attachments.length > 0) {
                 final String threadKey = message.parent_key == null ? message.key : message.parent_key;
                 final File attachmentsDir;
@@ -734,7 +738,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             return avatar;
         }
 
-        private void setMessage(MessageTO message, Context context, View view) {
+        private void setMessage(MessageTO message, View view) {
             TextView messageView = (TextView) view.findViewById(R.id.message);
             if (message.message == null || "".equals(message.message)) {
                 messageView.setVisibility(View.GONE);
@@ -744,7 +748,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             }
         }
 
-        private void setSenderAvatar(Context context, View view, Cursor c, final MessageTO message) {
+        private void setSenderAvatar(View view, Cursor c, final MessageTO message) {
             ImageView senderAvatar = (ImageView) view.findViewById(R.id.sender_avatar);
             ProgressBar spinner = (ProgressBar) view.findViewById(R.id.spinner); // todo ruben
             final boolean isChat = SystemUtils.isFlagEnabled(message.flags, MessagingPlugin.FLAG_DYNAMIC_CHAT);
@@ -798,7 +802,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             configureAvatarOnClickListener(message.sender, senderAvatar, isChat);
         }
 
-        private String setMessageInfo(Context context, View view, boolean isSender, MessageTO message, boolean isChat) {
+        private String setMessageInfo(View view, boolean isSender, MessageTO message, boolean isChat) {
             if (message.priority == Message.PRIORITY_HIGH) {
                 RelativeLayout textBubble = (RelativeLayout) view.findViewById(R.id.text_bubble);
                 if (isSender) {
@@ -925,12 +929,11 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             return;
         }
         List<String> members = new ArrayList<>();
+
         Collection<MessageMemberStatus> leastMemberStatusses = mMessageStore.getLeastMemberStatusses(mParentMessageKey);
         memberStatusTOMap.clear();
         for (final MessageMemberStatus memberStatus : leastMemberStatusses) {
-            if (!memberStatusTOMap.containsKey(memberStatus.member)) {
-                memberStatusTOMap.put(memberStatus.member, memberStatus);
-            }
+            memberStatusTOMap.put(memberStatus.member, memberStatus);
         }
 
         for (MemberStatusTO memberStatus : parentMessage.members) {
