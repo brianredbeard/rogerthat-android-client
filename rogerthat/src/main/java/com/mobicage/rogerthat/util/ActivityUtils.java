@@ -125,6 +125,12 @@ public class ActivityUtils {
                     Intent intent = new Intent(context, ServiceActionMenuActivity.class);
                     intent.putExtra(ServiceActionMenuActivity.SERVICE_EMAIL, serviceEmail);
                     intent.putExtra(ServiceActionMenuActivity.MENU_PAGE, 0);
+                    if (clearStack) {
+                        intent.addFlags(MainActivity.FLAG_CLEAR_STACK);
+                    }
+                    if (extras != null) {
+                        intent.putExtras(extras);
+                    }
                     context.startActivity(intent);
                     return;
                 }
