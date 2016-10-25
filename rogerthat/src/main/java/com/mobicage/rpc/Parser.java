@@ -18,9 +18,6 @@
 
 package com.mobicage.rpc;
 
-import com.mobicage.to.news.SaveNewsStatisticsRequestTO;
-import com.mobicage.to.news.SaveNewsStatisticsResponseTO;
-
 import java.util.Map;
 
 public class Parser {
@@ -2144,17 +2141,17 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
-    public static SaveNewsStatisticsRequestTO ComMobicageToNewsNewsStatisticsRequestTO(Object value) throws IncompleteMessageException {
+    public static com.mobicage.to.news.SaveNewsStatisticsRequestTO ComMobicageToNewsSaveNewsStatisticsRequestTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;
-        return new SaveNewsStatisticsRequestTO((Map<String, Object>) value);
+        return new com.mobicage.to.news.SaveNewsStatisticsRequestTO((Map<String, Object>) value);
     }
 
     @SuppressWarnings("unchecked")
-    public static SaveNewsStatisticsResponseTO ComMobicageToNewsNewsStatisticsResponseTO(Object value) throws IncompleteMessageException {
+    public static com.mobicage.to.news.SaveNewsStatisticsResponseTO ComMobicageToNewsSaveNewsStatisticsResponseTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;
-        return new SaveNewsStatisticsResponseTO((Map<String, Object>) value);
+        return new com.mobicage.to.news.SaveNewsStatisticsResponseTO((Map<String, Object>) value);
     }
 
     @SuppressWarnings("unchecked")

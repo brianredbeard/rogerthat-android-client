@@ -18,8 +18,6 @@
 
 package com.mobicage.rpc;
 
-import com.mobicage.to.news.SaveNewsStatisticsResponseTO;
-
 public class ResponseReceiverHandler {
 
     @SuppressWarnings("unchecked")
@@ -548,13 +546,13 @@ public class ResponseReceiverHandler {
             ((IResponseHandler<com.mobicage.to.news.GetNewsItemsResponseTO>) responseHandler).handle(resp);
         }
         if ("com.mobicage.api.news.saveNewsStatistic".equals(function)) {
-            final Response<SaveNewsStatisticsResponseTO> resp = new Response<SaveNewsStatisticsResponseTO>();
+            final Response<com.mobicage.to.news.SaveNewsStatisticsResponseTO> resp = new Response<com.mobicage.to.news.SaveNewsStatisticsResponseTO>();
             resp.setError(rpcr.error);
             resp.setSuccess(rpcr.success);
             resp.setCallId(rpcr.callId);
             if (rpcr.success)
-                resp.setResult(Parser.ComMobicageToNewsNewsStatisticsResponseTO(rpcr.result));
-            ((IResponseHandler<SaveNewsStatisticsResponseTO>) responseHandler).handle(resp);
+                resp.setResult(Parser.ComMobicageToNewsSaveNewsStatisticsResponseTO(rpcr.result));
+            ((IResponseHandler<com.mobicage.to.news.SaveNewsStatisticsResponseTO>) responseHandler).handle(resp);
         }
         if ("com.mobicage.api.services.findService".equals(function)) {
             final Response<com.mobicage.to.service.FindServiceResponseTO> resp = new Response<com.mobicage.to.service.FindServiceResponseTO>();

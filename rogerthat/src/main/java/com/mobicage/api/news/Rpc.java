@@ -18,9 +18,6 @@
 
 package com.mobicage.api.news;
 
-import com.mobicage.to.news.SaveNewsStatisticsRequestTO;
-import com.mobicage.to.news.SaveNewsStatisticsResponseTO;
-
 public class Rpc {
 
     public static void getNews(com.mobicage.rpc.IResponseHandler<com.mobicage.to.news.GetNewsResponseTO> responseHandler,
@@ -45,8 +42,8 @@ public class Rpc {
         com.mobicage.rpc.Rpc.call("com.mobicage.api.news.getNewsItems", arguments, responseHandler);
     }
 
-    public static void saveNewsStatistic(com.mobicage.rpc.IResponseHandler<SaveNewsStatisticsResponseTO> responseHandler,
-                                         SaveNewsStatisticsRequestTO request) throws Exception {
+    public static void saveNewsStatistic(com.mobicage.rpc.IResponseHandler<com.mobicage.to.news.SaveNewsStatisticsResponseTO> responseHandler,
+            com.mobicage.to.news.SaveNewsStatisticsRequestTO request) throws Exception {
         java.util.Map<java.lang.String, java.lang.Object> arguments = new java.util.LinkedHashMap<java.lang.String, java.lang.Object>();
         if (request == null) {
             arguments.put("request", null);
