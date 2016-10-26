@@ -28,6 +28,7 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -59,6 +60,7 @@ import com.mobicage.rogerthat.IdentityStore;
 import com.mobicage.rogerthat.ServiceBoundCursorListActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
+import com.mobicage.rogerthat.plugins.system.SystemPlugin;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
@@ -145,9 +147,9 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         final Intent intent = getIntent();
         mParentMessageKey = intent.getStringExtra(PARENT_MESSAGE_KEY);
         mFlags = intent.getLongExtra(MESSAGE_FLAGS, 0);
-        setListView((ListView) findViewById(R.id.thread_messages));
+        ListView listView = (ListView) findViewById(R.id.thread_messages);
+        setListView(listView);
         mScroller = Scroller.getInstance();
-        ListView listView = getListView();
         listView.setDivider(null);
         listView.setVerticalScrollBarEnabled(false);
         mScroller.setListView(listView);
@@ -163,6 +165,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         filter2.addAction(BrandingMgr.ATTACHMENT_AVAILABLE_INTENT);
         filter2.addAction(MessagingPlugin.THREAD_MODIFIED_INTENT);
         filter2.addAction(FriendsPlugin.FRIEND_INFO_RECEIVED_INTENT);
+        filter2.addAction(BrandingMgr.ASSET_AVAILABLE_INTENT);
         registerReceiver(mReceiver, filter2);
     }
 
@@ -217,6 +220,16 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             mSendMessageView.setActive(this, mService, null, null, mParentMessageKey, mFlags, mParentMessageKey, mParentMessage.default_priority, mParentMessage.default_sticky);
         } else {
             mSendMessageView.setVisibility(View.GONE);
+        }
+        setThreadBackground();
+    }
+
+    private void setThreadBackground() {
+        Bitmap background = mService.getPlugin(SystemPlugin.class).getAppAsset(SystemPlugin.ASSET_CHAT_BACKGROUND);
+        if (background != null) {
+            BitmapDrawable backgroundDrawable = new BitmapDrawable(getResources(), background);
+            backgroundDrawable.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
+            findViewById(R.id.thread_container).setBackground(backgroundDrawable);
         }
     }
 
@@ -390,6 +403,12 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                 if (intent.getBooleanExtra("success", false)) {
                     refreshCursor();
                     return new String[] { intent.getAction() };
+                }
+            }
+            if (BrandingMgr.ASSET_AVAILABLE_INTENT.equals(intent.getAction())) {
+                String kind = intent.getStringExtra(BrandingMgr.ASSET_KIND);
+                if (SystemPlugin.ASSET_CHAT_BACKGROUND.equals(kind)) {
+                    setThreadBackground();
                 }
             }
             return null;

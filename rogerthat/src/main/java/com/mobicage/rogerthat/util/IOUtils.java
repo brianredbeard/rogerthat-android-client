@@ -57,11 +57,7 @@ public class IOUtils {
     }
 
     public static boolean shouldCheckExternalStorageAvailable() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            return false;
-        } else {
-            return true;
-        }
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.M;
     }
 
     public static void deleteRecursive(File fileOrDirectory) {

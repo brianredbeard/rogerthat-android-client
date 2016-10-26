@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/mc_background_color">
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
 
     <ImageView
         android:id="@+id/sender_avatar"
@@ -43,7 +42,7 @@
             android:layout_alignParentTop="true"
             android:layout_toLeftOf="@id/status"
             android:ellipsize="start"
-            android:singleLine="true"
+            android:maxLines="1"
             android:textColor="@color/mc_gray_11" >
         </TextView>
 

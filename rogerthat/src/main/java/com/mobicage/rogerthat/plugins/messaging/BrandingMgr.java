@@ -64,6 +64,7 @@ import com.mobicage.rpc.IJSONable;
 import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.rpc.RpcCall;
 import com.mobicage.rpc.config.CloudConstants;
+import com.mobicage.to.app.UpdateAppAssetRequestTO;
 import com.mobicage.to.friends.FriendTO;
 import com.mobicage.to.friends.ServiceMenuItemTO;
 import com.mobicage.to.js_embedding.JSEmbeddingItemTO;
@@ -123,6 +124,7 @@ public class BrandingMgr implements Pickleable, Closeable {
         protected static final int TYPE_LOCAL_FLOW_ATTACHMENT = 5;
         protected static final int TYPE_LOCAL_FLOW_BRANDING = 6;
         protected static final int TYPE_ATTACHMENT = 7;
+        protected static final int TYPE_APP_ASSET = 8;
 
         protected static final int STATUS_TODO = 1;
         protected static final int STATUS_DONE = 2;
@@ -137,6 +139,7 @@ public class BrandingMgr implements Pickleable, Closeable {
             DOWNLOAD_PRIORITIES.put(TYPE_LOCAL_FLOW_ATTACHMENT, 8);
             DOWNLOAD_PRIORITIES.put(TYPE_LOCAL_FLOW_BRANDING, 8);
             DOWNLOAD_PRIORITIES.put(TYPE_JS_EMBEDDING_PACKET, 4);
+            DOWNLOAD_PRIORITIES.put(TYPE_ATTACHMENT, 1);
             DOWNLOAD_PRIORITIES.put(TYPE_GENERIC, 0);
             DOWNLOAD_PRIORITIES.put(TYPE_FRIEND, -4);
         }
@@ -174,6 +177,14 @@ public class BrandingMgr implements Pickleable, Closeable {
             this.status = STATUS_TODO;
             this.object = packet;
             this.brandingKey = packet.hash;
+            this.attemptsLeft = 3;
+        }
+
+        public BrandedItem(UpdateAppAssetRequestTO appAsset) {
+            this.type = TYPE_APP_ASSET;
+            this.status = STATUS_TODO;
+            this.object = appAsset;
+            this.brandingKey = appAsset.kind;
             this.attemptsLeft = 3;
         }
 
@@ -232,6 +243,8 @@ public class BrandingMgr implements Pickleable, Closeable {
                 break;
             case TYPE_ATTACHMENT:
                 object = new AttachmentDownload((Map<String, Object>) source.get("object"));
+                case TYPE_APP_ASSET:
+                    object = new UpdateAppAssetRequestTO((Map<String, Object>) source.get("object"));
             }
             this.calls = new ArrayList<RpcCall>();
             JSONArray val_arr = (JSONArray) source.get("calls");
@@ -306,6 +319,12 @@ public class BrandingMgr implements Pickleable, Closeable {
                     AttachmentDownload ad = (AttachmentDownload) object;
                     AttachmentDownload otherAd = (AttachmentDownload) other.object;
                     if (!(ad.threadKey.equals(otherAd.threadKey) && ad.messageKey.equals(otherAd.messageKey))) {
+                        return false;
+                    }
+                } else if (type == TYPE_APP_ASSET) {
+                    UpdateAppAssetRequestTO asset = (UpdateAppAssetRequestTO) object;
+                    UpdateAppAssetRequestTO otherAsset = (UpdateAppAssetRequestTO) other.object;
+                    if (!(asset.kind.equals(otherAsset.kind) && asset.url.equals(otherAsset.kind))) {
                         return false;
                     }
                 }
@@ -410,6 +429,8 @@ public class BrandingMgr implements Pickleable, Closeable {
     public static final String SERVICE_EMAIL = "email";
     public static final String BRANDING_KEY = "branding";
     public static final String ATTACHMENT_AVAILABLE_INTENT = "com.mobicage.rogerthat.plugins.messaging.ATTACHMENT_AVAILABLE_INTENT";
+    public static final String ASSET_AVAILABLE_INTENT = "com.mobicage.rogerthat.plugins.messaging.ASSET_AVAILABLE_INTENT";
+    public static final String ASSET_KIND = "asset_kind";
     public static final String THREAD_KEY = "thread_key";
     public static final String MESSAGE_KEY = "message_key";
     public static final String ATTACHMENT_URL_HASH = "attachment_url_hash";
@@ -661,6 +682,11 @@ public class BrandingMgr implements Pickleable, Closeable {
         return queue(new BrandedItem(BrandedItem.TYPE_ATTACHMENT, attachment, attachment.download_url));
     }
 
+    public boolean queue(UpdateAppAssetRequestTO assetRequestTO) {
+        T.dontCare();
+        return queue(new BrandedItem(assetRequestTO));
+    }
+
     public boolean queueGenericBranding(String brandingKey) {
         return queue(new BrandedItem(BrandedItem.TYPE_GENERIC, null, brandingKey));
     }
@@ -873,6 +899,24 @@ public class BrandingMgr implements Pickleable, Closeable {
                     }
                 }
 
+            });
+        } else if (item.type == BrandedItem.TYPE_APP_ASSET) {
+            final UpdateAppAssetRequestTO updateAppAssetRequestTO = (UpdateAppAssetRequestTO) item.object;
+            mMainService.postOnBIZZHandler(new SafeRunnable() {
+                @Override
+                protected void safeRun() throws Exception {
+                    synchronized (mLock) {
+                        T.BIZZ();
+                        if (item.status == BrandedItem.STATUS_DELETED) {
+                            return;
+                        }
+                        Intent intent = new Intent(ASSET_AVAILABLE_INTENT);
+                        intent.putExtra(ASSET_KIND, updateAppAssetRequestTO.kind);
+                        mMainService.sendBroadcast(intent);
+
+                        deleteItemFromQueue(item);
+                    }
+                }
             });
         } else {
             boolean brandingAvailable = false;
@@ -1476,8 +1520,6 @@ public class BrandingMgr implements Pickleable, Closeable {
         }
     };
 
-    // Not using DownloadManager under api lvl 11
-    @SuppressLint("InlinedApi")
     private File getDownloadedFile(final Long downloadId) throws DownloadNotCompletedException {
         final DownloadManager dwnlMgr = getDownloadManager();
         final Cursor cursor = dwnlMgr.query(new Query().setFilterById(downloadId));
@@ -1550,6 +1592,9 @@ public class BrandingMgr implements Pickleable, Closeable {
         } else if (item.type == BrandedItem.TYPE_ATTACHMENT) {
             final AttachmentDownload attachment = (AttachmentDownload) item.object;
             dstFile = getAttachmentFile(attachment);
+        } else if (item.type == BrandedItem.TYPE_APP_ASSET) {
+            final UpdateAppAssetRequestTO assetRequestTO = (UpdateAppAssetRequestTO) item.object;
+            dstFile = getAssetFile(assetRequestTO.kind);
         } else {
             dstFile = getBrandingFile(item.brandingKey);
         }
@@ -1579,7 +1624,9 @@ public class BrandingMgr implements Pickleable, Closeable {
             DigestInputStream dis = new DigestInputStream(input, digester);
             try {
                 if (item.type == BrandedItem.TYPE_JS_EMBEDDING_PACKET
-                    || item.type == BrandedItem.TYPE_LOCAL_FLOW_ATTACHMENT || item.type == BrandedItem.TYPE_ATTACHMENT) {
+                        || item.type == BrandedItem.TYPE_LOCAL_FLOW_ATTACHMENT
+                        || item.type == BrandedItem.TYPE_ATTACHMENT
+                        || item.type == BrandedItem.TYPE_APP_ASSET) {
                     IOUtils.copy(dis, output, BUFFER_SIZE);
                 } else {
                     try {
@@ -1592,7 +1639,8 @@ public class BrandingMgr implements Pickleable, Closeable {
                 dis.close();
             }
 
-            if (item.type == BrandedItem.TYPE_LOCAL_FLOW_ATTACHMENT || item.type == BrandedItem.TYPE_ATTACHMENT) {
+            if (item.type == BrandedItem.TYPE_LOCAL_FLOW_ATTACHMENT || item.type == BrandedItem.TYPE_ATTACHMENT
+                    || item.type == BrandedItem.TYPE_APP_ASSET) {
             } else {
                 String hexDigest = com.mobicage.rogerthat.util.TextUtils.toHex(digester.digest());
                 if (!brandingKey.equals(hexDigest))
@@ -1611,6 +1659,9 @@ public class BrandingMgr implements Pickleable, Closeable {
                 url = CloudConstants.JS_EMBEDDING_URL_PREFIX + packet.name;
             } else if (item.type == BrandedItem.TYPE_LOCAL_FLOW_ATTACHMENT || item.type == BrandedItem.TYPE_ATTACHMENT) {
                 url = item.brandingKey;
+            } else if (item.type == BrandedItem.TYPE_APP_ASSET) {
+                UpdateAppAssetRequestTO updateAppAssetRequestTO = (UpdateAppAssetRequestTO) item.object;
+                url = updateAppAssetRequestTO.url;
             } else {
                 url = CloudConstants.BRANDING_URL_PREFIX + item.brandingKey;
             }
@@ -1687,6 +1738,9 @@ public class BrandingMgr implements Pickleable, Closeable {
                     AttachmentDownload attachment = (AttachmentDownload) item.object;
                     errorMessage += " for attachment " + attachment.download_url + " in message "
                         + attachment.messageKey;
+                } else if (item.type == BrandedItem.TYPE_APP_ASSET) {
+                    UpdateAppAssetRequestTO appAssetRequestTO = (UpdateAppAssetRequestTO) item.object;
+                    errorMessage += " for app asset of kind " + appAssetRequestTO.kind + " in message ";
                 }
 
                 if (e instanceof IOException) {
@@ -1790,6 +1844,13 @@ public class BrandingMgr implements Pickleable, Closeable {
         return file;
     }
 
+    private File getAssetsRootDirectory() throws BrandingFailureException {
+        T.dontCare();
+        File directory = new File(mMainService.getFilesDir(), "assets");
+        createDirIfNotExists(directory);
+        return directory;
+    }
+
     private File getAttachmentsRootDirectory() throws BrandingFailureException {
         T.dontCare();
         File file = IOUtils.getFilesDirectory(mMainService);
@@ -1836,6 +1897,11 @@ public class BrandingMgr implements Pickleable, Closeable {
         T.dontCare();
         File dir = getAttachmentsThreadDirectory(threadKey);
         return new File(dir, attachmentUrlHash);
+    }
+
+    public File getAssetFile(String kind) throws BrandingFailureException {
+        File dir = getAssetsRootDirectory();
+        return new File(dir, kind);
     }
 
     private File getLocalFlowContentFile(String threadKey) throws BrandingFailureException {
