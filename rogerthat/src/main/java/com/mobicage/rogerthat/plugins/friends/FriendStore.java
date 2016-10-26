@@ -1543,7 +1543,12 @@ public class FriendStore implements Closeable {
     private final Comparator<ServiceMenuItemTO> comparator = new Comparator<ServiceMenuItemTO>() {
         @Override
         public int compare(ServiceMenuItemTO item1, ServiceMenuItemTO item2) {
-            return item1.action > item2.action ? -1 : 1;
+            if (item1.action > item2.action) {
+                return -1;
+            } else if (item1.action < item2.action) {
+                return 1;
+            }
+            return 0;
         }
     };
 
