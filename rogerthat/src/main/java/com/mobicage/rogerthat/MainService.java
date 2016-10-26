@@ -1197,11 +1197,6 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
                 getPlugin(SystemPlugin.class).updateJSEmbeddedPackets(request.items);
                 return new UpdateJSEmbeddingResponseTO();
             }
-
-            @Override
-            public UpdateAppAssetResponseTO updateAppAsset(UpdateAppAssetRequestTO request) throws Exception {
-                return new UpdateAppAssetResponseTO();
-            }
         };
     }
 
