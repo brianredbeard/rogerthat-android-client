@@ -185,6 +185,9 @@ public class CallReceiver {
         if ("com.mobicage.capi.system.unregisterMobile".equals(function)) {
             return comMobicageCapiSystemIClientRpc.unregisterMobile(Parser.ComMobicageToSystemUnregisterMobileRequestTO(call.arguments.get("request")));
         }
+        if ("com.mobicage.capi.system.updateAppAsset".equals(function)) {
+            return comMobicageCapiSystemIClientRpc.updateAppAsset(Parser.ComMobicageToAppUpdateAppAssetRequestTO(call.arguments.get("request")));
+        }
         if ("com.mobicage.capi.system.updateAvailable".equals(function)) {
             return comMobicageCapiSystemIClientRpc.updateAvailable(Parser.ComMobicageToSystemUpdateAvailableRequestTO(call.arguments.get("request")));
         }

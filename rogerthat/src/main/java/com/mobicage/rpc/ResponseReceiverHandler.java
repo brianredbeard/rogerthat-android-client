@@ -653,6 +653,15 @@ public class ResponseReceiverHandler {
                 resp.setResult(Parser.ComMobicageToSystemEditProfileResponseTO(rpcr.result));
             ((IResponseHandler<com.mobicage.to.system.EditProfileResponseTO>) responseHandler).handle(resp);
         }
+        if ("com.mobicage.api.system.getAppAsset".equals(function)) {
+            final Response<com.mobicage.to.app.GetAppAssetResponseTO> resp = new Response<com.mobicage.to.app.GetAppAssetResponseTO>();
+            resp.setError(rpcr.error);
+            resp.setSuccess(rpcr.success);
+            resp.setCallId(rpcr.callId);
+            if (rpcr.success)
+                resp.setResult(Parser.ComMobicageToAppGetAppAssetResponseTO(rpcr.result));
+            ((IResponseHandler<com.mobicage.to.app.GetAppAssetResponseTO>) responseHandler).handle(resp);
+        }
         if ("com.mobicage.api.system.getIdentity".equals(function)) {
             final Response<com.mobicage.to.system.GetIdentityResponseTO> resp = new Response<com.mobicage.to.system.GetIdentityResponseTO>();
             resp.setError(rpcr.error);

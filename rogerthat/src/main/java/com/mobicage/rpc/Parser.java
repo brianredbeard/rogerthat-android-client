@@ -160,6 +160,34 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
+    public static com.mobicage.to.app.GetAppAssetRequestTO ComMobicageToAppGetAppAssetRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.app.GetAppAssetRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.app.GetAppAssetResponseTO ComMobicageToAppGetAppAssetResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.app.GetAppAssetResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.app.UpdateAppAssetRequestTO ComMobicageToAppUpdateAppAssetRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.app.UpdateAppAssetRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.app.UpdateAppAssetResponseTO ComMobicageToAppUpdateAppAssetResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.app.UpdateAppAssetResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
     public static com.mobicage.to.beacon.BeaconRegionTO ComMobicageToBeaconBeaconRegionTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;
