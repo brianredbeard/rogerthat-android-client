@@ -568,10 +568,10 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                     if (Message.MC_CONFIRM_PREFIX.equals(buttonAction)) {
                         return;
                     }
-                    mActivity.newsPlugin.saveNewsStatistics(new long[]{newsItem.id}, NewsPlugin.STATISTIC_ACTION);
                     if (Message.MC_SMI_PREFIX.equals(buttonAction)) {
                         final int currentExistenceStatus = mActivity.friendsPlugin.getStore().getExistence(newsItem.sender.email);
                         if (Friend.ACTIVE == currentExistenceStatus) {
+                            mActivity.newsPlugin.saveNewsStatistics(new long[]{newsItem.id}, NewsPlugin.STATISTIC_ACTION);
                             if (mMenuItemPresser != null) {
                                 mMenuItemPresser.stop();
                             }
@@ -583,6 +583,14 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                                     .setPositiveButton(R.string.yes, new SafeDialogInterfaceOnClickListener() {
                                         @Override
                                         public void safeOnClick(DialogInterface dialog, int which) {
+                                            if (!mMainService.getNetworkConnectivityManager().isConnected()) {
+                                                AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
+                                                builder.setMessage(R.string.no_internet_connection_try_again);
+                                                builder.setPositiveButton(R.string.rogerthat, null);
+                                                builder.create().show();
+                                                return;
+                                            }
+
                                             mActivity.progressDialog.show();
                                             mActivity.expectedEmailHash = newsItem.sender.email;
                                             mCurrentActionBtn = btn;
@@ -591,12 +599,14 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                                     }).setNegativeButton(R.string.no, null).create().show();
                         }
                     } else if (Message.MC_POKE_PREFIX.equals(buttonAction)) {
+                        mActivity.newsPlugin.saveNewsStatistics(new long[]{newsItem.id}, NewsPlugin.STATISTIC_ACTION);
                         if (mPoker != null) {
                             mPoker.stop();
                         }
                         mPoker = new Poker<>(mActivity, newsItem.sender.email);
                         mPoker.poke(buttonUrl, null);
                     } else if (buttonAction != null) {
+                        mActivity.newsPlugin.saveNewsStatistics(new long[]{newsItem.id}, NewsPlugin.STATISTIC_ACTION);
                         Uri uri = Uri.parse(buttonUrl);
                         if (buttonUrl.startsWith("http")) {
                             CustomTabsIntent.Builder customTabsBuilder = new CustomTabsIntent.Builder();
