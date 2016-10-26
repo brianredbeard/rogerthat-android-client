@@ -76,7 +76,9 @@ public abstract class Widget extends LinearLayout {
 
     protected Message mMessage;
     protected Map<String, Object> mWidgetMap;
+    protected int mColorId;
     protected int mTextColor;
+    protected BrandingMgr.ColorScheme mColorScheme;
     protected MessagingPlugin mPlugin;
     protected ServiceMessageDetailActivity mActivity;
     protected ViewGroup mParentView;
@@ -92,11 +94,14 @@ public abstract class Widget extends LinearLayout {
     }
 
     public void setColorScheme(Context context, BrandingMgr.ColorScheme colorScheme) {
-        int colorId = android.R.color.primary_text_light;
-        if (colorScheme == BrandingMgr.ColorScheme.DARK)
-            colorId = android.R.color.primary_text_dark;
+        mColorScheme = colorScheme;
+        mColorId = android.R.color.primary_text_light;
 
-        mTextColor = ContextCompat.getColor(context, colorId);
+        mColorScheme = BrandingMgr.ColorScheme.DARK; // todo ruben
+        if (mColorScheme == BrandingMgr.ColorScheme.DARK)
+            mColorId = android.R.color.primary_text_dark;
+
+        mTextColor = ContextCompat.getColor(context, mColorId);
     }
 
     @SuppressWarnings("unchecked")

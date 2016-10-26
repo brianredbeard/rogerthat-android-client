@@ -25,6 +25,9 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.speech.RecognizerIntent;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.AppCompatAutoCompleteTextView;
+import android.support.v7.widget.AppCompatEditText;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.util.AttributeSet;
@@ -90,6 +93,13 @@ public class TextLineWidget extends Widget {
         mEditText.setFilters(new InputFilter[] { new InputFilter.LengthFilter(((Long) mWidgetMap.get("max_chars"))
             .intValue()) });
         mEditText.setInputType(getDefaultInputTypes() | KeyboardType.getInputType((String) mWidgetMap.get("keyboard_type")));
+        mEditText.setTextColor(mTextColor);
+        if (mEditText instanceof AppCompatEditText) {
+            ((AppCompatEditText) mEditText).setSupportBackgroundTintList(ContextCompat.getColorStateList(mActivity, mColorId));
+        } else if (mEditText instanceof AppCompatAutoCompleteTextView) {
+            ((AppCompatAutoCompleteTextView) mEditText).setSupportBackgroundTintList(ContextCompat.getColorStateList(mActivity, mColorId));
+        }
+
 
         ImageButton btnSpeak = (ImageButton) findViewById(R.id.btn_speak);
         if (AppConstants.SPEECH_TO_TEXT && isSpeechRecognitionActivityPresented(mActivity)) {

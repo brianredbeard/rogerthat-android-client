@@ -18,7 +18,8 @@
 			android:gravity="top"
 			android:inputType="textCapSentences|textMultiLine"
 			android:minLines="3"
-			android:singleLine="false" >
+			android:singleLine="false"
+			android:textCursorDrawable="@null">
 		</EditText>
 	    
 	    <ImageButton

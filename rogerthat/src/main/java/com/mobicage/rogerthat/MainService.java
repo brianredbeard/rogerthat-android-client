@@ -87,6 +87,8 @@ import com.mobicage.rpc.http.HttpBacklog;
 import com.mobicage.rpc.http.HttpBacklogItem;
 import com.mobicage.rpc.http.HttpCommunicator;
 import com.mobicage.rpc.newxmpp.XMPPKickChannel;
+import com.mobicage.to.app.UpdateAppAssetRequestTO;
+import com.mobicage.to.app.UpdateAppAssetResponseTO;
 import com.mobicage.to.js_embedding.UpdateJSEmbeddingRequestTO;
 import com.mobicage.to.js_embedding.UpdateJSEmbeddingResponseTO;
 import com.mobicage.to.system.ForwardLogsRequestTO;
@@ -1190,6 +1192,10 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
                 return new UpdateJSEmbeddingResponseTO();
             }
 
+            @Override
+            public UpdateAppAssetResponseTO updateAppAsset(UpdateAppAssetRequestTO request) throws Exception {
+                return new UpdateAppAssetResponseTO();
+            }
         };
     }
 
