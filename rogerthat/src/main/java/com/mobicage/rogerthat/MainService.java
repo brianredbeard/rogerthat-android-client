@@ -1162,12 +1162,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
 
                 return null;
             }
-
-            @Override
-            public UpdateAppAssetResponseTO updateAppAsset(UpdateAppAssetRequestTO request) throws Exception {
-                return null;
-            }
-
+            
             @Override
             public IdentityUpdateResponseTO identityUpdate(final IdentityUpdateRequestTO request) throws Exception {
                 T.BIZZ();
