@@ -218,9 +218,13 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         mVisibleItems = new ArrayList<>();
         for (Long newsId : mItems) {
             if (!mActivity.newsStore.getNewsItemDetails(newsId).isPartial) {
-                NewsItem newsItem = mActivity.newsStore.getNewsItem(newsId);
-                if (mActivity.friendsPlugin.isBroadcastTypeDisabled(newsItem.sender.email, newsItem.broadcast_type)) {
-                    continue;
+                if (mActivity instanceof NewsPinnedActivity) {
+                    // Hidden items are always displayed
+                } else {
+                    NewsItem newsItem = mActivity.newsStore.getNewsItem(newsId);
+                    if (mActivity.friendsPlugin.isBroadcastTypeDisabled(newsItem.sender.email, newsItem.broadcast_type)) {
+                        continue;
+                    }
                 }
             }
 
@@ -782,7 +786,9 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                     sheetView.addView(actionSave);
                 }
 
-                if (existenceStatus == Friend.ACTIVE) {
+                if (mActivity instanceof NewsPinnedActivity) {
+                    // You cannot hide news items from pinned item list
+                } else if (existenceStatus == Friend.ACTIVE) {
                     final View actionHide = mLayoutInflater.inflate(R.layout.news_options_item, null);
                     ((ImageView) actionHide.findViewById(R.id.icon)).setImageDrawable(new IconicsDrawable(mActivity, FontAwesome.Icon.faw_times_circle).color(ContextCompat.getColor(mActivity, R.color.mc_default_text)).sizeDp(20).paddingDp(2));
                     ((TextView) actionHide.findViewById(R.id.title)).setText(R.string.hide);
