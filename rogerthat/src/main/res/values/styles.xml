@@ -64,6 +64,11 @@
         <item name="colorButtonNormal">@color/mc_primary_color</item>
     </style>
 
+    <style name="DarkGrayButtonBackground" parent="Widget.AppCompat.Button.Colored">
+        <item name="android:textColor">@android:color/primary_text_dark</item>
+        <item name="colorButtonNormal">@color/mc_default_button</item>
+    </style>
+
     <style name="RogerthatButton" parent="BaseButton">
         <item name="colorButtonNormal">@color/mc_green</item>
     </style>

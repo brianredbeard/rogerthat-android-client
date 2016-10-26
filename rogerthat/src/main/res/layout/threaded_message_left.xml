@@ -96,7 +96,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/buttons"
         android:layout_margin="5dp"
-        android:gravity="end"
+        android:gravity="right"
         android:orientation="horizontal" />
 
     <android.support.v7.widget.AppCompatButton

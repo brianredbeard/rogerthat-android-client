@@ -58,7 +58,7 @@
                 android:layout_alignParentRight="true"
                 android:layout_gravity="right"
                 android:layout_marginLeft="16dp"
-                android:gravity="end"
+                android:gravity="right"
                 android:textColor="@android:color/secondary_text_light"
                 android:textSize="12sp"
                 tools:text="Sep 7" />
