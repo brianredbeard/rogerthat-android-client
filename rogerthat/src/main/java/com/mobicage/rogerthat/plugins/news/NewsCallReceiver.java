@@ -51,11 +51,18 @@ public class NewsCallReceiver implements com.mobicage.capi.news.IClientRpc {
         T.BIZZ();
         NewNewsResponseTO response = new NewNewsResponseTO();
 
-        NewsPlugin newsPlugin = mMainService.getPlugin(NewsPlugin.class);
+        FriendsPlugin friendsPlugin = mMainService.getPlugin(FriendsPlugin.class);
+        boolean showNewsItem = !friendsPlugin.isBroadcastTypeDisabled(request.news_item.sender.email, request.news_item.broadcast_type);
 
-        if (newsPlugin.getStore().getNewsItem(request.news_item.id) == null) {
-            newsPlugin.getStore().insertNewsItem(request.news_item);
-            newsPlugin.increaseBadgeCount();
+        if (mPlugin.getStore().getNewsItem(request.news_item.id) == null) {
+            mPlugin.getStore().insertNewsItem(request.news_item);
+            if (showNewsItem) {
+                mPlugin.increaseBadgeCount();
+            }
+        }
+
+        if (!showNewsItem) {
+            return response;
         }
 
         Intent intent = new Intent(NewsPlugin.NEW_NEWS_ITEM_INTENT);
@@ -85,7 +92,6 @@ public class NewsCallReceiver implements com.mobicage.capi.news.IClientRpc {
                 count, null, null, mMainService.currentTimeMillis(), NotificationCompat.PRIORITY_DEFAULT, null,
                 longNotificationText, largeIcon, NotificationCompat.CATEGORY_PROMO);
 
-
         return response;
     }
 
@@ -94,8 +100,7 @@ public class NewsCallReceiver implements com.mobicage.capi.news.IClientRpc {
         T.BIZZ();
         DisableNewsResponseTO response = new DisableNewsResponseTO();
 
-        NewsPlugin newsPlugin = mMainService.getPlugin(NewsPlugin.class);
-        newsPlugin.getStore().setNewsItemDisabled(request.news_id);
+        mPlugin.getStore().setNewsItemDisabled(request.news_id);
 
         Intent intent = new Intent(NewsPlugin.DISABLE_NEWS_ITEM_INTENT);
         intent.putExtra("id", request.news_id);

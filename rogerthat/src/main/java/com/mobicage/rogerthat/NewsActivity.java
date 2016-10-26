@@ -581,6 +581,9 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
             mService.postAtFrontOfUIHandler(new SafeRunnable() {
                 @Override
                 protected void safeRun() throws Exception {
+                    if (friendsPlugin.isBroadcastTypeDisabled(newsItem.sender.email, newsItem.broadcast_type)) {
+                        return;
+                    }
                     mNewNewsItems.add(newsItem.id);
                     setupUpdatesAvailable();
                 }
