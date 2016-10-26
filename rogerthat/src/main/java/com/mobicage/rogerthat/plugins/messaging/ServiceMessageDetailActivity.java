@@ -1232,6 +1232,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
                         i.putExtra("message", intent.getStringExtra("message"));
                         i.putExtra(JUMP_TO_SERVICE_HOME_SCREEN, getIntent().getBooleanExtra(JUMP_TO_SERVICE_HOME_SCREEN, true));
                         i.putExtra(MessagingPlugin.MEMBER_FILTER, getIntent().getStringExtra(MessagingPlugin.MEMBER_FILTER));
+                        i.putExtra(TITLE, getIntent().getStringExtra(TITLE));
                         startActivity(i);
                         overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_up);
                         dismissTransferingDialog();
@@ -1257,6 +1258,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
                     i.putExtra("message", intent.getStringExtra("message"));
                     i.putExtra(JUMP_TO_SERVICE_HOME_SCREEN, getIntent().getBooleanExtra(JUMP_TO_SERVICE_HOME_SCREEN, true));
                     i.putExtra(MessagingPlugin.MEMBER_FILTER, getIntent().getStringExtra(MessagingPlugin.MEMBER_FILTER));
+                    i.putExtra(TITLE, getIntent().getStringExtra(TITLE));
                     startActivity(i);
 
                     overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_up);
