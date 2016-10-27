@@ -7,13 +7,14 @@
 	android:background="@color/mc_background_color">
 
 	<com.mobicage.rogerthat.util.ui.SendMessageView
-		android:id="@+id/chat_container"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:orientation="vertical"
-		android:layout_alignParentBottom="true"
-		android:layout_margin="5dp"
-		android:background="@color/mc_background_color">
+        android:id="@+id/chat_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="5dp"
+        android:background="@color/mc_white"
+        android:orientation="vertical"
+        android:paddingTop="8dp">
 
 		<include layout="@layout/chat_container_message" />
 
