@@ -38,6 +38,7 @@ import android.widget.TextView;
 
 import com.mobicage.api.messaging.Rpc;
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.util.logging.L;
@@ -93,11 +94,13 @@ public class TextLineWidget extends Widget {
         mEditText.setFilters(new InputFilter[] { new InputFilter.LengthFilter(((Long) mWidgetMap.get("max_chars"))
             .intValue()) });
         mEditText.setInputType(getDefaultInputTypes() | KeyboardType.getInputType((String) mWidgetMap.get("keyboard_type")));
-        mEditText.setTextColor(mTextColor);
-        if (mEditText instanceof AppCompatEditText) {
-            ((AppCompatEditText) mEditText).setSupportBackgroundTintList(ContextCompat.getColorStateList(mActivity, mColorId));
-        } else if (mEditText instanceof AppCompatAutoCompleteTextView) {
-            ((AppCompatAutoCompleteTextView) mEditText).setSupportBackgroundTintList(ContextCompat.getColorStateList(mActivity, mColorId));
+        if (mColorScheme == BrandingMgr.ColorScheme.DARK) {
+            mEditText.setTextColor(mTextColor);
+            if (mEditText instanceof AppCompatEditText) {
+                ((AppCompatEditText) mEditText).setSupportBackgroundTintList(ContextCompat.getColorStateList(mActivity, mColorId));
+            } else if (mEditText instanceof AppCompatAutoCompleteTextView) {
+                ((AppCompatAutoCompleteTextView) mEditText).setSupportBackgroundTintList(ContextCompat.getColorStateList(mActivity, mColorId));
+            }
         }
 
 

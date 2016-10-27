@@ -18,16 +18,14 @@
 
 package com.mobicage.rogerthat.plugins.messaging.widgets;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Checkable;
 
 import com.mobicage.api.messaging.Rpc;
+import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
@@ -35,6 +33,10 @@ import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.to.messaging.forms.SubmitSingleSelectFormRequestTO;
 import com.mobicage.to.messaging.forms.SubmitSingleSelectFormResponseTO;
 import com.mobicage.to.messaging.forms.UnicodeWidgetResultTO;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class SingleSelectWidget extends AbstractSelectWidget {
 
@@ -61,7 +63,10 @@ public class SingleSelectWidget extends AbstractSelectWidget {
 
     @Override
     protected int getTextViewResourceId() {
-        return android.R.layout.simple_list_item_single_choice;
+        if (mColorScheme == BrandingMgr.ColorScheme.DARK) {
+            return R.layout.widget_simple_list_item_single_choice_white;
+        }
+        return R.layout.widget_simple_list_item_single_choice_normal;
     }
 
     @Override

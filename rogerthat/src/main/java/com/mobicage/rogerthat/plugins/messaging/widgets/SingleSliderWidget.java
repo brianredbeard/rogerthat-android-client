@@ -18,16 +18,15 @@
 
 package com.mobicage.rogerthat.plugins.messaging.widgets;
 
-import java.util.Map;
-import java.util.UnknownFormatConversionException;
-
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.mobicage.api.messaging.Rpc;
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.util.logging.L;
@@ -35,6 +34,9 @@ import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.to.messaging.forms.FloatWidgetResultTO;
 import com.mobicage.to.messaging.forms.SubmitSingleSliderFormRequestTO;
 import com.mobicage.to.messaging.forms.SubmitSingleSliderFormResponseTO;
+
+import java.util.Map;
+import java.util.UnknownFormatConversionException;
 
 public class SingleSliderWidget extends Widget implements SeekBar.OnSeekBarChangeListener {
 
@@ -81,7 +83,13 @@ public class SingleSliderWidget extends Widget implements SeekBar.OnSeekBarChang
             mTextView.setText(String.format(mFormat, value));
         }
 
-        mSeekBar = (SeekBar) findViewById(R.id.seek_bar);
+        if (mColorScheme == BrandingMgr.ColorScheme.DARK) {
+            findViewById(R.id.seek_bar).setVisibility(View.GONE);
+            mSeekBar = (SeekBar) findViewById(R.id.seek_bar_white);
+            mSeekBar.setVisibility(View.VISIBLE);
+        } else {
+            mSeekBar = (SeekBar) findViewById(R.id.seek_bar);
+        }
         mSeekBar.setOnSeekBarChangeListener(this);
         mSeekBar.setMax(toProgress(mMax));
         mSeekBar.setProgress(toProgress(value));

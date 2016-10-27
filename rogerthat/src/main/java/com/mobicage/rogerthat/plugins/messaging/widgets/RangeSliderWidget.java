@@ -25,6 +25,7 @@ import android.widget.TextView;
 
 import com.mobicage.api.messaging.Rpc;
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.util.logging.L;
@@ -68,20 +69,21 @@ public class RangeSliderWidget extends Widget implements RangeSeekBar.OnRangeSee
         String unit = (String) mWidgetMap.get("unit");
         mTextView = (TextView) findViewById(R.id.slider_text);
         mTextView.setTextColor(mTextColor);
-        String defaultUnit = Message.UNIT_LOW_VALUE + " - " + Message.UNIT_HIGH_VALUE;
-        if (unit == null || defaultUnit.equals(unit)) {
-            unit = defaultUnit;
-            mRangeSeekBar = (RangeSeekBar) findViewById(R.id.range_slider_with_values);
-            mTextView.setVisibility(View.GONE);
+        if (unit == null)
+            unit = Message.UNIT_LOW_VALUE + " - " + Message.UNIT_HIGH_VALUE;
+
+        if (mColorScheme == BrandingMgr.ColorScheme.DARK) {
+            findViewById(R.id.range_slider).setVisibility(View.GONE);
+            mRangeSeekBar = (RangeSeekBar) findViewById(R.id.range_slider_white);
+            mRangeSeekBar.setVisibility(View.VISIBLE);
         } else {
             mRangeSeekBar = (RangeSeekBar) findViewById(R.id.range_slider);
-            mTextView.setVisibility(View.VISIBLE);
         }
+
         mFormat = unit.replace(Message.UNIT_LOW_VALUE, "%1$." + mPrecision + "f")
                 .replace(Message.UNIT_HIGH_VALUE, "%2$." + mPrecision + "f");
 
         mRangeSeekBar.setTextAboveThumbsColor(mTextColor);
-        mRangeSeekBar.setVisibility(View.VISIBLE);
         mRangeSeekBar.setNotifyWhileDragging(true);
         mRangeSeekBar.setRangeValues(min, max);
         mRangeSeekBar.setSelectedMaxValue(high);
