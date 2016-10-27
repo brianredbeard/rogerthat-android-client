@@ -175,27 +175,27 @@
                   android:orientation="horizontal"
                   android:gravity="center">
 
-      <Button android:layout_width="0dip"
+      <android.support.v7.widget.AppCompatButton android:layout_width="0dip"
               android:layout_height="wrap_content"
               android:layout_weight="1"
               android:visibility="gone"/>
 
-      <Button android:layout_width="0dip"
+      <android.support.v7.widget.AppCompatButton android:layout_width="0dip"
               android:layout_height="wrap_content"
               android:layout_weight="1"
               android:visibility="gone"/>
 
-      <Button android:layout_width="0dip"
+      <android.support.v7.widget.AppCompatButton android:layout_width="0dip"
               android:layout_height="wrap_content"
               android:layout_weight="1"
               android:visibility="gone"/>
 
-      <Button android:layout_width="0dip"
+      <android.support.v7.widget.AppCompatButton android:layout_width="0dip"
               android:layout_height="wrap_content"
               android:layout_weight="1"
               android:visibility="gone"/>
 
-      <Button android:id="@+id/shopper_button"
+      <android.support.v7.widget.AppCompatButton android:id="@+id/shopper_button"
               android:layout_width="0dip"
               android:layout_height="wrap_content"
               android:layout_weight="1"

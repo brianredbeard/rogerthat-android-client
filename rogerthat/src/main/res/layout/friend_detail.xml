@@ -145,7 +145,7 @@
         android:background="@color/mc_background_color"
         android:padding="15dp">
 
-        <Button
+        <android.support.v7.widget.AppCompatButton
             android:id="@+id/poke_button"
             android:layout_width="match_parent"
             android:layout_height="50dp"

@@ -60,7 +60,7 @@
                 android:textSize="18sp"/>
         </LinearLayout>
 
-        <Button
+        <android.support.v7.widget.AppCompatButton
             android:id="@+id/login_via_oauth"
             android:layout_width="match_parent"
             android:layout_alignParentBottom="true"

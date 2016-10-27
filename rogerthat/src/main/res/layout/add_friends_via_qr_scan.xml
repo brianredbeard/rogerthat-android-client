@@ -8,7 +8,7 @@
     android:orientation="vertical"
     android:padding="20dp">
 
-    <Button
+    <android.support.v7.widget.AppCompatButton
         android:id="@+id/add_via_qr_scan_button"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"

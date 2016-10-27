@@ -111,7 +111,7 @@
             android:textSize="14sp"
             android:textColor="@color/mc_default_text" />
 
-        <Button
+        <android.support.v7.widget.AppCompatButton
             android:id="@+id/registration_beacon_usage_continue"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

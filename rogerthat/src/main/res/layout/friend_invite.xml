@@ -20,7 +20,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <Button
+            <android.support.v7.widget.AppCompatButton
                 android:id="@+id/invite_friend_button"
                 android:minWidth="150dp"
                 android:layout_width="fill_parent"

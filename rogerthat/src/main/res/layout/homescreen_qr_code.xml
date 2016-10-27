@@ -95,7 +95,7 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_weight="2">
 
-                <Button
+                <android.support.v7.widget.AppCompatButton
                     android:id="@+id/scan_btn"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"

@@ -39,7 +39,7 @@
         android:orientation="horizontal"
         android:layout_below="@id/divider_line">     
         
-        <Button
+        <android.support.v7.widget.AppCompatButton
             android:id="@+id/submit"
             android:layout_width="0dp"
             android:layout_weight="1"
@@ -55,7 +55,7 @@
 	        android:layout_height="fill_parent"
 	        android:background="@color/mc_divider_gray" />
         
-        <Button
+        <android.support.v7.widget.AppCompatButton
             android:id="@+id/dismiss"
             android:layout_width="0dp"
             android:layout_weight="1"

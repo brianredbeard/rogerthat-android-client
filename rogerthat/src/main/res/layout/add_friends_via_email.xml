@@ -36,7 +36,7 @@
                 android:textSize="16sp" />
         </android.support.design.widget.TextInputLayout>
 
-        <Button
+        <android.support.v7.widget.AppCompatButton
             android:id="@+id/add_via_email_button"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"

@@ -53,7 +53,7 @@
             android:textColor="@color/mc_about_blue"
             android:textSize="16sp" />
 
-        <Button
+        <android.support.v7.widget.AppCompatButton
             android:id="@+id/about_btn_visit_rogerthat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -38,7 +38,7 @@
         android:layout_alignParentBottom="true"
         android:orientation="horizontal" >
 
-        <Button
+        <android.support.v7.widget.AppCompatButton
             android:id="@+id/skip_button"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -46,7 +46,7 @@
             android:layout_gravity="bottom"
             android:text="@string/skip" />
 
-        <Button
+        <android.support.v7.widget.AppCompatButton
             android:id="@+id/sent_invites"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"

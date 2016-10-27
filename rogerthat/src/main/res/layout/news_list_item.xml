@@ -305,7 +305,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="28dp">
 
-                <Button
+                <android.support.v7.widget.AppCompatButton
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     style="?attr/buttonBarButtonStyle"
@@ -321,7 +321,7 @@
                     android:textSize="14sp"
                     tools:text="Rogerthat"/>
 
-                <Button
+                <android.support.v7.widget.AppCompatButton
                     android:layout_height="match_parent"
                     style="?attr/buttonBarButtonStyle"
                     android:layout_width="0dp"
@@ -337,7 +337,7 @@
                     android:textSize="14sp"
                     tools:text="Volgen"/>
 
-                <Button
+                <android.support.v7.widget.AppCompatButton
                     style="?attr/buttonBarButtonStyle"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"

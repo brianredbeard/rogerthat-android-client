@@ -49,7 +49,7 @@
             android:textColorLink="@color/mc_black"
             android:textSize="18sp" />
 
-        <Button
+        <android.support.v7.widget.AppCompatButton
             android:id="@+id/registration_agree_tos"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

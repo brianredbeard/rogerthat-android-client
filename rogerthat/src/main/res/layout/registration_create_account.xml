@@ -75,7 +75,7 @@
 
         </LinearLayout>
 
-        <Button
+        <android.support.v7.widget.AppCompatButton
             android:id="@+id/login_via_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -117,7 +117,7 @@
                 android:background="@color/mc_black" />
         </LinearLayout>
 
-        <Button
+        <android.support.v7.widget.AppCompatButton
             android:id="@+id/login_via_fb"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

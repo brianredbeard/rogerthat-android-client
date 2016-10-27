@@ -113,7 +113,7 @@
         android:background="@color/mc_divider_gray"
         android:layout_below="@id/value_container" />
     
-    <Button
+    <android.support.v7.widget.AppCompatButton
         android:id="@+id/dismiss"
         android:layout_width="fill_parent"
         android:layout_height="50dp"
