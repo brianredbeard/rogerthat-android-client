@@ -29,8 +29,11 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.api.messaging.Rpc;
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.util.logging.L;
@@ -73,6 +76,9 @@ public class DateSelectWidget extends Widget {
     private boolean mIgnoreDateOrTimeChanges = false;
     private Toast mCurrentToast;
 
+    private ImageButton mPickDate;
+    private ImageButton mPickTime;
+
     public DateSelectWidget(Context context) {
         super(context);
     }
@@ -99,6 +105,14 @@ public class DateSelectWidget extends Widget {
         mTextView = (TextView) findViewById(R.id.label);
         mTextView.setTextColor(mTextColor);
 
+        mPickDate = (ImageButton) findViewById(R.id.pick_date);
+        mPickTime = (ImageButton) findViewById(R.id.pick_time);
+
+        if (mColorScheme == BrandingMgr.ColorScheme.DARK) {
+            mPickDate.setImageDrawable(new IconicsDrawable(mActivity, FontAwesome.Icon.faw_calendar_o).color(mTextColor).sizeDp(24));
+            mPickTime.setImageDrawable(new IconicsDrawable(mActivity, FontAwesome.Icon.faw_clock_o).color(mTextColor).sizeDp(24));
+        }
+
         mCal = Calendar.getInstance();
         mCal.setTimeZone(TimeZone.getTimeZone("UTC"));
 
@@ -112,12 +126,10 @@ public class DateSelectWidget extends Widget {
 
     private void initDateSlider() {
         T.UI();
-        ImageButton pickDate = (ImageButton) findViewById(R.id.pick_date);
-        ImageButton pickTime = (ImageButton) findViewById(R.id.pick_time);
         if (MODE_DATE.equals(mMode)) {
-            pickTime.setVisibility(View.GONE);
+            mPickTime.setVisibility(View.GONE);
         } else if (MODE_TIME.equals(mMode)) {
-            pickDate.setVisibility(View.GONE);
+            mPickDate.setVisibility(View.GONE);
         } else {
             if (!MODE_DATE_TIME.equals(mMode)) {
                 L.e("I don't know date_select mode '" + mMode + "'. Falling back to date_time");
@@ -143,7 +155,7 @@ public class DateSelectWidget extends Widget {
                 mCal.setTimeInMillis(mMaxDateInMillis);
         }
 
-        if (pickDate.getVisibility() == View.VISIBLE) {
+        if (mPickDate.getVisibility() == View.VISIBLE) {
             final View dialog = mActivity.getLayoutInflater().inflate(R.layout.ds_date_picker, null);
             mDatePicker = (DatePicker) dialog.findViewById(R.id.date_picker);
             mDatePicker.setDescendantFocusability(DatePicker.FOCUS_BLOCK_DESCENDANTS);
@@ -171,7 +183,7 @@ public class DateSelectWidget extends Widget {
                     }).create();
             mDatePickerDialog.setCanceledOnTouchOutside(true);
 
-            pickDate.setOnClickListener(new SafeViewOnClickListener() {
+            mPickDate.setOnClickListener(new SafeViewOnClickListener() {
                 @Override
                 public void safeOnClick(View v) {
                     mDatePickerDialog.show();
@@ -179,7 +191,7 @@ public class DateSelectWidget extends Widget {
             });
         }
 
-        if (pickTime.getVisibility() == View.VISIBLE) {
+        if (mPickTime.getVisibility() == View.VISIBLE) {
             final View dialog = mActivity.getLayoutInflater().inflate(R.layout.ds_time_picker, null);
             mTimePicker = (TimePicker) dialog.findViewById(R.id.time_picker);
             mTimePicker.setDescendantFocusability(TimePicker.FOCUS_BLOCK_DESCENDANTS);
@@ -208,7 +220,7 @@ public class DateSelectWidget extends Widget {
                     }).create();
             mTimePickerDialog.setCanceledOnTouchOutside(true);
 
-            pickTime.setOnClickListener(new SafeViewOnClickListener() {
+            mPickTime.setOnClickListener(new SafeViewOnClickListener() {
                 @Override
                 public void safeOnClick(View v) {
                     mTimePickerDialog.show();
