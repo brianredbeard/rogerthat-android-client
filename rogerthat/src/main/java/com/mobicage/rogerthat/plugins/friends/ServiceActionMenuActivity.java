@@ -297,7 +297,7 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
             rows[0] = true;
 
         boolean useDarkScheme = false;
-        Integer menuItemColor = null;
+        Integer defaultMenuItemColor = null;
         Integer brandingBackgroundColor = null;
         if (menu.branding != null) {
             try {
@@ -306,7 +306,7 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
                     final int displayWidth = UIUtils.getDisplayWidth(this);
                     BrandingResult br = brandingMgr.prepareBranding(menu.branding, null, false);
                     brandingBackgroundColor = br.color;
-                    menuItemColor = br.menuItemColor;
+                    defaultMenuItemColor = br.menuItemColor;
                     if (br.displayType.equals(BrandingMgr.DisplayType.NATIVE)) {
                         ServiceHeader.setupNative(br, mHeaderContainer);
                         brandingWebview.setVisibility(View.GONE);
@@ -348,8 +348,8 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
                 L.bug("Could not display service action menu with branding.", e);
             }
         }
-        if (menuItemColor == null)
-            menuItemColor = ContextCompat.getColor(this, R.color.mc_page_light);
+        if (defaultMenuItemColor == null)
+            defaultMenuItemColor = ContextCompat.getColor(this, R.color.mc_page_light);
         if (brandingBackgroundColor == null) {
             brandingBackgroundColor = ContextCompat.getColor(this, R.color.mc_page_light);
         }
@@ -368,6 +368,10 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
                 }
             };
             p.setOnClickListener(onClickListener);
+            int menuItemColor = defaultMenuItemColor;
+            if (item.iconColor != null) {
+                menuItemColor = Color.parseColor("#" + item.iconColor);
+            }
             if (UIUtils.isSupportedFontawesomeIcon(item.iconName)) {
                 Drawable icon = UIUtils.getIconFromString(this, item.iconName).color(brandingBackgroundColor).sizeDp(24).paddingDp(5);
                 cell.icon.setImageDrawable(icon);
@@ -405,17 +409,17 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
 
         if (page == 0) {
             cells[0][0].icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_info).color(brandingBackgroundColor).sizeDp(24).paddingDp(5));
-            UIUtils.setIconBackground(cells[0][0].icon, menuItemColor);
+            UIUtils.setIconBackground(cells[0][0].icon, defaultMenuItemColor);
             cells[1][0].icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_envelope).color(brandingBackgroundColor).sizeDp(24).paddingDp(5));
-            UIUtils.setIconBackground(cells[1][0].icon, menuItemColor);
+            UIUtils.setIconBackground(cells[1][0].icon, defaultMenuItemColor);
             cells[2][0].icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_phone).color(brandingBackgroundColor).sizeDp(24).paddingDp(5));
-            UIUtils.setIconBackground(cells[2][0].icon, menuItemColor);
+            UIUtils.setIconBackground(cells[2][0].icon, defaultMenuItemColor);
             if (CloudConstants.isYSAAA()) {
                 cells[3][0].icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_qrcode).color(brandingBackgroundColor).sizeDp(24).paddingDp(5));
             } else {
                 cells[3][0].icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_thumbs_up).color(brandingBackgroundColor).sizeDp(24).paddingDp(5));
             }
-            UIUtils.setIconBackground(cells[3][0].icon, menuItemColor);
+            UIUtils.setIconBackground(cells[3][0].icon, defaultMenuItemColor);
         }
 
         if (menu.maxPage > 0) {

@@ -46,3 +46,4 @@ CREATE TABLE news_rogered_users (
 ALTER TABLE friend ADD COLUMN actions TEXT;
 ALTER TABLE service_menu_item ADD COLUMN "action" INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE service_menu_item ADD COLUMN "icon_name" TEXT;
+ALTER TABLE service_menu_item ADD COLUMN "icon_color" TEXT;

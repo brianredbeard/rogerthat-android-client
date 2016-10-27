@@ -965,6 +965,7 @@ public class FriendStore implements Closeable {
         smi.runInBackground = curs.getLong(i++) == 1;
         smi.action = curs.getLong(i++);
         smi.iconName = curs.getString(i++);
+        smi.iconColor = curs.getString(i++);
         if (!UIUtils.isSupportedFontawesomeIcon(smi.iconName)) {
             smi.icon = curs.getBlob(blobIndex);
         }
@@ -1148,6 +1149,7 @@ public class FriendStore implements Closeable {
             mInsertServiceMenuHTTP.bindLong(11, item.runInBackground ? 1 : 0);
             mInsertServiceMenuHTTP.bindLong(12, item.action);
             bindString(mInsertServiceMenuHTTP, 13, item.iconName);
+            bindString(mInsertServiceMenuHTTP, 14, item.iconColor);
             mInsertServiceMenuHTTP.execute();
 
             if (!UIUtils.isSupportedFontawesomeIcon(item.iconName) && !isMenuIconAvailable(item.iconHash)) {
