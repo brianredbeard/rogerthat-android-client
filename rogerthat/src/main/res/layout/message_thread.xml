@@ -21,7 +21,9 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_alignParentBottom="true"
-        android:layout_margin="5dp">
+        android:layout_marginTop="5dp"
+        android:background="@color/mc_white"
+        android:paddingTop="7dp">
 
         <include layout="@layout/chat_container_message" />
 
