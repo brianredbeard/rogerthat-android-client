@@ -187,8 +187,8 @@
     <string name="hide">Hide</string>
     <string name="hide_detail">Hide \'%1$s\' items from %2$s</string>
     <string name="high">High</string>
-    <string name="hint_broadcast">You can unsubscribe using \'Notification settings\' if you don\'t want \'%1$s\' messages from %2$s any more.</string>
-    <string name="hint_broadcast_icon">Press this icon at the top right to select which messages from %1$s you don\'t want to receive any more.</string>
+    <string name="hint_broadcast">You can unsubscribe using \'Notification settings\' if you don\'t want \'%1$s\' messages of %2$s anymore.</string>
+    <string name="hint_broadcast_icon">Press this icon at the top right to select which messages of %1$s you don\'t want to receive anymore.</string>
     <string name="hint_double_tap">Double tap to reply</string>
     <string name="hint_swipe">Swipe to jump to another conversation</string>
     <string name="ibeacon_usage_augment_experience">The %1$s app uses iBeacons to augment your user experience.</string>
