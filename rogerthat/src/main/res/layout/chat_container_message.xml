@@ -185,6 +185,7 @@
 						android:layout_marginLeft="12dp"
 						android:background="@null"
 						android:hint="@string/type_your_message"
+						android:maxLines="3"
 						android:inputType="textMultiLine"
 						android:textColorHint="#c4c0bd"
 						android:textSize="18sp" />
