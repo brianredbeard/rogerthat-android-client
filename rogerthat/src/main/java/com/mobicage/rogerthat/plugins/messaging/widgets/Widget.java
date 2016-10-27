@@ -97,7 +97,6 @@ public abstract class Widget extends LinearLayout {
         mColorScheme = colorScheme;
         mColorId = android.R.color.primary_text_light;
 
-        mColorScheme = BrandingMgr.ColorScheme.DARK; // todo ruben
         if (mColorScheme == BrandingMgr.ColorScheme.DARK)
             mColorId = android.R.color.primary_text_dark;
 
