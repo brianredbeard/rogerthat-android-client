@@ -96,4 +96,14 @@
         <item name="windowNoTitle">true</item>
         <item name="android:colorBackground">?attr/colorBackgroundFloating</item>
     </style>
+
+    <style name="CheckedTextViewNormal" parent="AppTheme">
+        <item name="colorAccent">@color/mc_primary_color</item>
+        <item name="android:textColorSecondary">@color/mc_primary_color</item>
+    </style>
+
+    <style name="CheckedTextViewWhite" parent="AppTheme">
+        <item name="colorControlNormal">@color/mc_white</item>
+        <item name="colorControlActivated">@color/mc_white</item>
+    </style>
 </resources>

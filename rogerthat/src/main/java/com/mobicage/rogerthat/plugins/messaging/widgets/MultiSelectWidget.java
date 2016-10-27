@@ -18,15 +18,14 @@
 
 package com.mobicage.rogerthat.plugins.messaging.widgets;
 
-import java.util.List;
-import java.util.Map;
-
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Checkable;
 
 import com.mobicage.api.messaging.Rpc;
+import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
@@ -34,6 +33,9 @@ import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.to.messaging.forms.SubmitMultiSelectFormRequestTO;
 import com.mobicage.to.messaging.forms.SubmitMultiSelectFormResponseTO;
 import com.mobicage.to.messaging.forms.UnicodeListWidgetResultTO;
+
+import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("unchecked")
 public class MultiSelectWidget extends AbstractSelectWidget {
@@ -48,7 +50,10 @@ public class MultiSelectWidget extends AbstractSelectWidget {
 
     @Override
     protected int getTextViewResourceId() {
-        return android.R.layout.simple_list_item_multiple_choice;
+        if (mColorScheme == BrandingMgr.ColorScheme.DARK) {
+            return R.layout.widget_simple_list_item_multiple_choice_white;
+        }
+        return R.layout.widget_simple_list_item_multiple_choice_normal;
     }
 
     @Override
