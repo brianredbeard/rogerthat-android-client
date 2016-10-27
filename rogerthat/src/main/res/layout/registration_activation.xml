@@ -40,7 +40,7 @@
             android:id="@+id/registration_enter_pin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/registration_request_new_pin"
+            android:layout_above="@+id/registration_activate"
             android:layout_marginBottom="20dp"
             android:digits="0123456789"
             android:gravity="center"
@@ -52,7 +52,7 @@
             android:textSize="18sp" />
 
         <Button
-            android:id="@+id/registration_request_new_pin"
+            android:id="@+id/registration_activate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"

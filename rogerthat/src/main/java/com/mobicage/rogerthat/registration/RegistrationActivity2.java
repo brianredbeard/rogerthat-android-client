@@ -493,15 +493,12 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
             }
         });
 
-        Button requestNewPinButton = (Button) findViewById(R.id.registration_request_new_pin);
-        requestNewPinButton.setOnClickListener(new View.OnClickListener() {
+        Button activatePinButton = (Button) findViewById(R.id.registration_activate);
+        activatePinButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mWiz.setEmail(null);
-                hideNotification();
-                mWiz.reInit();
-                mWiz.goBackToPrevious();
-                mEnterEmailAutoCompleteTextView.setText("");
+                if (mEnterPinEditText.getText().length() == PIN_LENGTH)
+                    onPinEntered();
             }
         });
 
