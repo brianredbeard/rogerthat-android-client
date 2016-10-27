@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.mobicage.rogerthat.plugins.messaging.widgets.SingleSliderWidget 
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.mobicage.rogerthat.plugins.messaging.widgets.SingleSliderWidget xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical">
 
     <TextView
@@ -18,8 +18,21 @@
         android:id="@+id/seek_bar"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:padding="8dip"
-        android:layout_weight="1">
+        tools:progress="50"></SeekBar>
+
+    <SeekBar
+        android:id="@+id/seek_bar_white"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dip"
+        android:layout_weight="1"
+        android:progressTint="@color/mc_white"
+        android:thumbTint="@color/mc_white"
+        android:visibility="gone"
+        tools:progress="50"
+        tools:visibility="visible">
     </SeekBar>
 
 </com.mobicage.rogerthat.plugins.messaging.widgets.SingleSliderWidget>
