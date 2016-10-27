@@ -569,7 +569,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
             @Override
             protected void safeRun() throws Exception {
                 final NewsListAdapter nla = ((NewsListAdapter) getAdapter());
-                nla.updateView(newsId);
+                nla.updateView(newsId, "roger");
             }
         });
     }
@@ -601,7 +601,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity implements 
                 for (Map.Entry<Long, Long> entry : statsMap.entrySet()) {
                     if (entry.getValue() > 0) {
                         newsStore.setNewsItemReach(entry.getKey(), entry.getValue());
-                        nla.updateView(entry.getKey());
+                        nla.updateView(entry.getKey(), "read");
                     }
                 }
             }

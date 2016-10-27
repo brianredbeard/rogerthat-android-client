@@ -127,6 +127,10 @@ public abstract class ServiceBoundCursorRecyclerActivity extends ServiceBoundAct
         }
     }
 
+    protected RecyclerView.ViewHolder getViewForPosition(int position) {
+        return mRecyclerView.findViewHolderForAdapterPosition(position);
+    }
+
     protected BroadcastReceiver getDefaultBroadcastReceiver() {
         return mBroadcastReceiver;
     }

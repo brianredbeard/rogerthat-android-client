@@ -294,9 +294,37 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     }
 
     public void updateView(long newsId) {
+        updateView(newsId, "full");
+    }
+
+    public void updateView(long newsId, String updateType) {
         int position = mVisibleItems.indexOf(newsId);
         if (position >= 0) {
-            notifyItemChanged(position);
+            if ("read".equals(updateType)) {
+                NewsItem newsItem = mActivity.newsStore.getNewsItem(newsId);
+                ViewHolder viewHolder = (ViewHolder) mActivity.getViewForPosition(position);
+                if (newsItem.reach >= 0) {
+                    viewHolder.reach.setVisibility(View.VISIBLE);
+                    viewHolder.reachSpinner.setVisibility(View.GONE);
+                    viewHolder.reach.setText(String.valueOf(newsItem.reach));
+                } else {
+                    viewHolder.reach.setVisibility(View.GONE);
+                    viewHolder.reachSpinner.setVisibility(View.VISIBLE);
+                }
+
+            } else if ("roger".equals(updateType)) {
+                NewsItem newsItem = mActivity.newsStore.getNewsItem(newsId);
+                ViewHolder viewHolder = (ViewHolder) mActivity.getViewForPosition(position);
+
+                setupRogeredUsers(viewHolder, newsItem);
+
+                LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) viewHolder.details.getLayoutParams();
+                if (newsItem.users_that_rogered.length > 0) {
+                    lp.setMargins(0, 0, 0, 0);
+                }
+            } else {
+                notifyItemChanged(position);
+            }
 
             if (!mActivity.newsStore.getNewsItemDetails(newsId).isPartial) {
                 mRequestedPartialItems.remove(newsId);
@@ -393,7 +421,6 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         } else {
             viewHolder.title.setText(newsItem.title);
             viewHolder.title.setVisibility(View.VISIBLE);
-
         }
 
         LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) viewHolder.details.getLayoutParams();
@@ -453,7 +480,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
 
         viewHolder.broadcastType.setText(String.format("[%s]", newsItem.broadcast_type));
 
-        setupButtons(viewHolder, position, newsItem, existenceStatus);
+        setupButtons(viewHolder, newsItem, existenceStatus);
 
         if (newsItem.disabled) {
             viewHolder.image.setAlpha(0.4f);
@@ -466,7 +493,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         }
     }
 
-    private void setupButtons(final ViewHolder viewHolder, final int position, final NewsItem newsItem, int existenceStatus) {
+    private void setupButtons(final ViewHolder viewHolder, final NewsItem newsItem, int existenceStatus) {
         viewHolder.actions.removeAllViews();
         int totalButtonCount = 0;
         int currentButton = 0;
@@ -486,7 +513,9 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
             viewHolder.actions.addView(rogerthatButton);
             rogerthatButton.setText(mActivity.getString(R.string.rogerthat));
 
-            GradientDrawable background = new GradientDrawable();
+            final GradientDrawable background = new GradientDrawable();
+            background.setCornerRadii(getCorners(totalButtonCount, currentButton));
+
             int backgroundColor;
             if (newsItem.rogered) {
                 backgroundColor = R.color.mc_divider_gray;
@@ -506,7 +535,9 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                                 mMainService.postAtFrontOfUIHandler(new SafeRunnable() {
                                     @Override
                                     protected void safeRun() throws Exception {
-                                        notifyItemChanged(position);
+                                        updateView(newsItem.id, "roger");
+                                        background.setColor(ContextCompat.getColor(mActivity, R.color.mc_divider_gray));
+                                        rogerthatButton.setBackground(background);
                                     }
                                 });
                             }
@@ -514,7 +545,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                     }
                 });
             }
-            background.setCornerRadii(getCorners(totalButtonCount, currentButton));
+
             background.setColor(ContextCompat.getColor(mActivity, backgroundColor));
             rogerthatButton.setBackground(background);
 
