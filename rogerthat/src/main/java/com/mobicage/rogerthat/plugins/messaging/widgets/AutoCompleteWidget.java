@@ -18,8 +18,6 @@
 
 package com.mobicage.rogerthat.plugins.messaging.widgets;
 
-import java.util.List;
-
 import android.content.Context;
 import android.text.InputType;
 import android.util.AttributeSet;
@@ -33,6 +31,8 @@ import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.to.messaging.forms.SubmitAutoCompleteFormRequestTO;
 import com.mobicage.to.messaging.forms.SubmitAutoCompleteFormResponseTO;
+
+import java.util.List;
 
 public class AutoCompleteWidget extends TextLineWidget {
 
@@ -54,7 +54,7 @@ public class AutoCompleteWidget extends TextLineWidget {
     public void initializeWidget() {
         super.initializeWidget();
 
-        AutoCompleteTextView ac = (AutoCompleteTextView) findViewById(R.id.edit_text);
+        AutoCompleteTextView ac = (AutoCompleteTextView) mEditText;
         ac.setAdapter(new ArrayAdapter<String>(getContext(), R.layout.list_item, (List<String>) mWidgetMap
             .get("choices")));
     }

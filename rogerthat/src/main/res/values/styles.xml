@@ -97,9 +97,9 @@
         <item name="android:colorBackground">?attr/colorBackgroundFloating</item>
     </style>
 
-    <style name="CheckedTextViewNormal" parent="AppTheme">
-        <item name="colorAccent">@color/mc_primary_color</item>
-        <item name="android:textColorSecondary">@color/mc_primary_color</item>
+    <style name="EditTextWhite" parent="AppTheme">
+        <item name="colorControlNormal">@color/mc_white</item>
+        <item name="colorAccent">@color/mc_white</item>
     </style>
 
     <style name="CheckedTextViewWhite" parent="AppTheme">

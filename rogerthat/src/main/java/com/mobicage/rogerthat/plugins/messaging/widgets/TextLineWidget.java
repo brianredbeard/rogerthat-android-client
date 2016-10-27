@@ -25,9 +25,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.speech.RecognizerIntent;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.AppCompatAutoCompleteTextView;
-import android.support.v7.widget.AppCompatEditText;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.util.AttributeSet;
@@ -57,7 +54,7 @@ public class TextLineWidget extends Widget {
 
     public static final int REQUEST_CODE_VOICE = 123;
 
-    private EditText mEditText;
+    protected EditText mEditText;
 
     public TextLineWidget(Context context) {
         super(context);
@@ -88,21 +85,19 @@ public class TextLineWidget extends Widget {
 
     @Override
     public void initializeWidget() {
-        mEditText = (EditText) findViewById(R.id.edit_text);
+        if (mColorScheme == BrandingMgr.ColorScheme.DARK) {
+            findViewById(R.id.edit_text).setVisibility(View.GONE);
+            mEditText = (EditText) findViewById(R.id.edit_text_white);
+            mEditText.setVisibility(View.VISIBLE);
+        } else {
+            mEditText = (EditText) findViewById(R.id.edit_text);
+        }
+        mEditText.setTextColor(mTextColor);
         mEditText.setText((String) mWidgetMap.get("value"));
         mEditText.setHint((String) mWidgetMap.get("place_holder"));
         mEditText.setFilters(new InputFilter[] { new InputFilter.LengthFilter(((Long) mWidgetMap.get("max_chars"))
             .intValue()) });
         mEditText.setInputType(getDefaultInputTypes() | KeyboardType.getInputType((String) mWidgetMap.get("keyboard_type")));
-        if (mColorScheme == BrandingMgr.ColorScheme.DARK) {
-            mEditText.setTextColor(mTextColor);
-            if (mEditText instanceof AppCompatEditText) {
-                ((AppCompatEditText) mEditText).setSupportBackgroundTintList(ContextCompat.getColorStateList(mActivity, mColorId));
-            } else if (mEditText instanceof AppCompatAutoCompleteTextView) {
-                ((AppCompatAutoCompleteTextView) mEditText).setSupportBackgroundTintList(ContextCompat.getColorStateList(mActivity, mColorId));
-            }
-        }
-
 
         ImageButton btnSpeak = (ImageButton) findViewById(R.id.btn_speak);
         if (AppConstants.SPEECH_TO_TEXT && isSpeechRecognitionActivityPresented(mActivity)) {

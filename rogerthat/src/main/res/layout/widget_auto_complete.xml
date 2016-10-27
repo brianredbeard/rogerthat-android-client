@@ -3,6 +3,7 @@
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:layout_width="fill_parent"
 	android:layout_height="wrap_content"
+	xmlns:tools="http://schemas.android.com/tools"
 	android:orientation="vertical">
 
 	<LinearLayout
@@ -10,7 +11,7 @@
 		android:layout_height="wrap_content"
 		android:orientation="horizontal">
 
-		<android.support.v7.widget.AppCompatAutoCompleteTextView
+		<AutoCompleteTextView
 			android:id="@+id/edit_text"
 			android:layout_width="0dp"
 			android:layout_height="wrap_content"
@@ -18,8 +19,20 @@
 			android:completionThreshold="1"
 			android:imeOptions="actionDone"
 			android:inputType="textCapSentences"
+			android:maxLines="1" />
+
+		<AutoCompleteTextView
+			android:id="@+id/edit_text_white"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:completionThreshold="1"
+			android:imeOptions="actionDone"
+			android:inputType="textCapSentences"
 			android:maxLines="1"
-			android:textCursorDrawable="@null" />
+			android:theme="@style/EditTextWhite"
+			android:visibility="gone"
+			tools:visibility="visible" />
 
 		<ImageButton
 			android:id="@+id/btn_speak"
