@@ -43,6 +43,12 @@ public class ServiceHeader {
             final Bitmap avatar = BitmapFactory.decodeFile(brandingResult.avatar.getAbsolutePath());
             avatarImage.setImageBitmap(getRoundedCornerAvatar(avatar));
             avatarImage.setVisibility(View.VISIBLE);
+            if (logoImage.getHeight() != 0) {
+                // This will be called when the branding is refreshed due to an intent, but the logo didn't change.
+                // Therefore the height is already set and the layoutChangeListener shouldn't be attached again.
+                setAvatarMargin(logoImage, imagesContainer, avatarImage);
+                return;
+            }
             // When the view is drawn for the first time, calculate the correct height of the container so that the
             // avatar can be shown on the correct place.
             logoImage.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
@@ -54,16 +60,20 @@ public class ServiceHeader {
                     if (left == 0 && top == 0 && right == 0 && bottom == 0) {
                         return;
                     }
-                    int avatarHeight = logoImage.getHeight();
-                    int halfAvatarHeight = Math.round(avatarHeight / 2);
-                    imagesContainer.getLayoutParams().height = avatarHeight + halfAvatarHeight;
-                    ViewGroup.MarginLayoutParams avatarMarginLayoutParams = (ViewGroup.MarginLayoutParams) avatarImage.getLayoutParams();
-                    //noinspection SuspiciousNameCombination
-                    avatarMarginLayoutParams.width = avatarHeight;
-                    avatarMarginLayoutParams.height = avatarHeight;
-                    avatarMarginLayoutParams.topMargin = avatarHeight - halfAvatarHeight;
+                    setAvatarMargin(logoImage, imagesContainer, avatarImage);
                 }
             });
         }
+    }
+
+    private static void setAvatarMargin(ImageView logoImage, FrameLayout imagesContainer, ImageView avatarImage) {
+        int avatarHeight = logoImage.getHeight();
+        int halfAvatarHeight = Math.round(avatarHeight / 2);
+        imagesContainer.getLayoutParams().height = avatarHeight + halfAvatarHeight;
+        ViewGroup.MarginLayoutParams avatarMarginLayoutParams = (ViewGroup.MarginLayoutParams) avatarImage.getLayoutParams();
+        //noinspection SuspiciousNameCombination
+        avatarMarginLayoutParams.width = avatarHeight;
+        avatarMarginLayoutParams.height = avatarHeight;
+        avatarMarginLayoutParams.topMargin = avatarHeight - halfAvatarHeight;
     }
 }

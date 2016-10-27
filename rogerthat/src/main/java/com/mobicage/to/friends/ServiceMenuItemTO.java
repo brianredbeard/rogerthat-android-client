@@ -30,6 +30,7 @@ public class ServiceMenuItemTO implements com.mobicage.rpc.IJSONable {
     public String hashedTag;
     public String iconHash;
     public String iconName;
+    public String iconColor;
     public String label;
     public boolean requiresWifi;
     public long[] roles;
@@ -81,6 +82,12 @@ public class ServiceMenuItemTO implements com.mobicage.rpc.IJSONable {
             this.iconName = (String) val;
         } else {
             this.iconName = null;
+        }
+        if (json.containsKey("iconColor")) {
+            Object val = json.get("iconColor");
+            this.iconColor = (String) val;
+        } else {
+            this.iconColor = null;
         }
         if (json.containsKey("label")) {
             Object val = json.get("label");
@@ -144,6 +151,7 @@ public class ServiceMenuItemTO implements com.mobicage.rpc.IJSONable {
         obj.put("hashedTag", this.hashedTag);
         obj.put("iconHash", this.iconHash);
         obj.put("iconName", this.iconName);
+        obj.put("iconColor", this.iconColor);
         obj.put("label", this.label);
         obj.put("requiresWifi", this.requiresWifi);
         if (this.roles == null) {

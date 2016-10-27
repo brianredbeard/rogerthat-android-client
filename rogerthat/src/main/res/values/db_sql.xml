@@ -54,15 +54,15 @@
     <string name="sql_friend_delete_service_menu">DELETE FROM service_menu_item WHERE friend = ?</string>
     <string name="sql_friend_insert_service_menu">
         INSERT INTO service_menu_item (friend, x, y, z, label, icon_hash, screen_branding, static_flow_hash,
-        hashed_tag, requires_wifi, run_in_background, \"action\", icon_name)
-        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        hashed_tag, requires_wifi, run_in_background, \"action\", icon_name, icon_color)
+        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     </string>
     <string name="sql_friend_check_menu_icon_available">SELECT count(*) FROM service_menu_icon WHERE icon_hash = ?</string>
     <string name="sql_friend_insert_menu_icon">INSERT OR REPLACE INTO service_menu_icon (icon_hash, icon) values (?, ?)</string>
     <string name="sql_friend_menu_icon_usage">SELECT smi.icon_hash, count(smii.icon_hash) FROM service_menu_icon smi LEFT OUTER JOIN service_menu_item smii ON smi.icon_hash = smii.icon_hash GROUP BY smi.icon_hash </string>
     <string name="sql_friend_get_menu">
         SELECT x, y, label, icon, screen_branding, static_flow_hash, hashed_tag, requires_wifi, run_in_background,
-        \"action\", icon_name
+        \"action\", icon_name, icon_color
         FROM service_menu_item smii LEFT OUTER JOIN service_menu_icon smi ON smi.icon_hash = smii.icon_hash
         WHERE friend = ? AND z = ?
     </string>
@@ -104,7 +104,7 @@
     </string>
     <string name="sql_friend_get_smi_by_tag">
         SELECT smi.x, smi.y, smi.z, smi.label, NULL, smi.screen_branding, smi.static_flow_hash, smi.hashed_tag,
-        smi.requires_wifi, smi.run_in_background, smi.action, smi.icon_name, f.generation
+        smi.requires_wifi, smi.run_in_background, smi.action, smi.icon_name, smi.icon_color, f.generation
         FROM service_menu_item smi INNER JOIN friend f ON smi.friend = f.email
         WHERE f.email = ? and smi.hashed_tag = ?
     </string>
@@ -507,7 +507,8 @@ ORDER BY ms.acked_timestamp DESC
     <string name="sql_services_get_by_index_and_organization_type">SELECT f.email, f.name, f.share_location, f.shares_location, f.avatar, f.existence, f.type, f.description, f.description_branding, f.poke_description, f.qualified_identifier, f.organization_type, f.callbacks, f.flags, f.profile_data, f.content_branding_hash, f.actions, IFNULL(c.id, f.email) AS cat_id, IFNULL(c.name, f.name) AS cat_name, c.avatar, count(f.email) FROM friend f LEFT OUTER JOIN friend_category c ON c.id = f.category_id WHERE (f.existence = 0 OR f.existence = 4) AND f.type = 2 AND organization_type=? GROUP BY cat_id ORDER BY cat_name COLLATE NOCASE LIMIT ?, 1</string>
 
     <string name="sql_friend_get_full_menu">
-        SELECT x, y, z, label, icon, screen_branding, static_flow_hash, hashed_tag, requires_wifi, run_in_background, \"action\", icon_name
+        SELECT x, y, z, label, icon, screen_branding, static_flow_hash, hashed_tag, requires_wifi, run_in_background,
+        \"action\", icon_name, icon_color
         FROM service_menu_item smii LEFT OUTER JOIN service_menu_icon smi ON smi.icon_hash = smii.icon_hash
         WHERE friend = ?
     </string>
