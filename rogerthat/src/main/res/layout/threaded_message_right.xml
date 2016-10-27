@@ -78,23 +78,11 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:layout_below="@id/text_bubble"
-        android:layout_marginLeft="1dp"
+        android:layout_marginLeft="60dp"
         android:layout_marginRight="1dp"
         android:layout_marginTop="5dp"
         android:orientation="vertical" >
     </LinearLayout>
-
-    <ProgressBar
-        android:id="@+id/spinner"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@id/sender_avatar"
-        android:layout_marginLeft="3dp"
-        android:layout_marginTop="3dp"
-        android:indeterminate="true" >
-    </ProgressBar>
-
 
     <LinearLayout
         android:id="@+id/read_friends_container"

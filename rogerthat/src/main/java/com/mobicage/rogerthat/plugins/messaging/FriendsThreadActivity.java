@@ -50,7 +50,6 @@ import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -520,47 +519,36 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
 
                     final String downloadUrlHash = mMessagingPlugin.attachmentDownloadUrlHash(attachment.download_url);
                     final File attachmentFile = new File(attachmentsDir, downloadUrlHash);
-
-                    if (!attachmentFile.exists()
-                        && mMessagingPlugin.getBrandingMgr().isAttachmentInBrandingQueue(attachment.threadKey,
-                            attachment.messageKey, attachment.download_url)) {
-                        L.i("show spinner");
-                        // Show spinner if in queue and disable click
-                        ProgressBar spinner = (ProgressBar) view.findViewById(R.id.spinner);
-                        spinner.setVisibility(View.VISIBLE); // todo ruben
-
-                    } else {
-                        final ImageView attachmentImageView = (ImageView) View.inflate(mContext,
+                    final ImageView attachmentImageView = (ImageView) View.inflate(mContext,
                             R.layout.threaded_message_attachment, null);
-                        linearLayout.addView(attachmentImageView);
+                    linearLayout.addView(attachmentImageView);
 
-                        // Set 10dp margin bottom. Setting it in the xml did not work
-                        LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) attachmentImageView
+                    // Set 10dp margin bottom. Setting it in the xml did not work
+                    LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) attachmentImageView
                             .getLayoutParams();
-                        final int dpi5 = UIUtils.convertDipToPixels(mContext, 5);
-                        layoutParams.setMargins(0, dpi5, 0, dpi5);
+                    final int dpi5 = UIUtils.convertDipToPixels(mContext, 5);
+                    layoutParams.setMargins(0, dpi5, 0, dpi5);
 
-                        final Bitmap thumbnail = setAttachmentThumbnail(attachment, attachmentFile, attachmentImageView);
-                        final boolean generateThumbnail = thumbnail == null;
+                    final Bitmap thumbnail = setAttachmentThumbnail(attachment, attachmentFile, attachmentImageView);
+                    final boolean generateThumbnail = thumbnail == null;
 
-                        attachmentImageView.setOnClickListener(new SafeViewOnClickListener() {
-                            @Override
-                            public void safeOnClick(View v) {
-                                Intent i = new Intent(FriendsThreadActivity.this, AttachmentViewerActivity.class);
-                                i.putExtra("thread_key", attachment.threadKey);
-                                i.putExtra("message", attachment.messageKey);
-                                i.putExtra("content_type", attachment.content_type);
-                                i.putExtra("download_url", attachment.download_url);
-                                i.putExtra("name", attachment.name);
-                                i.putExtra("download_url_hash", downloadUrlHash);
-                                i.putExtra("generate_thumbnail", generateThumbnail);
+                    attachmentImageView.setOnClickListener(new SafeViewOnClickListener() {
+                        @Override
+                        public void safeOnClick(View v) {
+                            Intent i = new Intent(FriendsThreadActivity.this, AttachmentViewerActivity.class);
+                            i.putExtra("thread_key", attachment.threadKey);
+                            i.putExtra("message", attachment.messageKey);
+                            i.putExtra("content_type", attachment.content_type);
+                            i.putExtra("download_url", attachment.download_url);
+                            i.putExtra("name", attachment.name);
+                            i.putExtra("download_url_hash", downloadUrlHash);
+                            i.putExtra("generate_thumbnail", generateThumbnail);
 
-                                startActivity(i);
-                            }
-                        });
+                            startActivity(i);
+                        }
+                    });
 
-                        linearLayout.setVisibility(View.VISIBLE);
-                    }
+                    linearLayout.setVisibility(View.VISIBLE);
                 }
             }
         }
@@ -632,8 +620,8 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
 
         private void addButton(final MessageTO message, boolean left, boolean canEdit, final LinearLayout buttons,
                                final ButtonTO button, final boolean isChat) {
-            LinearLayout buttonContainer = (LinearLayout) mInflator.inflate(
-                left ? R.layout.message_thread_member_detail_right : R.layout.message_thread_member_detail_left, null);
+            int buttonLayout = left ? R.layout.message_thread_member_detail_left : R.layout.message_thread_member_detail_right;
+            LinearLayout buttonContainer = (LinearLayout) mInflator.inflate(buttonLayout, null);
             buttons.addView(buttonContainer);
             AppCompatButton buttonView = (AppCompatButton) buttonContainer.findViewById(R.id.button);
             buttonView.setText(button.caption);
@@ -748,11 +736,9 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             avatar.setPadding(_1_DP_IN_PX, _1_DP_IN_PX, _1_DP_IN_PX, _1_DP_IN_PX);
             configureAvatarOnClickListener(memberStatus.member, avatar, isChat);
             if (rtl) {
-                avatar.setLayoutParams(new FlowLayout.LayoutParams(size, size, _4_DP_IN_PX,
-                        _4_DP_IN_PX));
+                avatar.setLayoutParams(new FlowLayoutRTL.LayoutParams(size, size, _4_DP_IN_PX, _4_DP_IN_PX));
             } else {
-                avatar.setLayoutParams(new FlowLayoutRTL.LayoutParams(size, size, _4_DP_IN_PX,
-                        _4_DP_IN_PX));
+                avatar.setLayoutParams(new FlowLayout.LayoutParams(size, size, _4_DP_IN_PX, _4_DP_IN_PX));
             }
             return avatar;
         }
@@ -769,7 +755,6 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
 
         private void setSenderAvatar(View view, Cursor c, final MessageTO message) {
             ImageView senderAvatar = (ImageView) view.findViewById(R.id.sender_avatar);
-            ProgressBar spinner = (ProgressBar) view.findViewById(R.id.spinner); // todo ruben
             final boolean isChat = SystemUtils.isFlagEnabled(message.flags, MessagingPlugin.FLAG_DYNAMIC_CHAT);
             final SafeRunnable friendNotFoundRunnable;
             if (isChat) {
@@ -784,9 +769,6 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             }
             senderAvatar
                     .setImageBitmap(mFriendsPlugin.getAvatarBitmap(message.sender, !isChat, friendNotFoundRunnable, -1));
-
-            spinner.setVisibility(View.GONE); // todo ruben
-
             final boolean isSender = message.sender.equals(mMyEmail);
             if (isSender && !isChat && !SystemUtils.isFlagEnabled(message.flags, MessagingPlugin.FLAG_LOCKED)) {
                 senderAvatar.setOnLongClickListener(new OnLongClickListener() {

@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="42dp"
-    android:layout_gravity="right"
-    android:gravity="center"
-    android:orientation="horizontal">
+              android:layout_width="match_parent"
+              android:layout_height="42dp"
+              android:layout_gravity="end"
+              android:gravity="center"
+              android:orientation="horizontal">
 
     <thirdparty.nishantnair.FlowLayoutRTL
         android:id="@+id/members"
         android:layout_width="0dp"
         android:layout_height="42dp"
         android:layout_gravity="center"
-        android:layout_marginLeft="3dp"
-        android:layout_marginRight="3dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
         android:layout_weight="1"/>
 
     <android.support.v7.widget.AppCompatButton
