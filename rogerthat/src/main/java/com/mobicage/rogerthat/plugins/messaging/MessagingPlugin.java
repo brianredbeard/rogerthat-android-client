@@ -456,6 +456,7 @@ public class MessagingPlugin implements MobicagePlugin {
                 intent.putExtra(ServiceMessageDetailActivity.JUMP_TO_SERVICE_HOME_SCREEN,
                         jumpToServiceHomeScreenWhenFinished);
                 intent.putExtra(MEMBER_FILTER, memberFilter);
+                intent.putExtra(ServiceMessageDetailActivity.TITLE, friendsPlugin.getStore().getName(message.sender));
                 context.startActivity(intent);
 
             } else {
