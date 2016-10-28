@@ -27,7 +27,7 @@
                 android:layout_height="40dp"
                 android:layout_gravity="center"
                 android:layout_marginBottom="10dp"
-                android:background="@drawable/icon_background"
+                android:background="@drawable/tab_icon_background"
                 android:src="@drawable/ic_launcher" />
 
             <View
@@ -53,7 +53,7 @@
                 android:layout_height="40dp"
                 android:layout_gravity="center"
                 android:layout_marginBottom="10dp"
-                android:background="@drawable/icon_background"
+                android:background="@drawable/tab_icon_background"
                 app:ico_color="@color/mc_white"
                 app:ico_icon="@string/faw_book"
                 app:ico_padding="10dp" />
@@ -82,7 +82,7 @@
                 android:layout_height="40dp"
                 android:layout_gravity="center"
                 android:layout_marginBottom="10dp"
-                android:background="@drawable/icon_background"
+                android:background="@drawable/tab_icon_background"
                 app:ico_color="@color/mc_white"
                 app:ico_icon="@string/faw_envelope"
                 app:ico_padding="10dp" />
@@ -110,7 +110,7 @@
                 android:layout_height="40dp"
                 android:layout_gravity="center"
                 android:layout_marginBottom="10dp"
-                android:background="@drawable/icon_background"
+                android:background="@drawable/tab_icon_background"
                 app:ico_color="@color/mc_white"
                 app:ico_icon="@string/faw_facebook"
                 app:ico_padding="10dp" />
