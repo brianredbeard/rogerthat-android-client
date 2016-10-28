@@ -107,4 +107,10 @@
         <item name="colorControlNormal">@color/mc_white</item>
         <item name="colorControlActivated">@color/mc_white</item>
     </style>
+
+    <style name="NavDrawerTextStyle" parent="Base.TextAppearance.AppCompat">
+        <item name="android:textColor">@color/mc_black</item>
+        <item name="android:textSize">16sp</item>
+
+    </style>
 </resources>
