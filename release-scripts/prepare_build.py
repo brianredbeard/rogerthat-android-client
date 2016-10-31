@@ -269,7 +269,11 @@ public class NavigationConstants {
     public static ServiceBoundActivity.NavigationItem[] getNavigationItems() {
         return new ServiceBoundActivity.NavigationItem[]{''' % dict(LICENSE=LICENSE)
 
-    for i, item in enumerate(doc['HOMESCREEN']['items']):
+    app_type = doc.get('APP_CONSTANTS')['APP_TYPE']
+    homescreen_items = doc['HOMESCREEN'].get('items', [])
+    if app_type == 'cityapp' and not homescreen_items:
+        raise Exception('No homescreen items are specified in build.yaml')
+    for i, item in enumerate(homescreen_items):
         icon_file_name = "menu_%s.png" % (i)
         source_file = os.path.join(APP_DIR, "build", icon_file_name)
         app_utils.download_icon(item["icon"], "#FFFFFF", 512, source_file)
@@ -314,7 +318,7 @@ public class NavigationConstants {
     public static ServiceBoundActivity.NavigationItem[] getNavigationFooterItems() {
         return new ServiceBoundActivity.NavigationItem[]{'''
 
-    if 'TOOLBAR' not in doc and doc.get('APP_CONSTANTS').get('APP_TYPE') == 'cityapp':
+    if app_type == 'cityapp' and 'TOOLBAR' not in doc:
         raise Exception('The build.yaml for this app should be migrated first')
     if doc.get('TOOLBAR') and doc['TOOLBAR'].get('items'):
         for i, item in enumerate(doc['TOOLBAR']['items']):
