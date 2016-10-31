@@ -217,6 +217,7 @@ public class SystemPlugin implements MobicagePlugin {
                             getAppAssetRequestTO.kind = ASSET_CHAT_BACKGROUND;
                             final GetAppAssetResponseHandler responseHandler = new GetAppAssetResponseHandler();
                             Rpc.getAppAsset(responseHandler, getAppAssetRequestTO);
+                            mMainService.clearPluginDBUpdate(SystemPlugin.class, SYSTEM_PLUGIN_MUST_DOWNLOAD_ASSETS);
                         }
 
                     }

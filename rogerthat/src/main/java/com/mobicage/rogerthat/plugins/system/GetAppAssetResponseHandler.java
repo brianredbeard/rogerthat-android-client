@@ -7,7 +7,7 @@ import com.mobicage.rpc.IResponse;
 import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.to.app.GetAppAssetResponseTO;
 
-class GetAppAssetResponseHandler extends ResponseHandler<GetAppAssetResponseTO> {
+public class GetAppAssetResponseHandler extends ResponseHandler<GetAppAssetResponseTO> {
 
     @Override
     public void handle(final IResponse<GetAppAssetResponseTO> response) {

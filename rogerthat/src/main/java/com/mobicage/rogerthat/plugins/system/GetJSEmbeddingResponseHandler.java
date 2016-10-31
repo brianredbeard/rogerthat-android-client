@@ -17,34 +17,13 @@
  */
 package com.mobicage.rogerthat.plugins.system;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
-
 import com.mobicage.rogerthat.util.logging.L;
-import com.mobicage.rogerthat.util.pickle.PickleException;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.IResponse;
 import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.to.js_embedding.GetJSEmbeddingResponseTO;
 
 public class GetJSEmbeddingResponseHandler extends ResponseHandler<GetJSEmbeddingResponseTO> {
-
-    public void setRequestSubmissionTimestamp(final long requestSubmissionTimestamp) {
-        T.UI();
-    }
-
-    @Override
-    public void readFromPickle(final int version, final DataInput in) throws IOException, PickleException {
-        T.dontCare();
-        super.readFromPickle(version, in);
-    }
-
-    @Override
-    public void writePickle(final DataOutput out) throws IOException {
-        T.dontCare();
-        super.writePickle(out);
-    }
 
     @Override
     public void handle(final IResponse<GetJSEmbeddingResponseTO> response) {
