@@ -18,11 +18,6 @@
 
 package com.mobicage.rogerthat;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -48,6 +43,11 @@ import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.config.CloudConstants;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class ContentBrandingMainActivity extends ServiceBoundActivity {
     private ProgressBar mProgressBar;
@@ -147,6 +147,7 @@ public class ContentBrandingMainActivity extends ServiceBoundActivity {
 
             if (!brandingAvailable) {
                 L.i("Content branding not available yet");
+                friendsPlugin.getBrandingMgr().queueGenericBranding(friend.contentBrandingHash);
                 return;
             }
             if (progress < 50) {
