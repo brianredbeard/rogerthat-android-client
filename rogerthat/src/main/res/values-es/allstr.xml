@@ -309,7 +309,6 @@
     <string name="profile">Perfil</string>
     <string name="qr_call_tel">¿Desea llamar a %1$s?</string>
     <string name="qr_open_url">¿Desea abrir el sitio web:\n\n%1$s</string>
-    <string name="read_less">Leer menos...</string>
     <string name="read_more">Leer más...</string>
     <string name="received_at">Recibido %1$s.</string>
     <string name="recipients">Para:</string>

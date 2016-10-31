@@ -340,7 +340,6 @@
     <string name="qr_call_tel">Wenst u te bellen naar %1$s?</string>
     <string name="qr_open_url">Wenst u de volgende web pagina te openen:\n\n%1$s</string>
     <string name="reach">Bereik:</string>
-    <string name="read_less">Minder lezen ...</string>
     <string name="read_more">Meer lezen ...</string>
     <string name="received_at">Ontvangen: %1$s.</string>
     <string name="recipients">Aan:</string>

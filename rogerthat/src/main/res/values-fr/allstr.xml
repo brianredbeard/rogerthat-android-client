@@ -339,7 +339,6 @@
     <string name="qr_call_tel">Voulez-vous appeler %1$s?</string>
     <string name="qr_open_url">Voulez-vous ouvrir la page Web suivante:\n\n%1$s</string>
     <string name="reach">Atteindre :</string>
-    <string name="read_less">Afficher moins…</string>
     <string name="read_more">Afficher plus…</string>
     <string name="received_at">Reçu: %1$s.</string>
     <string name="recipients">À:</string>

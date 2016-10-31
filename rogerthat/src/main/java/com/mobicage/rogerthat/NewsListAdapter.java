@@ -400,9 +400,9 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 protected void safeRun() throws Exception {
                     mActivity.newsStore.setNewsItemRead(newsItem.id);
                     mActivity.newsChannel.readNews(newsItem.id);
+                    mActivity.newsPlugin.saveNewsStatistics(new long[]{newsItem.id}, NewsPlugin.STATISTIC_REACH);
                 }
             });
-            mActivity.newsPlugin.saveNewsStatistics(new long[]{newsItem.id}, NewsPlugin.STATISTIC_REACH);
         }
 
         setupPinned(viewHolder, newsItem);
@@ -444,7 +444,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                         viewHolder.readmore.setVisibility(View.VISIBLE);
                         if (mReadMoreItems.contains(newsItem.id)) {
                             viewHolder.text.setMaxLines(lineCount);
-                            viewHolder.readmore.setText(R.string.read_less);
+                            viewHolder.readmore.setVisibility(View.GONE);
                         } else {
                             viewHolder.text.setMaxLines(5);
                             viewHolder.readmore.setText(R.string.read_more);
