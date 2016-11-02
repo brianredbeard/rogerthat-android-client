@@ -623,6 +623,12 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
                 messageText = mMessagingPlugin.getMessageTextFromButtonsOrAttachments(message);
             }
 
+            // this can happen when the name of the service wasn't available yet when fetching the messages during re-registration.
+            if (TextUtils.isEmptyOrWhitespace(recipients)) {
+                recipients = mFriendsPlugin.getName(message.sender);
+                mMessagingPlugin.getStore().updateMessageRecipients(message.parent_key != null ? message.parent_key : message.key, recipients);
+            }
+
             int tmpThreadTextColor = Integer.MAX_VALUE;
             int tmpThreadBackgroundColor = Integer.MAX_VALUE;
             final long priority = message.priority;

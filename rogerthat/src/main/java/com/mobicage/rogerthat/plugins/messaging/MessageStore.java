@@ -135,6 +135,7 @@ public class MessageStore implements Closeable {
 
     private final SQLiteStatement mGetUnreadMessageCountInThread;
     private final SQLiteStatement mGetTotalDirtyMessagecount;
+    private final SQLiteStatement mUpdateMessageRecipients;
 
     public MessageStore(final DatabaseManager databaseManager, final MainService mainService) {
         T.UI();
@@ -218,6 +219,7 @@ public class MessageStore implements Closeable {
         mGetMessageMessage = mDb.compileStatement(mMainService.getString(R.string.sql_message_message_get));
         mGetUnreadMessageCountInThread = mDb.compileStatement(mMainService.getString(R.string.sql_get_unread_count_in_thread));
         mGetTotalDirtyMessagecount = mDb.compileStatement(mMainService.getString(R.string.sql_get_total_unread_count));
+        mUpdateMessageRecipients = mDb.compileStatement(mMainService.getString(R.string.sql_store_message_recipients));
     }
 
     public CursorSet getMessagesCursor(String memberFilter) {
@@ -525,6 +527,13 @@ public class MessageStore implements Closeable {
         });
 
         return senderIsMobileOwner;
+    }
+
+    public void updateMessageRecipients(final String messageKey, final String recipients) {
+        mUpdateMessageRecipients.bindString(1, recipients);
+        mUpdateMessageRecipients.bindString(2, messageKey);
+        mUpdateMessageRecipients.bindString(3, messageKey);
+        mUpdateMessageRecipients.execute();
     }
 
     public void insertMemberStatusBIZZ(final String parentKey, final String messageKey,
@@ -908,23 +917,6 @@ public class MessageStore implements Closeable {
         return mGetLastInboxOpenTime.simpleQueryForLong();
     }
 
-    public Message getFullMessageByUnprocessedMessageIndex(long index) {
-        T.dontCare();
-        final Cursor curs = mDb.rawQuery(
-            mMainService.getString(R.string.sql_message_get_message_by_unprocessed_message_index),
-            new String[] { Long.toString(index) });
-        try {
-            if (!curs.moveToFirst()) {
-                return null;
-            }
-            Message fullMessage = toFullMessage(curs, R.string.sql_message_get_message_by_unprocessed_message_index);
-            addMembers(fullMessage);
-            return fullMessage;
-        } finally {
-            curs.close();
-        }
-    }
-
     // Get message with buttons, but without member statuses
     public Message getPartialMessageByKey(String key) {
         T.dontCare();
@@ -1194,6 +1186,7 @@ public class MessageStore implements Closeable {
         mThreadAvatarCountByHash.close();
         mStoreThreadAvatar.close();
         mGetMessageMessage.close();
+        mUpdateMessageRecipients.close();
     }
 
     private void updateMessageMemberStatusInDbNotInTransaction(MemberStatusUpdateRequestTO request) {
@@ -1320,18 +1313,6 @@ public class MessageStore implements Closeable {
             message.default_sticky = curs.getLong(25) != 0;
             break;
         case R.string.sql_message_cursor_full_thread:
-            message.needsMyAnswer = curs.getLong(11) != 0;
-            message.replyCount = curs.getLong(12);
-            message.dirty = curs.getLong(13) != 0;
-            message.recipients_status = curs.getLong(14);
-            message.recipients = curs.getString(15);
-            formString = curs.getString(16);
-            if (formString != null)
-                message.form = (Map<String, Object>) JSONValue.parse(formString);
-            // column 15: rowid
-            message.threadNeedsMyAnswer = curs.getLong(18) != 0;
-            //$FALL-THROUGH$
-        case R.string.sql_message_get_message_by_unprocessed_message_index:
             message.key = curs.getString(0);
             message.parent_key = curs.getString(1);
             message.sender = curs.getString(2);
@@ -1343,6 +1324,16 @@ public class MessageStore implements Closeable {
             message.priority = curs.getLong(8);
             message.default_priority = curs.getLong(9);
             message.default_sticky = curs.getLong(10) != 0;
+            message.needsMyAnswer = curs.getLong(11) != 0;
+            message.replyCount = curs.getLong(12);
+            message.dirty = curs.getLong(13) != 0;
+            message.recipients_status = curs.getLong(14);
+            message.recipients = curs.getString(15);
+            formString = curs.getString(16);
+            if (formString != null)
+                message.form = (Map<String, Object>) JSONValue.parse(formString);
+            // column 15: rowid
+            message.threadNeedsMyAnswer = curs.getLong(18) != 0;
         }
         addButtonsToMessageObject(message);
         message.attachments = getAttachmentsFromMessage(message.key);

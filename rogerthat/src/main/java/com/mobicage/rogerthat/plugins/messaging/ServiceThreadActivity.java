@@ -263,6 +263,12 @@ public class ServiceThreadActivity extends ServiceBoundCursorListActivity {
             if (position == 0) {
                 avatarView.setImageBitmap(mFriendsPlugin.getAvatarBitmap(message.sender));
                 avatarView.setVisibility(View.VISIBLE);
+                String recipients = message.recipients;
+                if (com.mobicage.rogerthat.util.TextUtils.isEmptyOrWhitespace(recipients)) {
+                    recipients = mFriendsPlugin.getName(message.sender);
+                    mMessagingPlugin.getStore().updateMessageRecipients(message.parent_key != null ? message.parent_key : message.key, recipients);
+                }
+                recipientsView.setText(recipients);
                 recipientsView.setText(message.recipients);
                 recipientsView.setVisibility(View.VISIBLE);
                 svcDetail.setOnClickListener(new SafeViewOnClickListener() {

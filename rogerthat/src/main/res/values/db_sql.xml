@@ -185,7 +185,6 @@ WHERE
     <string name="sql_message_get_unprocessed_message_after_timestamp_keys">SELECT key FROM message WHERE show_in_message_list = 1 AND existence = 1 AND thread_dirty = 1 AND \"timestamp\" > ?</string>
     <string name="sql_message_get_unprocessed_message_count_for_sender">SELECT count(*) FROM message WHERE show_in_message_list > 0  AND existence = 1 AND thread_dirty = 1 AND sender = ?</string>
     <string name="sql_message_get_message_by_key">SELECT \"key\", parent_key, sender, message, \"timestamp\", flags, branding, alert_flags, needs_my_answer, reply_count, dirty, recipients_status, recipients, form, thread_dirty, thread_needs_my_answer, dismiss_button_ui_flags, last_thread_message, thread_show_in_list, broadcast_type, thread_avatar_hash, thread_background_color, thread_text_color, priority, default_priority, default_sticky FROM message WHERE \"key\" = ?</string>
-    <string name="sql_message_get_message_by_unprocessed_message_index" >SELECT \"key\", parent_key, sender, message, \"timestamp\", flags, branding, alert_flags, priority, default_priority, default_sticky FROM message WHERE needs_my_answer = 1 AND show_in_message_list = 1 AND existence = 1 ORDER BY thread_dirty DESC, \"timestamp\" DESC LIMIT ?, 1</string>
     <string name="sql_message_get_message_buttons">SELECT id, caption, action, ui_flags FROM button WHERE message = ? ORDER BY \"index\"</string>
     <string name="sql_message_get_message_members_statusses">SELECT member, received_timestamp, acked_timestamp, button, custom_reply, status FROM member_status WHERE message = ? </string>
     <string name="sql_message_get_message_members">SELECT member FROM member_status WHERE message = ? </string>
@@ -540,7 +539,7 @@ ORDER BY m.thread_dirty DESC, m.\"timestamp\" DESC;
 
     <string name="sql_message_set_message_dirty_ios">UPDATE message SET dirty = ? WHERE \"key\" = ?</string>
     <string name="sql_message_get_dirty_count_ios">SELECT count(*) FROM message WHERE needs_my_answer = 0 AND dirty = 1 AND existence = 1</string>
-
+    <string name="sql_store_message_recipients">UPDATE message SET recipients = ? WHERE parent_key = ? or key = ?</string>
     <string name="sql_get_identity_qr_code">SELECT qr_code FROM my_identity</string>
 
     <string name="sql_activity_get_by_index">SELECT id, timestamp, \"type\", reference, parameters, friend_reference FROM activity ORDER BY id DESC LIMIT ?, 1</string>
