@@ -27,6 +27,7 @@ public class GetAppAssetResponseTO implements com.mobicage.rpc.IJSONable {
 
     public String kind;
     public String url;
+    public float scale_x;
 
     public GetAppAssetResponseTO() {
     }
@@ -44,6 +45,18 @@ public class GetAppAssetResponseTO implements com.mobicage.rpc.IJSONable {
         } else {
             throw new IncompleteMessageException("com.mobicage.to.app.GetAppAssetResponseTO object is missing field 'url'");
         }
+        if (json.containsKey("scale_x")) {
+            Object val = json.get("scale_x");
+            if (val instanceof Float) {
+                this.scale_x = (Float) val;
+            } else if (val instanceof Double) {
+                this.scale_x = new Float((Double) val);
+            } else {
+                this.scale_x = new Float((Long) val);
+            }
+        } else {
+            throw new IncompleteMessageException("com.mobicage.to.app.GetAppAssetResponseTO object is missing field 'scale_x'");
+        }
     }
 
     @Override
@@ -51,6 +64,7 @@ public class GetAppAssetResponseTO implements com.mobicage.rpc.IJSONable {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
         obj.put("kind", this.kind);
         obj.put("url", this.url);
+        obj.put("scale_x", this.scale_x);
         return obj;
     }
 

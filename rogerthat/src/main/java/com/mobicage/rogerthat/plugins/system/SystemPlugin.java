@@ -303,7 +303,7 @@ public class SystemPlugin implements MobicagePlugin {
         return info;
     }
 
-    public void updateAppAsset(String kind, String url) {
+    public void updateAppAsset(String kind, String url, float scaleX) {
         if (url == null) {
             File file = null;
             try {
@@ -320,6 +320,7 @@ public class SystemPlugin implements MobicagePlugin {
             UpdateAppAssetRequestTO packet = new UpdateAppAssetRequestTO();
             packet.kind = kind;
             packet.url = url;
+            packet.scale_x = scaleX;
             mBrandingMgr.queue(packet);
         }
     }

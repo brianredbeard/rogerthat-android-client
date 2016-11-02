@@ -58,6 +58,7 @@ import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.time.TimeUtils;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
+import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.CallReceiver;
 import com.mobicage.rpc.Credentials;
 import com.mobicage.rpc.IJSONable;
@@ -324,7 +325,8 @@ public class BrandingMgr implements Pickleable, Closeable {
                 } else if (type == TYPE_APP_ASSET) {
                     UpdateAppAssetRequestTO asset = (UpdateAppAssetRequestTO) object;
                     UpdateAppAssetRequestTO otherAsset = (UpdateAppAssetRequestTO) other.object;
-                    if (!(asset.kind.equals(otherAsset.kind) && asset.url.equals(otherAsset.kind))) {
+                    if (!(asset.kind.equals(otherAsset.kind) && asset.url.equals(otherAsset.kind)
+                            && asset.scale_x == otherAsset.scale_x)) {
                         return false;
                     }
                 }
@@ -1661,7 +1663,8 @@ public class BrandingMgr implements Pickleable, Closeable {
                 url = item.brandingKey;
             } else if (item.type == BrandedItem.TYPE_APP_ASSET) {
                 UpdateAppAssetRequestTO updateAppAssetRequestTO = (UpdateAppAssetRequestTO) item.object;
-                url = updateAppAssetRequestTO.url;
+                float pictureSize = UIUtils.getDisplayWidth(mMainService) * updateAppAssetRequestTO.scale_x;
+                url = updateAppAssetRequestTO.url + "=s" + Math.min(1600, Math.round(pictureSize));
             } else {
                 url = CloudConstants.BRANDING_URL_PREFIX + item.brandingKey;
             }

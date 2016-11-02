@@ -1165,7 +1165,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
 
             @Override
             public UpdateAppAssetResponseTO updateAppAsset(UpdateAppAssetRequestTO request) throws Exception {
-                getPlugin(SystemPlugin.class).updateAppAsset(request.kind, request.url);
+                getPlugin(SystemPlugin.class).updateAppAsset(request.kind, request.url, request.scale_x);
                 return new UpdateAppAssetResponseTO();
             }
 

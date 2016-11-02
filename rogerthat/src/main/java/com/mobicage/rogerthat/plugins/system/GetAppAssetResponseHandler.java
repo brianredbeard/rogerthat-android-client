@@ -15,7 +15,7 @@ public class GetAppAssetResponseHandler extends ResponseHandler<GetAppAssetRespo
         try {
             final SystemPlugin systemPlugin = mMainService.getPlugin(SystemPlugin.class);
             GetAppAssetResponseTO asset = response.getResponse();
-            systemPlugin.updateAppAsset(asset.kind, asset.url);
+            systemPlugin.updateAppAsset(asset.kind, asset.url, asset.scale_x);
         } catch (Exception e) {
             L.w("GetAppAsset call resulted in failure!", e);
         }

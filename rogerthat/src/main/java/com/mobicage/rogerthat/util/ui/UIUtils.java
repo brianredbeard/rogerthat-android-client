@@ -387,28 +387,6 @@ public class UIUtils {
         return size;
     }
 
-    public static float getLightness(int color) {
-        int red = Color.red(color);
-        int green = Color.green(color);
-        int blue = Color.blue(color);
-        float r = red / 255f;
-        float g = green / 255f;
-        float b = blue / 255f;
-        float cMax = Math.max(r, Math.max(g, b));
-        float cMin = Math.min(r, Math.min(g, b));
-        return (cMax + cMin) / 2f;
-    }
-
-    public static float getLuminus(int color) {
-        int red = Color.red(color);
-        int green = Color.green(color);
-        int blue = Color.blue(color);
-        float r = red / 255f;
-        float g = green / 255f;
-        float b = blue / 255f;
-        return (0.299f * r) + (0.587f * g) + (0.114f * b);
-    }
-
     public static ColorFilter imageColorFilter(int color) {
         int red = (color & 0xFF0000) / 0xFFFF;
         int green = (color & 0xFF00) / 0xFF;
