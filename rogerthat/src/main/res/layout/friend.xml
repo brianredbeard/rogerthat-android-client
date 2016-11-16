@@ -1,32 +1,55 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
+    android:minHeight="72dp"
     android:orientation="vertical"
-    android:padding="3dp" >
+    android:paddingLeft="?attr/listPreferredItemPaddingLeft"
+    android:paddingRight="?attr/listPreferredItemPaddingRight">
 
     <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" >
+        android:layout_height="wrap_content">
 
-        <ImageView
-            android:id="@+id/friend_avatar"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:layout_alignParentLeft="true"
-			android:layout_alignParentTop="true"
-            android:background="@drawable/avatar_background_black"
-            android:padding="1dp"
-            android:scaleType="fitCenter" />
-        
+        <FrameLayout
+            android:id="@+id/friend_avatar_container"
+            android:layout_width="40dp"
+            android:layout_height="72dp"
+            android:layout_gravity="center">
+
+            <ImageView
+                android:id="@+id/friend_avatar"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                tools:src="@drawable/unknown_avatar" />
+
+            <ImageView
+                android:id="@+id/friend_status"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="40dp"
+                android:background="@drawable/circle_tint"
+                android:padding="5dp"
+                android:visibility="gone"
+                app:ico_color="@color/mc_white"
+                app:ico_icon="@string/faw_check"
+                app:ico_size="12dp"
+                tools:visibility="visible" />
+
+        </FrameLayout>
+
         <LinearLayout
             android:id="@+id/friend_existence_layout"
             android:layout_width="wrap_content"
-            android:layout_height="48dp"
+            android:layout_height="60dp"
             android:layout_alignParentRight="true"
+            android:layout_marginTop="5dp"
             android:gravity="center"
             android:orientation="horizontal"
-            android:visibility="gone" >
+            android:visibility="gone">
 
             <ProgressBar
                 android:id="@+id/friend_spinner"
@@ -40,36 +63,65 @@
                 android:id="@+id/friend_existence"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:visibility="gone" />
+                android:visibility="gone"
+                tools:visibility="visible" />
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="fill_parent"
+            android:id="@+id/friend_indicator_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="5dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/friend_indicator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                app:ico_color="@color/mc_black"
+                app:ico_icon="@string/faw_angle_down"
+                app:ico_size="28dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
+            android:layout_alignWithParentIfMissing="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
             android:layout_toLeftOf="@id/friend_existence_layout"
-			android:layout_toRightOf="@id/friend_avatar"
-            android:paddingLeft="5dp">
+            android:layout_toRightOf="@id/friend_avatar_container"
+            android:orientation="vertical"
+            android:paddingBottom="16dp"
+            android:paddingTop="16dp">
 
             <TextView
                 android:id="@+id/friend_name"
-                android:layout_width="fill_parent"
+                style="@style/TextAppearance.AppCompat.Body2"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:ellipsize="end"
-                android:singleLine="true"
-                android:textColor="@android:color/primary_text_light"
-                android:textSize="20sp"/>
+                android:gravity="center_vertical"
+                android:maxLines="1"
+                android:textSize="20sp"
+                tools:text="Friend that has a really long name" />
 
             <TextView
                 android:id="@+id/friend_subtitle"
-                android:layout_width="fill_parent"
+                style="@style/TextAppearance.AppCompat.Body1"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
-                android:singleLine="true"
-                android:textColor="@android:color/secondary_text_light"
+                android:maxLines="1"
                 android:textSize="14sp"
-                android:visibility="gone" />
+                android:visibility="gone"
+                tools:text="Friend subtitle"
+                tools:visibility="visible" />
+
         </LinearLayout>
     </RelativeLayout>
 
@@ -77,44 +129,75 @@
         android:id="@+id/actions"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
+        android:gravity="center"
         android:orientation="horizontal"
-        android:visibility="gone" >
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
 
         <ImageView
             android:id="@+id/location"
-            android:layout_width="fill_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/mc_state_selector"
-            android:src="@drawable/friend_location" >
-        </ImageView>
+            android:background="?attr/selectableItemBackground"
+            android:padding="10dp"
+            app:ico_color="@color/mc_primary_icon"
+            app:ico_icon="@string/faw_map_marker"
+            app:ico_size="28dp" />
 
-        <ImageView
-            android:id="@+id/history"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/mc_state_selector"
-            android:src="@drawable/friend_history" >
-        </ImageView>
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
 
         <ImageView
             android:id="@+id/send"
-            android:layout_width="fill_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/mc_state_selector"
-            android:src="@drawable/friend_new_message" >
-        </ImageView>
+            android:background="?attr/selectableItemBackground"
+            android:padding="10dp"
+            app:ico_color="@color/mc_primary_icon"
+            app:ico_icon="@string/faw_envelope"
+            app:ico_size="28dp" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
 
         <ImageView
             android:id="@+id/details"
-            android:layout_width="fill_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/mc_state_selector"
-            android:src="@drawable/friend_details" >
-        </ImageView>
-    </LinearLayout>
+            android:background="?attr/selectableItemBackground"
+            android:padding="10dp"
+            app:ico_color="@color/mc_primary_icon"
+            app:ico_icon="@string/faw_user"
+            app:ico_size="28dp" />
 
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <ImageView
+            android:id="@+id/history"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:padding="10dp"
+            app:ico_color="@color/mc_primary_icon"
+            app:ico_icon="@string/faw_history"
+            app:ico_size="28dp" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+    </LinearLayout>
 </LinearLayout>

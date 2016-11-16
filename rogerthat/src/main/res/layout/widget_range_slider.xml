@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.mobicage.rogerthat.plugins.messaging.widgets.RangeSliderWidget
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.mobicage.rogerthat.plugins.messaging.widgets.RangeSliderWidget xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:rsb="http://schemas.android.com/apk/res-auto"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical">
 
     <TextView
@@ -11,7 +12,40 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:textSize="20dp">
-    </TextView>
+        android:textSize="20sp" />
+
+    <org.florescu.android.rangeseekbar.RangeSeekBar
+        android:id="@+id/range_slider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        rsb:absoluteMaxValue="100"
+        rsb:absoluteMinValue="0"
+        rsb:thumbDisabled="@drawable/range_slider_thumb_normal"
+        rsb:thumbShadow="true"
+        rsb:thumbNormal="@drawable/range_slider_thumb_normal"
+        rsb:thumbPressed="@drawable/range_slider_thumb_normal"
+        rsb:barHeight="2dp"
+        rsb:defaultColor="@color/mc_primary_color"
+        rsb:activeColor="@color/mc_primary_color"
+        rsb:showLabels="false"
+        rsb:valuesAboveThumbs="false" />
+
+    <org.florescu.android.rangeseekbar.RangeSeekBar
+        android:id="@+id/range_slider_white"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        rsb:activeColor="@color/mc_white"
+        rsb:absoluteMaxValue="100"
+        rsb:absoluteMinValue="0"
+        rsb:defaultColor="@color/mc_white"
+        rsb:thumbShadow="true"
+        rsb:thumbDisabled="@drawable/range_slider_thumb_white"
+        rsb:thumbNormal="@drawable/range_slider_thumb_white"
+        rsb:barHeight="2dp"
+        rsb:thumbPressed="@drawable/range_slider_thumb_white"
+        rsb:valuesAboveThumbs="false"
+        rsb:showLabels="false"
+        tools:visibility="visible" />
 
 </com.mobicage.rogerthat.plugins.messaging.widgets.RangeSliderWidget>

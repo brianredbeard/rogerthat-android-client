@@ -16,14 +16,6 @@
 
 package com.google.zxing.client.android;
 
-import java.io.IOException;
-import java.text.DateFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.Map;
-import java.util.Set;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -38,6 +30,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.content.ContextCompat;
 import android.text.ClipboardManager;
 import android.util.Log;
 import android.util.TypedValue;
@@ -61,6 +54,14 @@ import com.google.zxing.client.android.result.ResultButtonListener;
 import com.google.zxing.client.android.result.ResultHandler;
 import com.google.zxing.client.android.result.ResultHandlerFactory;
 import com.mobicage.rogerth.at.R;
+
+import java.io.IOException;
+import java.text.DateFormat;
+import java.util.Collection;
+import java.util.Date;
+import java.util.EnumSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This activity opens the camera and does the actual scanning on a background thread. It draws a viewfinder to help the
@@ -399,7 +400,7 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
         if (points != null && points.length > 0) {
             Canvas canvas = new Canvas(barcode);
             Paint paint = new Paint();
-            paint.setColor(getResources().getColor(R.color.result_points));
+            paint.setColor(ContextCompat.getColor(this, R.color.result_points));
             if (points.length == 2) {
                 paint.setStrokeWidth(4.0f);
                 drawLine(canvas, paint, points[0], points[1]);

@@ -18,11 +18,9 @@
 
 package com.mobicage.rogerthat.plugins.messaging.widgets;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -34,6 +32,9 @@ import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.plugins.messaging.ServiceMessageDetailActivity;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rpc.IJSONable;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class Widget extends LinearLayout {
 
@@ -75,27 +76,31 @@ public abstract class Widget extends LinearLayout {
 
     protected Message mMessage;
     protected Map<String, Object> mWidgetMap;
+    protected int mColorId;
     protected int mTextColor;
+    protected BrandingMgr.ColorScheme mColorScheme;
     protected MessagingPlugin mPlugin;
     protected ServiceMessageDetailActivity mActivity;
     protected ViewGroup mParentView;
 
     public Widget(Context context, AttributeSet attrs) {
         super(context, attrs);
-        setColorScheme(BrandingMgr.ColorScheme.LIGHT);
+        setColorScheme(context, BrandingMgr.ColorScheme.LIGHT);
     }
 
     public Widget(Context context) {
         super(context);
-        setColorScheme(BrandingMgr.ColorScheme.LIGHT);
+        setColorScheme(context, BrandingMgr.ColorScheme.LIGHT);
     }
 
-    public void setColorScheme(BrandingMgr.ColorScheme colorScheme) {
-        int colorId = android.R.color.primary_text_light;
-        if (colorScheme == BrandingMgr.ColorScheme.DARK)
-            colorId = android.R.color.primary_text_dark;
+    public void setColorScheme(Context context, BrandingMgr.ColorScheme colorScheme) {
+        mColorScheme = colorScheme;
+        mColorId = android.R.color.primary_text_light;
 
-        mTextColor = getResources().getColor(colorId);
+        if (mColorScheme == BrandingMgr.ColorScheme.DARK)
+            mColorId = android.R.color.primary_text_dark;
+
+        mTextColor = ContextCompat.getColor(context, mColorId);
     }
 
     @SuppressWarnings("unchecked")

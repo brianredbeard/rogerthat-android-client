@@ -40,7 +40,11 @@ public class LogLocationRecipientTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("target")) {
             Object val = json.get("target");
-            this.target = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.target = ((Integer) val).longValue();
+            } else {
+                this.target = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.activity.LogLocationRecipientTO object is missing field 'target'");
         }

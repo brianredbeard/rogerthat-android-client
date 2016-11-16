@@ -33,19 +33,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import com.melnykov.fab.FloatingActionButton;
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+
 public abstract class ServiceBoundListActivity extends ListActivity implements ServiceBound {
 
     protected MainService mService; // Owned by UI thread
     protected boolean mServiceIsBound = false; // Owned by UI thread
-    private FloatingActionButton mFAB;
 
     private BroadcastReceiver closeActivityListener = new SafeBroadcastReceiver() {
         @Override
@@ -63,6 +64,11 @@ public abstract class ServiceBoundListActivity extends ListActivity implements S
         IntentFilter filter = new IntentFilter(MainService.CLOSE_ACTIVITY_INTENT);
         registerReceiver(closeActivityListener, filter);
         doBindService();
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
     @Override
@@ -140,43 +146,6 @@ public abstract class ServiceBoundListActivity extends ListActivity implements S
 
     protected abstract void onServiceUnbound();
 
-    protected View wrapViewWithFab(View view) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH || !showFABMenu())
-            return view;
-
-        FrameLayout frameLayout = new FrameLayout(this);
-        frameLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
-        frameLayout.addView(view);
-
-        mFAB = new FloatingActionButton(this);
-        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
-        layoutParams.gravity = getFabGravity();
-        int m = UIUtils.convertDipToPixels(this, 16);
-        layoutParams.setMargins(m, m, m, m);
-        mFAB.setLayoutParams(layoutParams);
-        mFAB.setImageResource(R.drawable.ic_menu);
-        mFAB.setColorNormalResId(R.color.mc_homescreen_background);
-        mFAB.setColorPressedResId(R.color.mc_homescreen_background);
-        mFAB.setColorRipple(R.color.mc_homescreen_background);
-        mFAB.setOnClickListener(new SafeViewOnClickListener() {
-            @Override
-            public void safeOnClick(View v) {
-                openOptionsMenu();
-            }
-        });
-        mFAB.setVisibility(View.VISIBLE);
-        frameLayout.addView(mFAB);
-        return frameLayout;
-    }
-
-    protected int getFabGravity() {
-        return Gravity.BOTTOM | Gravity.RIGHT;
-    }
-
-    protected boolean showFABMenu() {
-        return false;
-    }
-
     @Override
     public void setContentView(int layoutResID) {
         setContentView(getLayoutInflater().inflate(layoutResID, null));
@@ -184,12 +153,11 @@ public abstract class ServiceBoundListActivity extends ListActivity implements S
 
     @Override
     public void setContentView(View view) {
-        super.setContentView(wrapViewWithFab(view));
+        super.setContentView(view);
     }
 
     @Override
     public void setContentView(View view, ViewGroup.LayoutParams params) {
-        super.setContentView(wrapViewWithFab(view), params);
+        super.setContentView(view, params);
     }
-
 }

@@ -1,52 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
-    
+    android:background="@color/mc_background_color"
+    android:orientation="vertical">
+
     <LinearLayout
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/message_thread_header"
+        android:orientation="horizontal"
         android:padding="5dp">
 
         <EditText
             android:id="@+id/search_text"
-            android:layout_width="fill_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="@string/discover_services_short"
+            android:hint="@string/enter_search_query"
             android:imeOptions="actionSearch"
             android:inputType="textEmailAddress" />
 
         <ImageButton
             android:id="@+id/search_button"
-            android:layout_width="100dp"
-            android:layout_height="fill_parent"
-            android:layout_weight="1"
-            android:src="@drawable/ic_menu_search" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right|center_vertical"
+            android:background="@null"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            app:ico_color="@color/mc_primary_icon"
+            app:ico_icon="@string/faw_search"
+            app:ico_size="24dp" />
     </LinearLayout>
-    
-    <HorizontalScrollView 
-        	android:layout_width="fill_parent"
-        	android:layout_height="wrap_content"
-        	android:scrollbars="none"
-        	android:background="@color/mc_background"
-        	android:id="@+id/search_category_scroll_container">
-        
+
+    <HorizontalScrollView
+        android:id="@+id/search_category_scroll_container"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/mc_background_color"
+        android:scrollbars="none">
+
         <LinearLayout
-            	android:id="@+id/search_category"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-                
+            android:id="@+id/search_category"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
         </LinearLayout>
     </HorizontalScrollView>
-    
+
 
     <com.mobicage.rogerthat.util.ui.SafeViewFlipper
         android:id="@+id/search_result_lists"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent" />
-    
+        android:layout_height="fill_parent"
+        android:background="@color/mc_background_color"/>
+
 </LinearLayout>

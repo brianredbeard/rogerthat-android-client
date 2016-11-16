@@ -17,10 +17,6 @@
  */
 package com.mobicage.rogerthat;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Locale;
-
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -50,7 +46,11 @@ import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 
-public class GetLocationActivity extends ServiceBoundMapActivity {
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
+
+public class GetLocationActivity extends ServiceBoundActivity {
 
     private final static int TURNING_ON_GPS = 1;
     private final static int LOCATION_REQUEST_CODE = 2;
@@ -92,15 +92,12 @@ public class GetLocationActivity extends ServiceBoundMapActivity {
         }
     }
 
-    @Override
-    protected boolean isRouteDisplayed() {
-        return false;
-    }
 
     @Override
     protected void onServiceBound() {
         T.UI();
         setContentView(R.layout.get_location);
+        setTitle(R.string.get_location);
 
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);

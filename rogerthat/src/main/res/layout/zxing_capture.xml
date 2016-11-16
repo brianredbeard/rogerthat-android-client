@@ -67,7 +67,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/msg_default_format"
                     android:textColor="@color/result_minor_text"
-                    android:textStyle="bold"
+                    fontPath="fonts/lato_bold.ttf"
                     android:paddingRight="@dimen/half_padding"/>
 
           <TextView android:id="@+id/format_text_view"
@@ -86,7 +86,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/msg_default_type"
                     android:textColor="@color/result_minor_text"
-                    android:textStyle="bold"
+                    fontPath="fonts/lato_bold.ttf"
                     android:paddingRight="@dimen/half_padding"/>
 
           <TextView android:id="@+id/type_text_view"
@@ -105,7 +105,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/msg_default_time"
                     android:textColor="@color/result_minor_text"
-                    android:textStyle="bold"
+                    fontPath="fonts/lato_bold.ttf"
                     android:paddingRight="@dimen/half_padding"/>
 
           <TextView android:id="@+id/time_text_view"
@@ -125,7 +125,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/msg_default_meta"
                     android:textColor="@color/result_minor_text"
-                    android:textStyle="bold"
+                    fontPath="fonts/lato_bold.ttf"
                     android:paddingRight="@dimen/half_padding"/>
 
           <TextView android:id="@+id/meta_text_view"
@@ -175,27 +175,27 @@
                   android:orientation="horizontal"
                   android:gravity="center">
 
-      <Button android:layout_width="0dip"
+      <android.support.v7.widget.AppCompatButton android:layout_width="0dip"
               android:layout_height="wrap_content"
               android:layout_weight="1"
               android:visibility="gone"/>
 
-      <Button android:layout_width="0dip"
+      <android.support.v7.widget.AppCompatButton android:layout_width="0dip"
               android:layout_height="wrap_content"
               android:layout_weight="1"
               android:visibility="gone"/>
 
-      <Button android:layout_width="0dip"
+      <android.support.v7.widget.AppCompatButton android:layout_width="0dip"
               android:layout_height="wrap_content"
               android:layout_weight="1"
               android:visibility="gone"/>
 
-      <Button android:layout_width="0dip"
+      <android.support.v7.widget.AppCompatButton android:layout_width="0dip"
               android:layout_height="wrap_content"
               android:layout_weight="1"
               android:visibility="gone"/>
 
-      <Button android:id="@+id/shopper_button"
+      <android.support.v7.widget.AppCompatButton android:id="@+id/shopper_button"
               android:layout_width="0dip"
               android:layout_height="wrap_content"
               android:layout_weight="1"

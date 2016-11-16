@@ -9,9 +9,9 @@
 		android:id="@+id/thread_messages"
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent"
-		android:divider="@drawable/divider"
+		android:divider="@drawable/divider_gray"
 		android:dividerHeight="1px"
-                android:background="@color/mc_background"
+        android:background="@color/mc_background_color"
 		android:cacheColorHint="#00000000">
 	</ListView>
 

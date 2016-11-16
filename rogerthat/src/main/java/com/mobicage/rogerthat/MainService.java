@@ -18,34 +18,8 @@
 
 package com.mobicage.rogerthat;
 
-import java.io.File;
-import java.io.FileReader;
-import java.security.KeyFactory;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
-import org.altbeacon.beacon.BeaconConsumer;
-import org.jivesoftware.smack.util.Base64;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-
-import android.Manifest;
 import android.app.AlarmManager;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -67,9 +41,9 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.NotificationCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.SparseIntArray;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.config.Configuration;
@@ -79,6 +53,7 @@ import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.history.HistoryPlugin;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
+import com.mobicage.rogerthat.plugins.news.NewsPlugin;
 import com.mobicage.rogerthat.plugins.system.SystemPlugin;
 import com.mobicage.rogerthat.plugins.trackme.TrackmePlugin;
 import com.mobicage.rogerthat.upgrade.Upgrader;
@@ -99,13 +74,11 @@ import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.CallReceiver;
 import com.mobicage.rpc.Credentials;
 import com.mobicage.rpc.DefaultRpcHandler;
-import com.mobicage.rpc.IJSONable;
 import com.mobicage.rpc.IRequestSubmitter;
 import com.mobicage.rpc.IResponseHandler;
 import com.mobicage.rpc.PriorityMap;
 import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.rpc.Rpc;
-import com.mobicage.rpc.RpcCall;
 import com.mobicage.rpc.SDCardLogger;
 import com.mobicage.rpc.SaveSettingsResponseHandler;
 import com.mobicage.rpc.config.AppConstants;
@@ -114,6 +87,8 @@ import com.mobicage.rpc.http.HttpBacklog;
 import com.mobicage.rpc.http.HttpBacklogItem;
 import com.mobicage.rpc.http.HttpCommunicator;
 import com.mobicage.rpc.newxmpp.XMPPKickChannel;
+import com.mobicage.to.app.UpdateAppAssetRequestTO;
+import com.mobicage.to.app.UpdateAppAssetResponseTO;
 import com.mobicage.to.js_embedding.UpdateJSEmbeddingRequestTO;
 import com.mobicage.to.js_embedding.UpdateJSEmbeddingResponseTO;
 import com.mobicage.to.system.ForwardLogsRequestTO;
@@ -131,6 +106,28 @@ import com.mobicage.to.system.UpdateAvailableResponseTO;
 import com.mobicage.to.system.UpdateSettingsRequestTO;
 import com.mobicage.to.system.UpdateSettingsResponseTO;
 
+import org.altbeacon.beacon.BeaconConsumer;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
+import java.io.File;
+import java.io.FileReader;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 public class MainService extends Service implements TimeProvider, BeaconConsumer {
 
     public final static String PREFERENCES_UPDATE_INTENT = "com.mobicage.rogerthat.PREFERENCES_UPDATE";
@@ -144,6 +141,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
     private final static String PREFERENCES_READY = "ready";
     public final static String PREFERENCE_EMAIL = "email";
     public final static String PREFERENCE_MY_PROFILE = "my_profile";
+    public final static String PREFERENCE_ABOUT = "about";
     public final static String PREFERENCE_ALARM_SOUND = "alarm_sound";
     public final static String PREFERENCE_ALARM_TITLE = "alarm_title";
 
@@ -179,10 +177,13 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
     public final static String START_INTENT_GCM = "gcm";
 
     public final static String CLOSE_ACTIVITY_INTENT = "com.mobicage.rogerthat.CLOSE_ACTIVITY_INTENT";
+    public final static String UPDATE_BADGE_INTENT = "com.mobicage.rogerthat.UPDATE_BADGE_INTENT";
 
     private final static long WIPE_DELAY_MILLIS = 5 * 1000;
 
     private volatile static MainService current = null;
+
+    protected Map<String, Long> badges = new HashMap<>();
 
     // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // "FINAL" STATE DEFINED IN ONCREATE
@@ -245,6 +246,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
     private boolean mEnterPinActivityActive = false;
     private boolean mShouldClearPrivateKey = false;
 
+    private Credentials mCredentials;
     // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static MainService getInstance() {
@@ -741,8 +743,6 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
 
         teardownConfiguration();
 
-        UIUtils.cancelNotification(MainService.this, R.integer.magic_message_newmessage);
-
         if (mMustWipePersistenceInOnDestroy) {
             L.d("Wiping database and SharedPreferences in MainService.onDestroy");
             mDatabaseManager.wipeAndClose();
@@ -882,6 +882,12 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
             this, mDatabaseManager, brandingMgr);
         mPlugins.put(MessagingPlugin.class.toString(), messagingPlugin);
 
+        // operations on news
+        if (AppConstants.NEWS_ENABLED) {
+            MobicagePlugin newsPlugin = new com.mobicage.rogerthat.plugins.news.NewsPlugin(this, mConfigProvider, mDatabaseManager);
+            mPlugins.put(NewsPlugin.class.toString(), newsPlugin);
+        }
+
         for (MobicagePlugin plugin : mPlugins.values())
             plugin.initialize();
 
@@ -1005,6 +1011,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         T.UI();
         createPlugins();
         setupSystemRPC();
+        restoreBadgeValues();
     }
 
     private void loadIdentity(String forceEmail) {
@@ -1041,7 +1048,10 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
     }
 
     public Credentials getCredentials() {
-        return getCredentials(mConfigProvider);
+        if (mCredentials == null) {
+            mCredentials = getCredentials(mConfigProvider);
+        }
+        return mCredentials;
     }
 
     public static Credentials getCredentials(ConfigurationProvider configProvider) {
@@ -1156,6 +1166,12 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
             }
 
             @Override
+            public UpdateAppAssetResponseTO updateAppAsset(UpdateAppAssetRequestTO request) throws Exception {
+                getPlugin(SystemPlugin.class).updateAppAsset(request.kind, request.url, request.scale_x);
+                return new UpdateAppAssetResponseTO();
+            }
+
+            @Override
             public IdentityUpdateResponseTO identityUpdate(final IdentityUpdateRequestTO request) throws Exception {
                 T.BIZZ();
                 L.d("Server called identityUpdate()");
@@ -1183,7 +1199,6 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
                 getPlugin(SystemPlugin.class).updateJSEmbeddedPackets(request.items);
                 return new UpdateJSEmbeddingResponseTO();
             }
-
         };
     }
 
@@ -1204,7 +1219,8 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         long timestamp = currentTimeMillis();
 
         UIUtils.doNotification(MainService.this, title, message, notificationId, action, withSound, withVibration,
-            withLight, autoCancel, icon, notificationNumber, extra, extraData, tickerText, timestamp);
+                withLight, autoCancel, icon, notificationNumber, extra, extraData, tickerText, timestamp,
+                Notification.PRIORITY_DEFAULT, null, null, null, NotificationCompat.CATEGORY_PROGRESS);
     }
 
     private void hideLogForwardNotification() {
@@ -1413,6 +1429,22 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
 
     public void postOnBIZZHandler(SafeRunnable r) {
         mBizzHandler.post(r);
+    }
+
+    public void runOnBIZZHandler(SafeRunnable runnable) {
+        if (com.mobicage.rogerthat.util.system.T.getThreadType() == com.mobicage.rogerthat.util.system.T.BIZZ) {
+            runnable.run();
+        } else {
+            postOnBIZZHandler(runnable);
+        }
+    }
+
+    public void runOnBIZZHandlerNow(SafeRunnable runnable) {
+        if (com.mobicage.rogerthat.util.system.T.getThreadType() == com.mobicage.rogerthat.util.system.T.BIZZ) {
+            runnable.run();
+        } else {
+            postAtFrontOfBIZZHandler(runnable);
+        }
     }
 
     public void postDelayedOnBIZZHandler(SafeRunnable r, long delayMillis) {
@@ -1771,5 +1803,14 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         s.initVerify(mPublicKey);
         s.update(payload);
         return s.verify(payloadSignature);
+    }
+
+    private void restoreBadgeValues() {
+        MessagingPlugin messagingPlugin = getPlugin(MessagingPlugin.class);
+        badges.put("messages", messagingPlugin.getBadgeCount());
+        if (AppConstants.NEWS_ENABLED) {
+            NewsPlugin newsPlugin = getPlugin(NewsPlugin.class);
+            badges.put("news", newsPlugin.getBadgeCount());
+        }
     }
 }

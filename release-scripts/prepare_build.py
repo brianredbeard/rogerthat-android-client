@@ -16,6 +16,8 @@
 #
 # @@license_version:1.1@@
 
+import hashlib
+import logging
 import os
 import pprint
 import re
@@ -23,8 +25,13 @@ import shutil
 import sys
 import tempfile
 import yaml
-from PIL import Image
+from PIL import Image, ImageDraw
 from xml.dom import minidom
+
+logging.basicConfig(
+        level=logging.INFO,
+        format="%(levelname)s [%(asctime)s] [%(funcName)s:%(lineno)d] %(message)s",
+        datefmt="%H:%M:%S", stream=sys.stdout)
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 APPS_REPO_DIR = os.path.join(CURRENT_DIR, "..", "..", "apps", 'res')
@@ -36,7 +43,6 @@ SRC_JAVA_DIR = os.path.join(ANDROID_SRC_DIR, 'main', 'java')
 TEST_SRC_JAVA_DIR = os.path.join(ANDROID_SRC_DIR, 'androidTest', 'java')
 SRC_RES_DIR = os.path.join(ANDROID_SRC_DIR, 'main', 'res')
 
-
 MAIN_APP_ID = "rogerthat"
 
 APP_TYPE_ROGERTHAT = "rogerthat"
@@ -45,40 +51,45 @@ APP_TYPE_ENTERPRISE = "enterprise"
 APP_TYPE_CONTENT_BRANDING = "content_branding"
 APP_TYPE_YSAAA = "ysaaa"
 
-LAUNCHER_ICON_SIZES = { 'drawable-ldpi-v5':    36,
-                        'drawable':            48,
-                        'drawable-mdpi-v5':    48,
-                        'drawable-hdpi-v5':    72,
-                        'drawable-xhdpi-v5':   96,
-                        'drawable-xxhdpi-v5':  180,
-                        'drawable-xxxhdpi-v5': 196,
-                        }
+LAUNCHER_ICON_SIZES = {
+    'drawable-ldpi-v5': 36,
+    'drawable': 48,
+    'drawable-mdpi-v5': 48,
+    'drawable-hdpi-v5': 72,
+    'drawable-xhdpi-v5': 96,
+    'drawable-xxhdpi-v5': 180,
+    'drawable-xxxhdpi-v5': 196,
+}
 
-ICON_SIZES = {'drawable-ldpi-v5':    36,
-              'drawable':            48,
-              'drawable-mdpi-v5':    48,
-              'drawable-hdpi-v5':    72,
-              'drawable-xhdpi-v5':   96,
-              'drawable-xxhdpi-v5':  180,
-              }
+ICON_SIZES = {
+    'drawable-ldpi-v5': 36,
+    'drawable': 48,
+    'drawable-mdpi-v5': 48,
+    'drawable-hdpi-v5': 72,
+    'drawable-xhdpi-v5': 96,
+    'drawable-xxhdpi-v5': 180,
+}
 
-SCREEN_SIZES = {'drawable-ldpi-v5':    240,
-                'drawable':            320,
-                'drawable-mdpi-v5':    320,
-                'drawable-hdpi-v5':    480,
-                'drawable-xhdpi-v5':   720,
-                'drawable-xxhdpi-v5':  1080,
-                }
+SCREEN_SIZES = {
+    'drawable-ldpi-v5': 240,
+    'drawable': 320,
+    'drawable-mdpi-v5': 320,
+    'drawable-hdpi-v5': 480,
+    'drawable-xhdpi-v5': 720,
+    'drawable-xxhdpi-v5': 1080,
+}
 
-NOTIFICATION_ICON_SIZES = {'drawable-ldpi-v5':    18,
-                           'drawable':            24,
-                           'drawable-mdpi-v5':    36,
-                           'drawable-hdpi-v5':    48,
-                           'drawable-xhdpi-v5':   72,
-                           'drawable-xxhdpi-v5':  96,
-                           }
+NOTIFICATION_ICON_SIZES = {
+    'drawable-ldpi-v5': 18,
+    'drawable': 24,
+    'drawable-mdpi-v5': 36,
+    'drawable-hdpi-v5': 48,
+    'drawable-xhdpi-v5': 72,
+    'drawable-xxhdpi-v5': 96,
+}
 
-HOME_SCREEN_STYLE_TABS = "tabs"
+HOME_SCREEN_STYLE_NEWS = "news"
+HOME_SCREEN_STYLE_MESSAGING = "messaging"
 HOME_SCREEN_STYLE_2X3 = "2x3"
 HOME_SCREEN_STYLE_3X3 = "3x3"
 
@@ -90,7 +101,39 @@ FRIENDS_CAPTION_ENUMS = {FRIENDS_CAPTION_FRIENDS: 'FriendsCaption.FRIENDS',
                          FRIENDS_CAPTION_COLLEAGUES: 'FriendsCaption.COLLEAGUES',
                          FRIENDS_CAPTION_CONTACTS: 'FriendsCaption.CONTACTS'}
 
+COLOURED_BUTTONS = {
+    'facebook': ('#39527F', '#39527F'),
+    'gray': ('#989898', '#989898'),
+    'primary': {
+        'sizes': {
+            'drawable-ldpi-v5': SCREEN_SIZES['drawable-ldpi-v5'] * .9,
+            'drawable': SCREEN_SIZES['drawable'] * .9,
+            'drawable-mdpi-v5': SCREEN_SIZES['drawable-mdpi-v5'] * .9,
+            'drawable-hdpi-v5': SCREEN_SIZES['drawable-hdpi-v5'] * .9,
+            'drawable-xhdpi-v5': SCREEN_SIZES['drawable-xhdpi-v5'] * .9,
+            'drawable-xxhdpi-v5': SCREEN_SIZES['drawable-xxhdpi-v5'] * .9,
+        }
+    },
+    'small_square': {
+        'sizes': {
+            'drawable-ldpi-v5': SCREEN_SIZES['drawable-ldpi-v5'] * .1,
+            'drawable': SCREEN_SIZES['drawable'] * .1,
+            'drawable-mdpi-v5': SCREEN_SIZES['drawable-mdpi-v5'] * .1,
+            'drawable-hdpi-v5': SCREEN_SIZES['drawable-hdpi-v5'] * .1,
+            'drawable-xhdpi-v5': SCREEN_SIZES['drawable-xhdpi-v5'] * .1,
+            'drawable-xxhdpi-v5': SCREEN_SIZES['drawable-xxhdpi-v5'] * .1,
+        }
+    }
+}
+
 LICENSE = app_utils.get_license_header()
+
+
+def sha256_hash(val):
+    digester = hashlib.sha256()
+    digester.update(val)
+    return digester.hexdigest()
+
 
 def generate_resource_images(source_file_name, size, height_width_ratio):
     # size: percentage of screen width
@@ -104,12 +147,16 @@ def generate_resource_images(source_file_name, size, height_width_ratio):
     im1_heigth_width_ratio_str = "%.2f" % im1_heigth_width_ratio
     height_width_ratio_str = "%.2f" % height_width_ratio
     if im1_heigth_width_ratio_str != height_width_ratio_str:
-        raise Exception("Cannot generate resource images for %s ratio does not match (IMG:%s, GIVEN:%s)" % (source_file_name, im1_heigth_width_ratio_str, height_width_ratio_str))
+        raise Exception(
+                "Cannot generate resource images for %s ratio does not match (IMG:%s, GIVEN:%s)" % (
+                    source_file_name, im1_heigth_width_ratio_str, height_width_ratio_str))
 
     for drawable_folder_name, screen_width in SCREEN_SIZES.iteritems():
         width = int(screen_width * size)
         height = int(width * height_width_ratio)
-        app_utils.resize_image(source_file_name, os.path.join(SRC_RES_DIR, drawable_folder_name, resource_name), width, height)
+        app_utils.resize_image(source_file_name,
+                               os.path.join(SRC_RES_DIR, drawable_folder_name, resource_name),
+                               width, height)
 
 
 def bool_str(b):
@@ -121,20 +168,23 @@ def quoted_str_or_null(s):
 
 
 def rename_package():
-    NEW_PACKAGE_NAME = "com.mobicage.rogerthat.%s" % APP_ID.replace("-", ".")
-
     rogerthat_build_gradle = os.path.join(ANDROID_SRC_DIR, '..', 'build.gradle')
+    facebook_app_id = doc["APP_CONSTANTS"].get("FACEBOOK_APP_ID")
     with open(rogerthat_build_gradle, 'r+') as f:
         s = f.read()
-        s = re.sub('applicationId ".*"', 'applicationId "%s"' % NEW_PACKAGE_NAME, s)
-
+        package_sufix = APP_ID.replace('-', '.')
+        if APP_ID != 'rogerthat':
+            s = s.replace('com.mobicage.rogerth.at', 'com.mobicage.rogerthat')
+        s = s.replace("applicationIdSuffix '.debug'", "applicationIdSuffix '.%s.debug'" % package_sufix)
+        s = s.replace("applicationIdSuffix ''", "applicationIdSuffix '.%s'" % package_sufix)
+        s = s.replace('"app_id", "rogerthat"', '"app_id", "%s"' % APP_ID)
+        if facebook_app_id:
+            s = s.replace('188033791211994', str(facebook_app_id))
         f.seek(0)
         f.write(s)
         f.truncate()
-
     with open(os.path.join(ANDROID_SRC_DIR, 'main', 'AndroidManifest.xml'), 'r+') as f:
         s = f.read()
-        OLD_PACKAGE_NAME = re.findall('package="(.*)"', s)[0]
 
         if doc['CLOUD_CONSTANTS'].get("USE_XMPP_KICK_CHANNEL", False):
             # remove GCM permissions
@@ -164,20 +214,7 @@ def rename_package():
         else:
             raise Exception("Could not apply DEVICE_TYPE '%s'" % device_type)
 
-
-        s = re.sub('package=".*"', 'package="%s"' % NEW_PACKAGE_NAME, s)
-        s = re.sub('<(permission|uses-permission) android:name="%s\\.(.*)"' % OLD_PACKAGE_NAME.replace('.', '\\.'),
-                   lambda m: '<%s android:name="%s.%s"' % (m.group(1), NEW_PACKAGE_NAME, m.group(2)),
-                   s)
-        s = re.sub('mdp-rogerthat', 'mdp-%s' % APP_ID, s)
-        s = re.sub('oauth-rogerthat', 'oauth-%s' % APP_ID, s)
-
-        facebook_app_id = doc["APP_CONSTANTS"].get("FACEBOOK_APP_ID")
-        if facebook_app_id:
-            s = re.sub('android:authorities="com.facebook.app.FacebookContentProvider.+"',
-                       'android:authorities="com.facebook.app.FacebookContentProvider%s"' % facebook_app_id,
-                       s)
-        else:
+        if not facebook_app_id:
             # remove FacebookProvider
             splitted = s.split('<!-- BEGIN FB -->')
             if len(splitted) != 1:
@@ -186,20 +223,6 @@ def rename_package():
         f.seek(0)
         f.write(s)
         f.truncate()
-
-    print ''
-    print "old package name: %s" % OLD_PACKAGE_NAME
-    print "new package name: %s" % NEW_PACKAGE_NAME
-
-    for d in (SRC_RES_DIR, SRC_JAVA_DIR, TEST_SRC_JAVA_DIR):
-        for dname, _, files in os.walk(d):
-            for fname in files:
-                fpath = os.path.join(dname, fname)
-                with open(fpath) as f:
-                    s = f.read()
-                s = s.replace(OLD_PACKAGE_NAME, NEW_PACKAGE_NAME)
-                with open(fpath, "w") as f:
-                    f.write(s)
 
 
 def create_notification_icon(android_icon_filename, android_notification_icon_filename):
@@ -213,7 +236,7 @@ def create_notification_icon(android_icon_filename, android_notification_icon_fi
             new_data.append((255, 255, 255, 0))
             continue
         gray_factor = item[0] * 0.2126 + item[1] * 0.7152 + item[2] * 0.0722
-        if gray_factor > 240 :  # Almost white
+        if gray_factor > 240:  # Almost white
             new_data.append((255, 255, 255, 0))  # Make transparent
         else:
             new_data.append((255, 255, 255, int(255 - gray_factor)))  # Make white
@@ -222,23 +245,141 @@ def create_notification_icon(android_icon_filename, android_notification_icon_fi
     img.save(android_notification_icon_filename, "PNG")
 
 
+def get_translation_strings():
+    strings_map = dict()
+    with open(os.path.join(SRC_RES_DIR, "values", "allstr.xml"), 'r+') as f:
+        s = f.read()
+        for i in re.findall('<string name="(.*)</string', s):
+            v = i.split('">')
+            strings_map[v[1]] = v[0]
+    return strings_map
+
+
+def get_action(item):
+    if item.get("click"):
+        action_type = "null"
+        action = quoted_str_or_null(item["click"])
+    elif item.get("tag"):
+        action_type = quoted_str_or_null("click")
+        action = quoted_str_or_null(sha256_hash(item["tag"]))
+    elif item.get("action"):
+        action_type = quoted_str_or_null(item["action_type"])
+        if item["action_type"] in ("action", "click"):
+            action = quoted_str_or_null(sha256_hash(item["action"]))
+        else:
+            action = quoted_str_or_null(item["action"])
+    else:
+        logging.error(item)
+        raise Exception('Unknown homescreen item')
+
+    return action, action_type
+
+
+def generate_navigation_menu(doc, strings_map):
+    app_type = doc.get('APP_CONSTANTS')['APP_TYPE']
+    homescreen_items = doc['HOMESCREEN'].get('items', [])
+    if app_type == 'cityapp' and not homescreen_items:
+        raise Exception('No homescreen items are specified in build.yaml')
+
+    if app_type == 'cityapp' and 'TOOLBAR' not in doc:
+        raise Exception('The build.yaml for this app should be migrated first')
+
+    output = u'''%(LICENSE)s
+
+package com.mobicage.rpc.config;
+
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.ServiceBoundActivity;
+
+public class NavigationConstants {
+
+    public static ServiceBoundActivity.NavigationItem[] getNavigationItems() {
+        return new ServiceBoundActivity.NavigationItem[]{''' % dict(LICENSE=LICENSE)
+
+    for i, item in enumerate(homescreen_items):
+        icon_file_name = "menu_%s.png" % (i)
+        source_file = os.path.join(APP_DIR, "build", icon_file_name)
+        app_utils.download_icon(item["icon"], "#FFFFFF", 512, source_file)
+        foreground_image = Image.open(source_file)
+
+        background_image = Image.new('RGBA', (1024, 1024))
+        draw = ImageDraw.Draw(background_image)
+        draw.ellipse((124, 124, 900, 900), fill="#%s" % doc["HOMESCREEN"]["color"],
+                     outline="#%s" % doc["HOMESCREEN"]["color"])
+
+        background_image.paste(foreground_image, (262, 262), mask=foreground_image)
+        background_image.save(source_file)
+        generate_resource_images(source_file, 0.2, 1)
+
+        action, action_type = get_action(item)
+        output += '''
+            new ServiceBoundActivity.NavigationItem(R.drawable.menu_%(i)s, %(action_type)s, %(action)s, R.string.%(string_id)s, %(collapse)s),''' % dict(
+            i=i,
+            action_type=action_type,
+            action=action,
+            string_id=strings_map[item['text']],
+            collapse=bool_str(item.get('collapse', False)))
+
+    output += '''
+        };
+    }
+
+    public static ServiceBoundActivity.NavigationItem[] getNavigationFooterItems() {
+        return new ServiceBoundActivity.NavigationItem[]{'''
+
+    if doc.get('TOOLBAR') and doc['TOOLBAR'].get('items'):
+        for i, item in enumerate(doc['TOOLBAR']['items']):
+            icon_name = item["icon"].replace("-", "_").replace("fa_", "faw_")
+            action, action_type = get_action(item)
+            output += '''
+                new ServiceBoundActivity.NavigationItem(FontAwesome.Icon.%(icon_name)s, %(action_type)s, %(action)s, R.string.%(string_id)s, %(collapse)s),''' % dict(
+                    icon_name=icon_name,
+                    action_type=action_type,
+                    action=action,
+                    string_id=strings_map[item['text']] if item.get('text') else u"app_name",
+                    collapse=bool_str(item.get('collapse', False)))
+
+    output += '''
+        };
+    }
+}
+'''
+
+    path = os.path.join(SRC_JAVA_DIR, "com", "mobicage", "rpc", "config")
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    with open(os.path.join(path, "NavigationConstants.java"), 'w+') as f:
+        f.write(output.encode('utf-8'))
+
+
+# This function is not executed in case the app is Rogerthat
 def convert_config():
     path = os.path.join(SRC_JAVA_DIR, "com", "mobicage", "rogerthat")
     if not os.path.exists(path):
         os.makedirs(path)
 
-    mainScreenContainsFriends = False
-    mainScreenContainsProfile = False
-    mainScreenContainsScan = False
-    mainScreenContainsServices = False
+    main_screen_contains_friends = False
+    main_screen_contains_profile = False
+    main_screen_contains_scan = False
+    main_screen_contains_services = False
+    main_screen_contains_news = False
 
     SERVICE_TYPES = ["services", "community_services", "merchants", "associations", "emergency_services"]
 
     add_translations(doc)
 
     ##### HOMESCREEN #############################################
-    if doc["HOMESCREEN"].get("style") != HOME_SCREEN_STYLE_TABS:
-
+    if doc["HOMESCREEN"].get("style") == HOME_SCREEN_STYLE_MESSAGING or \
+        doc["HOMESCREEN"].get("style") == HOME_SCREEN_STYLE_NEWS:
+        print "Not generating homescreen images"
+        items = doc['HOMESCREEN'].get('items', [])
+        toolbar = doc.get('TOOLBAR')
+        if toolbar:
+            items += toolbar.get('items', [])
+        main_screen_contains_news = str(any((i for i in items if i['click'] == 'news'))).lower()
+    else:
         color = doc["HOMESCREEN"]["color"]
 
         output = u'''%(LICENSE)s
@@ -257,15 +398,6 @@ def convert_config():
         ItemDef[] getItemDefs() {
             return new ItemDef[] {
     ''' % dict(LICENSE=LICENSE)
-
-
-        strings_map = dict()
-
-        with open(os.path.join(SRC_RES_DIR, "values", "allstr.xml"), 'r+') as f:
-            s = f.read()
-            for i in re.findall('<string name="(.*)</string', s):
-                v = i.split('">')
-                strings_map[v[1]] = v[0]
 
         for item in doc["HOMESCREEN"].get("items", []):
             icon_file_name = "menu_%sx%s.png" % (item["position"][0], item["position"][1])
@@ -297,13 +429,15 @@ def convert_config():
                 output += 'goToActivity("%s", %s);' % (item["click"], bool_str(item.get('collapse', False)))
 
                 if item["click"] == "friends":
-                    mainScreenContainsFriends = True
+                    main_screen_contains_friends = True
                 elif item["click"] == "profile":
-                    mainScreenContainsProfile = True
+                    main_screen_contains_profile = True
                 elif item["click"] == "scan":
-                    mainScreenContainsScan = True
+                    main_screen_contains_scan = True
+                elif item["click"] == "news":
+                    main_screen_contains_news = True
                 elif item["click"] in SERVICE_TYPES:
-                    mainScreenContainsServices = True
+                    main_screen_contains_services = True
             output += '''\n                    }
                 }
             ),
@@ -358,7 +492,6 @@ def convert_config():
         shutil.copy2(path, source_file)
         generate_resource_images(source_file, 0.75, 180.0 / 960.0)
 
-
     ##### STRINGS ###########################################
 
     output = '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n'
@@ -397,67 +530,56 @@ def convert_config():
         with open(os.path.join(path, "fb.xml"), 'w+') as f:
             f.write(output.encode('utf-8'))
 
-
     if doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_ROGERTHAT:
         app_type = "APP_TYPE_ROGERTHAT"
-        show_nav_header = "false"
-        home_activity = "R.layout.homescreen"
+        home_activity = "R.layout.messaging"
         show_profile_in_more = "true"
         show_scan_in_more = "false"
         services_enabled = "true"
-        search_services_if_none_connected = "-1"
 
     elif doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_CITYPAPP:
         app_type = "APP_TYPE_CITYAPP"
-        show_nav_header = "true"
         home_activity = "R.layout.homescreen_3x3_with_qr_code"
-        show_profile_in_more = bool_str(not mainScreenContainsProfile)
-        show_scan_in_more = bool_str(not mainScreenContainsScan)
-        services_enabled = bool_str(mainScreenContainsServices)
-        search_services_if_none_connected = ",".join(map(str, doc['APP_CONSTANTS'].get('SEARCH_SERVICES_IF_NONE_CONNECTED', [])))
+        show_profile_in_more = bool_str(not main_screen_contains_profile)
+        show_scan_in_more = bool_str(not main_screen_contains_scan)
+        services_enabled = bool_str(main_screen_contains_services)
 
     elif doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_ENTERPRISE:
         app_type = "APP_TYPE_ENTERPRISE"
-        show_nav_header = "true"
         home_activity = "R.layout.homescreen_2x3"
-        show_profile_in_more = bool_str(not mainScreenContainsProfile)
-        show_scan_in_more = bool_str(not mainScreenContainsScan)
-        services_enabled = bool_str(mainScreenContainsServices)
-        search_services_if_none_connected = ",".join(map(str, doc['APP_CONSTANTS'].get('SEARCH_SERVICES_IF_NONE_CONNECTED', [])))
+        show_profile_in_more = bool_str(not main_screen_contains_profile)
+        show_scan_in_more = bool_str(not main_screen_contains_scan)
+        services_enabled = bool_str(main_screen_contains_services)
 
     elif doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_CONTENT_BRANDING:
         app_type = "APP_TYPE_CONTENT_BRANDING"
-        show_nav_header = "false"
-        home_activity = "R.layout.homescreen"
+        home_activity = "R.layout.messaging"
         show_profile_in_more = "true"
         show_scan_in_more = "true"
         services_enabled = "true"
-        search_services_if_none_connected = "-1"
 
         if not doc['CLOUD_CONSTANTS'].get("USE_XMPP_KICK_CHANNEL", False):
             raise Exception("XMPP_KICK_CHANNEL must be enabled for content_branding")
 
     elif doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_YSAAA:
         app_type = "APP_TYPE_YSAAA"
-        show_nav_header = "false"
-        home_activity = "R.layout.homescreen"
+        home_activity = "R.layout.messaging"
         show_profile_in_more = "false"
         show_scan_in_more = "false"
         services_enabled = "true"
-        search_services_if_none_connected = "-1"
 
     else:
         raise Exception("There is no app_type defined")
 
-    home_screen_style = doc['HOMESCREEN'].get('style')
-    if home_screen_style == HOME_SCREEN_STYLE_TABS:
-        show_nav_header = "false"
-        home_activity = "R.layout.homescreen"
+    home_screen_style = doc['HOMESCREEN']['style']
+
+    if home_screen_style == HOME_SCREEN_STYLE_MESSAGING:
+        home_activity = "R.layout.messaging"
+    elif home_screen_style == HOME_SCREEN_STYLE_NEWS:
+        home_activity = "R.layout.news"
     elif home_screen_style == HOME_SCREEN_STYLE_2X3:
-        show_nav_header = "true"
         home_activity = "R.layout.homescreen_2x3"
     elif home_screen_style == HOME_SCREEN_STYLE_3X3:
-        show_nav_header = "true"
         if doc['HOMESCREEN'].get('show_qr_code', doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_CITYPAPP):
             home_activity = "R.layout.homescreen_3x3_with_qr_code"
         else:
@@ -474,15 +596,13 @@ def convert_config():
             friends_caption = FRIENDS_CAPTION_FRIENDS
     friends_caption_enum = FRIENDS_CAPTION_ENUMS[friends_caption]
 
-    show_friends_in_more = bool_str(not mainScreenContainsFriends) if friends_enabled == "true" else "false"
+    show_friends_in_more = bool_str(not main_screen_contains_friends) if friends_enabled == "true" else "false"
     show_homescreen_footer = bool_str(doc["HOMESCREEN"].get("footer", False))
     app_email = quoted_str_or_null(doc["APP_CONSTANTS"]["APP_EMAIL"])
     app_service_guid = quoted_str_or_null(doc["APP_CONSTANTS"].get("APP_SERVICE_GUID"))
     fb_app_id = quoted_str_or_null(doc["APP_CONSTANTS"]["FACEBOOK_APP_ID"])
     fb_registration = bool_str(doc["APP_CONSTANTS"]["FACEBOOK_REGISTRATION"])
     full_width_headers = bool_str(full_width_headers)
-
-    messages_show_reply_vs_unread_count = bool_str(doc["APP_CONSTANTS"].get('MESSAGES_SHOW_REPLY_VS_UNREAD_COUNT', "true"))
 
     profile_settings = doc.get('PROFILE', dict())
     profile_data_fields = ','.join(['"%s"' % s for s in profile_settings.get('DATA_FIELDS', [])])
@@ -569,13 +689,13 @@ public class AppConstants {
     public static final int HOME_ACTIVITY_LAYOUT = %(home_activity)s;
     public static final int HOMESCREEN_QRCODE_HEADER = R.string.%(homescreen_qrcode_header_text)s;
     public static final boolean SHOW_HOMESCREEN_FOOTER = %(show_homescreen_footer)s;
-    public static final boolean SHOW_NAV_HEADER = %(show_nav_header)s;
     public static final String FACEBOOK_APP_ID = %(fb_app_id)s;
     public static final boolean FACEBOOK_REGISTRATION = %(fb_registration)s;
     public static final String APP_EMAIL = %(app_email)s;
     public static final String APP_SERVICE_GUID = %(app_service_guid)s;
     public static final boolean FRIENDS_ENABLED = %(friends_enabled)s;
     public static final boolean SERVICES_ENABLED = %(services_enabled)s;
+    public static final boolean NEWS_ENABLED = %(news_enabled)s;
     public static final FriendsCaption FRIENDS_CAPTION = %(friends_caption_enum)s;
     public static final boolean SHOW_FRIENDS_IN_MORE = %(show_friends_in_more)s;
     public static final boolean SHOW_PROFILE_IN_MORE = %(show_profile_in_more)s;
@@ -583,12 +703,9 @@ public class AppConstants {
     public static final boolean FULL_WIDTH_HEADERS = %(full_width_headers)s;
 
     public static final boolean REGISTRATION_ASKS_LOCATION_PERMISSION = %(registration_asks_location_permission)s;
-    public static final int[] SEARCH_SERVICES_IF_NONE_CONNECTED = new int[] {%(search_services_if_none_connected)s};
 
     public static final String[] PROFILE_DATA_FIELDS = new String[] { %(profile_data_fields)s };
     public static final boolean PROFILE_SHOW_GENDER_AND_BIRTHDATE = %(profile_show_gender_and_birthdate)s;
-
-    public static final boolean MESSAGES_SHOW_REPLY_VS_UNREAD_COUNT = %(messages_show_reply_vs_unread_count)s;
 
     public static final String ABOUT_WEBSITE = "%(about_website)s";
     public static final String ABOUT_WEBSITE_URL = "%(about_website_url)s";
@@ -609,21 +726,19 @@ public class AppConstants {
            home_activity=home_activity,
            homescreen_qrcode_header_text=homescreen_qrcode_header_text,
            show_homescreen_footer=show_homescreen_footer,
-           show_nav_header=show_nav_header,
            fb_app_id=fb_app_id,
            fb_registration=fb_registration,
            app_email=app_email,
            friends_enabled=friends_enabled,
            services_enabled=services_enabled,
+           news_enabled=main_screen_contains_news,
            friends_caption_enum=friends_caption_enum,
            show_friends_in_more=show_friends_in_more,
            show_profile_in_more=show_profile_in_more,
            show_scan_in_more=show_scan_in_more,
-           search_services_if_none_connected=search_services_if_none_connected,
            full_width_headers=full_width_headers,
            profile_data_fields=profile_data_fields,
            profile_show_gender_and_birthdate=profile_show_gender_and_birthdate,
-           messages_show_reply_vs_unread_count=messages_show_reply_vs_unread_count,
            about_website=about_website,
            about_website_url=about_website_url,
            about_email=about_email,
@@ -655,13 +770,22 @@ public class AppConstants {
 
     colors = dict(mc_homescreen_background='homescreen_background',
                   mc_homescreen_text='homescreen_text',
-                  mc_homescreen_divider='homescreen_divider')
+                  mc_primary_color='primary_color',
+                  mc_secondary_color='secondary_color',
+                  mc_primary_icon='primary_color')
     with open(os.path.join(path, "colors.xml"), 'r+') as f:
         s = f.read()
         for mc_color_name, color_name in colors.iteritems():
             s = re.sub('<color name="%s">(.*)</color>' % mc_color_name,
                        '<color name="%s">#%s</color>' % (mc_color_name, doc["COLORS"][color_name]),
                        s)
+
+        s = re.sub('<color name="mc_primary_color_dark">(.*)</color>',
+                   '<color name="mc_primary_color_dark">%s</color>' % colorscale(doc["COLORS"][
+                                                                                     "primary_color"],
+                                                                                 0.6),
+                   s)
+
         f.seek(0)
         f.write(s)
         f.truncate()
@@ -679,14 +803,50 @@ public class AppConstants {
                                     os.path.join(SRC_RES_DIR, "drawable", "homescreen_qr_area_background.png"))
 
 
+def clamp(val, minimum=0, maximum=255):
+    if val < minimum:
+        return minimum
+    if val > maximum:
+        return maximum
+    return val
+
+
+def colorscale(hexstr, scalefactor):
+    """
+    Scales a hex string by ``scalefactor``. Returns scaled hex string.
+
+    To darken the color, use a float value between 0 and 1.
+    To brighten the color, use a float value greater than 1.
+
+    # >>> colorscale("#DF3C3C", .5)
+    #6F1E1E
+    # >>> colorscale("#52D24F", 1.6)
+    #83FF7E
+    # >>> colorscale("#4F75D2", 1)
+    #4F75D2
+    """
+
+    hexstr = hexstr.strip('#')
+
+    if scalefactor < 0 or len(hexstr) != 6:
+        return hexstr
+
+    r, g, b = int(hexstr[:2], 16), int(hexstr[2:4], 16), int(hexstr[4:], 16)
+
+    r = clamp(r * scalefactor)
+    g = clamp(g * scalefactor)
+    b = clamp(b * scalefactor)
+
+    return "#%02x%02x%02x" % (r, g, b)
+
 def encode_translation(s):
     return s.replace("\n", "\\n") \
-            .replace("'", "\\'") \
-            .replace('\r', '') \
-            .replace('"', '\\"') \
-            .replace("&", "&amp;") \
-            .replace("<", "&lt;") \
-            .replace(">", "&gt;")
+        .replace("'", "\\'") \
+        .replace('\r', '') \
+        .replace('"', '\\"') \
+        .replace("&", "&amp;") \
+        .replace("<", "&lt;") \
+        .replace(">", "&gt;").encode('utf-8')
 
 
 def add_translations(doc):
@@ -746,6 +906,9 @@ class CustomCloudConstants {
     final static boolean XMPP_DEBUG = false;
     final static boolean DEBUG_LOGGING = false;
 
+    final static boolean NEWS_CHANNEL_SSL = true;
+    final static boolean NEWS_CHANNEL_MUST_VALIDATE_SSL_CERTIFICATE = true;
+
     final static String REGISTRATION_MAIN_SIGNATURE = %(REGISTRATION_MAIN_SIGNATURE)s;
     final static String REGISTRATION_EMAIL_SIGNATURE = %(REGISTRATION_EMAIL_SIGNATURE)s;
     final static String REGISTRATION_PIN_SIGNATURE = %(REGISTRATION_PIN_SIGNATURE)s;
@@ -793,7 +956,7 @@ if __name__ == "__main__":
     validate_android_manifest()
 
     APP_ID = sys.argv[1]
-    print 'APP ID:', APP_ID
+    logging.info('APP ID: %s', APP_ID)
 
     APP_DIR = os.path.join(APPS_REPO_DIR, APP_ID)
 
@@ -851,28 +1014,18 @@ if __name__ == "__main__":
     with open(os.path.join(APP_DIR, "build.yaml"), 'r') as f:
         doc = yaml.load(f)
 
-    print 'BUILD CFG:'
-    print pprint.pformat(doc)
-    print ''
+    logging.info('BUILD CFG:')
+    logging.info(pprint.pformat(doc))
 
+    strings_map = get_translation_strings()
+    if doc.get('TRANSLATIONS'):
+        for entry in doc['TRANSLATIONS']['en']:
+            strings_map[entry['value']] = entry['name']
+    generate_navigation_menu(doc, strings_map)
 
     if APP_ID != MAIN_APP_ID:
-        #### MORE IMAGES ###################################
-
-        color = doc["MORE_ACTIVITY"]["color"]
-
-        for filename_in_app, icon_name in [('network_monitor', 'fa-commenting-o'),
-                                           ('gear', 'fa-tachometer'),
-                                           ('messenger', 'fa-users'),
-                                           ('id', 'fa-user'),
-                                           ('info', 'fa-info'),
-                                           ('qrcode', 'fa-qrcode')]:
-            app_utils.download_icon(icon_name, color, 512,
-                                    os.path.join(APP_DIR, "build", "%s.png" % filename_in_app))
-            resize_more_icon(os.path.join(APP_DIR, "build", "%s.png" % filename_in_app), filename_in_app)
-
         convert_config()
         rename_package()
     else:
-        print "app_id was rogerthat, no prepare needed"
+        logging.info('app_id was rogerthat, only limited prepare is needed')
     generate_custom_cloud_constants(doc)

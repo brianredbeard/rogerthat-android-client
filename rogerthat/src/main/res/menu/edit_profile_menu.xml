@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/edit_profile"
-        android:icon="@drawable/ic_menu_edit"
-        android:title="@string/edit"/>
+        app:showAsAction="ifRoom"
+        android:title="@string/edit_profile" />
+
+    <item
+        android:id="@+id/save_profile"
+        app:showAsAction="ifRoom"
+        android:title="@string/save_profile"
+        android:visible="false" />
     
     <item
         android:id="@+id/cancel_edit_profile"
-        android:icon="@drawable/ic_menu_close_clear_cancel"
         android:title="@string/cancel"
-        android:visible="false"/>
+        app:showAsAction="ifRoom"
+        android:visible="false" />
 
 </menu>

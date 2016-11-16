@@ -55,31 +55,51 @@ public class RawLocationInfoTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("cid")) {
             Object val = json.get("cid");
-            this.cid = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.cid = ((Integer) val).longValue();
+            } else {
+                this.cid = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.activity.RawLocationInfoTO object is missing field 'cid'");
         }
         if (json.containsKey("lac")) {
             Object val = json.get("lac");
-            this.lac = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.lac = ((Integer) val).longValue();
+            } else {
+                this.lac = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.activity.RawLocationInfoTO object is missing field 'lac'");
         }
         if (json.containsKey("mobileDataType")) {
             Object val = json.get("mobileDataType");
-            this.mobileDataType = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.mobileDataType = ((Integer) val).longValue();
+            } else {
+                this.mobileDataType = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.activity.RawLocationInfoTO object is missing field 'mobileDataType'");
         }
         if (json.containsKey("net")) {
             Object val = json.get("net");
-            this.net = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.net = ((Integer) val).longValue();
+            } else {
+                this.net = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.activity.RawLocationInfoTO object is missing field 'net'");
         }
         if (json.containsKey("signalStrength")) {
             Object val = json.get("signalStrength");
-            this.signalStrength = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.signalStrength = ((Integer) val).longValue();
+            } else {
+                this.signalStrength = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.activity.RawLocationInfoTO object is missing field 'signalStrength'");
         }

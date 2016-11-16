@@ -22,6 +22,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -83,7 +84,7 @@ public class HistoryListAdapter extends CursorAdapter {
 
         final TextView tv1 = (TextView) view.findViewById(R.id.activity_list_row_text1);
         tv1.setText(historyText.s1);
-        tv1.setTextColor(mContext.getResources().getColorStateList(android.R.color.primary_text_light));
+        tv1.setTextColor(ContextCompat.getColorStateList(mContext, android.R.color.primary_text_light));
 
         final TextView tv2 = (TextView) view.findViewById(R.id.activity_list_row_text2);
         if (historyText.s2 == null)
@@ -91,7 +92,7 @@ public class HistoryListAdapter extends CursorAdapter {
         else {
             tv2.setText(historyText.s2);
             tv2.setVisibility(View.VISIBLE);
-            tv2.setTextColor(mContext.getResources().getColorStateList(android.R.color.secondary_text_light));
+            tv2.setTextColor(ContextCompat.getColorStateList(mContext, android.R.color.secondary_text_light));
         }
 
         final TextView tv3 = (TextView) view.findViewById(R.id.activity_list_row_text3);
@@ -100,7 +101,7 @@ public class HistoryListAdapter extends CursorAdapter {
         else {
             tv3.setText(historyText.s3);
             tv3.setVisibility(View.VISIBLE);
-            tv3.setTextColor(mContext.getResources().getColorStateList(android.R.color.secondary_text_light));
+            tv3.setTextColor(ContextCompat.getColorStateList(mContext, android.R.color.secondary_text_light));
         }
 
         updateDividerLine(view, item);

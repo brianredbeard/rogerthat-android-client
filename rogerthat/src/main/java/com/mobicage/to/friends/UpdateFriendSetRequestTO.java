@@ -55,7 +55,11 @@ public class UpdateFriendSetRequestTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("version")) {
             Object val = json.get("version");
-            this.version = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.version = ((Integer) val).longValue();
+            } else {
+                this.version = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.friends.UpdateFriendSetRequestTO object is missing field 'version'");
         }

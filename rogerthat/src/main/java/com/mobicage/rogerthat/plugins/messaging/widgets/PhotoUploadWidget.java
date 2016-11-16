@@ -64,12 +64,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import com.commonsware.cwac.cam2.CameraActivity;
+import com.commonsware.cwac.cam2.Facing;
+import com.commonsware.cwac.cam2.FlashMode;
 import com.mobicage.api.messaging.Rpc;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.messaging.AttachmentViewerActivity;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.plugins.messaging.ServiceMessageDetailActivity;
+import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.IOUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeAsyncTask;
@@ -166,9 +170,7 @@ public class PhotoUploadWidget extends Widget {
                 boolean hasCamera = mActivity.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA);
                 boolean hasCameraPermission = mActivity.getMainService().isPermitted(Manifest.permission.CAMERA);
                 if (hasCamera && hasCameraPermission) {
-                    cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                    cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, mUriSavedImage);
-                    cameraIntent.putExtra("outputFormat", Bitmap.CompressFormat.JPEG.toString());
+                    cameraIntent = ActivityUtils.buildTakePictureIntent(mActivity, mUriSavedImage, Facing.BACK);
                 }
 
                 Intent galleryIntent = new Intent(Intent.ACTION_PICK,
@@ -190,9 +192,7 @@ public class PhotoUploadWidget extends Widget {
                     mActivity.startActivityForResult(chooserIntent, PICK_IMAGE);
                 } else if (TRUE.equals(mWidgetMap.get("camera"))) {
                     if (cameraIntent != null) {
-                        chooserIntent = Intent.createChooser(cameraIntent,
-                            mActivity.getString(R.string.select_source));
-                        mActivity.startActivityForResult(chooserIntent, PICK_IMAGE);
+                        mActivity.startActivityForResult(cameraIntent, PICK_IMAGE);
                     } else if (!hasCamera) {
                         AlertDialog.Builder ad = new AlertDialog.Builder(mActivity);
                         ad.setTitle(mActivity.getString(R.string.no_camera_available_title));

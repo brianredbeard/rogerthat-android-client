@@ -18,24 +18,25 @@
 
 package com.mobicage.rogerthat;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TextView;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendStore;
 import com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity;
 import com.mobicage.rogerthat.plugins.friends.ServiceSearchActivity;
-import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
-import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.config.AppConstants;
 
@@ -50,18 +51,42 @@ public class ServiceFriendsActivity extends FriendsActivity {
         super.onCreate(savedInstanceState);
 
         Intent intent = getIntent();
+        TextView noServicesTextView = (TextView) findViewById(R.id.no_services_text);
         mOrganizationType = intent.getIntExtra(ORGANIZATION_TYPE, FriendStore.SERVICE_ORGANIZATION_TYPE_UNSPECIFIED);
+        int noServicesStringId;
         if (mOrganizationType == FriendStore.SERVICE_ORGANIZATION_TYPE_NON_PROFIT) {
             mOrganizationTypeStringId = R.string.associations;
+            noServicesStringId = R.string.no_associations_found;
+            setActivityName("associations");
         } else if (mOrganizationType == FriendStore.SERVICE_ORGANIZATION_TYPE_PROFIT) {
             mOrganizationTypeStringId = R.string.merchants;
+            noServicesStringId = R.string.no_merchants_found;
+            setActivityName("merchants");
         } else if (mOrganizationType == FriendStore.SERVICE_ORGANIZATION_TYPE_CITY) {
             mOrganizationTypeStringId = R.string.community_service;
+            noServicesStringId = R.string.no_community_services_found;
+            setActivityName("community_services");
         } else if (mOrganizationType == FriendStore.SERVICE_ORGANIZATION_TYPE_EMERGENCY) {
             mOrganizationTypeStringId = R.string.care;
+            noServicesStringId = R.string.no_care_institutions_found;
+            setActivityName("care");
         } else {
             mOrganizationTypeStringId = R.string.tab_services;
+            noServicesStringId = R.string.no_services_found;
+            setActivityName("services");
         }
+        noServicesTextView.setText(getString(noServicesStringId, getString(R.string.app_name)) + " " + getString(R
+                .string.click_magnifying_glass_to_search_services));
+
+        ImageButton magnifyingGlass = (ImageButton) findViewById(R.id.ic_magnifying_glass);
+        magnifyingGlass.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_search).color(ContextCompat.getColor(this, R.color.mc_primary_icon)).sizeDp(200).paddingDp(20));
+
+        magnifyingGlass.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startSearching();
+            }
+        });
     }
 
     @Override
@@ -83,6 +108,7 @@ public class ServiceFriendsActivity extends FriendsActivity {
         if (mServiceIsBound) {
             createCursor();
             ((FriendListAdapter) getListAdapter()).changeCursor(getCursor());
+            updateVisibleItems();
         }
     }
 
@@ -99,69 +125,24 @@ public class ServiceFriendsActivity extends FriendsActivity {
     @Override
     protected void onServiceBound() {
         super.onServiceBound();
-        setNavigationBarVisible(AppConstants.SHOW_NAV_HEADER);
-        setNavigationBarTitle(mOrganizationTypeStringId);
-
-        findViewById(R.id.navigation_bar_home_button).setOnClickListener(new SafeViewOnClickListener() {
-            @Override
-            public void safeOnClick(View v) {
-                Intent i = new Intent(ServiceFriendsActivity.this, HomeActivity.class);
-                i.setFlags(MainActivity.FLAG_CLEAR_STACK);
-                startActivity(i);
-                finish();
-            }
-        });
+        setTitle(mOrganizationTypeStringId);
     }
 
     @Override
     protected void loadCursorAndSetAdaptar() {
         super.loadCursorAndSetAdaptar();
-        if (((FriendListAdapter) mListAdapter).getCount() == 0) {
-            boolean found = false;
-            for (int i = 0; i < AppConstants.SEARCH_SERVICES_IF_NONE_CONNECTED.length; i++) {
-                if (AppConstants.SEARCH_SERVICES_IF_NONE_CONNECTED[i] == mOrganizationType) {
-                    found = true;
-                    break;
-                }
-            }
-            if (found) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(ServiceFriendsActivity.this);
-                builder.setCancelable(true);
+        updateVisibleItems();
+    }
 
-                builder.setTitle(mOrganizationTypeStringId);
-                builder.setMessage(getString(R.string.search_services_if_none_connected_message,
-                    getString(mOrganizationTypeStringId)));
-                builder.setNegativeButton(R.string.no, new SafeDialogInterfaceOnClickListener() {
-                    @Override
-                    public void safeOnClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-                builder.setPositiveButton(R.string.yes, new SafeDialogInterfaceOnClickListener() {
-                    @Override
-                    public void safeOnClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        final Intent serviceSearch = new Intent(ServiceFriendsActivity.this,
-                            ServiceSearchActivity.class);
-                        serviceSearch.putExtra(ServiceSearchActivity.ORGANIZATION_TYPE, mOrganizationType);
-                        startActivity(serviceSearch);
-                    }
-                });
-                builder.create().show();
-            }
-        }
+    private void updateVisibleItems() {
+        boolean hasResults = mListAdapter.getCount() > 0;
+        findViewById(R.id.no_services).setVisibility(hasResults ? View.GONE : View.VISIBLE);
+        findViewById(R.id.friend_list).setVisibility(hasResults ? View.VISIBLE : View.GONE);
     }
 
     @Override
     protected void onListItemClick(ListView listView, final View listItem, int position, long id) {
         T.UI();
-
-        if (position == 0) {
-            // tapped header cell
-            onHeaderTapped();
-            return;
-        }
-
         Friend friend = (Friend) listItem.getTag();
         if (friend.category != null && friend.category.friendCount > 1) {
             Intent intent = new Intent(this, FriendCategoryActivity.class);
@@ -181,15 +162,10 @@ public class ServiceFriendsActivity extends FriendsActivity {
         }
     }
 
-    protected void onHeaderTapped() {
+    protected void startSearching() {
         final Intent serviceSearch = new Intent(this, ServiceSearchActivity.class);
         serviceSearch.putExtra(ServiceSearchActivity.ORGANIZATION_TYPE, mOrganizationType);
         startActivity(serviceSearch);
-    }
-
-    @Override
-    protected boolean showFABMenu() {
-        return true;
     }
 
     @Override
@@ -198,6 +174,7 @@ public class ServiceFriendsActivity extends FriendsActivity {
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.services_menu, menu);
+        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_search).color(Color.DKGRAY).sizeDp(18));
         return true;
     }
 
@@ -206,21 +183,23 @@ public class ServiceFriendsActivity extends FriendsActivity {
         T.UI();
 
         switch (item.getItemId()) {
-        case R.id.help:
-            showHelp();
-            return true;
+            case R.id.find_services:
+                startSearching();
+                return true;
+            case R.id.help:
+                showHelp();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     protected CharSequence getHeaderCellMainText() {
-        return getString(R.string.discover_services_short, getString(R.string.app_name));
+        return null;
     }
 
     @Override
     protected CharSequence getHeaderCellSubText() {
-        return getString(R.string.discover_services_long, getString(R.string.app_name));
+        return null;
     }
-
 }

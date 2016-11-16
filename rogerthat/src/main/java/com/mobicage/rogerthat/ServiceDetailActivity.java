@@ -18,30 +18,42 @@
 
 package com.mobicage.rogerthat;
 
-import java.util.Map;
-
-import org.jivesoftware.smack.util.Base64;
-import org.json.simple.JSONValue;
-
 import android.content.Intent;
+import android.graphics.Color;
+import android.view.Menu;
 import android.view.View;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SystemUtils;
+import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.IncompleteMessageException;
+import com.mobicage.to.friends.GetUserInfoResponseTO;
 import com.mobicage.to.service.FindServiceItemTO;
+
+import org.jivesoftware.smack.util.Base64;
+import org.json.simple.JSONValue;
+
+import java.util.Map;
 
 public class ServiceDetailActivity extends FriendDetailActivity {
 
     public static final String FIND_SERVICE_RESULT = "FIND_SERVICE_RESULT";
+    public static final String GET_USER_INFO_RESULT = "GET_USER_INFO_RESULT";
     public static final String EXISTENCE = "EXISTENCE";
 
     private int mExistence = Friend.ACTIVE;
     private Friend mFriend;
+
+    @Override
+    protected int getHeaderVisibility() {
+        return View.GONE;
+    }
 
     @Override
     protected int getServiceAreaVisibility() {
@@ -63,10 +75,30 @@ public class ServiceDetailActivity extends FriendDetailActivity {
         if (mExistence == Friend.NOT_FOUND)
             return -1;
 
+        if (mFriend == null)
+            return -1;
+
         if (SystemUtils.isFlagEnabled(mFriend.flags, FriendsPlugin.FRIEND_NOT_REMOVABLE))
             return -1;
 
         return R.menu.service_detail_menu;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        T.UI();
+        boolean result = super.onCreateOptionsMenu(menu);
+        if (mExistence == Friend.NOT_FOUND)
+            return result;
+
+        if (mFriend == null)
+            return result;
+
+        if (SystemUtils.isFlagEnabled(mFriend.flags, FriendsPlugin.FRIEND_NOT_REMOVABLE))
+            return result;
+
+        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_trash).color(Color.DKGRAY).sizeDp(18));
+        return result;
     }
 
     @Override
@@ -81,8 +113,9 @@ public class ServiceDetailActivity extends FriendDetailActivity {
 
     @Override
     protected int getPokeVisibility() {
-        if (mExistence == Friend.NOT_FOUND || mExistence == Friend.INVITE_PENDING)
+        if (mExistence == Friend.NOT_FOUND || mExistence == Friend.INVITE_PENDING) {
             return View.VISIBLE;
+        }
 
         return View.GONE;
     }
@@ -102,12 +135,35 @@ public class ServiceDetailActivity extends FriendDetailActivity {
                 service.avatarId = 0;
                 service.description = item.description;
                 service.descriptionBranding = TextUtils.isEmptyOrWhitespace(item.description_branding) ? null
-                    : item.description_branding;
+                        : item.description_branding;
                 service.email = item.email;
                 service.existenceStatus = mExistence;
                 service.name = item.name;
                 service.type = FriendsPlugin.FRIEND_TYPE_SERVICE;
                 service.qualifiedIdentifier = item.qualified_identifier;
+                return service;
+
+            } catch (IncompleteMessageException e) {
+                L.bug(e);
+                return null;
+            }
+        } else if (intent.hasExtra(GET_USER_INFO_RESULT)) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> map = (Map<String, Object>) JSONValue.parse(intent.getStringExtra(GET_USER_INFO_RESULT));
+            try {
+                GetUserInfoResponseTO item = new GetUserInfoResponseTO(map);
+
+                Friend service = new Friend();
+                service.avatar = Base64.decode(item.avatar);
+                service.avatarId = 0;
+                service.description = item.description;
+                service.descriptionBranding = TextUtils.isEmptyOrWhitespace(item.descriptionBranding) ? null
+                        : item.descriptionBranding;
+                service.email = item.email;
+                service.existenceStatus = mExistence;
+                service.name = item.name;
+                service.type = FriendsPlugin.FRIEND_TYPE_SERVICE;
+                service.qualifiedIdentifier = item.qualifiedIdentifier;
                 return service;
 
             } catch (IncompleteMessageException e) {

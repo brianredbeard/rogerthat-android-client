@@ -260,6 +260,7 @@
     <string name="need_location_permission_title">Locul de amplasare acces interzis</string>
     <string name="new_message_long">Compune un mesaj nou</string>
     <string name="new_message_short">Mesaj nou</string>
+    <string name="news">Stiri</string>
     <string name="nextButton">Urmatorul</string>
     <string name="next_in_thread">Urmatorul mesaj din aceasta conversatie</string>
     <string name="no">Nu</string>
@@ -285,6 +286,7 @@
     <string name="not_authenticated">nu autentificat</string>
     <string name="not_yet_received">Nu a fost inca primit</string>
     <string name="not_yet_replied">Nu a fost inca raspuns</string>
+    <string name="notification_settings">Setari notificari</string>
     <string name="ok">OK</string>
     <string name="one_updated_message">1 mesaj modificat.</string>
     <string name="opening_camera">Porneste camera…</string>
@@ -357,6 +359,7 @@
     <string name="reply">Raspuns</string>
     <string name="report_card">Formular raportare</string>
     <string name="request_location_of">Solicita localizare a %1$s</string>
+    <string name="reserve">Rezervare</string>
     <string name="retrieving_information">Preluarea de informatii de pe server…</string>
     <string name="retry">Reîncercați</string>
     <string name="rogerthat">Roger that</string>
@@ -379,6 +382,7 @@
     <string name="search_services_if_none_connected_message">Doriți să căutați %1$s în tine cartier?</string>
     <string name="searching">Cauta…</string>
     <string name="select_all">Selectati totul</string>
+    <string name="select_contact">Selecteaza contact</string>
     <string name="select_size">Selectati dimensiunea</string>
     <string name="select_source">Selectati sursa</string>
     <string name="send">Trimite</string>
@@ -442,6 +446,7 @@
     <string name="unable_to_read_write_sd_card">A aparut o eroare. Verificati disponibilitatea cardului SD.</string>
     <string name="unknown">Necunoscut</string>
     <string name="unrecognized_scan_result">Continutul rezultatului scanat nu este recunoscut.</string>
+    <string name="unsubscribe">dezabonare de</string>
     <string name="update">Actualizare</string>
     <string name="update_settings_failure">Nu am putut actualiza setarile.</string>
     <string name="updating_location">Actualizare locatie…</string>

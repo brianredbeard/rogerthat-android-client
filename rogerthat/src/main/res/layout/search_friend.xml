@@ -1,69 +1,84 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="wrap_content"
-    android:background="@color/mc_white"
-    android:padding="3dp" >
+    android:layout_width="match_parent"
+    android:background="?attr/selectableItemBackground"
+    android:minHeight="72dp"
+    android:orientation="horizontal"
+    android:paddingLeft="?attr/listPreferredItemPaddingLeft"
+    android:paddingRight="?attr/listPreferredItemPaddingRight">
 
     <ImageView
         android:id="@+id/friend_avatar"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:background="@drawable/avatar_background_black"
-        android:padding="1dp"
-        android:scaleType="fitCenter" />
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="16dp"
+        tools:src="@drawable/unknown_avatar" />
 
     <LinearLayout
-        android:id="@+id/friend_existence_layout"
         android:layout_width="wrap_content"
-        android:layout_height="48dp"
-        android:layout_alignParentRight="true"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:visibility="gone" >
-
-        <ProgressBar
-            android:id="@+id/friend_spinner"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginRight="5dp"
-            android:indeterminate="true"
-            android:visibility="gone" />
-
-        <ImageView
-            android:id="@+id/friend_existence"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
         android:layout_toLeftOf="@id/friend_existence_layout"
         android:layout_toRightOf="@id/friend_avatar"
         android:orientation="vertical"
-        android:paddingLeft="5dp" >
+        android:paddingBottom="16dp"
+        android:paddingTop="16dp">
 
         <TextView
             android:id="@+id/friend_name"
-            android:layout_width="fill_parent"
+            style="@style/TextAppearance.AppCompat.Body2"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
+            android:layout_gravity="center_vertical"
             android:ellipsize="end"
-            android:singleLine="true"
-            android:textColor="@android:color/primary_text_light"
-            android:textSize="20sp" />
+            android:maxLines="1"
+            android:textSize="16sp"
+            tools:text="Really long friend name that should be truncated" />
 
         <TextView
             android:id="@+id/friend_subtitle"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:ellipsize="end"
-            android:singleLine="true"
+            android:maxLines="1"
             android:textColor="@android:color/secondary_text_light"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            tools:text="Really long friend subtitle that should be truncated" />
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/friend_existence_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <ProgressBar
+            android:id="@+id/friend_spinner"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            android:indeterminateTint="@color/mc_primary_color"
+            android:indeterminateTintMode="src_atop"
+            android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/friend_existence"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:padding="5dp"
+            android:visibility="gone"
+            tools:src="@drawable/act_friend_plus"
+            tools:visibility="visible" />
+
+    </LinearLayout>
 </RelativeLayout>

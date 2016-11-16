@@ -18,18 +18,6 @@
 
 package com.mobicage.rogerthat.plugins.friends;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.json.simple.JSONValue;
-
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -49,6 +37,7 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -71,6 +60,18 @@ import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.to.friends.FindFriendItemTO;
 import com.mobicage.to.friends.FindFriendResponseTO;
 
+import org.json.simple.JSONValue;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class FriendSearchActivity extends ServiceBoundActivity {
 
     public static final String SEARCH_RESULT = "SEARCH_RESULT";
@@ -90,8 +91,8 @@ public class FriendSearchActivity extends ServiceBoundActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.friend_search);
+        setActivityName("directory");
 
         mSearchInfo = new SearchInfo();
         mSearchInfo.results = (ListView) findViewById(R.id.search_result_lists);
@@ -128,7 +129,8 @@ public class FriendSearchActivity extends ServiceBoundActivity {
             }
         });
 
-        findViewById(R.id.search_button).setOnClickListener(new SafeViewOnClickListener() {
+        final ImageButton searchButton = (ImageButton) findViewById(R.id.search_button);
+        searchButton.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
                 if (TextUtils.isEmptyOrWhitespace(mSearchString)) {
@@ -331,7 +333,7 @@ public class FriendSearchActivity extends ServiceBoundActivity {
             // Set avatar
             final ImageView avatarView = (ImageView) v.findViewById(R.id.friend_avatar);
             LayoutParams lp = avatarView.getLayoutParams();
-            lp.width = lp.height = UIUtils.convertDipToPixels(FriendSearchActivity.this, 50);
+            lp.width = lp.height = UIUtils.convertDipToPixels(FriendSearchActivity.this, 40);
 
             new SafeAsyncTask<Object, Object, Object>() {
                 @Override

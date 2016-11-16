@@ -18,8 +18,6 @@
 
 package com.mobicage.rogerthat.plugins.scan;
 
-import org.jivesoftware.smack.util.Base64;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -46,6 +44,8 @@ import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
 import com.mobicage.rpc.config.AppConstants;
+
+import org.jivesoftware.smack.util.Base64;
 
 public class InviteFriendActivity extends ServiceBoundActivity {
 
@@ -116,7 +116,7 @@ public class InviteFriendActivity extends ServiceBoundActivity {
                 }
             }
 
-            ((TextView) findViewById(R.id.title_bar)).setText(R.string.successful_scan);
+            setTitle(R.string.successful_scan);
 
             final Bitmap bitmap = ImageHelper.getRoundedCornerAvatar(BitmapFactory.decodeByteArray(mFriend.avatar, 0,
                 mFriend.avatar.length));
@@ -158,11 +158,11 @@ public class InviteFriendActivity extends ServiceBoundActivity {
                 }
             });
 
+            TextView descriptionTextView = (TextView)findViewById(R.id.description);
             if (mFriend.description == null) {
-                findViewById(R.id.about_service).setVisibility(View.GONE);
-                findViewById(R.id.description).setVisibility(View.GONE);
+                descriptionTextView.setVisibility(View.GONE);
             } else {
-                ((TextView) findViewById(R.id.description)).setText(mFriend.description);
+                descriptionTextView.setText(mFriend.description);
             }
 
         } catch (Exception e) {

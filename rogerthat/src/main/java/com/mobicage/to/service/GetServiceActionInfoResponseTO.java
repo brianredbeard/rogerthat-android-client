@@ -72,7 +72,11 @@ public class GetServiceActionInfoResponseTO implements com.mobicage.rpc.IJSONabl
         }
         if (json.containsKey("avatar_id")) {
             Object val = json.get("avatar_id");
-            this.avatar_id = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.avatar_id = ((Integer) val).longValue();
+            } else {
+                this.avatar_id = ((Long) val).longValue();
+            }
         } else {
             this.avatar_id = -1;
         }
@@ -139,7 +143,11 @@ public class GetServiceActionInfoResponseTO implements com.mobicage.rpc.IJSONabl
         }
         if (json.containsKey("type")) {
             Object val = json.get("type");
-            this.type = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.type = ((Integer) val).longValue();
+            } else {
+                this.type = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.service.GetServiceActionInfoResponseTO object is missing field 'type'");
         }

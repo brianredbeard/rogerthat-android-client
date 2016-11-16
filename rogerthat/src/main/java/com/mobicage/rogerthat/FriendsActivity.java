@@ -19,7 +19,6 @@ package com.mobicage.rogerthat;
 
 import android.app.AlertDialog;
 import android.content.IntentFilter;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
@@ -43,10 +42,20 @@ public abstract class FriendsActivity extends ServiceBoundCursorListActivity {
 
     protected abstract CharSequence getHeaderCellSubText();
 
+    protected boolean useAppBar() {
+        return true;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         T.UI();
-        setContentView(getLayout());
+        super.onCreate(savedInstanceState);
+        if (useAppBar()) {
+            setContentView(getLayout());
+        } else {
+            setContentView(getLayout());
+        }
+
         final ListView listView = (ListView) findViewById(R.id.friend_list);
         setListView(listView);
 
@@ -62,7 +71,6 @@ public abstract class FriendsActivity extends ServiceBoundCursorListActivity {
                 getListView().addHeaderView(headerView);
             }
         }
-        super.onCreate(savedInstanceState);
     }
 
     protected View getHeaderView() {
@@ -119,7 +127,7 @@ public abstract class FriendsActivity extends ServiceBoundCursorListActivity {
         createCursor();
         startManagingCursor(getCursor());
 
-        setListAdapter(new FriendListAdapter(this, getCursor(), mFriendsPlugin.getStore(), null, mFriendsPlugin, true, null));
+        setListAdapter(new FriendListAdapter(this, getCursor(), mFriendsPlugin.getStore(), null, mFriendsPlugin, true, null, false));
     }
 
     protected abstract void createCursor();

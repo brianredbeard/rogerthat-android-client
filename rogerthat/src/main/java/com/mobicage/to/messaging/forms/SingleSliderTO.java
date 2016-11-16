@@ -62,7 +62,11 @@ public class SingleSliderTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("precision")) {
             Object val = json.get("precision");
-            this.precision = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.precision = ((Integer) val).longValue();
+            } else {
+                this.precision = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.forms.SingleSliderTO object is missing field 'precision'");
         }

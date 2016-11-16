@@ -18,11 +18,11 @@
 
 package com.mobicage.rpc.singlecall;
 
+import org.json.simple.JSONValue;
+
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-import org.json.simple.JSONValue;
 
 public abstract class SingleCall {
 
@@ -53,6 +53,7 @@ public abstract class SingleCall {
         SINGLE_CALL_FUNCTIONS.add("com.mobicage.api.system.heartBeat");
         SINGLE_CALL_FUNCTIONS.add("com.mobicage.api.system.saveSettings");
         SINGLE_CALL_FUNCTIONS.add("com.mobicage.api.system.unregisterMobile");
+        SINGLE_CALL_FUNCTIONS.add("com.mobicage.api.news.getNews");
 
         SPECIAL_SINGLE_CALL_FUNCTIONS.add(SINGLE_CALL_SERVCICES_START_ACTION);
         SPECIAL_SINGLE_CALL_FUNCTIONS.add(SINGLE_CALL_FRIENDS_GET_FRIEND);

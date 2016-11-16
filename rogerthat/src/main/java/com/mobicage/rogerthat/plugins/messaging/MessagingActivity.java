@@ -17,17 +17,6 @@
  */
 package com.mobicage.rogerthat.plugins.messaging;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -36,8 +25,9 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.ContextCompat;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -53,15 +43,20 @@ import android.widget.ListView;
 import android.widget.SectionIndexer;
 import android.widget.TextView;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.HomeActivity;
 import com.mobicage.rogerthat.IdentityStore;
 import com.mobicage.rogerthat.MainActivity;
-import com.mobicage.rogerthat.SendMessageWizardActivity;
+import com.mobicage.rogerthat.SendMessageContactActivity;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.ServiceBoundCursorListActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.messaging.MessageStore.CursorSet;
+import com.mobicage.rogerthat.plugins.scan.ProcessScanActivity;
+import com.mobicage.rogerthat.util.ActivityUtils;
+import com.mobicage.rogerthat.util.RegexPatterns;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
@@ -69,21 +64,26 @@ import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.time.TimeUtils;
-import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.AppConstants;
-import com.mobicage.to.messaging.AttachmentTO;
-import com.mobicage.to.messaging.ButtonTO;
 import com.mobicage.to.messaging.MemberStatusTO;
+
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class MessagingActivity extends ServiceBoundCursorListActivity {
 
     private static final long sGMTOffsetMillis = TimeUtils.getGMTOffsetMillis();
 
     // Owned by UI thread
+    private FloatingActionButton mFloatingActionButton;
     private MessagingPlugin mMessagingPlugin;
     private FriendsPlugin mFriendsPlugin;
     private String mMemberFilter;
-    private boolean mFirstCellIsComposeMessage = false;
     private String mMyEmail;
     private Resources mResources;
     private boolean mEditing = false;
@@ -97,31 +97,20 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
         for (int i = 0; i < menu.size(); i++) {
             MenuItem item = menu.getItem(i);
             switch (item.getItemId()) {
-            case R.id.new_message:
-                if (!mEditing)
-                    item.setVisible(AppConstants.FRIENDS_ENABLED);
-                else
-                    item.setVisible(false);
-                break;
-            case R.id.select_all:
-            case R.id.deselect_all:
-                item.setVisible(mEditing);
-                break;
-            case R.id.delete_messages:
-                item.setEnabled(((CursorAdapter) getListAdapter()).getCursor().getCount() > 0);
-                //$FALL-THROUGH$
-            default:
-                item.setVisible(!mEditing);
-                break;
+                case R.id.select_all:
+                case R.id.deselect_all:
+                    item.setVisible(mEditing);
+                    break;
+                case R.id.delete_messages:
+                    item.setEnabled(((CursorAdapter) getListAdapter()).getCursor().getCount() > 0);
+                    //$FALL-THROUGH$
+                default:
+                    item.setVisible(!mEditing);
+                    break;
             }
         }
 
         return super.onPrepareOptionsMenu(menu);
-    }
-
-    @Override
-    protected boolean showFABMenu() {
-        return true;
     }
 
     @Override
@@ -136,33 +125,30 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         T.UI();
         switch (item.getItemId()) {
-        case R.id.new_message:
-            showSendMessageWizardActivity();
-            return true;
-        case R.id.delete_messages:
-            setEditing(true);
-            return true;
-        case R.id.select_all:
-            mToBeDeleted.clear();
-            Cursor c = ((CursorAdapter) getListAdapter()).getCursor();
-            if (!c.moveToFirst()) {
-                L.e("Could not move cursor to first position");
-                return false;
-            }
-            do {
-                String key = MessageStore.getKeyFromMessageCursor(c);
-                String parentKey = MessageStore.getParentKeyFromMessageCursor(c);
-                long flags = MessageStore.getFlagsFromMessageCursor(c);
-                if (!SystemUtils.isFlagEnabled(flags, MessagingPlugin.FLAG_NOT_REMOVABLE))
-                    mToBeDeleted.add(parentKey == null ? key : parentKey);
-            } while (c.moveToNext());
+            case R.id.delete_messages:
+                setEditing(true);
+                return true;
+            case R.id.select_all:
+                mToBeDeleted.clear();
+                Cursor c = ((CursorAdapter) getListAdapter()).getCursor();
+                if (!c.moveToFirst()) {
+                    L.e("Could not move cursor to first position");
+                    return false;
+                }
+                do {
+                    String key = MessageStore.getKeyFromMessageCursor(c);
+                    String parentKey = MessageStore.getParentKeyFromMessageCursor(c);
+                    long flags = MessageStore.getFlagsFromMessageCursor(c);
+                    if (!SystemUtils.isFlagEnabled(flags, MessagingPlugin.FLAG_NOT_REMOVABLE))
+                        mToBeDeleted.add(parentKey == null ? key : parentKey);
+                } while (c.moveToNext());
 
-            ((CursorAdapter) getListAdapter()).notifyDataSetChanged();
-            return true;
-        case R.id.deselect_all:
-            mToBeDeleted.clear();
-            ((CursorAdapter) getListAdapter()).notifyDataSetChanged();
-            return true;
+                ((CursorAdapter) getListAdapter()).notifyDataSetChanged();
+                return true;
+            case R.id.deselect_all:
+                mToBeDeleted.clear();
+                ((CursorAdapter) getListAdapter()).notifyDataSetChanged();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -177,6 +163,8 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
         if (getWasPaused() && mCursorSet != null) {
             startManagingCursor(mCursorSet.cursor);
             startManagingCursor(mCursorSet.indexer);
+
+            ((CursorAdapter) getListAdapter()).notifyDataSetChanged();
         }
     }
 
@@ -203,20 +191,104 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         T.UI();
-        setContentView(R.layout.messaging);
-        setListView((ListView) findViewById(R.id.message_list));
         super.onCreate(savedInstanceState);
         mResources = getResources();
+    }
+
+    private void processMessageUpdatesIntent(final Intent intent) {
+        final String url = intent.getDataString();
+        if (intent.getBooleanExtra(HomeActivity.INTENT_PROCESSED, false))
+            return;
+        if (url != null) {
+            ActivityUtils.goToMessagingActivity(this, false, null);
+            processUrl(url);
+        } else if (intent.hasExtra(HomeActivity.INTENT_KEY_LAUNCHINFO)) {
+            String value = intent.getStringExtra(HomeActivity.INTENT_KEY_LAUNCHINFO);
+            if (HomeActivity.INTENT_VALUE_SHOW_FRIENDS.equals(value)) {
+                // goToUserFriendsActivity();
+
+            } else if (HomeActivity.INTENT_VALUE_SHOW_MESSAGES.equals(value)) {
+                ActivityUtils.goToMessagingActivity(this, false, null);
+
+            } else if (HomeActivity.INTENT_VALUE_SHOW_NEW_MESSAGES.equals(value)
+                    || HomeActivity.INTENT_VALUE_SHOW_UPDATED_MESSAGES.equals(value)) {
+                if (intent.hasExtra(HomeActivity.INTENT_KEY_MESSAGE)) {
+                    String messageKey = intent.getStringExtra(HomeActivity.INTENT_KEY_MESSAGE);
+                    goToMessageDetail(messageKey);
+                } else {
+                    ActivityUtils.goToMessagingActivity(this, false, null);
+                }
+
+            } else if (HomeActivity.INTENT_VALUE_SHOW_SCANTAB.equals(value)) {
+                ActivityUtils.goToScanActivity(this, false, null);
+            } else {
+                L.bug("Unexpected (key, value) for HomeActivity intent: (" + HomeActivity.INTENT_KEY_LAUNCHINFO + ", " + value + ")");
+            }
+        }
+        intent.putExtra(HomeActivity.INTENT_PROCESSED, true);
+    }
+
+    private void processUrl(final String url) {
+        T.UI();
+        if (RegexPatterns.OPEN_HOME_URL.matcher(url).matches())
+            return;
+
+        if (RegexPatterns.FRIEND_INVITE_URL.matcher(url).matches()
+                || RegexPatterns.SERVICE_INTERACT_URL.matcher(url).matches()) {
+            final Intent launchIntent = new Intent(this, ProcessScanActivity.class);
+            launchIntent.putExtra(ProcessScanActivity.URL, url);
+            launchIntent.putExtra(ProcessScanActivity.SCAN_RESULT, false);
+            startActivity(launchIntent);
+        }
+    }
+
+    private void goToMessageDetail(final String messageKey) {
+        Message message = mMessagingPlugin.getStore().getPartialMessageByKey(messageKey);
+        mMessagingPlugin.showMessage(this, message, null);
+    }
+
+    @Override
+    protected String[] getAllReceivingIntents() {
+        return new String[]{MessagingPlugin.NEW_MESSAGE_RECEIVED_INTENT,
+                MessagingPlugin.MESSAGE_MEMBER_STATUS_UPDATE_RECEIVED_INTENT, MessagingPlugin.MESSAGE_DIRTY_CLEANED_INTENT,
+                MessagingPlugin.MESSAGE_LOCKED_INTENT,
+                MessagingPlugin.MESSAGE_PROCESSED_INTENT, MessagingPlugin.MESSAGE_FAILURE,
+                MessagingPlugin.MESSAGE_THREAD_VISIBILITY_CHANGED_INTENT, MessagingPlugin.THREAD_DELETED_INTENT,
+                MessagingPlugin.THREAD_RECOVERED_INTENT, MessagingPlugin.THREAD_MODIFIED_INTENT,
+                FriendsPlugin.FRIEND_AVATAR_CHANGED_INTENT, IdentityStore.IDENTITY_CHANGED_INTENT,
+                FriendsPlugin.FRIENDS_LIST_REFRESHED};
+    }
+
+    @Override
+    protected void onServiceBound() {
+        T.UI();
+        mMessagingPlugin = mService.getPlugin(MessagingPlugin.class);
+        mFriendsPlugin = mService.getPlugin(FriendsPlugin.class);
+        mMyEmail = mService.getIdentityStore().getIdentity().getEmail();
 
         Intent intent = getIntent();
         if (intent != null) {
-            Bundle extras = intent.getExtras();
-            if (extras != null) {
-                mMemberFilter = extras.getString(MessagingPlugin.MEMBER_FILTER);
+            final String intentAction = intent.getAction();
+            if (MainActivity.ACTION_NOTIFICATION_MESSAGE_RECEIVED.equals(intentAction)) {
+                processMessageUpdatesIntent(intent);
+            } else {
+                Bundle extras = intent.getExtras();
+                if (extras != null) {
+                    mMemberFilter = extras.getString(MessagingPlugin.MEMBER_FILTER);
+                }
             }
         }
 
-        calculateFirstCellIsComposeMessage();
+        if (mMemberFilter == null) {
+            mMessagingPlugin.inboxOpened();
+            setContentView(R.layout.messaging);
+            setActivityName("messages");
+        } else {
+            setContentView(R.layout.messaging);
+            setActivityName("messages_filter");
+        }
+
+        setListView((ListView) findViewById(R.id.message_list));
 
         findViewById(R.id.delete_done_button).setOnClickListener(new SafeViewOnClickListener() {
             @Override
@@ -234,35 +306,25 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
                 setEditing(false);
             }
         });
-    }
 
-    @Override
-    protected String[] getAllReceivingIntents() {
-        return new String[] { MessagingPlugin.NEW_MESSAGE_RECEIVED_INTENT,
-            MessagingPlugin.MESSAGE_MEMBER_STATUS_UPDATE_RECEIVED_INTENT, MessagingPlugin.MESSAGE_DIRTY_CLEANED_INTENT,
-            MessagingPlugin.MESSAGE_KEY_UPDATED_INTENT, MessagingPlugin.MESSAGE_LOCKED_INTENT,
-            MessagingPlugin.MESSAGE_PROCESSED_INTENT, MessagingPlugin.MESSAGE_FAILURE,
-            MessagingPlugin.MESSAGE_THREAD_VISIBILITY_CHANGED_INTENT, MessagingPlugin.THREAD_DELETED_INTENT,
-            MessagingPlugin.THREAD_RECOVERED_INTENT, MessagingPlugin.THREAD_MODIFIED_INTENT,
-            FriendsPlugin.FRIEND_AVATAR_CHANGED_INTENT, IdentityStore.IDENTITY_CHANGED_INTENT,
-            FriendsPlugin.FRIENDS_LIST_REFRESHED };
-    }
+        mFloatingActionButton = ((FloatingActionButton) findViewById(R.id.add));
+        mFloatingActionButton.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_plus).color(Color.WHITE).sizeDp(24));
 
-    @Override
-    protected void onServiceBound() {
-        T.UI();
-        mMessagingPlugin = mService.getPlugin(MessagingPlugin.class);
-        if (mMemberFilter == null)
-            mMessagingPlugin.inboxOpened();
-        mFriendsPlugin = mService.getPlugin(FriendsPlugin.class);
-        mMyEmail = mService.getIdentityStore().getIdentity().getEmail();
+        mFloatingActionButton.setOnClickListener(new SafeViewOnClickListener() {
+            @Override
+            public void safeOnClick(View v) {
+                showSendMessageActivity();
+            }
+        });
+
+        if (!AppConstants.FRIENDS_ENABLED || mMemberFilter != null) {
+            mFloatingActionButton.hide();
+        }
 
         if (mMemberFilter == null) {
-            setNavigationBarVisible(AppConstants.SHOW_NAV_HEADER);
-            setNavigationBarTitle(R.string.tab_messaging);
+            setTitle(R.string.tab_messaging);
         } else {
-            setNavigationBarVisible(true);
-            setNavigationBarTitle(getString(R.string.member_message_history, mFriendsPlugin.getName(mMemberFilter)));
+            setTitle(R.string.message_history);
         }
 
         createCursorSet();
@@ -270,7 +332,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
         startManagingCursor(mCursorSet.indexer);
 
         final MessageListAdapter messageListAdapter = new MessageListAdapter(this, mCursorSet, mMessagingPlugin.getStore(),
-            mFriendsPlugin);
+                mFriendsPlugin);
         setListAdapter(messageListAdapter);
 
         final IntentFilter filter = new IntentFilter();
@@ -278,15 +340,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
             filter.addAction(action);
         registerReceiver(getDefaultBroadcastReceiver(), filter);
 
-        findViewById(R.id.navigation_bar_home_button).setOnClickListener(new SafeViewOnClickListener() {
-            @Override
-            public void safeOnClick(View v) {
-                Intent i = new Intent(MessagingActivity.this, HomeActivity.class);
-                i.setFlags(MainActivity.FLAG_CLEAR_STACK);
-                startActivity(i);
-                finish();
-            }
-        });
+
     }
 
     @Override
@@ -297,23 +351,16 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         T.UI();
-        if (mFirstCellIsComposeMessage && (position == 0)) {
-            showSendMessageWizardActivity();
-        } else {
-            final Object tag = v.getTag();
-            if (tag != null) {
-                final ViewInfoHolder holder = (ViewInfoHolder) tag;
-                final Message message = holder.message;
-                mMessagingPlugin.showMessage(this, message, mMemberFilter);
-            }
+        final Object tag = v.getTag();
+        if (tag != null) {
+            final ViewInfoHolder holder = (ViewInfoHolder) tag;
+            final Message message = holder.message;
+            mMessagingPlugin.showMessage(this, message, mMemberFilter);
         }
     }
 
     @Override
     protected boolean onListItemLongClick(ListView l, View v, int position, long id) {
-        if (mFirstCellIsComposeMessage && (position == 0))
-            return false;
-
         final Object tag = v.getTag();
         if (tag != null) {
             final ViewInfoHolder holder = (ViewInfoHolder) tag;
@@ -345,31 +392,36 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
         }
     }
 
-    private void showSendMessageWizardActivity() {
+    private void showSendMessageActivity() {
         long currentTime = System.currentTimeMillis();
         if (getLastTimeClicked() != 0
-            && (currentTime < (getLastTimeClicked() + ServiceBoundActivity.DOUBLE_CLICK_TIMESPAN))) {
+                && (currentTime < (getLastTimeClicked() + ServiceBoundActivity.DOUBLE_CLICK_TIMESPAN))) {
             L.d("ignoring click on send message");
             return;
         }
 
         setLastTimeClicked(currentTime);
-        Intent intent = new Intent(this, SendMessageWizardActivity.class);
+        
+        Intent intent = new Intent(this, SendMessageContactActivity.class);
         startActivity(intent);
     }
 
     private void setEditing(boolean editing) {
         mEditing = editing;
+        if (AppConstants.FRIENDS_ENABLED) {
+            if (editing) {
+                mFloatingActionButton.hide();
+            } else {
+                mFloatingActionButton.show();
+            }
+        }
+
+        invalidateOptionsMenu();
         mToBeDeleted = mEditing ? new HashSet<String>() : null;
 
         findViewById(R.id.delete_messages).setVisibility(mEditing ? View.VISIBLE : View.GONE);
 
-        calculateFirstCellIsComposeMessage();
         ((CursorAdapter) getListAdapter()).notifyDataSetChanged();
-    }
-
-    private void calculateFirstCellIsComposeMessage() {
-        mFirstCellIsComposeMessage = AppConstants.FRIENDS_ENABLED ? (mMemberFilter == null && !mEditing) : false;
     }
 
     // Object put in view tag. Contains fast references to message and subviews
@@ -380,8 +432,8 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
         TextView messageView;
         TextView messageCountView;
         ImageView avatarView;
-        ImageView statusView;
         CheckBox checkBox;
+        ImageView statusView;
     }
 
     private class MessageListAdapter extends CursorAdapter implements SectionIndexer {
@@ -421,7 +473,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
 
         private void buildSectionIndex() {
             mSections = new Section[mIndexerCursor.getCount()];
-            int pos = mFirstCellIsComposeMessage ? 1 : 0;
+            int pos = 0;
             int index = 0;
             if (mIndexerCursor.moveToFirst()) {
                 while (true) {
@@ -451,8 +503,6 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
         @Override
         public int getCount() {
             int c = super.getCount();
-            if (mFirstCellIsComposeMessage)
-                c++;
             return c;
         }
 
@@ -469,16 +519,6 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             T.UI();
-            if (mFirstCellIsComposeMessage) {
-                if (position == 0) {
-                    View headerView = mLayoutInflater.inflate(R.layout.main_list_header, null);
-                    ((TextView) headerView.findViewById(R.id.mainheader)).setText(R.string.new_message_short);
-                    ((TextView) headerView.findViewById(R.id.subheader)).setText(R.string.new_message_long);
-                    return headerView;
-                }
-                position--;
-            }
-
             if (!mCursor.moveToPosition(position)) {
                 throw new IllegalStateException("couldn't move cursor to position " + position);
             }
@@ -506,15 +546,14 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
                 holder.recipientsView = (TextView) view.findViewById(R.id.recipients);
                 holder.timestampView = (TextView) view.findViewById(R.id.timestamp);
                 holder.messageView = (TextView) view.findViewById(R.id.message);
-                holder.statusView = (ImageView) view.findViewById(R.id.status_icon);
                 holder.messageCountView = (TextView) view.findViewById(R.id.message_count);
                 holder.checkBox = (CheckBox) view.findViewById(R.id.message_checkbox);
+                holder.statusView = (ImageView) view.findViewById(R.id.message_status);
                 view.setTag(holder);
             }
             holder.message = message;
 
             final boolean dynamicChat = SystemUtils.isFlagEnabled(message.flags, MessagingPlugin.FLAG_DYNAMIC_CHAT);
-            setStatusIcon(holder, dynamicChat);
             setMessageOnView(view, holder, dynamicChat);
 
             return view;
@@ -526,14 +565,17 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
 
             final ImageView avatarView = holder.avatarView;
 
+            boolean shouldShowStatusIcon = true;
+
             final Bitmap threadAvatar;
             if (message.thread_avatar_hash != null
-                && (threadAvatar = mMessagingPlugin.getStore().getThreadAvatar(message.thread_avatar_hash)) != null) {
+                    && (threadAvatar = mMessagingPlugin.getStore().getThreadAvatar(message.thread_avatar_hash)) != null) {
                 avatarView.setImageBitmap(threadAvatar);
             } else if (dynamicChat) {
                 avatarView.setImageResource(R.drawable.group_60);
             } else if (FriendsPlugin.SYSTEM_FRIEND.equals(message.sender)
-                || mFriendsPlugin.getStore().getFriendType(message.sender) == FriendsPlugin.FRIEND_TYPE_SERVICE) {
+                    || mFriendsPlugin.getStore().getFriendType(message.sender) == FriendsPlugin.FRIEND_TYPE_SERVICE) {
+                shouldShowStatusIcon = false;
                 avatarView.setImageBitmap(mFriendsPlugin.getAvatarBitmap(message.sender));
 
             } else if (message.members.length == 2) {
@@ -566,7 +608,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
             } else if (message.parent_key != null && dynamicChat) {
                 try {
                     JSONObject json = (JSONObject) JSONValue.parse(mMessagingPlugin.getStore().getMessageMessage(
-                        message.parent_key));
+                            message.parent_key));
                     recipients = (String) json.get("t");
                     messageText = message.message;
                 } catch (Throwable t) {
@@ -578,45 +620,32 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
                 messageText = message.message;
             }
             if (TextUtils.isEmptyOrWhitespace(messageText)) {
-                if (message.buttons != null && message.buttons.length > 0) {
-                    List<String> buttons = new ArrayList<String>();
-                    for (ButtonTO bt : message.buttons) {
-                        buttons.add(bt.caption);
-                    }
-                    messageText = android.text.TextUtils.join(" / ", buttons);
-                } else if (message.attachments != null && message.attachments.length > 0) {
-                    Set<String> attachments = new HashSet<String>();
-                    for (AttachmentTO at : message.attachments) {
-                        if (!TextUtils.isEmptyOrWhitespace(at.name)) {
-                            attachments.add(at.name);
-                        } else if (at.content_type.toLowerCase(Locale.US).startsWith("video/")) {
-                            attachments.add(getString(R.string.attachment_name_video));
-                        } else if (at.content_type.toLowerCase(Locale.US).startsWith("image/")) {
-                            attachments.add(getString(R.string.attachment_name_image));
-                        } else {
-                            L.d("Not added attachment with type '" + at.content_type + "' because no translation found");
-                        }
-                    }
-                    if (attachments.size() > 0) {
-                        messageText = android.text.TextUtils.join(", ", attachments);
-                    }
-                }
+                messageText = mMessagingPlugin.getMessageTextFromButtonsOrAttachments(message);
+            }
+            if (message.members.length > 2) {
+                messageText = mFriendsPlugin.getName(message.sender) + ": " + message.message;
+            }
+
+            // this can happen when the name of the service wasn't available yet when fetching the messages during re-registration.
+            if (TextUtils.isEmptyOrWhitespace(recipients)) {
+                recipients = mFriendsPlugin.getName(message.sender);
+                mMessagingPlugin.getStore().updateMessageRecipients(message.parent_key != null ? message.parent_key : message.key, recipients);
             }
 
             int tmpThreadTextColor = Integer.MAX_VALUE;
             int tmpThreadBackgroundColor = Integer.MAX_VALUE;
             final long priority = message.priority;
             if (priority == Message.PRIORITY_HIGH) {
-                tmpThreadTextColor = mResources.getColor(R.color.mc_priority_high_text);
-                tmpThreadBackgroundColor = mResources.getColor(R.color.mc_priority_high_background);
+                tmpThreadTextColor = ContextCompat.getColor(mService, R.color.mc_priority_high_text);
+                tmpThreadBackgroundColor = ContextCompat.getColor(mService, R.color.mc_priority_high_background);
             } else if (priority == Message.PRIORITY_URGENT || priority == Message.PRIORITY_URGENT_WITH_ALARM) {
-                tmpThreadTextColor = mResources.getColor(R.color.mc_priority_urgent_text);
-                tmpThreadBackgroundColor = mResources.getColor(R.color.mc_priority_urgent_background);
+                tmpThreadTextColor = ContextCompat.getColor(mService, R.color.mc_priority_urgent_text);
+                tmpThreadBackgroundColor = ContextCompat.getColor(mService, R.color.mc_priority_urgent_background);
             }
             final int threadTextColor = message.thread_text_color != null ? Color.parseColor("#"
-                + message.thread_text_color) : tmpThreadTextColor;
+                    + message.thread_text_color) : tmpThreadTextColor;
             final int threadBackgroundColor = message.thread_background_color != null ? Color.parseColor("#"
-                + message.thread_background_color) : tmpThreadBackgroundColor;
+                    + message.thread_background_color) : tmpThreadBackgroundColor;
             final TextView recipientsView = holder.recipientsView;
             recipientsView.setText(recipients);
 
@@ -631,60 +660,50 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
             if (dynamicChat)
                 replyCount--;
 
-            long messageCountText = 0;
-            if (AppConstants.MESSAGES_SHOW_REPLY_VS_UNREAD_COUNT) {
-                if (replyCount > 1) {
-                    messageCountText = replyCount;
-                } else {
-                    messageCountText = 0;
-                }
-            } else {
-                messageCountText = message.unreadCount;
-                if (dynamicChat && replyCount < messageCountText) {
-                    messageCountText--;
-                }
+            long messageUnreadCount = message.unreadCount;
+            if (dynamicChat && replyCount < messageUnreadCount) {
+                messageUnreadCount--;
             }
-            if (messageCountText >= 1) {
-                messageCountView.setText("" + messageCountText);
-                messageCountView.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
-
-                if (threadBackgroundColor != Integer.MAX_VALUE) {
-                    final int bgColor;
-                    final int color;
-                    if (UIUtils.getLuminus(threadBackgroundColor) < 0.5f) {
-                        // Dark background
-                        // bg color white , alpha 0.75
-                        // color black
-                        bgColor = Color.argb(192, 255, 255, 255);
-                        color = Color.BLACK;
-                    } else {
-                        // Light background
-                        // bg color black , alpha 0.25
-                        // color white
-                        bgColor = Color.argb(63, 0, 0, 0);
-                        color = Color.WHITE;
-                    }
-                    messageCountView.setTextColor(color);
-                    GradientDrawable bgShape = (GradientDrawable) messageCountView.getBackground();
-                    bgShape.setColor(bgColor);
-                }
+            if (messageUnreadCount >= 1) {
+                Typeface boldFont = TextUtils.getFont(MessagingActivity.this);
+                holder.recipientsView.setTypeface(boldFont);
+                holder.messageView.setTypeface(boldFont);
+                messageCountView.setVisibility(View.VISIBLE);
             } else {
-                messageCountView.getLayoutParams().width = 0;
+                Typeface normalFont = TextUtils.getFont(MessagingActivity.this, "regular");
+                holder.recipientsView.setTypeface(normalFont);
+                holder.messageView.setTypeface(normalFont);
+                messageCountView.setVisibility(View.GONE);
+            }
+
+            if (messageCountView.getVisibility() == View.VISIBLE) {
+                long count = 0;
+                if (messageUnreadCount >= 1) {
+                    count = messageUnreadCount;
+                } else {
+                    count = replyCount;
+                }
+
+                if (count < 10) {
+                    messageCountView.setText(String.valueOf(count));
+                } else {
+                    messageCountView.setText("9+");
+                }
             }
 
             final TextView timestamp = holder.timestampView;
             if (timestamp != null) {
                 long startRunnableIn = TimeUtils.startRunnableToUpdateTimeIn(MessagingActivity.this,
-                    message.timestamp * 1000);
+                        message.timestamp * 1000);
                 if (startRunnableIn > 0) {
                     SafeRunnable sr = new SafeRunnable() {
 
                         @Override
                         protected void safeRun() throws Exception {
                             timestamp.setText(TimeUtils.getHumanTime(MessagingActivity.this, message.timestamp * 1000,
-                                true));
+                                    true));
                             long startRunnableIn = TimeUtils.startRunnableToUpdateTimeIn(MessagingActivity.this,
-                                message.timestamp * 1000);
+                                    message.timestamp * 1000);
                             if (startRunnableIn > 0) {
                                 mService.postDelayedOnUIHandler(this, startRunnableIn);
                             } else {
@@ -709,28 +728,6 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
                 messageView.setTextColor(threadTextColor);
             }
 
-            if (!message.threadDirty) {
-                messageView.setTypeface(null, Typeface.NORMAL);
-                if (threadBackgroundColor == Integer.MAX_VALUE)
-                    view.setBackgroundDrawable(getResources().getDrawable(R.drawable.mc_message_background));
-                if (threadTextColor == Integer.MAX_VALUE) {
-                    messageView.setTextColor(mResources.getColorStateList(android.R.color.secondary_text_light));
-                }
-            } else {
-                if (message.threadNeedsMyAnswer)
-                    messageView.setTypeface(null, Typeface.BOLD);
-                else
-                    messageView.setTypeface(null, Typeface.ITALIC);
-                if (threadBackgroundColor == Integer.MAX_VALUE)
-                    view.setBackgroundDrawable(getResources().getDrawable(R.drawable.mc_message_highlighted_background));
-                if (threadTextColor == Integer.MAX_VALUE) {
-                    messageView.setTextColor(mResources.getColorStateList(android.R.color.primary_text_light));
-                }
-            }
-
-            messageView.setTextSize(18);
-            recipientsView.setTextSize(14);
-
             if (threadBackgroundColor != Integer.MAX_VALUE)
                 view.setBackgroundColor(threadBackgroundColor);
 
@@ -748,38 +745,46 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
             });
             holder.checkBox.setChecked(mToBeDeleted != null && mToBeDeleted.contains(message.getThreadKey()));
             holder.checkBox.setVisibility(mEditing
-                && !SystemUtils.isFlagEnabled(message.flags, MessagingPlugin.FLAG_NOT_REMOVABLE) ? View.VISIBLE
-                : View.GONE);
+                    && !SystemUtils.isFlagEnabled(message.flags, MessagingPlugin.FLAG_NOT_REMOVABLE) ? View.VISIBLE
+                    : View.GONE);
+            boolean showMessageStatus = messageUnreadCount == 0;
+            if (showMessageStatus) {
+                showMessageStatus = shouldShowStatusIcon && setStatusIcon(MessagingActivity.this, message, holder.statusView, dynamicChat);
+            }
+            holder.statusView.setVisibility(showMessageStatus ? View.VISIBLE : View.GONE);
         }
 
-        private void setStatusIcon(ViewInfoHolder holder, boolean dynamicChat) {
-            final Message message = holder.message;
+        private boolean setStatusIcon(Context context, Message message, ImageView statusView, boolean dynamicChat) {
             if (dynamicChat) {
                 if (message.priority == Message.PRIORITY_URGENT_WITH_ALARM) {
-                    holder.statusView.setImageResource(R.drawable.status_ringing);
-                    holder.statusView.setVisibility(View.VISIBLE);
+                    int primaryColor = ContextCompat.getColor(mService, R.color.mc_gray_11);
+                    statusView.setImageDrawable(new IconicsDrawable(context, FontAwesome.Icon.faw_bell).color(primaryColor).sizeDp(15));
+                    return true;
                 } else {
-                    holder.statusView.setVisibility(View.GONE);
+                    return false;
                 }
             } else {
-                if ((message.flags & MessagingPlugin.FLAG_LOCKED) == MessagingPlugin.FLAG_LOCKED) {
-                    holder.statusView.setImageResource(R.drawable.status_locked);
-                } else if (message.hasTempKey) {
-                    holder.statusView.setImageDrawable(null);
-                } else if (message.recipients_status == MessageMemberStatusSummaryEncoding.ERROR) {
-                    holder.statusView.setImageResource(R.drawable.status_red);
+                if (!mMyEmail.equals(message.sender))
+                    return false;
+
+                if (message.recipients_status == MessageMemberStatusSummaryEncoding.ERROR) {
+                    int errorColor = ContextCompat.getColor(mService, R.color.mc_error);
+                    statusView.setImageDrawable(new IconicsDrawable(context, FontAwesome.Icon.faw_exclamation).color(errorColor).sizeDp(15));
                 } else if (message.alert_flags >= AlertManager.ALERT_FLAG_RING_5
-                    && !mMessagingPlugin.isMessageAckedByMe(message)) {
-                    holder.statusView.setImageResource(R.drawable.status_ringing);
+                        && !mMessagingPlugin.isMessageAckedByMe(message)) {
+                    int rogerthatColor = ContextCompat.getColor(mService, R.color.mc_green);
+                    statusView.setImageDrawable(new IconicsDrawable(context, FontAwesome.Icon.faw_bell).color(rogerthatColor).sizeDp(15));
                 } else if (message.numAcked() != 0) {
-                    holder.statusView.setImageResource(R.drawable.status_blue);
-                } else if (message.numRecipients() == message.numReceived()) {
-                    holder.statusView.setImageResource(R.drawable.status_green);
+                    int rogerthatColor = ContextCompat.getColor(mService, R.color.mc_green);
+                    statusView.setImageDrawable(new IconicsDrawable(context, FontAwesome.Icon.faw_check).color(rogerthatColor).sizeDp(15));
+                } else if (message.numReceived() != 0) {
+                    int grayColor = ContextCompat.getColor(mService, R.color.mc_gray_11);
+                    statusView.setImageDrawable(new IconicsDrawable(context, FontAwesome.Icon.faw_check).color(grayColor).sizeDp(15));
                 } else {
-                    // message is on server
-                    holder.statusView.setImageResource(R.drawable.status_yellow);
+                    int grayColor = ContextCompat.getColor(mService, R.color.mc_gray_11);
+                    statusView.setImageDrawable(new IconicsDrawable(context, FontAwesome.Icon.faw_paper_plane).color(grayColor).sizeDp(15));
                 }
-                holder.statusView.setVisibility(View.VISIBLE);
+                return true;
             }
         }
 

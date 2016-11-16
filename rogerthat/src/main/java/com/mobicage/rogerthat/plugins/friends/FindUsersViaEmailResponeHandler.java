@@ -18,9 +18,9 @@
 
 package com.mobicage.rogerthat.plugins.friends;
 
-import org.json.simple.JSONValue;
-
+import android.app.Notification;
 import android.content.Intent;
+import android.support.v7.app.NotificationCompat;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.AddFriendsActivity;
@@ -33,6 +33,8 @@ import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.IResponse;
 import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.to.friends.FindRogerthatUsersViaEmailResponseTO;
+
+import org.json.simple.JSONValue;
 
 public class FindUsersViaEmailResponeHandler extends ResponseHandler<FindRogerthatUsersViaEmailResponseTO> {
 
@@ -59,7 +61,8 @@ public class FindUsersViaEmailResponeHandler extends ResponseHandler<FindRogerth
 
         UIUtils.doNotification(mMainService, title, message, notificationId,
             MainActivity.ACTION_NOTIFICATION_ADDRESSBOOK_SCAN, withSound, withVibration, withLight, autoCancel, icon,
-            notificationNumber, extra, extraData, tickerText, timestamp);
+                notificationNumber, extra, extraData, tickerText, timestamp, Notification.PRIORITY_LOW, null, null,
+                null, NotificationCompat.CATEGORY_EVENT);
     }
 
     @Override

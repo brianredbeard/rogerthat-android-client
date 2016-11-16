@@ -18,27 +18,21 @@
 
 package com.mobicage.rogerthat.plugins.history;
 
-import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.ListView;
 
 import com.mobicage.rogerth.at.R;
-import com.mobicage.rogerthat.HomeActivity;
-import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.ServiceBoundCursorListActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.util.logging.L;
-import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
-import com.mobicage.rpc.config.AppConstants;
 
 public class HistoryListActivity extends ServiceBoundCursorListActivity implements OnSharedPreferenceChangeListener {
 
@@ -78,17 +72,7 @@ public class HistoryListActivity extends ServiceBoundCursorListActivity implemen
         mShowImportantOnly = mustShowImportantOnly(options);
         setListAdapter();
 
-        setNavigationBarVisible(AppConstants.SHOW_NAV_HEADER);
-        setNavigationBarTitle(R.string.stream_title);
-        findViewById(R.id.navigation_bar_home_button).setOnClickListener(new SafeViewOnClickListener() {
-            @Override
-            public void safeOnClick(View v) {
-                Intent i = new Intent(HistoryListActivity.this, HomeActivity.class);
-                i.setFlags(MainActivity.FLAG_CLEAR_STACK);
-                startActivity(i);
-                finish();
-            }
-        });
+        setTitle(R.string.stream_title);
     }
 
     private void createCursor() {

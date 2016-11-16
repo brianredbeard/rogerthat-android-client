@@ -20,11 +20,11 @@ package com.mobicage.rogerthat.plugins.trackme;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapView;
@@ -54,10 +54,10 @@ public class MapDetailActivity extends ServiceBoundMapActivity {
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         setContentView(R.layout.map_dialog);
+        setTitle(R.string.friends_map);
 
         mMapView = (MapView) findViewById(R.id.map);
 
-        mMapView.setBuiltInZoomControls(true);
         mMapView.getController().setZoom(14);
         mMapView.setVisibility(View.VISIBLE);
     }
@@ -79,13 +79,19 @@ public class MapDetailActivity extends ServiceBoundMapActivity {
         mMapView.getOverlays().add(overlay);
         mMapView.getController().setCenter(point);
 
+        final Toolbar bar = (Toolbar) findViewById(R.id.toolbar);
         if (intent.getBooleanExtra(VERIFY, false)) {
+
+            bar.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    finish();
+                }
+            });
+
             LinearLayout mapVerify = (LinearLayout) findViewById(R.id.map_verify);
             mapVerify.setVisibility(View.VISIBLE);
-            TextView title = (TextView) findViewById(R.id.title);
-            title.setVisibility(View.VISIBLE);
-            View titleDivider = findViewById(R.id.title_divider);
-            titleDivider.setVisibility(View.VISIBLE);
+            setTitle(R.string.validate_discovered_location);
             Button mapYes = (Button) findViewById(R.id.map_yes);
             mapYes.setVisibility(View.VISIBLE);
             Button mapNo = (Button) findViewById(R.id.map_no);
@@ -114,6 +120,8 @@ public class MapDetailActivity extends ServiceBoundMapActivity {
                     finish();
                 }
             });
+        } else {
+            bar.setVisibility(View.GONE);
         }
     }
 

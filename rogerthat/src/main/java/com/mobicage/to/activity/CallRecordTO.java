@@ -59,13 +59,21 @@ public class CallRecordTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("duration")) {
             Object val = json.get("duration");
-            this.duration = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.duration = ((Integer) val).longValue();
+            } else {
+                this.duration = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.activity.CallRecordTO object is missing field 'duration'");
         }
         if (json.containsKey("id")) {
             Object val = json.get("id");
-            this.id = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.id = ((Integer) val).longValue();
+            } else {
+                this.id = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.activity.CallRecordTO object is missing field 'id'");
         }
@@ -77,13 +85,21 @@ public class CallRecordTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("starttime")) {
             Object val = json.get("starttime");
-            this.starttime = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.starttime = ((Integer) val).longValue();
+            } else {
+                this.starttime = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.activity.CallRecordTO object is missing field 'starttime'");
         }
         if (json.containsKey("type")) {
             Object val = json.get("type");
-            this.type = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.type = ((Integer) val).longValue();
+            } else {
+                this.type = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.activity.CallRecordTO object is missing field 'type'");
         }

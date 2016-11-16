@@ -34,7 +34,11 @@ public class GetFriendRequestTO implements com.mobicage.rpc.IJSONable {
     public GetFriendRequestTO(Map<String, Object> json) throws IncompleteMessageException {
         if (json.containsKey("avatar_size")) {
             Object val = json.get("avatar_size");
-            this.avatar_size = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.avatar_size = ((Integer) val).longValue();
+            } else {
+                this.avatar_size = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.friends.GetFriendRequestTO object is missing field 'avatar_size'");
         }

@@ -39,6 +39,7 @@ import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity;
 import com.mobicage.rogerthat.plugins.messaging.BrandingFailureException;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
+import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
 import com.mobicage.rogerthat.plugins.messaging.ServiceMessageDetailActivity;
 import com.mobicage.rogerthat.plugins.scan.ProcessScanActivity;
 import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
@@ -56,7 +57,6 @@ import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
-import com.mobicage.rogerthat.widget.SendCannedMessageActivity;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.to.friends.ServiceMenuItemTO;
@@ -68,20 +68,25 @@ import java.util.Map;
 
 public class MainActivity extends ServiceBoundActivity {
 
-    public static final int FLAG_CLEAR_STACK = Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP
-        | Intent.FLAG_ACTIVITY_SINGLE_TOP;
+    public static final int FLAG_NEW_STACK = Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP
+        | Intent.FLAG_ACTIVITY_CLEAR_TASK;
+
+    public static final int FLAG_CLEAR_STACK_SINGLE_TOP = Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP
+            | Intent.FLAG_ACTIVITY_SINGLE_TOP;
+
+    public static final int FLAG_CLEAR_STACK = Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP;
 
     public static final String ACTION_WIDGET_MAIN = "ROGERTHAT_ACTION_WIDGET_MAIN";
     public static final String ACTION_WIDGET_SCAN = "ROGERTHAT_ACTION_WIDGET_SCAN";
     public static final String ACTION_WIDGET_COMPOSE = "ROGERTHAT_ACTION_WIDGET_COMPOSE";
-    public static final String ACTION_WIDGET_SEND_CANNED_MSG = "ROGERTHAT_ACTION_WIDGET_SEND_CANNED_MSG";
 
     public static final String ACTION_NOTIFICATION_ENTER_PIN = "ROGERTHAT_ACTION_NOTIFICATION_ENTER_PIN";
-    public static final String ACTION_NOTIFICATION_MESSAGE_UPDATES = "ROGERTHAT_ACTION_NOTIFICATION_MESSAGE_UPDATES";
+    public static final String ACTION_NOTIFICATION_MESSAGE_RECEIVED = "ROGERTHAT_ACTION_NOTIFICATION_MESSAGE_UPDATES";
     public static final String ACTION_NOTIFICATION_ADDRESSBOOK_SCAN = "ROGERTHAT_ACTION_NOTIFICATION_SCAN_AB_RESULT ";
     public static final String ACTION_NOTIFICATION_FACEBOOK_SCAN = "ROGERTHAT_ACTION_NOTIFICATION_SCAN_FB_RESULT ";
     public static final String ACTION_NOTIFICATION_PHOTO_UPLOAD_DONE = "ROGERTHAT_ACTION_NOTIFICATION_PHOTO_UPLOAD_DONE";
     public static final String ACTION_NOTIFICATION_OPEN_APP = "ROGERTHAT_ACTION_NOTIFICATION_OPEN_APP";
+    public static final String ACTION_NOTIFICATION_NEW_NEWS = "ROGERTHAT_ACTION_NOTIFICATION_NEW_NEWS";
 
     public static final String ACTION_REGISTERED = "ROGERTHAT_ACTION_REGISTERED";
     public static final String ACTION_COMPLETE_PROFILE = "ROGERTHAT_ACTION_COMPLETE_PROFILE";
@@ -107,7 +112,7 @@ public class MainActivity extends ServiceBoundActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         T.UI();
-        setContentView(R.layout.blank);
+        setContentViewWithoutNavigationBar(R.layout.blank);
         //noinspection PointlessBooleanExpression
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && CloudConstants.DEBUG_LOGGING) {
             WebView.setWebContentsDebuggingEnabled(true);
@@ -167,8 +172,7 @@ public class MainActivity extends ServiceBoundActivity {
             }
         }
 
-        if (ACTION_WIDGET_SCAN.equals(intentAction) || ACTION_WIDGET_COMPOSE.equals(intentAction)
-            || ACTION_WIDGET_SEND_CANNED_MSG.equals(intentAction)) {
+        if (ACTION_WIDGET_SCAN.equals(intentAction) || ACTION_WIDGET_COMPOSE.equals(intentAction)) {
 
             // Started via one of the last 3 widget buttons
             processWidgetIntent(intent, hasRegistered);
@@ -181,22 +185,25 @@ public class MainActivity extends ServiceBoundActivity {
             processPhotoUploadDoneIntent(intent, hasRegistered);
 
         } else if (ACTION_NOTIFICATION_ENTER_PIN.equals(intentAction)) {
-            launchRegistrationActivityAndFinish(null, FLAG_CLEAR_STACK);
+            launchRegistrationActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP);
 
-        } else if (ACTION_NOTIFICATION_MESSAGE_UPDATES.equals(intentAction)) {
+        } else if (ACTION_NOTIFICATION_MESSAGE_RECEIVED.equals(intentAction)) {
             processMessageUpdatesIntent(intent, hasRegistered);
+
+        } else if (ACTION_NOTIFICATION_NEW_NEWS.equals(intentAction)) {
+            processNewNewsIntent(intent, hasRegistered);
 
         } else if (ACTION_REGISTERED.equals(intentAction)) {
             showRegistrationCompleteDialogAndGoToHomeActivity();
 
         } else if (ACTION_COMPLETE_PROFILE.equals(intentAction)) {
-            launchProfileActivityAndFinish(null, FLAG_CLEAR_STACK, false);
+            launchProfileActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP, false);
 
         } else if (ACTION_COMPLETE_PROFILE_FINISHED.equals(intentAction)) {
             showRegistrationCompleteDialogAndGoToHomeActivity();
 
         } else if (ACTION_SHOW_DETECTED_BEACONS.equals(intentAction)) {
-            launchDetectedBeaconsAndFinish(null, FLAG_CLEAR_STACK,
+            launchDetectedBeaconsAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP,
                 intent.getStringExtra(DetectedBeaconActivity.EXTRA_DETECTED_BEACONS),
                 intent.getBooleanExtra(DetectedBeaconActivity.EXTRA_AGE_AND_GENDER_SET, true));
         } else {
@@ -211,7 +218,7 @@ public class MainActivity extends ServiceBoundActivity {
                 } else {
                     // Started via rogerthat://
                     qrUri = intent.getData();
-                    flags = FLAG_CLEAR_STACK;
+                    flags = FLAG_CLEAR_STACK_SINGLE_TOP;
                 }
 
             } else {
@@ -256,7 +263,7 @@ public class MainActivity extends ServiceBoundActivity {
 
     private void processWidgetIntent(Intent intent, boolean hasRegistered) {
         if (hasRegistered) {
-            launchHomeActivityAndFinish(null, FLAG_CLEAR_STACK);
+            launchHomeActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP);
 
             if (ACTION_WIDGET_SCAN.equals(intent.getAction())) {
                 startScanner();
@@ -264,8 +271,6 @@ public class MainActivity extends ServiceBoundActivity {
             } else if (ACTION_WIDGET_COMPOSE.equals(intent.getAction())) {
                 startSendMessageWizard();
 
-            } else if (ACTION_WIDGET_SEND_CANNED_MSG.equals(intent.getAction())) {
-                startSendCannedMessage();
             }
         } else {
             alertMustRegisterFirst();
@@ -274,7 +279,7 @@ public class MainActivity extends ServiceBoundActivity {
 
     private void processAddFriendsIntent(Intent intent, boolean hasRegistered) {
         if (hasRegistered) {
-            launchHomeActivityAndFinish(null, FLAG_CLEAR_STACK);
+            launchHomeActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP);
 
             Intent i = new Intent(this, AddFriendsActivity.class);
             i.putExtras(intent.getExtras());
@@ -287,7 +292,7 @@ public class MainActivity extends ServiceBoundActivity {
     private void processPhotoUploadDoneIntent(Intent intent, boolean hasRegistered) {
         if (hasRegistered) {
             UIUtils.cancelNotification(mService, R.integer.transfer_complete_continue);
-            launchHomeActivityAndFinish(null, FLAG_CLEAR_STACK);
+            launchHomeActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP);
 
             Intent i = new Intent(this, ServiceMessageDetailActivity.class);
             String jsonString = intent.getStringExtra("data");
@@ -322,7 +327,7 @@ public class MainActivity extends ServiceBoundActivity {
                 if (friends.size() == 1) {
                     Friend friend = friendStore.getFriend(friends.get(0));
                     Intent i = new Intent(this, ServiceActionMenuActivity.class);
-                    i.setFlags(FLAG_CLEAR_STACK);
+                    i.setFlags(FLAG_CLEAR_STACK_SINGLE_TOP);
                     intent.putExtra(ServiceActionMenuActivity.SERVICE_EMAIL, friend.email);
                     intent.putExtra(ServiceActionMenuActivity.MENU_PAGE, 0);
                     i.putExtras(intent.getExtras());
@@ -330,12 +335,31 @@ public class MainActivity extends ServiceBoundActivity {
                     finish();
                 }
             } else {
-                Intent i = new Intent(this, HomeActivity.class);
-                i.setFlags(FLAG_CLEAR_STACK);
+                final Intent i;
+                if (AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.messaging || AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.news) {
+                    i  = new Intent(this, MessagingActivity.class);
+                } else {
+                    i  = new Intent(this, HomeActivity.class);
+                }
+                i.setFlags(FLAG_NEW_STACK);
+                i.setAction(ACTION_NOTIFICATION_MESSAGE_RECEIVED);
+                i.putExtra("show_drawer_icon", true);
                 i.putExtras(intent.getExtras());
                 startActivity(i);
                 finish();
             }
+        } else {
+            alertMustRegisterFirst();
+        }
+    }
+
+    private void processNewNewsIntent(Intent intent, boolean hasRegistered) {
+        if (hasRegistered) {
+            Intent i = new Intent(this, NewsActivity.class);
+            i.putExtra("show_drawer_icon", true);
+            i.putExtra("id", intent.getLongExtra("id", -1));
+            startActivity(i);
+            finish();
         } else {
             alertMustRegisterFirst();
         }
@@ -348,13 +372,13 @@ public class MainActivity extends ServiceBoundActivity {
         builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialog) {
-                launchRegistrationActivityAndFinish(null, FLAG_CLEAR_STACK);
+                launchRegistrationActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP);
             }
         });
         builder.setPositiveButton(R.string.rogerthat, new SafeDialogInterfaceOnClickListener() {
             @Override
             public void safeOnClick(DialogInterface dialog, int which) {
-                launchRegistrationActivityAndFinish(null, FLAG_CLEAR_STACK);
+                launchRegistrationActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP);
             }
         });
         builder.create().show();
@@ -452,7 +476,7 @@ public class MainActivity extends ServiceBoundActivity {
 
                 boolean hasMenuIconsToDownload = false;
                 for (ServiceMenuItemTO item : friend.actionMenu.items) {
-                    if (item.iconHash != null && !friendsPlugin.isMenuIconAvailable(item.iconHash)) {
+                    if (item.iconHash != null && !friendsPlugin.isMenuIconAvailable(item.iconHash) && !UIUtils.isSupportedFontawesomeIcon(item.iconName)) {
                         hasMenuIconsToDownload = true;
                         break;
                     }
@@ -504,7 +528,7 @@ public class MainActivity extends ServiceBoundActivity {
     private void launchContentBrandingMainActivityAndFinish() {
         T.UI();
         Intent intent = new Intent(this, ContentBrandingMainActivity.class);
-        intent.setFlags(MainActivity.FLAG_CLEAR_STACK);
+        intent.setFlags(MainActivity.FLAG_CLEAR_STACK_SINGLE_TOP);
         startActivity(intent);
         this.finish();
     }
@@ -519,7 +543,7 @@ public class MainActivity extends ServiceBoundActivity {
                 mDialog.dismiss();
 
             Intent intent = new Intent(this, ServiceActionMenuActivity.class);
-            intent.setFlags(FLAG_CLEAR_STACK);
+            intent.setFlags(FLAG_CLEAR_STACK_SINGLE_TOP);
             intent.putExtra(ServiceActionMenuActivity.SERVICE_EMAIL, f.email);
             intent.putExtra(ServiceActionMenuActivity.MENU_PAGE, 0);
             startActivity(intent);
@@ -534,6 +558,7 @@ public class MainActivity extends ServiceBoundActivity {
             mDialog = new ProgressDialog(this);
             mDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
             mDialog.setMessage(getString(R.string.downloading));
+            mDialog.setIndeterminate(true);
             mDialog.setCancelable(false);
             mDialog.show();
         }
@@ -575,7 +600,7 @@ public class MainActivity extends ServiceBoundActivity {
                     @Override
                     public void onCancel(DialogInterface dialog) {
                         try {
-                            launchHomeActivityAndFinish(null, FLAG_CLEAR_STACK);
+                            launchHomeActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP);
                         } catch (Exception e) {
                             L.bug(e);
                         }
@@ -588,28 +613,40 @@ public class MainActivity extends ServiceBoundActivity {
                 builder.setPositiveButton(R.string.rogerthat, new SafeDialogInterfaceOnClickListener() {
                     @Override
                     public void safeOnClick(DialogInterface dialog, int which) {
-                        launchHomeActivityAndFinish(null, FLAG_CLEAR_STACK);
+                        launchHomeActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP);
                     }
                 });
                 mRegistrationCompleteDialog = builder.create();
                 mRegistrationCompleteDialog.show();
             } else {
                 // All other cases
-                launchHomeActivityAndFinish(null, FLAG_CLEAR_STACK);
+                launchHomeActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP);
             }
         } else if (CloudConstants.isContentBrandingApp()) {
             launchContentBrandingMainActivityAndFinish();
         } else if (CloudConstants.isYSAAA()) {
             launchYSAAAActivityAndFinish();
         } else {
-            launchHomeActivityAndFinish(null, FLAG_CLEAR_STACK);
+            launchHomeActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP);
         }
     }
 
     private void launchHomeActivityAndFinish(final Uri qrUri, final int flags) {
         T.UI();
 
-        final Intent homeActivityIntent = new Intent(this, HomeActivity.class);
+        final Intent homeActivityIntent;
+        if (AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.messaging) {
+            homeActivityIntent  = new Intent(this, MessagingActivity.class);
+            homeActivityIntent.putExtra("show_drawer", true);
+            homeActivityIntent.putExtra("show_drawer_icon", true);
+        } else if (AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.news) {
+            homeActivityIntent  = new Intent(this, NewsActivity.class);
+            homeActivityIntent.putExtra("show_drawer", true);
+            homeActivityIntent.putExtra("show_drawer_icon", true);
+        } else {
+            homeActivityIntent  = new Intent(this, HomeActivity.class);
+        }
+
         homeActivityIntent.setFlags(flags);
         homeActivityIntent.setData(qrUri);
 
@@ -684,14 +721,10 @@ public class MainActivity extends ServiceBoundActivity {
         startActivity(scanIntent);
     }
 
-    private void startSendCannedMessage() {
-        L.d("Starting SendCannedMessageActivity");
-        startActivity(new Intent(this, SendCannedMessageActivity.class));
-    }
-
     private void startSendMessageWizard() {
-        L.d("Starting SendMessageWizardActivity");
-        startActivity(new Intent(this, SendMessageWizardActivity.class));
+        if (AppConstants.FRIENDS_ENABLED) {
+            L.d("Starting SendMessageContactActivity");
+            startActivity(new Intent(this, SendMessageContactActivity.class));
+        }
     }
-
 }

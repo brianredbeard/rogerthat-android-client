@@ -2,116 +2,133 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
 
     <LinearLayout
         android:id="@+id/tab_view"
         android:layout_width="fill_parent"
-        android:layout_height="50dp"
-        android:background="@android:color/white"
+        android:layout_height="70dp"
+        android:background="@color/mc_background_color"
         android:baselineAligned="false" >
 
-        <RelativeLayout
+        <LinearLayout
             android:id="@+id/rogerthat_layout"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:layout_weight="1" >
+            android:layout_weight="1"
+            android:foreground="?attr/selectableItemBackground"
+            android:orientation="vertical"
+            android:paddingTop="15dp">
+
+            <ImageView
+                android:id="@+id/rogerthat_img"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/tab_icon_background"
+                android:src="@drawable/ic_launcher" />
 
             <View
                 android:id="@+id/rogerthat_indicator"
                 android:layout_width="fill_parent"
                 android:layout_height="5dp"
-                android:layout_alignParentBottom="true"
-                android:background="@color/mc_blue2" />
+                android:background="@color/mc_primary_color" />
+        </LinearLayout>
 
-            <ImageView
-                android:id="@+id/rogerthat_img"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:layout_above="@id/rogerthat_indicator"
-                android:layout_margin="5dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_launcher" />
-        </RelativeLayout>
 
-        <RelativeLayout
+        <LinearLayout
             android:id="@+id/contacts_layout"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:layout_weight="1" >
+            android:layout_weight="1"
+            android:foreground="?attr/selectableItemBackground"
+            android:orientation="vertical"
+            android:paddingTop="15dp">
+
+            <ImageView
+                android:id="@+id/contacts_img"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/tab_icon_background"
+                app:ico_color="@color/mc_white"
+                app:ico_icon="@string/faw_book"
+                app:ico_padding="10dp" />
 
             <View
                 android:id="@+id/contacts_indicator"
                 android:layout_width="fill_parent"
                 android:layout_height="5dp"
-                android:layout_alignParentBottom="true"
-                android:background="@color/mc_blue2"
+                android:background="@color/mc_primary_color"
                 android:visibility="invisible" />
+        </LinearLayout>
 
-            <ImageView
-                android:id="@+id/contacts_img"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:layout_above="@id/contacts_indicator"
-                android:layout_margin="5dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/contacts_icon" />
-        </RelativeLayout>
 
-        <RelativeLayout
+        <LinearLayout
+            android:layout_weight="1"
             android:id="@+id/mail_layout"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:layout_weight="1" >
+            android:foreground="?attr/selectableItemBackground"
+            android:orientation="vertical"
+            android:paddingTop="15dp">
+
+            <ImageView
+                android:id="@+id/mail_img"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/tab_icon_background"
+                app:ico_color="@color/mc_white"
+                app:ico_icon="@string/faw_envelope"
+                app:ico_padding="10dp" />
 
             <View
                 android:id="@+id/mail_indicator"
                 android:layout_width="fill_parent"
                 android:layout_height="5dp"
-                android:layout_alignParentBottom="true"
-                android:background="@color/mc_blue2"
+                android:background="@color/mc_primary_color"
                 android:visibility="invisible" />
+        </LinearLayout>
 
-            <ImageView
-                android:id="@+id/mail_img"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:layout_above="@id/mail_indicator"
-                android:layout_margin="5dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/mail_icon" />
-        </RelativeLayout>
-
-        <RelativeLayout
+        <LinearLayout
             android:id="@+id/facebook_layout"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:layout_weight="1" >
+            android:layout_weight="1"
+            android:foreground="?attr/selectableItemBackground"
+            android:orientation="vertical"
+            android:paddingTop="15dp">
+
+            <ImageView
+                android:id="@+id/facebook_img"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/tab_icon_background"
+                app:ico_color="@color/mc_white"
+                app:ico_icon="@string/faw_facebook"
+                app:ico_padding="10dp" />
 
             <View
                 android:id="@+id/facebook_indicator"
                 android:layout_width="fill_parent"
                 android:layout_height="5dp"
-                android:layout_alignParentBottom="true"
-                android:background="@color/mc_blue2"
+                android:background="@color/mc_primary_color"
                 android:visibility="invisible" />
-
-            <ImageView
-                android:id="@+id/facebook_img"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:layout_above="@id/facebook_indicator"
-                android:layout_margin="5dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/f" />
-        </RelativeLayout>
+        </LinearLayout>
     </LinearLayout>
 
     <com.mobicage.rogerthat.util.ui.SafeViewFlipper
         android:id="@+id/view_flipper"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:background="@color/mc_background"
+        android:background="@color/mc_background_color"
         android:inAnimation="@android:anim/fade_in"
         android:outAnimation="@android:anim/fade_out" >
 
@@ -130,7 +147,7 @@
                 android:paddingLeft="5dp"
                 android:paddingRight="5dp"
                 android:paddingTop="2dp"
-                android:textSize="16dp" />
+                android:textSize="16sp" />
 
             <ListView
                 android:id="@+id/recommend_to_friends_listview"
@@ -154,7 +171,7 @@
                 android:paddingLeft="5dp"
                 android:paddingRight="5dp"
                 android:paddingTop="2dp"
-                android:textSize="16dp" />
+                android:textSize="16sp" />
 
             <ListView
                 android:id="@+id/recommend_to_contacts_listview"
@@ -168,17 +185,17 @@
             android:id="@+id/recommend_to_email"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
+            android:layout_gravity="left"
+            android:layout_marginTop="10dp"
             android:orientation="vertical"
-            android:padding="10dp" >
+            android:padding="20dp">
 
             <TextView
                 android:id="@+id/recommend_email_description"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="50dp"
-                android:gravity="center"
-                android:text="@string/recommend_email_description"
+                android:layout_marginBottom="30dp"
+                android:text="@string/add_via_email_description"
                 android:textSize="16sp" />
 
             <AutoCompleteTextView
@@ -188,37 +205,45 @@
                 android:hint="@string/email"
                 android:imeOptions="actionDone"
                 android:inputType="textEmailAddress"
-                android:textColor="@android:color/primary_text_light"
                 android:textSize="16sp" />
 
-            <Button
+            <android.support.v7.widget.AppCompatButton
                 android:id="@+id/recommend_email_button"
-                android:layout_width="fill_parent"
+                android:theme="@style/PrimaryButtonTheme"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="50dp"
-                android:text="@string/recommend_service" />
+                android:layout_gravity="right"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:text="@string/recommend_service"
+                android:textSize="16sp" />
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/recommend_on_fb"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
+            android:layout_gravity="left"
+            android:layout_marginTop="10dp"
             android:orientation="vertical"
             android:padding="10dp" >
 
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="50dp"
+                android:layout_marginBottom="20dp"
                 android:gravity="center"
                 android:text="@string/recommend_on_fb_description"
                 android:textSize="16sp" />
 
-            <Button
+            <android.support.v7.widget.AppCompatButton
                 android:id="@+id/recommend_on_fb_button"
-                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
+                android:theme="@style/PrimaryButtonTheme"
+                android:layout_width="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
                 android:text="@string/recommend_on_fb" />
         </LinearLayout>
     </com.mobicage.rogerthat.util.ui.SafeViewFlipper>

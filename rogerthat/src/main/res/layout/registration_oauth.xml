@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+
+    <com.mobicage.rogerthat.util.ui.ScaleImageView
+        android:id="@+id/full_width_rogerthat_logo4"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:adjustViewBounds="true"
+        android:scaleType="fitStart"
+        android:src="@drawable/registration_logo"
+        android:visibility="gone"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="10dp">
+
+        <ImageView
+            android:id="@+id/rogerthat_logo4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginBottom="30dp"
+            android:adjustViewBounds="true"
+            android:padding="50dp"
+            android:layout_marginTop="20dp"
+            android:src="@drawable/registration_logo"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/login_via_oauth"
+            android:layout_below="@id/rogerthat_logo4"
+            android:layout_gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/oauth_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center"
+                app:ico_color="@color/mc_primary_icon"
+                app:ico_icon="@string/faw_lock"
+                app:ico_size="75dp"/>
+
+            <TextView
+                android:id="@+id/oauth_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="center_horizontal"
+                android:text="_Authenticate using your 'dummy' account._"
+                android:textColor="@color/mc_homescreen_text"
+                android:textSize="18sp"/>
+        </LinearLayout>
+
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/login_via_oauth"
+            android:layout_width="match_parent"
+            android:layout_alignParentBottom="true"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:text="@string/authenticate"
+            android:theme="@style/PrimaryButtonTheme"
+            android:textSize="18sp"/>
+    </RelativeLayout>
+
+</LinearLayout>

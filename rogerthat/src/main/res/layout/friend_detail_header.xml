@@ -1,6 +1,9 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/friend_detail_header"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content" >
+    android:layout_height="wrap_content"
+    android:layout_margin="5dp">
 
     <ImageView
         android:id="@+id/friend_avatar"
@@ -9,9 +12,10 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
+        android:layout_marginRight="16dp"
         android:background="@drawable/avatar_background_black"
-        android:padding="1dp" >
+        android:padding="1dp"
+        tools:src="@drawable/unknown_avatar">
     </ImageView>
 
     <TextView
@@ -21,18 +25,23 @@
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@id/friend_avatar"
         android:ellipsize="end"
-        android:singleLine="true"
-        android:textSize="20dp"
-        android:textStyle="bold" >
+        android:maxLines="1"
+        fontPath="fonts/lato_bold.ttf"
+        android:textColor="@android:color/black"
+        android:textSize="20sp"
+        tools:text="Friend name goes here">
     </TextView>
 
     <TextView
         android:id="@+id/email"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="10dp"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/friend_name"
         android:layout_toRightOf="@id/friend_avatar"
-        android:textSize="16dp" >
+        android:textSize="16sp"
+        tools:text="test@example.com">
     </TextView>
 
 </RelativeLayout>

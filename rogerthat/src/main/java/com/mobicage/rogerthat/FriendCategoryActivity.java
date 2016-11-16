@@ -36,6 +36,11 @@ public class FriendCategoryActivity extends ServiceFriendsActivity {
     private String mCategoryName = null;
 
     @Override
+    protected boolean useAppBar() {
+        return false;
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         Intent intent = getIntent();
         mCategoryId = intent.getStringExtra(FRIEND_CATEGORY_ID);
@@ -46,7 +51,7 @@ public class FriendCategoryActivity extends ServiceFriendsActivity {
     @Override
     protected void onServiceBound() {
         super.onServiceBound();
-        setNavigationBarTitle(mCategoryName);
+        setTitle(mCategoryName);
     }
 
     @Override
@@ -66,29 +71,17 @@ public class FriendCategoryActivity extends ServiceFriendsActivity {
 
     @Override
     protected View getHeaderView() {
-        if (!AppConstants.SHOW_NAV_HEADER) {
-            final View view = getLayoutInflater().inflate(R.layout.title_bar, null);
-            TextView textView = (TextView) view.findViewById(R.id.title);
-            textView.setText(mCategoryName);
-            return view;
-        } else {
-            return null;
-        }
+        return null;
     }
 
     @Override
-    protected void onHeaderTapped() {
+    protected void startSearching() {
         // Do nothing
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Don't show a menu
-        return false;
-    }
-
-    @Override
-    protected boolean showFABMenu() {
         return false;
     }
 }

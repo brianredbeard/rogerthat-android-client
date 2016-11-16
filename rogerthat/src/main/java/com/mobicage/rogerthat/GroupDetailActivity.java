@@ -18,13 +18,6 @@
 
 package com.mobicage.rogerthat;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -40,8 +33,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -64,14 +57,19 @@ import com.mobicage.rogerthat.util.IOUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
-import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
 import com.mobicage.rogerthat.util.ui.SeparatedListAdapter;
 import com.mobicage.rogerthat.util.ui.UIUtils;
-import com.mobicage.rpc.config.AppConstants;
 import com.soundcloud.android.crop.Crop;
 import com.soundcloud.android.crop.CropUtil;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GroupDetailActivity extends ServiceBoundActivity {
 
@@ -337,11 +335,6 @@ public class GroupDetailActivity extends ServiceBoundActivity {
     }
 
     @Override
-    protected boolean showFABMenu() {
-        return true;
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         T.UI();
         super.onCreateOptionsMenu(menu);
@@ -433,18 +426,7 @@ public class GroupDetailActivity extends ServiceBoundActivity {
 
         initListView();
 
-        setNavigationBarVisible(AppConstants.SHOW_NAV_HEADER);
-        setNavigationBarTitle(mGroup.name);
-        findViewById(R.id.navigation_bar_home_button).setOnClickListener(new SafeViewOnClickListener() {
-            @Override
-            public void safeOnClick(View v) {
-                T.UI();
-                Intent i = new Intent(GroupDetailActivity.this, HomeActivity.class);
-                i.setFlags(MainActivity.FLAG_CLEAR_STACK);
-                startActivity(i);
-                finish();
-            }
-        });
+        setTitle(mGroup.name);
     }
 
     private void deleteGroup() {
@@ -546,12 +528,12 @@ public class GroupDetailActivity extends ServiceBoundActivity {
     private void setViewColors(View view, TextView name, boolean selected) {
         T.UI();
         Resources resources = getResources();
-        name.setTextColor(resources.getColor(android.R.color.primary_text_light));
+        name.setTextColor(ContextCompat.getColor(mService, android.R.color.primary_text_light));
         if (selected) {
-            view.setBackgroundColor(resources.getColor(R.color.mc_highlight_background));
+            view.setBackgroundColor(ContextCompat.getColor(mService, R.color.mc_highlight_background));
             name.setTypeface(Typeface.DEFAULT_BOLD);
         } else {
-            view.setBackgroundColor(resources.getColor(R.color.mc_background));
+            view.setBackgroundColor(ContextCompat.getColor(mService, R.color.mc_background_color));
             name.setTypeface(Typeface.DEFAULT);
         }
     }
@@ -573,7 +555,7 @@ public class GroupDetailActivity extends ServiceBoundActivity {
                     boolean selected = mGroup.members.contains(friend.email);
                     setViewColors(view, name, selected);
                 }
-            }, mFriendsPlugin, false, null);
+            }, mFriendsPlugin, false, null, false);
 
         mCursorGroups = mFriendsPlugin.getStore().getGroupMemberListCursor(mGroup.guid);
         startManagingCursor(mCursorGroups);

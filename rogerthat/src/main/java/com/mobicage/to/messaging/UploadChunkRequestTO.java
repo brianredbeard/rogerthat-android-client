@@ -58,7 +58,11 @@ public class UploadChunkRequestTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("number")) {
             Object val = json.get("number");
-            this.number = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.number = ((Integer) val).longValue();
+            } else {
+                this.number = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.UploadChunkRequestTO object is missing field 'number'");
         }
@@ -82,7 +86,11 @@ public class UploadChunkRequestTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("total_chunks")) {
             Object val = json.get("total_chunks");
-            this.total_chunks = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.total_chunks = ((Integer) val).longValue();
+            } else {
+                this.total_chunks = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.UploadChunkRequestTO object is missing field 'total_chunks'");
         }

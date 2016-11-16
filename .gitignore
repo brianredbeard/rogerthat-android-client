@@ -22,7 +22,20 @@ lib/src/asmack/lib/
 release-scripts/.pydevproject
 CustomCloudConstants.java
 .gradle
-/.idea/workspace.xml
+# User-specific stuff:
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/dictionaries
+.idea/vcs.xml
+.idea/misc.xml
+.idea/jsLibraryMappings.xml
 /.idea/runConfigurations.xml
-/.idea/libraries
+.idea/codeStyleSettings.xml
+.idea/inspectionProfiles
+
+# Gradle:
+.idea/gradle.xml
+.idea/libraries
+
 build
+.idea/gradle.xml

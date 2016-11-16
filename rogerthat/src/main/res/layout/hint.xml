@@ -1,28 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="fill_parent"
-	android:layout_height="fill_parent"
-	android:orientation="vertical">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:orientation="vertical"
+	android:paddingBottom="15dp"
+	android:paddingLeft="25dp"
+	android:paddingRight="25dp"
+	android:paddingTop="25dp">
+
+	<ImageView
+		android:id="@+id/icon"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center_horizontal"
+		android:layout_marginBottom="20dp"
+		android:visibility="gone" />
 
 	<TextView
 		android:id="@+id/message"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:textSize="20dp"
-		android:textColor="@android:color/primary_text_dark_nodisable"
-		android:singleLine="false"
-		android:paddingLeft="5dp"
-		android:paddingRight="5dp"
-		android:scrollbars="vertical" >
-	</TextView>
-	
-	<CheckBox
+		android:textSize="20sp" />
+
+	<android.support.v7.widget.AppCompatCheckBox
 		android:id="@+id/checkBox"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:textColor="@android:color/primary_text_dark_nodisable"
-		android:text="@string/activity_do_not_show_this_again">
-	</CheckBox>
-	
+		android:text="@string/activity_do_not_show_this_again" />
+
 </LinearLayout>

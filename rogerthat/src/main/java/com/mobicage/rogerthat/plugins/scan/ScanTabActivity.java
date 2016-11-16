@@ -74,6 +74,7 @@ public class ScanTabActivity extends ServiceBoundActivity {
         mFinishAfterScan = START_SCANNER_INTENT_ACTION.equals(intent.getAction());
 
         setContentView(R.layout.scan_tab_activity);
+        setActivityName("scan");
 
         final Button scanbutton = (Button) findViewById(R.id.scanbutton);
         scanbutton.setText(getString(R.string.scan_button, getString(R.string.app_name)));
@@ -84,17 +85,7 @@ public class ScanTabActivity extends ServiceBoundActivity {
             }
         });
 
-        setNavigationBarVisible(AppConstants.SHOW_NAV_HEADER);
-        setNavigationBarTitle(R.string.scan);
-        findViewById(R.id.navigation_bar_home_button).setOnClickListener(new SafeViewOnClickListener() {
-            @Override
-            public void safeOnClick(View v) {
-                Intent i = new Intent(ScanTabActivity.this, HomeActivity.class);
-                i.setFlags(MainActivity.FLAG_CLEAR_STACK);
-                startActivity(i);
-                finish();
-            }
-        });
+        setTitle(R.string.scan);
 
         final IntentFilter intentFilter = new IntentFilter(PERMISSION_CAMERA_UPDATED);
         registerReceiver(mBroadcastReceiver, intentFilter);
@@ -232,5 +223,4 @@ public class ScanTabActivity extends ServiceBoundActivity {
         super.onConfigurationChanged(newConfig);
         sShowScannerOnResume = false;
     }
-
 }

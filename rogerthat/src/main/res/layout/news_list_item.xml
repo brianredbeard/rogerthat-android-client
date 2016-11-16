@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:background="@color/mc_background_color"
+              android:orientation="vertical"
+              android:paddingBottom="8dp"
+              android:paddingTop="8dp">
+
+
+    <FrameLayout
+        android:id="@+id/partial_item"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/news_background"
+        android:visibility="gone"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="10dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <View
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_margin="5dp"
+                    android:background="@color/mc_gray_11"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:orientation="vertical">
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp"
+                        android:background="@color/mc_gray_11"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:orientation="horizontal">
+
+                        <View
+                            android:layout_width="200dp"
+                            android:layout_height="15dp"
+                            android:background="@color/mc_gray_11"/>
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="15dp"
+                            android:layout_weight="1"/>
+
+                        <View
+                            android:layout_width="50dp"
+                            android:layout_height="15dp"
+                            android:background="@color/mc_gray_11"/>
+
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="15dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="10dp"
+                android:background="@color/mc_gray_11"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="15dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="5dp"
+                android:background="@color/mc_gray_11"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <ProgressBar
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="42dp"
+                android:indeterminate="true"
+                android:indeterminateTint="@color/mc_gray_22"/>
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/full_item"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/news_background"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/members_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="vertical"
+                tools:visibility="visible">
+
+                <TextView
+                    android:id="@+id/members"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="43dp"
+                    android:layout_marginRight="43dp"
+                    android:paddingBottom="5dp"
+                    android:paddingTop="5dp"
+                    android:textSize="12sp"
+                    tools:text="Bart Pede and Ruben Mattan Rogered this message"/>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1px"
+                    android:background="@color/mc_divider_gray"/>
+
+            </LinearLayout>
+
+            <com.mobicage.rogerthat.widget.Resizable16by6ImageView
+                android:id="@+id/image"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1px"
+                android:layout_marginRight="1px"
+                android:layout_marginTop="1px"
+                android:adjustViewBounds="true"
+                android:src="@drawable/news_image_placeholder"
+                android:visibility="gone"
+                tools:visibility="gone"/>
+
+            <LinearLayout
+                android:id="@+id/qr_code_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <com.mobicage.rogerthat.util.ui.ScaleImageView
+                    android:id="@+id/qr_code"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="1dp"
+                    android:layout_weight="1"
+                    android:adjustViewBounds="true"
+                    android:src="@drawable/qr_gray_preview"/>
+
+                <TextView
+                    android:id="@+id/qr_code_caption"
+                    fontPath="fonts/lato_bold.ttf"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:textSize="20sp"
+                    tools:text="Use this coupon to get a free drink."/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/details"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="8dp">
+
+                    <ImageView
+                        android:id="@+id/service_avatar"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_marginBottom="5dp"
+                        android:layout_marginRight="5dp"
+                        android:layout_marginTop="5dp"
+                        android:src="@drawable/unknown_avatar"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="5dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/title"
+                            fontPath="fonts/lato_bold.ttf"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/mc_primary_color"
+                            android:textSize="16sp"
+                            tools:text="Scan uw mobiele klantenkaart en maak kans op een diner voor 2 personen!"/>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/service_name"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:textSize="12sp"
+                                android:textStyle="italic"
+                                tools:text="Ma-Tu-Vu"/>
+
+                            <TextView
+                                android:id="@+id/date"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="5dp"
+                                android:textSize="12sp"
+                                android:textStyle="italic"
+                                tools:text="12/01/2016"/>
+
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:maxLines="5"
+                    android:padding="8dp"
+                    android:textSize="14sp"
+                    tools:text="Kom langs en scan uw mobile klantenkaart bij het afrekenen om zo kans te maken op een gratis 3-gangen etentje voor 2 personen."/>
+
+                <TextView
+                    android:id="@+id/readmore"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:text="@string/read_more"
+                    android:textSize="12sp"
+                    android:textStyle="italic"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:minHeight="20dp"
+                android:orientation="horizontal"
+                android:paddingBottom="8dp"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/reach"
+                    android:textSize="12sp"/>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="2dp"
+                    android:minWidth="28dp">
+
+                    <TextView
+                        android:id="@+id/reach"
+                        fontPath="fonts/lato_bold.ttf"
+                        android:layout_width="wrap_content"
+                        android:layout_height="14dp"
+                        android:textSize="12sp"
+                        tools:ignore="MissingPrefix"
+                        tools:text="5499"
+                        tools:visibility="visible"/>
+
+                    <ProgressBar
+                        android:id="@+id/reach_spinner"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:indeterminate="true"
+                        android:paddingTop="1dp"
+                        android:visibility="gone"/>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/broadcast_type"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:textSize="12sp"
+                    tools:text="[nieuws]"/>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:background="@color/mc_divider_gray"/>
+
+            <LinearLayout
+                android:id="@+id/actions"
+                android:layout_width="match_parent"
+                android:layout_height="28dp">
+
+                <android.support.v7.widget.AppCompatButton
+                    style="?attr/buttonBarButtonStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@color/mc_default_text"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:lines="1"
+                    android:minWidth="0dp"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:textColor="@color/mc_white"
+                    android:textSize="14sp"
+                    tools:text="Rogerthat"/>
+
+                <android.support.v7.widget.AppCompatButton
+                    style="?attr/buttonBarButtonStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@color/mc_divider_gray"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:lines="1"
+                    android:minWidth="0dp"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:textColor="@color/mc_white"
+                    android:textSize="14sp"
+                    tools:text="Volgen"/>
+
+                <android.support.v7.widget.AppCompatButton
+                    style="?attr/buttonBarButtonStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@color/mc_primary_color"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:lines="1"
+                    android:minWidth="0dp"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:textColor="@color/mc_white"
+                    android:textSize="14sp"
+                    tools:text="Reserveren"/>
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/pin_button"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="top|left"
+            android:background="@drawable/news_pin_background"
+            android:padding="5dp"
+            app:ico_color="@color/mc_primary_color"
+            app:ico_icon="@string/faw_thumb_tack"
+            app:ico_size="16dp"/>
+
+        <ImageButton
+            android:id="@+id/dropdown_button"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="top|right"
+            android:background="@drawable/news_dropdown_background"
+            android:padding="5dp"
+            app:ico_color="@color/mc_primary_color"
+            app:ico_icon="@string/faw_angle_down"
+            app:ico_size="16dp"/>
+
+    </FrameLayout>
+</LinearLayout>

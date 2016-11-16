@@ -24,12 +24,12 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 
-import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.soundcloud.android.crop.CropUtil;
 
 // Copied from http://stackoverflow.com/questions/2459916/how-to-make-an-imageview-to-have-rounded-corners
@@ -37,18 +37,43 @@ import com.soundcloud.android.crop.CropUtil;
 
 public class ImageHelper {
 
+    public static Bitmap getRoundTopCornerBitmap(final Bitmap bitmap, int radius) {
+        if (bitmap == null)
+            return null; // saw this once when phone complains about "not enough storage"
+
+        int w = bitmap.getWidth();
+        int h = bitmap.getHeight();
+        Bitmap output = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+
+        final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        final RectF rectF = new RectF(0, 0, w, h);
+
+        canvas.drawRoundRect(rectF, radius, radius, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, null, rectF, paint);
+
+        // draw the top corners
+        final Rect clipRect = new Rect(0, radius, w, h);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
+        canvas.drawRect(clipRect, paint);
+
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, null, rectF, paint);
+
+        bitmap.recycle();
+
+        return output;
+    }
+
     public static Bitmap getRoundedCornerAvatar(final Bitmap bitmap) {
-        int roundingPixels = bitmap.getWidth() / 10;
+        if (bitmap == null)
+            return null;
+        int roundingPixels = bitmap.getWidth() / 1;
         return getRoundedCornerBitmap(bitmap, roundingPixels);
     }
 
     public static Bitmap getRoundedCornerBitmap(final Bitmap bitmap, final int roundingPixels) {
-
-        if (SystemUtils.getAndroidVersion() <= 3) {
-            // burden on performance
-            return bitmap;
-        }
-
         if (bitmap == null)
             return null; // saw this once when phone complains about "not enough storage"
 

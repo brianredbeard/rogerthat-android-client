@@ -17,20 +17,6 @@
  */
 package com.mobicage.rogerthat.plugins.messaging;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.TreeSet;
-
-import org.json.JSONObject;
-import org.json.simple.JSONValue;
-
-import thirdparty.nishantnair.FlowLayout;
-
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -39,21 +25,23 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
+import android.support.v7.widget.AppCompatButton;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.WindowManager;
 import android.webkit.WebSettings;
@@ -62,7 +50,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
@@ -73,14 +60,15 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.IdentityStore;
 import com.mobicage.rogerthat.MainActivity;
-import com.mobicage.rogerthat.ServiceBoundMapActivity;
+import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.friends.MenuItemPresser;
-import com.mobicage.rogerthat.plugins.friends.MenuItemPressingActivity;
 import com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity;
 import com.mobicage.rogerthat.plugins.friends.ServiceMenuItemDetails;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr.BrandingResult;
@@ -96,6 +84,7 @@ import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.time.TimeUtils;
+import com.mobicage.rogerthat.util.ui.ServiceHeader;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.IJSONable;
 import com.mobicage.rpc.config.AppConstants;
@@ -103,7 +92,21 @@ import com.mobicage.to.messaging.AttachmentTO;
 import com.mobicage.to.messaging.ButtonTO;
 import com.mobicage.to.messaging.MemberStatusTO;
 
-public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implements MenuItemPressingActivity {
+import org.json.JSONObject;
+import org.json.simple.JSONValue;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.TreeSet;
+
+import thirdparty.nishantnair.FlowLayout;
+
+public class ServiceMessageDetailActivity extends ServiceBoundActivity {
 
     private final static String HINT_BROADCAST = "com.mobicage.rogerthat.plugins.messaging.ServiceMessageDetailActivity.HINT_BROADCAST";
 
@@ -111,6 +114,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
 
     public final static String STARTED_FROM_SERVICE_MENU = "STARTED_FROM_SERVICE_MENU";
     public static final String JUMP_TO_SERVICE_HOME_SCREEN = "JUMP_TO_SERVICE_HOME_SCREEN";
+    public static final String TITLE = "TITLE";
 
     private final static int[] DETAIL_SECTIONS = new int[] { R.id.previous_messages_in_thread_title,
         R.id.previous_messages_in_thread, R.id.message_section_title, R.id.member_details_title, R.id.members,
@@ -134,7 +138,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
     private FriendsPlugin mFriendsPlugin;
     private MessagingPlugin mMessagingPlugin;
     private MessageStore mStore;
-    private MenuItemPresser mMenuItemPresser;
+    private MenuItemPresser<ServiceMessageDetailActivity> mMenuItemPresser;
     private Message mCurrentMessage;
     private int mDisplayWidth;
     private BroadcastReceiver mBroadcastReceiver;
@@ -143,11 +147,9 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
     private Timer mExpectNextTimer = null;
     private boolean mSomebodyAnswered = false;
     private boolean mTransfering = false;
-    private Typeface mFontAwesomeTypeFace;
 
-    private RelativeLayout activity;
     private ImageView mStatusImage;
-    private String mContext;
+    private LinearLayout mHeaderContainer;
 
     public void setTransfering(boolean b) {
         mTransfering = b;
@@ -200,7 +202,8 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
         super.onCreate(savedInstanceState);
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        mFontAwesomeTypeFace = Typeface.createFromAsset(getAssets(), "FontAwesome.ttf");
+        setContentView(R.layout.message_detail);
+        mHeaderContainer = (LinearLayout) findViewById(R.id.header_container);
     }
 
     @Override
@@ -230,23 +233,26 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
         mStore = mMessagingPlugin.getStore();
         mDisplayWidth = UIUtils.getDisplayWidth(this);
 
-        final View activityView = LayoutInflater.from(this).inflate(R.layout.message_detail, null);
-
-        ((ImageButton) activityView.findViewById(R.id.expand)).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.expand).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 expandDetails();
             }
         });
 
-        mStatusImage = (ImageView) activityView.findViewById(R.id.status_image);
-
-        setContentView(activityView);
-        activity = (RelativeLayout) activityView;
+        mStatusImage = (ImageView) findViewById(R.id.status_image);
 
         final Intent intent = getIntent();
         String messageKey = intent.getStringExtra("message");
+        String title = intent.getStringExtra(TITLE);
         mCurrentMessage = mStore.getFullMessageByKey(messageKey);
+        invalidateOptionsMenu();
+
+        if (title == null) {
+            setTitle(mFriendsPlugin.getName(mCurrentMessage.sender));
+        } else {
+            setTitle(title);
+        }
 
         if (intent.hasExtra("submitToJSMFR")) {
             messageSubmitToJsMfr(intent, intent.getAction());
@@ -286,6 +292,10 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
     protected void onDestroy() {
         if (mExpectNextTimer != null)
             mExpectNextTimer.cancel();
+
+        if (mMessagingPlugin != null) {
+            mMessagingPlugin.cleanThreadDirtyFlags(mCurrentMessage.getThreadKey());
+        }
         super.onDestroy();
     }
 
@@ -336,7 +346,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
         WebView web = (WebView) findViewById(R.id.webview);
         FrameLayout flay = (FrameLayout) findViewById(R.id.message_details);
         Resources resources = getResources();
-        flay.setBackgroundColor(resources.getColor(R.color.mc_background));
+        flay.setBackgroundColor(resources.getColor(R.color.mc_background_color));
         boolean showBranded = false;
 
         int darkSchemeTextColor = resources.getColor(android.R.color.primary_text_dark);
@@ -356,11 +366,17 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
             try {
                 if (brandingAvailable) {
                     br = mMessagingPlugin.getBrandingMgr().prepareBranding(mCurrentMessage);
-                    WebSettings settings = web.getSettings();
-                    settings.setJavaScriptEnabled(false);
-                    settings.setBlockNetworkImage(false);
-                    web.loadUrl("file://" + br.file.getAbsolutePath());
-                    web.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+                    if (br.displayType == BrandingMgr.DisplayType.NATIVE) {
+                        web.setVisibility(View.GONE);
+                        ServiceHeader.setupNative(br, mHeaderContainer);
+                    } else {
+                        web.setVisibility(View.VISIBLE);
+                        WebSettings settings = web.getSettings();
+                        settings.setJavaScriptEnabled(false);
+                        settings.setBlockNetworkImage(false);
+                        web.loadUrl("file://" + br.file.getAbsolutePath());
+                        web.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+                    }
                     if (br.color != null) {
                         flay.setBackgroundColor(br.color);
                     }
@@ -383,10 +399,8 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
         }
 
         if (showBranded) {
-            web.setVisibility(View.VISIBLE);
             messageView.setVisibility(View.GONE);
         } else {
-            web.setVisibility(View.GONE);
             messageView.setVisibility(View.VISIBLE);
             messageView.setText(mCurrentMessage.message);
         }
@@ -623,119 +637,24 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
         tableLayout.removeAllViews();
 
         for (final ButtonTO button : mCurrentMessage.buttons) {
-            addButton(senderName, myEmail, mSomebodyAnswered, canEdit, tableLayout, button);
+            addButton(myEmail, mSomebodyAnswered, canEdit, tableLayout, button);
         }
         if (mCurrentMessage.form == null
             && (mCurrentMessage.flags & MessagingPlugin.FLAG_ALLOW_DISMISS) == MessagingPlugin.FLAG_ALLOW_DISMISS) {
             ButtonTO button = new ButtonTO();
             button.caption = "Roger that!";
-            addButton(senderName, myEmail, mSomebodyAnswered, canEdit, tableLayout, button);
+            addButton(myEmail, mSomebodyAnswered, canEdit, tableLayout, button);
         }
 
         if (mCurrentMessage.broadcast_type != null) {
-            L.d("Show broadcast spam control");
-            final RelativeLayout broadcastSpamControl = (RelativeLayout) findViewById(R.id.broadcast_spam_control);
-            View broadcastSpamControlBorder = findViewById(R.id.broadcast_spam_control_border);
-            final View broadcastSpamControlDivider = findViewById(R.id.broadcast_spam_control_divider);
-
-            final LinearLayout broadcastSpamControlTextContainer = (LinearLayout) findViewById(R.id.broadcast_spam_control_text_container);
-            TextView broadcastSpamControlText = (TextView) findViewById(R.id.broadcast_spam_control_text);
-
-            final LinearLayout broadcastSpamControlSettingsContainer = (LinearLayout) findViewById(R.id.broadcast_spam_control_settings_container);
-            TextView broadcastSpamControlSettingsText = (TextView) findViewById(R.id.broadcast_spam_control_settings_text);
-            TextView broadcastSpamControlIcon = (TextView) findViewById(R.id.broadcast_spam_control_icon);
-            broadcastSpamControlIcon.setTypeface(mFontAwesomeTypeFace);
-            broadcastSpamControlIcon.setText(R.string.fa_bell);
-
             final ServiceMenuItemDetails smi = mFriendsPlugin.getStore().getBroadcastServiceMenuItem(mCurrentMessage
                     .sender);
             if (smi == null) {
                 L.bug("BroadcastData was null for: " + mCurrentMessage.sender);
-                collapseDetails(DETAIL_SECTIONS);
                 return;
             }
-            broadcastSpamControl.setVisibility(View.VISIBLE);
 
-            broadcastSpamControlSettingsContainer.setOnClickListener(new SafeViewOnClickListener() {
-
-                @Override
-                public void safeOnClick(View v) {
-                    L.d("goto broadcast settings");
-                    if (mMenuItemPresser == null) {
-                        //noinspection unchecked,unchecked
-                        mMenuItemPresser = new MenuItemPresser(ServiceMessageDetailActivity.this, mCurrentMessage
-                                .sender);
-                    }
-                    mMenuItemPresser.itemPressed(smi, smi.menuGeneration, new MenuItemPresser.ResultHandler() {
-                        @Override
-                        public void onSuccess() {
-                            overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_up);
-                            finish();
-                        }
-                    });
-
-                }
-
-            });
-
-            UIUtils.showHint(this, mService, HINT_BROADCAST, R.string.hint_broadcast, mCurrentMessage.broadcast_type,
-                mFriendsPlugin.getName(mCurrentMessage.sender));
-
-            broadcastSpamControlText
-                .setText(getString(R.string.broadcast_subscribed_to, mCurrentMessage.broadcast_type));
-            broadcastSpamControlSettingsText.setText(smi.label);
-            int ligthAlpha = 180;
-            int darkAlpha = 70;
-            int alpha = ligthAlpha;
-            if (br != null && br.scheme == ColorScheme.DARK) {
-                broadcastSpamControlIcon.setTextColor(getResources().getColor(android.R.color.black));
-                broadcastSpamControlBorder.setBackgroundColor(darkSchemeTextColor);
-                broadcastSpamControlDivider.setBackgroundColor(darkSchemeTextColor);
-                activity.setBackgroundColor(darkSchemeTextColor);
-                broadcastSpamControlText.setTextColor(lightSchemeTextColor);
-                broadcastSpamControlSettingsText.setTextColor(lightSchemeTextColor);
-                int alpacolor = Color.argb(darkAlpha, Color.red(lightSchemeTextColor),
-                    Color.green(lightSchemeTextColor), Color.blue(lightSchemeTextColor));
-                broadcastSpamControl.setBackgroundColor(alpacolor);
-
-                alpha = darkAlpha;
-            } else {
-                broadcastSpamControlIcon.setTextColor(getResources().getColor(android.R.color.white));
-                broadcastSpamControlBorder.setBackgroundColor(lightSchemeTextColor);
-                broadcastSpamControlDivider.setBackgroundColor(lightSchemeTextColor);
-                activity.setBackgroundColor(lightSchemeTextColor);
-                broadcastSpamControlText.setTextColor(darkSchemeTextColor);
-                broadcastSpamControlSettingsText.setTextColor(darkSchemeTextColor);
-                int alpacolor = Color.argb(darkAlpha, Color.red(darkSchemeTextColor), Color.green(darkSchemeTextColor),
-                    Color.blue(darkSchemeTextColor));
-                broadcastSpamControl.setBackgroundColor(alpacolor);
-            }
-
-            if (br != null && br.color != null) {
-                int alphaColor = Color.argb(alpha, Color.red(br.color), Color.green(br.color), Color.blue(br.color));
-                broadcastSpamControl.setBackgroundColor(alphaColor);
-            }
-
-            mService.postOnUIHandler(new SafeRunnable() {
-
-                @Override
-                protected void safeRun() throws Exception {
-                    int maxHeight = broadcastSpamControl.getHeight();
-                    broadcastSpamControlDivider.getLayoutParams().height = maxHeight;
-                    broadcastSpamControlDivider.requestLayout();
-
-                    broadcastSpamControlSettingsContainer.getLayoutParams().height = maxHeight;
-                    broadcastSpamControlSettingsContainer.requestLayout();
-
-                    broadcastSpamControlTextContainer.getLayoutParams().height = maxHeight;
-                    broadcastSpamControlTextContainer.requestLayout();
-
-                    int broadcastSpamControlWidth = broadcastSpamControl.getWidth();
-                    android.view.ViewGroup.LayoutParams lp = broadcastSpamControlSettingsContainer.getLayoutParams();
-                    lp.width = broadcastSpamControlWidth / 4;
-                    broadcastSpamControlSettingsContainer.setLayoutParams(lp);
-                }
-            });
+            UIUtils.showHintWithImage(this, mService, HINT_BROADCAST, FontAwesome.Icon.faw_bell, R.string.hint_broadcast_icon, mFriendsPlugin.getName(mCurrentMessage.sender));
         }
 
         if (!isUpdate)
@@ -749,19 +668,29 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
 
         final Widget widget = (Widget) getLayoutInflater().inflate(Widget.RESOURCES.get(type), null, false);
         if (br != null) {
-            widget.setColorScheme(br.scheme);
+            widget.setColorScheme(this, br.scheme);
         }
         widget.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
         widget.setEnabled(widgetLayout.isEnabled());
         widget.loadMessage(mCurrentMessage, this, widgetLayout);
 
         if (!widgetLayout.isEnabled()) {
-            for (int i = 0; i < widget.getChildCount(); i++) {
-                View v = widget.getChildAt(i);
-                v.setEnabled(false);
-            }
+            disableView(widget);
         }
         widgetLayout.addView(widget);
+    }
+
+    private void disableView(View v) {
+        if (v instanceof ViewGroup) {
+            ViewGroup vg = (ViewGroup) v;
+            for (int i = 0; i < vg.getChildCount(); i++) {
+                View child = vg.getChildAt(i);
+                disableView(child);
+            }
+        } else {
+            v.setEnabled(false);
+            v.setFocusable(false);
+        }
     }
 
     private Comparator<MemberStatusTO> getMemberstatusComparator() {
@@ -870,7 +799,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
             askConfirmation(button, buttonUrl, container);
         } else if (Message.MC_SMI_PREFIX.equals(buttonAction)) {
             if (mMenuItemPresser == null) {
-                mMenuItemPresser = new MenuItemPresser(this, mCurrentMessage.sender);
+                mMenuItemPresser = new MenuItemPresser<>(this, mCurrentMessage.sender);
             }
 
             mMenuItemPresser.itemPressed(buttonUrl, new MenuItemPresser.ResultHandler() {
@@ -906,7 +835,9 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
         if (!mTransfering)
             jumpToServiceHomeScreen(button, null);
 
-        if (buttonAction != null && !Message.MC_CONFIRM_PREFIX.equals(buttonAction)) {
+        // action "poke" is not allowed in message buttons and action "confirm" is already handled.
+        if (buttonAction != null && !Message.MC_CONFIRM_PREFIX.equals(buttonAction) && !Message.MC_POKE_PREFIX.equals
+                (buttonAction)) {
             final Intent intent = new Intent(buttonAction, Uri.parse(buttonUrl));
             startActivity(intent);
         }
@@ -1020,8 +951,8 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
         return true;
     }
 
-    private void addButton(final String senderName, String myEmail, boolean somebodyAnswered, boolean canEdit,
-        TableLayout tableLayout, final ButtonTO button) {
+    private void addButton(String myEmail, boolean somebodyAnswered, boolean canEdit,
+                           TableLayout tableLayout, final ButtonTO button) {
         TableRow row = new TableRow(this);
         tableLayout.addView(row);
         row.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT,
@@ -1029,10 +960,10 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
 
         // XXX: inconsistent margin between 2 rows
 
-        final Button buttonView = new Button(this);
+        final AppCompatButton buttonView = new AppCompatButton(this);
         buttonView.setMinWidth(UIUtils.convertDipToPixels(this, 100));
         buttonView.setText(button.caption);
-        buttonView.setTextColor(getResources().getColor(android.R.color.primary_text_dark));
+        buttonView.setTextColor(ContextCompat.getColor(this, android.R.color.primary_text_dark));
         if (somebodyAnswered)
             buttonView.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
         else {
@@ -1074,13 +1005,14 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
 
         int color;
         if (button.id == null || mCurrentMessage.form != null && Message.POSITIVE.equals(button.id)) {
-            color = buttonIsEnabled ? Message.GREEN_BUTTON_COLOR : Message.GREENGRAY_BUTTON_COLOR;
+            color = buttonIsEnabled ? R.color.mc_positive_button : R.color.mc_positive_button_disabled;
         } else if (mCurrentMessage.form != null && Message.NEGATIVE.equals(button.id)) {
-            color = buttonIsEnabled ? Message.RED_BUTTON_COLOR : Message.REDGRAY_BUTTON_COLOR;
+            color = buttonIsEnabled ? R.color.mc_negative_button : R.color.mc_negative_button_disabled;
         } else {
-            color = buttonIsEnabled ? Message.BLUE_BUTTON_COLOR : Message.BLUEGRAY_BUTTON_COLOR;
+            color = buttonIsEnabled ? R.color.mc_default_button : R.color.mc_default_button_disabled;
         }
-        buttonView.getBackground().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
+        ColorStateList colorListState = ContextCompat.getColorStateList(mService, color);
+        ViewCompat.setBackgroundTintList(buttonView, colorListState);
 
         buttonView.setOnClickListener(new SafeViewOnClickListener() {
 
@@ -1101,8 +1033,21 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
     }
 
     @Override
-    protected boolean showFABMenu() {
-        return false;
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        for (int i = 0; i < menu.size(); i++) {
+            MenuItem item = menu.getItem(i);
+            switch (item.getItemId()) {
+                case R.id.show_notification_settings:
+                    item.setVisible(mCurrentMessage.broadcast_type != null);
+                    break;
+                case R.id.show_details:
+                default:
+                    item.setVisible(false);
+                    break;
+            }
+        }
+
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -1111,6 +1056,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.message_menu, menu);
+        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_bell).color(Color.DKGRAY).sizeDp(18));
         return true;
     }
 
@@ -1118,9 +1064,30 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
     public boolean onOptionsItemSelected(MenuItem item) {
         T.UI();
         switch (item.getItemId()) {
-        case R.id.show_details:
-            expandDetails();
-            return true;
+            case R.id.show_notification_settings:
+                final ServiceMenuItemDetails smi = mFriendsPlugin.getStore().getBroadcastServiceMenuItem(mCurrentMessage.sender);
+                if (smi == null) {
+                    L.bug("BroadcastData was null for: " + mCurrentMessage.sender);
+                } else {
+                    L.d("goto broadcast settings");
+                    if (mMenuItemPresser == null) {
+                        //noinspection unchecked,unchecked
+                        mMenuItemPresser = new MenuItemPresser(ServiceMessageDetailActivity.this, mCurrentMessage.sender);
+                    }
+
+                    mMenuItemPresser.itemPressed(smi, smi.menuGeneration, new MenuItemPresser.ResultHandler() {
+                        @Override
+                        public void onSuccess() {
+                            overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_up);
+                            finish();
+                        }
+                    });
+                }
+
+                return true;
+            case R.id.show_details:
+                expandDetails();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -1129,7 +1096,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
         if (FriendsPlugin.SYSTEM_FRIEND.equals(email)) {
             imageView.setImageResource(R.drawable.ic_dashboard);
         } else {
-            imageView.setImageBitmap(mFriendsPlugin.getAvatarBitmap(email, true));
+            imageView.setImageBitmap(mFriendsPlugin.getAvatarBitmap(email, true, -1));
             final SafeViewOnClickListener listener = getFriendDetailOnClickListener(email);
             if (listener != null)
                 imageView.setOnClickListener(listener);
@@ -1207,8 +1174,10 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
             return;
         }
 
-        if (isUpdate)
+        if (isUpdate) {
             mCurrentMessage = mStore.getFullMessageByKey(mCurrentMessage.key);
+            invalidateOptionsMenu();
+        }
 
         boolean isLocked = (mCurrentMessage.flags & MessagingPlugin.FLAG_LOCKED) == MessagingPlugin.FLAG_LOCKED;
         boolean isRinging = mCurrentMessage.alert_flags >= AlertManager.ALERT_FLAG_RING_5
@@ -1271,6 +1240,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
                         i.putExtra("message", intent.getStringExtra("message"));
                         i.putExtra(JUMP_TO_SERVICE_HOME_SCREEN, getIntent().getBooleanExtra(JUMP_TO_SERVICE_HOME_SCREEN, true));
                         i.putExtra(MessagingPlugin.MEMBER_FILTER, getIntent().getStringExtra(MessagingPlugin.MEMBER_FILTER));
+                        i.putExtra(TITLE, getIntent().getStringExtra(TITLE));
                         startActivity(i);
                         overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_up);
                         dismissTransferingDialog();
@@ -1296,6 +1266,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
                     i.putExtra("message", intent.getStringExtra("message"));
                     i.putExtra(JUMP_TO_SERVICE_HOME_SCREEN, getIntent().getBooleanExtra(JUMP_TO_SERVICE_HOME_SCREEN, true));
                     i.putExtra(MessagingPlugin.MEMBER_FILTER, getIntent().getStringExtra(MessagingPlugin.MEMBER_FILTER));
+                    i.putExtra(TITLE, getIntent().getStringExtra(TITLE));
                     startActivity(i);
 
                     overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_up);
@@ -1471,10 +1442,5 @@ public class ServiceMessageDetailActivity extends ServiceBoundMapActivity implem
                 }
             }, 1000 * expectNext);
         }
-    }
-
-    @Override
-    protected boolean isRouteDisplayed() {
-        return false;
     }
 }

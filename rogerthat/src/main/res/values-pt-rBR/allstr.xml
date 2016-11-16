@@ -240,6 +240,7 @@
     <string name="name_required">O nome é obrigatório</string>
     <string name="new_message_long">Criar nova mensagem</string>
     <string name="new_message_short">Nova mensagem</string>
+    <string name="news">Novidades</string>
     <string name="nextButton">Próximo</string>
     <string name="next_in_thread">Próximas mensagens desta conversa</string>
     <string name="no">Não</string>
@@ -311,7 +312,7 @@
     <string name="registration_screen_install_zxing">%1$s utiliza o leitor de código de barras ZXing para automatizar várias tarefas.\n\nDeseja instalar o leitor de código de barras ZXing agora?</string>
     <string name="registration_screen_instructions_check_network_not_available">Nenhuma rede disponível. Verifique suas configurações de rede e tente novamente quando a conectividade for restaurada.</string>
     <string name="registration_send_code">Enviar código de ativação</string>
-    <string name="registration_sending_email">Enviando por e-mail seu código de ativação \npara %1$s.</string>
+    <string name="registration_sending_email">Enviando por e-mail seu código de ativação para %1$s.</string>
     <string name="registration_sending_pin_error">Ocorreu um erro ao verificar seu código de ativação. Tente novamente.</string>
     <string name="registration_success">Registro concluído.\n\nSe você recebeu um convite %1$s de 2 passos, abra-o e vá para o passo 2.\n\nSe você recebeu um código QR, pressione Escanear.\n\nCaso contrário, pressione Continuar.</string>
     <string name="registration_success_title">Parabéns</string>
@@ -339,7 +340,7 @@
     <string name="save_canned_message_no_name">sem nome</string>
     <string name="save_profile">Salvar seu perfil</string>
     <string name="scan">Escanear</string>
-    <string name="scan_button">Escanear código \nQR %1$s</string>
+    <string name="scan_button">Escanear código QR %1$s</string>
     <string name="scan_my_addressbook">Escanear meu catálogo de endereços</string>
     <string name="scan_my_qr">Ou deixe alguém escanear o seu.</string>
     <string name="scan_passport">Escanear uma ID %1$s</string>

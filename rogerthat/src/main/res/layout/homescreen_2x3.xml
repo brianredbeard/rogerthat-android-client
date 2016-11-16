@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="@color/mc_homescreen_background" >
+    android:background="@color/mc_homescreen_background">
 
     <com.mobicage.rogerthat.util.ui.ScaleImageView
         android:id="@+id/homescreen_footer"
@@ -30,7 +30,7 @@
         android:layout_above="@+id/homescreen_footer"
         android:layout_below="@+id/full_width_homescreen_header"
         android:gravity="center_vertical"
-        android:orientation="vertical" >
+        android:orientation="vertical">
 
         <com.mobicage.rogerthat.widget.SpacerView
             android:id="@+id/homescreen_header_spacer_view"
@@ -42,7 +42,7 @@
             android:id="@+id/homescreen_header_container"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal" >
+            android:orientation="horizontal">
 
             <View
                 android:layout_width="0dp"
@@ -71,7 +71,7 @@
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal" >
+            android:orientation="horizontal">
 
             <View
                 android:layout_width="0dp"
@@ -82,7 +82,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="20"
-                android:adjustViewBounds="true" >
+                android:adjustViewBounds="true">
 
                 <ImageView
                     android:id="@+id/icon_0x0"
@@ -91,8 +91,7 @@
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentTop="true"
                     android:adjustViewBounds="true"
-                    android:src="@drawable/menu_0x0" >
-                </ImageView>
+                    android:src="@drawable/menu_0x0" />
 
                 <com.mobicage.rogerthat.widget.HomeScreenBadge
                     android:id="@+id/badge_0x0"
@@ -101,7 +100,7 @@
                     android:layout_alignParentRight="true"
                     android:layout_alignParentTop="true"
                     android:layout_marginTop="20dp"
-                    android:background="@drawable/badge"
+                    android:background="@drawable/badge_red"
                     android:gravity="center"
                     android:text="9+"
                     android:textColor="#FFFFFF"
@@ -134,7 +133,7 @@
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal" >
+            android:orientation="horizontal">
 
             <View
                 android:layout_width="0dp"
@@ -144,13 +143,14 @@
             <com.mobicage.rogerthat.widget.HomeScreenMenuLabel
                 android:id="@+id/label_0x0"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="56dp"
                 android:layout_weight="34"
                 android:adjustViewBounds="true"
                 android:gravity="center_horizontal"
                 android:textColor="@color/mc_homescreen_text"
                 app:nexus10TextSize="45"
-                tools:ignore="SpUsage" />
+                tools:ignore="SpUsage"
+                tools:text="Messages" />
 
             <View
                 android:layout_width="0dp"
@@ -160,13 +160,14 @@
             <com.mobicage.rogerthat.widget.HomeScreenMenuLabel
                 android:id="@+id/label_0x1"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="56dp"
                 android:layout_weight="34"
                 android:adjustViewBounds="true"
                 android:gravity="center_horizontal"
                 android:textColor="@color/mc_homescreen_text"
                 app:nexus10TextSize="45"
-                tools:ignore="SpUsage" />
+                tools:ignore="SpUsage"
+                tools:text="Some long label that takes three lines" />
 
             <View
                 android:layout_width="0dp"
@@ -182,7 +183,7 @@
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal" >
+            android:orientation="horizontal">
 
             <View
                 android:layout_width="0dp"
@@ -219,7 +220,7 @@
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal" >
+            android:orientation="horizontal">
 
             <View
                 android:layout_width="0dp"
@@ -229,13 +230,14 @@
             <com.mobicage.rogerthat.widget.HomeScreenMenuLabel
                 android:id="@+id/label_1x0"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="56dp"
                 android:layout_weight="34"
                 android:adjustViewBounds="true"
                 android:gravity="center_horizontal"
                 android:textColor="@color/mc_homescreen_text"
                 app:nexus10TextSize="45"
-                tools:ignore="SpUsage" />
+                tools:ignore="SpUsage"
+                tools:text="Agenda" />
 
             <View
                 android:layout_width="0dp"
@@ -245,13 +247,14 @@
             <com.mobicage.rogerthat.widget.HomeScreenMenuLabel
                 android:id="@+id/label_1x1"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="56dp"
                 android:layout_weight="34"
                 android:adjustViewBounds="true"
                 android:gravity="center_horizontal"
                 android:textColor="@color/mc_homescreen_text"
                 app:nexus10TextSize="45"
-                tools:ignore="SpUsage" />
+                tools:ignore="SpUsage"
+                tools:text="Merchants" />
 
             <View
                 android:layout_width="0dp"
@@ -267,7 +270,7 @@
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal" >
+            android:orientation="horizontal">
 
             <View
                 android:layout_width="0dp"
@@ -304,7 +307,7 @@
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal" >
+            android:orientation="horizontal">
 
             <View
                 android:layout_width="0dp"
@@ -314,13 +317,14 @@
             <com.mobicage.rogerthat.widget.HomeScreenMenuLabel
                 android:id="@+id/label_2x0"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="56dp"
                 android:layout_weight="34"
                 android:adjustViewBounds="true"
                 android:gravity="center_horizontal"
                 android:textColor="@color/mc_homescreen_text"
                 app:nexus10TextSize="45"
-                tools:ignore="SpUsage" />
+                tools:ignore="SpUsage"
+                tools:text="Scan" />
 
             <View
                 android:layout_width="0dp"
@@ -330,13 +334,14 @@
             <com.mobicage.rogerthat.widget.HomeScreenMenuLabel
                 android:id="@+id/label_2x1"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="56dp"
                 android:layout_weight="34"
                 android:adjustViewBounds="true"
                 android:gravity="center_horizontal"
                 android:textColor="@color/mc_homescreen_text"
                 app:nexus10TextSize="45"
-                tools:ignore="SpUsage" />
+                tools:ignore="SpUsage"
+                tools:text="Care with a long label" />
 
             <View
                 android:layout_width="0dp"

@@ -18,18 +18,6 @@
 
 package com.mobicage.rogerthat.plugins.friends;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher;
-
-import org.jivesoftware.smack.util.Base64;
-import org.json.simple.JSONValue;
-
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -122,6 +110,19 @@ import com.mobicage.to.system.SetSecureInfoRequestTO;
 import com.mobicage.to.system.SetSecureInfoResponseTO;
 import com.mobicage.to.system.SettingsTO;
 
+import org.jivesoftware.smack.util.Base64;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONValue;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+
 public class FriendsPlugin implements MobicagePlugin {
 
     private static final String CONFIGKEY = "com.mobicage.rogerthat.plugins.friends";
@@ -207,6 +208,8 @@ public class FriendsPlugin implements MobicagePlugin {
     private final GeoLocationProvider mGeoProvider;
     private final TrackmePlugin mTrackmePlugin;
 
+    private final Map<String, JSONArray> mDisabledBroadcastTypesCache = new HashMap<>();
+
     public FriendsPlugin(final DatabaseManager pDatabaseManager, final ConfigurationProvider pConfigProvider,
         final MainService mainService, final NetworkConnectivityManager connectivityManager,
         final BrandingMgr brandingMgr, final GeoLocationProvider pGeoProvider) {
@@ -283,6 +286,7 @@ public class FriendsPlugin implements MobicagePlugin {
             public UpdateUserDataResponseTO updateUserData(UpdateUserDataRequestTO request) throws Exception {
                 T.BIZZ();
                 mStore.updateServiceData(request.service, request.user_data, request.app_data, true);
+                mDisabledBroadcastTypesCache.remove(request.service);
                 return new UpdateUserDataResponseTO();
             }
         };
@@ -727,7 +731,7 @@ public class FriendsPlugin implements MobicagePlugin {
         return true;
     }
 
-    public boolean searchService(final String searchString, final int organizationType, final String cursor) {
+    public boolean searchService(final String searchString, final int organizationType, final String cursor, final String hashedTag) {
         FindServiceRequestTO request = new FindServiceRequestTO();
         request.search_string = searchString;
         request.geo_point = mMainService.isPermitted(Manifest.permission.ACCESS_FINE_LOCATION) ? mGeoProvider
@@ -735,6 +739,7 @@ public class FriendsPlugin implements MobicagePlugin {
         request.organization_type = organizationType;
         request.cursor = cursor;
         request.avatar_size = 50 * mMainService.getScreenScale();
+        request.hashed_tag = hashedTag;
 
         try {
             com.mobicage.api.services.Rpc.findService(new FindServiceResponseHandler(searchString), request);
@@ -865,15 +870,19 @@ public class FriendsPlugin implements MobicagePlugin {
     }
 
     public Bitmap getAvatarBitmap(String email) {
-        return getAvatarBitmap(email, false);
+        return getAvatarBitmap(email, false, -1);
     }
 
-    public Bitmap getAvatarBitmap(String email, boolean showAddFriendIfNotFriend) {
-        return getAvatarBitmap(email, showAddFriendIfNotFriend, null);
+    public Bitmap getAvatarBitmap(String email, int size) {
+        return getAvatarBitmap(email, false, size);
     }
 
-    public Bitmap getAvatarBitmap(String email, boolean showAddFriendIfNotFriend, SafeRunnable friendNotFoundRunnable) {
-        T.UI();
+    public Bitmap getAvatarBitmap(String email, boolean showAddFriendIfNotFriend, int size) {
+        return getAvatarBitmap(email, showAddFriendIfNotFriend, null, size);
+    }
+
+    public Bitmap getAvatarBitmap(String email, boolean showAddFriendIfNotFriend, SafeRunnable friendNotFoundRunnable, int size) {
+        T.dontCare();
         MyIdentity identity = mMainService.getIdentityStore().getIdentity();
         if (identity.getEmail().equals(email))
             return identity.getAvatarBitmap();
@@ -881,7 +890,7 @@ public class FriendsPlugin implements MobicagePlugin {
         if (SYSTEM_FRIEND.equals(email)) {
             return mSystemFriendAvatar;
         } else {
-            final Bitmap avatarBitmap = mStore.getAvatarBitmap(email);
+            final Bitmap avatarBitmap = mStore.getAvatarBitmap(email, size);
             if (avatarBitmap == null) {
                 if (friendNotFoundRunnable != null) {
                     friendNotFoundRunnable.run();
@@ -918,7 +927,6 @@ public class FriendsPlugin implements MobicagePlugin {
         }
     }
 
-    @SuppressWarnings("all")
     public String getName(String email) {
         T.dontCare();
         if (SYSTEM_FRIEND.equals(email)) {
@@ -958,19 +966,10 @@ public class FriendsPlugin implements MobicagePlugin {
     public Bitmap getMissingFriendAvatarBitmap() {
         return mMissingFriendAvatarBitmap;
     }
-
-    public Bitmap getMissingNonFriendAvatarBitmap() {
-        return mMissingNonFriendAvatarBitmap;
-    }
-
+    
     public void updateFriendAvatar(final String friendEmail, final byte[] avatarBytes) {
         T.BIZZ();
         mStore.updateFriendAvatar(friendEmail, avatarBytes);
-    }
-
-    public long getFriendCount() {
-        T.UI();
-        return mStore.getCount();
     }
 
     public String getEmailByEmailHash(final byte[] emailHash) {
@@ -1262,6 +1261,7 @@ public class FriendsPlugin implements MobicagePlugin {
             protected void safeRun() throws Exception {
                 T.BIZZ();
                 mStore.updateServiceData(serviceEmail, userDataJsonString, null, false);
+                mDisabledBroadcastTypesCache.remove(serviceEmail);
 
                 UpdateUserDataRequestTO request = new UpdateUserDataRequestTO();
                 request.user_data = userDataJsonString;
@@ -1408,5 +1408,46 @@ public class FriendsPlugin implements MobicagePlugin {
         info.put("service", serviceInfo);
         info.put("system", systemInfo);
         return info;
+    }
+
+    public void disableBroadcastType(final String serviceEmail, final String broadcastType) {
+        disableBroadcastTypeInCache(serviceEmail, broadcastType);
+        SafeRunnable handler = new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                T.BIZZ();
+                String userDataJsonString = mStore.disableBroadcastType(serviceEmail, broadcastType);
+                if (userDataJsonString != null) {
+                    UpdateUserDataRequestTO request = new UpdateUserDataRequestTO();
+                    request.user_data = userDataJsonString;
+                    request.service = serviceEmail;
+                    try {
+                        com.mobicage.api.services.Rpc.updateUserData(new ResponseHandler<UpdateUserDataResponseTO>(),
+                                request);
+                    } catch (Exception e) {
+                        L.bug("Failed to send " + request, e);
+                    }
+                }
+            }
+        };
+
+        if (T.getThreadType() == T.BIZZ) {
+            handler.run();
+        } else {
+            mMainService.postOnBIZZHandler(handler);
+        }
+    }
+
+    public boolean isBroadcastTypeDisabled(final String serviceEmail, final String broadcastType) {
+        if (!mDisabledBroadcastTypesCache.containsKey(serviceEmail)) {
+            mDisabledBroadcastTypesCache.put(serviceEmail, mStore.getDisabledBroadcastTypes(serviceEmail));
+        }
+        return mDisabledBroadcastTypesCache.get(serviceEmail).contains(broadcastType);
+    }
+
+    private void disableBroadcastTypeInCache(final String serviceEmail, final String broadcastType) {
+        if (!isBroadcastTypeDisabled(serviceEmail, broadcastType)) {
+            mDisabledBroadcastTypesCache.get(serviceEmail).add(broadcastType);
+        }
     }
 }

@@ -18,18 +18,6 @@
 
 package com.mobicage.rogerthat.plugins.friends;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.jivesoftware.smack.util.Base64;
-
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -56,6 +44,7 @@ import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
+import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.to.friends.FriendCategoryTO;
 import com.mobicage.to.friends.FriendTO;
 import com.mobicage.to.friends.GetAvatarRequestTO;
@@ -64,7 +53,24 @@ import com.mobicage.to.friends.GetUserInfoResponseTO;
 import com.mobicage.to.friends.ServiceMenuItemTO;
 import com.mobicage.to.friends.UpdateFriendResponseTO;
 import com.mobicage.to.service.GetMenuIconRequestTO;
-import com.mobicage.to.service.GetStaticFlowRequestTO;
+
+import org.jivesoftware.smack.util.Base64;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONValue;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static com.mobicage.rogerthat.util.db.DBUtils.bindString;
 
 public class FriendStore implements Closeable {
 
@@ -99,7 +105,6 @@ public class FriendStore implements Closeable {
     private final SimpleCache<String, String> mFriendNameCache;
 
     // Statements for UI thread
-    private final SQLiteStatement mGetFriendCountUI;
     private final SQLiteStatement mGetLocationSharingFriendCountUI;
     private final SQLiteStatement mGetIsFriendUI;
     private final SQLiteStatement mGetEmailByEmailHashUI;
@@ -166,6 +171,7 @@ public class FriendStore implements Closeable {
     private final SQLiteStatement mInsertGroupAvatarHashBIZZ;
 
     private final SQLiteStatement mCountServicesByOrganizationType;
+    private final SQLiteStatement mCountServices;
 
     private final MultiThreadedSQLStatement mGetFriendName;
     private final PhoneContacts mPhoneContacts;
@@ -179,7 +185,6 @@ public class FriendStore implements Closeable {
         mAvatarBitmapCacheUI = new SimpleCache<String, BitmapHolder>(50, 120);
         mFriendNameCache = new SimpleCache<String, String>(200, 120);
 
-        mGetFriendCountUI = mDb.compileStatement(mMainService.getString(R.string.sql_friend_count));
         mGetLocationSharingFriendCountUI = mDb.compileStatement(mMainService
             .getString(R.string.sql_friend_count_friends_sharing_location));
         mGetFriendName = new MultiThreadedSQLStatement(mDb, new int[] { T.UI, T.BIZZ },
@@ -273,6 +278,8 @@ public class FriendStore implements Closeable {
 
         mCountServicesByOrganizationType = mDb.compileStatement(mMainService
             .getString(R.string.sql_services_count_by_organization_type));
+        mCountServices = mDb.compileStatement(mMainService
+                .getString(R.string.sql_services_count));
 
         mPhoneContacts = new PhoneContacts(mMainService.getContentResolver());
 
@@ -288,7 +295,6 @@ public class FriendStore implements Closeable {
     private void closeSQLStatements() {
         T.UI();
 
-        mGetFriendCountUI.close();
         mGetLocationSharingFriendCountUI.close();
         mGetIsFriendUI.close();
         mGetEmailByEmailHashUI.close();
@@ -353,17 +359,13 @@ public class FriendStore implements Closeable {
         mInsertGroupAvatarHashBIZZ.close();
 
         mCountServicesByOrganizationType.close();
+        mCountServices.close();
     }
 
     @Override
     public void close() {
         T.UI();
         closeSQLStatements();
-    }
-
-    public long getCount() {
-        T.UI();
-        return mGetFriendCountUI.simpleQueryForLong();
     }
 
     public List<String> getEmails() {
@@ -472,9 +474,11 @@ public class FriendStore implements Closeable {
     }
 
     public Bitmap getAvatarBitmap(String email) {
-        T.UI();
+        return getAvatarBitmap(email, -1);
+    }
 
-        final BitmapHolder bitmapHolder = mAvatarBitmapCacheUI.get(email);
+    public Bitmap getAvatarBitmap(String email, int size) {
+        final BitmapHolder bitmapHolder = mAvatarBitmapCacheUI.get(email + size);
         if (bitmapHolder != null)
             return bitmapHolder.bitmap; // Possibly returns null (e.g. for FRIEND_WITHOUT_AVATAR)
 
@@ -484,10 +488,13 @@ public class FriendStore implements Closeable {
             return null;
         }
 
-        final Bitmap bitmap = ImageHelper.getRoundedCornerAvatar(BitmapFactory.decodeByteArray(bitmapBytes, 0,
-            bitmapBytes.length));
+        Bitmap avatarBitmap = BitmapFactory.decodeByteArray(bitmapBytes, 0, bitmapBytes.length);
+        if (size != -1) {
+            avatarBitmap = Bitmap.createScaledBitmap(avatarBitmap, size, size, false);
+        }
+        final Bitmap bitmap = ImageHelper.getRoundedCornerAvatar(avatarBitmap);
 
-        mAvatarBitmapCacheUI.put(email, new BitmapHolder(bitmap));
+        mAvatarBitmapCacheUI.put(email + size, new BitmapHolder(bitmap));
 
         return bitmap;
     }
@@ -781,8 +788,10 @@ public class FriendStore implements Closeable {
                     else
                         mUpdateFriendHTTP.bindString(32, friend.contentBrandingHash);
 
+                    bindString(mUpdateFriendHTTP, 33, getActions(friend));
+
                     // Where clause
-                    mUpdateFriendHTTP.bindString(33, friend.email);
+                    mUpdateFriendHTTP.bindString(34, friend.email);
                     mUpdateFriendHTTP.execute();
 
                     mFriendNameCache.put(friend.email, friendDisplayName);
@@ -940,12 +949,18 @@ public class FriendStore implements Closeable {
         int i = 0;
         smi.coords = new long[]{curs.getInt(i++), curs.getInt(i++), page == null ? curs.getInt(i++) : page};
         smi.label = curs.getString(i++);
-        smi.icon = curs.getBlob(i++);
+        int blobIndex = i++;
         smi.screenBranding = curs.getString(i++);
         smi.staticFlowHash = curs.getString(i++);
         smi.hashedTag = curs.getString(i++);
         smi.requiresWifi = curs.getLong(i++) == 1;
         smi.runInBackground = curs.getLong(i++) == 1;
+        smi.action = curs.getLong(i++);
+        smi.iconName = curs.getString(i++);
+        smi.iconColor = curs.getString(i++);
+        if (!UIUtils.isSupportedFontawesomeIcon(smi.iconName)) {
+            smi.icon = curs.getBlob(blobIndex);
+        }
         return smi;
     }
 
@@ -1084,6 +1099,20 @@ public class FriendStore implements Closeable {
         }
     }
 
+    public String getUserData(final String email) {
+        T.dontCare();
+        final Cursor curs = mDb.rawQuery(mMainService.getString(R.string.sql_friend_user_data_get), new String[]{email});
+
+        try {
+            if (!curs.moveToFirst())
+                return null;
+
+            return curs.getString(0);
+        } finally {
+            curs.close();
+        }
+    }
+
     private void deleteServiceMenuForFriend(final String email) {
         mDeleteServiceMenuHTTP.bindString(1, email);
         mDeleteServiceMenuHTTP.execute();
@@ -1105,23 +1134,17 @@ public class FriendStore implements Closeable {
             mInsertServiceMenuHTTP.bindLong(4, item.coords[2]);
             mInsertServiceMenuHTTP.bindString(5, item.label);
             mInsertServiceMenuHTTP.bindString(6, item.iconHash);
-            if (item.screenBranding == null)
-                mInsertServiceMenuHTTP.bindNull(7);
-            else
-                mInsertServiceMenuHTTP.bindString(7, item.screenBranding);
-            if (item.staticFlowHash == null)
-                mInsertServiceMenuHTTP.bindNull(8);
-            else
-                mInsertServiceMenuHTTP.bindString(8, item.staticFlowHash);
-            if (item.hashedTag == null)
-                mInsertServiceMenuHTTP.bindNull(9);
-            else
-                mInsertServiceMenuHTTP.bindString(9, item.hashedTag);
+            bindString(mInsertServiceMenuHTTP, 7, item.screenBranding);
+            bindString(mInsertServiceMenuHTTP, 8, item.staticFlowHash);
+            bindString(mInsertServiceMenuHTTP, 9, item.hashedTag);
             mInsertServiceMenuHTTP.bindLong(10, item.requiresWifi ? 1 : 0);
             mInsertServiceMenuHTTP.bindLong(11, item.runInBackground ? 1 : 0);
+            mInsertServiceMenuHTTP.bindLong(12, item.action);
+            bindString(mInsertServiceMenuHTTP, 13, item.iconName);
+            bindString(mInsertServiceMenuHTTP, 14, item.iconColor);
             mInsertServiceMenuHTTP.execute();
 
-            if (!isMenuIconAvailable(item.iconHash)) {
+            if (!UIUtils.isSupportedFontawesomeIcon(item.iconName) && !isMenuIconAvailable(item.iconHash)) {
                 // Download menu icon
                 GetMenuIconRequestTO request = new GetMenuIconRequestTO();
                 request.service = friend.email;
@@ -1213,6 +1236,11 @@ public class FriendStore implements Closeable {
             new String[] { organizationType + "" });
     }
 
+    public Cursor getServiceActionsListCursor(String action) {
+        return mDb.rawQuery(mMainService.getString(R.string.sql_service_actions_list_cursor),
+                new String[]{action});
+    }
+
     public Cursor getUserFriendListCursor() {
         return mDb.rawQuery(mMainService.getString(R.string.sql_user_friend_list_cursor), null);
     }
@@ -1220,6 +1248,10 @@ public class FriendStore implements Closeable {
     public long countServicesByOrganizationType(int organizationType) {
         mCountServicesByOrganizationType.bindLong(1, organizationType);
         return mCountServicesByOrganizationType.simpleQueryForLong();
+    }
+
+    public long countServices() {
+        return mCountServices.simpleQueryForLong();
     }
 
     public SparseIntArray countServicesGroupedByOrganizationType() {
@@ -1284,15 +1316,16 @@ public class FriendStore implements Closeable {
             friend.flags = cursor.getLong(14);
             friend.profileData = cursor.getString(15);
             friend.contentBrandingHash = cursor.getString(16);
+            friend.actions = cursor.getString(17);
 
             if (hasCategoryId) {
-                final String emailOrCategoryId = cursor.getString(17);
+                final String emailOrCategoryId = cursor.getString(18);
                 if (!friend.email.equals(emailOrCategoryId)) {
                     friend.category = new FriendCategory();
                     friend.category.id = friend.category_id = emailOrCategoryId;
-                    friend.category.name = cursor.getString(18);
-                    friend.category.avatar = cursor.getBlob(19);
-                    friend.category.friendCount = cursor.getInt(20);
+                    friend.category.name = cursor.getString(19);
+                    friend.category.avatar = cursor.getBlob(20);
+                    friend.category.friendCount = cursor.getInt(21);
                 }
             }
 
@@ -1476,8 +1509,42 @@ public class FriendStore implements Closeable {
         else
             mInsertFriendHTTP.bindString(35, friend.contentBrandingHash);
 
+        bindString(mInsertFriendHTTP, 36, getActions(friend));
+
         mInsertFriendHTTP.execute();
     }
+
+    private String getActions(FriendTO friend) {
+        if (friend.actionMenu == null || friend.actionMenu.items == null)
+            return null;
+
+        List<ServiceMenuItemTO> order = new ArrayList<>();
+        for (ServiceMenuItemTO smi : friend.actionMenu.items) {
+            if (smi.action > 0) {
+                order.add(smi);
+            }
+        }
+        if (order.size() == 0)
+            return null;
+        Collections.sort(order, comparator);
+        List<String> actions = new ArrayList<>();
+        for (ServiceMenuItemTO smi : order) {
+            actions.add(smi.label);
+        }
+        return android.text.TextUtils.join(" - ", actions);
+    }
+
+    private final Comparator<ServiceMenuItemTO> comparator = new Comparator<ServiceMenuItemTO>() {
+        @Override
+        public int compare(ServiceMenuItemTO item1, ServiceMenuItemTO item2) {
+            if (item1.action > item2.action) {
+                return -1;
+            } else if (item1.action < item2.action) {
+                return 1;
+            }
+            return 0;
+        }
+    };
 
     void updateFriendAvatar(final String friendEmail, final byte[] avatarBytes) {
         T.BIZZ();
@@ -1765,7 +1832,7 @@ public class FriendStore implements Closeable {
     }
 
     public List<String> getFriendSet() {
-        T.BIZZ();
+        T.dontCare();
         List<String> emails = new ArrayList<String>();
 
         final Cursor cursor = mDb.rawQuery(mMainService.getString(R.string.sql_friendset_get), null);
@@ -2023,5 +2090,38 @@ public class FriendStore implements Closeable {
                 }
             }
         });
+    }
+
+    public String disableBroadcastType(final String serviceEmail, final String broadcastType) {
+        T.BIZZ();
+        String userDataString = getUserData(serviceEmail);
+        Map<String, Object> userData = userDataString == null ? new HashMap<String, Object>() : (Map<String, Object>) JSONValue.parse(userDataString);
+
+        JSONArray disabledBroadcastTypes;
+        if (userData.containsKey("__rt__disabledBroadcastTypes")) {
+            disabledBroadcastTypes = (JSONArray) userData.get("__rt__disabledBroadcastTypes");
+        } else {
+            disabledBroadcastTypes = new JSONArray();
+        }
+
+        if (disabledBroadcastTypes.contains(broadcastType)) {
+            return null;
+        }
+
+        disabledBroadcastTypes.add(broadcastType);
+
+        String userDataJsonString = JSONValue.toJSONString(userData);
+        updateServiceData(serviceEmail, userDataJsonString, null, false);
+        return userDataJsonString;
+    }
+
+    public JSONArray getDisabledBroadcastTypes(final String serviceEmail) {
+        T.dontCare(); // T.UI or T.BIZZ
+        String userDataString = getUserData(serviceEmail);
+        Map<String, Object> userData = userDataString == null ? new HashMap<String, Object>() : (Map<String, Object>) JSONValue.parse(userDataString);
+        if (userData.containsKey("__rt__disabledBroadcastTypes")) {
+            return (JSONArray) userData.get("__rt__disabledBroadcastTypes");
+        }
+        return new JSONArray();
     }
 }

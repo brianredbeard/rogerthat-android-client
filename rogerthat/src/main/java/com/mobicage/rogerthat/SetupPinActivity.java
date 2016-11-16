@@ -47,7 +47,7 @@ public class SetupPinActivity extends ServiceBoundActivity implements PinEntryLi
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
-        setContentView(R.layout.enter_pin);
+        setContentViewWithoutNavigationBar(R.layout.enter_pin);
 
         mMessage = (TextView) findViewById(R.id.message);
         mMessage.setText(R.string.pin_setup_4_digit);

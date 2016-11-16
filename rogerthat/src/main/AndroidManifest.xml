@@ -1,23 +1,27 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools"
           package="com.mobicage.rogerth.at"
           android:configChanges="orientation|screenSize"
-          android:versionCode="2397"
-          android:versionName="1.0.2397.A">
+          android:versionCode="2473"
+          android:versionName="1.0.2473.A">
 
     <!-- BEGIN GCM -->
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
-    <permission android:name="com.mobicage.rogerth.at.permission.C2D_MESSAGE"
+    <permission
+        android:name="${applicationId}.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
-    <uses-permission android:name="com.mobicage.rogerth.at.permission.C2D_MESSAGE" />
+    <uses-permission android:name="${applicationId}.permission.C2D_MESSAGE"/>
     <!-- END GCM -->
 
     <!-- BEGIN supports-screens -->
     <!-- END supports-screens -->
 
     <!-- Never broadcast internal intents without this permission -->
-    <permission android:name="com.mobicage.rogerth.at.permission.internal_intent"
+    <permission
+        android:name="${applicationId}.permission.internal_intent"
         android:protectionLevel="signature" />
-    <uses-permission android:name="com.mobicage.rogerth.at.permission.internal_intent" />
+
+    <uses-permission android:name="${applicationId}.permission.internal_intent"/>
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -68,7 +72,8 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:allowBackup="false"
-        android:theme="@android:style/Theme.Light.NoTitleBar" >
+        android:theme="@style/AppTheme"
+        tools:replace="android:allowBackup">
         <uses-library android:name="com.google.android.maps" />
 
         <meta-data
@@ -91,7 +96,7 @@
             android:screenOrientation="portrait"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@android:style/Theme.Light.NoTitleBar" >
+            android:theme="@style/AppTheme.NoActionBar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -111,8 +116,12 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:scheme="rogerthat" />
-                <data android:scheme="mdp-rogerthat" android:host="x-callback-url" />
-                <data android:scheme="oauth-rogerthat" android:host="x-callback-url" />
+                <data
+                    android:host="x-callback-url"
+                    android:scheme="mdp-${app_id}"/>
+                <data
+                    android:host="x-callback-url"
+                    android:scheme="oauth-{app_id}"/>
             </intent-filter>
         </activity-alias>
 
@@ -121,99 +130,212 @@
             android:configChanges="keyboardHidden"
             android:screenOrientation="landscape"
             android:label="@string/app_name"
-            android:theme="@android:style/Theme.Light.NoTitleBar" >
+            android:theme="@style/AppTheme.NoActionBar" >
         </activity>
 
         <activity
             android:name="com.google.zxing.client.android.CaptureActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:screenOrientation="landscape"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+            android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateAlwaysHidden" >
         </activity>
 
-        <activity android:name="com.soundcloud.android.crop.CropImageActivity" >
+        <activity
+            android:name="com.soundcloud.android.crop.CropImageActivity"
+            android:screenOrientation="portrait">
         </activity>
-        <activity android:name="com.soundcloud.android.crop.MonitoredActivity" >
-        </activity>
-        <activity android:name="com.mobicage.rogerthat.plugins.messaging.ChatInfoActivity" android:theme="@android:style/Theme.NoTitleBar">
+
+        <activity
+            android:name="com.mobicage.rogerthat.plugins.messaging.ChatInfoActivity"
+            android:screenOrientation="portrait"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity" >
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
 
         <activity
             android:name="com.mobicage.rogerthat.registration.RegistrationActivity2"
             android:configChanges="keyboardHidden|orientation"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             android:label="@string/app_name"
-            android:theme="@android:style/Theme.Light.NoTitleBar" >
+            android:theme="@style/AppTheme.NoActionBar" >
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.registration.ContentBrandingRegistrationActivity"
             android:label="@string/app_name"
             android:screenOrientation="landscape"
-            android:theme="@android:style/Theme.Light.NoTitleBar" >
+            android:theme="@style/AppTheme.NoActionBar" >
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.registration.YSAAARegistrationActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Light.NoTitleBar" >
+            android:theme="@style/AppTheme.NoActionBar" >
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.HomeActivity"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.NoTitleBar" >
+            android:theme="@style/AppTheme.NoActionBar" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.QRCodeActivity"
+            android:screenOrientation="portrait"></activity>
+        <activity
+            android:name="com.mobicage.rogerthat.NewsActivity"
+            android:screenOrientation="portrait">
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.NewsPinnedActivity"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity"
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.messaging.FriendsThreadActivity"
-            android:windowSoftInputMode="adjustResize|stateHidden" >
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize|stateHidden"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity" >
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
-        <activity android:name="com.mobicage.rogerthat.plugins.messaging.MessagingActivity" >
+        <activity
+            android:name="com.mobicage.rogerthat.plugins.messaging.MembersActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize|stateHidden"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity" >
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
-        <activity android:name="com.mobicage.rogerthat.plugins.messaging.ServiceThreadActivity" >
+        <activity
+            android:name="com.mobicage.rogerthat.plugins.messaging.MessagingActivity"
+            android:screenOrientation="portrait">
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.plugins.messaging.MessagingFilterActivity"
+            android:screenOrientation="portrait"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity" >
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
+        </activity>
+
+        <activity
+            android:name="com.mobicage.rogerthat.plugins.messaging.ServiceThreadActivity"
+            android:screenOrientation="portrait"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity" >
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.AddFriendsActivity"
-            android:configChanges="orientation|screenSize">
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity" >
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
-        <activity android:name="com.mobicage.rogerthat.UserFriendsActivity" >
+        <activity android:name="com.mobicage.rogerthat.UserFriendsActivity"
+            android:screenOrientation="portrait">
         </activity>
-        <activity android:name="com.mobicage.rogerthat.ServiceFriendsActivity" >
+        <activity android:name="com.mobicage.rogerthat.ServiceFriendsActivity"
+            android:screenOrientation="portrait">
         </activity>
-        <activity android:name="com.mobicage.rogerthat.FriendCategoryActivity" >
+        <activity
+            android:name="com.mobicage.rogerthat.ServiceActionsOfflineActivity"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity"
+            android:screenOrientation="portrait">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
+
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.FriendCategoryActivity"
+            android:screenOrientation="portrait"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity" >
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="portrait"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity" >
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.friends.RecommendServiceActivity"
-            android:configChanges="orientation|screenSize">
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.friends.ServiceSearchActivity"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize"
-            android:windowSoftInputMode="stateHidden" >
+            android:windowSoftInputMode="stateHidden"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity" >
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.friends.FriendSearchActivity"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.friends.ActionScreenActivity"
-            android:configChanges="orientation|screenSize">
+            android:configChanges="orientation|screenSize"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity" >
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.friends.ContentBrandingActionScreenActivity"
-            android:configChanges="orientation|screenSize">
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.GetLocationActivity"
-            android:theme="@android:style/Theme.Light.NoTitleBar" >
+            android:screenOrientation="portrait"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
-        <activity android:name="com.mobicage.rogerthat.SettingsActivity" >
+        <activity
+            android:name="com.mobicage.rogerthat.SettingsActivity"
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.scan.ScanTabActivity"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize">
         </activity>
         <activity
@@ -223,78 +345,136 @@
         <activity
             android:name="com.mobicage.rogerthat.plugins.scan.ProcessScanActivity"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Light.NoTitleBar" >
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.scan.InviteFriendActivity"
-            android:theme="@android:style/Theme.Light.NoTitleBar" >
+            android:screenOrientation="portrait"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.scan.ServiceActionActivity"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Light.NoTitleBar" >
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.ServiceDetailActivity"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Light.NoTitleBar" >
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.UserDetailActivity"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Light.NoTitleBar" >
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
+
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.FriendDetailOrInviteActivity"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Light.NoTitleBar" >
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.messaging.ServiceMessageDetailActivity"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize"
-            android:theme="@android:style/Theme.Light.NoTitleBar" >
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.plugins.messaging.AttachmentViewerActivity"
             android:configChanges="orientation|screenSize"
-            android:theme="@android:style/Theme.Light.NoTitleBar" >
-        </activity>
-        <activity
-            android:name="com.mobicage.rogerthat.FriendLocationActivity"
-            android:theme="@android:style/Theme.Light.NoTitleBar" >
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.FriendsLocationActivity"
-            android:theme="@android:style/Theme.Light.NoTitleBar" >
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" >
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.AboutActivity"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Light.NoTitleBar" >
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
+
         <activity
-            android:name="com.mobicage.rogerthat.SendMessageWizardActivity"
+            android:name="com.mobicage.rogerthat.SendMessageContactActivity"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize"
-            android:theme="@style/FullHeightDialog"
-            android:windowSoftInputMode="adjustResize" >
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity
-            android:name="com.mobicage.rogerthat.widget.SendCannedMessageActivity"
-            android:theme="@style/FullHeightDialog"
-            android:windowSoftInputMode="adjustResize" >
+            android:name="com.mobicage.rogerthat.SendMessageMessageActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize"
+            android:windowSoftInputMode="adjustResize"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity
-            android:name="com.mobicage.rogerthat.widget.CannedMessageSummaryActivity"
-            android:theme="@style/FullHeightDialog"
-            android:windowSoftInputMode="adjustResize" >
+            android:name="com.mobicage.rogerthat.SendMessageButtonActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
-        <activity android:name="com.mobicage.rogerthat.plugins.history.HistoryListActivity" >
+
+        <activity
+            android:name="com.mobicage.rogerthat.plugins.history.HistoryListActivity"
+            android:screenOrientation="portrait"
+            android:parentActivityName="com.mobicage.rogerthat.MainActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.mobicage.rogerthat.MainActivity" />
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.GroupDetailActivity"
             android:screenOrientation="portrait" >
         </activity>
-        <activity android:name="com.mobicage.rogerthat.plugins.trackme.MapDetailActivity" >
+        <activity
+            android:name="com.mobicage.rogerthat.plugins.trackme.MapDetailActivity"
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.registration.DetectedBeaconActivity"
@@ -319,26 +499,43 @@
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.NoTitleBar" >
         </activity>
+        <activity
+            android:name="com.commonsware.cwac.cam2.CameraActivity"
+            android:theme="@android:style/Theme.Holo.Light"
+            android:icon="@drawable/rogerthat_camera"
+            android:label="@string/camera" />
+        <activity
+            android:name="com.commonsware.cwac.cam2.VideoRecorderActivity"
+            android:theme="@android:style/Theme.Holo.Light"
+            android:icon="@drawable/rogerthat_camera"
+            android:label="@string/camera" />
 
-        <receiver
-            android:name="com.mobicage.rogerthat.widget.RogerthatWidgetProvider"
-            android:exported="false"
-            android:label="@string/widget_name" >
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
+        <activity
+            android:name="com.mobicage.rogerthat.QuickReplyActivity"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
+            android:taskAffinity=""
+            android:theme="@style/NoTitleDialogTheme"/>
+        <!--todo: Needs to be restyled-->
+        <!--<receiver-->
+            <!--android:name="com.mobicage.rogerthat.widget.RogerthatWidgetProvider"-->
+            <!--android:exported="false"-->
+            <!--android:label="@string/widget_name" >-->
+            <!--<intent-filter>-->
+                <!--<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />-->
+            <!--</intent-filter>-->
 
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/rogerthat_widget_provider" />
-        </receiver>
+            <!--<meta-data-->
+                <!--android:name="android.appwidget.provider"-->
+                <!--android:resource="@xml/rogerthat_widget_provider" />-->
+        <!--</receiver>-->
 
         <receiver
             android:name="com.mobicage.rogerthat.GCMReveiver"
             android:permission="com.google.android.c2dm.permission.SEND" >
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-                <category android:name="com.mobicage.rogerth.at" />
+                <category android:name="${applicationId}"/>
             </intent-filter>
         </receiver>
 
@@ -360,7 +557,7 @@
         <!-- BEGIN FB -->
         <provider
             android:name="com.facebook.FacebookContentProvider"
-            android:authorities="com.facebook.app.FacebookContentProvider188033791211994"
+            android:authorities="com.facebook.app.FacebookContentProvider${facebook_content_provider_id}"
             android:exported="true"/>
         <!-- END FB -->
 

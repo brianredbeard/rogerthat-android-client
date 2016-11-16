@@ -18,14 +18,22 @@
 
 package com.mobicage.rogerthat.test.screenshots;
 
+import android.Manifest;
+import android.app.Activity;
+import android.os.Build;
+import android.support.test.annotation.UiThreadTest;
+import android.support.test.espresso.Espresso;
 import android.support.test.espresso.PerformException;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
+import android.view.WindowManager;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.registration.RegistrationActivity2;
+import com.mobicage.rogerthat.test.ui_test_helpers.PermissionGranter;
 import com.mobicage.rogerthat.util.logging.L;
 
+import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -38,7 +46,6 @@ import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.action.ViewActions.typeText;
 import static android.support.test.espresso.matcher.ViewMatchers.isRoot;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static com.mobicage.rogerthat.test.ui_test_helpers.UiTestHelpers.waitUntilExists;
 
 @RunWith(AndroidJUnit4.class)
@@ -49,10 +56,24 @@ public class Test1Register {
     @Rule
     public ActivityTestRule<RegistrationActivity2> activityTestRule = new ActivityTestRule<>(RegistrationActivity2.class);
 
+    @UiThreadTest
+    @Before
+    public void setup() throws Throwable {
+        L.d("Unlocking screen");
+        final Activity activity = activityTestRule.getActivity();
+        activityTestRule.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+                        | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
+                        | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                        | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+                        | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
+            }
+        });
+    }
     @Test
     public void testRegister() throws InterruptedException {
-        // This test requires that the facebook app is NOT installed on the device the tests run on
-
         boolean isRegistered = activityTestRule.getActivity().getMainService().getRegisteredFromConfig();
         // User already registered. Skip this test. (For screenshot tests)
         if(isRegistered){
@@ -64,29 +85,20 @@ public class Test1Register {
         } catch (PerformException ex) {
             L.i("Not clicking 'agree to TOS because it was already clicked'");
         }
-        try {
-            onView(withId(R.id.login_via_email))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            onView(withId(R.id.registration_beacon_usage_continue))
                     .perform(click());
-        }catch(PerformException exc){
-            // facebook disabled
-        };
+            PermissionGranter.allowPermissionsIfNeeded(Manifest.permission.ACCESS_COARSE_LOCATION);
+        }
         // Fill in email field
         onView(withId(R.id.registration_enter_email))
                 .perform(typeText("apple.review@rogerth.at"));
-        onView(withId(R.id.registration_continue_email))
+        Espresso.closeSoftKeyboard();
+        onView(withId(R.id.login_via_email))
                 .perform(click());
-/*
-        TODO: this suddenly stopped working
         onView(isRoot())
                 .perform(waitUntilExists(withId(R.id.registration_enter_pin), 2000));
-*/
-        Thread.sleep(5000);
         onView(withId(R.id.registration_enter_pin))
                 .perform(typeText("0666"));
-        while(!activityTestRule.getActivity().isFinishing()){
-            Thread.sleep(250);
-        }
-        // Allow the activity to finish
-        Thread.sleep(1000);
     }
 }

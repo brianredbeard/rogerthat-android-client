@@ -18,19 +18,6 @@
 
 package com.mobicage.rogerthat.registration;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -55,6 +42,19 @@ import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
 import com.mobicage.rpc.config.AppConstants;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class DetectedBeaconActivity extends ServiceBoundActivity {
 
     public static final String EXTRA_DETECTED_BEACONS = "detected_beacons";
@@ -67,7 +67,7 @@ public class DetectedBeaconActivity extends ServiceBoundActivity {
 
     @Override
     protected void onServiceBound() {
-        setContentView(R.layout.detected_beacons);
+        setContentViewWithoutNavigationBar(R.layout.detected_beacons);
         mFriendsPlugin = mService.getPlugin(FriendsPlugin.class);
         Intent intent = getIntent();
         mAgeGenderSet = intent.getBooleanExtra(EXTRA_AGE_AND_GENDER_SET, true);
@@ -134,7 +134,7 @@ public class DetectedBeaconActivity extends ServiceBoundActivity {
         } else {
             intent.setAction(MainActivity.ACTION_REGISTERED);
         }
-        intent.setFlags(MainActivity.FLAG_CLEAR_STACK);
+        intent.setFlags(MainActivity.FLAG_CLEAR_STACK_SINGLE_TOP);
         startActivity(intent);
         super.onStop();
     }

@@ -18,13 +18,20 @@
 
 package com.mobicage.rogerthat;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
+import android.content.Context;
+import android.support.multidex.MultiDexApplication;
+
+import com.facebook.FacebookSdk;
+import com.facebook.appevents.AppEventsLogger;
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.Iconics;
+import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.util.http.HTTPUtil;
+import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.system.SafeAsyncTask;
+import com.mobicage.rogerthat.util.system.SystemUtils;
+import com.mobicage.rpc.Credentials;
+import com.mobicage.rpc.config.CloudConstants;
 
 import org.altbeacon.beacon.powersave.BackgroundPowerSaver;
 import org.apache.http.NameValuePair;
@@ -35,19 +42,17 @@ import org.apache.http.protocol.HTTP;
 import org.jivesoftware.smack.util.Base64;
 import org.json.simple.JSONObject;
 
-import android.app.Application;
-import android.content.Context;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
 
-import com.facebook.FacebookSdk;
-import com.facebook.appevents.AppEventsLogger;
-import com.mobicage.rogerthat.util.http.HTTPUtil;
-import com.mobicage.rogerthat.util.logging.L;
-import com.mobicage.rogerthat.util.system.SafeAsyncTask;
-import com.mobicage.rogerthat.util.system.SystemUtils;
-import com.mobicage.rpc.Credentials;
-import com.mobicage.rpc.config.CloudConstants;
+import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
-public class App extends Application implements Thread.UncaughtExceptionHandler {
+public class App extends MultiDexApplication implements Thread.UncaughtExceptionHandler {
 
     private static Context sContext;
 
@@ -57,8 +62,15 @@ public class App extends Application implements Thread.UncaughtExceptionHandler 
     @Override
     public void onCreate() {
         super.onCreate();
+
         Thread.setDefaultUncaughtExceptionHandler(this);
         sContext = this;
+
+        CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                .setDefaultFontPath("fonts/lato_regular.ttf")
+                .setFontAttrId(R.attr.fontPath)
+                .build()
+        );
 
         // Initialize the SDK before executing any other operations,
         FacebookSdk.sdkInitialize(getApplicationContext());
@@ -69,6 +81,7 @@ public class App extends Application implements Thread.UncaughtExceptionHandler 
         if (android.os.Build.VERSION.SDK_INT >= 18) {
             mBackgroundPowerSaver = new BackgroundPowerSaver(this);
         }
+        Iconics.registerFont(new FontAwesome());
     }
 
     public static Context getContext() {

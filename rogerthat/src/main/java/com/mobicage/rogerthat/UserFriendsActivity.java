@@ -18,54 +18,45 @@
 
 package com.mobicage.rogerthat;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.support.v4.content.ContextCompat;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
-import android.widget.Adapter;
 import android.widget.Button;
-import android.widget.CursorAdapter;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.TextView;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
-import com.mobicage.rogerthat.plugins.friends.Group;
-import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
+import com.mobicage.rogerthat.plugins.messaging.MessagingFilterActivity;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
-import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
-import com.mobicage.rogerthat.util.ui.SeparatedListAdapter;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.AppConstants;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class UserFriendsActivity extends FriendsActivity {
 
     private final static String HINT_FRIEND_LOCATION_REQUESTED = "com.mobicage.rogerthat.plugins.friends.UserFriendsActivity.HINT_FRIEND_LOCATION_REQUESTED";
-
-    private final static int HEADERCELL_GROUPS = 0;
-    private final static int HEADERCELL_FRIENDS = 1;
 
     private Button mMapButton;
     private int mFirstVisibleItem = 0;
@@ -73,7 +64,6 @@ public class UserFriendsActivity extends FriendsActivity {
     private View mLastExpandedActionView = null;
 
     private Cursor mCursorFriends = null;
-    private Cursor mCursorGroups = null;
 
     @Override
     protected int getLayout() {
@@ -88,25 +78,12 @@ public class UserFriendsActivity extends FriendsActivity {
     @Override
     protected void changeCursor() {
         if (mServiceIsBound) {
-            SeparatedListAdapter separatedListAdapter = ((SeparatedListAdapter) getListAdapter());
-            int sectionIndex = 0;
-            for (Adapter adapter : separatedListAdapter.sections.values()) {
-                Cursor c = null;
-                if (sectionIndex == 0) {
-                    createGroupCursor();
-                    c = mCursorGroups;
-                } else if (sectionIndex == 1) {
-                    createFriendsCursor();
-                    c = mCursorFriends;
-                } else {
-                    L.w("Don't know how to change if section " + sectionIndex);
-                }
-                if (c != null) {
-                    ((CursorAdapter) adapter).changeCursor(c);
-                }
-                sectionIndex += 1;
+            FriendListAdapter fla = ((FriendListAdapter) getListAdapter());
+            createFriendsCursor();
+            if (mCursorFriends != null) {
+                fla.changeCursor(mCursorFriends);
             }
-            separatedListAdapter.notifyDataSetChanged();
+            fla.notifyDataSetChanged();
         }
 
         if (mMapButton != null) {
@@ -130,74 +107,14 @@ public class UserFriendsActivity extends FriendsActivity {
         mCursorFriends = mFriendsPlugin.getStore().getUserFriendListCursor();
     }
 
-    private void createGroupCursor() {
-        if (mCursorGroups != null)
-            stopManagingCursor(mCursorGroups);
-        mCursorGroups = mFriendsPlugin.getStore().getGroupListCursor();
-    }
-
     @Override
     protected void loadCursorAndSetAdaptar() {
         createFriendsCursor();
         startManagingCursor(mCursorFriends);
 
-        View headerViewFriends = getLayoutInflater().inflate(R.layout.main_list_header, null);
-
-        final int longText;
-        final int shortText;
-        switch (AppConstants.FRIENDS_CAPTION) {
-        case COLLEAGUES:
-            longText = R.string.invite_colleagues_long;
-            shortText = R.string.find_colleagues;
-            break;
-        case CONTACTS:
-            longText = R.string.invite_contacts_long;
-            shortText = R.string.find_contacts;
-            break;
-        case FRIENDS:
-        default:
-            longText = R.string.invite_friends_long;
-            shortText = R.string.invite_friends_short;
-            break;
-        }
-
-        ((TextView) headerViewFriends.findViewById(R.id.mainheader)).setText(shortText);
-        ((TextView) headerViewFriends.findViewById(R.id.subheader)).setText(longText);
-        headerViewFriends.setTag(HEADERCELL_FRIENDS);
-
         FriendListAdapter fla = new FriendListAdapter(this, mCursorFriends, mFriendsPlugin.getStore(), null,
-            mFriendsPlugin, true, headerViewFriends);
-
-        createGroupCursor();
-        startManagingCursor(mCursorGroups);
-
-        View headerViewGroups = getLayoutInflater().inflate(R.layout.main_list_header, null);
-        ((TextView) headerViewGroups.findViewById(R.id.mainheader)).setText(R.string.create_groups_short);
-        ((TextView) headerViewGroups.findViewById(R.id.subheader)).setText(R.string.create_groups_long);
-        headerViewGroups.setTag(HEADERCELL_GROUPS);
-
-        GroupListAdapter gla = new GroupListAdapter(this, mCursorGroups, mFriendsPlugin.getStore(), null,
-            mFriendsPlugin, true, headerViewGroups);
-
-        SeparatedListAdapter adapter = new SeparatedListAdapter(this);
-
-        adapter.addSection(mService.getString(R.string.groups), gla);
-        final int text;
-        switch (AppConstants.FRIENDS_CAPTION) {
-        case COLLEAGUES:
-            text = R.string.colleagues;
-            break;
-        case CONTACTS:
-            text = R.string.contacts;
-            break;
-        case FRIENDS:
-        default:
-            text = R.string.tab_friends;
-            break;
-        }
-        adapter.addSection(mService.getString(text), fla);
-
-        setListAdapter(adapter);
+                mFriendsPlugin, false, null, true);
+        setListAdapter(fla);
     }
 
     private void updateMapButtonCaption() {
@@ -230,7 +147,7 @@ public class UserFriendsActivity extends FriendsActivity {
     @Override
     protected void onServiceBound() {
         super.onServiceBound();
-        setNavigationBarVisible(AppConstants.SHOW_NAV_HEADER);
+        setActivityName("friends");
         final int text;
         switch (AppConstants.FRIENDS_CAPTION) {
         case COLLEAGUES:
@@ -244,26 +161,14 @@ public class UserFriendsActivity extends FriendsActivity {
             text = R.string.tab_friends;
             break;
         }
-        setNavigationBarTitle(text);
-        findViewById(R.id.navigation_bar_home_button).setOnClickListener(new SafeViewOnClickListener() {
-            @Override
-            public void safeOnClick(View v) {
-                Intent i = new Intent(UserFriendsActivity.this, HomeActivity.class);
-                i.setFlags(MainActivity.FLAG_CLEAR_STACK);
-                startActivity(i);
-                finish();
-            }
-        });
-    }
+        setTitle(text);
+     }
 
     @Override
     protected void onPause() {
         super.onPause();
         if (mCursorFriends != null) {
             stopManagingCursor(mCursorFriends);
-        }
-        if (mCursorGroups != null) {
-            stopManagingCursor(mCursorGroups);
         }
     }
 
@@ -273,9 +178,6 @@ public class UserFriendsActivity extends FriendsActivity {
         if (getWasPaused() && mCursorFriends != null) {
             startManagingCursor(mCursorFriends);
         }
-        if (getWasPaused() && mCursorGroups != null) {
-            startManagingCursor(mCursorGroups);
-        }
     }
 
     @Override
@@ -284,47 +186,18 @@ public class UserFriendsActivity extends FriendsActivity {
         Object tag = listItem.getTag();
         if (tag == null) {
             return;
-        } else if (tag instanceof Integer && (Integer) tag == HEADERCELL_FRIENDS) {
-            startActivity(new Intent(this, AddFriendsActivity.class));
+        } else if (tag instanceof Friend) {
+            if (mLastExpandedActionView != null) {
+                mLastExpandedActionView.findViewById(R.id.actions).setVisibility(View.GONE);
+                ImageView friendIndicator = (ImageView) mLastExpandedActionView.findViewById(R.id.friend_indicator);
+                friendIndicator.setImageDrawable(new IconicsDrawable(UserFriendsActivity.this).icon(FontAwesome.Icon.faw_angle_down).color(Color.DKGRAY).sizeDp(12));
+            }
 
-        } else if (tag instanceof Integer && (Integer) tag == HEADERCELL_GROUPS) {
-            final EditText edit = (EditText) getLayoutInflater().inflate(R.layout.save_canned_message_edit, null);
-            new AlertDialog.Builder(this).setTitle(R.string.create_group).setView(edit)
-                .setPositiveButton(R.string.ok, new SafeDialogInterfaceOnClickListener() {
-                    @Override
-                    public void safeOnClick(DialogInterface dialog, int which) {
-                        InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                        mgr.hideSoftInputFromWindow(edit.getWindowToken(), 0);
-
-                        String name = edit.getText().toString();
-                        String guid = UUID.randomUUID().toString();
-                        mFriendsPlugin.getStore().insertGroup(guid, name, null, null);
-
-                        final Intent groupDetails = new Intent(UserFriendsActivity.this, GroupDetailActivity.class);
-                        groupDetails.putExtra(GroupDetailActivity.GUID, guid);
-                        groupDetails.putExtra(GroupDetailActivity.NEW_GROUP, true);
-                        startActivity(groupDetails);
-                    }
-                }).setNegativeButton(R.string.cancel, new SafeDialogInterfaceOnClickListener() {
-                    @Override
-                    public void safeOnClick(DialogInterface dialog, int which) {
-                        InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                        mgr.hideSoftInputFromWindow(edit.getWindowToken(), 0);
-                    }
-                }).create().show();
-
-            edit.requestFocus();
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
-
-        } else if (tag instanceof Friend || tag instanceof Group) {
-            if (mLastExpandedActionView != null)
-                mLastExpandedActionView.setVisibility(View.GONE);
-
-            LinearLayout actions = (LinearLayout) listItem.findViewById(R.id.actions);
-            if (mLastExpandedActionView == actions) {
+            if (mLastExpandedActionView == listItem) {
                 mLastExpandedActionView = null;
             } else {
+                LinearLayout actions = (LinearLayout) listItem.findViewById(R.id.actions);
+
                 if (position >= mFirstVisibleItem + mVisibleItemCount - 2) {
                     // item is the last visible one, scroll up
                     int x = position - mVisibleItemCount + 3;
@@ -333,18 +206,16 @@ public class UserFriendsActivity extends FriendsActivity {
                 }
 
                 actions.setVisibility(View.VISIBLE);
-                mLastExpandedActionView = actions;
 
-                if (tag instanceof Friend) {
-                    final Friend friend = (Friend) tag;
-                    handleLocation(listItem, friend);
-                    handleHistory(listItem, friend);
-                    handleSend(listItem, friend);
+                ImageView friendIndicator = (ImageView) listItem.findViewById(R.id.friend_indicator);
+                friendIndicator.setImageDrawable(new IconicsDrawable(UserFriendsActivity.this).icon(FontAwesome.Icon.faw_angle_up).color(ContextCompat.getColor(this, R.color.mc_primary_icon)).sizeDp(12));
 
-                } else {
-                    final Group group = (Group) tag;
-                    handleSend(listItem, group);
-                }
+                mLastExpandedActionView = listItem;
+
+                final Friend friend = (Friend) tag;
+                handleLocation(listItem, friend);
+                handleHistory(listItem, friend);
+                handleSend(listItem, friend);
                 handleDetails(listItem);
             }
         }
@@ -360,25 +231,7 @@ public class UserFriendsActivity extends FriendsActivity {
                     final Intent friendDetails = new Intent(UserFriendsActivity.this, UserDetailActivity.class);
                     friendDetails.putExtra(FriendDetailActivity.EMAIL, ((Friend) tag).email);
                     startActivity(friendDetails);
-
-                } else if (tag instanceof Group) {
-                    final Intent groupDetails = new Intent(UserFriendsActivity.this, GroupDetailActivity.class);
-                    groupDetails.putExtra(GroupDetailActivity.GUID, ((Group) tag).guid);
-                    groupDetails.putExtra(GroupDetailActivity.NEW_GROUP, false);
-                    startActivity(groupDetails);
                 }
-            }
-        });
-    }
-
-    private void handleSend(final View listItem, final Group group) {
-        ImageView newMessage = (ImageView) listItem.findViewById(R.id.send);
-        newMessage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final Intent sendMessage = new Intent(UserFriendsActivity.this, SendMessageWizardActivity.class);
-                sendMessage.putExtra(SendMessageWizardActivity.GROUP_RECIPIENTS, new String[] { group.guid });
-                startActivity(sendMessage);
             }
         });
     }
@@ -388,8 +241,8 @@ public class UserFriendsActivity extends FriendsActivity {
         newMessage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final Intent sendMessage = new Intent(UserFriendsActivity.this, SendMessageWizardActivity.class);
-                sendMessage.putExtra(SendMessageWizardActivity.RECIPIENTS, new String[] { friend.email });
+                final Intent sendMessage = new Intent(UserFriendsActivity.this, SendMessageMessageActivity.class);
+                sendMessage.putExtra(SendMessageMessageActivity.RECIPIENTS, new String[] { friend.email });
                 startActivity(sendMessage);
             }
         });
@@ -400,7 +253,7 @@ public class UserFriendsActivity extends FriendsActivity {
         history.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final Intent viewMessages = new Intent(UserFriendsActivity.this, MessagingActivity.class);
+                final Intent viewMessages = new Intent(UserFriendsActivity.this, MessagingFilterActivity.class);
                 viewMessages.putExtra(MessagingPlugin.MEMBER_FILTER, friend.email);
                 startActivity(viewMessages);
             }
@@ -470,16 +323,27 @@ public class UserFriendsActivity extends FriendsActivity {
     }
 
     @Override
-    protected boolean showFABMenu() {
-        return true;
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         T.UI();
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.friends_menu, menu);
+
+        switch (AppConstants.FRIENDS_CAPTION) {
+            case COLLEAGUES:
+                menu.getItem(0).setTitle(R.string.find_colleagues);
+                break;
+            case CONTACTS:
+                menu.getItem(0).setTitle(R.string.find_contacts);
+                break;
+            case FRIENDS:
+            default:
+                menu.getItem(0).setTitle(R.string.invite_friends_short);
+                break;
+        }
+
+        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_search).color(Color.DKGRAY).sizeDp(18));
+        menu.getItem(1).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_street_view).color(Color.DKGRAY).sizeDp(18));
         return true;
     }
 
@@ -488,12 +352,15 @@ public class UserFriendsActivity extends FriendsActivity {
         T.UI();
 
         switch (item.getItemId()) {
-        case R.id.help:
-            showHelp();
-            return true;
-        case R.id.friend_map:
-            startActivity(new Intent(UserFriendsActivity.this, FriendsLocationActivity.class));
-            return true;
+            case R.id.find_friends:
+                startActivity(new Intent(this, AddFriendsActivity.class));
+                return true;
+            case R.id.help:
+                showHelp();
+                return true;
+            case R.id.friend_map:
+                startActivity(new Intent(UserFriendsActivity.this, FriendsLocationActivity.class));
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }

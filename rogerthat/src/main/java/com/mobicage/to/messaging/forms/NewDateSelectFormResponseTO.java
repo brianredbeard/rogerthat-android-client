@@ -33,7 +33,11 @@ public class NewDateSelectFormResponseTO implements com.mobicage.rpc.IJSONable {
     public NewDateSelectFormResponseTO(Map<String, Object> json) throws IncompleteMessageException {
         if (json.containsKey("received_timestamp")) {
             Object val = json.get("received_timestamp");
-            this.received_timestamp = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.received_timestamp = ((Integer) val).longValue();
+            } else {
+                this.received_timestamp = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.forms.NewDateSelectFormResponseTO object is missing field 'received_timestamp'");
         }

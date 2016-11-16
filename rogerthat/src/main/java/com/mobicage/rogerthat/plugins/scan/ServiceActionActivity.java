@@ -48,11 +48,6 @@ public class ServiceActionActivity extends FriendDetailActivity {
     private String mStaticFlowHash;
 
     @Override
-    protected boolean showFABMenu() {
-        return false;
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Menu not visible
         return false;
@@ -64,10 +59,16 @@ public class ServiceActionActivity extends FriendDetailActivity {
         return false;
     }
 
+
     @Override
     protected int getMenu() {
         // Menu not visible
         return 0;
+    }
+
+    @Override
+    protected int getHeaderVisibility() {
+        return View.VISIBLE;
     }
 
     @Override

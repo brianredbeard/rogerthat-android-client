@@ -18,11 +18,11 @@
 
 package com.mobicage.rogerthat.util.db;
 
-import java.io.Closeable;
-
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
+
+import java.io.Closeable;
 
 public class SimpleKeyValueDatabase implements Closeable {
 

@@ -3,12 +3,8 @@
     android:id="@+id/update_profile_gender"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
-
-    <View
-        style="@style/RogerThatThickDivider"
-        android:layout_marginBottom="10dp" >
-    </View>
+    android:orientation="vertical"
+    android:padding="25dp">
 
     <RadioGroup
         android:id="@+id/gender_group"
@@ -28,13 +24,5 @@
             android:layout_height="wrap_content"
             android:text="@string/female" />
     </RadioGroup>
-
-     <Button
-         android:id="@+id/ok"
-         android:layout_width="fill_parent"
-         android:layout_height="wrap_content"
-         android:layout_marginTop="10dp"
-         android:text="@string/ok" >
-     </Button>
 
 </LinearLayout>

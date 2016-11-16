@@ -33,7 +33,11 @@ public class NewAutoCompleteFormResponseTO implements com.mobicage.rpc.IJSONable
     public NewAutoCompleteFormResponseTO(Map<String, Object> json) throws IncompleteMessageException {
         if (json.containsKey("received_timestamp")) {
             Object val = json.get("received_timestamp");
-            this.received_timestamp = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.received_timestamp = ((Integer) val).longValue();
+            } else {
+                this.received_timestamp = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.forms.NewAutoCompleteFormResponseTO object is missing field 'received_timestamp'");
         }

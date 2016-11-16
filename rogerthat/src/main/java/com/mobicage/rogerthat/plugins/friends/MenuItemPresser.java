@@ -45,6 +45,8 @@ import com.mobicage.to.friends.ServiceMenuItemTO;
 import com.mobicage.to.service.PressMenuIconRequestTO;
 import com.mobicage.to.service.PressMenuIconResponseTO;
 
+import org.json.simple.JSONValue;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -89,6 +91,7 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
     // fields set by itemPressed
     private ResultHandler mResultHandler = mDefaultResultHandler; // mResultHandler is never null for simplicity
     private String mContextMatch = "";
+    private ServiceMenuItemTO mItem;
     private long mLastTimeClicked = 0;
 
     public MenuItemPresser(T activity, String email) {
@@ -98,6 +101,10 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
     }
 
     public void itemPressed(final String tag, final ResultHandler resultHandler) {
+        itemPressed(tag, null, resultHandler);
+    }
+
+    public void itemPressed(final String tag, final String flowParams, final ResultHandler resultHandler) {
         final FriendStore friendStore = mService.getPlugin(FriendsPlugin.class).getStore();
         final ServiceMenuItemDetails smi = friendStore.getMenuItem(mEmail, tag);
         if (smi == null) {
@@ -105,11 +112,17 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
                 resultHandler.onError();
             return;
         }
-        itemPressed(smi, smi.menuGeneration, resultHandler);
+        itemPressed(smi, smi.menuGeneration, flowParams, resultHandler);
     }
 
     public void itemPressed(final ServiceMenuItemTO item, final long menuGeneration, final ResultHandler
             resultHandler) {
+        itemPressed(item, menuGeneration, null, resultHandler);
+    }
+
+    public void itemPressed(final ServiceMenuItemTO item, final long menuGeneration, final String flowParams,
+                            final ResultHandler resultHandler) {
+        mItem = item;
         mResultHandler = resultHandler == null ? mDefaultResultHandler : resultHandler;
 
         long currentTime = System.currentTimeMillis();
@@ -154,7 +167,7 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
         if (item.screenBranding != null) {
             openBranding(item);
         } else if (item.staticFlowHash != null) {
-            startLocalFlow(item, request);
+            startLocalFlow(item, request, flowParams);
         } else {
             poked();
         }
@@ -174,7 +187,7 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
         }
     }
 
-    private void startLocalFlow(ServiceMenuItemTO item, PressMenuIconRequestTO request) {
+    private void startLocalFlow(ServiceMenuItemTO item, PressMenuIconRequestTO request, String flowParams) {
         mActivity.showTransmitting(new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
@@ -187,8 +200,12 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
         userInput.put("request", request.toJSONMap());
         userInput.put("func", "com.mobicage.api.services.pressMenuItem");
 
+        Map<String, Object> tmpState = new HashMap<String, Object>();
+        tmpState.put("flow_params", flowParams);
+
         MessageFlowRun mfr = new MessageFlowRun();
         mfr.staticFlowHash = item.staticFlowHash;
+        mfr.state = JSONValue.toJSONString(tmpState);
         try {
             JsMfr.executeMfr(mfr, userInput, mService, true);
         } catch (EmptyStaticFlowException ex) {
@@ -250,6 +267,7 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
                             i.putExtra(FriendsThreadActivity.MESSAGE_FLAGS, flags);
                         } else {
                             i = new Intent(context, ServiceMessageDetailActivity.class);
+                            i.putExtra(ServiceMessageDetailActivity.TITLE, mItem.label);
                             if (mActivity instanceof AbstractHomeActivity) {
                                 i.putExtra(ServiceMessageDetailActivity.JUMP_TO_SERVICE_HOME_SCREEN, false);
                             }
@@ -268,7 +286,7 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
                 mActivity.completeTransmit(new SafeRunnable() {
                     @Override
                     protected void safeRun() throws Exception {
-                        UIUtils.showAlertDialog(mService, null, R.string.error_please_try_again);
+                        UIUtils.showAlertDialog(mActivity, null, R.string.error_please_try_again);
                     }
                 });
                 mResultHandler.onError();

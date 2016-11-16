@@ -62,7 +62,11 @@ public class SubmitAdvancedOrderFormRequestTO implements com.mobicage.rpc.IJSONa
         }
         if (json.containsKey("timestamp")) {
             Object val = json.get("timestamp");
-            this.timestamp = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.timestamp = ((Integer) val).longValue();
+            } else {
+                this.timestamp = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.forms.SubmitAdvancedOrderFormRequestTO object is missing field 'timestamp'");
         }

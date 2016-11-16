@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/mc_background_color"
+    android:gravity="center_horizontal"
+    android:orientation="vertical">
+
+    <com.mobicage.rogerthat.widget.SpacerView
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        app:nexus10Height="100" />
+
+    <TextView
+        android:id="@+id/loyalty_text"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:textColor="@color/mc_homescreen_text" />
+
+    <ImageView
+        android:id="@+id/qrcode"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="15dp"
+        android:layout_marginTop="15dp"
+        android:adjustViewBounds="true" />
+
+</LinearLayout>

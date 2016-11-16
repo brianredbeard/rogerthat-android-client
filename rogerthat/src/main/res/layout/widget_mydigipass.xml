@@ -4,11 +4,12 @@
     android:layout_height="wrap_content"
     android:orientation="vertical" >
 
-    <Button
+    <android.support.v7.widget.AppCompatButton
         android:id="@+id/authenticate_btn"
         android:layout_width="fill_parent"
         android:layout_height="88dp"
         android:drawableLeft="@drawable/mdp_icon"
+        android:theme="@style/ButtonTheme"
         android:text="@string/authenticate" />
 
     <ImageView

@@ -1,71 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:paddingBottom="5dp" >
+    android:orientation="vertical">
 
     <View
         android:id="@+id/top_divider_line"
         android:layout_width="fill_parent"
         android:layout_height="2dp"
-        android:layout_alignParentTop="true"
         android:background="@color/mc_red_divider" />
 
-    <ImageView
-        android:id="@+id/activity_list_row_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@id/top_divider_line"
-        android:layout_margin="5dp" />
-
-    <TextView
-        android:id="@+id/timestamp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_below="@id/top_divider_line"
-        android:layout_marginLeft="5dp"
-        android:paddingRight="7dp"
-        android:textColor="@color/mc_timestamp_blue"
-        android:textSize="12dp" />
-
-    <TextView
-        android:id="@+id/activity_list_row_text1"
+    <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/top_divider_line"
-        android:layout_marginLeft="5dp"
-        android:layout_toLeftOf="@id/timestamp"
-        android:layout_toRightOf="@id/activity_list_row_icon"
-        android:ellipsize="end"
-        android:paddingRight="7dp"
-        android:singleLine="true"
-        android:textSize="16dp" />
+        android:padding="10dp">
 
-    <TextView
-        android:id="@+id/activity_list_row_text2"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/activity_list_row_text1"
-        android:layout_marginLeft="10dp"
-        android:layout_toLeftOf="@id/timestamp"
-        android:layout_toRightOf="@id/activity_list_row_icon"
-        android:ellipsize="end"
-        android:paddingRight="7dp"
-        android:textSize="14dp" />
+        <ImageView
+            android:id="@+id/activity_list_row_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_margin="5dp" />
 
-    <TextView
-        android:id="@+id/activity_list_row_text3"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/activity_list_row_text2"
-        android:layout_marginLeft="15dp"
-        android:layout_toLeftOf="@id/timestamp"
-        android:layout_toRightOf="@id/activity_list_row_icon"
-        android:ellipsize="end"
-        android:paddingRight="7dp"
-        android:singleLine="true"
-        android:textSize="14dp" />
+        <TextView
+            android:id="@+id/timestamp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginLeft="5dp"
+            android:paddingLeft="7dp"
+            android:paddingRight="7dp"
+            android:textColor="@color/mc_primary_color"
+            android:textSize="12sp" />
 
-</RelativeLayout>
+        <TextView
+            android:id="@+id/activity_list_row_text1"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_toLeftOf="@id/timestamp"
+            android:layout_toRightOf="@id/activity_list_row_icon"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/activity_list_row_text2"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/activity_list_row_text1"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="5dp"
+            android:layout_toRightOf="@id/activity_list_row_icon"
+            android:ellipsize="end"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/activity_list_row_text3"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/activity_list_row_text2"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="5dp"
+            android:layout_toRightOf="@id/activity_list_row_icon"
+            android:singleLine="true"
+            android:textSize="14sp"
+            android:textColor="@color/mc_list_item_3_line"/>
+
+    </RelativeLayout>
+</LinearLayout>

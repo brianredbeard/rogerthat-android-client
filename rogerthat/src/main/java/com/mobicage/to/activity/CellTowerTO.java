@@ -34,13 +34,21 @@ public class CellTowerTO implements com.mobicage.rpc.IJSONable {
     public CellTowerTO(Map<String, Object> json) throws IncompleteMessageException {
         if (json.containsKey("cid")) {
             Object val = json.get("cid");
-            this.cid = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.cid = ((Integer) val).longValue();
+            } else {
+                this.cid = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.activity.CellTowerTO object is missing field 'cid'");
         }
         if (json.containsKey("strength")) {
             Object val = json.get("strength");
-            this.strength = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.strength = ((Integer) val).longValue();
+            } else {
+                this.strength = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.activity.CellTowerTO object is missing field 'strength'");
         }

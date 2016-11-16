@@ -61,13 +61,21 @@ public class SettingsTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("geoLocationSamplingIntervalBattery")) {
             Object val = json.get("geoLocationSamplingIntervalBattery");
-            this.geoLocationSamplingIntervalBattery = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.geoLocationSamplingIntervalBattery = ((Integer) val).longValue();
+            } else {
+                this.geoLocationSamplingIntervalBattery = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.system.SettingsTO object is missing field 'geoLocationSamplingIntervalBattery'");
         }
         if (json.containsKey("geoLocationSamplingIntervalCharging")) {
             Object val = json.get("geoLocationSamplingIntervalCharging");
-            this.geoLocationSamplingIntervalCharging = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.geoLocationSamplingIntervalCharging = ((Integer) val).longValue();
+            } else {
+                this.geoLocationSamplingIntervalCharging = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.system.SettingsTO object is missing field 'geoLocationSamplingIntervalCharging'");
         }
@@ -79,7 +87,11 @@ public class SettingsTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("geoLocationTrackingDays")) {
             Object val = json.get("geoLocationTrackingDays");
-            this.geoLocationTrackingDays = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.geoLocationTrackingDays = ((Integer) val).longValue();
+            } else {
+                this.geoLocationTrackingDays = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.system.SettingsTO object is missing field 'geoLocationTrackingDays'");
         }
@@ -98,7 +110,11 @@ public class SettingsTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("operatingVersion")) {
             Object val = json.get("operatingVersion");
-            this.operatingVersion = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.operatingVersion = ((Integer) val).longValue();
+            } else {
+                this.operatingVersion = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.system.SettingsTO object is missing field 'operatingVersion'");
         }
@@ -116,7 +132,11 @@ public class SettingsTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("recordPhoneCallsDays")) {
             Object val = json.get("recordPhoneCallsDays");
-            this.recordPhoneCallsDays = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.recordPhoneCallsDays = ((Integer) val).longValue();
+            } else {
+                this.recordPhoneCallsDays = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.system.SettingsTO object is missing field 'recordPhoneCallsDays'");
         }
@@ -147,7 +167,11 @@ public class SettingsTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("version")) {
             Object val = json.get("version");
-            this.version = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.version = ((Integer) val).longValue();
+            } else {
+                this.version = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.system.SettingsTO object is missing field 'version'");
         }
@@ -159,7 +183,11 @@ public class SettingsTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("xmppReconnectInterval")) {
             Object val = json.get("xmppReconnectInterval");
-            this.xmppReconnectInterval = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.xmppReconnectInterval = ((Integer) val).longValue();
+            } else {
+                this.xmppReconnectInterval = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.system.SettingsTO object is missing field 'xmppReconnectInterval'");
         }

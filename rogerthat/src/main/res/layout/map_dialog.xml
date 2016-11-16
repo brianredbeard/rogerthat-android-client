@@ -1,29 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content" >
+    android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="fill_parent"
+    <android.support.v7.widget.Toolbar
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/toolbar"
+        app:theme="@style/Theme.AppCompat.Light"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:background="@color/mc_black"
-        android:gravity="center"
-        android:padding="2dp"
-        android:text="@string/validate_discovered_location"
-        android:textColor="@color/mc_divider_green"
-        android:textSize="18sp"
-        android:visibility="gone" />
-
-    <View
-        android:id="@+id/title_divider"
-        style="@style/RogerThatThickDivider"
-        android:layout_below="@id/title"
-        android:visibility="gone" >
-    </View>
+        android:minHeight="?attr/actionBarSize"
+        app:navigationContentDescription="@string/abc_action_bar_up_description"
+        android:background="@color/mc_background_color"
+        app:navigationIcon="?attr/homeAsUpIndicator"
+        app:title="@string/validate_discovered_location"
+        android:elevation="5dp"
+        />
 
     <LinearLayout
         android:id="@+id/map_verify"
@@ -34,31 +27,31 @@
         android:visibility="gone"
         android:orientation="horizontal" >
 
-        <Button
+        <android.support.v7.widget.AppCompatButton
             android:id="@+id/map_yes"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/yes"
-            android:visibility="gone" >
-        </Button>
+            android:theme="@style/ButtonTheme"
+            android:visibility="gone" />
 
-        <Button
+        <android.support.v7.widget.AppCompatButton
             android:id="@+id/map_no"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/no"
-            android:visibility="gone" >
-        </Button>
+            android:theme="@style/ButtonTheme"
+            android:visibility="gone" />
     </LinearLayout>
 
     <com.google.android.maps.MapView
         android:id="@+id/map"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/toolbar"
         android:layout_above="@id/map_verify"
-        android:layout_below="@id/title_divider"
         android:clickable="true"
         android:visibility="gone"
         android:apiKey="@string/google_maps_debug_api_key" />

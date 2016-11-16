@@ -62,7 +62,11 @@ public class SubmitSingleSliderFormRequestTO implements com.mobicage.rpc.IJSONab
         }
         if (json.containsKey("timestamp")) {
             Object val = json.get("timestamp");
-            this.timestamp = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.timestamp = ((Integer) val).longValue();
+            } else {
+                this.timestamp = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.forms.SubmitSingleSliderFormRequestTO object is missing field 'timestamp'");
         }

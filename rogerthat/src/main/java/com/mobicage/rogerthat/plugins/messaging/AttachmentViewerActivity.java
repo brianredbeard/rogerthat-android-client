@@ -17,30 +17,7 @@
  */
 package com.mobicage.rogerthat.plugins.messaging;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.net.URLEncoder;
-import java.util.Map;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.params.HttpClientParams;
-import org.json.simple.JSONValue;
-
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -51,18 +28,16 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
-import android.view.View;
 import android.view.WindowManager;
 import android.webkit.WebChromeClient;
-import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.MediaController;
-import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
+import com.github.barteksc.pdfviewer.PDFView;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.util.TextUtils;
@@ -73,6 +48,22 @@ import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.params.HttpClientParams;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 
 public class AttachmentViewerActivity extends ServiceBoundActivity {
 
@@ -300,14 +291,8 @@ public class AttachmentViewerActivity extends ServiceBoundActivity {
                 }
             });
 
-            final TextView titleTextView = (TextView) findViewById(R.id.title);
-            if (TextUtils.isEmptyOrWhitespace(mName)) {
-                titleTextView.setVisibility(View.GONE);
-                findViewById(R.id.divider).setVisibility(View.GONE);
-            } else {
-                titleTextView.setVisibility(View.VISIBLE);
-                titleTextView.setText(mName);
-                findViewById(R.id.divider).setVisibility(View.VISIBLE);
+            if (!TextUtils.isEmptyOrWhitespace(mName)) {
+                setTitle(mName);
             }
         }
 
@@ -427,32 +412,12 @@ public class AttachmentViewerActivity extends ServiceBoundActivity {
             });
 
         } else if (CONTENT_TYPE_PDF.equalsIgnoreCase(mContentType)) {
-            WebSettings settings = mWebview.getSettings();
-            settings.setJavaScriptEnabled(true);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                settings.setAllowUniversalAccessFromFileURLs(true);
-            }
-
-            mWebview.setWebViewClient(new WebViewClient() {
-
-                @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-                @Override
-                public WebResourceResponse shouldInterceptRequest (WebView view, String url) {
-                    if (fileOnDisk.equals(url)) {
-                        return null;
-                    }
-                    if (url.startsWith("file:///android_asset/")) {
-                        return null;
-                    }
-                    L.d("404: Expected: '" + fileOnDisk + "'\n Received: '" + url+"'");
-                    return new WebResourceResponse("text/plain", "UTF-8", null);
-                }
-            });
-            try {
-                mWebview.loadUrl("file:///android_asset/pdfjs/web/viewer.html?file=" + URLEncoder.encode(fileOnDisk, "UTF-8"));
-            } catch (UnsupportedEncodingException uee) {
-                L.bug(uee);
-            }
+            setContentView(R.layout.pdf_viewer);
+            PDFView viewer = (PDFView) findViewById(R.id.pdfView);
+            viewer.fromFile(mFile)
+                    .enableSwipe(true)
+                    .enableDoubletap(true)
+                    .load();
         } else {
             WebSettings settings = mWebview.getSettings();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
@@ -480,7 +445,6 @@ public class AttachmentViewerActivity extends ServiceBoundActivity {
     private void downloadAttachment() {
         final DownloadTask downloadTask = new DownloadTask(AttachmentViewerActivity.this);
         downloadTask.execute(mDownloadUrl);
-
         mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialog) {

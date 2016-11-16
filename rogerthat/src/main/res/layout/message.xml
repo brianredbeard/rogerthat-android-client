@@ -1,121 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    tools:ignore="UselessParent" >
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:minHeight="72dp"
+    android:orientation="horizontal"
+    android:paddingLeft="?attr/listPreferredItemPaddingLeft"
+    android:paddingRight="?attr/listPreferredItemPaddingRight">
 
-    <!-- We need this double RelativeLayout to make sure the padding works on android 1.5 as well -->
-
-    <RelativeLayout
-        android:id="@+id/frame"
-        android:layout_width="fill_parent"
+    <android.support.v7.widget.AppCompatCheckBox
+        android:id="@+id/message_checkbox"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="5dp" >
+        android:layout_gravity="center_vertical"
+        android:checked="false"
+        android:visibility="visible"
+        tools:visibility="gone" />
 
-        <CheckBox
-            android:id="@+id/message_checkbox"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_marginRight="5dp"
-            android:checked="false"
-            android:visibility="visible" />
+    <ImageView
+        android:id="@+id/avatar"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center"
+        android:background="@drawable/avatar_background_black"
+        android:layout_marginRight="16dp"
+        tools:src="@drawable/unknown_avatar" />
 
-        <ImageView
-            android:id="@+id/avatar"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_alignParentTop="true"
-            android:layout_marginRight="5dp"
-            android:layout_toRightOf="@id/message_checkbox"
-            android:background="@drawable/avatar_background_black"
-            android:padding="1dp" >
-        </ImageView>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="16dp"
+        android:paddingTop="16dp">
 
         <RelativeLayout
-            android:id="@+id/top"
-            android:layout_width="fill_parent"
-            android:layout_height="20dp"
-            android:layout_alignParentTop="true"
-            android:layout_toRightOf="@id/avatar"
-            android:orientation="horizontal" >
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/recipients"
+                style="@style/TextAppearance.AppCompat.Body2"
+                android:layout_width="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_toLeftOf="@+id/timestamp"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textSize="16sp"
+                tools:text="Firstname Lastname or something else that is can be long" />
 
             <TextView
                 android:id="@+id/timestamp"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="16dp"
                 android:layout_alignParentRight="true"
-                android:layout_centerInParent="true"
-                android:layout_marginLeft="5dp"
+                android:layout_gravity="right"
+                android:layout_marginLeft="16dp"
+                android:gravity="right"
                 android:textColor="@android:color/secondary_text_light"
-                android:textSize="12sp" >
-            </TextView>
-
-            <TextView
-                android:id="@+id/recipients"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_centerInParent="true"
-                android:layout_toLeftOf="@id/timestamp"
-                android:textSize="14sp"
-                android:ellipsize="end"
-                android:singleLine="true" >
-            </TextView>
+                android:textSize="12sp"
+                tools:text="Sep 7" />
         </RelativeLayout>
 
-        <RelativeLayout
-            android:layout_width="fill_parent"
-            android:layout_height="30dp"
-            android:layout_below="@id/top"
-            android:layout_toRightOf="@id/avatar" >
-            
-            <LinearLayout
-                android:id="@+id/message_details"
-                android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        android:layout_alignParentRight="true"
-		        android:layout_centerInParent="true"
-		        android:orientation="horizontal">
-	
-	            <TextView
-	                android:id="@+id/message_count"
-	                android:layout_width="wrap_content"
-	                android:layout_height="wrap_content"
-	                android:layout_marginRight="3dp"
-	                android:layout_marginTop="5dp"
-	                android:background="@drawable/reply_count"
-	                android:paddingLeft="4dp"
-	                android:paddingRight="4dp"
-	                android:singleLine="true"
-	                android:textColor="@android:color/white"
-	                android:textSize="14sp" >
-	            </TextView>
-	            
-	            <ImageView
-	                android:id="@+id/status_icon"
-	                android:layout_width="16dp"
-	                android:layout_height="19dp"
-	                android:layout_marginTop="5dp" >
-	            </ImageView>
-            </LinearLayout>
-
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/message"
-                android:layout_width="fill_parent"
+                style="@style/TextAppearance.AppCompat.Body1"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:layout_marginRight="3dp"
-                android:layout_marginTop="5dp"
-                android:layout_toLeftOf="@id/message_details"
+                android:layout_marginTop="4dp"
                 android:ellipsize="end"
-                android:singleLine="true"
-                android:textColor="@android:color/primary_text_light"
-                android:textSize="18sp" >
-            </TextView>
-        </RelativeLayout>
-    </RelativeLayout>
+                android:maxLines="1"
+                android:textSize="14sp"
+                tools:text="Message content goes here. Long text should not overlap"
+                tools:visibility="visible" />
 
-</RelativeLayout>
+            <TextView
+                android:id="@+id/message_count"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="bottom"
+                android:layout_marginLeft="16dp"
+                android:background="@drawable/reply_count"
+                android:gravity="center"
+                android:textColor="@color/mc_white"
+                android:textSize="10sp"
+                tools:text="9+" />
+
+            <ImageView
+                android:id="@+id/message_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:paddingLeft="10dp"
+                app:ico_color="@color/mc_primary_color"
+                app:ico_icon="@string/faw_check"
+                app:ico_size="15dp"/>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>
+

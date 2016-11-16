@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/mc_background" >
+                android:layout_width="fill_parent"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_height="wrap_content">
 
     <ImageView
         android:id="@+id/sender_avatar"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_margin="3dp"
+        android:layout_alignBottom="@id/text_bubble"
+        android:layout_marginBottom="5dp"
+        android:layout_marginLeft="5dp"
         android:background="@drawable/avatar_background_black"
         android:padding="1dp"
         android:src="@drawable/unknown_avatar" >
@@ -18,33 +19,35 @@
 
     <RelativeLayout
         android:id="@+id/text_bubble"
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_marginRight="3dp"
-        android:layout_marginTop="3dp"
+        android:layout_marginRight="50dp"
+        android:background="@drawable/textballoon2_left"
         android:layout_toRightOf="@id/sender_avatar"
-        android:background="@drawable/textballoon_left" >
+        android:padding="25dp">
 
         <ImageView
             android:id="@+id/status"
             android:layout_width="16dp"
             android:layout_height="16dp"
-            android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
+            android:layout_marginLeft="5dp"
+            android:layout_toRightOf="@id/message_info"
             android:src="@drawable/lock" >
         </ImageView>
 
         <TextView
             android:id="@+id/message_info"
-            android:layout_width="fill_parent"
+            fontPath="fonts/lato_light_italic.ttf"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:layout_toLeftOf="@id/status"
             android:ellipsize="start"
-            android:singleLine="true"
-            android:textColor="@color/mc_gray_11" >
+            android:maxLines="1"
+            android:layout_width="wrap_content"
+            android:textColor="@color/mc_primary_color"
+            tools:text="Gert Cornelis - 12:30">
         </TextView>
 
         <LinearLayout
@@ -58,11 +61,13 @@
 
         <TextView
             android:id="@+id/message"
-            android:layout_width="fill_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/message_attachments"
+            android:layout_marginTop="10dp"
             android:textColor="@android:color/primary_text_light"
-            android:textSize="16sp" >
+            android:textSize="17sp"
+            tools:text="Alles goed bartjeeeeeeeee!!!!!??">
         </TextView>
     </RelativeLayout>
 
@@ -73,37 +78,36 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:layout_below="@id/text_bubble"
-        android:layout_marginLeft="1dp"
+        android:layout_marginLeft="60dp"
         android:layout_marginRight="1dp"
         android:layout_marginTop="5dp"
         android:orientation="vertical" >
     </LinearLayout>
 
-    <ProgressBar
-        android:id="@+id/spinner"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@id/sender_avatar"
-        android:layout_marginLeft="3dp"
-        android:layout_marginTop="3dp"
-        android:indeterminate="true" >
-    </ProgressBar>
+    <LinearLayout
+        android:id="@+id/read_friends_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/buttons"
+        android:layout_margin="5dp"
+        android:gravity="right"
+        android:orientation="horizontal" />
 
-    <Button
+    <android.support.v7.widget.AppCompatButton
         android:id="@+id/rogerthat_button"
-        android:layout_width="fill_parent"
+        style="@style/RogerthatButtonTheme"
+        fontPath="fonts/lato_bold.ttf"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_below="@id/buttons"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/read_friends_container"
         android:layout_marginBottom="5dp"
         android:layout_marginLeft="1dp"
         android:layout_marginRight="1dp"
         android:layout_marginTop="5dp"
         android:text="@string/rogerthat"
-        android:textColor="@android:color/primary_text_dark"
-        android:textStyle="bold"
-        android:visibility="gone" >
-    </Button>
+        android:textColor="@color/mc_white"
+        android:visibility="gone"/>
 
 </RelativeLayout>

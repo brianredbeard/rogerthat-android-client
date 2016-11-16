@@ -18,11 +18,6 @@
 
 package com.mobicage.rogerthat.plugins.messaging.widgets;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -31,6 +26,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.speech.RecognizerIntent;
 import android.text.InputFilter;
+import android.text.InputType;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.EditText;
@@ -39,6 +35,7 @@ import android.widget.TextView;
 
 import com.mobicage.api.messaging.Rpc;
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.util.logging.L;
@@ -48,11 +45,16 @@ import com.mobicage.to.messaging.forms.SubmitTextLineFormRequestTO;
 import com.mobicage.to.messaging.forms.SubmitTextLineFormResponseTO;
 import com.mobicage.to.messaging.forms.UnicodeWidgetResultTO;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
 public class TextLineWidget extends Widget {
 
     public static final int REQUEST_CODE_VOICE = 123;
 
-    private EditText mEditText;
+    protected EditText mEditText;
 
     public TextLineWidget(Context context) {
         super(context);
@@ -77,14 +79,25 @@ public class TextLineWidget extends Widget {
         return false;
     }
 
+    public int getDefaultInputTypes() {
+        return InputType.TYPE_NULL;
+    }
+
     @Override
     public void initializeWidget() {
-        mEditText = (EditText) findViewById(R.id.edit_text);
+        if (mColorScheme == BrandingMgr.ColorScheme.DARK) {
+            findViewById(R.id.edit_text).setVisibility(View.GONE);
+            mEditText = (EditText) findViewById(R.id.edit_text_white);
+            mEditText.setVisibility(View.VISIBLE);
+        } else {
+            mEditText = (EditText) findViewById(R.id.edit_text);
+        }
+        mEditText.setTextColor(mTextColor);
         mEditText.setText((String) mWidgetMap.get("value"));
         mEditText.setHint((String) mWidgetMap.get("place_holder"));
         mEditText.setFilters(new InputFilter[] { new InputFilter.LengthFilter(((Long) mWidgetMap.get("max_chars"))
             .intValue()) });
-        mEditText.setInputType(KeyboardType.getInputType((String) mWidgetMap.get("keyboard_type")));
+        mEditText.setInputType(getDefaultInputTypes() | KeyboardType.getInputType((String) mWidgetMap.get("keyboard_type")));
 
         ImageButton btnSpeak = (ImageButton) findViewById(R.id.btn_speak);
         if (AppConstants.SPEECH_TO_TEXT && isSpeechRecognitionActivityPresented(mActivity)) {

@@ -60,7 +60,11 @@ public class HeartBeatRequestTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("appType")) {
             Object val = json.get("appType");
-            this.appType = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.appType = ((Integer) val).longValue();
+            } else {
+                this.appType = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.system.HeartBeatRequestTO object is missing field 'appType'");
         }
@@ -96,13 +100,21 @@ public class HeartBeatRequestTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("majorVersion")) {
             Object val = json.get("majorVersion");
-            this.majorVersion = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.majorVersion = ((Integer) val).longValue();
+            } else {
+                this.majorVersion = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.system.HeartBeatRequestTO object is missing field 'majorVersion'");
         }
         if (json.containsKey("minorVersion")) {
             Object val = json.get("minorVersion");
-            this.minorVersion = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.minorVersion = ((Integer) val).longValue();
+            } else {
+                this.minorVersion = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.system.HeartBeatRequestTO object is missing field 'minorVersion'");
         }
@@ -168,7 +180,11 @@ public class HeartBeatRequestTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("timestamp")) {
             Object val = json.get("timestamp");
-            this.timestamp = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.timestamp = ((Integer) val).longValue();
+            } else {
+                this.timestamp = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.system.HeartBeatRequestTO object is missing field 'timestamp'");
         }
@@ -180,7 +196,11 @@ public class HeartBeatRequestTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("timezoneDeltaGMT")) {
             Object val = json.get("timezoneDeltaGMT");
-            this.timezoneDeltaGMT = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.timezoneDeltaGMT = ((Integer) val).longValue();
+            } else {
+                this.timezoneDeltaGMT = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.system.HeartBeatRequestTO object is missing field 'timezoneDeltaGMT'");
         }

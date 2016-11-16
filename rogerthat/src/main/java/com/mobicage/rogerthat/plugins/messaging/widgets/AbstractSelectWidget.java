@@ -18,10 +18,6 @@
 
 package com.mobicage.rogerthat.plugins.messaging.widgets;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -30,6 +26,10 @@ import android.widget.Checkable;
 import android.widget.TextView;
 
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("unchecked")
 public abstract class AbstractSelectWidget extends Widget {

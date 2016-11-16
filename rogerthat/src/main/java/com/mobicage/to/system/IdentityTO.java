@@ -32,6 +32,9 @@ public class IdentityTO implements com.mobicage.rpc.IJSONable {
     public boolean hasBirthdate;
     public boolean hasGender;
     public String name;
+    public String owncloudPassword;
+    public String owncloudUri;
+    public String owncloudUsername;
     public String profileData;
     public String qualifiedIdentifier;
 
@@ -41,13 +44,21 @@ public class IdentityTO implements com.mobicage.rpc.IJSONable {
     public IdentityTO(Map<String, Object> json) throws IncompleteMessageException {
         if (json.containsKey("avatarId")) {
             Object val = json.get("avatarId");
-            this.avatarId = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.avatarId = ((Integer) val).longValue();
+            } else {
+                this.avatarId = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.system.IdentityTO object is missing field 'avatarId'");
         }
         if (json.containsKey("birthdate")) {
             Object val = json.get("birthdate");
-            this.birthdate = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.birthdate = ((Integer) val).longValue();
+            } else {
+                this.birthdate = ((Long) val).longValue();
+            }
         } else {
             this.birthdate = 0;
         }
@@ -59,7 +70,11 @@ public class IdentityTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("gender")) {
             Object val = json.get("gender");
-            this.gender = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.gender = ((Integer) val).longValue();
+            } else {
+                this.gender = ((Long) val).longValue();
+            }
         } else {
             this.gender = 0;
         }
@@ -80,6 +95,24 @@ public class IdentityTO implements com.mobicage.rpc.IJSONable {
             this.name = (String) val;
         } else {
             throw new IncompleteMessageException("com.mobicage.to.system.IdentityTO object is missing field 'name'");
+        }
+        if (json.containsKey("owncloudPassword")) {
+            Object val = json.get("owncloudPassword");
+            this.owncloudPassword = (String) val;
+        } else {
+            throw new IncompleteMessageException("com.mobicage.to.system.IdentityTO object is missing field 'owncloudPassword'");
+        }
+        if (json.containsKey("owncloudUri")) {
+            Object val = json.get("owncloudUri");
+            this.owncloudUri = (String) val;
+        } else {
+            throw new IncompleteMessageException("com.mobicage.to.system.IdentityTO object is missing field 'owncloudUri'");
+        }
+        if (json.containsKey("owncloudUsername")) {
+            Object val = json.get("owncloudUsername");
+            this.owncloudUsername = (String) val;
+        } else {
+            throw new IncompleteMessageException("com.mobicage.to.system.IdentityTO object is missing field 'owncloudUsername'");
         }
         if (json.containsKey("profileData")) {
             Object val = json.get("profileData");
@@ -105,6 +138,9 @@ public class IdentityTO implements com.mobicage.rpc.IJSONable {
         obj.put("hasBirthdate", this.hasBirthdate);
         obj.put("hasGender", this.hasGender);
         obj.put("name", this.name);
+        obj.put("owncloudPassword", this.owncloudPassword);
+        obj.put("owncloudUri", this.owncloudUri);
+        obj.put("owncloudUsername", this.owncloudUsername);
         obj.put("profileData", this.profileData);
         obj.put("qualifiedIdentifier", this.qualifiedIdentifier);
         return obj;

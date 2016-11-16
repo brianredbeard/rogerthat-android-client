@@ -25,6 +25,7 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.util.SparseIntArray;
 import android.view.KeyEvent;
@@ -37,21 +38,17 @@ import android.widget.TextView;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.Friend;
-import com.mobicage.rogerthat.plugins.friends.FriendSearchActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendStore;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.friends.MenuItemPresser;
-import com.mobicage.rogerthat.plugins.friends.MenuItemPressingActivity;
 import com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity;
 import com.mobicage.rogerthat.plugins.friends.ServiceMenu;
 import com.mobicage.rogerthat.plugins.friends.ServiceMenuItem;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessageStore;
-import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.plugins.scan.ProcessScanActivity;
-import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
-import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
+import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.RegexPatterns;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
@@ -68,13 +65,13 @@ import fr.castorflex.android.verticalviewpager.VerticalViewPager;
 /**
  * Super class for HomeActivity | Only used in City & Enterprise Apps
  */
-public abstract class AbstractHomeActivity extends ServiceBoundActivity implements MenuItemPressingActivity {
+public abstract class AbstractHomeActivity extends ServiceBoundActivity {
 
-    protected static class ItemDef {
-        private int iconId;
-        private int labelId;
-        private int labelTextId;
-        private SafeViewOnClickListener clickListener;
+    public static class ItemDef {
+        public int iconId;
+        public int labelId;
+        public int labelTextId;
+        public SafeViewOnClickListener clickListener;
 
         public ItemDef(int iconId, int labelId, int labelTextId, SafeViewOnClickListener clickListener) {
             super();
@@ -85,7 +82,7 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity implemen
         }
     }
 
-    protected static final String INTENT_PROCESSED = "processed";
+    public static final String INTENT_PROCESSED = "processed";
 
     public final static String INTENT_KEY_LAUNCHINFO = "launchInfo";
     public final static String INTENT_VALUE_SHOW_MESSAGES = "showMessages";
@@ -117,7 +114,7 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity implemen
         super.onCreate(savedInstanceState);
         LayoutInflater inflater = getLayoutInflater();
 
-        setContentView(AppConstants.HOME_ACTIVITY_LAYOUT);
+        setContentViewWithoutNavigationBar(AppConstants.HOME_ACTIVITY_LAYOUT);
 
         if (AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.homescreen_3x3_with_qr_code ||
                 AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.homescreen_3x3) {
@@ -128,7 +125,7 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity implemen
 
         if (AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.homescreen_3x3_with_qr_code) {
             if (AppConstants.SHOW_HOMESCREEN_FOOTER) {
-                ((TextView) findViewById(R.id.loyalty_text)).setTextColor(getResources().getColor(R.color
+                ((TextView) findViewById(R.id.loyalty_text)).setTextColor(ContextCompat.getColor(this, R.color
                         .mc_homescreen_background));
             }
 
@@ -153,14 +150,17 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity implemen
             findViewById(R.id.scan_btn).setOnClickListener(new SafeViewOnClickListener() {
                 @Override
                 public void safeOnClick(View v) {
-                    goToScanActivity();
+                    ActivityUtils.goToScanActivity(AbstractHomeActivity.this, false, null);
                 }
             });
         }
 
         if (!AppConstants.SHOW_HOMESCREEN_FOOTER) {
             for (int id : new int[]{R.id.homescreen_footer, R.id.invisible_homescreen_footer}) {
-                findViewById(id).setVisibility(View.GONE);
+                View view = findViewById(id);
+                if (view != null) {
+                    view.setVisibility(View.GONE);
+                }
             }
 
             final View secondSpacerView = findViewById(R.id.second_spacerview);
@@ -240,16 +240,6 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity implemen
         }
     }
 
-    protected void goToMessagingActivity() {
-        Intent i = new Intent(this, MessagingActivity.class);
-        startActivity(i);
-    }
-
-    protected void goToUserFriendsActivity() {
-        Intent launchIntent = new Intent(this, UserFriendsActivity.class);
-        startActivity(launchIntent);
-    }
-
     protected void goToServicesActivity(int organizationType, boolean collapse) {
         if (collapse) {
             int serviceCount = 0;
@@ -274,29 +264,7 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity implemen
             }
         }
 
-        final Intent launchIntent = new Intent(this, ServiceFriendsActivity.class);
-        launchIntent.putExtra(ServiceFriendsActivity.ORGANIZATION_TYPE, organizationType);
-        startActivity(launchIntent);
-    }
-
-    protected void goToScanActivity() {
-        Intent launchIntent = new Intent(this, ScanTabActivity.class);
-        startActivity(launchIntent);
-    }
-
-    protected void goToMoreActivity() {
-        final Intent launchIntent = new Intent(this, MoreActivity.class);
-        startActivity(launchIntent);
-    }
-
-    protected void goToProfileActivity() {
-        final Intent launchIntent = new Intent(this, ProfileActivity.class);
-        startActivity(launchIntent);
-    }
-
-    protected void goToFriendSearchActivity() {
-        final Intent serviceSearch = new Intent(this, FriendSearchActivity.class);
-        startActivity(serviceSearch);
+        ActivityUtils.goToServicesActivity(this, organizationType, false, false, null);
     }
 
     protected void simulateMenuItemPress(String serviceEmail, long[] serviceCoords) {
@@ -330,19 +298,19 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity implemen
 
     protected void goToActivity(String activityName, boolean collapse) {
         if ("messages".equals(activityName)) {
-            goToMessagingActivity();
+            ActivityUtils.goToMessagingActivity(this, false, null);
         } else if ("scan".equals(activityName)) {
-            goToScanActivity();
+            ActivityUtils.goToScanActivity(this, false, null);
         } else if ("services".equals(activityName)) {
             goToServicesActivity(FriendStore.SERVICE_ORGANIZATION_TYPE_UNSPECIFIED, collapse);
         } else if ("friends".equals(activityName)) {
-            goToUserFriendsActivity();
+            ActivityUtils.goToFriendSearchActivity(this, false, null);
         } else if ("directory".equals(activityName)) {
-            goToFriendSearchActivity();
+            ActivityUtils.goToFriendSearchActivity(this, false, null);
         } else if ("profile".equals(activityName)) {
-            goToProfileActivity();
+            ActivityUtils.goToProfileActivity(this, false, null);
         } else if ("more".equals(activityName)) {
-            goToMoreActivity();
+            ActivityUtils.goToMoreActivity(this, false, null);
         } else if ("community_services".equals(activityName)) {
             goToServicesActivity(FriendStore.SERVICE_ORGANIZATION_TYPE_CITY, collapse);
         } else if ("merchants".equals(activityName)) {
@@ -361,7 +329,7 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity implemen
         if (intent.getBooleanExtra(INTENT_PROCESSED, false))
             return;
         if (url != null) {
-            goToMessagingActivity();
+            ActivityUtils.goToMessagingActivity(this, false, null);
             processUrl(url);
         } else if (intent.hasExtra(INTENT_KEY_LAUNCHINFO)) {
             String value = intent.getStringExtra(INTENT_KEY_LAUNCHINFO);
@@ -369,14 +337,14 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity implemen
                 // goToUserFriendsActivity();
 
             } else if (INTENT_VALUE_SHOW_MESSAGES.equals(value)) {
-                goToMessagingActivity();
+                ActivityUtils.goToMessagingActivity(this, false, null);
 
             } else if (INTENT_VALUE_SHOW_NEW_MESSAGES.equals(value)) {
                 if (intent.hasExtra(INTENT_KEY_MESSAGE)) {
                     String messageKey = intent.getStringExtra(INTENT_KEY_MESSAGE);
                     goToMessageDetail(messageKey);
                 } else {
-                    goToMessagingActivity();
+                    ActivityUtils.goToMessagingActivity(this, false, null);
                 }
 
             } else if (INTENT_VALUE_SHOW_UPDATED_MESSAGES.equals(value)) {
@@ -384,16 +352,15 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity implemen
                     String messageKey = intent.getStringExtra(INTENT_KEY_MESSAGE);
                     goToMessageDetail(messageKey);
                 } else {
-                    goToMessagingActivity();
+                    ActivityUtils.goToMessagingActivity(this, false, null);
                 }
 
             } else if (INTENT_VALUE_SHOW_SCANTAB.equals(value)) {
-                goToScanActivity();
+                ActivityUtils.goToScanActivity(this, false, null);
             } else {
                 L.bug("Unexpected (key, value) for HomeActivity intent: (" + INTENT_KEY_LAUNCHINFO + ", " + value + ")");
             }
             if (mMessagingPlugin != null) {
-                mMessagingPlugin.updateMessagesNotification(false, false, false);
                 handleBadgeMessages();
             }
         }
@@ -492,7 +459,6 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity implemen
 
     @Override
     protected void onServiceUnbound() {
-        mMessagingPlugin.updateMessagesNotification(false, false, false);
         handleBadgeMessages();
         unregisterReceiver(mBroadcastReceiver);
 

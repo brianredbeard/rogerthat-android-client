@@ -18,12 +18,6 @@
 
 package com.mobicage.rogerthat.util.ui;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Notification;
@@ -41,6 +35,7 @@ import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Point;
+import android.graphics.drawable.GradientDrawable;
 import android.media.ThumbnailUtils;
 import android.os.Bundle;
 import android.provider.MediaStore.Video.Thumbnails;
@@ -54,18 +49,30 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
+import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.T;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class UIUtils {
 
@@ -80,6 +87,7 @@ public class UIUtils {
     public static final String NOTIFICATION_TIMESTAMP = "NOTIFICATION_TIMESTAMP";
 
     private static List<Activity> sActivities = new ArrayList<Activity>();
+    private static Map<String, Integer> notificationIds = new HashMap<>();
 
     public static void onActivityStart(final Activity activity) {
         if (T.getThreadType() != T.UI) {
@@ -111,21 +119,26 @@ public class UIUtils {
     }
 
     public static void doNotification(Context pContext, String title, String message, int notificationId,
-        String action, boolean withSound, boolean withVibration, boolean withLight, boolean autoCancel, int icon,
-        int notificationNumber, String extra, String extraData, String tickerText, long timestamp) {
+                                      String action, boolean withSound, boolean withVibration, boolean withLight,
+                                      boolean autoCancel, int icon, int notificationNumber, String extra,
+                                      String extraData, String tickerText, long timestamp, int priority,
+                                      List<NotificationCompat.Action> actionButtons,
+                                      String longNotificationText, Bitmap largeIcon, String category) {
         Bundle b = null;
         if (extra != null) {
             b = new Bundle();
             b.putString(extra, extraData);
         }
         doNotification(pContext, title, message, notificationId, action, withSound, withVibration, withLight,
-            autoCancel, icon, notificationNumber, b, tickerText, timestamp);
-
+                autoCancel, icon, notificationNumber, b, tickerText, timestamp, priority, actionButtons,
+                longNotificationText, largeIcon, category);
     }
 
-    public static void doNotification(Context pContext, String title, String message, int notificationId,
-        String action, boolean withSound, boolean withVibration, boolean withLight, boolean autoCancel, int icon,
-        int notificationNumber, Bundle extras, String tickerText, long timestamp) {
+    public static void doNotification(Context pContext, String title, String message, int notificationId, String action,
+                                      boolean withSound, boolean withVibration, boolean withLight, boolean autoCancel,
+                                      int icon, int notificationNumber, Bundle extras, String tickerText,
+                                      long timestamp, int priority, List<NotificationCompat.Action> actionButtons,
+                                      String longNotificationText, Bitmap largeIcon, String category) {
         T.dontCare();
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(pContext);
         int defaults = 0;
@@ -143,31 +156,59 @@ public class UIUtils {
 
         builder.setAutoCancel(autoCancel);
         builder.setOngoing(!autoCancel);
+        builder.setCategory(category);
 
         if (message != null) {
             builder.setSmallIcon(icon);
-            builder.setTicker(tickerText);
+            if (largeIcon != null) {
+                builder.setLargeIcon(largeIcon);
+            }
+            if (tickerText != null) {
+                builder.setTicker(tickerText);
+            }
             builder.setWhen(System.currentTimeMillis());
             final Intent intent = new Intent(action, null, pContext, MainActivity.class);
-            intent.addFlags(MainActivity.FLAG_CLEAR_STACK);
+            intent.addFlags(MainActivity.FLAG_CLEAR_STACK_SINGLE_TOP);
             if (extras != null)
                 intent.putExtras(extras);
             intent.putExtra(NOTIFICATION_TIMESTAMP, timestamp);
 
-            final PendingIntent pi = PendingIntent.getActivity(pContext, 1000, intent,
+            final PendingIntent pi = PendingIntent.getActivity(pContext, NotificationID.next(), intent,
                     PendingIntent.FLAG_UPDATE_CURRENT);
 
             builder.setContentIntent(pi);
             builder.setContentText(message);
             builder.setContentTitle(title);
+            if (!TextUtils.isEmptyOrWhitespace(longNotificationText)) {
+                builder.setStyle(new NotificationCompat.BigTextStyle().bigText(longNotificationText));
+            }
+            builder.setPriority(priority);
+            if (actionButtons != null) {
+                for (NotificationCompat.Action actionButton : actionButtons) {
+                    builder.addAction(actionButton);
+                }
+            }
         }
 
         builder.setNumber(notificationNumber);
 
         final NotificationManager nm = (NotificationManager) pContext.getSystemService(Context.NOTIFICATION_SERVICE);
         nm.notify(notificationId, builder.build());
-
         sNotificationIDs.add(notificationId);
+    }
+
+    public static int getNotificationId(final String notificationKey, boolean create) {
+        for (Map.Entry<String, Integer> notification : notificationIds.entrySet()) {
+            if (notification.getKey().equals(notificationKey)) {
+                return notification.getValue();
+            }
+        }
+        if (!create) {
+            return -1;
+        }
+        int notificationID = NotificationID.next();
+        notificationIds.put(notificationKey, notificationID);
+        return notificationID;
     }
 
     public static void cancelNotification(final Context pContext, final int pNotificationId) {
@@ -176,12 +217,10 @@ public class UIUtils {
         nm.cancel(pNotificationId);
     }
 
-    public static void cancelAllNotifications(final Context pContext) {
-        T.dontCare();
-        final NotificationManager nm = (NotificationManager) pContext.getSystemService(Context.NOTIFICATION_SERVICE);
-        for (final Iterator<Integer> it = sNotificationIDs.iterator(); it.hasNext();) {
-            nm.cancel(it.next());
-            it.remove();
+    public static void cancelNotification(final Context context, final String notificationString) {
+        int notificationId = getNotificationId(notificationString, false);
+        if (notificationId != -1) {
+            cancelNotification(context, notificationId);
         }
     }
 
@@ -250,7 +289,21 @@ public class UIUtils {
     }
 
     public static boolean showHint(final Activity activity, final MainService mainService,
-        final SafeRunnable onDismissHandler, final String hintCode, final int hintResource, final Object... args) {
+                                   final SafeRunnable onDismissHandler, final String hintCode,
+                                   final int hintResource, final Object... args) {
+        return UIUtils.showHintWithImage(activity, mainService, null, hintCode, null, hintResource, args);
+    }
+
+    public static boolean showHintWithImage(final Activity activity, final MainService mainService,
+                                            final String hintCode, final FontAwesome.Icon hintIcon,
+                                            final int hintResource, final Object... args) {
+
+        return UIUtils.showHintWithImage(activity, mainService, null, hintCode, hintIcon, hintResource, args);
+    }
+
+    public static boolean showHintWithImage(final Activity activity, final MainService mainService,
+                                            final SafeRunnable onDismissHandler, final String hintCode,
+                                            final FontAwesome.Icon hintIcon, final int hintResource, final Object... args) {
         final ConfigurationProvider configurationProvider = mainService.getConfigurationProvider();
         final String configkey = "HINT_REPOSITORY";
         final com.mobicage.rogerthat.config.Configuration config = configurationProvider.getConfiguration(configkey);
@@ -261,6 +314,11 @@ public class UIUtils {
         final View checkboxLayout = inflater.inflate(R.layout.hint, null);
         final TextView message = (TextView) checkboxLayout.findViewById(R.id.message);
         final CheckBox checkBox = (CheckBox) checkboxLayout.findViewById(R.id.checkBox);
+        if (hintIcon != null) {
+            final ImageView icon = (ImageView) checkboxLayout.findViewById(R.id.icon);
+            icon.setImageDrawable(new IconicsDrawable(activity, hintIcon).color(Color.DKGRAY).sizeDp(30));
+            icon.setVisibility(View.VISIBLE);
+        }
         Resources resources = activity.getResources();
         message.setText(resources.getString(hintResource, args));
 
@@ -327,28 +385,6 @@ public class UIUtils {
         size.x = display.getWidth();
         size.y = display.getHeight();
         return size;
-    }
-
-    public static float getLightness(int color) {
-        int red = Color.red(color);
-        int green = Color.green(color);
-        int blue = Color.blue(color);
-        float r = red / 255f;
-        float g = green / 255f;
-        float b = blue / 255f;
-        float cMax = Math.max(r, Math.max(g, b));
-        float cMin = Math.min(r, Math.min(g, b));
-        return (cMax + cMin) / 2f;
-    }
-
-    public static float getLuminus(int color) {
-        int red = Color.red(color);
-        int green = Color.green(color);
-        int blue = Color.blue(color);
-        float r = red / 255f;
-        float g = green / 255f;
-        float b = blue / 255f;
-        return (0.299f * r) + (0.587f * g) + (0.114f * b);
     }
 
     public static ColorFilter imageColorFilter(int color) {
@@ -446,4 +482,38 @@ public class UIUtils {
         showAlertDialog(context, null, R.string.error_please_try_again);
     }
 
+    public static boolean isSupportedFontawesomeIcon(String iconName) {
+        return iconName != null && getIcon(iconName) != null;
+    }
+
+    public static FontAwesome.Icon getIcon(String iconName) {
+        iconName = iconName.replace("fa-", "faw_").replace("-", "_");
+        try {
+            return FontAwesome.Icon.valueOf(iconName);
+        } catch (IllegalArgumentException exception) {
+            L.d("Unknown icon: " + iconName);
+            return null;
+        }
+    }
+
+    public static IconicsDrawable getIconFromString(Context context, String iconName) {
+        FontAwesome.Icon icon = getIcon(iconName);
+        if (icon == null) {
+            icon = FontAwesome.Icon.faw_question;
+        }
+        return new IconicsDrawable(context, icon);
+    }
+
+    public static void setIconBackground(ImageView imageView, int backgroundColor) {
+        GradientDrawable background = (GradientDrawable) imageView.getBackground();
+        background.setColor(backgroundColor);
+    }
+}
+
+class NotificationID {
+    private final static AtomicInteger c = new AtomicInteger(1000);
+
+    public static int next() {
+        return c.incrementAndGet();
+    }
 }

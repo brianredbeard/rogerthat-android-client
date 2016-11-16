@@ -17,21 +17,6 @@
  */
 package com.mobicage.rogerthat.plugins.messaging;
 
-import static com.mobicage.rogerthat.util.db.DBUtils.bindString;
-
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.jivesoftware.smack.util.Base64;
-import org.json.simple.JSONValue;
-
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -62,6 +47,21 @@ import com.mobicage.to.messaging.GetConversationAvatarRequestTO;
 import com.mobicage.to.messaging.MemberStatusTO;
 import com.mobicage.to.messaging.MemberStatusUpdateRequestTO;
 import com.mobicage.to.messaging.MessageTO;
+
+import org.jivesoftware.smack.util.Base64;
+import org.json.simple.JSONValue;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static com.mobicage.rogerthat.util.db.DBUtils.bindString;
 
 public class MessageStore implements Closeable {
 
@@ -132,6 +132,10 @@ public class MessageStore implements Closeable {
     private final SQLiteStatement mStoreThreadAvatar;
 
     private final SQLiteStatement mGetMessageMessage;
+
+    private final SQLiteStatement mGetUnreadMessageCountInThread;
+    private final SQLiteStatement mGetTotalDirtyMessagecount;
+    private final SQLiteStatement mUpdateMessageRecipients;
 
     public MessageStore(final DatabaseManager databaseManager, final MainService mainService) {
         T.UI();
@@ -213,6 +217,9 @@ public class MessageStore implements Closeable {
         mThreadAvatarCountByHash = mDb.compileStatement(mMainService.getString(R.string.sql_thread_avatar_count));
         mStoreThreadAvatar = mDb.compileStatement(mMainService.getString(R.string.sql_thread_avatar_insert));
         mGetMessageMessage = mDb.compileStatement(mMainService.getString(R.string.sql_message_message_get));
+        mGetUnreadMessageCountInThread = mDb.compileStatement(mMainService.getString(R.string.sql_get_unread_count_in_thread));
+        mGetTotalDirtyMessagecount = mDb.compileStatement(mMainService.getString(R.string.sql_get_total_unread_count));
+        mUpdateMessageRecipients = mDb.compileStatement(mMainService.getString(R.string.sql_store_message_recipients));
     }
 
     public CursorSet getMessagesCursor(String memberFilter) {
@@ -374,9 +381,27 @@ public class MessageStore implements Closeable {
         TransactionHelper.runInTransaction(mDb, "storeNewMessage", new TransactionWithoutResult() {
             @Override
             protected void run() {
+                L.d("Storing new message with key " + message.key + " and parent key " + message.parent_key);
                 final boolean fetchThreadAvatar;
-
                 long sortid;
+
+                StringBuilder recipients = new StringBuilder();
+                boolean needscomma = false;
+                if (FriendsPlugin.SYSTEM_FRIEND.equals(message.sender) ||
+                        mFriendsPlugin.getStore().getFriendType(message.sender) == FriendsPlugin.FRIEND_TYPE_SERVICE) {
+                    needscomma = true;
+                    recipients.append(mFriendsPlugin.getName(message.sender));
+                }
+
+                for (MemberStatusTO member : message.members) {
+                    if (member.member.equals(me))
+                        continue;
+                    if (needscomma)
+                        recipients.append(", ");
+                    else
+                        needscomma = true;
+                    recipients.append(mFriendsPlugin.getName(member.member));
+                }
 
                 mInsertMessageBIZZ.bindString(1, message.key);
                 if (message.parent_key != null) {
@@ -406,32 +431,7 @@ public class MessageStore implements Closeable {
                 else
                     mInsertMessageBIZZ.bindNull(9);
                 mInsertMessageBIZZ.bindLong(11, dirty ? 1 : 0);
-
-                StringBuilder sb = new StringBuilder();
-                if (senderIsMobileOwner)
-                    sb.append(mMainService.getString(R.string.__me_as_sender));
-                else
-                    sb.append(mFriendsPlugin.getName(message.sender));
-                sb.append(" >> ");
-                boolean needscomma = false;
-                for (MemberStatusTO member : message.members) {
-                    MemberStatusTO memberStatus = member;
-                    if (memberStatus.member.equals(me)) {
-                        memberStatus.status |= MessagingPlugin.STATUS_RECEIVED;
-                    }
-                    if (memberStatus.member.equals(message.sender))
-                        continue;
-                    if (needscomma)
-                        sb.append(", ");
-                    else
-                        needscomma = true;
-                    if (memberStatus.member.equals(me))
-                        sb.append(mMainService.getString(R.string.__me_as_recipient));
-                    else
-                        sb.append(mFriendsPlugin.getName(memberStatus.member));
-                }
-                mInsertMessageBIZZ.bindString(12, sb.toString());
-
+                mInsertMessageBIZZ.bindString(12, recipients.toString());
                 mInsertMessageBIZZ.bindLong(13, calculateMemberStatusSummary(message));
                 mInsertMessageBIZZ.bindLong(14, message.alert_flags);
                 mInsertMessageBIZZ.bindLong(15, (message.timestamp + tzdiff) / 86400);
@@ -485,14 +485,20 @@ public class MessageStore implements Closeable {
                 for (MemberStatusTO memberStatus : message.members) {
                     mAddMemberStatusBIZZ.bindString(1, message.key);
                     mAddMemberStatusBIZZ.bindString(2, memberStatus.member);
+                    long ackedTimeStamp = memberStatus.acked_timestamp;
                     if (me.equals(memberStatus.member)) {
                         mAddMemberStatusBIZZ.bindLong(3, mMainService.currentTimeMillis() / 1000);
                         mAddMemberStatusBIZZ.bindLong(6, memberStatus.status | MessagingPlugin.STATUS_RECEIVED);
                     } else {
                         mAddMemberStatusBIZZ.bindLong(3, memberStatus.received_timestamp);
-                        mAddMemberStatusBIZZ.bindLong(6, memberStatus.status);
+                        long status = memberStatus.status;
+                        if (message.sender.equals(memberStatus.member)) {
+                            status |= MessagingPlugin.STATUS_ACKED | MessagingPlugin.STATUS_READ | MessagingPlugin.STATUS_RECEIVED;
+                            ackedTimeStamp = message.timestamp;
+                        }
+                        mAddMemberStatusBIZZ.bindLong(6, status);
                     }
-                    mAddMemberStatusBIZZ.bindLong(4, memberStatus.acked_timestamp);
+                    mAddMemberStatusBIZZ.bindLong(4, ackedTimeStamp);
                     if (memberStatus.button_id != null)
                         mAddMemberStatusBIZZ.bindString(5, memberStatus.button_id);
                     else
@@ -515,6 +521,13 @@ public class MessageStore implements Closeable {
         });
 
         return senderIsMobileOwner;
+    }
+
+    public void updateMessageRecipients(final String messageKey, final String recipients) {
+        mUpdateMessageRecipients.bindString(1, recipients);
+        mUpdateMessageRecipients.bindString(2, messageKey);
+        mUpdateMessageRecipients.bindString(3, messageKey);
+        mUpdateMessageRecipients.execute();
     }
 
     public void insertMemberStatusBIZZ(final String parentKey, final String messageKey,
@@ -738,26 +751,33 @@ public class MessageStore implements Closeable {
         return senderIsMobileOwner;
     }
 
-    public Collection<MemberStatusTO> getLeastMemberStatusses(String parentMessageKey) {
+    public Collection<MessageMemberStatus> getLeastMemberStatusses(String parentMessageKey) {
         T.UI();
-        Map<String, MemberStatusTO> result = new HashMap<String, MemberStatusTO>();
+        Map<String, MessageMemberStatus> result = new HashMap<String, MessageMemberStatus>();
         final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_message_get_least_member_statusses),
             new String[] { parentMessageKey, parentMessageKey });
         try {
             if (!c.moveToFirst())
                 return result.values();
             do {
-                String sender = c.getString(0);
-                String member = c.getString(1);
-                long status = c.getLong(2);
-                long flags = c.getLong(3);
+                String messageKey = c.getString(0);
+                long receivedTimeStamp = c.getLong(1);
+                long ackedTimestamp = c.getLong(2);
+                String sender = c.getString(3);
+                String member = c.getString(4);
+                long status = c.getLong(5);
+                long flags = c.getLong(6);
                 if (sender.equals(member) || (flags & MessagingPlugin.FLAG_LOCKED) == MessagingPlugin.FLAG_LOCKED)
-                    status = MessagingPlugin.STATUS_ACKED;
-                MemberStatusTO mst = result.get(member);
+                    status |= MessagingPlugin.STATUS_ACKED;
+
+                MessageMemberStatus mst = result.get(member);
                 if (mst == null) {
-                    mst = new MemberStatusTO();
+                    mst = new MessageMemberStatus();
+                    mst.acked_timestamp = ackedTimestamp;
+                    mst.received_timestamp = receivedTimeStamp;
                     mst.member = member;
                     mst.status = status;
+                    mst.messageKey = messageKey;
                     result.put(member, mst);
                 } else {
                     if (status < mst.status)
@@ -887,25 +907,8 @@ public class MessageStore implements Closeable {
     }
 
     public long getLastInboxOpenedTimestamp() {
-        T.UI();
-        return mGetLastInboxOpenTime.simpleQueryForLong();
-    }
-
-    public Message getFullMessageByUnprocessedMessageIndex(long index) {
         T.dontCare();
-        final Cursor curs = mDb.rawQuery(
-            mMainService.getString(R.string.sql_message_get_message_by_unprocessed_message_index),
-            new String[] { Long.toString(index) });
-        try {
-            if (!curs.moveToFirst()) {
-                return null;
-            }
-            Message fullMessage = toFullMessage(curs, R.string.sql_message_get_message_by_unprocessed_message_index);
-            addMembers(fullMessage);
-            return fullMessage;
-        } finally {
-            curs.close();
-        }
+        return mGetLastInboxOpenTime.simpleQueryForLong();
     }
 
     // Get message with buttons, but without member statuses
@@ -1047,32 +1050,6 @@ public class MessageStore implements Closeable {
         });
     }
 
-    public void replaceTmpKeyAndTimestamp(final String tmpKey, final String key, final long timestamp) {
-        T.BIZZ();
-        TransactionHelper.runInTransaction(mDb, "replaceTmpKeyAndTimestamp", new TransactionWithoutResult() {
-
-            @Override
-            protected void run() {
-                mUpdateMessageKeyAndTimestampBIZZ.bindString(1, key);
-                mUpdateMessageKeyAndTimestampBIZZ.bindLong(2, timestamp);
-                mUpdateMessageKeyAndTimestampBIZZ.bindString(3, tmpKey);
-                mUpdateMessageKeyAndTimestampBIZZ.execute();
-                mUpdateMessageLastThreadMessageBIZZ.bindString(1, key);
-                mUpdateMessageLastThreadMessageBIZZ.bindString(2, tmpKey);
-                mUpdateMessageLastThreadMessageBIZZ.execute();
-                mUpdateMessageButtonKeyBIZZ.bindString(1, key);
-                mUpdateMessageButtonKeyBIZZ.bindString(2, tmpKey);
-                mUpdateMessageButtonKeyBIZZ.execute();
-                mUpdateMessageMemberKeyBIZZ.bindString(1, key);
-                mUpdateMessageMemberKeyBIZZ.bindString(2, tmpKey);
-                mUpdateMessageMemberKeyBIZZ.execute();
-                mUpdateMessageAttachmentKeyBIZZ.bindString(1, key);
-                mUpdateMessageAttachmentKeyBIZZ.bindString(2, tmpKey);
-                mUpdateMessageAttachmentKeyBIZZ.execute();
-            }
-        });
-    }
-
     // XXX: use MultiThreadedSQLStatement
     public boolean messageNeedsAnswerUI(final String messageKey) {
         T.UI();
@@ -1203,6 +1180,7 @@ public class MessageStore implements Closeable {
         mThreadAvatarCountByHash.close();
         mStoreThreadAvatar.close();
         mGetMessageMessage.close();
+        mUpdateMessageRecipients.close();
     }
 
     private void updateMessageMemberStatusInDbNotInTransaction(MemberStatusUpdateRequestTO request) {
@@ -1329,18 +1307,6 @@ public class MessageStore implements Closeable {
             message.default_sticky = curs.getLong(25) != 0;
             break;
         case R.string.sql_message_cursor_full_thread:
-            message.needsMyAnswer = curs.getLong(11) != 0;
-            message.replyCount = curs.getLong(12);
-            message.dirty = curs.getLong(13) != 0;
-            message.recipients_status = curs.getLong(14);
-            message.recipients = curs.getString(15);
-            formString = curs.getString(16);
-            if (formString != null)
-                message.form = (Map<String, Object>) JSONValue.parse(formString);
-            // column 15: rowid
-            message.threadNeedsMyAnswer = curs.getLong(18) != 0;
-            //$FALL-THROUGH$
-        case R.string.sql_message_get_message_by_unprocessed_message_index:
             message.key = curs.getString(0);
             message.parent_key = curs.getString(1);
             message.sender = curs.getString(2);
@@ -1352,6 +1318,16 @@ public class MessageStore implements Closeable {
             message.priority = curs.getLong(8);
             message.default_priority = curs.getLong(9);
             message.default_sticky = curs.getLong(10) != 0;
+            message.needsMyAnswer = curs.getLong(11) != 0;
+            message.replyCount = curs.getLong(12);
+            message.dirty = curs.getLong(13) != 0;
+            message.recipients_status = curs.getLong(14);
+            message.recipients = curs.getString(15);
+            formString = curs.getString(16);
+            if (formString != null)
+                message.form = (Map<String, Object>) JSONValue.parse(formString);
+            // column 15: rowid
+            message.threadNeedsMyAnswer = curs.getLong(18) != 0;
         }
         addButtonsToMessageObject(message);
         message.attachments = getAttachmentsFromMessage(message.key);
@@ -1638,6 +1614,40 @@ public class MessageStore implements Closeable {
 
     public long getDirtyThreadsCount() {
         return mGetDirtyThreadsCount.simpleQueryForLong();
+    }
+
+    public ArrayList<UnreadMessage> getFirstUnreadMessagesInThread(String parentKey) {
+        ArrayList<UnreadMessage> messages = new ArrayList<>();
+
+        final Cursor cursor = mDb.rawQuery(mMainService.getString(R.string.sql_get_first_unread_messages_in_thread),
+                new String[]{parentKey});
+        try {
+            if (!cursor.moveToFirst()) {
+                return new ArrayList<>();
+            }
+            do {
+                messages.add(readUnreadMessage(cursor));
+            } while (cursor.moveToNext());
+        } finally {
+            cursor.close();
+        }
+        return messages;
+    }
+
+    public UnreadMessage readUnreadMessage(Cursor cursor) {
+        return new UnreadMessage(cursor.getString(0), cursor.getString(1), cursor.getString(2), cursor.getString(3));
+    }
+
+    public int getUnreadMessageCountInThread(String parentKey) {
+        mGetUnreadMessageCountInThread.bindString(1, parentKey);
+        return (int) mGetUnreadMessageCountInThread.simpleQueryForLong();
+    }
+
+
+    public int getTotalUnreadCount(long timestamp) {
+        T.dontCare();
+        mGetTotalDirtyMessagecount.bindLong(1, timestamp);
+        return (int) mGetTotalDirtyMessagecount.simpleQueryForLong();
     }
 
 }

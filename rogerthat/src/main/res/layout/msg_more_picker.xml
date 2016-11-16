@@ -3,12 +3,7 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@color/mc_background">
-
-    <View
-        style="@style/RogerThatThickDivider"
-        android:layout_marginBottom="10dp" >
-    </View>
+    android:padding="25dp">
 
     <ListView
         android:id="@+id/pick_msg_more"
@@ -16,17 +11,10 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:cacheColorHint="#00000000"
-        android:divider="@drawable/divider"
+        android:divider="@drawable/divider_gray"
         android:dividerHeight="1px"
         android:fastScrollEnabled="true">
     </ListView>
 
-    <Button
-        android:id="@+id/close"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="@string/activity_close_hint" >
-    </Button>
 
 </LinearLayout>

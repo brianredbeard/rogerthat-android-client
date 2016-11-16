@@ -17,13 +17,26 @@
  */
 package com.mobicage.rogerthat.util;
 
+import android.annotation.SuppressLint;
+import android.os.Build;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyProperties;
+
+import com.mobicage.rogerthat.MainService;
+import com.mobicage.rogerthat.config.Configuration;
+import com.mobicage.rogerthat.config.ConfigurationProvider;
+import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
+import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.system.T;
+
+import org.jivesoftware.smack.util.Base64;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -43,21 +56,6 @@ import javax.crypto.CipherOutputStream;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-
-import android.annotation.SuppressLint;
-
-import android.os.Build;
-import android.security.keystore.KeyGenParameterSpec;
-import android.security.keystore.KeyProperties;
-
-import com.mobicage.rogerthat.MainService;
-import com.mobicage.rogerthat.config.Configuration;
-import com.mobicage.rogerthat.config.ConfigurationProvider;
-import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
-import com.mobicage.rogerthat.util.logging.L;
-import com.mobicage.rogerthat.util.system.T;
-
-import org.jivesoftware.smack.util.Base64;
 
 
 public class Security {
@@ -80,6 +78,11 @@ public class Security {
         if (Build.VERSION.SDK_INT >= 23) {
             java.security.Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
         }
+    }
+
+    public static String sha256Lower(String value) {
+        byte[] data = sha256Digest(value);
+        return String.format("%0" + (data.length * 2) + "x", new BigInteger(1, data));
     }
 
     public static String sha256(String value) {

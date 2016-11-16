@@ -17,48 +17,25 @@
  */
 package com.mobicage.rogerthat.registration;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
 import android.Manifest;
-import android.content.pm.PackageManager;
-import android.support.v4.app.ActivityCompat;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HTTP;
-import org.jivesoftware.smack.ConnectionConfiguration;
-import org.jivesoftware.smack.Logger;
-import org.jivesoftware.smack.XMPPConnection;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.support.v4.app.ActivityCompat;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.ContentBrandingMainActivity;
 import com.mobicage.rogerthat.Installation;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
-import com.mobicage.rogerthat.ContentBrandingMainActivity;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
 import com.mobicage.rogerthat.plugins.system.MobileInfo;
@@ -77,6 +54,29 @@ import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.Credentials;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.rpc.newxmpp.XMPPConfigurationFactory;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
+import org.jivesoftware.smack.ConnectionConfiguration;
+import org.jivesoftware.smack.Logger;
+import org.jivesoftware.smack.XMPPConnection;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 public class ContentBrandingRegistrationActivity extends ServiceBoundActivity {
 
@@ -156,7 +156,7 @@ public class ContentBrandingRegistrationActivity extends ServiceBoundActivity {
     @Override
     protected void onServiceBound() {
         T.UI();
-        setContentView(R.layout.registration_for_content_branding);
+        setContentViewWithoutNavigationBar(R.layout.registration_for_content_branding);
         mProgressContainer = (LinearLayout) findViewById(R.id.progress_container);
         mProgressContainer.setVisibility(View.GONE);
         mButtonContainer = (LinearLayout) findViewById(R.id.button_container);
@@ -467,7 +467,7 @@ public class ContentBrandingRegistrationActivity extends ServiceBoundActivity {
 
                             Intent intent = new Intent(ContentBrandingRegistrationActivity.this, ContentBrandingMainActivity.class);
                             intent.setAction(MainActivity.ACTION_REGISTERED);
-                            intent.setFlags(MainActivity.FLAG_CLEAR_STACK);
+                            intent.setFlags(MainActivity.FLAG_CLEAR_STACK_SINGLE_TOP);
                             startActivity(intent);
                             ContentBrandingRegistrationActivity.this.finish();
                         }

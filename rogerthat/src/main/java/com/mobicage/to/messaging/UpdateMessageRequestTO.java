@@ -43,13 +43,21 @@ public class UpdateMessageRequestTO implements com.mobicage.rpc.IJSONable {
     public UpdateMessageRequestTO(Map<String, Object> json) throws IncompleteMessageException {
         if (json.containsKey("existence")) {
             Object val = json.get("existence");
-            this.existence = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.existence = ((Integer) val).longValue();
+            } else {
+                this.existence = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.UpdateMessageRequestTO object is missing field 'existence'");
         }
         if (json.containsKey("flags")) {
             Object val = json.get("flags");
-            this.flags = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.flags = ((Integer) val).longValue();
+            } else {
+                this.flags = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.UpdateMessageRequestTO object is missing field 'flags'");
         }

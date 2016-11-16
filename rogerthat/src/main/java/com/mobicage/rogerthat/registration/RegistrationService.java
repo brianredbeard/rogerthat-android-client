@@ -18,12 +18,14 @@
 
 package com.mobicage.rogerthat.registration;
 
+import android.app.Notification;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
+import android.support.v7.app.NotificationCompat;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainActivity;
@@ -55,14 +57,15 @@ public class RegistrationService extends Service {
             public void onReceive(Context context, Intent intent) {
                 if (intent.getAction().equals(INTENT_SHOW_NOTIFICATION)) {
                     UIUtils.doNotification(RegistrationService.this, getString(R.string.app_name),
-                        getString(R.string.registration_enter_pin), R.integer.enter_pin,
-                        MainActivity.ACTION_NOTIFICATION_ENTER_PIN, false, false, false, false,
-                        R.drawable.notification_icon, 0, null, null, getString(R.string.registration_enter_pin),
-                        System.currentTimeMillis());
+                            getString(R.string.registration_enter_pin), R.integer.enter_pin,
+                            MainActivity.ACTION_NOTIFICATION_ENTER_PIN, false, false, false, false,
+                            R.drawable.notification_icon, 0, null, null, getString(R.string.registration_enter_pin),
+                            System.currentTimeMillis(), Notification.PRIORITY_MIN, null, null, null,
+                            NotificationCompat.CATEGORY_PROGRESS);
                 } else if (intent.getAction().equals(INTENT_HIDE_NOTIFICATION)) {
                     UIUtils.cancelNotification(RegistrationService.this, R.integer.enter_pin);
                 } else {
-                    L.bug("Unkown intent for registration service: " + intent.getAction());
+                    L.bug("Unknown intent for registration service: " + intent.getAction());
                 }
             }
         };

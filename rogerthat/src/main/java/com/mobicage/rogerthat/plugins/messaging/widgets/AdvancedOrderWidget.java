@@ -18,13 +18,6 @@
 
 package com.mobicage.rogerthat.plugins.messaging.widgets;
 
-import java.io.File;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
@@ -35,6 +28,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.graphics.Typeface;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,12 +37,12 @@ import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mobicage.api.messaging.Rpc;
 import com.mobicage.models.properties.forms.AdvancedOrderCategory;
 import com.mobicage.models.properties.forms.AdvancedOrderItem;
@@ -57,9 +51,9 @@ import com.mobicage.rogerthat.plugins.messaging.AdvancedOrderWidgetResult;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.util.CachedDownloader;
+import com.mobicage.rogerthat.util.DownloadImageTask;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
-import com.mobicage.rogerthat.util.system.SafeAsyncTask;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.T;
@@ -70,6 +64,12 @@ import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.to.messaging.forms.AdvancedOrderTO;
 import com.mobicage.to.messaging.forms.SubmitAdvancedOrderFormRequestTO;
 import com.mobicage.to.messaging.forms.SubmitAdvancedOrderFormResponseTO;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class AdvancedOrderWidget extends Widget {
 
@@ -161,12 +161,12 @@ public class AdvancedOrderWidget extends Widget {
                 AdvancedOrderCategoryRow row = (AdvancedOrderCategoryRow) rowObject;
                 nameLbl.setText(row.name);
                 nameLbl.setTypeface(Typeface.DEFAULT_BOLD);
-                iconLbl.setTextColor(getResources().getColor(android.R.color.black));
+                iconLbl.setTextColor(ContextCompat.getColor(mActivity, android.R.color.black));
                 if (mResultDictionary.containsKey(row.id)) {
                     for (String itemId : mResultDictionary.get(row.id).keySet()) {
                         AdvancedOrderItem item = mResultDictionary.get(row.id).get(itemId);
                         if (item.value > 0) {
-                            iconLbl.setTextColor(getResources().getColor(R.color.mc_divider_green));
+                            iconLbl.setTextColor(ContextCompat.getColor(mActivity, R.color.mc_divider_green));
                             break;
                         }
                     }
@@ -190,7 +190,7 @@ public class AdvancedOrderWidget extends Widget {
                     priceLbl.setVisibility(View.GONE);
                 }
 
-                priceLbl.setTextColor(getResources().getColor(R.color.mc_divider_gray));
+                priceLbl.setTextColor(ContextCompat.getColor(mActivity, R.color.mc_divider_gray));
                 if (row.value > 0) {
                     iconLbl.setVisibility(View.GONE);
                     countLbl.setVisibility(View.VISIBLE);
@@ -199,7 +199,7 @@ public class AdvancedOrderWidget extends Widget {
                 } else {
                     countLbl.setVisibility(View.GONE);
                     iconLbl.setVisibility(View.VISIBLE);
-                    iconLbl.setTextColor(getResources().getColor(R.color.mc_divider_gray));
+                    iconLbl.setTextColor(ContextCompat.getColor(mActivity, R.color.mc_divider_gray));
                     iconLbl.setText(R.string.fa_plus_circle);
                 }
 
@@ -308,14 +308,14 @@ public class AdvancedOrderWidget extends Widget {
             nameLbl.setText(row.name);
             nameLbl.setTypeface(Typeface.DEFAULT);
             priceLbl.setText(getPriceStringForRow(row));
-            priceLbl.setTextColor(getResources().getColor(R.color.mc_divider_gray));
+            priceLbl.setTextColor(ContextCompat.getColor(mActivity, R.color.mc_divider_gray));
 
             if (row.expanded) {
                 countLbl.setVisibility(View.GONE);
                 details.setVisibility(View.VISIBLE);
                 minValueLbl.setText(R.string.fa_minus_circle);
                 minValueLbl.setTypeface(mFontAwesomeTypeFace);
-                minValueLbl.setTextColor(getResources().getColor(R.color.mc_red_divider));
+                minValueLbl.setTextColor(ContextCompat.getColor(mActivity, R.color.mc_red_divider));
 
                 minValueLbl.setOnClickListener(new OnClickListener() {
                     @Override
@@ -334,7 +334,7 @@ public class AdvancedOrderWidget extends Widget {
 
                 plusValueLbl.setText(R.string.fa_plus_circle);
                 plusValueLbl.setTypeface(mFontAwesomeTypeFace);
-                plusValueLbl.setTextColor(getResources().getColor(R.color.mc_divider_green));
+                plusValueLbl.setTextColor(ContextCompat.getColor(mActivity, R.color.mc_divider_green));
 
                 plusValueLbl.setOnClickListener(new OnClickListener() {
                     @Override
@@ -532,7 +532,9 @@ public class AdvancedOrderWidget extends Widget {
         }
         renderListData();
 
-        mFontAwesomeTypeFace = Typeface.createFromAsset(mActivity.getAssets(), "FontAwesome.ttf");
+        if (mFontAwesomeTypeFace == null) {
+            mFontAwesomeTypeFace = new FontAwesome().getTypeface(mActivity);
+        }
         mBasketBtn = (TextView) findViewById(R.id.basket);
         mBasketBtn.setText(R.string.fa_shopping_cart);
         mBasketBtn.setTypeface(mFontAwesomeTypeFace);
@@ -542,7 +544,7 @@ public class AdvancedOrderWidget extends Widget {
             mBasketBtn.setTextColor(mTextColor);
         } else {
             mBasketBtn.setEnabled(false);
-            mBasketBtn.setTextColor(getResources().getColor(R.color.mc_divider_gray));
+            mBasketBtn.setTextColor(ContextCompat.getColor(mActivity, R.color.mc_divider_gray));
         }
 
         mBasketBtn.setOnClickListener(new OnClickListener() {
@@ -699,7 +701,7 @@ public class AdvancedOrderWidget extends Widget {
             mBasketBtn.setTextColor(mTextColor);
         } else {
             mBasketBtn.setEnabled(false);
-            mBasketBtn.setTextColor(getResources().getColor(R.color.mc_divider_gray));
+            mBasketBtn.setTextColor(ContextCompat.getColor(mActivity, R.color.mc_divider_gray));
         }
 
         return item.value;
@@ -715,7 +717,7 @@ public class AdvancedOrderWidget extends Widget {
             mBasketBtn.setTextColor(mTextColor);
         } else {
             mBasketBtn.setEnabled(false);
-            mBasketBtn.setTextColor(getResources().getColor(R.color.mc_divider_gray));
+            mBasketBtn.setTextColor(ContextCompat.getColor(mActivity, R.color.mc_divider_gray));
         }
 
         return item.value;
@@ -824,7 +826,7 @@ public class AdvancedOrderWidget extends Widget {
         if (mDetailDialog != null && mDetailDialog.isShowing())
             return;
         mCurrentItemDetail = position;
-        final View v = mLayoutInFlater.inflate(R.layout.widget_advanced_order_item_detail, this, false); // todo ruben
+        final View v = mLayoutInFlater.inflate(R.layout.widget_advanced_order_item_detail, this, false);
 
         mDetailDialog = new Dialog(mActivity);
         mDetailDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -843,12 +845,12 @@ public class AdvancedOrderWidget extends Widget {
         final Button dismissBtn = (Button) v.findViewById(R.id.dismiss);
 
         nameLbl.setText(row.name);
-        nameLbl.setTextColor(getResources().getColor(android.R.color.black));
+        nameLbl.setTextColor(ContextCompat.getColor(mActivity, android.R.color.black));
 
         if (row.hasPrice) {
             priceLbl.setVisibility(View.VISIBLE);
             priceLbl.setText(getPriceStringForRow(row));
-            priceLbl.setTextColor(getResources().getColor(R.color.mc_divider_gray));
+            priceLbl.setTextColor(ContextCompat.getColor(mActivity, R.color.mc_divider_gray));
         } else {
             priceLbl.setVisibility(View.GONE);
         }
@@ -858,12 +860,12 @@ public class AdvancedOrderWidget extends Widget {
         } else {
             descriptionLbl.setVisibility(View.VISIBLE);
             descriptionLbl.setText(row.description);
-            descriptionLbl.setTextColor(getResources().getColor(android.R.color.black));
+            descriptionLbl.setTextColor(ContextCompat.getColor(mActivity, android.R.color.black));
         }
 
         minValueBtn.setText(R.string.fa_minus_circle);
         minValueBtn.setTypeface(mFontAwesomeTypeFace);
-        minValueBtn.setTextColor(getResources().getColor(R.color.mc_red_divider));
+        minValueBtn.setTextColor(ContextCompat.getColor(mActivity, R.color.mc_red_divider));
 
         minValueBtn.setOnClickListener(new OnClickListener() {
             @Override
@@ -881,7 +883,7 @@ public class AdvancedOrderWidget extends Widget {
 
         plusValueBtn.setText(R.string.fa_plus_circle);
         plusValueBtn.setTypeface(mFontAwesomeTypeFace);
-        plusValueBtn.setTextColor(getResources().getColor(R.color.mc_divider_green));
+        plusValueBtn.setTextColor(ContextCompat.getColor(mActivity, R.color.mc_divider_green));
 
         plusValueBtn.setOnClickListener(new OnClickListener() {
             @Override
@@ -927,39 +929,10 @@ public class AdvancedOrderWidget extends Widget {
         mDetailDialog.show();
     }
 
-    private class DownloadImageTask extends SafeAsyncTask<String, Void, Bitmap> {
-        ImageView bmImage;
-
-        public DownloadImageTask(ImageView bmImage) {
-            this.bmImage = bmImage;
-        }
-
-        @Override
-        protected Bitmap safeDoInBackground(String... urls) {
-            String urldisplay = urls[0];
-            Bitmap mIcon11 = null;
-            try {
-                InputStream in = new java.net.URL(urldisplay).openStream();
-                mIcon11 = BitmapFactory.decodeStream(in);
-            } catch (Exception e) {
-                L.d("AdvancedOrder DownloadImageTask error", e);
-            }
-            return mIcon11;
-        }
-
-        @Override
-        protected void onPostExecute(Bitmap result) {
-            if (result != null) {
-                bmImage.setImageBitmap(result);
-                bmImage.setVisibility(View.VISIBLE);
-            }
-        }
-    }
-
     private void showAdvancedOrderBasket() {
         if (mBasketDialog != null && mBasketDialog.isShowing())
             return;
-        final View v = mLayoutInFlater.inflate(R.layout.widget_advanced_order_basket, this, false); // todo ruben
+        final View v = mLayoutInFlater.inflate(R.layout.widget_advanced_order_basket, this, false);
         mBasketDialog = new Dialog(mActivity);
         mBasketDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         mBasketDialog.setContentView(v);

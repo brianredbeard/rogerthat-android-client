@@ -16,11 +16,11 @@
         android:scaleType="centerInside">
     </ImageView>
         
-    <Button 
+    <android.support.v7.widget.AppCompatButton
         android:id="@+id/select_picture"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_weight="1">
-    </Button>   
+        android:theme="@style/ButtonTheme"
+        android:layout_weight="1" />
 </com.mobicage.rogerthat.plugins.messaging.widgets.PhotoUploadWidget>

@@ -17,46 +17,6 @@
  */
 package com.mobicage.rogerthat.registration;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.net.ssl.SSLException;
-
-import org.altbeacon.beacon.Beacon;
-import org.altbeacon.beacon.BeaconManager;
-import org.altbeacon.beacon.BeaconParser;
-import org.altbeacon.beacon.BleNotAvailableException;
-import org.altbeacon.beacon.MonitorNotifier;
-import org.altbeacon.beacon.RangeNotifier;
-import org.altbeacon.beacon.Region;
-import org.altbeacon.beacon.logging.LogManager;
-import org.altbeacon.beacon.logging.Loggers;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HTTP;
-import org.jivesoftware.smack.ConnectionConfiguration;
-import org.jivesoftware.smack.Logger;
-import org.jivesoftware.smack.XMPPConnection;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -67,8 +27,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
-import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
@@ -78,6 +36,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
@@ -94,8 +53,8 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.ScrollView;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.ViewFlipper;
@@ -111,7 +70,6 @@ import com.mobicage.rogerthat.OauthActivity;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.config.Configuration;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
-import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.scan.ProcessScanActivity;
 import com.mobicage.rogerthat.plugins.system.MobileInfo;
 import com.mobicage.rogerthat.plugins.system.SystemPlugin;
@@ -140,6 +98,47 @@ import com.mobicage.rpc.newxmpp.XMPPConfigurationFactory;
 import com.mobicage.to.beacon.BeaconRegionTO;
 import com.mobicage.to.location.BeaconDiscoveredRequestTO;
 
+import org.altbeacon.beacon.Beacon;
+import org.altbeacon.beacon.BeaconManager;
+import org.altbeacon.beacon.BeaconParser;
+import org.altbeacon.beacon.BleNotAvailableException;
+import org.altbeacon.beacon.MonitorNotifier;
+import org.altbeacon.beacon.RangeNotifier;
+import org.altbeacon.beacon.Region;
+import org.altbeacon.beacon.logging.LogManager;
+import org.altbeacon.beacon.logging.Loggers;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
+import org.jivesoftware.smack.ConnectionConfiguration;
+import org.jivesoftware.smack.Logger;
+import org.jivesoftware.smack.XMPPConnection;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.net.ssl.SSLException;
+
+
 public class RegistrationActivity2 extends ServiceBoundActivity {
 
     private static final int XMPP_CHECK_DELAY_MILLIS = 5000;
@@ -159,10 +158,10 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
     private static final int START_OAUTH_REQUEST_CODE = 1;
 
     private static final int[] NORMAL_WIDTH_ROGERTHAT_LOGOS = new int[] { R.id.rogerthat_logo, R.id.rogerthat_logo1,
-            R.id.rogerthat_logo2, R.id.rogerthat_logo3, R.id.rogerthat_logo4, R.id.rogerthat_logo5 };
+            R.id.rogerthat_logo2, R.id.rogerthat_logo3, R.id.rogerthat_logo4};
     private static final int[] FULL_WIDTH_ROGERTHAT_LOGOS = new int[] { R.id.full_width_rogerthat_logo,
             R.id.full_width_rogerthat_logo1, R.id.full_width_rogerthat_logo2, R.id.full_width_rogerthat_logo3, R.id
-            .full_width_rogerthat_logo4, R.id.full_width_rogerthat_logo5 };
+            .full_width_rogerthat_logo4};
 
     private Intent mNotYetProcessedIntent = null;
 
@@ -208,6 +207,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         T.UI();
         createWorkerThread();
         mUIHandler = new Handler();
@@ -237,7 +237,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
         // If the app relies on GCM the user should not be able to register.
         if (CloudConstants.USE_GCM_KICK_CHANNEL)
             GoogleServicesUtils.checkPlayServices(this);
-    };
+    }
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -281,7 +281,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                 mService.getConfigurationProvider().updateConfigurationNow(RegistrationWizard2.CONFIGKEY, cfg);
 
             } else if (RegexPatterns.FRIEND_INVITE_URL.matcher(url).matches()
-                || RegexPatterns.SERVICE_INTERACT_URL.matcher(url).matches()) {
+                    || RegexPatterns.SERVICE_INTERACT_URL.matcher(url).matches()) {
                 popupRegisterFirst(uri);
 
                 Configuration cfg = mService.getConfigurationProvider().getConfiguration(RegistrationWizard2.CONFIGKEY);
@@ -333,9 +333,8 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
             mNotYetProcessedIntent = null;
         }
 
-        setContentView(R.layout.registration2);
+        setContentViewWithoutNavigationBar(R.layout.registration2);
 
-        final Typeface faTypeFace = Typeface.createFromAsset(getAssets(), "FontAwesome.ttf");
         final int[] visibleLogos;
         final int[] goneLogos;
         if (AppConstants.FULL_WIDTH_HEADERS) {
@@ -356,42 +355,34 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
 
         handleScreenOrientation(getResources().getConfiguration().orientation);
 
-        ScrollView rc = (ScrollView) findViewById(R.id.registration_container);
-        Resources resources = getResources();
-        if (CloudConstants.isRogerthatApp()) {
-            rc.setBackgroundColor(resources.getColor(R.color.mc_page_dark));
-        } else {
-            rc.setBackgroundColor(resources.getColor(R.color.mc_homescreen_background));
-        }
-
-        TextView rogerthatWelcomeTextView = (TextView) findViewById(R.id.rogerthat_welcome);
         TextView tosTextView = (TextView) findViewById(R.id.registration_tos);
-        Button agreeBtn = (Button) findViewById(R.id.registration_agree_tos);
+        tosTextView.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/lato_light_italic.ttf"));
+        tosTextView.setTextColor(ContextCompat.getColor(RegistrationActivity2.this, R.color.mc_default_text));
 
-        TextView registrationNeedEmail = (TextView) findViewById(R.id.registration_need_email);
+        TextView signupTextView = (TextView) findViewById(R.id.registration);
+        signupTextView.setText(getString(CloudConstants.isCityApp() ? R.string.registration_city_app_sign_up : R
+                .string.registration_sign_up, getString(R.string.app_name)));
+
         mEnterEmailAutoCompleteTextView = (AutoCompleteTextView) findViewById(R.id.registration_enter_email);
 
+        Button agreeBtn = (Button) findViewById(R.id.registration_agree_tos);
+        TextView rogerthatWelcomeTextView = (TextView) findViewById(R.id.rogerthat_welcome);
         if (CloudConstants.isEnterpriseApp()) {
             rogerthatWelcomeTextView.setText(getString(R.string.rogerthat_welcome_enterprise,
-                getString(R.string.app_name)));
+                    getString(R.string.app_name)));
             tosTextView.setVisibility(View.GONE);
             agreeBtn.setText(R.string.start_registration);
-            registrationNeedEmail.setText(R.string.registration_need_your_email_enterprise);
-            mEnterEmailAutoCompleteTextView.setHint(R.string.registration_enter_email_hint_enterprise);
         } else {
-            rogerthatWelcomeTextView.setText(getString(R.string.rogerthat_welcome, getString(R.string.app_name)));
+            rogerthatWelcomeTextView.setText(getString(R.string.registration_welcome_text,
+                    getString(R.string.app_name)));
 
             tosTextView.setText(Html.fromHtml("<a href=\"" + CloudConstants.TERMS_OF_SERVICE_URL + "\">"
-                + tosTextView.getText() + "</a>"));
+                    + tosTextView.getText() + "</a>"));
             tosTextView.setMovementMethod(LinkMovementMethod.getInstance());
 
-            agreeBtn.setText(R.string.registration_agree_tos);
-
-            registrationNeedEmail.setText(R.string.registration_need_your_email);
-            mEnterEmailAutoCompleteTextView.setHint(R.string.registration_enter_email_hint);
+            agreeBtn.setText(R.string.registration_btn_agree_tos);
         }
 
-        agreeBtn.getBackground().setColorFilter(Message.GREEN_BUTTON_COLOR, PorterDuff.Mode.MULTIPLY);
         agreeBtn.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
@@ -400,7 +391,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
             }
         });
 
-        initLocationUsageStep(faTypeFace);
+        initLocationUsageStep();
 
         View.OnClickListener emailLoginListener = new View.OnClickListener() {
             @Override
@@ -411,10 +402,8 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
         };
 
         findViewById(R.id.login_via_email).setOnClickListener(emailLoginListener);
-        findViewById(R.id.email_login).setOnClickListener(emailLoginListener);
 
         Button facebookButton = (Button) findViewById(R.id.login_via_fb);
-        ImageView facebookImage = (ImageView) findViewById(R.id.fb_login);
 
         View.OnClickListener facebookLoginListener = new View.OnClickListener() {
             @Override
@@ -468,16 +457,14 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
         };
 
         facebookButton.setOnClickListener(facebookLoginListener);
-        facebookImage.setOnClickListener(facebookLoginListener);
 
-        initOauthStep(faTypeFace);
+        initOauthStep();
 
-        final Button getAccountsButton = (Button) findViewById(R.id.get_accounts);
+        final ImageButton getAccountsButton = (ImageButton) findViewById(R.id.get_accounts);
         if (configureEmailAutoComplete()) {
             // GET_ACCOUNTS permission is granted
             getAccountsButton.setVisibility(View.GONE);
         } else {
-            getAccountsButton.setTypeface(faTypeFace);
             getAccountsButton.setOnClickListener(new SafeViewOnClickListener() {
                 @Override
                 public void safeOnClick(View v) {
@@ -506,15 +493,12 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
             }
         });
 
-        Button requestNewPinButton = (Button) findViewById(R.id.registration_request_new_pin);
-        requestNewPinButton.setOnClickListener(new View.OnClickListener() {
+        Button activatePinButton = (Button) findViewById(R.id.registration_activate);
+        activatePinButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mWiz.setEmail(null);
-                hideNotification();
-                mWiz.reInit();
-                mWiz.goBackToPrevious();
-                mEnterEmailAutoCompleteTextView.setText("");
+                if (mEnterPinEditText.getText().length() == PIN_LENGTH)
+                    onPinEntered();
             }
         });
 
@@ -523,9 +507,8 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
         setFinishHandler();
         addAgreeTOSHandler();
         addIBeaconUsageHandler();
-        addChooseLoginMethodHandler();
         addOauthMethodHandler();
-        addEnterEmailHandler();
+        addChooseLoginMethodHandler();
         addEnterPinHandler();
         mWiz.run();
         mWiz.setDeviceId(Installation.id(this));
@@ -546,8 +529,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
         }
     }
 
-    private void initLocationUsageStep(Typeface faTypeFace) {
-        ((TextView) findViewById(R.id.ibeacon_usage_icon)).setTypeface(faTypeFace);
+    private void initLocationUsageStep() {
 
         final String appName = getString(R.string.app_name);
         ((TextView) findViewById(R.id.ibeacon_usage_augment_experience)).setText(getString(R.string
@@ -560,22 +542,19 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
         findViewById(R.id.registration_beacon_usage_continue).setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
-                ActivityCompat.requestPermissions(RegistrationActivity2.this, new String[] {Manifest.permission
+                ActivityCompat.requestPermissions(RegistrationActivity2.this, new String[]{Manifest.permission
                         .ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_COARSE_LOCATION);
             }
         });
     }
 
-    private void initOauthStep(Typeface faTypeFace) {
+    private void initOauthStep() {
         View.OnClickListener oauthLoginListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 getOauthRegistrationInfo();
             }
         };
-
-        TextView oauthIcon = (TextView)findViewById(R.id.oauth_icon);
-        oauthIcon.setTypeface(faTypeFace);
 
         TextView oauthText = (TextView)findViewById(R.id.oauth_text);
         oauthText.setText(getString(R.string.authenticate_via_your_oauth_account, AppConstants.REGISTRATION_TYPE_OAUTH_DOMAIN));
@@ -1006,7 +985,8 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_GO
-                    || (event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)) {
+                        || (event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent
+                        .ACTION_DOWN)) {
                     requestPin();
                     return true;
                 }
@@ -1187,7 +1167,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
 
     private void handleEnterEmail() {
         T.UI();
-        final Button continueButton = (Button) findViewById(R.id.registration_continue_email);
+        final Button continueButton = (Button) findViewById(R.id.login_via_email);
         continueButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View button) {
@@ -1257,13 +1237,15 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
             @Override
             public void pageDisplayed(Button back, Button next, ViewFlipper switcher) {
                 if (AppConstants.getRegistrationType() == AppConstants.REGISTRATION_TYPE_OAUTH) {
-                    mWiz.proceedToNextPage();
+                    mWiz.proceedToNextPage(); // todo ruben validate
                 } else {
+                    mEnterEmailAutoCompleteTextView.setThreshold(1000); // Prevent popping up automatically
+
                     if (AppConstants.FACEBOOK_APP_ID == null || !AppConstants.FACEBOOK_REGISTRATION) {
-                        sendRegistrationStep(RegistrationWizard2.REGISTRATION_STEP_EMAIL_LOGIN);
-                        mWiz.proceedToNextPage();
-                    } else {
-                        mEnterEmailAutoCompleteTextView.setThreshold(1000); // Prevent popping up automatically
+                        LinearLayout orLaylout = (LinearLayout) findViewById(R.id.or);
+                        orLaylout.setVisibility(View.INVISIBLE);
+                        Button facebookButton = (Button) findViewById(R.id.login_via_fb);
+                        facebookButton.setVisibility(View.INVISIBLE);
                     }
                 }
             }
@@ -1293,7 +1275,6 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                 if (AppConstants.getRegistrationType() == AppConstants.REGISTRATION_TYPE_OAUTH) {
                     mEnterEmailAutoCompleteTextView.setThreshold(1000); // Prevent popping up automatically
                 } else {
-                    sendRegistrationStep(RegistrationWizard2.REGISTRATION_STEP_EMAIL_LOGIN);
                     mWiz.proceedToNextPage();
                 }
             }
@@ -1315,35 +1296,6 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
         });
     }
 
-    private void addEnterEmailHandler() {
-        mWiz.addPageHandler(new Wizard.PageHandler() {
-
-            @Override
-            public void pageDisplayed(Button back, Button next, ViewFlipper switcher) {
-                mEnterEmailAutoCompleteTextView.setThreshold(1);
-                mEnterEmailAutoCompleteTextView.requestFocus();
-                UIUtils.showKeyboard(RegistrationActivity2.this);
-            }
-
-            @Override
-            public String getTitle() {
-                return null;
-            }
-
-            @Override
-            public boolean beforeNextClicked(Button back, Button next, ViewFlipper switcher) {
-                return false;
-            }
-
-            @Override
-            public boolean beforeBackClicked(Button back, Button next, ViewFlipper switcher) {
-                if (AppConstants.FACEBOOK_APP_ID == null || !AppConstants.FACEBOOK_REGISTRATION)
-                    return false;
-                return true;
-            }
-        });
-    }
-
     private void addEnterPinHandler() {
         mWiz.addPageHandler(new Wizard.PageHandler() {
             @Override
@@ -1351,15 +1303,8 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                 mEnterPinEditText.setText("");
                 mEnterEmailAutoCompleteTextView.setThreshold(1000); // Prevent popping up automatically
 
-                final String f;
-                if (CloudConstants.isRogerthatApp()) {
-                    f = "<font color=\"#39c\">%s</font>";
-                } else {
-                    f = "%s";
-                }
-                final TextView tv = (TextView) findViewById(R.id.registration_pin_was_mailed);
-                tv.setText(Html.fromHtml(getString(R.string.registration_pin_was_mailed,
-                        String.format(f, mWiz.getEmail()))));
+                ((TextView) findViewById(R.id.registration_pin_was_mailed)).setText(getString(R.string
+                        .registration_activation_code_was_mailed, mWiz.getEmail()));
             }
 
             @Override
@@ -1374,7 +1319,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
 
             @Override
             public boolean beforeBackClicked(Button back, Button next, ViewFlipper switcher) {
-                return false;
+                return true;
             }
         });
     }
@@ -1395,7 +1340,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                     intent.setAction(MainActivity.ACTION_SHOW_DETECTED_BEACONS);
                     intent.putExtra(DetectedBeaconActivity.EXTRA_DETECTED_BEACONS, mDiscoveredBeacons);
                     intent.putExtra(DetectedBeaconActivity.EXTRA_AGE_AND_GENDER_SET, mAgeAndGenderSet);
-                    intent.setFlags(MainActivity.FLAG_CLEAR_STACK);
+                    intent.setFlags(MainActivity.FLAG_CLEAR_STACK_SINGLE_TOP);
                     startActivity(intent);
                     RegistrationActivity2.this.finish();
                     return;
@@ -1403,7 +1348,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                 if (AppConstants.PROFILE_SHOW_GENDER_AND_BIRTHDATE && !mAgeAndGenderSet) {
                     Intent intent = new Intent(RegistrationActivity2.this, MainActivity.class);
                     intent.setAction(MainActivity.ACTION_COMPLETE_PROFILE);
-                    intent.setFlags(MainActivity.FLAG_CLEAR_STACK);
+                    intent.setFlags(MainActivity.FLAG_CLEAR_STACK_SINGLE_TOP);
                     startActivity(intent);
                     RegistrationActivity2.this.finish();
                     return;
@@ -1440,6 +1385,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
 
     @Override
     protected void onServiceUnbound() {
+
     }
 
     private void createWorkerThread() {
@@ -1474,7 +1420,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
     }
 
     private void tryConnect(final ProgressDialog pd, final int attempt, final String statusMessage,
-        final RegistrationInfo info) {
+                            final RegistrationInfo info) {
         T.UI();
         final Pausable pausable = this;
 
@@ -1482,7 +1428,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
             pd.dismiss();
 
             new AlertDialog.Builder(RegistrationActivity2.this).setMessage(getString(R.string.registration_error))
-                .setCancelable(true).setPositiveButton(R.string.try_again, null).create().show();
+                    .setCancelable(true).setPositiveButton(R.string.try_again, null).create().show();
             mWiz.reInit();
             mWiz.goBackToPrevious();
             return;
@@ -1511,8 +1457,8 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                     if (CloudConstants.USE_XMPP_KICK_CHANNEL) {
 
                         final ConnectionConfiguration xmppConfig = new XMPPConfigurationFactory(cp,
-                            mService.getNetworkConnectivityManager(), null)
-                            .getSafeXmppConnectionConfiguration(xmppServiceName);
+                                mService.getNetworkConnectivityManager(), null)
+                                .getSafeXmppConnectionConfiguration(xmppServiceName);
                         final XMPPConnection xmppCon = new XMPPConnection(xmppConfig);
 
                         xmppCon.setLogger(new Logger() {
@@ -1538,7 +1484,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                     }
 
                     postFinishRegistration(info.mCredentials.getUsername(), info.mCredentials.getPassword(),
-                        invitorCode, invitorSecret);
+                            invitorCode, invitorSecret);
 
                     mUIHandler.post(new SafeRunnable(pausable) {
 
@@ -1594,7 +1540,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
 
     @SuppressWarnings("unchecked")
     private void postFinishRegistration(final String username, final String password, final String invitorCode,
-        final String invitorSecret) throws ClientProtocolException, IOException {
+                                        final String invitorSecret) throws ClientProtocolException, IOException {
         T.REGISTRATION();
         final String mobileInfo = getMobileInfo();
         HttpClient httpClient = HTTPUtil.getHttpClient();
@@ -1641,7 +1587,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
         }
 
         final Map<String, Object> responseMap = (Map<String, Object>) JSONValue.parse(new InputStreamReader(httpEntity
-            .getContent()));
+                .getContent()));
         if (responseMap == null) {
             throw new IOException("HTTP request responseMap was null");
         }
@@ -1729,8 +1675,9 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                                 boolean stringSet = false;
                                 if (entity != null) {
                                     @SuppressWarnings("unchecked")
-                                    final Map<String, Object> responseMap = (Map<String, Object>) org.json.simple.JSONValue
-                                        .parse(new InputStreamReader(entity.getContent()));
+                                    final Map<String, Object> responseMap = (Map<String, Object>) org.json.simple
+                                            .JSONValue
+                                            .parse(new InputStreamReader(entity.getContent()));
 
                                     if (responseMap != null) {
                                         String result = (String) responseMap.get("result");
@@ -1768,7 +1715,9 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (mWiz.getPosition() == 2) {
+            int position = mWiz.getPosition();
+            // 4 == Enter activation code
+            if (position == 4) {
                 mWiz.goBack();
                 return true;
             }
@@ -1882,7 +1831,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
         mBeaconManager = BeaconManager.getInstanceForApplication(mService);
         if (!mBeaconManager.isAnyConsumerBound()) {
             mBeaconManager.getBeaconParsers().add(
-                new BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25"));
+                    new BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25"));
         }
 
         try {
@@ -1910,7 +1859,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
 
                 try {
                     mBeaconManager.startMonitoringBeaconsInRegion(new Region(regionId, BeaconRegion.getId1(br),
-                        BeaconRegion.getId2(br), BeaconRegion.getId3(br)));
+                            BeaconRegion.getId2(br), BeaconRegion.getId3(br)));
                 } catch (RemoteException e) {
                     L.e(e);
                 }

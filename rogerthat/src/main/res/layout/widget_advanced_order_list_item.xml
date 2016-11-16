@@ -23,6 +23,7 @@
 	        android:layout_marginBottom="10dp"
 	        android:ellipsize="end" 
 	        android:maxLines="2"
+			android:textColor="@android:color/black"
 	        android:background="@android:color/transparent"
 	        android:textSize="17sp" />
 	    

@@ -112,6 +112,8 @@ public abstract class ServiceBoundCursorListActivity extends ServiceBoundActivit
     @Override
     protected void onPause() {
         super.onPause();
+        if (mListView == null)
+            return;
         mScrollPositionIndex = mListView.getFirstVisiblePosition();
         View v = mListView.getChildAt(0);
         mScrollPositionTop = (v == null) ? 0 : v.getTop();

@@ -18,6 +18,34 @@
 
 package com.mobicage.rogerthat.plugins.messaging.widgets;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.util.AttributeSet;
+import android.view.View;
+import android.widget.DatePicker;
+import android.widget.ImageButton;
+import android.widget.TextView;
+import android.widget.TimePicker;
+import android.widget.Toast;
+
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.IconicsDrawable;
+import com.mobicage.api.messaging.Rpc;
+import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
+import com.mobicage.rogerthat.plugins.messaging.Message;
+import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
+import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
+import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
+import com.mobicage.rogerthat.util.system.T;
+import com.mobicage.rogerthat.util.ui.UIUtils;
+import com.mobicage.rpc.ResponseHandler;
+import com.mobicage.to.messaging.forms.LongWidgetResultTO;
+import com.mobicage.to.messaging.forms.SubmitDateSelectFormRequestTO;
+import com.mobicage.to.messaging.forms.SubmitDateSelectFormResponseTO;
+
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -26,30 +54,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UnknownFormatConversionException;
-
-import android.annotation.TargetApi;
-import android.content.Context;
-import android.content.res.Configuration;
-import android.util.AttributeSet;
-import android.view.View;
-import android.widget.DatePicker;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.TimePicker;
-import android.widget.Toast;
-
-import com.mobicage.api.messaging.Rpc;
-import com.mobicage.rogerth.at.R;
-import com.mobicage.rogerthat.plugins.messaging.Message;
-import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
-import com.mobicage.rogerthat.util.logging.L;
-import com.mobicage.rogerthat.util.system.SystemUtils;
-import com.mobicage.rogerthat.util.system.T;
-import com.mobicage.rogerthat.util.ui.UIUtils;
-import com.mobicage.rpc.ResponseHandler;
-import com.mobicage.to.messaging.forms.LongWidgetResultTO;
-import com.mobicage.to.messaging.forms.SubmitDateSelectFormRequestTO;
-import com.mobicage.to.messaging.forms.SubmitDateSelectFormResponseTO;
 
 public class DateSelectWidget extends Widget {
 
@@ -64,12 +68,16 @@ public class DateSelectWidget extends Widget {
     private String mMode;
     private String mFormat;
     private TextView mTextView;
-    private LinearLayout mContainer;
+    private AlertDialog mDatePickerDialog;
     private DatePicker mDatePicker;
+    private AlertDialog mTimePickerDialog;
     private TimePicker mTimePicker;
     private Calendar mCal;
     private boolean mIgnoreDateOrTimeChanges = false;
     private Toast mCurrentToast;
+
+    private ImageButton mPickDate;
+    private ImageButton mPickTime;
 
     public DateSelectWidget(Context context) {
         super(context);
@@ -97,6 +105,14 @@ public class DateSelectWidget extends Widget {
         mTextView = (TextView) findViewById(R.id.label);
         mTextView.setTextColor(mTextColor);
 
+        mPickDate = (ImageButton) findViewById(R.id.pick_date);
+        mPickTime = (ImageButton) findViewById(R.id.pick_time);
+
+        if (mColorScheme == BrandingMgr.ColorScheme.DARK) {
+            mPickDate.setImageDrawable(new IconicsDrawable(mActivity, FontAwesome.Icon.faw_calendar_o).color(mTextColor).sizeDp(24));
+            mPickTime.setImageDrawable(new IconicsDrawable(mActivity, FontAwesome.Icon.faw_clock_o).color(mTextColor).sizeDp(24));
+        }
+
         mCal = Calendar.getInstance();
         mCal.setTimeZone(TimeZone.getTimeZone("UTC"));
 
@@ -110,23 +126,24 @@ public class DateSelectWidget extends Widget {
 
     private void initDateSlider() {
         T.UI();
-        int resource;
         if (MODE_DATE.equals(mMode)) {
-            resource = R.layout.ds_date_picker;
+            mPickTime.setVisibility(View.GONE);
         } else if (MODE_TIME.equals(mMode)) {
-            resource = R.layout.ds_time_picker;
+            mPickDate.setVisibility(View.GONE);
         } else {
             if (!MODE_DATE_TIME.equals(mMode)) {
-                L.e("I dont know date_select mode '" + mMode + "'. Falling back to date_time");
+                L.e("I don't know date_select mode '" + mMode + "'. Falling back to date_time");
             }
-            resource = R.layout.ds_date_time_picker;
         }
 
         if (mDateInMillis != null) {
             mCal.setTimeInMillis(mDateInMillis);
         } else {
             long currentMillis = mCal.getTimeInMillis() + TimeZone.getDefault().getRawOffset();
-            currentMillis -= currentMillis % (mMinuteInterval * 60000); // floor to minute interval
+            long rest = currentMillis % (mMinuteInterval * 60000);
+            if (rest != 0) {
+                currentMillis = currentMillis - rest + mMinuteInterval * 60000; // ceil to minute interval
+            }
             mCal.setTimeInMillis(currentMillis);
 
             if (MODE_TIME.equals(mMode)) {
@@ -141,34 +158,45 @@ public class DateSelectWidget extends Widget {
                 mCal.setTimeInMillis(mMaxDateInMillis);
         }
 
-        mContainer = (LinearLayout) inflate(getContext(), resource, null);
-        if (SystemUtils.getAndroidVersion() >= 8) {
-            // onConfigurationChanged is Added in API level 8
-            boolean landscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
-            mContainer.setOrientation(landscape ? LinearLayout.HORIZONTAL : LinearLayout.VERTICAL);
-        }
-        mDatePicker = (DatePicker) mContainer.findViewById(R.id.date_picker);
-        mTimePicker = (TimePicker) mContainer.findViewById(R.id.time_picker);
-
-        if (mDatePicker != null) {
+        if (mPickDate.getVisibility() == View.VISIBLE) {
+            final View dialog = mActivity.getLayoutInflater().inflate(R.layout.ds_date_picker, null);
+            mDatePicker = (DatePicker) dialog.findViewById(R.id.date_picker);
             mDatePicker.setDescendantFocusability(DatePicker.FOCUS_BLOCK_DESCENDANTS);
             mDatePicker.init(mCal.get(Calendar.YEAR), mCal.get(Calendar.MONTH), mCal.get(Calendar.DAY_OF_MONTH),
-                new DatePicker.OnDateChangedListener() {
-                    @Override
-                    public void onDateChanged(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                        if (mIgnoreDateOrTimeChanges)
-                            return;
-
-                        mCal.set(Calendar.YEAR, year);
-                        mCal.set(Calendar.MONTH, monthOfYear);
-                        mCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                        checkBoundaries();
-                        updateLabel();
+                    new DatePicker.OnDateChangedListener() {
+                        @Override
+                        public void onDateChanged(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                            datePickerChanged(year, monthOfYear, dayOfMonth);
+                        }
                     }
-                });
+            );
+            mDatePickerDialog = new AlertDialog.Builder(mActivity)
+                    .setView(dialog)
+                    .setPositiveButton(mActivity.getString(R.string.ok), new SafeDialogInterfaceOnClickListener() {
+                        @Override
+                        public void safeOnClick(DialogInterface di, int which) {
+                            // Workaround for android 5.0 not triggering the changed listener
+                            datePickerChanged(mDatePicker.getYear(), mDatePicker.getMonth(), mDatePicker.getDayOfMonth());
+
+                        }
+                    }).setNegativeButton(mActivity.getString(R.string.cancel), new SafeDialogInterfaceOnClickListener() {
+                        @Override
+                        public void safeOnClick(DialogInterface dialog, int which) {
+                        }
+                    }).create();
+            mDatePickerDialog.setCanceledOnTouchOutside(true);
+
+            mPickDate.setOnClickListener(new SafeViewOnClickListener() {
+                @Override
+                public void safeOnClick(View v) {
+                    mDatePickerDialog.show();
+                }
+            });
         }
 
-        if (mTimePicker != null) {
+        if (mPickTime.getVisibility() == View.VISIBLE) {
+            final View dialog = mActivity.getLayoutInflater().inflate(R.layout.ds_time_picker, null);
+            mTimePicker = (TimePicker) dialog.findViewById(R.id.time_picker);
             mTimePicker.setDescendantFocusability(TimePicker.FOCUS_BLOCK_DESCENDANTS);
             mTimePicker.setIs24HourView(android.text.format.DateFormat.is24HourFormat(getContext()));
             mTimePicker.setCurrentHour(mCal.get(Calendar.HOUR_OF_DAY));
@@ -176,52 +204,88 @@ public class DateSelectWidget extends Widget {
             mTimePicker.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
                 @Override
                 public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
-                    if (mIgnoreDateOrTimeChanges)
-                        return;
+                    timePickerChanged(hourOfDay, minute);
+                }
+            });
 
-                    int oldMinute = mCal.get(Calendar.MINUTE);
-                    int oldHour = mCal.get(Calendar.HOUR_OF_DAY);
-                    if (oldMinute == minute && oldHour == hourOfDay)
-                        return;
+            mTimePickerDialog = new AlertDialog.Builder(mActivity)
+                    .setView(dialog)
+                    .setPositiveButton(mActivity.getString(R.string.ok), new SafeDialogInterfaceOnClickListener() {
+                        @Override
+                        public void safeOnClick(DialogInterface di, int which) {
+                            // Workaround for android 5.0 not triggering the changed listener
+                            timePickerChanged(mTimePicker.getCurrentHour(), mTimePicker.getCurrentMinute());
+                        }
+                    }).setNegativeButton(mActivity.getString(R.string.cancel), new SafeDialogInterfaceOnClickListener() {
+                        @Override
+                        public void safeOnClick(DialogInterface dialog, int which) {
+                        }
+                    }).create();
+            mTimePickerDialog.setCanceledOnTouchOutside(true);
 
-                    if (oldMinute != minute && mMinuteInterval > 1) {
-                        boolean hourOfDayModified = false;
-                        minute = (oldMinute > minute || oldMinute == 0 && minute == 59) ? oldMinute - mMinuteInterval
-                            : oldMinute + mMinuteInterval;
-                        if (minute >= 60) {
-                            minute -= 60;
-                            hourOfDay = (hourOfDay + 1) % 24;
-                            hourOfDayModified = true;
-                        } else if (minute < 0) {
-                            minute += 60;
-                            if (oldHour == hourOfDay) {
-                                // Only decrease if TimePicker did not do it itself (different behavior between APIs)
-                                hourOfDay = (hourOfDay - 1) % 24;
-                                hourOfDayModified = true;
-                            }
-                        }
-                        mCal.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                        mCal.set(Calendar.MINUTE, minute);
-                        mIgnoreDateOrTimeChanges = true;
-                        try {
-                            mTimePicker.setCurrentMinute(minute);
-                            if (hourOfDayModified)
-                                mTimePicker.setCurrentHour(hourOfDay);
-                        } finally {
-                            mIgnoreDateOrTimeChanges = false;
-                        }
-                    } else {
-                        mCal.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                        mCal.set(Calendar.MINUTE, minute);
-                    }
-                    checkBoundaries();
-                    updateLabel();
+            mPickTime.setOnClickListener(new SafeViewOnClickListener() {
+                @Override
+                public void safeOnClick(View v) {
+                    mTimePickerDialog.show();
                 }
             });
         }
 
         updateLabel();
-        addView(mContainer);
+    }
+
+    private void timePickerChanged(int hourOfDay, int minute) {
+        if (mIgnoreDateOrTimeChanges)
+            return;
+
+        int oldMinute = mCal.get(Calendar.MINUTE);
+        int oldHour = mCal.get(Calendar.HOUR_OF_DAY);
+        if (oldMinute == minute && oldHour == hourOfDay)
+            return;
+
+        if (oldMinute != minute && mMinuteInterval > 1) {
+            boolean hourOfDayModified = false;
+            minute = (oldMinute > minute || oldMinute == 0 && minute == 59) ? oldMinute - mMinuteInterval
+                    : oldMinute + mMinuteInterval;
+            if (minute >= 60) {
+                minute -= 60;
+                hourOfDay = (hourOfDay + 1) % 24;
+                hourOfDayModified = true;
+            } else if (minute < 0) {
+                minute += 60;
+                if (oldHour == hourOfDay) {
+                    // Only decrease if TimePicker did not do it itself (different behavior between APIs)
+                    hourOfDay = (hourOfDay - 1) % 24;
+                    hourOfDayModified = true;
+                }
+            }
+            mCal.set(Calendar.HOUR_OF_DAY, hourOfDay);
+            mCal.set(Calendar.MINUTE, minute);
+            mIgnoreDateOrTimeChanges = true;
+            try {
+                mTimePicker.setCurrentMinute(minute);
+                if (hourOfDayModified)
+                    mTimePicker.setCurrentHour(hourOfDay);
+            } finally {
+                mIgnoreDateOrTimeChanges = false;
+            }
+        } else {
+            mCal.set(Calendar.HOUR_OF_DAY, hourOfDay);
+            mCal.set(Calendar.MINUTE, minute);
+        }
+        checkBoundaries();
+        updateLabel();
+    }
+
+    private void datePickerChanged(int year, int month, int dayOfMonth) {
+        if (mIgnoreDateOrTimeChanges)
+            return;
+
+        mCal.set(Calendar.YEAR, year);
+        mCal.set(Calendar.MONTH, month);
+        mCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+        checkBoundaries();
+        updateLabel();
     }
 
     private void checkBoundaries() {
@@ -270,8 +334,11 @@ public class DateSelectWidget extends Widget {
     public void setEnabled(boolean enabled) {
         T.UI();
         super.setEnabled(enabled);
-        if (mContainer != null) {
-            mContainer.setVisibility(enabled ? View.VISIBLE : View.GONE);
+        if (!enabled) {
+            ImageButton pickDate = (ImageButton) findViewById(R.id.pick_date);
+            ImageButton pickTime = (ImageButton) findViewById(R.id.pick_time);
+            pickDate.setVisibility(View.GONE);
+            pickTime.setVisibility(View.GONE);
         }
     }
 
@@ -353,16 +420,4 @@ public class DateSelectWidget extends Widget {
 
         return valueString(context, mode, format, date);
     }
-
-    @Override
-    @TargetApi(8)
-    protected void onConfigurationChanged(Configuration newConfig) {
-        T.UI();
-        super.onConfigurationChanged(newConfig);
-        if (mContainer != null) {
-            boolean landscape = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE;
-            mContainer.setOrientation(landscape ? LinearLayout.HORIZONTAL : LinearLayout.VERTICAL);
-        }
-    }
-
 }

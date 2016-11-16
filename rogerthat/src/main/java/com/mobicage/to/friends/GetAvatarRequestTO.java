@@ -34,13 +34,21 @@ public class GetAvatarRequestTO implements com.mobicage.rpc.IJSONable {
     public GetAvatarRequestTO(Map<String, Object> json) throws IncompleteMessageException {
         if (json.containsKey("avatarId")) {
             Object val = json.get("avatarId");
-            this.avatarId = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.avatarId = ((Integer) val).longValue();
+            } else {
+                this.avatarId = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.friends.GetAvatarRequestTO object is missing field 'avatarId'");
         }
         if (json.containsKey("size")) {
             Object val = json.get("size");
-            this.size = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.size = ((Integer) val).longValue();
+            } else {
+                this.size = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.friends.GetAvatarRequestTO object is missing field 'size'");
         }

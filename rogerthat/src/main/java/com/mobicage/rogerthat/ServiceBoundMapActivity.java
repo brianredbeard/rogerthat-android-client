@@ -41,16 +41,17 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
 import android.view.Gravity;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 
 import com.google.android.maps.MapActivity;
-import com.melnykov.fab.FloatingActionButton;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendAvatar;
+import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
@@ -59,6 +60,8 @@ import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.Pausable;
 import com.mobicage.rogerthat.util.ui.UIUtils;
+
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public abstract class ServiceBoundMapActivity extends MapActivity implements Pausable, ServiceBound {
 
@@ -89,7 +92,6 @@ public abstract class ServiceBoundMapActivity extends MapActivity implements Pau
     private SafeRunnable mTransmitTimeoutRunnable;
 
     private ConnectivityManager mConnectivityManager;
-    private FloatingActionButton mFAB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,10 +104,12 @@ public abstract class ServiceBoundMapActivity extends MapActivity implements Pau
         mUnknownAvatar = getResources().getDrawable(R.drawable.unknown_avatar);
         mICDachboardAvatar = getResources().getDrawable(R.drawable.ic_dashboard);
         doBindService();
-        mTransmitProgressDialog = new Dialog(this);
-        mTransmitProgressDialog.setContentView(R.layout.progressdialog);
-        mTransmitProgressDialog.setTitle(R.string.transmitting);
-        mTransmitProgressBar = (ProgressBar) mTransmitProgressDialog.findViewById(R.id.progress_bar);
+
+        mConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        View progressDialg = getLayoutInflater().inflate(R.layout.progressdialog, null);
+        mTransmitProgressDialog = new AlertDialog.Builder(this).setTitle(R.string.transmitting).setView(progressDialg).create();
+        mTransmitProgressBar = (ProgressBar) progressDialg.findViewById(R.id.progress_bar);
         mTransmitProgressDialog.setCancelable(true);
         mTransmitProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
             @Override
@@ -113,7 +117,11 @@ public abstract class ServiceBoundMapActivity extends MapActivity implements Pau
                 completeTransmit(null);
             }
         });
-        mConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
     @Override
@@ -324,43 +332,6 @@ public abstract class ServiceBoundMapActivity extends MapActivity implements Pau
         return mService;
     }
 
-    protected View wrapViewWithFab(View view) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH || !showFABMenu())
-            return view;
-
-        FrameLayout frameLayout = new FrameLayout(this);
-        frameLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
-        frameLayout.addView(view);
-
-        mFAB = new FloatingActionButton(this);
-        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
-        layoutParams.gravity = getFabGravity();
-        int m = UIUtils.convertDipToPixels(this, 16);
-        layoutParams.setMargins(m, m, m, m);
-        mFAB.setLayoutParams(layoutParams);
-        mFAB.setImageResource(R.drawable.ic_menu);
-        mFAB.setColorNormalResId(R.color.mc_homescreen_background);
-        mFAB.setColorPressedResId(R.color.mc_homescreen_background);
-        mFAB.setColorRipple(R.color.mc_homescreen_background);
-        mFAB.setOnClickListener(new SafeViewOnClickListener() {
-            @Override
-            public void safeOnClick(View v) {
-                openOptionsMenu();
-            }
-        });
-        mFAB.setVisibility(View.VISIBLE);
-        frameLayout.addView(mFAB);
-        return frameLayout;
-    }
-
-    protected int getFabGravity() {
-        return Gravity.BOTTOM | Gravity.RIGHT;
-    }
-
-    protected boolean showFABMenu() {
-        return false;
-    }
-
     @Override
     public void setContentView(int layoutResID) {
         setContentView(getLayoutInflater().inflate(layoutResID, null));
@@ -368,12 +339,12 @@ public abstract class ServiceBoundMapActivity extends MapActivity implements Pau
 
     @Override
     public void setContentView(View view) {
-        super.setContentView(wrapViewWithFab(view));
+        super.setContentView(view);
     }
 
     @Override
     public void setContentView(View view, ViewGroup.LayoutParams params) {
-        super.setContentView(wrapViewWithFab(view), params);
+        super.setContentView(view, params);
     }
 
     public boolean askPermissionIfNeeded(final String permission, final int requestCode, final SafeRunnable onGranted,
@@ -404,4 +375,13 @@ public abstract class ServiceBoundMapActivity extends MapActivity implements Pau
         }
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }

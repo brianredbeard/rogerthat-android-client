@@ -57,7 +57,11 @@ public class AutoCompleteTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("max_chars")) {
             Object val = json.get("max_chars");
-            this.max_chars = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.max_chars = ((Integer) val).longValue();
+            } else {
+                this.max_chars = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.forms.AutoCompleteTO object is missing field 'max_chars'");
         }

@@ -40,6 +40,7 @@ public class CloudConstants {
     // Non-customizable HTTP constants
     public final static String HEAD_URL = HTTPS_BASE_URL;
     public static final String HTTPS_LOAD_SRV_RECORDS = HTTPS_BASE_URL + "/mobi/rest/srv/load?email=";
+    public static final String HTTPS_LOAD_NEWS_CONFIG = HTTPS_BASE_URL + "/mobi/rest/news/config";
     public final static String JSON_RPC_URL = HTTPS_BASE_URL + "/json-rpc";
     public final static String BRANDING_URL_PREFIX = HTTPS_BASE_URL + "/unauthenticated/mobi/branding/";
     public final static String AVATAR_URL_PREFIX = HTTPS_BASE_URL + "/unauthenticated/mobi/avatar/";
@@ -100,6 +101,9 @@ public class CloudConstants {
     public final static boolean USE_XMPP_KICK_CHANNEL = CustomCloudConstants.USE_XMPP_KICK_CHANNEL;
     public final static boolean USE_GCM_KICK_CHANNEL = !CustomCloudConstants.USE_XMPP_KICK_CHANNEL;
     public final static String GCM_SENDER_ID = CustomCloudConstants.GCM_SENDER_ID;
+
+    public final static boolean NEWS_CHANNEL_SSL = CustomCloudConstants.NEWS_CHANNEL_SSL;
+    public final static boolean NEWS_CHANNEL_MUST_VALIDATE_SSL_CERTIFICATE = CustomCloudConstants.NEWS_CHANNEL_MUST_VALIDATE_SSL_CERTIFICATE;
 
     public static boolean isRogerthatApp() {
         return AppConstants.getAppType() == AppConstants.APP_TYPE_ROGERTHAT;

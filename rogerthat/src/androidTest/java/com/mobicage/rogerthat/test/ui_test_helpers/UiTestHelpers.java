@@ -30,7 +30,6 @@ import org.hamcrest.Matcher;
 import java.util.concurrent.TimeoutException;
 
 import static android.support.test.espresso.matcher.ViewMatchers.isRoot;
-import static android.support.test.espresso.matcher.ViewMatchers.withText;
 
 public class UiTestHelpers {
     /** Perform action of waiting for a specific view. */

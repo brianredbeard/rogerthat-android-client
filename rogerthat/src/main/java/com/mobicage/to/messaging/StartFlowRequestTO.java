@@ -27,6 +27,7 @@ public class StartFlowRequestTO implements com.mobicage.rpc.IJSONable {
 
     public String[] attachments_to_dwnl;
     public String[] brandings_to_dwnl;
+    public String flow_params;
     public String message_flow_run_id;
     public String parent_message_key;
     public String service;
@@ -62,6 +63,12 @@ public class StartFlowRequestTO implements com.mobicage.rpc.IJSONable {
             }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.StartFlowRequestTO object is missing field 'brandings_to_dwnl'");
+        }
+        if (json.containsKey("flow_params")) {
+            Object val = json.get("flow_params");
+            this.flow_params = (String) val;
+        } else {
+            throw new IncompleteMessageException("com.mobicage.to.messaging.StartFlowRequestTO object is missing field 'flow_params'");
         }
         if (json.containsKey("message_flow_run_id")) {
             Object val = json.get("message_flow_run_id");
@@ -117,6 +124,7 @@ public class StartFlowRequestTO implements com.mobicage.rpc.IJSONable {
             }
             obj.put("brandings_to_dwnl", arr);
         }
+        obj.put("flow_params", this.flow_params);
         obj.put("message_flow_run_id", this.message_flow_run_id);
         obj.put("parent_message_key", this.parent_message_key);
         obj.put("service", this.service);

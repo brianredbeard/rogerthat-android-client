@@ -160,6 +160,34 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
+    public static com.mobicage.to.app.GetAppAssetRequestTO ComMobicageToAppGetAppAssetRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.app.GetAppAssetRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.app.GetAppAssetResponseTO ComMobicageToAppGetAppAssetResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.app.GetAppAssetResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.app.UpdateAppAssetRequestTO ComMobicageToAppUpdateAppAssetRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.app.UpdateAppAssetRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.app.UpdateAppAssetResponseTO ComMobicageToAppUpdateAppAssetResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.app.UpdateAppAssetResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
     public static com.mobicage.to.beacon.BeaconRegionTO ComMobicageToBeaconBeaconRegionTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;
@@ -2054,6 +2082,104 @@ public class Parser {
         if (value == null)
             return null;
         return new com.mobicage.to.messaging.jsmfr.NewFlowMessageResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.news.AppNewsInfoTO ComMobicageToNewsAppNewsInfoTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.news.AppNewsInfoTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.news.AppNewsItemTO ComMobicageToNewsAppNewsItemTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.news.AppNewsItemTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.news.DisableNewsRequestTO ComMobicageToNewsDisableNewsRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.news.DisableNewsRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.news.DisableNewsResponseTO ComMobicageToNewsDisableNewsResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.news.DisableNewsResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.news.GetNewsItemsRequestTO ComMobicageToNewsGetNewsItemsRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.news.GetNewsItemsRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.news.GetNewsItemsResponseTO ComMobicageToNewsGetNewsItemsResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.news.GetNewsItemsResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.news.GetNewsRequestTO ComMobicageToNewsGetNewsRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.news.GetNewsRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.news.GetNewsResponseTO ComMobicageToNewsGetNewsResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.news.GetNewsResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.news.NewNewsRequestTO ComMobicageToNewsNewNewsRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.news.NewNewsRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.news.NewNewsResponseTO ComMobicageToNewsNewNewsResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.news.NewNewsResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.news.NewsActionButtonTO ComMobicageToNewsNewsActionButtonTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.news.NewsActionButtonTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.news.NewsSenderTO ComMobicageToNewsNewsSenderTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.news.NewsSenderTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.news.SaveNewsStatisticsRequestTO ComMobicageToNewsSaveNewsStatisticsRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.news.SaveNewsStatisticsRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.news.SaveNewsStatisticsResponseTO ComMobicageToNewsSaveNewsStatisticsResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.news.SaveNewsStatisticsResponseTO((Map<String, Object>) value);
     }
 
     @SuppressWarnings("unchecked")

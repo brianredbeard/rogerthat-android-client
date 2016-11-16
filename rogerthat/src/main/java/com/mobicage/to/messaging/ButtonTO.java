@@ -54,7 +54,11 @@ public class ButtonTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("ui_flags")) {
             Object val = json.get("ui_flags");
-            this.ui_flags = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.ui_flags = ((Integer) val).longValue();
+            } else {
+                this.ui_flags = ((Long) val).longValue();
+            }
         } else {
             this.ui_flags = 0;
         }

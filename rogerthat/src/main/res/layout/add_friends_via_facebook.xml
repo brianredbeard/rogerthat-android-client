@@ -8,29 +8,36 @@
         android:id="@+id/add_via_facebook_0"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
+        android:layout_gravity="left"
+        android:layout_marginTop="10dp"
         android:orientation="vertical"
-        android:padding="10dp" >
+        android:padding="20dp">
 
         <TextView
             android:id="@+id/add_via_facebook_description"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="50dp"
+            android:layout_marginBottom="20dp"
             android:gravity="center"
             android:textSize="16sp" />
 
-        <Button
+        <android.support.v7.widget.AppCompatButton
             android:id="@+id/add_via_facebook_button"
-            android:layout_width="fill_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/find_from_facebook" />
+            android:theme="@style/PrimaryButtonTheme"
+            android:layout_gravity="center_horizontal"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:text="@string/find_from_facebook"
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/add_via_facebook_dont_worry"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="50dp"
+            android:layout_marginTop="10dp"
             android:gravity="center"
             android:text="@string/wont_store_data"
             android:textSize="12sp" />
@@ -48,7 +55,7 @@
         <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="50dp"
+            android:layout_marginBottom="20dp"
             android:gravity="center"
             android:text="@string/add_via_facebook_waiting"
             android:textSize="16sp" />
@@ -99,11 +106,12 @@
             android:gravity="center"
             android:textSize="16sp" />
 
-        <Button
+        <android.support.v7.widget.AppCompatButton
             android:id="@+id/add_via_facebook_try_again"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="50dp"
+            android:theme="@style/ButtonTheme"
             android:text="@string/try_again" />
     </LinearLayout>
 

@@ -18,27 +18,18 @@
 
 package com.mobicage.rogerthat.plugins.friends;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.jivesoftware.smack.util.Base64;
-import org.json.simple.JSONValue;
-
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.GestureDetector;
@@ -54,6 +45,7 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -61,9 +53,12 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.ServiceDetailActivity;
+import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
@@ -78,18 +73,29 @@ import com.mobicage.to.service.FindServiceCategoryTO;
 import com.mobicage.to.service.FindServiceItemTO;
 import com.mobicage.to.service.FindServiceResponseTO;
 
+import org.jivesoftware.smack.util.Base64;
+import org.json.simple.JSONValue;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class ServiceSearchActivity extends ServiceBoundActivity {
 
     public final static String ORGANIZATION_TYPE = "organization_type";
+    public final static String ACTION = "action";
+    public final static String TITLE = "title";
 
     public static final String SEARCH_RESULT = "SEARCH_RESULT";
     public static final String SEARCH_STRING = "SEARCH_STRING";
 
     private static final int PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 1;
 
-    private static final String[] UPDATE_VIEW_INTENTS = new String[] { FriendsPlugin.FRIENDS_LIST_REFRESHED,
-        FriendsPlugin.FRIEND_ADDED_INTENT, FriendsPlugin.FRIEND_MARKED_FOR_REMOVAL_INTENT,
-        FriendsPlugin.FRIEND_REMOVED_INTENT };
+    private static final String[] UPDATE_VIEW_INTENTS = new String[]{FriendsPlugin.FRIENDS_LIST_REFRESHED,
+            FriendsPlugin.FRIEND_ADDED_INTENT, FriendsPlugin.FRIEND_MARKED_FOR_REMOVAL_INTENT,
+            FriendsPlugin.FRIEND_REMOVED_INTENT};
 
     private FriendsPlugin mFriendsPlugin;
     private BroadcastReceiver mBroadcastReceiver;
@@ -99,10 +105,13 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
     private String mSearchString = null;
     private FindServiceResponseTO mResponseTO;
     private int mOrganizationType;
+    private String mAction;
     private Map<String, SearchInfo> mSearchInfoByCategory;
     private Map<AbsListView, SearchInfo> mSearchInfoByListView;
 
     private GestureDetector mGestureScanner;
+
+    private String mLastFriendEmailClicked;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,11 +119,23 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
 
         setContentView(R.layout.service_search);
 
+        Intent intent = getIntent();
+        mOrganizationType = intent.getIntExtra(ORGANIZATION_TYPE,
+                FriendStore.SERVICE_ORGANIZATION_TYPE_UNSPECIFIED);
+
+        mAction = intent.getStringExtra(ACTION);
+        if (mAction == null) {
+            setTitle(R.string.discover_services_short);
+        } else {
+            setActivityName("action|" + mAction);
+            setTitle(intent.getIntExtra(TITLE, 0));
+        }
+
         mSearchCategoryLabels = (LinearLayout) findViewById(R.id.search_category);
         mSearchCategoryViewFlipper = (SafeViewFlipper) findViewById(R.id.search_result_lists);
 
-        mSearchInfoByCategory = new HashMap<String, ServiceSearchActivity.SearchInfo>();
-        mSearchInfoByListView = new HashMap<AbsListView, ServiceSearchActivity.SearchInfo>();
+        mSearchInfoByCategory = new HashMap<>();
+        mSearchInfoByListView = new HashMap<>();
 
         mGestureScanner = new GestureDetector(new ViewFlipperSlider(mOnSwipeLeft, mOnSwipeRight));
 
@@ -124,7 +145,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_SEARCH
-                    || (event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)) {
+                        || (event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)) {
                     if (!TextUtils.isEmptyOrWhitespace(mSearchString)) {
                         UIUtils.hideKeyboard(ServiceSearchActivity.this, v);
                         launchFindServiceCall();
@@ -150,7 +171,8 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
             }
         });
 
-        findViewById(R.id.search_button).setOnClickListener(new SafeViewOnClickListener() {
+        final ImageButton searchButton = (ImageButton) findViewById(R.id.search_button);
+        searchButton.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
                 if (TextUtils.isEmptyOrWhitespace(mSearchString)) {
@@ -166,8 +188,6 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
     @Override
     protected void onServiceBound() {
         mFriendsPlugin = mService.getPlugin(FriendsPlugin.class);
-        mOrganizationType = getIntent().getIntExtra(ORGANIZATION_TYPE,
-                FriendStore.SERVICE_ORGANIZATION_TYPE_UNSPECIFIED);
 
         mBroadcastReceiver = getBroadCastReceiver();
 
@@ -182,7 +202,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
         if (mService.isPermitted(Manifest.permission.ACCESS_FINE_LOCATION)) {
             launchFindServiceCall();
         } else {
-            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST_ACCESS_FINE_LOCATION);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST_ACCESS_FINE_LOCATION);
         }
     }
 
@@ -213,27 +233,56 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             @SuppressWarnings("unchecked")
             Map<String, Object> tag = (Map<String, Object>) view.getTag();
-            if (tag != null) {
-                int existence = (Integer) tag.get("existence");
-                FindServiceItemTO item = (FindServiceItemTO) tag.get("item");
-                if (existence == Friend.ACTIVE) {
+            connectWithService(tag, mAction == null ? false : true);
+        }
+    };
+
+    private void connectWithService(Map<String, Object> tag, boolean autoConnect) {
+        if (tag != null) {
+            int existence = (Integer) tag.get("existence");
+            FindServiceItemTO item = (FindServiceItemTO) tag.get("item");
+            if (mAction != null) {
+                mLastFriendEmailClicked = item.email;
+            }
+            if (existence == Friend.ACTIVE) {
+                if (mAction != null) {
+                    ActivityUtils.goToActivityBehindTag(ServiceSearchActivity.this, item.email, mAction);
+                } else {
                     Intent intent = new Intent(ServiceSearchActivity.this, ServiceActionMenuActivity.class);
                     intent.putExtra(ServiceActionMenuActivity.SERVICE_EMAIL, item.email);
                     startActivity(intent);
-                } else {
-                    Intent intent = new Intent(ServiceSearchActivity.this, ServiceDetailActivity.class);
-                    if (existence == Friend.DELETED || existence == Friend.DELETION_PENDING) {
-                        intent.putExtra(ServiceDetailActivity.EXISTENCE, Friend.NOT_FOUND);
-                    } else {
-                        intent.putExtra(ServiceDetailActivity.EXISTENCE, existence);
-                    }
-                    intent
-                        .putExtra(ServiceDetailActivity.FIND_SERVICE_RESULT, JSONValue.toJSONString(item.toJSONMap()));
-                    startActivity(intent);
                 }
+
+            } else if (autoConnect) {
+                if (existence == Friend.DELETED || existence == Friend.DELETION_PENDING) {
+                    existence = Friend.NOT_FOUND;
+                }
+                Friend service = new Friend();
+                service.avatar = Base64.decode(item.avatar);
+                service.avatarId = 0;
+                service.description = item.description;
+                service.descriptionBranding = TextUtils.isEmptyOrWhitespace(item.description_branding) ? null
+                        : item.description_branding;
+                service.email = item.email;
+                service.existenceStatus = existence;
+                service.name = item.name;
+                service.type = FriendsPlugin.FRIEND_TYPE_SERVICE;
+                service.qualifiedIdentifier = item.qualified_identifier;
+
+                mFriendsPlugin.inviteService(service);
+            } else {
+                Intent intent = new Intent(ServiceSearchActivity.this, ServiceDetailActivity.class);
+                if (existence == Friend.DELETED || existence == Friend.DELETION_PENDING) {
+                    intent.putExtra(ServiceDetailActivity.EXISTENCE, Friend.NOT_FOUND);
+                } else {
+                    intent.putExtra(ServiceDetailActivity.EXISTENCE, existence);
+                }
+                intent
+                        .putExtra(ServiceDetailActivity.FIND_SERVICE_RESULT, JSONValue.toJSONString(item.toJSONMap()));
+                startActivity(intent);
             }
         }
-    };
+    }
 
     final AbsListView.OnScrollListener mListViewScrollListener = new AbsListView.OnScrollListener() {
         @Override
@@ -262,7 +311,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
             @Override
             public String[] onSafeReceive(Context context, Intent intent) {
                 String action = intent.getAction();
-
+                L.i("onSafeReceive: "+ action);
                 if (mSearchString != null && FriendsPlugin.SERVICE_SEARCH_RESULT_INTENT.equals(action)) {
                     if (mSearchString.equals(intent.getStringExtra(SEARCH_STRING))) {
                         mProgressDialog.dismiss();
@@ -274,12 +323,12 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
                         } catch (IncompleteMessageException e) {
                             L.bug(e);
                             showSearchFailedDialog();
-                            return new String[] { action };
+                            return new String[]{action};
                         }
 
                         if (!TextUtils.isEmptyOrWhitespace(mResponseTO.error_string)) {
                             UIUtils.showAlertDialog(ServiceSearchActivity.this, null, mResponseTO.error_string);
-                            return new String[] { action };
+                            return new String[]{action};
                         }
 
                         for (FindServiceCategoryTO category : mResponseTO.matches) {
@@ -291,7 +340,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
                             } else {
                                 // Add Label
                                 LinearLayout label = (LinearLayout) getLayoutInflater().inflate(
-                                    R.layout.search_category, null);
+                                        R.layout.search_category, null);
                                 final boolean selected = mSearchCategoryLabels.getChildCount() == 0;
                                 final TextView labelTextView = setCatorySelected(label, selected);
                                 labelTextView.setText(category.category);
@@ -305,7 +354,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
 
                                 // Add ListView
                                 ListView results = (ListView) getLayoutInflater().inflate(
-                                    R.layout.search_category_results, null);
+                                        R.layout.search_category_results, null);
                                 mSearchCategoryViewFlipper.addView(results);
                                 SearchInfo si = new SearchInfo();
                                 ServiceSearchAdapter adapter = new ServiceSearchAdapter(category.items, si);
@@ -322,15 +371,21 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
                             }
                         }
 
-                        return new String[] { action };
+                        return new String[]{action};
                     }
                 } else if (FriendsPlugin.SERVICE_SEARCH_FAILED_INTENT.equals(action)) {
                     if (mSearchString.equals(intent.getStringExtra(SEARCH_STRING))) {
                         mProgressDialog.dismiss();
                         showSearchFailedDialog();
-                        return new String[] { action };
+                        return new String[]{action};
                     }
                 } else {
+                    if (FriendsPlugin.FRIEND_ADDED_INTENT.equals(action)) {
+                        if (mLastFriendEmailClicked != null && mLastFriendEmailClicked.equals(intent.getStringExtra("email"))) {
+                            ActivityUtils.goToActivityBehindTag(ServiceSearchActivity.this, mLastFriendEmailClicked, mAction);
+                        }
+                    }
+
                     L.d(ServiceSearchActivity.class.getName() + " received " + action + " intent");
                     for (SearchInfo si : mSearchInfoByCategory.values()) {
                         si.adapter.notifyDataSetChanged();
@@ -348,15 +403,8 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
     private TextView setCatorySelected(LinearLayout label, final boolean selected) {
         final View labelIndicatorView = label.findViewById(R.id.indicator);
         final TextView labelTextView = (TextView) label.findViewById(R.id.category);
-        if (selected) {
-            labelIndicatorView.setVisibility(View.VISIBLE);
-            labelTextView.setTypeface(Typeface.create(labelTextView.getTypeface(), Typeface.BOLD));
-            labelTextView.setTextColor(getResources().getColor(R.color.mc_blue2));
-        } else {
-            labelIndicatorView.setVisibility(View.INVISIBLE);
-            labelTextView.setTypeface(Typeface.create(labelTextView.getTypeface(), Typeface.NORMAL));
-            labelTextView.setTextColor(getResources().getColor(android.R.color.secondary_text_light));
-        }
+        labelIndicatorView.setVisibility(selected ? View.VISIBLE : View.INVISIBLE);
+        labelTextView.setTypeface(Typeface.create(labelTextView.getTypeface(), selected ? Typeface.BOLD : Typeface.NORMAL));
         return labelTextView;
     }
 
@@ -398,7 +446,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
     }
 
     private void launchFindServiceCall(String cursor) {
-        if (mFriendsPlugin.searchService(mSearchString, mOrganizationType, cursor)) {
+        if (mFriendsPlugin.searchService(mSearchString, mOrganizationType, cursor, mAction)) {
             if (cursor == null)
                 mProgressDialog = ProgressDialog.show(this, null, getString(R.string.searching), true, true);
         } else {
@@ -478,7 +526,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
                 v = getLayoutInflater().inflate(R.layout.search_friend, null);
             }
 
-            Map<String, Object> tag = new HashMap<String, Object>();
+            final Map<String, Object> tag = new HashMap<String, Object>();
             tag.put("item", item);
             tag.put("existence", existence);
             v.setTag(tag);
@@ -489,7 +537,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
             ImageView avatarView = (ImageView) v.findViewById(R.id.friend_avatar);
             avatarView.setImageBitmap(avatar);
             LayoutParams lp = avatarView.getLayoutParams();
-            lp.width = lp.height = UIUtils.convertDipToPixels(ServiceSearchActivity.this, 50);
+            lp.width = lp.height = UIUtils.convertDipToPixels(ServiceSearchActivity.this, 40);
 
             // Set name
             ((TextView) v.findViewById(R.id.friend_name)).setText(item.name);
@@ -499,29 +547,42 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
             // Set status icon
             v.findViewById(R.id.friend_existence_layout).setVisibility(View.VISIBLE);
             ProgressBar spinnerView = (ProgressBar) v.findViewById(R.id.friend_spinner);
-            ImageView statusView = (ImageView) v.findViewById(R.id.friend_existence);
+            final ImageView statusView = (ImageView) v.findViewById(R.id.friend_existence);
+            int buttonColor = ContextCompat.getColor(ServiceSearchActivity.this, R.color.mc_default_text_inverse);
 
             switch (existence) {
-            case Friend.ACTIVE:
-                spinnerView.setVisibility(View.GONE);
-                statusView.setVisibility(View.VISIBLE);
-                statusView.setImageResource(R.drawable.ic_bullet_key_permission);
-                break;
-            case Friend.DELETED:
-            case Friend.DELETION_PENDING:
-            case Friend.NOT_FOUND:
-                spinnerView.setVisibility(View.GONE);
-                statusView.setVisibility(View.VISIBLE);
-                statusView.setImageResource(R.drawable.ic_btn_arrow_right_unselected);
-                break;
-            case Friend.INVITE_PENDING:
-                spinnerView.setVisibility(View.VISIBLE);
-                statusView.setVisibility(View.GONE);
-                break;
-            default:
-                spinnerView.setVisibility(View.GONE);
-                statusView.setVisibility(View.GONE);
-                break;
+                case Friend.ACTIVE:
+                    spinnerView.setVisibility(View.GONE);
+                    statusView.setVisibility(View.VISIBLE);
+                    statusView.setImageDrawable(new IconicsDrawable(ServiceSearchActivity.this).icon(FontAwesome.Icon.faw_check).color(buttonColor).sizeDp(18));
+                    statusView.setBackgroundColor(ContextCompat.getColor(ServiceSearchActivity.this, R.color.mc_default_button));
+
+                    break;
+                case Friend.DELETED:
+                case Friend.DELETION_PENDING:
+                case Friend.NOT_FOUND:
+                    spinnerView.setVisibility(View.GONE);
+                    statusView.setVisibility(View.VISIBLE);
+                    statusView.setImageDrawable(new IconicsDrawable(ServiceSearchActivity.this).icon(FontAwesome.Icon.faw_plus).color(buttonColor).sizeDp(18));
+                    statusView.setBackgroundColor(ContextCompat.getColor(ServiceSearchActivity.this, R.color.mc_primary_color));
+
+                    statusView.setOnClickListener(new SafeViewOnClickListener() {
+                        @Override
+                        public void safeOnClick(View v) {
+                            statusView.setOnClickListener(null);
+                            ServiceSearchActivity.this.connectWithService(tag, true);
+                        }
+                    });
+
+                    break;
+                case Friend.INVITE_PENDING:
+                    spinnerView.setVisibility(View.VISIBLE);
+                    statusView.setVisibility(View.GONE);
+                    break;
+                default:
+                    spinnerView.setVisibility(View.GONE);
+                    statusView.setVisibility(View.GONE);
+                    break;
             }
             return v;
 

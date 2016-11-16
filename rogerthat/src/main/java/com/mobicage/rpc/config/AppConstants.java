@@ -39,16 +39,16 @@ public class AppConstants {
 
     // Customized by App flavor
     public static final String APP_ID = "rogerthat";
-    public static final int HOME_ACTIVITY_LAYOUT = R.layout.homescreen;
+    public static final int HOME_ACTIVITY_LAYOUT = R.layout.news;
     public static final int HOMESCREEN_QRCODE_HEADER = R.string.loyalty_card_description;
     public static final boolean SHOW_HOMESCREEN_FOOTER = false;
-    public static final boolean SHOW_NAV_HEADER = false;
     public static final String FACEBOOK_APP_ID = "188033791211994";
     public static final boolean FACEBOOK_REGISTRATION = true;
     public static final String APP_EMAIL = null;
     public static final String APP_SERVICE_GUID = null;
     public static final boolean FRIENDS_ENABLED = true;
     public static final boolean SERVICES_ENABLED = true;
+    public static final boolean NEWS_ENABLED = true;
     public static final FriendsCaption FRIENDS_CAPTION = FriendsCaption.FRIENDS;
     public static final boolean SHOW_FRIENDS_IN_MORE = false;
     public static final boolean SHOW_PROFILE_IN_MORE = true;
@@ -56,12 +56,9 @@ public class AppConstants {
     public static final boolean FULL_WIDTH_HEADERS = false;
 
     public static final boolean REGISTRATION_ASKS_LOCATION_PERMISSION = true;
-    public static final int[] SEARCH_SERVICES_IF_NONE_CONNECTED = new int[] { -1 };
 
     public static final String[] PROFILE_DATA_FIELDS = new String[] {};
     public static final boolean PROFILE_SHOW_GENDER_AND_BIRTHDATE = true;
-
-    public static final boolean MESSAGES_SHOW_REPLY_VS_UNREAD_COUNT = true;
 
     public static final String ABOUT_WEBSITE = "www.rogerthat.net";
     public static final String ABOUT_WEBSITE_URL = "http://www.rogerthat.net";

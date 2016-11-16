@@ -1,32 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<WebView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/webview"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
-
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:background="@color/mc_black"
-        android:gravity="center"
-        android:padding="2dp"
-        android:textSize="18sp"
-        android:textColor="@color/mc_divider_green" />
-    
-    <View 
-        android:id="@+id/divider"
-        android:layout_below="@id/title"
-        style="@style/RogerThatThickDivider" >
-    </View>
-    
-    <WebView
-        android:id="@+id/webview"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_below="@id/divider"
-        android:background="@color/mc_black" />
-
-</RelativeLayout>
+    android:layout_height="fill_parent" />

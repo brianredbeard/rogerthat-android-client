@@ -17,18 +17,6 @@
  */
 package com.mobicage.rogerthat.plugins.messaging;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-
-import thirdparty.nishantnair.FlowLayout;
-import thirdparty.nishantnair.FlowLayoutRTL;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -36,14 +24,18 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.PorterDuff;
+import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
+import android.support.v7.widget.AppCompatButton;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -58,17 +50,16 @@ import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.FriendDetailOrInviteActivity;
 import com.mobicage.rogerthat.IdentityStore;
-import com.mobicage.rogerthat.SendMessageWizardActivity;
 import com.mobicage.rogerthat.ServiceBoundCursorListActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
+import com.mobicage.rogerthat.plugins.system.SystemPlugin;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
@@ -78,34 +69,43 @@ import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.time.TimeUtils;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
+import com.mobicage.rogerthat.util.ui.SendMessageView;
 import com.mobicage.rogerthat.util.ui.Slider;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.IncompleteMessageException;
+import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.to.messaging.ButtonTO;
 import com.mobicage.to.messaging.MemberStatusTO;
 import com.mobicage.to.messaging.MessageTO;
 
-public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 
-    public final static String ANDROID_TEL_PREFIX = "tel:";
-    public final static String ANDROID_HTTP_PREFIX = "http://";
-    public final static String ANDROID_HTTPS_PREFIX = "https://";
-    public final static String ANDROID_GEO_PREFIX = "geo:";
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+import thirdparty.nishantnair.FlowLayout;
+import thirdparty.nishantnair.FlowLayoutRTL;
+
+public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
 
     public static final String PARENT_MESSAGE_KEY = "parent_message_key";
     public static final String MESSAGE_FLAGS = "message_flags";
 
-    public final static String BUTTON_INFO = "buttonInfo";
-
-    private final static String HINT_DOUBLE_TAP = "com.mobicage.rogerthat.plugins.messaging.FriendsThreadActivity.HINT_DOUBLE_TAP";
     private final static String HINT_SWIPE = "com.mobicage.rogerthat.plugins.messaging.FriendsThreadActivity.HINT_SWIPE";
 
     private boolean mScrollToBottomOnUpdate = false;
     private String mParentMessageKey;
     private MessagingPlugin mMessagingPlugin;
     private MessageStore mMessageStore;
-    private ImageView mSenderAvatar;
-    private LinearLayout mMemberAvatars;
     private FriendsPlugin mFriendsPlugin;
     private String mMyEmail;
     private Scroller mScroller;
@@ -115,11 +115,13 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
     private Message mParentMessage;
     private Set<String> mRenderedMessages;
 
+    private SendMessageView mSendMessageView;
+    private Map<String, MessageMemberStatus> memberStatusTOMap = new HashMap<>();
+
     private int _1_DP_IN_PX;
-    private int _3_DP_IN_PX;
     private int _4_DP_IN_PX;
+    private int _20_DP_IN_PX;
     private int _42_DP_IN_PX;
-    private int _48_DP_IN_PX;
 
     public static Intent createIntent(Context context, String threadKey, long messageFlags, String memberFilter) {
         Intent intent = new Intent(context, FriendsThreadActivity.class);
@@ -136,30 +138,20 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         setContentView(R.layout.message_thread);
 
         _1_DP_IN_PX = UIUtils.convertDipToPixels(this, 1);
-        _3_DP_IN_PX = UIUtils.convertDipToPixels(this, 3);
         _4_DP_IN_PX = UIUtils.convertDipToPixels(this, 4);
+        _20_DP_IN_PX = UIUtils.convertDipToPixels(this, 20);
         _42_DP_IN_PX = UIUtils.convertDipToPixels(this, 42);
-        _48_DP_IN_PX = UIUtils.convertDipToPixels(this, 48);
 
-        mRenderedMessages = new HashSet<String>();
+        mRenderedMessages = new HashSet<>();
         final Intent intent = getIntent();
         mParentMessageKey = intent.getStringExtra(PARENT_MESSAGE_KEY);
         mFlags = intent.getLongExtra(MESSAGE_FLAGS, 0);
-        mSenderAvatar = (ImageView) findViewById(R.id.sender_avatar);
-        mMemberAvatars = (LinearLayout) findViewById(R.id.member_avatars);
-        setListView((ListView) findViewById(R.id.thread_messages));
+        ListView listView = (ListView) findViewById(R.id.thread_messages);
+        setListView(listView);
         mScroller = Scroller.getInstance();
-        ListView listView = getListView();
         listView.setDivider(null);
         listView.setVerticalScrollBarEnabled(false);
         mScroller.setListView(listView);
-
-        findViewById(R.id.reply).setOnClickListener(new SafeViewOnClickListener() {
-            @Override
-            public void safeOnClick(View v) {
-                showReplyMessageWizard();
-            }
-        });
 
         final IntentFilter filter1 = new IntentFilter();
         for (String action : getAllReceivingIntents()) {
@@ -172,6 +164,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         filter2.addAction(BrandingMgr.ATTACHMENT_AVAILABLE_INTENT);
         filter2.addAction(MessagingPlugin.THREAD_MODIFIED_INTENT);
         filter2.addAction(FriendsPlugin.FRIEND_INFO_RECEIVED_INTENT);
+        filter2.addAction(BrandingMgr.ASSET_AVAILABLE_INTENT);
         registerReceiver(mReceiver, filter2);
     }
 
@@ -184,8 +177,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             if (!SystemUtils.isFlagEnabled(mFlags, MessagingPlugin.FLAG_DYNAMIC_CHAT) && !mParentMessage.threadDirty) {
                 List<String> dirties = new ArrayList<String>(mRenderedMessages.size());
                 for (String key : mRenderedMessages)
-                    if (!mMessagingPlugin.isTmpKey(key))
-                        dirties.add(key);
+                    dirties.add(key);
                 mMessagingPlugin.markMessagesAsRead(mParentMessageKey, dirties.toArray(new String[dirties.size()]));
             }
         }
@@ -198,7 +190,6 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         mFriendsPlugin = mService.getPlugin(FriendsPlugin.class);
         mMessageStore = mMessagingPlugin.getStore();
         mMyEmail = mService.getIdentityStore().getIdentity().getEmail();
-        reloadMessage();
         createCursor();
         mMessageCount = getCursor().getCount();
         startManagingCursor(getCursor());
@@ -212,18 +203,57 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         instance.setOnDoubleTapListener(new Slider.OnDoubleTapListener() {
             @Override
             public boolean onDoubleTap(MotionEvent event) {
-                showReplyMessageWizard();
+                if (mSendMessageView.getVisibility() == View.VISIBLE) {
+                    mSendMessageView.showKeyboard();
+                }
                 return true;
             }
         });
         mGestureScanner = new GestureDetector(instance);
 
-        if (!UIUtils.showHint(this, mService, HINT_DOUBLE_TAP, R.string.hint_double_tap))
-            UIUtils.showHint(this, mService, HINT_SWIPE, R.string.hint_swipe);
+        UIUtils.showHint(this, mService, HINT_SWIPE, R.string.hint_swipe);
+
+        mSendMessageView = (SendMessageView) findViewById(R.id.chat_container);
+        reloadMessage();
+        if (SystemUtils.isFlagEnabled(mFlags, MessagingPlugin.FLAG_ALLOW_REPLY)) {
+            mSendMessageView.setActive(this, mService, null, null, mParentMessageKey, mFlags, mParentMessageKey, mParentMessage.default_priority, mParentMessage.default_sticky);
+        } else {
+            mSendMessageView.setVisibility(View.GONE);
+        }
+        setThreadBackground();
+    }
+
+    private void setThreadBackground() {
+        Bitmap background = mService.getPlugin(SystemPlugin.class).getAppAsset(SystemPlugin.ASSET_CHAT_BACKGROUND);
+        if (background != null) {
+            BitmapDrawable backgroundDrawable = new BitmapDrawable(getResources(), background);
+            backgroundDrawable.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
+            findViewById(R.id.thread_container).setBackground(backgroundDrawable);
+        }
     }
 
     @Override
     protected void onServiceUnbound() {
+        mSendMessageView.hideKeyboard();
+    }
+
+    @Override
+    protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (!mServiceIsBound) {
+            addOnServiceBoundRunnable(new SafeRunnable() {
+                @Override
+                protected void safeRun() throws Exception {
+                    onActivityResult(requestCode, resultCode, data);
+                }
+            });
+            return;
+        }
+
+        if (mSendMessageView != null) {
+            mSendMessageView.onActivityResult(requestCode, resultCode, data);
+        }
     }
 
     @Override
@@ -275,11 +305,6 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
     }
 
     @Override
-    protected boolean showFABMenu() {
-        return true;
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         T.UI();
         super.onCreateOptionsMenu(menu);
@@ -294,15 +319,15 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         for (int i = 0; i < menu.size(); i++) {
             MenuItem item = menu.getItem(i);
             switch (item.getItemId()) {
-            case R.id.reply:
-                item.setVisible(SystemUtils.isFlagEnabled(mFlags, MessagingPlugin.FLAG_ALLOW_REPLY));
-                break;
-            case R.id.delete_conversation:
-                item.setVisible(!SystemUtils.isFlagEnabled(mFlags, MessagingPlugin.FLAG_NOT_REMOVABLE));
-                break;
-            case R.id.info:
-                item.setVisible(SystemUtils.isFlagEnabled(mFlags, MessagingPlugin.FLAG_DYNAMIC_CHAT));
-                break;
+                case R.id.members:
+                    item.setVisible(!SystemUtils.isFlagEnabled(mFlags, MessagingPlugin.FLAG_DYNAMIC_CHAT));
+                    break;
+                case R.id.delete_conversation:
+                    item.setVisible(!SystemUtils.isFlagEnabled(mFlags, MessagingPlugin.FLAG_NOT_REMOVABLE));
+                    break;
+                case R.id.info:
+                    item.setVisible(SystemUtils.isFlagEnabled(mFlags, MessagingPlugin.FLAG_DYNAMIC_CHAT));
+                    break;
             }
         }
         return true;
@@ -312,23 +337,38 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         T.UI();
         switch (item.getItemId()) {
-        case R.id.reply:
-            showReplyMessageWizard();
-            return true;
-        case R.id.help:
-            new AlertDialog.Builder(FriendsThreadActivity.this).setTitle(R.string.help)
-                .setMessage(getString(R.string.message_thread_help)).setPositiveButton(getString(R.string.ok), null)
-                .create().show();
-            return true;
-        case R.id.delete_conversation:
-            mMessagingPlugin.removeConversationFromList(this, mParentMessageKey);
-            return true;
-        case R.id.info:
-            startActivity(ChatInfoActivity.createIntent(this, mParentMessageKey));
-            return true;
-        default:
-            return super.onOptionsItemSelected(item);
+            case R.id.members:
+                onToolbarClicked();
+                return true;
+            case R.id.help:
+                new AlertDialog.Builder(FriendsThreadActivity.this).setTitle(R.string.help)
+                    .setMessage(getString(R.string.message_thread_help)).setPositiveButton(getString(R.string.ok), null)
+                    .create().show();
+                return true;
+            case R.id.delete_conversation:
+                mMessagingPlugin.removeConversationFromList(this, mParentMessageKey);
+                return true;
+            case R.id.info:
+                startActivity(ChatInfoActivity.createIntent(this, mParentMessageKey));
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public void onToolbarClicked() {
+        if (SystemUtils.isFlagEnabled(mFlags, MessagingPlugin.FLAG_DYNAMIC_CHAT))
+            return;
+
+        Intent intent = new Intent(this, MembersActivity.class);
+        String[] members = new String[mParentMessage.members.length];
+        for (int i = 0; i < mParentMessage.members.length; i++) {
+            members[i] = mParentMessage.members[i].member;
+        }
+        intent.putExtra(MembersActivity.ME, mMyEmail);
+        intent.putExtra(MembersActivity.MEMBERS, members);
+        startActivity(intent);
     }
 
     private final BroadcastReceiver mReceiver = new SafeBroadcastReceiver() {
@@ -362,6 +402,12 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                 if (intent.getBooleanExtra("success", false)) {
                     refreshCursor();
                     return new String[] { intent.getAction() };
+                }
+            }
+            if (BrandingMgr.ASSET_AVAILABLE_INTENT.equals(intent.getAction())) {
+                String kind = intent.getStringExtra(BrandingMgr.ASSET_KIND);
+                if (SystemPlugin.ASSET_CHAT_BACKGROUND.equals(kind)) {
+                    setThreadBackground();
                 }
             }
             return null;
@@ -405,20 +451,20 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             final boolean isChat = SystemUtils.isFlagEnabled(message.flags, MessagingPlugin.FLAG_DYNAMIC_CHAT);
             final boolean allowChatButtons = SystemUtils.isFlagEnabled(message.flags,
                 MessagingPlugin.FLAG_ALLOW_CHAT_BUTTONS);
-            String senderName = setMessageInfo(context, view, isSender, message, isChat);
-            setSenderAvatar(context, view, c, message);
-            setMessage(message, context, view);
-            setAttachments(message, context, view);
+            String senderName = setMessageInfo(view, isSender, message, isChat);
+            setSenderAvatar(view, c, message);
+            setMessage(message, view);
+            setAttachments(message, view);
+            setMemberStatuses(message, isChat, view);
             if (!isChat || allowChatButtons) {
-                boolean isLocked = SystemUtils.isFlagEnabled(message.flags, MessagingPlugin.FLAG_LOCKED)
-                    || mMessagingPlugin.isTmpKey(message.key);
+                boolean isLocked = SystemUtils.isFlagEnabled(message.flags, MessagingPlugin.FLAG_LOCKED);
                 boolean canEdit = isLocked;
                 if (!canEdit && allowChatButtons) {
                     canEdit = true;
                 } else {
                     canEdit = !isLocked && iAmMember(message);
                 }
-                addButtons(c, message, view, left, canEdit, senderName, isChat);
+                addButtons(c, message, view, left, canEdit, isChat);
             } else {
                 mMessagingPlugin.ackChat(message.getThreadKey());
             }
@@ -426,7 +472,29 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             return view;
         }
 
-        private void setAttachments(final Message message, final Context context, final View view) {
+        private void setMemberStatuses(Message message, boolean isChat, View view) {
+            LinearLayout container = (LinearLayout) view.findViewById(R.id.read_friends_container);
+            boolean shouldShowStatuses = false;
+            if (!isChat) {
+                for (MemberStatusTO memberStatus : message.members) {
+                    if (memberStatus.member.equals(mMyEmail)) {
+                        continue;
+                    }
+                    if (!SystemUtils.isFlagEnabled(memberStatus.status, MessagingPlugin.STATUS_ACKED)) {
+                        continue;
+                    }
+                    MessageMemberStatus lastMemberStatus = memberStatusTOMap.get(memberStatus.member);
+                    if (message.key.equals(lastMemberStatus.messageKey)) {
+                        ImageView avatar = getMemberAvatar(memberStatus, false, false, _20_DP_IN_PX);
+                        shouldShowStatuses = true;
+                        container.addView(avatar);
+                    }
+                }
+            }
+            container.setVisibility(shouldShowStatuses ? View.VISIBLE : View.GONE);
+        }
+
+        private void setAttachments(final Message message, final View view) {
             if (message.attachments.length > 0) {
                 final String threadKey = message.parent_key == null ? message.key : message.parent_key;
                 final File attachmentsDir;
@@ -451,46 +519,36 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
 
                     final String downloadUrlHash = mMessagingPlugin.attachmentDownloadUrlHash(attachment.download_url);
                     final File attachmentFile = new File(attachmentsDir, downloadUrlHash);
-
-                    if (!attachmentFile.exists()
-                        && mMessagingPlugin.getBrandingMgr().isAttachmentInBrandingQueue(attachment.threadKey,
-                            attachment.messageKey, attachment.download_url)) {
-                        // Show spinner if in queue and disable click
-                        ProgressBar spinner = (ProgressBar) view.findViewById(R.id.spinner);
-                        spinner.setVisibility(View.VISIBLE);
-
-                    } else {
-                        final ImageView attachmentImageView = (ImageView) View.inflate(mContext,
+                    final ImageView attachmentImageView = (ImageView) View.inflate(mContext,
                             R.layout.threaded_message_attachment, null);
-                        linearLayout.addView(attachmentImageView);
+                    linearLayout.addView(attachmentImageView);
 
-                        // Set 10dp margin bottom. Setting it in the xml did not work
-                        LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) attachmentImageView
+                    // Set 10dp margin bottom. Setting it in the xml did not work
+                    LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) attachmentImageView
                             .getLayoutParams();
-                        final int dpi5 = UIUtils.convertDipToPixels(mContext, 5);
-                        layoutParams.setMargins(0, dpi5, 0, dpi5);
+                    final int dpi5 = UIUtils.convertDipToPixels(mContext, 5);
+                    layoutParams.setMargins(0, dpi5, 0, dpi5);
 
-                        final Bitmap thumbnail = setAttachmentThumbnail(attachment, attachmentFile, attachmentImageView);
-                        final boolean generateThumbnail = thumbnail == null;
+                    final Bitmap thumbnail = setAttachmentThumbnail(attachment, attachmentFile, attachmentImageView);
+                    final boolean generateThumbnail = thumbnail == null;
 
-                        attachmentImageView.setOnClickListener(new SafeViewOnClickListener() {
-                            @Override
-                            public void safeOnClick(View v) {
-                                Intent i = new Intent(FriendsThreadActivity.this, AttachmentViewerActivity.class);
-                                i.putExtra("thread_key", attachment.threadKey);
-                                i.putExtra("message", attachment.messageKey);
-                                i.putExtra("content_type", attachment.content_type);
-                                i.putExtra("download_url", attachment.download_url);
-                                i.putExtra("name", attachment.name);
-                                i.putExtra("download_url_hash", downloadUrlHash);
-                                i.putExtra("generate_thumbnail", generateThumbnail);
+                    attachmentImageView.setOnClickListener(new SafeViewOnClickListener() {
+                        @Override
+                        public void safeOnClick(View v) {
+                            Intent i = new Intent(FriendsThreadActivity.this, AttachmentViewerActivity.class);
+                            i.putExtra("thread_key", attachment.threadKey);
+                            i.putExtra("message", attachment.messageKey);
+                            i.putExtra("content_type", attachment.content_type);
+                            i.putExtra("download_url", attachment.download_url);
+                            i.putExtra("name", attachment.name);
+                            i.putExtra("download_url_hash", downloadUrlHash);
+                            i.putExtra("generate_thumbnail", generateThumbnail);
 
-                                startActivity(i);
-                            }
-                        });
+                            startActivity(i);
+                        }
+                    });
 
-                        linearLayout.setVisibility(View.VISIBLE);
-                    }
+                    linearLayout.setVisibility(View.VISIBLE);
                 }
             }
         }
@@ -505,6 +563,13 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                 final File thumbnailFile = new File(attachmentFile.getAbsolutePath() + ".thumb");
                 if (thumbnailFile.exists()) {
                     thumbnail = ImageHelper.getBitmapFromFile(thumbnailFile.getAbsolutePath());
+                } else {
+                    try {
+                        mMessagingPlugin.createAttachmentThumbnail(attachmentFile.getAbsolutePath(), isImage,
+                                isVideo);
+                    } catch (Exception e) {
+                        L.e("Failed to generate attachment thumbnail", e);
+                    }
                 }
             }
 
@@ -530,11 +595,11 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         }
 
         private void addButtons(final Cursor cursor, final Message message, View view, boolean left, boolean canEdit,
-            String senderName, boolean isChat) {
+                                boolean isChat) {
             LinearLayout buttons = (LinearLayout) view.findViewById(R.id.buttons);
             buttons.removeAllViews();
             for (ButtonTO button : message.buttons) {
-                addButton(cursor, message, left, canEdit, senderName, buttons, button, isChat);
+                addButton(message, left, canEdit, buttons, button, isChat);
             }
             if (!isChat) {
                 boolean addRogerthatButton = message.threadNeedsMyAnswer
@@ -542,8 +607,6 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                 Button rogerThatButton = (Button) view.findViewById(R.id.rogerthat_button);
                 rogerThatButton.setVisibility(addRogerthatButton ? View.VISIBLE : View.GONE);
                 if (addRogerthatButton) {
-                    rogerThatButton.getBackground()
-                        .setColorFilter(Message.GREEN_BUTTON_COLOR, PorterDuff.Mode.MULTIPLY);
                     rogerThatButton.setOnClickListener(new SafeViewOnClickListener() {
                         @Override
                         public void safeOnClick(View v) {
@@ -554,19 +617,24 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             }
         }
 
-        private void addButton(final Cursor cursor, final MessageTO message, boolean left, boolean canEdit,
-            String senderName, final LinearLayout buttons, final ButtonTO button, final boolean isChat) {
-            RelativeLayout buttonContainer = (RelativeLayout) mInflator.inflate(
-                left ? R.layout.message_thread_member_detail_right : R.layout.message_thread_member_detail_left, null);
+
+        private void addButton(final MessageTO message, boolean left, boolean canEdit, final LinearLayout buttons,
+                               final ButtonTO button, final boolean isChat) {
+            int buttonLayout = left ? R.layout.message_thread_member_detail_left : R.layout.message_thread_member_detail_right;
+            LinearLayout buttonContainer = (LinearLayout) mInflator.inflate(buttonLayout, null);
             buttons.addView(buttonContainer);
-            Button buttonView = (Button) buttonContainer.findViewById(R.id.button);
+            AppCompatButton buttonView = (AppCompatButton) buttonContainer.findViewById(R.id.button);
             buttonView.setText(button.caption);
-            if (button.id == null) {
-                buttonView.getBackground().setColorFilter(Message.GREEN_BUTTON_COLOR, PorterDuff.Mode.MULTIPLY);
+            int color;
+            if (canEdit) {
+                color = button.id == null ? R.color.mc_positive_button : R.color.mc_default_button;
             } else {
-                buttonView.getBackground().setColorFilter(Message.BLUE_BUTTON_COLOR, PorterDuff.Mode.MULTIPLY);
+                color = button.id == null ? R.color.mc_positive_button_disabled : R.color.mc_default_button_disabled;
             }
+            ColorStateList colorListState = ContextCompat.getColorStateList(mService, color);
+            ViewCompat.setBackgroundTintList(buttonView, colorListState);
             buttonView.setEnabled(canEdit);
+            buttonView.setTextColor(ContextCompat.getColor(mService, canEdit ? R.color.mc_white : R.color.mc_default_text));
 
             Map<String, String> actionInfo = mMessagingPlugin.getButtonActionInfo(button);
             final String buttonAction = actionInfo.get("androidAction");
@@ -576,7 +644,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                 @Override
                 public void safeOnClick(View v) {
                     T.UI();
-                    if (buttonAction == Message.MC_CONFIRM_PREFIX) {
+                    if (Message.MC_CONFIRM_PREFIX.equals(buttonAction)) {
                         askConfirmation(message, button, buttonUrl);
                     } else {
                         if (buttonAction != null) {
@@ -609,6 +677,10 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                         mMessagingPlugin.getStore().insertMemberStatusBIZZ(message.parent_key, message.key, ms);
                     }
 
+                    if (message.parent_key != null) {
+                        // Ack the messages which were sent before this one
+                        mMessagingPlugin.ackThread(message.parent_key, message.timestamp);
+                    }
                     mMessagingPlugin.ackMessage(message, id, null, null, FriendsThreadActivity.this, buttons);
                 }
 
@@ -640,36 +712,38 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                     continue;
                 if ((button.id == null && member.button_id == null && !message.sender.equals(member.member))
                     || (button.id != null && button.id.equals(member.button_id))) {
-                    ImageView avatar = new ImageView(mContext);
-                    final SafeRunnable friendNotFoundRunnable;
-                    if (isChat) {
-                        friendNotFoundRunnable = new SafeRunnable() {
-                            @Override
-                            protected void safeRun() throws Exception {
-                                mFriendsPlugin.requestUserInfo(member.member, true);
-                            }
-                        };
-                    } else {
-                        friendNotFoundRunnable = null;
-                    }
-                    avatar.setImageBitmap(mFriendsPlugin
-                        .getAvatarBitmap(member.member, !isChat, friendNotFoundRunnable));
-                    avatar.setBackgroundResource(R.drawable.avatar_background_black);
-                    avatar.setPadding(_1_DP_IN_PX, _1_DP_IN_PX, _1_DP_IN_PX, _1_DP_IN_PX);
-                    configureAvatarOnClickListener(member.member, avatar, isChat);
-                    if (left) { // RTL
-                        avatar.setLayoutParams(new FlowLayout.LayoutParams(_42_DP_IN_PX, _42_DP_IN_PX, _4_DP_IN_PX,
-                            _4_DP_IN_PX));
-                    } else {
-                        avatar.setLayoutParams(new FlowLayoutRTL.LayoutParams(_42_DP_IN_PX, _42_DP_IN_PX, _4_DP_IN_PX,
-                            _4_DP_IN_PX));
-                    }
-                    members.addView(avatar);
+                    members.addView(getMemberAvatar(member, isChat, left, _42_DP_IN_PX));
                 }
             }
         }
 
-        private void setMessage(MessageTO message, Context context, View view) {
+        private ImageView getMemberAvatar(final MemberStatusTO memberStatus, boolean isChat, boolean rtl, int size) {
+            ImageView avatar = new ImageView(mContext);
+            final SafeRunnable friendNotFoundRunnable;
+            if (isChat) {
+                friendNotFoundRunnable = new SafeRunnable() {
+                    @Override
+                    protected void safeRun() throws Exception {
+                        mFriendsPlugin.requestUserInfo(memberStatus.member, true);
+                    }
+                };
+            } else {
+                friendNotFoundRunnable = null;
+            }
+            avatar.setImageBitmap(mFriendsPlugin
+                    .getAvatarBitmap(memberStatus.member, !isChat, friendNotFoundRunnable, -1));
+            avatar.setBackgroundResource(R.drawable.avatar_background_black);
+            avatar.setPadding(_1_DP_IN_PX, _1_DP_IN_PX, _1_DP_IN_PX, _1_DP_IN_PX);
+            configureAvatarOnClickListener(memberStatus.member, avatar, isChat);
+            if (rtl) {
+                avatar.setLayoutParams(new FlowLayoutRTL.LayoutParams(size, size, _4_DP_IN_PX, _4_DP_IN_PX));
+            } else {
+                avatar.setLayoutParams(new FlowLayout.LayoutParams(size, size, _4_DP_IN_PX, _4_DP_IN_PX));
+            }
+            return avatar;
+        }
+
+        private void setMessage(MessageTO message, View view) {
             TextView messageView = (TextView) view.findViewById(R.id.message);
             if (message.message == null || "".equals(message.message)) {
                 messageView.setVisibility(View.GONE);
@@ -679,9 +753,8 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             }
         }
 
-        private void setSenderAvatar(Context context, View view, Cursor c, final MessageTO message) {
+        private void setSenderAvatar(View view, Cursor c, final MessageTO message) {
             ImageView senderAvatar = (ImageView) view.findViewById(R.id.sender_avatar);
-            ProgressBar spinner = (ProgressBar) view.findViewById(R.id.spinner);
             final boolean isChat = SystemUtils.isFlagEnabled(message.flags, MessagingPlugin.FLAG_DYNAMIC_CHAT);
             final SafeRunnable friendNotFoundRunnable;
             if (isChat) {
@@ -695,22 +768,13 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                 friendNotFoundRunnable = null;
             }
             senderAvatar
-                .setImageBitmap(mFriendsPlugin.getAvatarBitmap(message.sender, !isChat, friendNotFoundRunnable));
-
-            if (mMessagingPlugin.isTmpKey(message.key)) {
-                spinner.setVisibility(View.VISIBLE);
-            } else {
-                spinner.setVisibility(View.GONE);
-            }
-
+                    .setImageBitmap(mFriendsPlugin.getAvatarBitmap(message.sender, !isChat, friendNotFoundRunnable, -1));
             final boolean isSender = message.sender.equals(mMyEmail);
             if (isSender && !isChat && !SystemUtils.isFlagEnabled(message.flags, MessagingPlugin.FLAG_LOCKED)) {
                 senderAvatar.setOnLongClickListener(new OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View v) {
                         if (!isSender)
-                            return false;
-                        if (mMessagingPlugin.isTmpKey(message.key))
                             return false;
                         final ProgressDialog dialog = ProgressDialog.show(FriendsThreadActivity.this, "",
                             getString(R.string.locking), true, false);
@@ -735,11 +799,11 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             } else {
                 senderAvatar.setOnLongClickListener(null);
                 senderAvatar.setTag(false);
-                configureAvatarOnClickListener(message.sender, senderAvatar, isChat);
             }
+            configureAvatarOnClickListener(message.sender, senderAvatar, isChat);
         }
 
-        private String setMessageInfo(Context context, View view, boolean isSender, MessageTO message, boolean isChat) {
+        private String setMessageInfo(View view, boolean isSender, MessageTO message, boolean isChat) {
             if (message.priority == Message.PRIORITY_HIGH) {
                 RelativeLayout textBubble = (RelativeLayout) view.findViewById(R.id.text_bubble);
                 if (isSender) {
@@ -819,15 +883,6 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             lv.setSelection(position);
     }
 
-    private void setAvatarBackground(ImageView avatar, MemberStatusTO memberStatus) {
-        if ((memberStatus.status & MessagingPlugin.STATUS_ACKED) == MessagingPlugin.STATUS_ACKED)
-            avatar.setBackgroundResource(R.drawable.avatar_background_acknowledged);
-        else if ((memberStatus.status & MessagingPlugin.STATUS_RECEIVED) == MessagingPlugin.STATUS_RECEIVED)
-            avatar.setBackgroundResource(R.drawable.avatar_background_received);
-        else
-            avatar.setBackgroundResource(R.drawable.avatar_background_not_received);
-    }
-
     private void configureAvatarOnClickListener(final String friendEmail, final ImageView avatar, final boolean isChat) {
         avatar.setOnClickListener(new SafeViewOnClickListener() {
             @Override
@@ -837,9 +892,14 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                     Intent intent = new Intent(FriendsThreadActivity.this, ProfileActivity.class);
                     startActivity(intent);
                 } else if (isChat) {
-                    Intent intent = new Intent(FriendsThreadActivity.this, FriendDetailOrInviteActivity.class);
-                    intent.putExtra(FriendDetailOrInviteActivity.EMAIL, friendEmail);
-                    startActivity(intent);
+                    final int contactType = mFriendsPlugin.getContactType(friendEmail);
+                    if ((contactType & FriendsPlugin.FRIEND) == FriendsPlugin.FRIEND && AppConstants.FRIENDS_ENABLED) {
+                        mFriendsPlugin.launchDetailActivity(FriendsThreadActivity.this, friendEmail);
+                    } else {
+                        Intent intent = new Intent(FriendsThreadActivity.this, FriendDetailOrInviteActivity.class);
+                        intent.putExtra(FriendDetailOrInviteActivity.EMAIL, friendEmail);
+                        startActivity(intent);
+                    }
                 } else {
                     final int contactType = mFriendsPlugin.getContactType(friendEmail);
                     if ((contactType & FriendsPlugin.FRIEND) == FriendsPlugin.FRIEND) {
@@ -862,59 +922,57 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
     }
 
     private void displayMembers(MessageTO parentMessage) {
-        View headerView = findViewById(R.id.message_thread_header);
         final boolean isChat = SystemUtils.isFlagEnabled(mFlags, MessagingPlugin.FLAG_DYNAMIC_CHAT);
         if (isChat) {
-            headerView.setVisibility(View.GONE);
+            setTitle(R.string.group_chat);
+            final JSONObject json = (JSONObject) JSONValue.parse(parentMessage.message);
+
+            getToolbar().post(new SafeRunnable() {
+                @Override
+                protected void safeRun() throws Exception {
+                    getSupportActionBar().setSubtitle((String) json.get("t"));
+                }
+            });
+
             return;
         }
+        List<String> members = new ArrayList<>();
 
-        headerView.setVisibility(View.VISIBLE);
+        Collection<MessageMemberStatus> leastMemberStatusses = mMessageStore.getLeastMemberStatusses(mParentMessageKey);
+        memberStatusTOMap.clear();
+        for (final MessageMemberStatus memberStatus : leastMemberStatusses) {
+            memberStatusTOMap.put(memberStatus.member, memberStatus);
+        }
 
-        Collection<MemberStatusTO> leastMemberStatusses = mMessageStore.getLeastMemberStatusses(mParentMessageKey);
-        // Set sender avatar
-        mSenderAvatar.setImageBitmap(mFriendsPlugin.getAvatarBitmap(parentMessage.sender));
-        // Add member avatars
-        mMemberAvatars.removeAllViews();
-        MemberStatusTO senderStatus = null;
-        for (final MemberStatusTO ms : leastMemberStatusses) {
-            if (ms.member.equals(parentMessage.sender)) {
-                senderStatus = ms;
-            } else {
-                ImageView avatar = new ImageView(this);
-                avatar.setImageBitmap(mFriendsPlugin.getAvatarBitmap(ms.member, true));
-                avatar.setPadding(_3_DP_IN_PX, _3_DP_IN_PX, _3_DP_IN_PX, _3_DP_IN_PX);
-                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(_48_DP_IN_PX, _48_DP_IN_PX);
-                layoutParams.setMargins(0, 0, _3_DP_IN_PX, 0);
-                avatar.setLayoutParams(layoutParams);
-                setAvatarBackground(avatar, ms);
-                configureAvatarOnClickListener(ms.member, avatar, isChat);
-                mMemberAvatars.addView(avatar);
+        for (MemberStatusTO memberStatus : parentMessage.members) {
+            if (!memberStatus.member.equals(mMyEmail)) {
+                members.add(memberStatus.member);
             }
         }
-        if (senderStatus == null) {
-            L.bug("Sender status could not be determined!");
-            mSenderAvatar.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+
+        if (members.size() > 1) {
+            setTitle(R.string.group_chat);
+            final StringBuilder sb = new StringBuilder();
+            boolean firstTime = true;
+            for (String member : members) {
+                if (firstTime) {
+                    firstTime = false;
+                } else {
+                    sb.append(", ");
+                }
+                sb.append(mFriendsPlugin.getName(member));
+            }
+
+            getToolbar().post(new SafeRunnable() {
+                @Override
+                protected void safeRun() throws Exception {
+                    getSupportActionBar().setSubtitle(sb.toString());
+                }
+            });
+
         } else {
-            setAvatarBackground(mSenderAvatar, senderStatus);
-            configureAvatarOnClickListener(senderStatus.member, mSenderAvatar, isChat);
+            setTitle(mFriendsPlugin.getName(members.get(0)));
         }
-    }
-
-    private boolean showReplyMessageWizard() {
-        if (!SystemUtils.isFlagEnabled(mFlags, MessagingPlugin.FLAG_ALLOW_REPLY)) {
-            return false;
-        }
-
-        final Intent intent = new Intent(FriendsThreadActivity.this,
-            com.mobicage.rogerthat.SendMessageWizardActivity.class);
-        intent.putExtra(SendMessageWizardActivity.PARENT_KEY, mParentMessageKey);
-        intent.putExtra(SendMessageWizardActivity.REPLIED_TO_KEY, mParentMessageKey);
-        intent.putExtra(SendMessageWizardActivity.FLAGS, mFlags);
-        intent.putExtra(SendMessageWizardActivity.DEFAULT_PRIORITY, mParentMessage.default_priority);
-        intent.putExtra(SendMessageWizardActivity.DEFAULT_STICKY, mParentMessage.default_sticky);
-        startActivity(intent);
-        return true;
     }
 
     @Override
@@ -931,8 +989,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             MessagingPlugin.MESSAGE_LOCKED_INTENT, MessagingPlugin.MESSAGE_PROCESSED_INTENT,
             MessagingPlugin.NEW_MESSAGE_RECEIVED_INTENT, FriendsPlugin.FRIEND_AVATAR_CHANGED_INTENT,
             FriendsPlugin.FRIEND_UPDATE_INTENT, IdentityStore.IDENTITY_CHANGED_INTENT,
-            FriendsPlugin.FRIENDS_LIST_REFRESHED, MessagingPlugin.NEW_MESSAGE_QUEUED_TO_BACKLOG_INTENT,
-            MessagingPlugin.MESSAGE_KEY_UPDATED_INTENT };
+            FriendsPlugin.FRIENDS_LIST_REFRESHED, MessagingPlugin.NEW_MESSAGE_QUEUED_TO_BACKLOG_INTENT };
     }
 
     private boolean iAmMember(final Message message) {
@@ -944,6 +1001,10 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             }
         }
         return isMember;
+    }
+
+    public String getParentMessageKey() {
+        return mParentMessageKey;
     }
 
 }

@@ -17,13 +17,6 @@
  */
 package com.mobicage.rogerthat;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import java.util.regex.Matcher;
-
-import org.jivesoftware.smack.util.Base64;
-
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -33,6 +26,7 @@ import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -43,6 +37,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.mobicage.rogerth.at.R;
@@ -52,6 +47,8 @@ import com.mobicage.rogerthat.plugins.messaging.BrandingFailureException;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr.BrandingResult;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr.ColorScheme;
+import com.mobicage.rogerthat.plugins.messaging.MessagingFilterActivity;
+import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.plugins.messaging.mfr.EmptyStaticFlowException;
 import com.mobicage.rogerthat.plugins.messaging.mfr.JsMfr;
 import com.mobicage.rogerthat.plugins.messaging.mfr.MessageFlowRun;
@@ -64,11 +61,19 @@ import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
+import com.mobicage.rogerthat.util.ui.ServiceHeader;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.to.friends.FriendTO;
 import com.mobicage.to.service.StartServiceActionRequestTO;
 import com.mobicage.to.system.GetIdentityQRCodeRequestTO;
+
+import org.jivesoftware.smack.util.Base64;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.regex.Matcher;
 
 public abstract class FriendDetailActivity extends ServiceBoundActivity {
 
@@ -93,13 +98,17 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
     private AlertDialog mRequestFriendToShareLocationDialog;
 
     // assigned in onCreate
-    private Button mFindFriendLocationButton;
     private View mTopArea;
     private View mFriendArea;
     private ViewGroup mServiceArea;
     private View mPokeArea;
+    private View mHeader;
 
     protected String mContextMatch;
+
+    private LinearLayout mHeaderContainer;
+    private WebView mWebview;
+    private TextView mDescriptionView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,10 +117,13 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
         setContentView(R.layout.friend_detail);
 
         mTopArea = findViewById(R.id.friend_detail_layout);
-        mFindFriendLocationButton = (Button) findViewById(R.id.retrieve_friend_location_button);
         mServiceArea = (ViewGroup) findViewById(R.id.service_area);
         mPokeArea = findViewById(R.id.poke_area);
         mFriendArea = findViewById(R.id.friend_area);
+        mHeader = findViewById(R.id.friend_detail_header);
+        mHeaderContainer = (LinearLayout) findViewById(R.id.header_container);
+        mWebview = (WebView) findViewById(R.id.webview);
+        mDescriptionView = (TextView) mServiceArea.findViewById(R.id.description);
     }
 
     @Override
@@ -214,6 +226,8 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
             return;
         }
 
+        setTitle(mFriend.getDisplayName());
+
         if (getPassportVisibility() != View.GONE) {
             GetFriendIdentityQRCodeResponseHandler rh = new GetFriendIdentityQRCodeResponseHandler();
             rh.setFriendEmail(mFriend.email);
@@ -227,14 +241,8 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
             }
         }
 
-        CheckBox iShareLocationCheckBox = (CheckBox) findViewById(R.id.share_location);
-        // Increase space between checkbox and text
-        iShareLocationCheckBox.setPadding(
-            iShareLocationCheckBox.getPaddingLeft() + UIUtils.convertDipToPixels(this, 10),
-            iShareLocationCheckBox.getPaddingTop(), iShareLocationCheckBox.getPaddingRight(),
-            iShareLocationCheckBox.getPaddingBottom());
-
-        mFindFriendLocationButton.setOnClickListener(new SafeViewOnClickListener() {
+        ImageView location = (ImageView) findViewById(R.id.location);
+        location.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
                 T.UI();
@@ -252,7 +260,6 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
                     builder.create().show();
 
                     mFriendsPlugin.scheduleSingleFriendLocationRetrieval(mFriend.email);
-                    mFindFriendLocationButton.setEnabled(false);
                 } else {
 
                     SafeDialogInterfaceOnClickListener onPositiveClickListener = new SafeDialogInterfaceOnClickListener() {
@@ -282,6 +289,33 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
             }
         });
 
+        ImageView newMessage = (ImageView) findViewById(R.id.send);
+        newMessage.setOnClickListener(new SafeViewOnClickListener() {
+            @Override
+            public void safeOnClick(View v) {
+                final Intent sendMessage = new Intent(FriendDetailActivity.this, SendMessageMessageActivity.class);
+                sendMessage.putExtra(SendMessageMessageActivity.RECIPIENTS, new String[] { mFriend.email });
+                startActivity(sendMessage);
+            }
+        });
+
+        ImageView history = (ImageView) findViewById(R.id.history);
+        history.setOnClickListener(new SafeViewOnClickListener() {
+            @Override
+            public void safeOnClick(View v) {
+                final Intent viewMessages = new Intent(FriendDetailActivity.this, MessagingFilterActivity.class);
+                viewMessages.putExtra(MessagingPlugin.MEMBER_FILTER, mFriend.email);
+                startActivity(viewMessages);
+            }
+        });
+
+        CheckBox iShareLocationCheckBox = (CheckBox) findViewById(R.id.share_location);
+        // Increase space between checkbox and text
+        iShareLocationCheckBox.setPadding(
+                iShareLocationCheckBox.getPaddingLeft() + UIUtils.convertDipToPixels(this, 10),
+                iShareLocationCheckBox.getPaddingTop(), iShareLocationCheckBox.getPaddingRight(),
+                iShareLocationCheckBox.getPaddingBottom());
+
         IntentFilter filter = getIntentFilter();
         if (filter != null)
             initBroadcastReceiver(filter);
@@ -304,11 +338,6 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
     }
 
     protected abstract int getMenu();
-
-    @Override
-    protected boolean showFABMenu() {
-        return true;
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -380,6 +409,8 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    protected abstract int getHeaderVisibility();
 
     protected abstract int getFriendAreaVisibility();
 
@@ -498,28 +529,33 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
             return;
         }
 
-        WebView webView = (WebView) findViewById(R.id.webview);
-        WebSettings settings = webView.getSettings();
-        settings.setJavaScriptEnabled(false);
-        settings.setBlockNetworkImage(false);
+        if (br.displayType == BrandingMgr.DisplayType.NATIVE) {
+            ServiceHeader.setupNative(br, mHeaderContainer);
+            mWebview.setVisibility(View.GONE);
+        } else {
+            WebSettings settings = mWebview.getSettings();
+            settings.setJavaScriptEnabled(false);
+            settings.setBlockNetworkImage(false);
 
-        webView.loadUrl("file://" + br.file.getAbsolutePath());
-        webView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
-        webView.setVisibility(View.VISIBLE);
+            mWebview.loadUrl("file://" + br.file.getAbsolutePath());
+            mWebview.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+            mWebview.setVisibility(View.VISIBLE);
+            mDescriptionView.setVisibility(View.GONE);
+        }
 
         if (br.color == null) {
-            mTopArea.setBackgroundResource(R.drawable.activity_background);
+            mTopArea.setBackgroundResource(R.color.mc_background_color);
         } else {
             mTopArea.setBackgroundColor(br.color);
         }
 
         int r = br.scheme == ColorScheme.LIGHT ? android.R.color.primary_text_light : android.R.color.primary_text_dark;
-        ((TextView) findViewById(R.id.friend_name)).setTextColor(getResources().getColor(r));
-        ((TextView) findViewById(R.id.email)).setTextColor(getResources().getColor(r));
+        ((TextView) findViewById(R.id.friend_name)).setTextColor(ContextCompat.getColor(this, r));
+        ((TextView) findViewById(R.id.email)).setTextColor(ContextCompat.getColor(this, r));
 
-        findViewById(R.id.description).setVisibility(View.GONE);
     }
 
+    @SuppressWarnings("WrongConstant")
     private Friend showFriend(Intent intent) {
         T.UI();
 
@@ -531,6 +567,7 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
         mServiceArea.setVisibility(getServiceAreaVisibility());
         mPokeArea.setVisibility(getPokeVisibility());
         mFriendArea.setVisibility(getFriendAreaVisibility());
+        mHeader.setVisibility(getHeaderVisibility());
 
         final ImageView image = (ImageView) findViewById(R.id.friend_avatar);
         if (friend.avatar == null) {
@@ -543,14 +580,14 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
         final TextView nameView = (TextView) findViewById(R.id.friend_name);
         mFriendName = friend.getDisplayName();
         nameView.setText(mFriendName);
-        nameView.setTextColor(getResources().getColor(android.R.color.primary_text_light));
+        nameView.setTextColor(ContextCompat.getColor(this, android.R.color.primary_text_light));
 
         final TextView emailView = (TextView) findViewById(R.id.email);
         emailView.setText(friend.getDisplayEmail());
         emailView.setTextColor(nameView.getTextColors());
 
         if (friend.existenceStatus == Friend.NOT_FOUND || friend.existenceStatus == Friend.INVITE_PENDING) {
-            final Button pokeBtn = (Button) mServiceArea.findViewById(R.id.poke_button);
+            final Button pokeBtn = (Button) findViewById(R.id.poke_button);
             pokeBtn.setText(R.string.connect_service_now);
             pokeBtn.setOnClickListener(new SafeViewOnClickListener() {
                 @Override
@@ -564,7 +601,7 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
             findViewById(R.id.poke_area).setVisibility(View.GONE);
         } else {
             findViewById(R.id.poke_area).setVisibility(View.VISIBLE);
-            final Button pokeBtn = (Button) mServiceArea.findViewById(R.id.poke_button);
+            final Button pokeBtn = (Button) findViewById(R.id.poke_button);
             pokeBtn.setText(friend.pokeDescription);
             pokeBtn.setOnClickListener(new SafeViewOnClickListener() {
                 @Override
@@ -575,8 +612,7 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
             });
         }
 
-        final TextView descriptionView = (TextView) mServiceArea.findViewById(R.id.description);
-        descriptionView.setText(friend.description);
+        mDescriptionView.setText(friend.description);
 
         if (friend.descriptionBranding != null) {
             boolean available = false;
@@ -591,9 +627,9 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
                 mFriendsPlugin.getBrandingMgr().queue(friend);
             }
         } else {
-            descriptionView.setVisibility(View.VISIBLE);
+            mDescriptionView.setVisibility(View.VISIBLE);
             mServiceArea.findViewById(R.id.webview).setVisibility(View.GONE);
-            mTopArea.setBackgroundResource(R.drawable.activity_background);
+            mTopArea.setBackgroundResource(R.color.mc_background_color);
         }
 
         final CheckBox iShareLocationCheckBox = (CheckBox) findViewById(R.id.share_location);
@@ -608,12 +644,6 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
                 mFriendsPlugin.updateFriendShareLocation(friend.email, isChecked);
             }
         });
-
-        mFindFriendLocationButton.setEnabled(true);
-        if (friend.sharesLocation)
-            mFindFriendLocationButton.setText(getString(R.string.locate_friend, mFriendName));
-        else
-            mFindFriendLocationButton.setText(getString(R.string.request_location_of, mFriendName));
 
         dismissDialogs();
 

@@ -83,7 +83,11 @@ public class SingleSliderFormMessageTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("alert_flags")) {
             Object val = json.get("alert_flags");
-            this.alert_flags = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.alert_flags = ((Integer) val).longValue();
+            } else {
+                this.alert_flags = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.forms.SingleSliderFormMessageTO object is missing field 'alert_flags'");
         }
@@ -107,7 +111,11 @@ public class SingleSliderFormMessageTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("default_priority")) {
             Object val = json.get("default_priority");
-            this.default_priority = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.default_priority = ((Integer) val).longValue();
+            } else {
+                this.default_priority = ((Long) val).longValue();
+            }
         } else {
             this.default_priority = 1;
         }
@@ -119,7 +127,11 @@ public class SingleSliderFormMessageTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("flags")) {
             Object val = json.get("flags");
-            this.flags = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.flags = ((Integer) val).longValue();
+            } else {
+                this.flags = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.forms.SingleSliderFormMessageTO object is missing field 'flags'");
         }
@@ -137,7 +149,11 @@ public class SingleSliderFormMessageTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("message_type")) {
             Object val = json.get("message_type");
-            this.message_type = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.message_type = ((Integer) val).longValue();
+            } else {
+                this.message_type = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.forms.SingleSliderFormMessageTO object is missing field 'message_type'");
         }
@@ -149,7 +165,11 @@ public class SingleSliderFormMessageTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("priority")) {
             Object val = json.get("priority");
-            this.priority = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.priority = ((Integer) val).longValue();
+            } else {
+                this.priority = ((Long) val).longValue();
+            }
         } else {
             this.priority = 1;
         }
@@ -161,7 +181,11 @@ public class SingleSliderFormMessageTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("threadTimestamp")) {
             Object val = json.get("threadTimestamp");
-            this.threadTimestamp = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.threadTimestamp = ((Integer) val).longValue();
+            } else {
+                this.threadTimestamp = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.forms.SingleSliderFormMessageTO object is missing field 'threadTimestamp'");
         }
@@ -179,7 +203,11 @@ public class SingleSliderFormMessageTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("thread_size")) {
             Object val = json.get("thread_size");
-            this.thread_size = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.thread_size = ((Integer) val).longValue();
+            } else {
+                this.thread_size = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.forms.SingleSliderFormMessageTO object is missing field 'thread_size'");
         }
@@ -191,7 +219,11 @@ public class SingleSliderFormMessageTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("timestamp")) {
             Object val = json.get("timestamp");
-            this.timestamp = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.timestamp = ((Integer) val).longValue();
+            } else {
+                this.timestamp = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.forms.SingleSliderFormMessageTO object is missing field 'timestamp'");
         }

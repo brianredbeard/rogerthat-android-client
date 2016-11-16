@@ -40,7 +40,11 @@ public class GetLocationErrorTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("status")) {
             Object val = json.get("status");
-            this.status = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.status = ((Integer) val).longValue();
+            } else {
+                this.status = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.location.GetLocationErrorTO object is missing field 'status'");
         }

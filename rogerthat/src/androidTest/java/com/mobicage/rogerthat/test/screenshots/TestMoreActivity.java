@@ -18,28 +18,43 @@
 
 package com.mobicage.rogerthat.test.screenshots;
 
+import android.content.Context;
+import android.content.Intent;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.ActivityTestRule;
+import android.support.test.runner.AndroidJUnit4;
 import android.test.UiThreadTest;
 
+import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MoreActivity;
+import com.mobicage.rpc.config.AppConstants;
 
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import tools.fastlane.screengrab.Screengrab;
 import tools.fastlane.screengrab.locale.LocaleTestRule;
 
+@RunWith(AndroidJUnit4.class)
 public class TestMoreActivity {
     @ClassRule
     public static final LocaleTestRule localeTestRule = new LocaleTestRule();
 
     @Rule
-    public ActivityTestRule<MoreActivity> activityTestRule = new ActivityTestRule<>(MoreActivity.class);
+    public ActivityTestRule<MoreActivity> activityTestRule = new ActivityTestRule<>(MoreActivity.class, true, false);
 
     @Test
     @UiThreadTest
     public void takeMoreActivityScreenshot(){
-        Screengrab.screenshot("more");
+
+        if (AppConstants.HOME_ACTIVITY_LAYOUT != R.layout.news && AppConstants.HOME_ACTIVITY_LAYOUT != R.layout.messaging) {
+            Context targetContext = InstrumentationRegistry.getInstrumentation()
+                    .getTargetContext();
+            Intent intent = new Intent(targetContext, MoreActivity.class);
+            activityTestRule.launchActivity(intent);
+            Screengrab.screenshot("more");
+        }
     }
 }

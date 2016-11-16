@@ -1,8 +1,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="3dp" >
+    android:padding="3dp">
 
     <RelativeLayout
         android:layout_width="fill_parent"
@@ -60,8 +61,9 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="@drawable/mc_state_selector"
-            android:src="@drawable/friend_new_message" >
+            app:ico_color="@color/mc_primary_icon"
+            app:ico_icon="@string/faw_envelope"
+            app:ico_size="16dp">
         </ImageView>
 
         <ImageView
@@ -69,8 +71,9 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="@drawable/mc_state_selector"
-            android:src="@drawable/ic_menu_allfriends" >
+            app:ico_color="@color/mc_primary_icon"
+            app:ico_icon="@string/faw_users"
+            app:ico_size="16dp">
         </ImageView>
     </LinearLayout>
 

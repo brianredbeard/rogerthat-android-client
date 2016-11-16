@@ -18,9 +18,14 @@
 
 package com.mobicage.rogerthat.util;
 
+import android.content.Context;
+import android.graphics.Typeface;
+
 import java.math.BigInteger;
+import java.util.HashMap;
 
 public class TextUtils {
+    public static HashMap<String, Typeface> fonts = new HashMap<>();
     private TextUtils() {
         /* cannot be instantiated */
     }
@@ -44,4 +49,20 @@ public class TextUtils {
         return s;
     }
 
+    public static synchronized Typeface getFont(Context context) {
+        String fontType = "bold";
+        return getFont(context, fontType);
+    }
+
+    public static synchronized Typeface getFont(Context context, String fontType) {
+        if (fontType == null) {
+            fontType = "bold";
+        }
+        String fileName = "fonts/lato_" + fontType + ".ttf";
+        if (!fonts.containsKey(fileName)) {
+            Typeface typeface = Typeface.createFromAsset(context.getAssets(), fileName);
+            fonts.put(fileName, typeface);
+        }
+        return fonts.get(fileName);
+    }
 }

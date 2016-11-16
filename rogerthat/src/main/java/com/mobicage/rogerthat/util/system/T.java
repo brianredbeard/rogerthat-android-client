@@ -21,6 +21,7 @@ package com.mobicage.rogerthat.util.system;
 import android.os.HandlerThread;
 
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.ui.TestUtils;
 
 public class T {
 
@@ -190,6 +191,9 @@ public class T {
     }
 
     private static void checkTid(int threadType) {
+        if (TestUtils.isRunningTest()) {
+            return;
+        }
         int myTid = android.os.Process.myTid();
         switch (threadType) {
         case UI:

@@ -527,6 +527,33 @@ public class ResponseReceiverHandler {
                 resp.setResult(Parser.ComMobicageToMessagingJsmfrNewFlowMessageResponseTO(rpcr.result));
             ((IResponseHandler<com.mobicage.to.messaging.jsmfr.NewFlowMessageResponseTO>) responseHandler).handle(resp);
         }
+        if ("com.mobicage.api.news.getNews".equals(function)) {
+            final Response<com.mobicage.to.news.GetNewsResponseTO> resp = new Response<com.mobicage.to.news.GetNewsResponseTO>();
+            resp.setError(rpcr.error);
+            resp.setSuccess(rpcr.success);
+            resp.setCallId(rpcr.callId);
+            if (rpcr.success)
+                resp.setResult(Parser.ComMobicageToNewsGetNewsResponseTO(rpcr.result));
+            ((IResponseHandler<com.mobicage.to.news.GetNewsResponseTO>) responseHandler).handle(resp);
+        }
+        if ("com.mobicage.api.news.getNewsItems".equals(function)) {
+            final Response<com.mobicage.to.news.GetNewsItemsResponseTO> resp = new Response<com.mobicage.to.news.GetNewsItemsResponseTO>();
+            resp.setError(rpcr.error);
+            resp.setSuccess(rpcr.success);
+            resp.setCallId(rpcr.callId);
+            if (rpcr.success)
+                resp.setResult(Parser.ComMobicageToNewsGetNewsItemsResponseTO(rpcr.result));
+            ((IResponseHandler<com.mobicage.to.news.GetNewsItemsResponseTO>) responseHandler).handle(resp);
+        }
+        if ("com.mobicage.api.news.saveNewsStatistics".equals(function)) {
+            final Response<com.mobicage.to.news.SaveNewsStatisticsResponseTO> resp = new Response<com.mobicage.to.news.SaveNewsStatisticsResponseTO>();
+            resp.setError(rpcr.error);
+            resp.setSuccess(rpcr.success);
+            resp.setCallId(rpcr.callId);
+            if (rpcr.success)
+                resp.setResult(Parser.ComMobicageToNewsSaveNewsStatisticsResponseTO(rpcr.result));
+            ((IResponseHandler<com.mobicage.to.news.SaveNewsStatisticsResponseTO>) responseHandler).handle(resp);
+        }
         if ("com.mobicage.api.services.findService".equals(function)) {
             final Response<com.mobicage.to.service.FindServiceResponseTO> resp = new Response<com.mobicage.to.service.FindServiceResponseTO>();
             resp.setError(rpcr.error);
@@ -625,6 +652,15 @@ public class ResponseReceiverHandler {
             if (rpcr.success)
                 resp.setResult(Parser.ComMobicageToSystemEditProfileResponseTO(rpcr.result));
             ((IResponseHandler<com.mobicage.to.system.EditProfileResponseTO>) responseHandler).handle(resp);
+        }
+        if ("com.mobicage.api.system.getAppAsset".equals(function)) {
+            final Response<com.mobicage.to.app.GetAppAssetResponseTO> resp = new Response<com.mobicage.to.app.GetAppAssetResponseTO>();
+            resp.setError(rpcr.error);
+            resp.setSuccess(rpcr.success);
+            resp.setCallId(rpcr.callId);
+            if (rpcr.success)
+                resp.setResult(Parser.ComMobicageToAppGetAppAssetResponseTO(rpcr.result));
+            ((IResponseHandler<com.mobicage.to.app.GetAppAssetResponseTO>) responseHandler).handle(resp);
         }
         if ("com.mobicage.api.system.getIdentity".equals(function)) {
             final Response<com.mobicage.to.system.GetIdentityResponseTO> resp = new Response<com.mobicage.to.system.GetIdentityResponseTO>();

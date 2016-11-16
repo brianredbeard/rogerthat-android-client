@@ -17,16 +17,16 @@
  */
 package com.mobicage.rogerthat.plugins.friends;
 
-import java.util.Map;
-
-import org.json.simple.JSONValue;
-
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
 import com.mobicage.to.friends.FriendTO;
+
+import org.json.simple.JSONValue;
+
+import java.util.Map;
 
 public class Friend extends FriendTO {
 
@@ -39,6 +39,7 @@ public class Friend extends FriendTO {
     public byte[] avatar;
     public int existenceStatus;
     public FriendCategory category = null;
+    public String actions = null;
 
     private Map<String, String> mCachedProfileDataDict = null;
 

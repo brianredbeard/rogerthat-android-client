@@ -39,7 +39,7 @@
         android:orientation="horizontal"
         android:layout_below="@id/divider_line">     
         
-        <Button
+        <android.support.v7.widget.AppCompatButton
             android:id="@+id/submit"
             android:layout_width="0dp"
             android:layout_weight="1"
@@ -48,14 +48,15 @@
             android:textSize="20sp"
             android:background="@android:color/transparent"
             android:layout_gravity="center_vertical"
-            android:textColor="@color/mc_about_blue" />
+            android:theme="@style/ButtonTheme"
+            android:textColor="@android:color/black" />
         
         <View
 	        android:layout_width="1dp"
 	        android:layout_height="fill_parent"
 	        android:background="@color/mc_divider_gray" />
         
-        <Button
+        <android.support.v7.widget.AppCompatButton
             android:id="@+id/dismiss"
             android:layout_width="0dp"
             android:layout_weight="1"
@@ -64,7 +65,8 @@
             android:textSize="20sp"
             android:background="@android:color/transparent"
             android:layout_gravity="center_vertical"
-            android:textColor="@color/mc_about_blue"
+            android:textColor="@android:color/black"
+            android:theme="@style/ButtonTheme"
             android:text="@string/continue_shopping" />
 
     </LinearLayout>

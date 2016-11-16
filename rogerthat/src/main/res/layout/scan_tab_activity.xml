@@ -2,24 +2,18 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="@color/mc_highlight_background"
-    android:orientation="vertical" >
+    android:background="@color/mc_background_color"
+    android:gravity="center"
+    android:orientation="vertical">
 
-    <include android:id="@+id/nav_bar" layout="@layout/navigation_bar" />
-
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:gravity="center"
-        android:padding="15dp" >
-        
-        <Button
+        <android.support.v7.widget.AppCompatButton
             android:id="@+id/scanbutton"
-            android:layout_width="fill_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:theme="@style/PrimaryButtonTheme"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
             android:text="@string/scan_button"
-            android:textSize="18sp" />
-    
-    </LinearLayout>
+            android:textSize="16sp" />
 
 </LinearLayout>

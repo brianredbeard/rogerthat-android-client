@@ -17,34 +17,15 @@
  */
 package com.mobicage.rogerthat.plugins.friends;
 
-import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
-
-import org.jivesoftware.smack.util.Base64;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
-import org.json.simple.JSONValue;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
-import android.content.res.Configuration;
-import android.support.v4.content.ContextCompat;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.hardware.Camera;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -56,11 +37,14 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.PowerManager;
+import android.support.customtabs.CustomTabsIntent;
+import android.support.v4.content.ContextCompat;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.ConsoleMessage;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceResponse;
@@ -82,6 +66,7 @@ import com.facebook.login.LoginResult;
 import com.facebook.share.Sharer;
 import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.widget.ShareDialog;
+import com.github.barteksc.pdfviewer.PDFView;
 import com.google.zxing.client.android.CaptureActivity;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainService;
@@ -93,7 +78,6 @@ import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr.BrandingResult;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
-import com.mobicage.rogerthat.plugins.messaging.ServiceMessageDetailActivity;
 import com.mobicage.rogerthat.plugins.scan.GetUserInfoResponseHandler;
 import com.mobicage.rogerthat.plugins.scan.ProcessScanActivity;
 import com.mobicage.rogerthat.plugins.scan.ScanCommunication;
@@ -114,6 +98,22 @@ import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.rpc.newxmpp.XMPPKickChannel;
 import com.mobicage.to.friends.GetUserInfoRequestTO;
+
+import org.jivesoftware.smack.util.Base64;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
+import org.json.simple.JSONValue;
+
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
 
 public class ActionScreenActivity extends ServiceBoundActivity {
 
@@ -141,7 +141,6 @@ public class ActionScreenActivity extends ServiceBoundActivity {
     private long mLasttimeBackPressed = 0;
 
     private WebView mBranding;
-    private WebView mBrandingHttp;
     private String mBrandingKey;
     private String mContextMatch = "";
     private String mServiceEmail;
@@ -157,6 +156,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
 
     private MessagingPlugin mMessagingPlugin;
     private FriendsPlugin mFriendsPlugin;
+    private Poker<ActionScreenActivity> mPoker;
 
     private MediaPlayer mSoundMediaPlayer = null;
     private HandlerThread mSoundThread = null;
@@ -659,14 +659,19 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         return wl;
     }
 
-    @SuppressLint({ "SetJavaScriptEnabled", "JavascriptInterface", "NewApi" })
+    @SuppressLint({"SetJavaScriptEnabled", "JavascriptInterface"})
     @Override
     public void onCreate(Bundle savedInstanceState) {
         if (CloudConstants.isContentBrandingApp()) {
             super.setTheme(android.R.style.Theme_Black_NoTitleBar_Fullscreen);
         }
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.action_screen);
+        if (this instanceof ContentBrandingActionScreenActivity) {
+            setContentViewWithoutNavigationBar(R.layout.action_screen);
+        } else {
+            setContentView(R.layout.action_screen);
+        }
+
         mBranding = (WebView) findViewById(R.id.branding);
         WebSettings brandingSettings = mBranding.getSettings();
         brandingSettings.setJavaScriptEnabled(true);
@@ -674,11 +679,6 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             brandingSettings.setAllowFileAccessFromFileURLs(true);
         }
-        mBrandingHttp = (WebView) findViewById(R.id.branding_http);
-        mBrandingHttp.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
-        WebSettings brandingSettingsHttp = mBrandingHttp.getSettings();
-        brandingSettingsHttp.setJavaScriptEnabled(true);
-        brandingSettingsHttp.setCacheMode(WebSettings.LOAD_DEFAULT);
 
         if (CloudConstants.isContentBrandingApp()) {
             int cameraPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
@@ -693,43 +693,15 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                     initFullScreenForContentBranding();
                 }
             });
-
-            mBrandingHttp.getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
-                @Override
-                public void onGlobalLayout() {
-                    initFullScreenForContentBranding();
-                }
-            });
         }
-
-        final View brandingHeader = findViewById(R.id.branding_header_container);
-
-        final ImageView brandingHeaderClose = (ImageView) findViewById(R.id.branding_header_close);
-        final TextView brandingHeaderText = (TextView) findViewById(R.id.branding_header_text);
-        brandingHeaderClose.setColorFilter(UIUtils
-            .imageColorFilter(getResources().getColor(R.color.mc_homescreen_text)));
-
-        brandingHeaderClose.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mQRCodeScanner != null) {
-                    mQRCodeScanner.onResume();
-                }
-                brandingHeader.setVisibility(View.GONE);
-                mBrandingHttp.setVisibility(View.GONE);
-                mBranding.setVisibility(View.VISIBLE);
-                mBrandingHttp.loadUrl("about:blank");
-            }
-        });
 
         final View brandingFooter = findViewById(R.id.branding_footer_container);
 
         if (CloudConstants.isContentBrandingApp()) {
-            brandingHeaderClose.setVisibility(View.GONE);
             final ImageView brandingFooterClose = (ImageView) findViewById(R.id.branding_footer_close);
             final TextView brandingFooterText = (TextView) findViewById(R.id.branding_footer_text);
             brandingFooterText.setText(getString(R.string.back));
-            brandingFooterClose.setColorFilter(UIUtils.imageColorFilter(getResources().getColor(
+            brandingFooterClose.setColorFilter(UIUtils.imageColorFilter(ContextCompat.getColor(this,
                 R.color.mc_homescreen_text)));
 
             brandingFooter.setOnClickListener(new OnClickListener() {
@@ -738,11 +710,8 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                     if (mQRCodeScanner != null) {
                         mQRCodeScanner.onResume();
                     }
-                    brandingHeader.setVisibility(View.GONE);
                     brandingFooter.setVisibility(View.GONE);
-                    mBrandingHttp.setVisibility(View.GONE);
                     mBranding.setVisibility(View.VISIBLE);
-                    mBrandingHttp.loadUrl("about:blank");
                 }
             });
         }
@@ -761,7 +730,11 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         mBranding.addJavascriptInterface(new JSInterface(this), "__rogerthat__");
         mBranding.setWebChromeClient(new WebChromeClient() {
             @Override
-            public void onConsoleMessage(String message, int lineNumber, String sourceID) {
+            public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+                String message = consoleMessage.message();
+                int lineNumber = consoleMessage.lineNumber();
+                String sourceID = consoleMessage.sourceId();
+                String level = consoleMessage.messageLevel().toString();
                 if (sourceID != null) {
                     try {
                         sourceID = new File(sourceID).getName();
@@ -770,10 +743,11 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                     }
                 }
                 if (mIsHtmlContent) {
-                    L.i("[BRANDING] " + sourceID + ":" + lineNumber + " | " + message);
+                    L.i("[BRANDING] " + level + ": " + sourceID + ":" + lineNumber + " | " + message);
                 } else {
-                    L.d("[BRANDING] " + sourceID + ":" + lineNumber + " | " + message);
+                    L.d("[BRANDING] " + level + ": " + sourceID + ":" + lineNumber + " | " + message);
                 }
+                return true;
             }
         });
         mBranding.setWebViewClient(new WebViewClient() {
@@ -786,7 +760,6 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 return false;
             }
 
-            @SuppressLint("DefaultLocale")
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 L.i("Branding is loading url: " + url);
@@ -804,20 +777,10 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                     if (mQRCodeScanner != null) {
                         mQRCodeScanner.onPause();
                     }
-                    brandingHeaderText.setText(getString(R.string.loading));
-                    brandingHeader.setVisibility(View.VISIBLE);
-                    if (CloudConstants.isContentBrandingApp()) {
-                        brandingFooter.setVisibility(View.VISIBLE);
-                    }
-                    mBranding.setVisibility(View.GONE);
-                    mBrandingHttp.setVisibility(View.VISIBLE);
-                    mBrandingHttp.loadUrl(url);
+                    CustomTabsIntent.Builder customTabsBuilder = new CustomTabsIntent.Builder();
+                    CustomTabsIntent customTabsIntent = customTabsBuilder.build();
+                    customTabsIntent.launchUrl(ActionScreenActivity.this, uri);
                     return true;
-                } else {
-                    brandingHeader.setVisibility(View.GONE);
-                    brandingFooter.setVisibility(View.GONE);
-                    mBrandingHttp.setVisibility(View.GONE);
-                    mBranding.setVisibility(View.VISIBLE);
                 }
                 return false;
             }
@@ -865,21 +828,6 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             }
         });
 
-        mBrandingHttp.setWebViewClient(new WebViewClient() {
-            @SuppressLint("DefaultLocale")
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                L.i("BrandingHttp is loading url: " + url);
-                return false;
-            }
-
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                brandingHeaderText.setText(view.getTitle());
-                L.i("onPageFinished " + url);
-            }
-        });
-
         Intent intent = getIntent();
         mBrandingKey = intent.getStringExtra(BRANDING_KEY);
         mServiceEmail = intent.getStringExtra(SERVICE_EMAIL);
@@ -887,6 +835,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         mItemLabel = intent.getStringExtra(ITEM_LABEL);
         mItemCoords = intent.getLongArrayExtra(ITEM_COORDS);
         mRunInBackground = intent.getBooleanExtra(RUN_IN_BACKGROUND, true);
+        setTitle(mItemLabel);
     }
 
     @Override
@@ -935,12 +884,6 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
                 | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-
-            mBrandingHttp.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
-                    | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
-                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         }
     }
 
@@ -1187,25 +1130,17 @@ public class ActionScreenActivity extends ServiceBoundActivity {
     }
 
     private void poke(String tag) {
-        showTransmitting(null);
-
-        mContextMatch = "SP_" + UUID.randomUUID().toString();
-        boolean success = mFriendsPlugin.pokeService(mServiceEmail, tag, mContextMatch);
-        if (!success) {
-            completeTransmit(new SafeRunnable() {
-                @Override
-                protected void safeRun() throws Exception {
-                    UIUtils.showAlertDialog(ActionScreenActivity.this, null, R.string.scanner_communication_failure);
-                }
-            });
+        if (mPoker == null) {
+            mPoker = new Poker<>(this, mServiceEmail);
         }
+
+        mPoker.poke(tag, null);
     }
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onServiceBound() {
-        final IntentFilter intentFilter = new IntentFilter(MessagingPlugin.NEW_MESSAGE_RECEIVED_INTENT);
-        intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
+        final IntentFilter intentFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
         intentFilter.addAction(FriendsPlugin.SERVICE_API_CALL_ANSWERED_INTENT);
         intentFilter.addAction(FriendsPlugin.SERVICE_DATA_UPDATED);
         intentFilter.addAction(FriendsPlugin.BEACON_IN_REACH);
@@ -1268,7 +1203,6 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         super.onActivityResult(requestCode, resultCode, intent);
     }
 
-    @SuppressWarnings("deprecation")
     @SuppressLint({ "SetJavaScriptEnabled", "Wakelock" })
     private void displayBranding() {
         try {
@@ -1278,21 +1212,19 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             settings.setJavaScriptEnabled(true);
             settings.setBlockNetworkImage(false);
 
-            String fileOnDisk = "file://" + mBrandingResult.file.getAbsolutePath();
             if (mBrandingResult.contentType != null
                 && AttachmentViewerActivity.CONTENT_TYPE_PDF.equalsIgnoreCase(mBrandingResult.contentType)) {
-                mIsHtmlContent = false;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    settings.setAllowUniversalAccessFromFileURLs(true);
-                }
-                try {
-                    mBranding.loadUrl("file:///android_asset/pdfjs/web/viewer.html?file=" + URLEncoder.encode(fileOnDisk, "UTF-8"));
-                } catch (UnsupportedEncodingException uee) {
-                    L.bug(uee);
-                }
+
+                setContentView(R.layout.pdf_viewer);
+                PDFView viewer = (PDFView) findViewById(R.id.pdfView);
+                viewer.fromFile(new File(mBrandingResult.file.getAbsolutePath()))
+                        .enableSwipe(true)
+                        .enableDoubletap(true)
+                        .load();
+
             } else {
                 mIsHtmlContent = true;
-                mBranding.loadUrl(fileOnDisk);
+                mBranding.loadUrl("file://"+mBrandingResult.file.getAbsolutePath());
                 mBranding.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
                 if (mBrandingResult.color != null) {
                     mBranding.setBackgroundColor(mBrandingResult.color);
@@ -1335,6 +1267,9 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         if (mIsListeningBacklogConnectivityChanged) {
             unregisterReceiver(mBroadcastReceiverBacklog);
         }
+        if (mPoker != null) {
+            mPoker.stop();
+        }
     }
 
     private BroadcastReceiver mBroadcastReceiverBacklog = new SafeBroadcastReceiver() {
@@ -1365,19 +1300,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         @Override
         public String[] onSafeReceive(final Context context, final Intent intent) {
             T.UI();
-            if (MessagingPlugin.NEW_MESSAGE_RECEIVED_INTENT.equals(intent.getAction())) {
-                if (mContextMatch.equals(intent.getStringExtra("context")) && isTransmitting()) {
-                    mContextMatch = "";
-                    completeTransmit(new SafeRunnable() {
-                        @Override
-                        protected void safeRun() throws Exception {
-                            final Intent i = new Intent(context, ServiceMessageDetailActivity.class);
-                            i.putExtra("message", intent.getStringExtra("message"));
-                            startActivity(i);
-                        }
-                    });
-                }
-            } else if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
+            if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
                 L.d("[BroadcastReceiver] Screen OFF");
                 if (!mRunInBackground) {
                     finish();
@@ -1610,10 +1533,6 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         if (mBranding != null) {
             // Stop all javascript
             mBranding.loadUrl("about:blank");
-        }
-        if (mBrandingHttp != null) {
-            // Stop all javascript
-            mBrandingHttp.loadUrl("about:blank");
         }
         super.finish();
     }

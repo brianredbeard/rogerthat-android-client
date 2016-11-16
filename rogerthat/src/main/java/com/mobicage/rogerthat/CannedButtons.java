@@ -33,6 +33,7 @@ import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.pickle.PickleException;
 import com.mobicage.rogerthat.util.pickle.Pickleable;
 import com.mobicage.rogerthat.util.pickle.Pickler;
+import com.mobicage.rogerthat.util.ui.SendMessageView;
 
 public class CannedButtons implements Pickleable {
 
@@ -107,8 +108,8 @@ public class CannedButtons implements Pickleable {
             return;
         }
         Configuration cfg = new Configuration();
-        cfg.put(SendMessageWizard.CANNED_BUTTONS, serializedButtons);
-        cfgProvider.updateConfigurationNow(SendMessageWizard.CONFIGKEY, cfg);
+        cfg.put(SendMessageView.CANNED_BUTTONS, serializedButtons);
+        cfgProvider.updateConfigurationNow(SendMessageView.CONFIGKEY, cfg);
     }
 
     public CannedButton getById(long id) {

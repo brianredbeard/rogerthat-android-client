@@ -25,11 +25,15 @@ import java.util.Map;
 
 public class ServiceMenuItemTO implements com.mobicage.rpc.IJSONable {
 
+    public long action;
     public long[] coords;
     public String hashedTag;
     public String iconHash;
+    public String iconName;
+    public String iconColor;
     public String label;
     public boolean requiresWifi;
+    public long[] roles;
     public boolean runInBackground;
     public String screenBranding;
     public String staticFlowHash;
@@ -38,6 +42,16 @@ public class ServiceMenuItemTO implements com.mobicage.rpc.IJSONable {
     }
 
     public ServiceMenuItemTO(Map<String, Object> json) throws IncompleteMessageException {
+        if (json.containsKey("action")) {
+            Object val = json.get("action");
+            if (val instanceof Integer) {
+                this.action = ((Integer) val).longValue();
+            } else {
+                this.action = ((Long) val).longValue();
+            }
+        } else {
+            throw new IncompleteMessageException("com.mobicage.to.friends.ServiceMenuItemTO object is missing field 'action'");
+        }
         if (json.containsKey("coords")) {
             org.json.simple.JSONArray val_arr = (org.json.simple.JSONArray) json.get("coords");
             if (val_arr == null) {
@@ -63,6 +77,18 @@ public class ServiceMenuItemTO implements com.mobicage.rpc.IJSONable {
         } else {
             throw new IncompleteMessageException("com.mobicage.to.friends.ServiceMenuItemTO object is missing field 'iconHash'");
         }
+        if (json.containsKey("iconName")) {
+            Object val = json.get("iconName");
+            this.iconName = (String) val;
+        } else {
+            this.iconName = null;
+        }
+        if (json.containsKey("iconColor")) {
+            Object val = json.get("iconColor");
+            this.iconColor = (String) val;
+        } else {
+            this.iconColor = null;
+        }
         if (json.containsKey("label")) {
             Object val = json.get("label");
             this.label = (String) val;
@@ -74,6 +100,19 @@ public class ServiceMenuItemTO implements com.mobicage.rpc.IJSONable {
             this.requiresWifi = ((Boolean) val).booleanValue();
         } else {
             this.requiresWifi = false;
+        }
+        if (json.containsKey("roles")) {
+            org.json.simple.JSONArray val_arr = (org.json.simple.JSONArray) json.get("roles");
+            if (val_arr == null) {
+                this.roles = null;
+            } else {
+                this.roles = new long[val_arr.size()];
+                for (int i=0; i < val_arr.size(); i++) {
+                    this.roles[i] = ((Long) val_arr.get(i)).longValue();
+                }
+            }
+        } else {
+            throw new IncompleteMessageException("com.mobicage.to.friends.ServiceMenuItemTO object is missing field 'roles'");
         }
         if (json.containsKey("runInBackground")) {
             Object val = json.get("runInBackground");
@@ -99,6 +138,7 @@ public class ServiceMenuItemTO implements com.mobicage.rpc.IJSONable {
     @SuppressWarnings("unchecked")
     public Map<String, Object> toJSONMap() {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
+        obj.put("action", this.action);
         if (this.coords == null) {
             obj.put("coords", null);
         } else {
@@ -110,8 +150,19 @@ public class ServiceMenuItemTO implements com.mobicage.rpc.IJSONable {
         }
         obj.put("hashedTag", this.hashedTag);
         obj.put("iconHash", this.iconHash);
+        obj.put("iconName", this.iconName);
+        obj.put("iconColor", this.iconColor);
         obj.put("label", this.label);
         obj.put("requiresWifi", this.requiresWifi);
+        if (this.roles == null) {
+            obj.put("roles", null);
+        } else {
+            org.json.simple.JSONArray arr = new org.json.simple.JSONArray();
+            for (int i=0; i < this.roles.length; i++) {
+                arr.add(this.roles[i]);
+            }
+            obj.put("roles", arr);
+        }
         obj.put("runInBackground", this.runInBackground);
         obj.put("screenBranding", this.screenBranding);
         obj.put("staticFlowHash", this.staticFlowHash);

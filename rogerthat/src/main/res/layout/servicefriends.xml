@@ -1,21 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
-    
-    <include android:id="@+id/nav_bar" layout="@layout/navigation_bar" />
+    android:layout_height="fill_parent"
+    android:background="@color/mc_background_color"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/no_services"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <ImageButton
+            android:id="@+id/ic_magnifying_glass"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:adjustViewBounds="true"
+            android:background="@null" />
+
+        <TextView
+            android:id="@+id/no_services_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:paddingLeft="50dp"
+            android:paddingRight="50dp"
+            android:textSize="18sp"
+            android:gravity="center_horizontal" />
+
+    </LinearLayout>
 
     <ListView
         android:id="@+id/friend_list"
-        android:layout_height="fill_parent"
         android:layout_width="fill_parent"
-        android:divider="@drawable/divider"
-        android:dividerHeight="1px"
-        android:background="@color/mc_highlight_background"
+        android:layout_height="fill_parent"
+        android:background="@color/mc_background_color"
         android:cacheColorHint="#00000000"
-        android:fastScrollEnabled="true">
-    </ListView>
+        android:divider="@drawable/divider_white"
+        android:dividerHeight="1px"
+        android:fastScrollEnabled="true" />
 
 </LinearLayout>

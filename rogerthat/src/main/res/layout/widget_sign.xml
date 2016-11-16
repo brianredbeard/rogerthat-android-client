@@ -19,11 +19,12 @@
         android:text="@string/successfully_signed"
         android:visibility="gone"/>
 
-    <Button
+    <android.support.v7.widget.AppCompatButton
         android:id="@+id/sign_btn"
         android:layout_width="match_parent"
         android:layout_height="88dp"
         android:drawableLeft="@drawable/sign"
+        android:theme="@style/ButtonTheme"
         android:text="@string/sign"/>
 
 </com.mobicage.rogerthat.plugins.messaging.widgets.SignWidget>

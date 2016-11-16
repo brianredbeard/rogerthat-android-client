@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+	android:focusableInTouchMode="true"
     android:orientation="vertical"
-    tools:ignore="UselessParent"
-    android:focusableInTouchMode="true" >
+	tools:ignore="UselessParent">
     
-        <include android:id="@+id/nav_bar" layout="@layout/navigation_bar" />
-
         <LinearLayout
             android:id="@+id/group_layout"
             android:layout_width="fill_parent"
@@ -22,25 +21,42 @@
 	            android:layout_height="fill_parent"
 	            android:layout_gravity="bottom"
 	            android:layout_marginTop="10dp"
-	            android:orientation="horizontal" >
-	            
-	            <Button
-	                android:id="@+id/save_group"
-	                android:layout_width="wrap_content"
-	                android:layout_height="wrap_content"
-	                android:layout_weight="1"
-	                android:text="@string/save"
-	                android:visibility="gone"  >
-	            </Button>
-	            
-	            <Button
-	                android:id="@+id/cancel"
-	                android:layout_width="wrap_content"
-	                android:layout_height="wrap_content"
-	                android:layout_weight="1"
-	                android:text="@string/cancel"
-	                android:visibility="gone" >
-	            </Button>
+				android:baselineAligned="false"
+				android:orientation="horizontal">
+
+				<FrameLayout
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center_horizontal"
+					android:layout_weight="1">
+
+					<android.support.v7.widget.AppCompatButton
+						android:id="@+id/save_group"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:paddingLeft="20dp"
+						android:paddingRight="20dp"
+						android:text="@string/save"
+						android:theme="@style/ButtonTheme"
+						android:visibility="gone" />
+				</FrameLayout>
+
+				<FrameLayout
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center_horizontal"
+					android:layout_weight="1">
+
+					<android.support.v7.widget.AppCompatButton
+						android:id="@+id/cancel"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:paddingLeft="20dp"
+						android:paddingRight="20dp"
+						android:text="@string/cancel"
+						android:theme="@style/ButtonTheme"
+						android:visibility="gone" />
+				</FrameLayout>
 	        </LinearLayout>
 
             <RelativeLayout
@@ -64,7 +80,9 @@
 			        android:layout_height="50dp"
 			        android:layout_alignParentRight="true"
 			        android:layout_alignParentTop="true"
-			        android:src="@drawable/ic_menu_edit" />
+					app:ico_color="@color/mc_primary_icon"
+					app:ico_icon="@string/faw_pencil"
+					app:ico_size="50dp" />
 
 			    <TextView
 			        android:id="@+id/friend_name"
@@ -75,8 +93,8 @@
 			        android:layout_toLeftOf="@id/edit_group"
 			        android:ellipsize="end"
 			        android:singleLine="true"
-			        android:textSize="20dp"
-			        android:textStyle="bold" >
+					android:textSize="20sp"
+			        fontPath="fonts/lato_bold.ttf" >
 			    </TextView>
 			</RelativeLayout>
 
@@ -99,11 +117,20 @@
                     android:padding="1dp" >
                 </ImageView>
 
-                <Button
-                    android:id="@+id/update_avatar"
-                    android:layout_width="fill_parent"
+				<FrameLayout
+					android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/get_new_avatar" />
+					android:layout_gravity="center_horizontal">
+
+					<android.support.v7.widget.AppCompatButton
+						android:id="@+id/update_avatar"
+						android:layout_width="fill_parent"
+						android:layout_height="wrap_content"
+						android:paddingLeft="20dp"
+						android:paddingRight="20dp"
+						android:theme="@style/ButtonTheme"
+						android:text="@string/get_new_avatar" />
+				</FrameLayout>
             </LinearLayout>
             
             <RelativeLayout
@@ -130,7 +157,9 @@
                     android:layout_height="30dp"
                     android:layout_alignParentRight="true"
                     android:layout_centerInParent="true"
-                    android:src="@drawable/ic_menu_edit">
+					app:ico_color="@color/mc_primary_icon"
+					app:ico_icon="@string/faw_pencil"
+					app:ico_size="30dp">
                 </ImageView>
 
                 <EditText
@@ -139,7 +168,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
                     android:textSize="16sp"
-                    android:textStyle="bold"
+                    fontPath="fonts/lato_bold.ttf"
                     android:background="@null"
                     android:layout_toLeftOf="@+id/update_group_name_edit"
                     android:layout_toRightOf="@+id/update_group_name_text"
@@ -154,7 +183,7 @@
                android:layout_height="fill_parent"
                android:layout_marginTop="5dp"
                android:cacheColorHint="#00000000"
-               android:divider="@drawable/divider"
+               android:divider="@drawable/divider_gray"
                android:dividerHeight="1px"
                android:fastScrollEnabled="true">
            </ListView>

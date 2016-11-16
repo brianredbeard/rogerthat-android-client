@@ -48,7 +48,11 @@ public class BeaconInReachRequestTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("proximity")) {
             Object val = json.get("proximity");
-            this.proximity = ((Long) val).longValue();
+            if (val instanceof Integer) {
+                this.proximity = ((Integer) val).longValue();
+            } else {
+                this.proximity = ((Long) val).longValue();
+            }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.location.BeaconInReachRequestTO object is missing field 'proximity'");
         }

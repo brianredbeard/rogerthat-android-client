@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:background="@color/mc_background_color"
     android:orientation="vertical">
 
     <TextView
@@ -10,15 +11,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
-        android:text="Test 123"
-        android:textSize="20sp"
-        tools:ignore="HardcodedText" >
+        tools:text="Test 123"
+        android:textColor="@color/mc_primary_color"
+        android:textSize="20sp">
     </TextView>
 
 	<View
         android:id="@+id/indicator"
         android:layout_width="fill_parent"
         android:layout_height="5dp"
-        android:background="@color/mc_blue2" />
+        android:background="@color/mc_primary_color" />
 
 </LinearLayout>

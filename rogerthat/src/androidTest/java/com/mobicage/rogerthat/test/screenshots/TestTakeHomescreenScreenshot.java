@@ -18,29 +18,43 @@
 
 package com.mobicage.rogerthat.test.screenshots;
 
+import android.content.Context;
+import android.content.Intent;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.ActivityTestRule;
+import android.support.test.runner.AndroidJUnit4;
 import android.test.UiThreadTest;
 
+import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.HomeActivity;
+import com.mobicage.rpc.config.AppConstants;
 
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import tools.fastlane.screengrab.Screengrab;
 import tools.fastlane.screengrab.locale.LocaleTestRule;
 
+@RunWith(AndroidJUnit4.class)
 public class TestTakeHomescreenScreenshot {
 
     @ClassRule
     public static final LocaleTestRule localeTestRule = new LocaleTestRule();
 
     @Rule
-    public ActivityTestRule<HomeActivity> activityTestRule = new ActivityTestRule<>(HomeActivity.class);
+    public ActivityTestRule<HomeActivity> activityTestRule = new ActivityTestRule<>(HomeActivity.class, true, false);
 
+    @SuppressWarnings("ConstantConditions")
     @Test
     @UiThreadTest
     public void takeHomeScreenScreenshot(){
-        Screengrab.screenshot("homescreen");
+        if (AppConstants.HOME_ACTIVITY_LAYOUT != R.layout.news && AppConstants.HOME_ACTIVITY_LAYOUT != R.layout.messaging) {
+            Context targetContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
+            Intent intent = new Intent(targetContext, HomeActivity.class);
+            activityTestRule.launchActivity(intent);
+            Screengrab.screenshot("homescreen");
+        }
     }
 }

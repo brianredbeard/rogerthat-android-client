@@ -18,21 +18,19 @@
 
 package com.mobicage.rogerthat.plugins.system;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TimeZone;
-
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.telephony.TelephonyManager;
 
+import com.mobicage.api.system.Rpc;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.config.Configuration;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
 import com.mobicage.rogerthat.plugins.MobicagePlugin;
+import com.mobicage.rogerthat.plugins.messaging.BrandingFailureException;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.util.db.DatabaseManager;
 import com.mobicage.rogerthat.util.logging.L;
@@ -40,13 +38,25 @@ import com.mobicage.rogerthat.util.net.NetworkConnectivityManager;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
+import com.mobicage.to.app.GetAppAssetRequestTO;
+import com.mobicage.to.app.UpdateAppAssetRequestTO;
 import com.mobicage.to.js_embedding.JSEmbeddingItemTO;
 import com.mobicage.to.system.HeartBeatRequestTO;
 import com.mobicage.to.system.SettingsTO;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
+
 public class SystemPlugin implements MobicagePlugin {
 
+    public static final String ASSET_CHAT_BACKGROUND = "ChatBackgroundImage";
     public static final String SYSTEM_PLUGIN_MUST_REFRESH_JS_EMBEDDING = "com.mobicage.rogerthat.plugins.system.SYSTEM_PLUGIN_MUST_REFRESH_JS_EMBEDDING";
+    public static final String SYSTEM_PLUGIN_MUST_DOWNLOAD_ASSETS = "com.mobicage.rogerthat.plugins.system.SYSTEM_PLUGIN_MUST_DOWNLOAD_ASSETS";
 
     private static final String CONFIGKEY = "com.mobicage.rogerthat.plugins.system";
     private static final String HEARTBEAT_INFO = "heartbeat_info";
@@ -60,6 +70,7 @@ public class SystemPlugin implements MobicagePlugin {
 
     private final SystemStore mStore;
     private boolean mWifiOnlyDownloads = false;
+
 
     public SystemPlugin(final MainService mainService, ConfigurationProvider pConfigProvider,
         NetworkConnectivityManager pNetworkConnectivityManager, final BrandingMgr brandingMgr,
@@ -184,7 +195,8 @@ public class SystemPlugin implements MobicagePlugin {
                 mMainService.postOnBIZZHandler(new SafeRunnable() {
                     @Override
                     protected void safeRun() throws Exception {
-                        if (mMainService.getPluginDBUpdates(SystemPlugin.class).contains(
+                        Set<String> pluginDBUpdates = mMainService.getPluginDBUpdates(SystemPlugin.class);
+                        if (pluginDBUpdates.contains(
                             SYSTEM_PLUGIN_MUST_REFRESH_JS_EMBEDDING)) {
 
                             // Set an empty array in the DB to clear all packets
@@ -200,6 +212,12 @@ public class SystemPlugin implements MobicagePlugin {
 
                             mMainService.clearPluginDBUpdate(SystemPlugin.class,
                                 SYSTEM_PLUGIN_MUST_REFRESH_JS_EMBEDDING);
+                        } else if (pluginDBUpdates.contains(SYSTEM_PLUGIN_MUST_DOWNLOAD_ASSETS)) {
+                            GetAppAssetRequestTO getAppAssetRequestTO = new GetAppAssetRequestTO();
+                            getAppAssetRequestTO.kind = ASSET_CHAT_BACKGROUND;
+                            final GetAppAssetResponseHandler responseHandler = new GetAppAssetResponseHandler();
+                            Rpc.getAppAsset(responseHandler, getAppAssetRequestTO);
+                            mMainService.clearPluginDBUpdate(SystemPlugin.class, SYSTEM_PLUGIN_MUST_DOWNLOAD_ASSETS);
                         }
 
                     }
@@ -283,5 +301,44 @@ public class SystemPlugin implements MobicagePlugin {
         info.timeZone.secondsFromGMT = timeZone.getRawOffset() / 1000;
 
         return info;
+    }
+
+    public void updateAppAsset(String kind, String url, float scaleX) {
+        if (url == null) {
+            File file = null;
+            try {
+                file = mBrandingMgr.getAssetFile(kind);
+            } catch (BrandingFailureException e) {
+                L.bug(e);
+            }
+            if (file != null) {
+                boolean fileDeleted = file.delete();
+                L.d("Asset " + kind + " deleted:" + fileDeleted);
+            }
+
+        } else {
+            UpdateAppAssetRequestTO packet = new UpdateAppAssetRequestTO();
+            packet.kind = kind;
+            packet.url = url;
+            packet.scale_x = scaleX;
+            mBrandingMgr.queue(packet);
+        }
+    }
+
+    public Bitmap getAppAsset(String kind) {
+        Bitmap bitmap = null;
+        try {
+            File file = mBrandingMgr.getAssetFile(kind);
+
+            if (file.exists()) {
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                options.inJustDecodeBounds = false;
+                bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+            }
+        } catch (BrandingFailureException e) {
+            L.bug(e);
+        }
+        return bitmap;
     }
 }

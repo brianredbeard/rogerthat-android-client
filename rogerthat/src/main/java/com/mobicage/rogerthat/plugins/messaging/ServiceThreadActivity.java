@@ -17,9 +17,6 @@
  */
 package com.mobicage.rogerthat.plugins.messaging;
 
-import java.util.Arrays;
-import java.util.Map;
-
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -38,8 +35,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.mobicage.rogerth.at.R;
@@ -57,6 +54,9 @@ import com.mobicage.rogerthat.util.ui.Slider;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.to.messaging.ButtonTO;
 import com.mobicage.to.messaging.MemberStatusTO;
+
+import java.util.Arrays;
+import java.util.Map;
 
 public class ServiceThreadActivity extends ServiceBoundCursorListActivity {
 
@@ -112,6 +112,7 @@ public class ServiceThreadActivity extends ServiceBoundCursorListActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.service_thread);
+        setTitle(R.string.message_history);
         mParentMessageKey = getIntent().getStringExtra(PARENT_MESSAGE_KEY);
         setListView((ListView) findViewById(R.id.thread_messages));
 
@@ -131,11 +132,6 @@ public class ServiceThreadActivity extends ServiceBoundCursorListActivity {
         unregisterReceiver(getDefaultBroadcastReceiver());
         unregisterReceiver(mReceiver);
         super.onDestroy();
-    }
-
-    @Override
-    protected boolean showFABMenu() {
-        return true;
     }
 
     @Override
@@ -260,13 +256,19 @@ public class ServiceThreadActivity extends ServiceBoundCursorListActivity {
             final Message message = mMessageStore.readFullThreadMessageFromCursor(cursor);
             final int position = cursor.getPosition();
 
-            final RelativeLayout svcDetail = (RelativeLayout) view.findViewById(R.id.svc_detail);
+            final LinearLayout svcDetail = (LinearLayout) view.findViewById(R.id.svc_detail);
             final ImageView avatarView = (ImageView) svcDetail.findViewById(R.id.avatar);
             final TextView recipientsView = (TextView) svcDetail.findViewById(R.id.recipients);
 
             if (position == 0) {
                 avatarView.setImageBitmap(mFriendsPlugin.getAvatarBitmap(message.sender));
                 avatarView.setVisibility(View.VISIBLE);
+                String recipients = message.recipients;
+                if (com.mobicage.rogerthat.util.TextUtils.isEmptyOrWhitespace(recipients)) {
+                    recipients = mFriendsPlugin.getName(message.sender);
+                    mMessagingPlugin.getStore().updateMessageRecipients(message.parent_key != null ? message.parent_key : message.key, recipients);
+                }
+                recipientsView.setText(recipients);
                 recipientsView.setText(message.recipients);
                 recipientsView.setVisibility(View.VISIBLE);
                 svcDetail.setOnClickListener(new SafeViewOnClickListener() {
@@ -291,6 +293,7 @@ public class ServiceThreadActivity extends ServiceBoundCursorListActivity {
                 });
             } else {
                 svcDetail.setOnClickListener(null);
+                svcDetail.setVisibility(View.GONE);
                 avatarView.setVisibility(View.GONE);
                 recipientsView.setVisibility(View.GONE);
             }

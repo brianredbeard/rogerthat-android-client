@@ -17,8 +17,6 @@
  */
 package com.mobicage.rogerthat;
 
-import java.util.Map;
-
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -30,6 +28,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -49,6 +48,8 @@ import com.mobicage.rogerthat.util.ui.ImageHelper;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.to.friends.GetUserInfoRequestTO;
+
+import java.util.Map;
 
 public class FriendDetailOrInviteActivity extends ServiceBoundActivity {
 
@@ -182,8 +183,9 @@ public class FriendDetailOrInviteActivity extends ServiceBoundActivity {
             image.setImageBitmap(ImageHelper.getRoundedCornerAvatar(avatarBitmap));
         }
 
+        setTitle(mFriend.getDisplayName());
         nameView.setText(mFriend.getDisplayName());
-        nameView.setTextColor(getResources().getColor(android.R.color.primary_text_light));
+        nameView.setTextColor(ContextCompat.getColor(this, android.R.color.primary_text_light));
 
         final LinearLayout profileDataContainer = (LinearLayout) findViewById(R.id.profile_data);
         if (AppConstants.PROFILE_DATA_FIELDS.length > 0) {
