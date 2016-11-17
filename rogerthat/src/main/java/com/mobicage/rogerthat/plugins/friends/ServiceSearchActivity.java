@@ -113,6 +113,8 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
 
     private String mLastFriendEmailClicked;
 
+    private ProgressDialog mConnectingDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -204,6 +206,11 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
         } else {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST_ACCESS_FINE_LOCATION);
         }
+
+        mConnectingDialog = new ProgressDialog(this);
+        mConnectingDialog.setMessage(getString(R.string.loading));
+        mConnectingDialog.setIndeterminate(true);
+        mConnectingDialog.setCancelable(true);
     }
 
     @Override
@@ -246,6 +253,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
             }
             if (existence == Friend.ACTIVE) {
                 if (mAction != null) {
+                    mLastFriendEmailClicked = null;
                     ActivityUtils.goToActivityBehindTag(ServiceSearchActivity.this, item.email, mAction);
                 } else {
                     Intent intent = new Intent(ServiceSearchActivity.this, ServiceActionMenuActivity.class);
@@ -254,6 +262,9 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
                 }
 
             } else if (autoConnect) {
+                if (mAction != null) {
+                    mConnectingDialog.show();
+                }
                 if (existence == Friend.DELETED || existence == Friend.DELETION_PENDING) {
                     existence = Friend.NOT_FOUND;
                 }
@@ -269,7 +280,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
                 service.type = FriendsPlugin.FRIEND_TYPE_SERVICE;
                 service.qualifiedIdentifier = item.qualified_identifier;
 
-                mFriendsPlugin.inviteService(service);
+                mFriendsPlugin.inviteService(service, mAction == null);
             } else {
                 Intent intent = new Intent(ServiceSearchActivity.this, ServiceDetailActivity.class);
                 if (existence == Friend.DELETED || existence == Friend.DELETION_PENDING) {
@@ -382,7 +393,10 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
                 } else {
                     if (FriendsPlugin.FRIEND_ADDED_INTENT.equals(action)) {
                         if (mLastFriendEmailClicked != null && mLastFriendEmailClicked.equals(intent.getStringExtra("email"))) {
-                            ActivityUtils.goToActivityBehindTag(ServiceSearchActivity.this, mLastFriendEmailClicked, mAction);
+                            if (ActivityUtils.goToActivityBehindTagWhenReady(ServiceSearchActivity.this, mLastFriendEmailClicked, mAction)) {
+                                mConnectingDialog.dismiss();
+                                mLastFriendEmailClicked = null;
+                            }
                         }
                     }
 

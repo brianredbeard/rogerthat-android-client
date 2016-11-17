@@ -164,11 +164,40 @@ public class ActivityUtils {
         goToActivity(context, FriendSearchActivity.class, clearStack, extras);
     }
 
+    private static void setupMenuItemPresser(final ServiceBoundActivity context, final String serviceEmail) {
+        if (context.menuItemPresser != null) {
+            context.menuItemPresser.stop();
+            context.menuItemPresser = null;
+        }
+        context.menuItemPresser = new MenuItemPresser(context, serviceEmail);
+    }
+
+    public static boolean goToActivityBehindTagWhenReady(final ServiceBoundActivity context, final String serviceEmail, final String tag) {
+        if (context instanceof MenuItemPressingActivity) {
+            setupMenuItemPresser(context, serviceEmail);
+
+            if (!context.menuItemPresser.itemReady(tag)) {
+                return false;
+            }
+
+            context.menuItemPresser.itemPressed(tag, new MenuItemPresser.ResultHandler() {
+                @Override
+                public void onError() {
+                    L.e("SMI with tag " + tag + " not found!"); // XXX: log error to message.sender
+                    onTimeout();
+                }
+            });
+            return true;
+        } else {
+            L.bug("goToActivityBehindTag called from wrong context: " + context);
+            return false;
+        }
+    }
+
     public static void goToActivityBehindTag(final ServiceBoundActivity context, final String serviceEmail, final String tag) {
         if (context instanceof MenuItemPressingActivity) {
-            if (context.menuItemPresser == null) {
-                context.menuItemPresser = new MenuItemPresser(context, serviceEmail);
-            }
+            setupMenuItemPresser(context, serviceEmail);
+
             context.menuItemPresser.itemPressed(tag, new MenuItemPresser.ResultHandler() {
                 @Override
                 public void onError() {

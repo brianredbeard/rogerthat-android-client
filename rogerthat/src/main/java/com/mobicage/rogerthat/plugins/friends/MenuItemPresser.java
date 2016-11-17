@@ -100,6 +100,15 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
         mEmail = email;
     }
 
+    public boolean itemReady(final String tag) {
+        final FriendStore friendStore = mService.getPlugin(FriendsPlugin.class).getStore();
+        final ServiceMenuItemDetails smi = friendStore.getMenuItem(mEmail, tag);
+        if (smi == null) {
+            return false;
+        }
+        return true;
+    }
+
     public void itemPressed(final String tag, final ResultHandler resultHandler) {
         itemPressed(tag, null, resultHandler);
     }

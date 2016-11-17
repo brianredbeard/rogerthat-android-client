@@ -688,7 +688,12 @@ public class FriendsPlugin implements MobicagePlugin {
 
     public boolean inviteService(final Friend service) {
         T.UI();
-        if (inviteFriend(service.email, null, service.getDisplayName(), true)) {
+        return inviteService(service, true);
+    }
+
+    public boolean inviteService(final Friend service, boolean showNotification) {
+        T.UI();
+        if (inviteFriend(service.email, null, service.getDisplayName(), showNotification)) {
             mMainService.postOnBIZZHandler(new SafeRunnable() {
                 @Override
                 protected void safeRun() throws Exception {
