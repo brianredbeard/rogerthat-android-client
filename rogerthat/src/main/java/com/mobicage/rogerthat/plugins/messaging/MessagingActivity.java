@@ -623,7 +623,11 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
                 messageText = mMessagingPlugin.getMessageTextFromButtonsOrAttachments(message);
             }
             if (message.members.length > 2) {
-                messageText = mFriendsPlugin.getName(message.sender) + ": " + message.message;
+                if (mMyEmail.equals(message.sender)) {
+                    messageText = message.message;
+                } else {
+                    messageText = mFriendsPlugin.getName(message.sender) + ": " + message.message;
+                }
             }
 
             // this can happen when the name of the service wasn't available yet when fetching the messages during re-registration.

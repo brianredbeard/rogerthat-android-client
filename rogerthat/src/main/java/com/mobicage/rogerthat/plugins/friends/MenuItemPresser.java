@@ -23,6 +23,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
 
 import com.mobicage.api.services.Rpc;
 import com.mobicage.rogerth.at.R;
@@ -110,7 +111,7 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
     }
 
     public void itemPressed(final String tag, final ResultHandler resultHandler) {
-        itemPressed(tag, null, resultHandler);
+        itemPressed(tag, null, null, resultHandler);
     }
 
     public void itemPressed(final String tag, final String flowParams, final ResultHandler resultHandler) {
@@ -121,15 +122,26 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
                 resultHandler.onError();
             return;
         }
-        itemPressed(smi, smi.menuGeneration, flowParams, resultHandler);
+        itemPressed(smi, smi.menuGeneration, null, flowParams, resultHandler);
+    }
+
+    public void itemPressed(final String tag, final Bundle extras, final String flowParams, final ResultHandler resultHandler) {
+        final FriendStore friendStore = mService.getPlugin(FriendsPlugin.class).getStore();
+        final ServiceMenuItemDetails smi = friendStore.getMenuItem(mEmail, tag);
+        if (smi == null) {
+            if (resultHandler != null)
+                resultHandler.onError();
+            return;
+        }
+        itemPressed(smi, smi.menuGeneration, extras, flowParams, resultHandler);
     }
 
     public void itemPressed(final ServiceMenuItemTO item, final long menuGeneration, final ResultHandler
             resultHandler) {
-        itemPressed(item, menuGeneration, null, resultHandler);
+        itemPressed(item, menuGeneration, null, null, resultHandler);
     }
 
-    public void itemPressed(final ServiceMenuItemTO item, final long menuGeneration, final String flowParams,
+    public void itemPressed(final ServiceMenuItemTO item, final long menuGeneration, final Bundle extras, final String flowParams,
                             final ResultHandler resultHandler) {
         mItem = item;
         mResultHandler = resultHandler == null ? mDefaultResultHandler : resultHandler;
@@ -174,7 +186,7 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
         }
 
         if (item.screenBranding != null) {
-            openBranding(item);
+            openBranding(item, extras);
         } else if (item.staticFlowHash != null) {
             startLocalFlow(item, request, flowParams);
         } else {
@@ -227,7 +239,7 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
         }
     }
 
-    private void openBranding(ServiceMenuItemTO item) {
+    private void openBranding(final ServiceMenuItemTO item, final Bundle extras) {
         final MessagingPlugin messagingPlugin = mService.getPlugin(MessagingPlugin.class);
 
         boolean brandingAvailable = false;
@@ -244,6 +256,9 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
         }
 
         Intent intent = new Intent(mService, ActionScreenActivity.class);
+        if (extras != null) {
+            intent.putExtras(extras);
+        }
         intent.putExtra(ActionScreenActivity.BRANDING_KEY, item.screenBranding);
         intent.putExtra(ActionScreenActivity.SERVICE_EMAIL, mEmail);
         intent.putExtra(ActionScreenActivity.ITEM_TAG_HASH, item.hashedTag);

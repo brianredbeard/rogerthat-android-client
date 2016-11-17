@@ -564,9 +564,9 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         }, 250);
 
 
+        Bundle extras = new Bundle();
+        extras.putBoolean("show_drawer_icon", true);
         if (ni.actionType == null) {
-            Bundle extras = new Bundle();
-            extras.putBoolean("show_drawer_icon", true);
             ActivityUtils.goToActivity(ServiceBoundActivity.this, ni.action, true, ni.collapse, extras);
         } else if ("action".equals(ni.actionType)) {
             Class clazz;
@@ -577,9 +577,9 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
             }
 
             final Intent i = new Intent(ServiceBoundActivity.this, clazz);
-            i.putExtra(ServiceActionsOfflineActivity.ACTION, ni.action);
-            i.putExtra(ServiceActionsOfflineActivity.TITLE, ni.labelTextId);
-            i.putExtra("show_drawer_icon", true);
+            extras.putString(ServiceActionsOfflineActivity.ACTION, ni.action);
+            extras.putInt(ServiceActionsOfflineActivity.TITLE, ni.labelTextId);
+            i.putExtras(extras);
             i.addFlags(MainActivity.FLAG_CLEAR_STACK);
             ServiceBoundActivity.this.startActivity(i);
 
@@ -588,7 +588,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
                 L.bug("simulateNavigationItemClick click but app_email was nog set");
                 return;
             }
-            ActivityUtils.goToActivityBehindTag(ServiceBoundActivity.this, AppConstants.APP_EMAIL, ni.action);
+            ActivityUtils.goToActivityBehindTag(ServiceBoundActivity.this, AppConstants.APP_EMAIL, ni.action, extras);
         } else {
             L.bug("ignoring simulateNavigationItemClick: " + ni.actionType + "|" + ni.action);
         }
@@ -709,6 +709,9 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
             for (int i = 0; i < navigationItems.length; i++) {
                 final NavigationItem ni = navigationItems[i];
                 if (ni.actionType == null && ni.action.equals(mActivityName)) {
+                    order = i;
+                    break;
+                } else if (ni.actionType != null && mActivityName.equals(ni.actionType + "|" + ni.action)) {
                     order = i;
                     break;
                 }

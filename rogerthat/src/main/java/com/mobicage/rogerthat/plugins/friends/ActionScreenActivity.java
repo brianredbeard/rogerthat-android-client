@@ -836,6 +836,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         mItemCoords = intent.getLongArrayExtra(ITEM_COORDS);
         mRunInBackground = intent.getBooleanExtra(RUN_IN_BACKGROUND, true);
         setTitle(mItemLabel);
+        setActivityName("click|" + mItemTagHash);
     }
 
     @Override
