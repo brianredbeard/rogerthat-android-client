@@ -456,6 +456,10 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
         getNewsItems(ids);
     }
 
+    public void removeNotification(long newsId) {
+        UIUtils.cancelNotification(mMainService, newsId);
+    }
+
     // NewsChannel
 
     protected void connectedToNewsChannelIfNotConnected() {

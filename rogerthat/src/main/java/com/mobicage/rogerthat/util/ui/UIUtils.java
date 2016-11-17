@@ -87,7 +87,7 @@ public class UIUtils {
     public static final String NOTIFICATION_TIMESTAMP = "NOTIFICATION_TIMESTAMP";
 
     private static List<Activity> sActivities = new ArrayList<Activity>();
-    private static Map<String, Integer> notificationIds = new HashMap<>();
+    private static Map<Object, Integer> notificationIds = new HashMap<>();
 
     public static void onActivityStart(final Activity activity) {
         if (T.getThreadType() != T.UI) {
@@ -197,13 +197,15 @@ public class UIUtils {
         sNotificationIDs.add(notificationId);
     }
 
-    public static int getNotificationId(final String notificationKey, boolean create) {
-        for (Map.Entry<String, Integer> notification : notificationIds.entrySet()) {
-            if (notification.getKey().equals(notificationKey)) {
-                return notification.getValue();
+    public static int getNotificationId(final Object notificationKey, boolean createIfNotExists) {
+        if (notificationIds.containsKey(notificationKey)) {
+            if (createIfNotExists) {
+                return notificationIds.get(notificationKey);
+            } else {
+                return notificationIds.remove(notificationKey);
             }
         }
-        if (!create) {
+        if (!createIfNotExists) {
             return -1;
         }
         int notificationID = NotificationID.next();
@@ -217,8 +219,8 @@ public class UIUtils {
         nm.cancel(pNotificationId);
     }
 
-    public static void cancelNotification(final Context context, final String notificationString) {
-        int notificationId = getNotificationId(notificationString, false);
+    public static void cancelNotification(final Context context, final Object notificationKey) {
+        int notificationId = getNotificationId(notificationKey, false);
         if (notificationId != -1) {
             cancelNotification(context, notificationId);
         }

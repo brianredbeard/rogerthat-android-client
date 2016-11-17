@@ -472,6 +472,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
 
             final int existenceStatus = mFriendsPlugin.getStore().getExistence(mNewsItem.sender.email);
 
+            mNewsPlugin.removeNotification(mNewsItem.id);
             if (!mNewsItem.read) {
                 mNewsItem.read = true;
                 mNewsPlugin.setNewsItemRead(mNewsItem.id);
