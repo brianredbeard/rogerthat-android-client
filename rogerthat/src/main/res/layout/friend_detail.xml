@@ -10,6 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/mc_background_color"
+        android:layout_above="@+id/poke_area"
         android:fillViewport="true"
         android:scrollbarStyle="insideOverlay"
         android:scrollbars="none">
