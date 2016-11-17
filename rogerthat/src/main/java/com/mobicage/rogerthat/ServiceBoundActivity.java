@@ -34,6 +34,7 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.design.internal.NavigationMenuView;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -505,6 +506,10 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         menu.add(navigationItems.length, navigationItems.length, navigationItems.length, "").setCheckable(false);
         menu.add(navigationItems.length, navigationItems.length + 1, navigationItems.length + 1, "").setCheckable(false);
         navigationView.setItemIconTintList(null);
+        NavigationMenuView navigationMenuView = (NavigationMenuView) navigationView.getChildAt(0);
+        if (navigationMenuView != null) {
+            navigationMenuView.setVerticalScrollBarEnabled(false);
+        }
 
         LinearLayout navigationFooter = (LinearLayout) findViewById(R.id.nav_view_footer);
         ServiceBoundActivity.NavigationItem[] navigationFooterItems = NavigationConstants.getNavigationFooterItems();
