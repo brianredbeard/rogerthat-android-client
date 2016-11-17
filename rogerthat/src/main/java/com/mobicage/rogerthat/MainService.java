@@ -1447,6 +1447,22 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         }
     }
 
+    public void runOnUIHandlerNow(SafeRunnable runnable) {
+        if (com.mobicage.rogerthat.util.system.T.getThreadType() == com.mobicage.rogerthat.util.system.T.UI) {
+            runnable.run();
+        } else {
+            postAtFrontOfUIHandler(runnable);
+        }
+    }
+
+    public void runOnUIHandler(SafeRunnable runnable) {
+        if (com.mobicage.rogerthat.util.system.T.getThreadType() == com.mobicage.rogerthat.util.system.T.UI) {
+            runnable.run();
+        } else {
+            postOnUIHandler(runnable);
+        }
+    }
+
     public void postDelayedOnBIZZHandler(SafeRunnable r, long delayMillis) {
         mBizzHandler.postDelayed(r, delayMillis);
     }

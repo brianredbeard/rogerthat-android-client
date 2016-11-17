@@ -18,12 +18,6 @@
 
 package com.mobicage.rogerthat.plugins.friends;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
-
-import org.json.simple.JSONValue;
-
 import android.content.Intent;
 
 import com.mobicage.rogerthat.util.logging.L;
@@ -32,6 +26,12 @@ import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.IResponse;
 import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.to.friends.FindFriendResponseTO;
+
+import org.json.simple.JSONValue;
+
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 
 public class FindFriendResponseHandler extends ResponseHandler<FindFriendResponseTO> {
 
@@ -71,8 +71,8 @@ public class FindFriendResponseHandler extends ResponseHandler<FindFriendRespons
         }
 
         Intent intent = new Intent(FriendsPlugin.FRIEND_SEARCH_RESULT_INTENT);
-        intent.putExtra(ServiceSearchActivity.SEARCH_RESULT, JSONValue.toJSONString(response.toJSONMap()));
-        intent.putExtra(ServiceSearchActivity.SEARCH_STRING, mSearchString);
+        intent.putExtra(FriendsPlugin.SEARCH_RESULT, JSONValue.toJSONString(response.toJSONMap()));
+        intent.putExtra(FriendsPlugin.SEARCH_STRING, mSearchString);
         mMainService.sendBroadcast(intent);
     }
 

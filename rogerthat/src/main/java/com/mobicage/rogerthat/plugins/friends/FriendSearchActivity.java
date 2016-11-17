@@ -74,9 +74,6 @@ import java.util.Map;
 
 public class FriendSearchActivity extends ServiceBoundActivity {
 
-    public static final String SEARCH_RESULT = "SEARCH_RESULT";
-    public static final String SEARCH_STRING = "SEARCH_STRING";
-
     private static final String[] UPDATE_VIEW_INTENTS = new String[] { FriendsPlugin.FRIENDS_LIST_REFRESHED,
         FriendsPlugin.FRIEND_ADDED_INTENT, FriendsPlugin.FRIEND_MARKED_FOR_REMOVAL_INTENT,
         FriendsPlugin.FRIEND_REMOVED_INTENT };
@@ -208,9 +205,9 @@ public class FriendSearchActivity extends ServiceBoundActivity {
                 String action = intent.getAction();
 
                 if (mSearchString != null && FriendsPlugin.FRIEND_SEARCH_RESULT_INTENT.equals(action)) {
-                    if (mSearchString.equals(intent.getStringExtra(SEARCH_STRING))) {
+                    if (mSearchString.equals(intent.getStringExtra(FriendsPlugin.SEARCH_STRING))) {
                         mProgressDialog.dismiss();
-                        String jsonResult = intent.getStringExtra(SEARCH_RESULT);
+                        String jsonResult = intent.getStringExtra(FriendsPlugin.SEARCH_RESULT);
                         @SuppressWarnings("unchecked")
                         Map<String, Object> jsonMap = (Map<String, Object>) JSONValue.parse(jsonResult);
                         try {
@@ -240,7 +237,7 @@ public class FriendSearchActivity extends ServiceBoundActivity {
                         return new String[] { action };
                     }
                 } else if (FriendsPlugin.FRIEND_SEARCH_FAILED_INTENT.equals(action)) {
-                    if (mSearchString.equals(intent.getStringExtra(SEARCH_STRING))) {
+                    if (mSearchString.equals(intent.getStringExtra(FriendsPlugin.SEARCH_STRING))) {
                         mProgressDialog.dismiss();
                         showSearchFailedDialog();
                         return new String[] { action };

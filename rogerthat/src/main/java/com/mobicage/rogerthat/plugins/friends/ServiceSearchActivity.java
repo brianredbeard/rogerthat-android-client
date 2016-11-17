@@ -68,7 +68,6 @@ import com.mobicage.rogerthat.util.ui.ImageHelper;
 import com.mobicage.rogerthat.util.ui.SafeViewFlipper;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rogerthat.util.ui.ViewFlipperSlider;
-import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.to.service.FindServiceCategoryTO;
 import com.mobicage.to.service.FindServiceItemTO;
 import com.mobicage.to.service.FindServiceResponseTO;
@@ -88,9 +87,6 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
     public final static String ACTION = "action";
     public final static String TITLE = "title";
 
-    public static final String SEARCH_RESULT = "SEARCH_RESULT";
-    public static final String SEARCH_STRING = "SEARCH_STRING";
-
     private static final int PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 1;
 
     private static final String[] UPDATE_VIEW_INTENTS = new String[]{FriendsPlugin.FRIENDS_LIST_REFRESHED,
@@ -103,7 +99,6 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
     private SafeViewFlipper mSearchCategoryViewFlipper;
     private ProgressDialog mProgressDialog;
     private String mSearchString = null;
-    private FindServiceResponseTO mResponseTO;
     private int mOrganizationType;
     private String mAction;
     private Map<String, SearchInfo> mSearchInfoByCategory;
@@ -324,25 +319,16 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
                 String action = intent.getAction();
                 L.i("onSafeReceive: "+ action);
                 if (mSearchString != null && FriendsPlugin.SERVICE_SEARCH_RESULT_INTENT.equals(action)) {
-                    if (mSearchString.equals(intent.getStringExtra(SEARCH_STRING))) {
+                    if (mSearchString.equals(intent.getStringExtra(FriendsPlugin.SEARCH_STRING))) {
                         mProgressDialog.dismiss();
-                        String jsonResult = intent.getStringExtra(SEARCH_RESULT);
-                        @SuppressWarnings("unchecked")
-                        Map<String, Object> jsonMap = (Map<String, Object>) JSONValue.parse(jsonResult);
-                        try {
-                            mResponseTO = new FindServiceResponseTO(jsonMap);
-                        } catch (IncompleteMessageException e) {
-                            L.bug(e);
-                            showSearchFailedDialog();
+                        FindServiceResponseTO responseTO = mFriendsPlugin.getLastSearchResult();
+
+                        if (!TextUtils.isEmptyOrWhitespace(responseTO.error_string)) {
+                            UIUtils.showAlertDialog(ServiceSearchActivity.this, null, responseTO.error_string);
                             return new String[]{action};
                         }
 
-                        if (!TextUtils.isEmptyOrWhitespace(mResponseTO.error_string)) {
-                            UIUtils.showAlertDialog(ServiceSearchActivity.this, null, mResponseTO.error_string);
-                            return new String[]{action};
-                        }
-
-                        for (FindServiceCategoryTO category : mResponseTO.matches) {
+                        for (FindServiceCategoryTO category : responseTO.matches) {
                             if (mSearchInfoByCategory.containsKey(category.category)) {
                                 SearchInfo si = mSearchInfoByCategory.get(category.category);
                                 si.cursor = category.cursor;
@@ -385,7 +371,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
                         return new String[]{action};
                     }
                 } else if (FriendsPlugin.SERVICE_SEARCH_FAILED_INTENT.equals(action)) {
-                    if (mSearchString.equals(intent.getStringExtra(SEARCH_STRING))) {
+                    if (mSearchString.equals(intent.getStringExtra(FriendsPlugin.SEARCH_STRING))) {
                         mProgressDialog.dismiss();
                         showSearchFailedDialog();
                         return new String[]{action};

@@ -89,6 +89,7 @@ import com.mobicage.to.location.GetFriendLocationRequestTO;
 import com.mobicage.to.location.GetFriendLocationResponseTO;
 import com.mobicage.to.location.GetFriendsLocationResponseTO;
 import com.mobicage.to.service.FindServiceRequestTO;
+import com.mobicage.to.service.FindServiceResponseTO;
 import com.mobicage.to.service.GetServiceActionInfoRequestTO;
 import com.mobicage.to.service.GetStaticFlowRequestTO;
 import com.mobicage.to.service.PokeServiceRequestTO;
@@ -166,6 +167,10 @@ public class FriendsPlugin implements MobicagePlugin {
 
     public static final String SYSTEM_FRIEND = "dashboard@rogerth.at";
 
+    public static final String SEARCH_STRING = "SEARCH_STRING";
+    public static final String SEARCH_RESULT = "SEARCH_RESULT";
+
+
     public static final int ME = 1;
     public static final int FRIEND = 4;
     public static final int NON_FRIEND = 8;
@@ -207,6 +212,8 @@ public class FriendsPlugin implements MobicagePlugin {
     private final Bitmap mSystemFriendAvatar;
     private final GeoLocationProvider mGeoProvider;
     private final TrackmePlugin mTrackmePlugin;
+    private FindServiceResponseTO mLastResponse;
+
 
     private final Map<String, JSONArray> mDisabledBroadcastTypesCache = new HashMap<>();
 
@@ -258,6 +265,28 @@ public class FriendsPlugin implements MobicagePlugin {
     public BrandingMgr getBrandingMgr() {
         T.dontCare();
         return mBrandingMgr;
+    }
+
+    public void setLastSearchResult(final String searchString, final FindServiceResponseTO response) {
+        T.dontCare();
+        mMainService.runOnUIHandler(new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                mLastResponse = response;
+                Intent intent = new Intent(SERVICE_SEARCH_RESULT_INTENT);
+                intent.putExtra(SEARCH_STRING, searchString);
+                mMainService.sendBroadcast(intent);
+            }
+        });
+    }
+
+    public FindServiceResponseTO getLastSearchResult() {
+        T.UI();
+        try {
+            return mLastResponse;
+        }finally {
+            mLastResponse = null;
+        }
     }
 
     private void initCallReceiver() {
