@@ -126,6 +126,14 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
         mBottomSheetDialog = new BottomSheetDialog(this);
     }
 
+    @Override
+    protected void onPause() {
+        if (swipeContainer.isRefreshing()) {
+            swipeContainer.setRefreshing(false);
+        }
+        super.onPause();
+    }
+
     protected void addBroadcastReceiver(BroadcastReceiver br, IntentFilter filter) {
         registerReceiver(br, filter);
         mBroadcastReceivers.add(br);
