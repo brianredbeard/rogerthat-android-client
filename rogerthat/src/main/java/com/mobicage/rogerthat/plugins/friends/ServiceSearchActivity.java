@@ -191,6 +191,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
         IntentFilter filter = new IntentFilter();
         filter.addAction(FriendsPlugin.SERVICE_SEARCH_FAILED_INTENT);
         filter.addAction(FriendsPlugin.SERVICE_SEARCH_RESULT_INTENT);
+        filter.addAction(FriendsPlugin.STATIC_FLOW_AVAILABLE_INTENT);
         for (String action : UPDATE_VIEW_INTENTS)
             filter.addAction(action);
         registerReceiver(mBroadcastReceiver, filter);
@@ -375,6 +376,14 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
                         mProgressDialog.dismiss();
                         showSearchFailedDialog();
                         return new String[]{action};
+                    }
+                } else if (FriendsPlugin.STATIC_FLOW_AVAILABLE_INTENT.equals(action)) {
+                    if (mLastFriendEmailClicked != null && mLastFriendEmailClicked.equals(intent.getStringExtra("email"))) {
+                        if (ActivityUtils.goToActivityBehindTagWhenReady(ServiceSearchActivity.this, mLastFriendEmailClicked, mAction)) {
+                            mConnectingDialog.dismiss();
+                            mLastFriendEmailClicked = null;
+                            return new String[]{action};
+                        }
                     }
                 } else {
                     if (FriendsPlugin.FRIEND_ADDED_INTENT.equals(action)) {

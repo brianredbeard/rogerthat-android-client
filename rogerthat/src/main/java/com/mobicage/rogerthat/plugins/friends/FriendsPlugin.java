@@ -165,6 +165,8 @@ public class FriendsPlugin implements MobicagePlugin {
     public static final String GROUP_MODIFIED = "com.mobicage.rogerthat.plugins.friends.GROUP_MODIFIED";
     public static final String GROUP_REMOVED = "com.mobicage.rogerthat.plugins.friends.GROUP_REMOVED";
 
+    public static final String STATIC_FLOW_AVAILABLE_INTENT = "com.mobicage.rogerthat.plugins.friends.STATIC_FLOW_AVAILABLE_INTENT";
+
     public static final String SYSTEM_FRIEND = "dashboard@rogerth.at";
 
     public static final String SEARCH_STRING = "SEARCH_STRING";

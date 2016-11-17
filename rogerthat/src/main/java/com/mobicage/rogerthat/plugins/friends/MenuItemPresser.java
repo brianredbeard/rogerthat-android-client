@@ -37,6 +37,7 @@ import com.mobicage.rogerthat.plugins.messaging.ServiceMessageDetailActivity;
 import com.mobicage.rogerthat.plugins.messaging.mfr.EmptyStaticFlowException;
 import com.mobicage.rogerthat.plugins.messaging.mfr.JsMfr;
 import com.mobicage.rogerthat.plugins.messaging.mfr.MessageFlowRun;
+import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
@@ -48,6 +49,7 @@ import com.mobicage.to.service.PressMenuIconResponseTO;
 
 import org.json.simple.JSONValue;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -107,7 +109,19 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
         if (smi == null) {
             return false;
         }
-        return true;
+
+        if (smi.staticFlowHash != null) {
+            try {
+                String htmlString = friendStore.getStaticFlow(smi.staticFlowHash);
+                if (!TextUtils.isEmptyOrWhitespace(htmlString)) {
+                    return true;
+                }
+            } catch (IOException e) {
+                L.bug("Failed to unzip static flow " + smi.staticFlowHash, e);
+            }
+        }
+
+        return false;
     }
 
     public void itemPressed(final String tag, final ResultHandler resultHandler) {

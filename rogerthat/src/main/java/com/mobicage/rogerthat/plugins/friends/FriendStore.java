@@ -904,12 +904,17 @@ public class FriendStore implements Closeable {
         return mCheckStaticFlowAvailableHTTP.simpleQueryForLong() != 0;
     }
 
-    public void storeStaticFlow(final String staticFlow, final String staticFlowHash) {
+    public void storeStaticFlow(final String email, final String staticFlow, final String staticFlowHash) {
         T.dontCare();
         SQLiteStatement stmt = mInsertStaticFlow.getStatementForThisThread();
         stmt.bindString(1, staticFlowHash);
         stmt.bindBlob(2, Base64.decode(staticFlow));
         stmt.execute();
+
+        Intent intent = new Intent(FriendsPlugin.STATIC_FLOW_AVAILABLE_INTENT);
+        intent.putExtra("email", email);
+        intent.putExtra("hash", staticFlowHash);
+        mMainService.sendBroadcast(intent);
     }
 
     private ServiceMenu getMenuDetails(String email) {

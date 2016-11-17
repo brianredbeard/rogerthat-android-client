@@ -1569,7 +1569,7 @@ public class MessagingPlugin implements MobicagePlugin {
             + UUID.randomUUID().toString();
 
         final FriendsPlugin friendsPlugin = mMainService.getPlugin(FriendsPlugin.class);
-        friendsPlugin.getStore().storeStaticFlow(flow.static_flow, flow.static_flow_hash);
+        friendsPlugin.getStore().storeStaticFlow(flow.service, flow.static_flow, flow.static_flow_hash);
 
         if (!mBrandingMgr.queue(flow)) {
             mMainService.postOnUIHandler(new SafeRunnable() {

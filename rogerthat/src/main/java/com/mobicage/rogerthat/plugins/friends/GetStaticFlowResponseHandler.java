@@ -18,16 +18,16 @@
 
 package com.mobicage.rogerthat.plugins.friends;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
-
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.pickle.PickleException;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.IResponse;
 import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.to.service.GetStaticFlowResponseTO;
+
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 
 public class GetStaticFlowResponseHandler extends ResponseHandler<com.mobicage.to.service.GetStaticFlowResponseTO> {
 
@@ -65,7 +65,7 @@ public class GetStaticFlowResponseHandler extends ResponseHandler<com.mobicage.t
             GetStaticFlowResponseTO resp = response.getResponse();
             if (resp != null && resp.staticFlow != null) {
                 final FriendsPlugin plugin = mMainService.getPlugin(FriendsPlugin.class);
-                plugin.getStore().storeStaticFlow(resp.staticFlow, mStaticFlowHash);
+                plugin.getStore().storeStaticFlow(mEmail, resp.staticFlow, mStaticFlowHash);
             }
         } catch (Exception e) {
             L.bug(e);
