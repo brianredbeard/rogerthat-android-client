@@ -40,6 +40,7 @@ import android.view.ViewGroup;
 
 import com.mobicage.api.messaging.Rpc;
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.AddFriendsActivity;
 import com.mobicage.rogerthat.HomeActivity;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
@@ -771,8 +772,14 @@ public class MessagingPlugin implements MobicagePlugin {
         // Don't create notification when the currently opened message thread is the same as the thread from the notification
         Activity currentActivity = UIUtils.getTopActivity(mMainService);
         if (currentActivity instanceof FriendsThreadActivity) {
-            FriendsThreadActivity friendsThreadActivity = (FriendsThreadActivity) currentActivity;
-            if (threadKey.equals(friendsThreadActivity.getParentMessageKey())) {
+            FriendsThreadActivity activity = (FriendsThreadActivity) currentActivity;
+            if (threadKey.equals(activity.getParentMessageKey())) {
+                return;
+            }
+        }
+        if (currentActivity instanceof ServiceMessageDetailActivity) {
+            ServiceMessageDetailActivity activity = (ServiceMessageDetailActivity) currentActivity;
+            if (threadKey.equals(activity.getParentMessageKey())) {
                 return;
             }
         }

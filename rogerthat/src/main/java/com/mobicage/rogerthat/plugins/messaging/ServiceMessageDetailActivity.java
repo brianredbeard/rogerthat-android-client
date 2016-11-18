@@ -1443,4 +1443,8 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
             }, 1000 * expectNext);
         }
     }
+
+    public String getParentMessageKey() {
+        return mCurrentMessage == null ? null : mCurrentMessage.getThreadKey();
+    }
 }

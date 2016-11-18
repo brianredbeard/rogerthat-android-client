@@ -56,8 +56,6 @@ public class Message extends MessageTO {
     public boolean threadNeedsMyAnswer;
     public boolean threadShowInList;
 
-    public boolean hasTempKey;
-
     public final static int PRIORITY_NORMAL = 1;
     public final static int PRIORITY_HIGH = 2;
     public final static int PRIORITY_URGENT = 3;
