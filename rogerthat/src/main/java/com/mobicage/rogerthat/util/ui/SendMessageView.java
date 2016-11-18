@@ -95,6 +95,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
@@ -333,13 +334,14 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
                     if (mUriSavedFile == null) {
                         setupUploadFile("png", false);
                     }
+                    mUploadFileExtenstion = AttachmentViewerActivity.CONTENT_TYPE_PNG;
                     if (data != null && data.getData() != null) {
                         final Uri selectedImage = data.getData();
-                        L.d("selectedImage: " + selectedImage.toString());
-                        copyImageFile(selectedImage);
+                        setFileExtemsionFromUri(selectedImage);
+                        setAttachmentSelected(selectedImage);
                     } else {
-                        mUploadFileExtenstion = AttachmentViewerActivity.CONTENT_TYPE_PNG;
-                        setPictureSelected();
+                        setFileExtemsionFromUri(mUriSavedFile);
+                        setAttachmentSelected(mUriSavedFile);
                     }
                 }
                 break;
@@ -348,25 +350,14 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
                     if (mUriSavedFile == null) {
                         setupUploadFile("mp4", false);
                     }
-                    final ContentResolver cr = mActivity.getContentResolver();
                     mUploadFileExtenstion = AttachmentViewerActivity.CONTENT_TYPE_VIDEO_MP4;
                     if (data != null && data.getData() != null) {
                         final Uri selectedVideo = data.getData();
-                        L.d("selectedVideo: " + selectedVideo.toString());
-                        final String fileType = cr.getType(selectedVideo);
-                        L.d("fileType: " + fileType);
-                        if (fileType != null && !AttachmentViewerActivity.CONTENT_TYPE_VIDEO_MP4.equalsIgnoreCase(fileType)) {
-                            L.bug("A video convert is needed for type: " + fileType);
-                        }
-
-                        if (!mUriSavedFile.toString().equalsIgnoreCase(selectedVideo.toString())) {
-                            copyVideoFile(cr, selectedVideo);
-                        } else {
-                            setVideoSelected();
-                        }
-
+                        setFileExtemsionFromUri(selectedVideo);
+                        setAttachmentSelected(selectedVideo);
                     } else {
-                        setVideoSelected();
+                        setFileExtemsionFromUri(mUriSavedFile);
+                        setAttachmentSelected(mUriSavedFile);
                     }
                 }
                 break;
@@ -405,6 +396,43 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
                 }
                 break;
 
+        }
+    }
+
+    private void setFileExtemsionFromUri(Uri file) {
+        L.d("setFileExtemsionFromUri: " + file.toString());
+        final ContentResolver cr = mActivity.getContentResolver();
+        final String fileType = cr.getType(file);
+        L.d("fileType: " + fileType);
+
+        if (fileType == null) {
+            // lets hope it was a correct...
+        } else {
+            if (fileType.toLowerCase(Locale.US).startsWith("image/")) {
+                if (AttachmentViewerActivity.CONTENT_TYPE_PNG.equalsIgnoreCase(fileType)) {
+                    mUploadFileExtenstion = AttachmentViewerActivity.CONTENT_TYPE_PNG;
+                } else {
+                    mUploadFileExtenstion = AttachmentViewerActivity.CONTENT_TYPE_JPEG;
+                }
+            } else if (!AttachmentViewerActivity.CONTENT_TYPE_VIDEO_MP4.equalsIgnoreCase(fileType)) {
+                L.bug("A video convert is needed for type: " + fileType);
+            }
+        }
+    }
+
+    private void setAttachmentSelected(Uri selectedVideo) {
+        if (mUploadFileExtenstion.equals(AttachmentViewerActivity.CONTENT_TYPE_VIDEO_MP4)) {
+            if (!mUriSavedFile.toString().equalsIgnoreCase(selectedVideo.toString())) {
+                copyVideoFile(selectedVideo);
+            } else {
+                setVideoSelected();
+            }
+        } else {
+            if (!mUriSavedFile.toString().equalsIgnoreCase(selectedVideo.toString())) {
+                copyImageFile(selectedVideo);
+            } else {
+                setPictureSelected();
+            }
         }
     }
 
@@ -668,7 +696,9 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
         mActivity.startActivityForResult(chooserIntent, PICK_VIDEO);
     }
 
-    private void copyVideoFile(final ContentResolver cr, final Uri selectedVideo) {
+    private void copyVideoFile(final Uri selectedVideo) {
+        final ContentResolver cr = mActivity.getContentResolver();
+
         final ProgressDialog progressDialog = new ProgressDialog(mActivity);
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progressDialog.setMessage(mActivity.getString(R.string.processing));
