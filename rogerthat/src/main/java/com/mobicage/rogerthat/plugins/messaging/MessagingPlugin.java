@@ -40,6 +40,7 @@ import android.view.ViewGroup;
 
 import com.mobicage.api.messaging.Rpc;
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.AddFriendsActivity;
 import com.mobicage.rogerthat.HomeActivity;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
@@ -422,8 +423,6 @@ public class MessagingPlugin implements MobicagePlugin {
 
     public void showMessage(Context context, Message message, String memberFilter) {
         showMessage(context, message, false, memberFilter);
-        String parentKey = message.parent_key != null ? message.parent_key : message.key;
-        UIUtils.cancelNotification(context, parentKey);
     }
 
     public void showMessage(Context context, Message message, boolean detail, String memberFilter) {
@@ -459,6 +458,8 @@ public class MessagingPlugin implements MobicagePlugin {
                 intent.putExtra(ServiceMessageDetailActivity.TITLE, friendsPlugin.getStore().getName(message.sender));
                 context.startActivity(intent);
 
+                String parentKey = message.parent_key != null ? message.parent_key : message.key;
+                UIUtils.cancelNotification(context, parentKey);
             } else {
                 Intent intent = ServiceThreadActivity.createIntent(context, threadKey, memberFilter,
                     message.parent_key != null);
@@ -650,7 +651,7 @@ public class MessagingPlugin implements MobicagePlugin {
         return mBrandingMgr;
     }
 
-    public void newMessage(MessageTO message, boolean brandingOk, boolean sendUpdateIntentImmediatly) {
+    public void newMessage(final MessageTO message, boolean brandingOk, boolean sendUpdateIntentImmediatly) {
         T.BIZZ();
         if (message.parent_key != null && !brandingOk && !mBrandingMgr.isMessageInBrandingQueue(message.parent_key)) {
             int existence = mStore.getExistence(message.parent_key);
@@ -720,13 +721,18 @@ public class MessagingPlugin implements MobicagePlugin {
         mMainService.sendBroadcast(broadcast, sendUpdateIntentImmediatly, true);
         updateBadge();
 
-        String parentKey = message.parent_key != null ? message.parent_key : message.key;
+        final String parentKey = message.parent_key != null ? message.parent_key : message.key;
         if (senderIsMobileOwner) {
             removeNotificationForThread(parentKey);
         } else {
-            int unreadInThreadCount = mStore.getUnreadMessageCountInThread(parentKey);
-            ArrayList<UnreadMessage> unreadMessages = mStore.getFirstUnreadMessagesInThread(parentKey);
-            updateNotificationForThread(parentKey, message.key, unreadMessages, unreadInThreadCount);
+            final int unreadInThreadCount = mStore.getUnreadMessageCountInThread(parentKey);
+            final ArrayList<UnreadMessage> unreadMessages = mStore.getFirstUnreadMessagesInThread(parentKey);
+            mMainService.runOnUIHandler(new SafeRunnable() {
+                @Override
+                protected void safeRun() throws Exception {
+                    updateNotificationForThread(parentKey, message.key, unreadMessages, unreadInThreadCount);
+                }
+            });
         }
     }
 
@@ -765,14 +771,20 @@ public class MessagingPlugin implements MobicagePlugin {
      */
     private void updateNotificationForThread(String threadKey, String messageKey, ArrayList<UnreadMessage> unreadMessages,
                                              int unreadInThreadCount) {
-        T.BIZZ();
+        T.UI();
         FriendsPlugin friendsPlugin = mMainService.getPlugin(FriendsPlugin.class);
         Bitmap largeIcon;
         // Don't create notification when the currently opened message thread is the same as the thread from the notification
         Activity currentActivity = UIUtils.getTopActivity(mMainService);
         if (currentActivity instanceof FriendsThreadActivity) {
-            FriendsThreadActivity friendsThreadActivity = (FriendsThreadActivity) currentActivity;
-            if (threadKey.equals(friendsThreadActivity.getParentMessageKey())) {
+            FriendsThreadActivity activity = (FriendsThreadActivity) currentActivity;
+            if (!activity.getPaused() && threadKey.equals(activity.getParentMessageKey())) {
+                return;
+            }
+        }
+        if (currentActivity instanceof ServiceMessageDetailActivity) {
+            ServiceMessageDetailActivity activity = (ServiceMessageDetailActivity) currentActivity;
+            if (!activity.getPaused() && threadKey.equals(activity.getParentMessageKey())) {
                 return;
             }
         }
@@ -841,12 +853,16 @@ public class MessagingPlugin implements MobicagePlugin {
         } else {
             UnreadMessage lastMessage = unreadMessages.get(0);
             notificationText = lastMessage.message;
-            longNotificationText.append(notificationText);
             if (TextUtils.isEmptyOrWhitespace(notificationText)) {
                 Message fullMessage = mMainService.getPlugin(MessagingPlugin.class).getStore().getFullMessageByKey(lastMessage.key);
                 notificationText = getMessageTextFromButtonsOrAttachments(fullMessage);
             }
+            longNotificationText.append(notificationText);
             lastSender = lastMessage.friendEmail;
+        }
+
+        if (lastSender == null) {
+            return;
         }
 
         List<NotificationCompat.Action> actionButtons = new ArrayList<>();
