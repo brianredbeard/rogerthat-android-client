@@ -207,6 +207,10 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
         return mStore;
     }
 
+    public boolean isLoadingInitial() {
+        return mIsLoadingInitial;
+    }
+
     public boolean getNews(boolean isRefresh, boolean initial) {
         if (isRefresh) {
             if (mGetNewsCursor != null) {

@@ -332,7 +332,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
         }
 
         swipeContainer.setEnabled(mIsConnectedToInternet);
-        if (!TestUtils.isRunningTest() && mIsConnectedToInternet && newsStore.countNewsItems() == 0) {
+        if (!TestUtils.isRunningTest() && mIsConnectedToInternet && newsPlugin.isLoadingInitial()) {
             swipeContainer.setRefreshing(true);
         }
 
