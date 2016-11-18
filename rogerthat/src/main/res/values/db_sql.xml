@@ -387,7 +387,7 @@ ORDER BY ms.acked_timestamp DESC
       LEFT OUTER JOIN friend ON friend.email = message.sender
     WHERE
       parent_key = ?
-      AND (dirty = 1 or thread_dirty = 1)
+      AND dirty = 1
     ORDER BY timestamp ASC
     LIMIT 5
     </string>

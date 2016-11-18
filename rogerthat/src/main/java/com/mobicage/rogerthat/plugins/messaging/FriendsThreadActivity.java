@@ -185,6 +185,12 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        UIUtils.cancelNotification(this, mParentMessageKey);
+    }
+
+    @Override
     protected void onServiceBound() {
         mMessagingPlugin = mService.getPlugin(MessagingPlugin.class);
         mFriendsPlugin = mService.getPlugin(FriendsPlugin.class);
