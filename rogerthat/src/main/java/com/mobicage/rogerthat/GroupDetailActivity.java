@@ -555,7 +555,7 @@ public class GroupDetailActivity extends ServiceBoundActivity {
                     boolean selected = mGroup.members.contains(friend.email);
                     setViewColors(view, name, selected);
                 }
-            }, mFriendsPlugin, false, null, false);
+            }, mFriendsPlugin, false, null);
 
         mCursorGroups = mFriendsPlugin.getStore().getGroupMemberListCursor(mGroup.guid);
         startManagingCursor(mCursorGroups);

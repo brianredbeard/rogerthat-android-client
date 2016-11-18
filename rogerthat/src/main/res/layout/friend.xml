@@ -68,26 +68,6 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/friend_indicator_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="60dp"
-            android:layout_alignParentRight="true"
-            android:layout_marginTop="5dp"
-            android:gravity="center"
-            android:orientation="horizontal"
-            android:visibility="gone">
-
-            <ImageView
-                android:id="@+id/friend_indicator"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="10dp"
-                app:ico_color="@color/mc_black"
-                app:ico_icon="@string/faw_angle_down"
-                app:ico_size="28dp" />
-        </LinearLayout>
-
-        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignWithParentIfMissing="true"

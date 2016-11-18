@@ -113,7 +113,7 @@ public class UserFriendsActivity extends FriendsActivity {
         startManagingCursor(mCursorFriends);
 
         FriendListAdapter fla = new FriendListAdapter(this, mCursorFriends, mFriendsPlugin.getStore(), null,
-                mFriendsPlugin, false, null, true);
+                mFriendsPlugin, false, null);
         setListAdapter(fla);
     }
 
@@ -189,8 +189,6 @@ public class UserFriendsActivity extends FriendsActivity {
         } else if (tag instanceof Friend) {
             if (mLastExpandedActionView != null) {
                 mLastExpandedActionView.findViewById(R.id.actions).setVisibility(View.GONE);
-                ImageView friendIndicator = (ImageView) mLastExpandedActionView.findViewById(R.id.friend_indicator);
-                friendIndicator.setImageDrawable(new IconicsDrawable(UserFriendsActivity.this).icon(FontAwesome.Icon.faw_angle_down).color(Color.DKGRAY).sizeDp(12));
             }
 
             if (mLastExpandedActionView == listItem) {
@@ -204,12 +202,7 @@ public class UserFriendsActivity extends FriendsActivity {
                     if (x >= 0)
                         listView.setSelection(x);
                 }
-
                 actions.setVisibility(View.VISIBLE);
-
-                ImageView friendIndicator = (ImageView) listItem.findViewById(R.id.friend_indicator);
-                friendIndicator.setImageDrawable(new IconicsDrawable(UserFriendsActivity.this).icon(FontAwesome.Icon.faw_angle_up).color(ContextCompat.getColor(this, R.color.mc_primary_icon)).sizeDp(12));
-
                 mLastExpandedActionView = listItem;
 
                 final Friend friend = (Friend) tag;
