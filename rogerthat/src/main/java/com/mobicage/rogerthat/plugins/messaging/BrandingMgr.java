@@ -224,28 +224,30 @@ public class BrandingMgr implements Pickleable, Closeable {
             this.status = ((Long) source.get("status")).intValue();
             this.brandingKey = (String) source.get("branding");
             switch (this.type) {
-            case TYPE_MESSAGE:
-                object = new Message((Map<String, Object>) source.get("object"));
-                break;
-            case TYPE_FRIEND:
-                object = new FriendTO((Map<String, Object>) source.get("object"));
-                break;
-            case TYPE_GENERIC:
-                object = (IJSONable) source.get("object");
-                break;
-            case TYPE_JS_EMBEDDING_PACKET:
-                object = new JSEmbeddingItemTO((Map<String, Object>) source.get("object"));
-                break;
-            case TYPE_LOCAL_FLOW_ATTACHMENT:
-                object = new StartFlowRequest((Map<String, Object>) source.get("object"));
-                break;
-            case TYPE_LOCAL_FLOW_BRANDING:
-                object = new StartFlowRequest((Map<String, Object>) source.get("object"));
-                break;
-            case TYPE_ATTACHMENT:
-                object = new AttachmentDownload((Map<String, Object>) source.get("object"));
+                case TYPE_MESSAGE:
+                    object = new Message((Map<String, Object>) source.get("object"));
+                    break;
+                case TYPE_FRIEND:
+                    object = new FriendTO((Map<String, Object>) source.get("object"));
+                    break;
+                case TYPE_GENERIC:
+                    object = (IJSONable) source.get("object");
+                    break;
+                case TYPE_JS_EMBEDDING_PACKET:
+                    object = new JSEmbeddingItemTO((Map<String, Object>) source.get("object"));
+                    break;
+                case TYPE_LOCAL_FLOW_ATTACHMENT:
+                    object = new StartFlowRequest((Map<String, Object>) source.get("object"));
+                    break;
+                case TYPE_LOCAL_FLOW_BRANDING:
+                    object = new StartFlowRequest((Map<String, Object>) source.get("object"));
+                    break;
+                case TYPE_ATTACHMENT:
+                    object = new AttachmentDownload((Map<String, Object>) source.get("object"));
+                    break;
                 case TYPE_APP_ASSET:
                     object = new UpdateAppAssetRequestTO((Map<String, Object>) source.get("object"));
+                    break;
             }
             this.calls = new ArrayList<RpcCall>();
             JSONArray val_arr = (JSONArray) source.get("calls");
