@@ -288,17 +288,26 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                         updateView();
                     }
                 } else if (FriendsPlugin.SERVICE_DATA_UPDATED.equals(action)) {
+                    if (mNewsItem.isPartial)
+                        return null;
+
                     String email = intent.getStringExtra("email");
                     if (mNewsItem.sender.email.equals(email)) {
                         updateView();
                     }
 
                 } else if (FriendsPlugin.FRIEND_REMOVED_INTENT.equals(action) || FriendsPlugin.FRIEND_MARKED_FOR_REMOVAL_INTENT.equals(action)) {
+                    if (mNewsItem.isPartial)
+                        return null;
+
                     String email = intent.getStringExtra("email");
                     if (mNewsItem.sender.email.equals(email)) {
                         updateView();
                     }
                 } else if (FriendsPlugin.FRIEND_ADDED_INTENT.equals(action)) {
+                    if (mNewsItem.isPartial)
+                        return null;
+
                     String email = intent.getStringExtra("email");
 
                     if (mActivity.expectedEmailHash != null && mActivity.expectedEmailHash.equals(email)) {
@@ -422,11 +431,17 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 updateNewsItem();
                 populateView();
             } else if (UPDATE_CAUSE_FOLLOW.equals(updateType)) {
+                if (mNewsItem.isPartial)
+                    return;
                 final int existenceStatus = mFriendsPlugin.getStore().getExistence(mNewsItem.sender.email);
                 setupButtons(existenceStatus);
             } else if (UPDATE_CAUSE_REACH.equals(updateType)) {
+                if (mNewsItem.isPartial)
+                    return;
                 updateReach();
             } else if (UPDATE_CAUSE_ROGER.equals(updateType)) {
+                if (mNewsItem.isPartial)
+                    return;
                 updateNewsItem();
                 setupRogeredUsers();
 
