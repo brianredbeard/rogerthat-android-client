@@ -61,7 +61,10 @@
         android:layout_marginTop="16dp"
         android:scaleType="centerInside"
         android:textSize="14sp"
+        android:maxLines="1"
         android:theme="@style/ButtonTheme"
+        android:minWidth="100dp"
+        android:maxWidth="200dp"
         tools:text="Add" />
 
 </RelativeLayout>

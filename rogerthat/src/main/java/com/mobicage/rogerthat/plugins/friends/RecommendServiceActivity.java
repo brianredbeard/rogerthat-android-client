@@ -504,7 +504,6 @@ public class RecommendServiceActivity extends ServiceBoundActivity {
                 }
             }
         });
-        btn.getLayoutParams().width = UIUtils.convertDipToPixels(this, 100);
         btn.setTextSize(12);
     }
 
