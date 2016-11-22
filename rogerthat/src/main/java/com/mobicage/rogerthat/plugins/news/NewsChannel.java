@@ -218,7 +218,9 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         } else {
             sslCtx = null;
         }
-        mEventLoopGroup = new NioEventLoopGroup();
+        if (mEventLoopGroup == null) {
+            mEventLoopGroup = new NioEventLoopGroup();
+        }
         Bootstrap b = new Bootstrap();
         b.group(mEventLoopGroup)
                 .channel(NioSocketChannel.class)
