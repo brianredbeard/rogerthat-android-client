@@ -588,7 +588,7 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
 
         if (friend.existenceStatus == Friend.NOT_FOUND || friend.existenceStatus == Friend.INVITE_PENDING) {
             final Button pokeBtn = (Button) findViewById(R.id.poke_button);
-            pokeBtn.setText(R.string.connect_service_now);
+            pokeBtn.setText(R.string.follow);
             pokeBtn.setOnClickListener(new SafeViewOnClickListener() {
                 @Override
                 public void safeOnClick(View v) {

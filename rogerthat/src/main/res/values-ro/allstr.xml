@@ -81,8 +81,6 @@
     <string name="compose_short">Compune</string>
     <string name="configure_new_canned_message">Creati un mesaj nou standard</string>
     <string name="confirm_remove_friend">Vreti sa ii dati unfriend lui %1$s?</string>
-    <string name="confirm_remove_service">Vreti sa va deconectati de la serviciul %1$s?</string>
-    <string name="connect_service_now">Conectati-va</string>
     <string name="contacts">Contacte</string>
     <string name="contacts_found_1">1 contact pe %1$s</string>
     <string name="contacts_found_more">%1$d contacte in %2$s</string>
@@ -107,7 +105,6 @@
     <string name="device_was_unregistered">Dispozitivul a fost neinregistrat.</string>
     <string name="dialog_request_location_sharing">%1$s nu a permis distribuirea locatiei cu tine.\nDoriti sa trimiteti o solicitare pentru a permite partajarea locatiei?</string>
     <string name="disabled">Dezactivat</string>
-    <string name="discover_services_long">Conecteaza-te la serviciile %1$s</string>
     <string name="discover_services_short">Descopera serviciile</string>
     <string name="dismissed_at">Recunoscut %1$s.</string>
     <string name="dont_like">Nu imi face placere</string>
@@ -222,7 +219,6 @@
     <string name="location_usage_services_area">Gasiti servicii pentru clienti in zona dumneavoastra.</string>
     <string name="location_usage_store">Stocati locatia dvs.</string>
     <string name="location_usage_track_location_without_concent">Urmariti locatia dumneavoastra fara consimtamantul dumneavoastra prealabil.</string>
-    <string name="location_usage_used_for">%1$s utilizeaza locatia dvs. la:</string>
     <string name="locking">Mesaje blocate, va rugam asteptati…</string>
     <string name="logs_forwarded">Jurnalele %2$s sunt transmise la %1$s.</string>
     <string name="loyalty_card_description">Cardul dvs. %1$s de loialitate\n\nScaneaza pentru a câștiga puncte de loialitate\nScaneaza pentru a te conecta cu prietenii</string>
@@ -352,8 +348,6 @@
     <string name="registration_welcome">Bine ati venit la %1$s!</string>
     <string name="remove_canned_button">Vreti sa stergeti butonul \"%1$s\" din lista?</string>
     <string name="remove_friend">Nu-ti mai este prieten</string>
-    <string name="remove_service">Serviciu de deconectare</string>
-    <string name="remove_service_confirm_button">Deconectati</string>
     <string name="repair">Reparație</string>
     <string name="replied_at">A raspuns %1$s la %2$s.</string>
     <string name="reply">Raspuns</string>
@@ -364,7 +358,6 @@
     <string name="retry">Reîncercați</string>
     <string name="rogerthat">Roger that</string>
     <string name="rogerthat_system">Sistemul Rogerthat</string>
-    <string name="rogerthat_welcome">Bine ati venit la %1$s. App dvs. pentru a va conecta cu furnizorii de servicii si sa le distribuiti cu prietenii. \n\nInainte de a incepe trebuie sa va inregistrati. Apasati butonul verde pentru a continua.</string>
     <string name="rogerthat_welcome_enterprise">Bine ati venit in aplicatia %1$s. \n\nInainte de a putea incepe, trebuie sa va inregistrati contul dvs. de utilizator.</string>
     <string name="save">Salveaza</string>
     <string name="save_canned_message_dialog_title">Furniza un nume pentru mesajele salvate</string>
@@ -393,7 +386,6 @@
     <string name="sent_at">Trimis la %1$s.</string>
     <string name="service_recommendation_sent">Recomandarea a fost trimisa.</string>
     <string name="service_remove_failed">Eroare in timpul trimiterii.</string>
-    <string name="servicefriends_getting_started_msg">Conectati-va la noi servicii, atingand \'%1$s\'</string>
     <string name="settings">Setari</string>
     <string name="settings_category_info">Informatii generale</string>
     <string name="settings_title">Setari Rogerthat</string>

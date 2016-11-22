@@ -73,7 +73,7 @@ public class FakeNewsActivity extends NewsActivity {
         int now = (int) System.currentTimeMillis();
         NewsActionButtonTO actionButton = new NewsActionButtonTO();
         actionButton.action = "https://google.com";
-        actionButton.caption = getString(R.string.action_button);
+        actionButton.caption = "Website";
         actionButton.id = "action_button";
         actionButton.flow_params = null;
         NewsActionButtonTO[] actionButtons = new NewsActionButtonTO[]{actionButton};

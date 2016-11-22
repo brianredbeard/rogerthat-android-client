@@ -10,7 +10,6 @@
     <string name="about_text">Rogerthat is een product van Mobicage.\n\nFeedback, support en in-browser messaging vind je op</string>
     <string name="about_version">Versie 1.%1$d.%2$d.A</string>
     <string name="about_version_debug">Versie 1.%1$d.%2$d.AD (debug)</string>
-    <string name="action_button">Actie knop</string>
     <string name="action_geo">geo</string>
     <string name="action_not_valid">Ongeldige actie.</string>
     <string name="action_scheduled">Het netwerk is traag. Je krijgt zo snel mogelijk een bericht.</string>
@@ -41,7 +40,7 @@
     <string name="add_via_contacts_description">Contacten zoeken die reeds %1$s gebruiken</string>
     <string name="add_via_contacts_notification">Resultaten ontvangen van het zoeken naar contactpersonen die %1$s gebruiken.</string>
     <string name="add_via_contacts_waiting">Je ontvangt een notificatie van zodra jouw contacten gescand zijn.</string>
-    <string name="add_via_email_description">Geef het e-mailadres van de gebruiker die je wenst uit te nodigen</string>
+    <string name="add_via_email_description">Geef het e-mailadres in van de persoon die je wil uitnodigen</string>
     <string name="add_via_facebook_description">Facebook vrienden zoeken die %1$s gebruiken</string>
     <string name="add_via_facebook_notification">Resultaten ontvangen van het zoeken naar Facebook vrienden die %1$s gebruiken.</string>
     <string name="add_via_facebook_waiting">Je ontvangt een notificatie van zodra we jouw Facebook vrienden gescand hebben.</string>
@@ -88,8 +87,7 @@
     <string name="compose_short">Nieuw bericht</string>
     <string name="configure_new_canned_message">Schrijf nieuw standaard bericht</string>
     <string name="confirm_remove_friend">Wil je %1$s verwijderen als vriend?</string>
-    <string name="confirm_remove_service">Wil je dienst %1$s afkoppelen?</string>
-    <string name="connect_service_now">Koppelen</string>
+    <string name="confirm_remove_service">Wil je dienst %1$s ontvolgen?</string>
     <string name="contacts">Contacten</string>
     <string name="contacts_found_1">1 contact gebruikt %1$s</string>
     <string name="contacts_found_more">%1$d contacten gebruiken %2$s</string>
@@ -115,7 +113,6 @@
     <string name="device_was_unregistered">Dit toestel is niet langer geregistreerd.</string>
     <string name="dialog_request_location_sharing">%1$s deelt zijn locatie niet met jou.\n\nWens je een aanvraag tot delen te versturen ?</string>
     <string name="disabled">Uitgeschakeld</string>
-    <string name="discover_services_long">Verbinden met %1$s diensten</string>
     <string name="discover_services_short">Diensten ontdekken</string>
     <string name="dismissed_at">Bevestigd: %1$s.</string>
     <string name="do_you_want_to_follow_service">Wens je %1$s te volgen?</string>
@@ -238,7 +235,6 @@
     <string name="location_usage_services_area">Vinden van mobiele diensten in uw omgeving.</string>
     <string name="location_usage_store">Uw locatie opslaan.</string>
     <string name="location_usage_track_location_without_concent">Uw locatie opvragen zonder uw voorafgaande toestemming.</string>
-    <string name="location_usage_used_for">%1$s gebruikt uw locatie voor:</string>
     <string name="locking">Bericht verzegelen…</string>
     <string name="logs_forwarded">Uw %2$s logs worden doorgezonden naar %1$s.</string>
     <string name="loyalty_card_description">Uw %1$s klantenkaart\n\nScan en spaar bij elke handelaar\nScan om vrienden toe te voegen</string>
@@ -402,8 +398,7 @@
     <string name="registration_welcome_text">Welkom in de %1$s app. De app waarmee je verbinding met je dienstverleners maakt en hen met je vrienden deelt.\n\nVoor je van start kunt gaan, moet je je even registreren. Tik op de knop \'Aanvaarden &amp; doorgaan\' om verder te gaan.</string>
     <string name="remove_canned_button">Wenst u antwoordknop \"%1$s\" te verwijderen?</string>
     <string name="remove_friend">Verwijder als vriend</string>
-    <string name="remove_service">Dienst afkoppelen</string>
-    <string name="remove_service_confirm_button">Afkoppelen</string>
+    <string name="remove_service">Dienst ontvolgen</string>
     <string name="remove_this_from_your_saved_items">Verwijder dit uit je opgeslagen items</string>
     <string name="repair">Herstellen</string>
     <string name="replied_at">Antwoord %1$s verstuurd om %2$s.</string>
@@ -415,7 +410,6 @@
     <string name="retry">Opnieuw proberen</string>
     <string name="rogerthat">Roger that</string>
     <string name="rogerthat_system">Rogerthat Systeem</string>
-    <string name="rogerthat_welcome">Welkom bij %1$s. Uw applicatie om met mobiele diensten te verbinden en te delen met vrienden.\n\nVoordat u van start kunt moet je eerst registreren. Druk op de groene knop om door te gaan.</string>
     <string name="rogerthat_welcome_enterprise">Welkom bij de %1$s app. \n\nVoordat u van start kunt moet je eerst uw account registreren.</string>
     <string name="sample_news_item_message_1">Nieuwsberichten zijn een fijne manier om je klanten te bereiken.</string>
     <string name="sample_news_item_message_2">Laat je mobiele getrouwheidskaart aan de kassa scannen en win een 3-gangenmenu voor 2 personen.</string>
@@ -453,7 +447,6 @@
     <string name="sent_at">Verzonden: %1$s.</string>
     <string name="service_recommendation_sent">De aanbeveling is verzonden.</string>
     <string name="service_remove_failed">Fout tijdens verzenden.</string>
-    <string name="servicefriends_getting_started_msg">Koppel nieuwe diensten aan door the klikken op \'%1$s\'</string>
     <string name="settings">Instellingen</string>
     <string name="settings_category_info">Algemene informatie</string>
     <string name="settings_title">Rogerthat Instellingen</string>
@@ -512,6 +505,7 @@
     <string name="unable_to_create_attachment_directory">Kon de bijlage niet opslaan. Zorg dat er vrije ruimte is op uw SD card.</string>
     <string name="unable_to_create_images_directory">Kon de %1$s images map niet aanmaken.</string>
     <string name="unable_to_read_write_sd_card">Er is een fout opgetreden. Zorg dat er vrije ruimte is op uw SD card.</string>
+    <string name="unfollow">Ontvolgen</string>
     <string name="unknown">Onbekend</string>
     <string name="unrecognized_scan_result">Er is een fout gebeurd tijdens de verwerking.</string>
     <string name="unsave">Opslaan ongedaan maken</string>

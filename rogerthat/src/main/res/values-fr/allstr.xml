@@ -87,8 +87,6 @@
     <string name="compose_short">Nouveau message</string>
     <string name="configure_new_canned_message">Créer un nouveau message standard</string>
     <string name="confirm_remove_friend">Voulez-vous vraiment ne plus être l\'ami de %1$s?</string>
-    <string name="confirm_remove_service">Voulez-vous vraiment vous déconnecter du service %1$s?</string>
-    <string name="connect_service_now">Se connecter</string>
     <string name="contacts">Contacts</string>
     <string name="contacts_found_1">1 contact utilise %1$s</string>
     <string name="contacts_found_more">%1$d contacts utilisant %2$s</string>
@@ -114,7 +112,6 @@
     <string name="device_was_unregistered">Cet appareil n\'est plus enregistré.</string>
     <string name="dialog_request_location_sharing">%1$s n\'a pas partagé sa position avec vous.\n\nVoulez-vous envoyer une demande pour partager sa position?</string>
     <string name="disabled">Désactivé</string>
-    <string name="discover_services_long">Se connecter aux services %1$s</string>
     <string name="discover_services_short">Découvrir les services</string>
     <string name="dismissed_at">Accusé réception %1$s.</string>
     <string name="dont_like">Je n\'aime pas</string>
@@ -188,6 +185,7 @@
     <string name="hide_detail">Masquer les éléments \'%1$s\' de %2$s</string>
     <string name="high">Elevé</string>
     <string name="hint_broadcast">Vérifiez la barre inférieure pour voir pourquoi vous avez reçu ce message.\n\nRemarque: Vous pouvez vous désinscrire en utilisant \'Réglages de notification\' si vous ne voulez pas \'%1$s\' des messages de %2$s plus.</string>
+    <string name="hint_broadcast_icon">Appuyez sur cette icône en haut à droite pour sélectionner les messages de %1$s que vous ne souhaitez plus recevoir.</string>
     <string name="hint_double_tap">Double-cliquez pour répondre</string>
     <string name="hint_swipe">Glissez votre doigt pour ouvrir une autre conversation</string>
     <string name="ibeacon_usage_augment_experience">%1$@ utilise des iBeacons afin d\'améliorer votre expérience utilisateur.</string>
@@ -235,7 +233,6 @@
     <string name="location_usage_services_area">Encuentre servicios móviles en su área.</string>
     <string name="location_usage_store">Sauvegarder votre position.</string>
     <string name="location_usage_track_location_without_concent">Repérer votre position sans votre consentement préalable.</string>
-    <string name="location_usage_used_for">%1$s utilise votre position pour:</string>
     <string name="locking">En train de verrouiller le message, prière d\'attendre…</string>
     <string name="logs_forwarded">Vos rapports sur %2$s sont transférés vers %1$s.</string>
     <string name="loyalty_card_description">Votre carte de fidélité de l\'application %1$s\n\n\n\nScanner pour gagner des points de fidélité\n\nScanner pour se connecter avec des amis</string>
@@ -399,8 +396,7 @@
     <string name="registration_welcome_text">Bienvenue dans l\'application %1$s, l\'application pour vous connecter à vos fournisseurs de services et les partager avec vos amis.\n\nAvant de commencer, veuillez vous inscrire. Appuyez sur le bouton \"Accepter et continuer\" pour continuer.</string>
     <string name="remove_canned_button">Est-ce-que vous voulez supprimer le bouton « %1$s » de la liste?</string>
     <string name="remove_friend">Ne plus être ami</string>
-    <string name="remove_service">Déconnecter service</string>
-    <string name="remove_service_confirm_button">Déconnecter</string>
+    <string name="remove_service">Désabonner service</string>
     <string name="remove_this_from_your_saved_items">Retirer cet élément de vos éléments sauvegardés</string>
     <string name="repair">Réparation</string>
     <string name="replied_at">Répondu %1$s à %2$s.</string>
@@ -412,7 +408,6 @@
     <string name="retry">Réessayez</string>
     <string name="rogerthat">Roger that</string>
     <string name="rogerthat_system">Système Rogerthat</string>
-    <string name="rogerthat_welcome">Bienvenue sur %1$s. L\'application pour se connecter à vos services et les partager avec vos amis.\n\nAvant de commencer, vous devez vous inscrire. Appuyez sur la touche verte pour continuer.</string>
     <string name="rogerthat_welcome_enterprise">Bienvenue sur  l\'application %1$s. \n\nAvant de commencer, merci de vous inscrire.</string>
     <string name="sample_news_item_message_1">Les nouvelles sont une bonne façon de toucher vos clients.</string>
     <string name="sample_news_item_message_2">Numérisez votre carte de fidélité mobile à la caisse et tentez de remporter un dîner 3 services pour 2 personnes.</string>
@@ -450,7 +445,6 @@
     <string name="sent_at">Envoyé à: %1$s.</string>
     <string name="service_recommendation_sent">La recommandation est envoyée.</string>
     <string name="service_remove_failed">Impossible d\'envoyer l\'action de suppression du service au serveur.</string>
-    <string name="servicefriends_getting_started_msg">Se connecter aux nouveaux services en cliquant sur \'%1$s\'</string>
     <string name="settings">Configuration</string>
     <string name="settings_category_info">Information générale</string>
     <string name="settings_title">Configuration</string>
@@ -509,6 +503,7 @@
     <string name="unable_to_create_attachment_directory">Impossible de créer l\'attachement. Vérifiez la disponibilité de votre carte SD.</string>
     <string name="unable_to_create_images_directory">Impossible de créer un répertoire d\'images %1$s.</string>
     <string name="unable_to_read_write_sd_card">Une erreur s\'est produite. Vérifiez la disponibilité de votre carte SD.</string>
+    <string name="unfollow">Désabonner</string>
     <string name="unknown">Inconnu</string>
     <string name="unrecognized_scan_result">Le contenu du résultat scanné n\'est pas reconnu.</string>
     <string name="unsave">Effacer</string>

@@ -1155,7 +1155,7 @@ public class FriendsPlugin implements MobicagePlugin {
         final boolean isService = friend.type == FriendsPlugin.FRIEND_TYPE_SERVICE;
         final int title = isService ? R.string.remove_service : R.string.remove_friend;
         final int message = isService ? R.string.confirm_remove_service : R.string.confirm_remove_friend;
-        final int positiveBtn = isService ? R.string.remove_service_confirm_button : R.string.remove_friend;
+        final int positiveBtn = isService ? R.string.unfollow : R.string.remove_friend;
         new AlertDialog.Builder(activity).setTitle(title)
             .setMessage((activity.getString(message, friend.getDisplayName())))
             .setPositiveButton(positiveBtn, new DialogInterface.OnClickListener() {

@@ -37,7 +37,6 @@
     <string name="add_via_contacts_description">Encontrar contatos telefônicos pelo %1$s</string>
     <string name="add_via_contacts_notification">Resultado da pesquisa de contatos que usam %1$s.</string>
     <string name="add_via_contacts_waiting">Você receberá uma notificação quando seu catálogo de endereços for escaneado</string>
-    <string name="add_via_email_description">Inserir o endereço de e-mail da pessoa que deseja convidar</string>
     <string name="add_via_facebook_description">Encontrar amigos do Facebook pelo %1$s</string>
     <string name="add_via_facebook_notification">Resultado da pesquisa de amigos do Facebook %1$s.</string>
     <string name="add_via_facebook_waiting">Você receberá uma notificação quando seus amigos do Facebook forem escaneados.</string>
@@ -73,8 +72,6 @@
     <string name="compose_short">Criar</string>
     <string name="configure_new_canned_message">Criar nova mensagem predeterminada</string>
     <string name="confirm_remove_friend">Deseja realmente desfazer amizade com %1$s?</string>
-    <string name="confirm_remove_service">Deseja realmente se desconectar do serviço %1$s?</string>
-    <string name="connect_service_now">Conectar-se</string>
     <string name="contacts">Contatos</string>
     <string name="contacts_found_1">1 contato no %1$s</string>
     <string name="contacts_found_more">%1$d contatos no %2$s</string>
@@ -97,7 +94,6 @@
     <string name="device_was_unregistered">O dispositivo não estava registrado.</string>
     <string name="dialog_request_location_sharing">%1$s não habilitou o compartilhamento de localização com você.\n\nDeseja enviar uma solicitação para habilitar o compartilhamento de localização?</string>
     <string name="disabled">Desabilitado</string>
-    <string name="discover_services_long">Conectar-se aos serviços de %1$s </string>
     <string name="discover_services_short">Encontrar serviços</string>
     <string name="dismissed_at">%1$s recebido.</string>
     <string name="dont_like">Não curti</string>
@@ -206,7 +202,6 @@
     <string name="location_usage_services_area">Encontrar serviços ao consumidor na sua área.</string>
     <string name="location_usage_store">Guardar sua localização.</string>
     <string name="location_usage_track_location_without_concent">Rastrear sua localização sem consentimento prévio.</string>
-    <string name="location_usage_used_for">%1$s utiliza sua localização para:</string>
     <string name="locking">Bloqueando mensagem, aguarde… </string>
     <string name="logs_forwarded">Seus logs %2$s estão sendo enviados para %1$s.</string>
     <string name="loyalty_card_description">Seu cartão de fidelidade %1$s \n\nEscanear para ganhar pontos de fidelidade\nEscanear para se conectar com amigos</string>
@@ -324,8 +319,6 @@
     <string name="registration_welcome">Bem-vindo a %1$s!</string>
     <string name="remove_canned_button">Deseja remover o botão \"%1$s\" da lista?</string>
     <string name="remove_friend">Desfazer amizade</string>
-    <string name="remove_service">Desconectar serviço</string>
-    <string name="remove_service_confirm_button">Desconectar</string>
     <string name="replied_at">%1$s respondida às %2$s.</string>
     <string name="reply">Resposta</string>
     <string name="report_card">Relatório</string>
@@ -333,7 +326,6 @@
     <string name="retrieving_information">Recuperando informações do servidor…</string>
     <string name="rogerthat">Rogerthat</string>
     <string name="rogerthat_system">Sistema Rogerthat</string>
-    <string name="rogerthat_welcome">Bem-vindo a %1$s. Seu aplicativo para conectar-se com seus prestadores de serviços e compartilhá-los com seus amigos.\n\nAntes de começar, você deve registrar-se. Toque o botão verde para continuar.</string>
     <string name="rogerthat_welcome_enterprise">Bem-vindo ao aplicativo %1$s.\n\nAntes de começar, você precisa registrar sua conta de usuário.</string>
     <string name="save">Salvar</string>
     <string name="save_canned_message_dialog_title">Dê um nome para as mensagens salvas</string>
@@ -360,7 +352,6 @@
     <string name="sent_at">Enviado às %1$s.</string>
     <string name="service_recommendation_sent">A recomendação foi enviada.</string>
     <string name="service_remove_failed">Não foi possível enviar a ação \"remover serviço\" ao servidor.</string>
-    <string name="servicefriends_getting_started_msg">Conectar-se aos novos serviços pulsando \'%1$s\'</string>
     <string name="settings">Configurações</string>
     <string name="settings_category_info">Informações gerais</string>
     <string name="settings_title">Configurações de Rogerthat</string>

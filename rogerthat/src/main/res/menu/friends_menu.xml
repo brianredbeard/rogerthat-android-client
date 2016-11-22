@@ -12,9 +12,4 @@
         app:showAsAction="ifRoom"
         android:title="@string/friends_map" />
 
-    <item
-        android:id="@+id/help"
-        app:showAsAction="never"
-        android:title="@string/help" />
-
 </menu>

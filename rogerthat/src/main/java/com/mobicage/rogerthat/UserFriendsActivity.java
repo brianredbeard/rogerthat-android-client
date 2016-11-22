@@ -307,7 +307,7 @@ public class UserFriendsActivity extends FriendsActivity {
 
     @Override
     protected String getHelpMessage() {
-        return getString(R.string.userfriends_getting_started_msg, getString(R.string.app_name));
+        return null;
     }
 
     @Override
@@ -347,9 +347,6 @@ public class UserFriendsActivity extends FriendsActivity {
         switch (item.getItemId()) {
             case R.id.find_friends:
                 startActivity(new Intent(this, AddFriendsActivity.class));
-                return true;
-            case R.id.help:
-                showHelp();
                 return true;
             case R.id.friend_map:
                 startActivity(new Intent(UserFriendsActivity.this, FriendsLocationActivity.class));

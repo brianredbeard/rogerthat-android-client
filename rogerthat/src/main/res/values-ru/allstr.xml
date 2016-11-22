@@ -39,7 +39,6 @@
     <string name="add_via_contacts_description">Найти телефонные контакты, которые используют %1$s</string>
     <string name="add_via_contacts_notification">Результаты поиска контактов, использующих %1$s.</string>
     <string name="add_via_contacts_waiting">Когда ваша адресная книга будет сканирована, вы получите уведомление.</string>
-    <string name="add_via_email_description">Введите адрес эл. почты человека, которого вы хотите пригласить</string>
     <string name="add_via_facebook_description">Найти друзей с Facebook, использующих %1$s</string>
     <string name="add_via_facebook_notification">Результаты поиска друзей с Facebook, использующих %1$s.</string>
     <string name="add_via_facebook_waiting">Когда ваши друзья на Facebook будут сканированы, вы получите уведомление.</string>
@@ -86,8 +85,6 @@
     <string name="compose_short">Написать</string>
     <string name="configure_new_canned_message">Создать новое стандартное сообщение</string>
     <string name="confirm_remove_friend">Вы действительно хотите удалить %1$s из списка друзей?</string>
-    <string name="confirm_remove_service">Вы действительно хотите отключиться от услуги %1$s?</string>
-    <string name="connect_service_now">Подключиться</string>
     <string name="contacts">Контакты</string>
     <string name="contacts_found_1">1 контакт на %1$s</string>
     <string name="contacts_found_more">Контактов на %2$s: %1$d </string>
@@ -113,7 +110,6 @@
     <string name="device_was_unregistered">Регистрация устройства была отменена.</string>
     <string name="dialog_request_location_sharing">%1$s не активировал(а) обмен информацией о позиционировании с вами.\n\nХотите отправить запрос на активацию обмена информацией о позиционировании?</string>
     <string name="disabled">Отключено</string>
-    <string name="discover_services_long">Подключиться к услугам %1$s</string>
     <string name="discover_services_short">Найти услуги</string>
     <string name="dismissed_at">Подтверждено %1$s.</string>
     <string name="dont_like">Не нравится</string>
@@ -233,7 +229,6 @@
     <string name="location_usage_services_area">Найти службы поддержки в вашем районе.</string>
     <string name="location_usage_store">Сохраните ваше местоположение</string>
     <string name="location_usage_track_location_without_concent">Отслеживать мое местоположение без предварительного согласия</string>
-    <string name="location_usage_used_for">%1$s использует ваше местоположение, чтобы:</string>
     <string name="locking">Пожалуйста, подождите, выполняется блокировка сообщения…</string>
     <string name="logs_forwarded">Ваши журналы %2$s перенаправлены %1$s.</string>
     <string name="loyalty_card_description">Ваша карта лояльности %1$s\n\nСканируйте, чтобы заработать баллы лояльности\nСканируйте, чтобы найти друзей</string>
@@ -395,8 +390,6 @@
     <string name="registration_welcome_text">Добро пожаловать в %1$s App. Ваше приложение для связи с поставщиками услуг и отправления рекомендаций друзьям.\n\nЧтобы начать работу, вам необходимо зарегистрироваться. Чтобы продолжить, нажмите на кнопку «Принять и продолжить».</string>
     <string name="remove_canned_button">Вы хотите удалить кнопку «%1$s» из списка?</string>
     <string name="remove_friend">Удалить из списка друзей</string>
-    <string name="remove_service">Отключить услугу</string>
-    <string name="remove_service_confirm_button">Отключить</string>
     <string name="remove_this_from_your_saved_items">Удалить это из ваших сохраненных элементов</string>
     <string name="repair">Ремонт</string>
     <string name="replied_at">Ответ %1$s отправлен в %2$s.</string>
@@ -408,7 +401,6 @@
     <string name="retry">Повторить попытку</string>
     <string name="rogerthat">Так точно</string>
     <string name="rogerthat_system">Система Rogerthat</string>
-    <string name="rogerthat_welcome">Добро пожаловать в %1$s — ваше приложение для связи с поставщиками услуг и отправления рекомендаций друзьям.\n\nЧтобы начать работу, вам необходимо зарегистрироваться. Чтобы продолжить, нажмите на кнопку «Принять».</string>
     <string name="rogerthat_welcome_enterprise">Добро пожаловать в приложение %1$s.\n\nЧтобы начать работу, вам необходимо зарегистрировать ваш аккаунт пользователя.</string>
     <string name="sample_news_item_message_1">Новости — хороший способ привлечь внимание клиентов.</string>
     <string name="sample_news_item_message_2">Придите и добавьте баллы на вашу мобильную карту лояльности, чтобы выиграть бесплатный ужин из 3 блюд для 2 персон.</string>
@@ -446,7 +438,6 @@
     <string name="sent_at">Отправлено в %1$s.</string>
     <string name="service_recommendation_sent">Рекомендация отправлена.</string>
     <string name="service_remove_failed">Не удалось отправить действие удаления услуги на сервер.</string>
-    <string name="servicefriends_getting_started_msg">Подключитесь к новым услугам, нажав %1$s</string>
     <string name="settings">Настройки</string>
     <string name="settings_category_info">Общая информация</string>
     <string name="settings_title">Настройки Rogerthat</string>

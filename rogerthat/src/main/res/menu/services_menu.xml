@@ -7,9 +7,4 @@
         app:showAsAction="ifRoom"
         android:title="@string/discover_services_short"/>
 
-    <item
-        android:id="@+id/help"
-        app:showAsAction="never"
-        android:title="@string/help"/>
-
 </menu>

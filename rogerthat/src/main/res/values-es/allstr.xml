@@ -38,7 +38,7 @@
     <string name="add_via_contacts_description">Encontrar contactos que ya usen %1$s desde la agenda de su teléfono</string>
     <string name="add_via_contacts_notification">Resultado de la búsqueda de contactos mediante %1$s.</string>
     <string name="add_via_contacts_waiting">Recibirás una notificación cuando tu libreta de direcciones sea comprobada.</string>
-    <string name="add_via_email_description">Escribe la dirección de correo electrónico del usuario con el que deseas conectarse</string>
+    <string name="add_via_email_description">Escribe la dirección de correo electrónico de la persona a quién deseas invitar</string>
     <string name="add_via_facebook_description">Encontrar contactos de Facebook a través de %1$s</string>
     <string name="add_via_facebook_notification">Resultado de la búsqueda de contactos de Facebook mediante %1$s.</string>
     <string name="add_via_facebook_waiting">Recibirás una notificación cuando tus contactos de Facebook sean comprobados.</string>
@@ -81,8 +81,6 @@
     <string name="compose_short">Redactar</string>
     <string name="configure_new_canned_message">Crear un borrador de mensaje</string>
     <string name="confirm_remove_friend">¿Está seguro que desea desvincular a %1$s?</string>
-    <string name="confirm_remove_service">¿Está seguro que desea desvincularse del servicio %1$s?</string>
-    <string name="connect_service_now">Agregar este servicio</string>
     <string name="contacts">Contactos</string>
     <string name="contacts_found_1">1 contacto en %1$s</string>
     <string name="contacts_found_more">%1$d contactos en %2$s</string>
@@ -107,7 +105,6 @@
     <string name="device_was_unregistered">El dispositivo ha sido desconectado.</string>
     <string name="dialog_request_location_sharing">%1$s no permite compartir su ubicación contigo.\n\n¿Deseas enviar una solicitud para que habilite la compartición de su ubicación?</string>
     <string name="disabled">Discapacidad</string>
-    <string name="discover_services_long">Pulsa aquí para elegir tus servicios favoritos</string>
     <string name="discover_services_short">Añadir nuevo</string>
     <string name="dismissed_at">%1$s admitido.</string>
     <string name="dont_like">No me gusta</string>
@@ -223,7 +220,6 @@
     <string name="location_usage_services_area">Encuentre servicios móviles en su área</string>
     <string name="location_usage_store">Almacene su ubicación</string>
     <string name="location_usage_track_location_without_concent">Seguimiento de su ubicación sin su consentimiento previo</string>
-    <string name="location_usage_used_for">%1$s utiliza su ubicación para:</string>
     <string name="locking">Cerrando mensaje. Por favor, espere…</string>
     <string name="logs_forwarded">Sus reportes de %2$s han sido enviados a %1$s.</string>
     <string name="loyalty_card_description">Tu tarjeta de lealtad de %1$s\n\nEscanea para obtener puntos de lealtad\nEscanea para conectar con amigos</string>
@@ -362,8 +358,6 @@
     <string name="registration_welcome">Bienvenido/a a %1$s!</string>
     <string name="remove_canned_button">¿Desea eliminar el botón \"%1$s\" de la lista?</string>
     <string name="remove_friend">Desvincular</string>
-    <string name="remove_service">Desconectar servicio</string>
-    <string name="remove_service_confirm_button">Desconectar</string>
     <string name="repair">Reparar</string>
     <string name="replied_at">%1$s respondió a las %2$s.</string>
     <string name="reply">Responder</string>
@@ -374,7 +368,6 @@
     <string name="retry">Rever</string>
     <string name="rogerthat">Entendido</string>
     <string name="rogerthat_system">Sistema Rogerthat</string>
-    <string name="rogerthat_welcome">Bienvenido a %1$s. Tu aplicación para conectar con tus tiendas, proveedores y servicios favoritos y compartirlos con tus amigos.\n\nAntes de empezar es necesario registrarse. Pulse el botón verde para continuar.</string>
     <string name="rogerthat_welcome_enterprise">Bienvenido a la aplicación de %1$s.\n\nAntes de empezar es necesario registrarse en su cuenta.</string>
     <string name="sample_news_item_sender_1">servicio ejemplo</string>
     <string name="save">Guardar</string>
@@ -405,7 +398,6 @@
     <string name="sent_at">Enviado: %1$s.</string>
     <string name="service_recommendation_sent">La recomendación ha sido enviada.</string>
     <string name="service_remove_failed">No se puede enviar la eliminación del servicio al servidor.</string>
-    <string name="servicefriends_getting_started_msg">Conéctese a un nuevo servicio seleccionándo \'%1$s\'</string>
     <string name="settings">Ajustes</string>
     <string name="settings_category_info">Información general</string>
     <string name="settings_title">Ajustes de Rogerthat</string>

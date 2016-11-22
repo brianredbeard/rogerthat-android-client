@@ -132,7 +132,7 @@ public class InviteFriendActivity extends ServiceBoundActivity {
 
             final Button inviteButton = ((Button) findViewById(R.id.invite_friend_button));
             if (mFriend.type == FriendsPlugin.FRIEND_TYPE_SERVICE) {
-                inviteButton.setText(R.string.connect_service_now);
+                inviteButton.setText(R.string.follow);
             } else {
                 final int text;
                 switch (AppConstants.FRIENDS_CAPTION) {

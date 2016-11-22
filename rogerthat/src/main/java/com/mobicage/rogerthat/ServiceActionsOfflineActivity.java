@@ -95,7 +95,7 @@ public class ServiceActionsOfflineActivity extends FriendsActivity {
 
     @Override
     protected String getHelpMessage() {
-        return getString(R.string.servicefriends_getting_started_msg, getString(R.string.discover_services_short));
+        return null;
     }
 
     @Override
@@ -151,9 +151,6 @@ public class ServiceActionsOfflineActivity extends FriendsActivity {
         switch (item.getItemId()) {
             case R.id.find_services:
                 startSearching();
-                return true;
-            case R.id.help:
-                showHelp();
                 return true;
         }
         return super.onOptionsItemSelected(item);
