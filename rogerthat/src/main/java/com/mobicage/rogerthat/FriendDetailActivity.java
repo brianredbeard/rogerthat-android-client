@@ -528,7 +528,7 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
             L.bug("Could not display service detail with branding.", e);
             return;
         }
-
+        mDescriptionView.setVisibility(View.GONE);
         if (br.displayType == BrandingMgr.DisplayType.NATIVE) {
             ServiceHeader.setupNative(br, mHeaderContainer);
             mWebview.setVisibility(View.GONE);
@@ -540,7 +540,6 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
             mWebview.loadUrl("file://" + br.file.getAbsolutePath());
             mWebview.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
             mWebview.setVisibility(View.VISIBLE);
-            mDescriptionView.setVisibility(View.GONE);
         }
 
         if (br.color == null) {
