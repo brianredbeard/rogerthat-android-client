@@ -915,6 +915,8 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                         // item started downloading intent when ready
                         if (shouldRoundCorners) {
                             mImage.setImageResource(R.drawable.news_image_placeholder_rounded);
+                        } else {
+                            mImage.setImageResource(R.drawable.news_image_placeholder);
                         }
                     }
                 } else if (shouldRoundCorners) {
