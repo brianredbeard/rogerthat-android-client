@@ -188,7 +188,7 @@
     <string name="hint_broadcast_icon">Appuyez sur cette icône en haut à droite pour sélectionner les messages de %1$s que vous ne souhaitez plus recevoir.</string>
     <string name="hint_double_tap">Double-cliquez pour répondre</string>
     <string name="hint_swipe">Glissez votre doigt pour ouvrir une autre conversation</string>
-    <string name="ibeacon_usage_augment_experience">%1$@ utilise des iBeacons afin d\'améliorer votre expérience utilisateur.</string>
+    <string name="ibeacon_usage_augment_experience">%1$s utilise des iBeacons afin d\'améliorer votre expérience utilisateur.</string>
     <string name="ibeacon_usage_discover_services_automatically">Retrouver automatiquement des services.</string>
     <string name="ibeacon_usage_not_used_for">%1$s ne fait pas:</string>
     <string name="ibeacon_usage_store">Sauvegarder votre position.</string>
@@ -226,7 +226,7 @@
     <string name="loading">Chargement…</string>
     <string name="locate_friend">Où se trouve %1$s ?</string>
     <string name="location_usage">Utilisation de la localisation</string>
-    <string name="location_usage_augment_experience">%1$@ utilise des services de localisation afin d\'améliorer votre expérience utilisateur.</string>
+    <string name="location_usage_augment_experience">%1$s utilise des services de localisation afin d\'améliorer votre expérience utilisateur.</string>
     <string name="location_usage_discover_services_automatically">Retrouver automatiquement des services.</string>
     <string name="location_usage_location_friends">Partager votre position avec vos collègues (seulement quand vous le permettez).</string>
     <string name="location_usage_not_used_for">%1$s ne fait pas:</string>

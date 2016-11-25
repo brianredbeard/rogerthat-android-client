@@ -125,7 +125,10 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
             setTitle(R.string.discover_services_short);
         } else {
             setActivityName("action|" + mAction);
-            setTitle(intent.getIntExtra(TITLE, 0));
+            String title = intent.getStringExtra(TITLE);
+            if (title != null) {
+                setTitle(title);
+            }
         }
 
         mSearchCategoryLabels = (LinearLayout) findViewById(R.id.search_category);

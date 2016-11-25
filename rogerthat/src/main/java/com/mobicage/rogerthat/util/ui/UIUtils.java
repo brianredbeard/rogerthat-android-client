@@ -61,10 +61,12 @@ import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
+import com.mobicage.rogerthat.plugins.news.NewsPlugin;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.T;
+import com.mobicage.rpc.config.AppConstants;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -89,20 +91,32 @@ public class UIUtils {
     private static List<Activity> sActivities = new ArrayList<Activity>();
     private static Map<Object, Integer> notificationIds = new HashMap<>();
 
-    public static void onActivityStart(final Activity activity) {
+    public static void onActivityStart(final Activity activity, final MainService mainService) {
         if (T.getThreadType() != T.UI) {
             throw new RuntimeException("This method must be called from T.UI, got " + T.getThreadName());
         }
         sActivities.add(activity);
         L.d(activity.getClass().getSimpleName() + " starting. Visible activities: " + sActivities);
+        if (mainService != null && AppConstants.NEWS_ENABLED && sActivities.size() == 1) {
+            NewsPlugin newsPlugin = mainService.getPlugin(NewsPlugin.class);
+            if (newsPlugin != null) {
+                newsPlugin.connectToChannel();
+            }
+        }
     }
 
-    public static void onActivityStop(final Activity activity) {
+    public static void onActivityStop(final Activity activity, final MainService mainService) {
         if (T.getThreadType() != T.UI) {
             throw new RuntimeException("This method must be called from T.UI, got " + T.getThreadName());
         }
         sActivities.remove(activity);
         L.d(activity.getClass().getSimpleName() + " stopping. Visible activities: " + sActivities);
+        if (mainService != null && AppConstants.NEWS_ENABLED && sActivities.size() == 0) {
+            NewsPlugin newsPlugin = mainService.getPlugin(NewsPlugin.class);
+            if (newsPlugin != null) {
+                newsPlugin.disconnectChannel();
+            }
+        }
     }
 
     public static Toast showLongToast(final Context context, final String text) {

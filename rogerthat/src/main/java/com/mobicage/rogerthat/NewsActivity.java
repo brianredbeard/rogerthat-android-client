@@ -313,7 +313,9 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
         setActivityName("news");
         setTitle(R.string.news);
 
-        getPlugins();
+        newsPlugin = mService.getPlugin(NewsPlugin.class);
+        friendsPlugin = mService.getPlugin(FriendsPlugin.class);
+
         newsStore = newsPlugin.getStore();
         newsPlugin.resetBadgeCount();
 
@@ -376,11 +378,6 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
     @Override
     public void onToolbarClicked() {
         setSelection(0);
-    }
-
-    public void getPlugins() {
-        newsPlugin = mService.getPlugin(NewsPlugin.class);
-        friendsPlugin = mService.getPlugin(FriendsPlugin.class);
     }
 
     private void setupUpdatesAvailable() {

@@ -68,6 +68,7 @@ import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.widget.ShareDialog;
 import com.github.barteksc.pdfviewer.PDFView;
 import com.google.zxing.client.android.CaptureActivity;
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.ServiceBoundActivity;
@@ -84,6 +85,7 @@ import com.mobicage.rogerthat.plugins.scan.ScanCommunication;
 import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
 import com.mobicage.rogerthat.plugins.trackme.DiscoveredBeaconProximity;
 import com.mobicage.rogerthat.plugins.trackme.TrackmePlugin;
+import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.FacebookUtils;
 import com.mobicage.rogerthat.util.FacebookUtils.PermissionType;
 import com.mobicage.rogerthat.util.Security;
@@ -262,6 +264,8 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 isConnectedToInternet(params);
             } else if ("util/playAudio".equals(action)) {
                 playAudio(params);
+            } else if ("util/open".equals(action)) {
+                openActivity(params);
             }
             // MESSAGING
             else if ("message/open".equals(action)) {
@@ -529,8 +533,32 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             deliverResult(requestId, result, null);
         }
 
+        private void openActivity(final JSONObject params) throws JSONException {
+            if (params == null) {
+                L.w("Expected params != null");
+                return;
+            }
+            final String requestId = params.getString("id");
+            final String actionType = params.has("action_type") ? params.getString("action_type") : null;
+            final String action = params.has("action") ? params.getString("action") : null;
+            final String title = params.has("title") ? params.getString("title") : null;
+
+            ServiceBoundActivity.NavigationItem ni = new ServiceBoundActivity.NavigationItem(FontAwesome.Icon.faw_question_circle_o, actionType, action, title, false);
+
+            String errorMessage = ActivityUtils.canOpenNavigationItem(ActionScreenActivity.this, ni);
+            Map<String, Object> error = null;
+            if (errorMessage != null) {
+                error = new HashMap<>();
+                error.put("exception", errorMessage);
+            } else {
+                Bundle extras = new Bundle();
+                ActivityUtils.goToActivity(ActionScreenActivity.this, ni, false, extras);
+            }
+
+            deliverResult(requestId, null, error);
+        }
+
         private void openMessage(final JSONObject params) throws JSONException {
-            T.UI();
             if (params == null) {
                 L.w("Expected params != null");
                 return;

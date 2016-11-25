@@ -201,13 +201,18 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         doUnbindService();
     }
 
-    public void showTransmitting(SafeRunnable onTimeout) {
-        T.UI();
-        mTransmitTimeoutRunnable = onTimeout;
-        mTransmitStart = System.currentTimeMillis();
-        mTransmitProgressBar.setProgress(0);
-        mTransmitProgressDialog.show();
-        mService.postDelayedOnUIHandler(mIncreaseProgress, 100);
+    public void showTransmitting(final SafeRunnable onTimeout) {
+        runOnUiThread(new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                T.UI();
+                mTransmitTimeoutRunnable = onTimeout;
+                mTransmitStart = System.currentTimeMillis();
+                mTransmitProgressBar.setProgress(0);
+                mTransmitProgressDialog.show();
+                mService.postDelayedOnUIHandler(mIncreaseProgress, 100);
+            }
+        });
     }
 
     public boolean isTransmitting() {
@@ -216,18 +221,23 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
     }
 
     public void completeTransmit(final SafeRunnable afterComplete) {
-        T.UI();
-        mTransmitProgressDialog.dismiss();
-        mService.removeFromUIHandler(mIncreaseProgress);
-        mTransmitProgressBar.setProgress(100);
-        if (afterComplete != null && mService != null) {
-            mService.postDelayedOnUIHandler(new SafeRunnable() {
-                @Override
-                protected void safeRun() throws Exception {
-                    afterComplete.run();
+        runOnUiThread(new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                T.UI();
+                mTransmitProgressDialog.dismiss();
+                mService.removeFromUIHandler(mIncreaseProgress);
+                mTransmitProgressBar.setProgress(100);
+                if (afterComplete != null && mService != null) {
+                    mService.postDelayedOnUIHandler(new SafeRunnable() {
+                        @Override
+                        protected void safeRun() throws Exception {
+                            afterComplete.run();
+                        }
+                    }, 200);
                 }
-            }, 200);
-        }
+            }
+        });
     }
 
     private final SafeRunnable mIncreaseProgress = new SafeRunnable() {
@@ -369,12 +379,12 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
     @Override
     protected void onStop() {
         super.onStop();
-        UIUtils.onActivityStop(this);
+        UIUtils.onActivityStop(this, mService);
     }
 
     @Override
     protected void onStart() {
-        UIUtils.onActivityStart(this);
+        UIUtils.onActivityStart(this, mService);
         super.onStart();
     }
 
@@ -563,35 +573,9 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
             }
         }, 250);
 
-
         Bundle extras = new Bundle();
         extras.putBoolean("show_drawer_icon", true);
-        if (ni.actionType == null) {
-            ActivityUtils.goToActivity(ServiceBoundActivity.this, ni.action, true, ni.collapse, extras);
-        } else if ("action".equals(ni.actionType)) {
-            Class clazz;
-            if (mService.getNetworkConnectivityManager().isConnected()) {
-                clazz = ServiceSearchActivity.class;
-            } else {
-                clazz = ServiceActionsOfflineActivity.class;
-            }
-
-            final Intent i = new Intent(ServiceBoundActivity.this, clazz);
-            extras.putString(ServiceActionsOfflineActivity.ACTION, ni.action);
-            extras.putInt(ServiceActionsOfflineActivity.TITLE, ni.labelTextId);
-            i.putExtras(extras);
-            i.addFlags(MainActivity.FLAG_CLEAR_STACK);
-            ServiceBoundActivity.this.startActivity(i);
-
-        } else if ("click".equals(ni.actionType)) {
-            if (TextUtils.isEmptyOrWhitespace(AppConstants.APP_EMAIL)) {
-                L.bug("simulateNavigationItemClick click but app_email was nog set");
-                return;
-            }
-            ActivityUtils.goToActivityBehindTag(ServiceBoundActivity.this, AppConstants.APP_EMAIL, ni.action, extras);
-        } else {
-            L.bug("ignoring simulateNavigationItemClick: " + ni.actionType + "|" + ni.action);
-        }
+        ActivityUtils.goToActivity(ServiceBoundActivity.this, ni, true, extras);
     }
 
     public static class NavigationItem {
@@ -600,6 +584,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         public String actionType;
         public String action;
         public int labelTextId;
+        public String labelText;
         public boolean collapse;
 
         public NavigationItem(FontAwesome.Icon icon, String actionType, String action, int labelTextId, boolean collapse) {
@@ -609,6 +594,18 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
             this.actionType = actionType;
             this.action = action;
             this.labelTextId = labelTextId;
+            this.labelText = null;
+            this.collapse = collapse;
+        }
+
+        public NavigationItem(FontAwesome.Icon icon, String actionType, String action, String labelText, boolean collapse) {
+            super();
+            this.icon = icon;
+            this.iconId = 0;
+            this.actionType = actionType;
+            this.action = action;
+            this.labelTextId = 0;
+            this.labelText = labelText;
             this.collapse = collapse;
         }
 
@@ -619,6 +616,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
             this.actionType = actionType;
             this.action = action;
             this.labelTextId = labelTextId;
+            this.labelText = null;
             this.collapse = collapse;
         }
     }

@@ -282,12 +282,12 @@ public abstract class ServiceBoundMapActivity extends MapActivity implements Pau
     @Override
     protected void onStop() {
         super.onStop();
-        UIUtils.onActivityStop(this);
+        UIUtils.onActivityStop(this, mService);
     }
 
     @Override
     protected void onStart() {
-        UIUtils.onActivityStart(this);
+        UIUtils.onActivityStart(this, mService);
         super.onStart();
     }
 

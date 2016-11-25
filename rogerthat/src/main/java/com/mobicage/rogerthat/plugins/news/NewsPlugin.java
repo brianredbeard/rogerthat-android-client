@@ -115,14 +115,7 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
             mBroadcastReceiver = null;
             return;
         }
-        mMainService.runOnBIZZHandler(new SafeRunnable() {
-            @Override
-            protected void safeRun() throws Exception {
-                if (!mNewsChannel.isConnected() && !mNewsChannel.isTryingToReconnect()) {
-                    mNewsChannel.connect();
-                }
-            }
-        });
+        connectToChannel();
         connectedToNewsChannelIfNotConnected();
 
         getNews(true, mUpdatedSince == 0);
@@ -137,7 +130,7 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
                     if (!mIsConnectedToInternet) {
                         mIsConnectedToInternet = true;
                         getNews(true, false);
-                        mMainService.postOnBIZZHandler(new SafeRunnable() {
+                        mMainService.runOnBIZZHandler(new SafeRunnable() {
                             @Override
                             protected void safeRun() throws Exception {
                                 mNewsChannel.internetConnected();
@@ -148,7 +141,7 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
                     if (mIsConnectedToInternet) {
                         mIsConnectedToInternet = false;
 
-                        mMainService.postOnBIZZHandler(new SafeRunnable() {
+                        mMainService.runOnBIZZHandler(new SafeRunnable() {
                             @Override
                             protected void safeRun() throws Exception {
                                 mNewsChannel.internetDisconnected();
@@ -309,7 +302,7 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
     }
 
     public void setNewsItemRead(final long id) {
-        SafeRunnable runnable = new SafeRunnable() {
+        mMainService.runOnBIZZHandler(new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
                 if (mStore.setNewsItemRead(id)) {
@@ -319,8 +312,7 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
                     setNewsItemSortPriority(id, SORT_PRIORITY_READ);
                 }
             }
-        };
-        mMainService.runOnBIZZHandler(runnable);
+        });
     }
 
     public void setNewsItemSortPriority(final long id, final long sortPriority) {
@@ -336,7 +328,7 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
     }
 
     public void setNewsItemRogered(final long id, final String myEmail) {
-        SafeRunnable runnable = new SafeRunnable() {
+        mMainService.runOnBIZZHandler(new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
                 mStore.setNewsItemRogered(id);
@@ -348,8 +340,7 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
                 intent.putExtra("id", id);
                 mMainService.sendBroadcast(intent);
             }
-        };
-        mMainService.runOnBIZZHandler(runnable);
+        });
     }
 
     public void addUser(long newsId, String email) {
@@ -489,32 +480,32 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
         );
     }
 
-    private void connectToChannel() {
-        SafeRunnable runnable = new SafeRunnable() {
+    public void connectToChannel() {
+        if (mMainService == null)
+            return;
+
+        mMainService.runOnBIZZHandler(new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
                 if (!mNewsChannel.isConnected() && !mNewsChannel.isTryingToReconnect()) {
                     mNewsChannel.connect();
                 }
             }
-        };
-        if (mMainService != null) {
-            mMainService.postOnBIZZHandler(runnable);
-        }
+        });
     }
 
-    private void disconnectChannel() {
-        SafeRunnable runnable = new SafeRunnable() {
+    public void disconnectChannel() {
+        if (mMainService == null)
+            return;
+
+        mMainService.runOnBIZZHandler(new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
                 if (mNewsChannel.isConnected()) {
                     mNewsChannel.disconnect();
                 }
             }
-        };
-        if (mMainService != null) {
-            mMainService.postOnBIZZHandler(runnable);
-        }
+        });
     }
 
     @Override

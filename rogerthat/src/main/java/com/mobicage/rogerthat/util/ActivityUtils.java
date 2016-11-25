@@ -34,6 +34,7 @@ import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MoreActivity;
 import com.mobicage.rogerthat.NewsActivity;
 import com.mobicage.rogerthat.QRCodeActivity;
+import com.mobicage.rogerthat.ServiceActionsOfflineActivity;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.ServiceFriendsActivity;
 import com.mobicage.rogerthat.SettingsActivity;
@@ -44,11 +45,15 @@ import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.friends.MenuItemPresser;
 import com.mobicage.rogerthat.plugins.friends.MenuItemPressingActivity;
 import com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity;
+import com.mobicage.rogerthat.plugins.friends.ServiceMenuItemDetails;
+import com.mobicage.rogerthat.plugins.friends.ServiceSearchActivity;
 import com.mobicage.rogerthat.plugins.history.HistoryListActivity;
 import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
 import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
 import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.system.SafeRunnable;
+import com.mobicage.rpc.config.AppConstants;
 
 public class ActivityUtils {
 
@@ -61,6 +66,83 @@ public class ActivityUtils {
             i.putExtras(extras);
         }
         context.startActivity(i);
+    }
+
+    public static String canOpenNavigationItem(ServiceBoundActivity context, ServiceBoundActivity.NavigationItem ni) {
+        if (ni.actionType == null) {
+            if ("news".equals(ni.action)) {
+            } else if ("messages".equals(ni.action)) {
+            } else if ("scan".equals(ni.action)) {
+            } else if ("services".equals(ni.action)) {
+            } else if ("friends".equals(ni.action)) {
+            } else if ("directory".equals(ni.action)) {
+            } else if ("profile".equals(ni.action)) {
+            } else if ("more".equals(ni.action)) {
+            } else if ("settings".equals(ni.action)) {
+            } else if ("community_services".equals(ni.action)) {
+            } else if ("merchants".equals(ni.action)) {
+            } else if ("associations".equals(ni.action)) {
+            } else if ("emergency_services".equals(ni.action)) {
+            } else if ("stream".equals(ni.action)) {
+            } else if ("qrcode".equals(ni.action)) {
+            } else {
+                return "Unknown action";
+            }
+        } else if ("action".equals(ni.actionType)) {
+        } else if ("click".equals(ni.actionType)) {
+            if (TextUtils.isEmptyOrWhitespace(AppConstants.APP_EMAIL)) {
+                return "Unknown email";
+            }
+            final FriendStore friendStore = context.getMainService().getPlugin(FriendsPlugin.class).getStore();
+            final ServiceMenuItemDetails smi = friendStore.getMenuItem(AppConstants.APP_EMAIL, ni.action);
+            if (smi == null) {
+                return "ServiceMenuItem not found";
+            }
+        } else {
+            return "Unknown action_type";
+        }
+        return null;
+    }
+
+    public static boolean goToActivity(final ServiceBoundActivity context, final ServiceBoundActivity.NavigationItem ni, final boolean clearStack, final Bundle extras) {
+        if (ni.actionType == null) {
+            ActivityUtils.goToActivity(context, ni.action, clearStack, ni.collapse, extras);
+        } else if ("action".equals(ni.actionType)) {
+            Class clazz;
+            if (context.getMainService().getNetworkConnectivityManager().isConnected()) {
+                clazz = ServiceSearchActivity.class;
+            } else {
+                clazz = ServiceActionsOfflineActivity.class;
+            }
+
+            final Intent i = new Intent(context, clazz);
+            extras.putString(ServiceActionsOfflineActivity.ACTION, ni.action);
+            if (ni.labelTextId > 0) {
+                extras.putString(ServiceActionsOfflineActivity.TITLE, context.getString(ni.labelTextId));
+            } else {
+                extras.putString(ServiceActionsOfflineActivity.TITLE, ni.labelText);
+            }
+
+            i.putExtras(extras);
+            i.addFlags(MainActivity.FLAG_CLEAR_STACK);
+            context.startActivity(i);
+
+        } else if ("click".equals(ni.actionType)) {
+            if (TextUtils.isEmptyOrWhitespace(AppConstants.APP_EMAIL)) {
+                L.bug("simulateNavigationItemClick click but app_email was nog set");
+                return false;
+            }
+            context.runOnUiThread(new SafeRunnable() {
+                @Override
+                protected void safeRun() throws Exception {
+                    ActivityUtils.goToActivityBehindTag(context, AppConstants.APP_EMAIL, ni.action, extras);
+                }
+            });
+        } else {
+            L.bug("ignoring simulateNavigationItemClick: " + ni.actionType + "|" + ni.action);
+            return false;
+        }
+        return true;
     }
 
     public static boolean goToActivity(ServiceBoundActivity context, String activityName, boolean clearStack, boolean collapse, Bundle extras) {

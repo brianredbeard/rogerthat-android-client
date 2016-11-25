@@ -56,7 +56,10 @@ public class ServiceActionsOfflineActivity extends FriendsActivity {
         mAction = intent.getStringExtra(ACTION);
 
         setActivityName("action|" + mAction);
-        setTitle(intent.getIntExtra(TITLE, 0));
+        String title = intent.getStringExtra(TITLE);
+        if (title != null) {
+            setTitle(title);
+        }
 
         TextView noServicesTextView = (TextView) findViewById(R.id.no_services_text);
         noServicesTextView.setText(getString(R.string.no_services_found,
