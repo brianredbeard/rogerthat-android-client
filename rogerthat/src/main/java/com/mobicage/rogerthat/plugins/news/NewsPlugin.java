@@ -24,7 +24,12 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.os.Bundle;
+import android.support.v7.app.NotificationCompat;
 
+import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.NewsActivity;
 import com.mobicage.rogerthat.NewsListAdapter;
@@ -32,6 +37,8 @@ import com.mobicage.rogerthat.NewsPinnedActivity;
 import com.mobicage.rogerthat.config.Configuration;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
 import com.mobicage.rogerthat.plugins.MobicagePlugin;
+import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
+import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.db.DatabaseManager;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.net.NetworkConnectivityManager;
@@ -46,6 +53,7 @@ import com.mobicage.to.news.AppNewsInfoTO;
 import com.mobicage.to.news.AppNewsItemTO;
 import com.mobicage.to.news.GetNewsItemsRequestTO;
 import com.mobicage.to.news.GetNewsRequestTO;
+import com.mobicage.to.news.NewNewsRequestTO;
 import com.mobicage.to.news.SaveNewsStatisticsRequestTO;
 import com.mobicage.to.news.SaveNewsStatisticsResponseTO;
 import com.mobicage.to.system.SettingsTO;
@@ -528,10 +536,42 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
     public void newsPush(final AppNewsItemTO newsItem) {
         T.BIZZ();
         if (mStore.insertNewsItem(newsItem)) {
+            increaseBadgeCount();
             Intent intent = new Intent(NewsPlugin.NEW_NEWS_ITEM_INTENT);
             intent.putExtra("id", newsItem.id);
             mMainService.sendBroadcast(intent);
+
+            createNewsNotification(newsItem);
         }
+    }
+
+    public void createNewsNotification(final AppNewsItemTO newsItem) {
+        Activity currentActivity = UIUtils.getTopActivity(mMainService);
+        if (currentActivity instanceof NewsActivity || currentActivity instanceof NewsPinnedActivity) {
+            return;
+        }
+
+        String message;
+        if (!TextUtils.isEmptyOrWhitespace(newsItem.title)) {
+            message = newsItem.title;
+        } else if (newsItem.type == NewsItem.TYPE_QR_CODE) {
+            message = newsItem.qr_code_caption;
+        } else {
+            message = newsItem.message;
+        }
+
+        Bundle b = new Bundle();
+        b.putLong("id", newsItem.id);
+
+        String notificationTitle = newsItem.sender.name;
+        String notificationText = message;
+        String longNotificationText = newsItem.qr_code_caption != null ? newsItem.qr_code_caption : newsItem.message;
+        int count = 0;
+        Bitmap largeIcon = mMainService.getPlugin(FriendsPlugin.class).getAvatarBitmap(newsItem.sender.email);
+        UIUtils.doNotification(mMainService, notificationTitle, notificationText, UIUtils.getNotificationId(newsItem.id, true),
+                MainActivity.ACTION_NOTIFICATION_NEW_NEWS, true, false, true, true, R.drawable.notification_icon,
+                count, b, null, mMainService.currentTimeMillis(), NotificationCompat.PRIORITY_DEFAULT, null,
+                longNotificationText, largeIcon, NotificationCompat.CATEGORY_PROMO);
     }
 
     @Override

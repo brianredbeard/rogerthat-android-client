@@ -70,29 +70,7 @@ public class NewsCallReceiver implements com.mobicage.capi.news.IClientRpc {
         Intent intent = new Intent(NewsPlugin.NEW_NEWS_ITEM_INTENT);
         intent.putExtra("id", request.news_item.id);
         mMainService.sendBroadcast(intent);
-
-        String message;
-        if (!TextUtils.isEmptyOrWhitespace(request.news_item.title)) {
-            message = request.news_item.title;
-        } else if (request.news_item.type == NewsItem.TYPE_QR_CODE) {
-            message = request.news_item.qr_code_caption;
-        } else {
-            message = request.news_item.message;
-        }
-
-        Bundle b = new Bundle();
-        b.putLong("id", request.news_item.id);
-
-        String notificationTitle = request.news_item.sender.name;
-        String notificationText = message;
-        String longNotificationText = request.news_item.qr_code_caption != null ? request.news_item.qr_code_caption : request.news_item.message;
-        int count = 0;
-        Bitmap largeIcon = mMainService.getPlugin(FriendsPlugin.class).getAvatarBitmap(request.news_item.sender.email);
-        UIUtils.doNotification(mMainService, notificationTitle, notificationText, UIUtils.getNotificationId(request.news_item.id, true),
-                MainActivity.ACTION_NOTIFICATION_NEW_NEWS, true, false, true, true, R.drawable.notification_icon,
-                count, b, null, mMainService.currentTimeMillis(), NotificationCompat.PRIORITY_DEFAULT, null,
-                longNotificationText, largeIcon, NotificationCompat.CATEGORY_PROMO);
-
+        mPlugin.createNewsNotification(request.news_item);
         return response;
     }
 

@@ -286,7 +286,7 @@ public class FriendsPlugin implements MobicagePlugin {
         T.UI();
         try {
             return mLastResponse;
-        }finally {
+        } finally {
             mLastResponse = null;
         }
     }
