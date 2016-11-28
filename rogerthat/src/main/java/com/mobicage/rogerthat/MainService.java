@@ -1354,6 +1354,8 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
 
     public <E extends MobicagePlugin> E getPlugin(Class<E> plugin) {
         T.dontCare();
+        if (mPlugins == null)
+            return null;
         @SuppressWarnings("unchecked")
         final E thePlugin = (E) mPlugins.get(plugin.toString());
         if (thePlugin == null) {

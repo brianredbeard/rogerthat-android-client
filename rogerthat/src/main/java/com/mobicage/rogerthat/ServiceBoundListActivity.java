@@ -107,6 +107,7 @@ public abstract class ServiceBoundListActivity extends ListActivity implements S
         public void onServiceConnected(ComponentName className, IBinder service) {
             T.UI();
             mService = ((MainService.MainBinder) service).getService();
+            UIUtils.onActivityBound(mService);
             try {
                 onServiceBound();
                 mServiceIsBound = true;

@@ -294,6 +294,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         public void onServiceConnected(ComponentName className, IBinder service) {
             T.UI();
             mService = ((MainService.MainBinder) service).getService();
+            UIUtils.onActivityBound(mService);
             if (mShowDrawerIcon) {
                 setupBadges();
             }

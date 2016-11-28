@@ -91,13 +91,31 @@ public class UIUtils {
     private static List<Activity> sActivities = new ArrayList<Activity>();
     private static Map<Object, Integer> notificationIds = new HashMap<>();
 
+    public static int getNumberOfActivities() {
+        if (T.getThreadType() != T.UI) {
+            throw new RuntimeException("This method must be called from T.UI, got " + T.getThreadName());
+        }
+        return sActivities.size();
+    }
+
     public static void onActivityStart(final Activity activity, final MainService mainService) {
         if (T.getThreadType() != T.UI) {
             throw new RuntimeException("This method must be called from T.UI, got " + T.getThreadName());
         }
         sActivities.add(activity);
         L.d(activity.getClass().getSimpleName() + " starting. Visible activities: " + sActivities);
-        if (mainService != null && AppConstants.NEWS_ENABLED && sActivities.size() == 1) {
+        connectToNewsChannel(mainService);
+    }
+
+    public static void onActivityBound(final MainService mainService) {
+        if (T.getThreadType() != T.UI) {
+            throw new RuntimeException("This method must be called from T.UI, got " + T.getThreadName());
+        }
+        connectToNewsChannel(mainService);
+    }
+
+    private static void connectToNewsChannel(final MainService mainService) {
+        if (mainService != null && AppConstants.NEWS_ENABLED) {
             NewsPlugin newsPlugin = mainService.getPlugin(NewsPlugin.class);
             if (newsPlugin != null) {
                 newsPlugin.connectToChannel();

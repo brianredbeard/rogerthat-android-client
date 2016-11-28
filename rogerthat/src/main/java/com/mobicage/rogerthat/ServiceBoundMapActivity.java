@@ -216,6 +216,7 @@ public abstract class ServiceBoundMapActivity extends MapActivity implements Pau
         public void onServiceConnected(ComponentName className, IBinder service) {
             T.UI();
             mService = ((MainService.MainBinder) service).getService();
+            UIUtils.onActivityBound(mService);
             try {
                 onServiceBound();
                 mServiceIsBound = true;

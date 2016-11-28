@@ -19,6 +19,8 @@
 package com.mobicage.rogerthat.plugins.news;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -115,8 +117,9 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
             mBroadcastReceiver = null;
             return;
         }
-        connectToChannel();
-        connectedToNewsChannelIfNotConnected();
+        if (UIUtils.getNumberOfActivities() > 0) {
+            connectToChannel();
+        }
 
         getNews(true, mUpdatedSince == 0);
 
@@ -170,10 +173,6 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
             L.bug(e);
         }
         disconnectChannel();
-        if (mChannelWatchTimer != null) {
-            mChannelWatchTimer.cancel();
-        }
-
         CallReceiver.comMobicageCapiNewsIClientRpc = null;
     }
 
@@ -457,22 +456,27 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
 
     // NewsChannel
 
-    protected void connectedToNewsChannelIfNotConnected() {
-        if (mChannelWatchTimer != null) {
-            mChannelWatchTimer.cancel();
-        }
+    protected void setupRetryToNewsChannelWhenNotConnected() {
+        if (mChannelWatchTimer != null)
+            return;
+
         mChannelWatchTimer = new Timer(true);
         mChannelWatchTimer.scheduleAtFixedRate(
                 new TimerTask() {
                     @Override
                     public void run() {
-                        if (mIsConnectedToInternet
-                                && !mNewsChannel.isConnected()
-                                && !mNewsChannel.isTryingToReconnect()
-                                && mNewsChannel.hasValidConfiguration()) {
-                            L.d("Reconnecting to channel since it is not connected and not retrying to reconnect");
-                            connectToChannel();
-                        }
+                        mMainService.runOnBIZZHandler(new SafeRunnable() {
+                            @Override
+                            protected void safeRun() throws Exception {
+                                if (mIsConnectedToInternet
+                                        && !mNewsChannel.isConnected()
+                                        && !mNewsChannel.isTryingToReconnect()
+                                        && mNewsChannel.hasValidConfiguration()) {
+                                    L.d("Reconnecting to channel since it is not connected and not retrying to reconnect");
+                                    connectToChannel();
+                                }
+                            }
+                        });
                     }
                 },
                 0,
@@ -483,6 +487,8 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
     public void connectToChannel() {
         if (mMainService == null)
             return;
+
+        setupRetryToNewsChannelWhenNotConnected();
 
         mMainService.runOnBIZZHandler(new SafeRunnable() {
             @Override
@@ -495,6 +501,11 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
     }
 
     public void disconnectChannel() {
+        if (mChannelWatchTimer != null) {
+            mChannelWatchTimer.cancel();
+            mChannelWatchTimer = null;
+        }
+
         if (mMainService == null)
             return;
 

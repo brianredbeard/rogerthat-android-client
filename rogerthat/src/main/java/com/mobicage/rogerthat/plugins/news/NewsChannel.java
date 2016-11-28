@@ -89,7 +89,6 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
     private NewsChannelCallbackHandler mNewsChannelCallbackHandler;
     private String mHost;
     private int mPort;
-    private boolean mIsSSL;
     private Channel mChannel;
     private EventLoopGroup mEventLoopGroup;
     private boolean mIsConnected;
@@ -149,7 +148,6 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         mNewsChannelCallbackHandler = handler;
         mService = handler.getMainService();
         mConfigurationProvider = configurationProvider;
-        mIsSSL = CloudConstants.NEWS_CHANNEL_SSL;
 
         if (TestUtils.isRunningTest()) {
             return;
@@ -195,10 +193,10 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
             L.d("Not connecting to news channel because no port was found");
             return;
         }
-
+        mIsRetryingToConnect = true;
         L.d("Attemping to connect to news channel...");
         final SslContext sslCtx;
-        if (mIsSSL) {
+        if (CloudConstants.NEWS_CHANNEL_SSL) {
             try {
                 if (!CloudConstants.NEWS_CHANNEL_MUST_VALIDATE_SSL_CERTIFICATE) {
 
@@ -281,13 +279,14 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
 
     private void sendCommand(Command command, String data) {
         String line = String.format("%s: %s", command, data);
-        if (mAuthenticated && mIsConnected) {
+        if (CloudConstants.NEWS_CHANNEL_SSL && mAuthenticated && mIsConnected) {
+            sendLine(line);
+        } else if (!CloudConstants.NEWS_CHANNEL_SSL && mIsConnected) {
             sendLine(line);
         } else {
             // Stash commands when not connected/authenticated. Will be send once authenticated.
             mStashedCommands.add(line);
         }
-
     }
 
     @Override
@@ -297,7 +296,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         mIsConnected = true;
         mIsRetryingToConnect = false;
         mAuthenticated = false;
-        if (!mIsSSL)
+        if (!CloudConstants.NEWS_CHANNEL_SSL)
             authenticate();
     }
 

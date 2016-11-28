@@ -208,6 +208,7 @@ public abstract class ServiceBoundFragmentActivity extends FragmentActivity impl
         public void onServiceConnected(ComponentName className, IBinder service) {
             T.UI();
             mService = ((MainService.MainBinder) service).getService();
+            UIUtils.onActivityBound(mService);
             try {
                 onServiceBound();
                 mServiceIsBound = true;

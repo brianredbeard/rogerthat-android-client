@@ -82,6 +82,7 @@ public abstract class ServiceBoundPreferenceActivity extends PreferenceActivity 
         public void onServiceConnected(ComponentName className, IBinder service) {
             T.UI();
             mService = ((MainService.MainBinder) service).getService();
+            UIUtils.onActivityBound(mService);
             try {
                 onServiceBound();
                 mServiceIsBound = true;
