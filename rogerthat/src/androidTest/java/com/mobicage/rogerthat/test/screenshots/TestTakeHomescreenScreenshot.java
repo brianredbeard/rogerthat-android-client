@@ -18,16 +18,11 @@
 
 package com.mobicage.rogerthat.test.screenshots;
 
-import android.content.Context;
-import android.content.Intent;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.UiThreadTest;
 
-import com.mobicage.rogerth.at.R;
-import com.mobicage.rogerthat.HomeActivity;
-import com.mobicage.rpc.config.AppConstants;
+import com.mobicage.rogerthat.MainActivity;
 
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -44,17 +39,13 @@ public class TestTakeHomescreenScreenshot {
     public static final LocaleTestRule localeTestRule = new LocaleTestRule();
 
     @Rule
-    public ActivityTestRule<HomeActivity> activityTestRule = new ActivityTestRule<>(HomeActivity.class, true, false);
+    public ActivityTestRule<MainActivity> activityTestRule = new ActivityTestRule<>(MainActivity.class);
 
     @SuppressWarnings("ConstantConditions")
     @Test
     @UiThreadTest
     public void takeHomeScreenScreenshot(){
-        if (AppConstants.HOME_ACTIVITY_LAYOUT != R.layout.news && AppConstants.HOME_ACTIVITY_LAYOUT != R.layout.messaging) {
-            Context targetContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-            Intent intent = new Intent(targetContext, HomeActivity.class);
-            activityTestRule.launchActivity(intent);
-            Screengrab.screenshot("homescreen");
-        }
+        // homescreen will be news with the sidebar open for apps with news and else the old homescreen with icons
+        Screengrab.screenshot("homescreen");
     }
 }
