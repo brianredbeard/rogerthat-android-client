@@ -79,12 +79,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class UIUtils {
 
     private final static float UNINITIALIZED_PIXEL_SCALE = -1;
+    private final static int UNINITIALIZED_PIXEL_WIDTH = -1;
 
     // Owned by UI thread
     private final static Set<Integer> sNotificationIDs = new HashSet<Integer>();
     private static boolean sHardKeyboardInitialized = false;
     private static boolean sHasHardKeyboard;
     private static float sPixelScale = UNINITIALIZED_PIXEL_SCALE;
+    private static int sPixelWith = UNINITIALIZED_PIXEL_WIDTH;
 
     public static final String NOTIFICATION_TIMESTAMP = "NOTIFICATION_TIMESTAMP";
 
@@ -310,10 +312,10 @@ public class UIUtils {
         return (int) (size * sPixelScale);
     }
 
-    public static int convertPixelsToDip(Context context, int size) {
-        if (sPixelScale == UNINITIALIZED_PIXEL_SCALE)
-            sPixelScale = context.getResources().getDisplayMetrics().density;
-        return (int) (size / sPixelScale);
+    public static int getAbsoluteWidthInPixels(Context context) {
+        if (sPixelWith == UNINITIALIZED_PIXEL_WIDTH)
+            sPixelWith = context.getResources().getDisplayMetrics().widthPixels;
+        return sPixelWith;
     }
 
     public static boolean showHint(final Activity activity, final MainService mainService, final String hintCode,

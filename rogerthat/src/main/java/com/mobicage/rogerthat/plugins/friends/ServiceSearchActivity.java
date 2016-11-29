@@ -326,6 +326,9 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
                     if (mSearchString.equals(intent.getStringExtra(FriendsPlugin.SEARCH_STRING))) {
                         mProgressDialog.dismiss();
                         FindServiceResponseTO responseTO = mFriendsPlugin.getLastSearchResult();
+                        if (responseTO == null) {
+                            return new String[]{action};
+                        }
 
                         if (!TextUtils.isEmptyOrWhitespace(responseTO.error_string)) {
                             UIUtils.showAlertDialog(ServiceSearchActivity.this, null, responseTO.error_string);

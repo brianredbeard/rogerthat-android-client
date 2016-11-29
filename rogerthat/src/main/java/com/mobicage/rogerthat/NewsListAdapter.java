@@ -262,7 +262,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                         Bitmap bm = BitmapFactory.decodeFile(cachedFile.getAbsolutePath());
                         Bitmap image = bm;
                         if (mNewsItemIndex.usersThatRogered.size() == 0) {
-                            image = ImageHelper.getRoundTopCornerBitmap(bm, topRadius);
+                            image = ImageHelper.getRoundTopCornerBitmap(mMainService, bm, topRadius);
                         }
                         mImage.setImageBitmap(image);
                         mImage.setVisibility(View.VISIBLE);
@@ -516,7 +516,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
 
             LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) mDetails.getLayoutParams();
             if (mNewsItemIndex.usersThatRogered.size() == 0 && !isImageVisible && !isQrCodeVisible) {
-                lp.setMargins(0, UIUtils.convertDipToPixels(mActivity, 27), 0, 0);
+                lp.setMargins(0, UIUtils.convertDipToPixels(mActivity, 30), 0, 0);
             } else {
                 lp.setMargins(0, 0, 0, 0);
             }
@@ -907,7 +907,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                     if (cachedFile != null) {
                         Bitmap bm = BitmapFactory.decodeFile(cachedFile.getAbsolutePath());
                         if (shouldRoundCorners) {
-                            mImage.setImageBitmap(ImageHelper.getRoundTopCornerBitmap(bm, corderRadius));
+                            mImage.setImageBitmap(ImageHelper.getRoundTopCornerBitmap(mMainService, bm, corderRadius));
                         } else {
                             mImage.setImageBitmap(bm);
                         }
@@ -920,7 +920,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                         }
                     }
                 } else if (shouldRoundCorners) {
-                    new DownloadImageTask(mImage, true, corderRadius).execute(mNewsItem.image_url);
+                    new DownloadImageTask(mImage, true, mMainService, corderRadius).execute(mNewsItem.image_url);
                 } else {
                     new DownloadImageTask(mImage).execute(mNewsItem.image_url);
                 }
@@ -946,8 +946,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                     mQRCodeContainer.setPadding(0, UIUtils.convertDipToPixels(mActivity, 27), 0, 0);
                 }
 
-                mQRCode.setImageResource(R.drawable.qr_gray_preview);
-                // todo ruben not working
+                mQRCode.setImageResource(R.drawable.qr_gray_preview); // todo ruben not working
 
                 mMainService.postOnBIZZHandler(new SafeRunnable() {
                     @Override

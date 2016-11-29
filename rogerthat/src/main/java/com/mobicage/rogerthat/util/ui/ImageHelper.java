@@ -18,6 +18,7 @@
 
 package com.mobicage.rogerthat.util.ui;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
@@ -37,12 +38,17 @@ import com.soundcloud.android.crop.CropUtil;
 
 public class ImageHelper {
 
-    public static Bitmap getRoundTopCornerBitmap(final Bitmap bitmap, int radius) {
+    public static Bitmap getRoundTopCornerBitmap(final Context context, final Bitmap bitmap, int radius) {
         if (bitmap == null)
             return null; // saw this once when phone complains about "not enough storage"
 
         int w = bitmap.getWidth();
         int h = bitmap.getHeight();
+
+        int aw = UIUtils.getAbsoluteWidthInPixels(context);
+
+        radius = (int) Math.ceil(((float) w / aw) * radius);
+
         Bitmap output = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(output);
 

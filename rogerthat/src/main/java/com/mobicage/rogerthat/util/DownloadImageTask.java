@@ -18,6 +18,7 @@
 
 package com.mobicage.rogerthat.util;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.view.View;
@@ -34,22 +35,26 @@ public class DownloadImageTask extends SafeAsyncTask<String, Void, Bitmap> {
     boolean rounded;
     int topRadius;
     ImageView bmImage;
+    Context context;
 
     public DownloadImageTask(ImageView bmImage) {
         this.bmImage = bmImage;
         this.rounded = false;
+        this.context = null;
         this.topRadius = 0;
     }
 
     public DownloadImageTask(ImageView bmImage, boolean rounded) {
         this.bmImage = bmImage;
         this.rounded = rounded;
+        this.context = null;
         this.topRadius = 0;
     }
 
-    public DownloadImageTask(ImageView bmImage, boolean rounded, int topRadius) {
+    public DownloadImageTask(ImageView bmImage, boolean rounded, Context context, int topRadius) {
         this.bmImage = bmImage;
         this.rounded = rounded;
+        this.context = context;
         this.topRadius = topRadius;
     }
 
@@ -70,7 +75,7 @@ public class DownloadImageTask extends SafeAsyncTask<String, Void, Bitmap> {
     protected void onPostExecute(Bitmap result) {
         if (result != null) {
             if (rounded && topRadius > 0) {
-                bmImage.setImageBitmap(ImageHelper.getRoundTopCornerBitmap(result, topRadius));
+                bmImage.setImageBitmap(ImageHelper.getRoundTopCornerBitmap(this.context, result, topRadius));
             } else if (rounded) {
                 bmImage.setImageBitmap(ImageHelper.getRoundedCornerAvatar(result));
             } else {
