@@ -21,7 +21,9 @@ package com.mobicage.rogerthat.test.screenshots;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.NewsActivity;
 import com.mobicage.rogerthat.NewsListAdapter;
+import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.news.NewsItem;
+import com.mobicage.rogerthat.plugins.news.NewsPlugin;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.to.news.AppNewsItemTO;
 import com.mobicage.to.news.NewsActionButtonTO;
@@ -67,7 +69,8 @@ public class FakeNewsActivity extends NewsActivity {
         if (AppConstants.HOME_ACTIVITY_LAYOUT != R.layout.news) {
             return;
         }
-        getPlugins();
+        newsPlugin = mService.getPlugin(NewsPlugin.class);
+        friendsPlugin = mService.getPlugin(FriendsPlugin.class);
         // Insert some fake news items in the database
         int flags = NewsListAdapter.FLAG_ACTION_FOLLOW | NewsListAdapter.FLAG_ACTION_ROGERTHAT;
         int now = (int) System.currentTimeMillis();
