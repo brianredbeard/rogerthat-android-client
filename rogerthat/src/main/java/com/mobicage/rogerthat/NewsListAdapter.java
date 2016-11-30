@@ -258,10 +258,10 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
 
                     File cachedFile = mActivity.getCachedDownloader().getCachedFilePath(url);
                     if (cachedFile != null) {
-                        int topRadius = UIUtils.convertDipToPixels(mActivity, 30);
                         Bitmap bm = BitmapFactory.decodeFile(cachedFile.getAbsolutePath());
                         Bitmap image = bm;
                         if (mNewsItemIndex.usersThatRogered.size() == 0) {
+                            int topRadius = UIUtils.convertDipToPixels(mActivity, 30);
                             image = ImageHelper.getRoundTopCornerBitmap(mMainService, bm, topRadius);
                         }
                         mImage.setImageBitmap(image);
@@ -943,7 +943,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 mQRCodeCaption.setText(mNewsItem.qr_code_caption);
 
                 if (mNewsItemIndex.usersThatRogered.size() == 0 && TextUtils.isEmptyOrWhitespace(mNewsItem.image_url)) {
-                    mQRCodeContainer.setPadding(0, UIUtils.convertDipToPixels(mActivity, 27), 0, 0);
+                    mQRCodeContainer.setPadding(0, UIUtils.convertDipToPixels(mActivity, 30), 0, 0);
                 }
 
                 mQRCode.setImageResource(R.drawable.qr_gray_preview); // todo ruben not working

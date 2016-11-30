@@ -309,6 +309,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         mChannel = null;
         mEventLoopGroup = null;
         mIsConnected = false;
+        mIsRetryingToConnect = false;
     }
 
     @Override
@@ -362,6 +363,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         L.d("News channel inactive");
         super.channelInactive(ctx);
         mIsConnected = false;
+        mIsRetryingToConnect = false;
     }
 
     @Override
@@ -369,6 +371,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         L.d("News channel unregistered");
         super.channelUnregistered(ctx);
         mIsConnected = false;
+        mIsRetryingToConnect = false;
     }
 
     private void getConfiguration() {
@@ -490,6 +493,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         L.e(cause);
         ctx.close();
         mIsConnected = false;  // Not sure if necessary
+        mIsRetryingToConnect = false;
     }
 
     private void removeCallFromDB(String type, Long newsId) {
