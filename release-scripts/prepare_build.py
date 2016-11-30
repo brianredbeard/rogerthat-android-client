@@ -378,7 +378,7 @@ def convert_config():
         toolbar = doc.get('TOOLBAR')
         if toolbar:
             items += toolbar.get('items', [])
-        main_screen_contains_news = str(any((i for i in items if i['click'] == 'news'))).lower()
+        main_screen_contains_news = any((i for i in items if i['click'] == 'news'))
     else:
         color = doc["HOMESCREEN"]["color"]
 
@@ -731,7 +731,7 @@ public class AppConstants {
            app_email=app_email,
            friends_enabled=friends_enabled,
            services_enabled=services_enabled,
-           news_enabled=main_screen_contains_news,
+           news_enabled=bool_str(main_screen_contains_news),
            friends_caption_enum=friends_caption_enum,
            show_friends_in_more=show_friends_in_more,
            show_profile_in_more=show_profile_in_more,
