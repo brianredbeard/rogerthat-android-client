@@ -544,8 +544,10 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
 
         if (br.color == null) {
             mTopArea.setBackgroundResource(R.color.mc_background_color);
+            mPokeArea.setBackgroundResource(R.color.mc_background_color);
         } else {
             mTopArea.setBackgroundColor(br.color);
+            mPokeArea.setBackgroundColor(br.color);
         }
 
         int r = br.scheme == ColorScheme.LIGHT ? android.R.color.primary_text_light : android.R.color.primary_text_dark;
