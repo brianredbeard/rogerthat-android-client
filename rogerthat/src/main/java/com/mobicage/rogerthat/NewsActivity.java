@@ -469,7 +469,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
             MenuItem item = menu.getItem(i);
             switch (item.getItemId()) {
                 case R.id.saved:
-                    item.setVisible(newsStore.countNewsPinnedItems() > 0);
+                    item.setVisible(newsStore == null ? false : newsStore.countNewsPinnedItems() > 0);
                     break;
             }
         }
