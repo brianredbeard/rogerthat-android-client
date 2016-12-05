@@ -487,17 +487,17 @@
         <activity
             android:name="com.mobicage.rogerthat.OauthActivity"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.NoTitleBar" >
+            android:theme="@style/AppTheme.NoActionBar" >
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.SetupPinActivity"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.NoTitleBar" >
+            android:theme="@style/AppTheme.NoActionBar" >
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.EnterPinActivity"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.NoTitleBar" >
+            android:theme="@style/AppTheme.NoActionBar" >
         </activity>
         <activity
             android:name="com.commonsware.cwac.cam2.CameraActivity"
