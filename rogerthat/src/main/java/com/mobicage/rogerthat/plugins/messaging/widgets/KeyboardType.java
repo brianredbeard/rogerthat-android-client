@@ -20,6 +20,8 @@ package com.mobicage.rogerthat.plugins.messaging.widgets;
 
 import android.text.InputType;
 
+import com.mobicage.rogerthat.util.TextUtils;
+
 public class KeyboardType {
 
     public static final String DEFAULT = "default";
@@ -33,6 +35,9 @@ public class KeyboardType {
     public static final String NUMBER_PASSWORD = "number_password";
 
     public static int getInputType(String keyboardType) {
+        if (TextUtils.isEmptyOrWhitespace(keyboardType)) {
+            return InputType.TYPE_CLASS_TEXT;
+        }
         switch (keyboardType) {
             case AUTO_CAPITALIZED:
                 return InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS;
