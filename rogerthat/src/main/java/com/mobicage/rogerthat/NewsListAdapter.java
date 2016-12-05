@@ -1081,12 +1081,14 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 mNewsItemsById.remove(ni.id);
             }
         }
-        L.d("onBindViewHolder position: " + position);
-        L.d("onBindViewHolder mMinPosition: " + mMinPosition);
-        L.d("onBindViewHolder mMaxPosition: " + mMaxPosition);
-        L.d("onBindViewHolder newsitem size: " + mNewsItemsByPosition.size());
-        L.d("onBindViewHolder adapter size: " + getItemCount());
+
+        String logMessage = "onBindViewHolder for:\n- position: " + position + "\n- mMinPosition: " + mMinPosition + "\n- mMaxPosition: " + mMaxPosition + "\n- newsitem size: " + mNewsItemsByPosition.size() + "\n- adapter size: " + getItemCount();
         NewsItemIndex ni = mNewsItemsByPosition.get(position);
-        holder.setNewsItem(position, mActivity.newsStore.getNewsItem(ni.id), ni);
+        if (ni == null) {
+            L.bug(logMessage);
+        } else {
+            L.d(logMessage);
+            holder.setNewsItem(position, mActivity.newsStore.getNewsItem(ni.id), ni);
+        }
     }
 }
