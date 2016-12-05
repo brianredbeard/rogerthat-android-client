@@ -69,6 +69,8 @@ public class NewsStore implements Closeable {
     private final SQLiteStatement mDeleteNewsButtons;
     private final SQLiteStatement mDeleteNewsRogeredUsers;
 
+    private final SQLiteStatement mClearNewsItems;
+
     private final SQLiteDatabase mDb;
     private final MainService mMainService;
 
@@ -98,6 +100,8 @@ public class NewsStore implements Closeable {
 
         mDeleteNewsButtons = mDb.compileStatement(mMainService.getString(R.string.sql_news_delete_buttons));
         mDeleteNewsRogeredUsers = mDb.compileStatement(mMainService.getString(R.string.sql_news_delete_rogerthat_users));
+
+        mClearNewsItems = mDb.compileStatement(mMainService.getString(R.string.sql_news_clear_all));
     }
 
     @Override
@@ -125,6 +129,8 @@ public class NewsStore implements Closeable {
 
         mDeleteNewsButtons.close();
         mDeleteNewsRogeredUsers.close();
+
+        mClearNewsItems.close();
     }
 
     public Map<String, List<Long>> savePartialNewsItems(final AppNewsInfoTO[] partialNewsItems) {
@@ -206,6 +212,17 @@ public class NewsStore implements Closeable {
 //            c.close();
 //        }
 //    }
+
+    public void clearNewsItems() {
+        T.dontCare();
+        TransactionHelper.runInTransaction(mDb, "clearNewsItems", new TransactionWithoutResult() {
+            @Override
+            protected void run() {
+                mClearNewsItems.execute();
+            }
+        });
+    }
+
 
     public boolean insertNewsItem(final AppNewsItemTO item) {
         T.BIZZ();

@@ -55,6 +55,7 @@ public class TestNewsActivity {
             Context targetContext = InstrumentationRegistry.getInstrumentation()
                     .getTargetContext();
             Intent intent = new Intent(targetContext, FakeNewsActivity.class);
+            intent.putExtra("show_drawer_icon", true);
             activityTestRule.launchActivity(intent);
             Screengrab.screenshot("news");
         }

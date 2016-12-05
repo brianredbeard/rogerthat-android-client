@@ -113,6 +113,7 @@ public class FakeNewsActivity extends NewsActivity {
                 null,
                 flags,
                 null);
+        newsPlugin.getStore().clearNewsItems();
         newsPlugin.getStore().insertNewsItem(fakeNews1);
         newsPlugin.getStore().insertNewsItem(fakeNews2);
         super.onServiceBound();
