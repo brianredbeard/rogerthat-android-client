@@ -412,6 +412,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
         } else {
             messageView.setVisibility(View.VISIBLE);
             messageView.setText(mCurrentMessage.message);
+            web.setVisibility(View.GONE);
         }
 
         // Add list of members who did not ack yet
