@@ -426,7 +426,12 @@ def convert_config():
             if 'coords' in item:
                 output += 'simulateMenuItemPress(AppConstants.APP_EMAIL, new long[] { %s });' % (', '.join(map(str, item["coords"])))
             else:
-                output += 'goToActivity("%s", %s);' % (item["click"], bool_str(item.get('collapse', False)))
+                action, action_type = get_action(item)
+                output += 'goToActivity(new ServiceBoundActivity.NavigationItem(R.drawable.menu_0, %(action_type)s, %(action)s, R.string.%(string_id)s, %(collapse)s));' % dict(
+                    action_type=action_type,
+                    action=action,
+                    string_id=strings_map[item['text']],
+                    collapse=bool_str(item.get('collapse', False)))
 
                 if item["click"] == "friends":
                     main_screen_contains_friends = True

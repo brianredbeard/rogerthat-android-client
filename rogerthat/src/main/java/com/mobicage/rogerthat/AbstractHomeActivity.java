@@ -52,6 +52,7 @@ import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.RegexPatterns;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
+import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
@@ -296,32 +297,8 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity {
         mMenuItemPresser.itemPressed(smi, service.generation, null);
     }
 
-    protected void goToActivity(String activityName, boolean collapse) {
-        if ("messages".equals(activityName)) {
-            ActivityUtils.goToMessagingActivity(this, false, null);
-        } else if ("scan".equals(activityName)) {
-            ActivityUtils.goToScanActivity(this, false, null);
-        } else if ("services".equals(activityName)) {
-            goToServicesActivity(FriendStore.SERVICE_ORGANIZATION_TYPE_UNSPECIFIED, collapse);
-        } else if ("friends".equals(activityName)) {
-            ActivityUtils.goToFriendSearchActivity(this, false, null);
-        } else if ("directory".equals(activityName)) {
-            ActivityUtils.goToFriendSearchActivity(this, false, null);
-        } else if ("profile".equals(activityName)) {
-            ActivityUtils.goToProfileActivity(this, false, null);
-        } else if ("more".equals(activityName)) {
-            ActivityUtils.goToMoreActivity(this, false, null);
-        } else if ("community_services".equals(activityName)) {
-            goToServicesActivity(FriendStore.SERVICE_ORGANIZATION_TYPE_CITY, collapse);
-        } else if ("merchants".equals(activityName)) {
-            goToServicesActivity(FriendStore.SERVICE_ORGANIZATION_TYPE_PROFIT, collapse);
-        } else if ("associations".equals(activityName)) {
-            goToServicesActivity(FriendStore.SERVICE_ORGANIZATION_TYPE_NON_PROFIT, collapse);
-        } else if ("emergency_services".equals(activityName)) {
-            goToServicesActivity(FriendStore.SERVICE_ORGANIZATION_TYPE_EMERGENCY, collapse);
-        } else {
-            L.bug("unknown goToActivity: " + activityName);
-        }
+    protected void goToActivity(NavigationItem ni) {
+        ActivityUtils.goToActivity(AbstractHomeActivity.this, ni, true, null);
     }
 
     private void processIntent(final Intent intent) {

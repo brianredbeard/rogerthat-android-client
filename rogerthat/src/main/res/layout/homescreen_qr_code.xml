@@ -99,7 +99,6 @@
                     android:id="@+id/scan_btn"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:theme="@style/PrimaryButtonTheme"
                     android:gravity="center"
                     android:text="@string/scan" />
             </FrameLayout>
