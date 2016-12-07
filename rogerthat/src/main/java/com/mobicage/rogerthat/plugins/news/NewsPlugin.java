@@ -475,6 +475,9 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
     }
 
     public void createNewsNotification(final AppNewsItemTO newsItem) {
+        if (newsItem.silent) {
+            return;
+        }
         Activity currentActivity = UIUtils.getTopActivity(mMainService);
         if (currentActivity instanceof NewsActivity || currentActivity instanceof NewsPinnedActivity) {
             return;

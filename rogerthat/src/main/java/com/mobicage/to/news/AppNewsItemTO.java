@@ -35,6 +35,7 @@ public class AppNewsItemTO implements com.mobicage.rpc.IJSONable {
     public String qr_code_caption;
     public String qr_code_content;
     public long reach;
+    public boolean silent;
     public long sort_priority;
     public long sort_timestamp;
     public long timestamp;
@@ -130,6 +131,12 @@ public class AppNewsItemTO implements com.mobicage.rpc.IJSONable {
         } else {
             throw new IncompleteMessageException("com.mobicage.to.news.AppNewsItemTO object is missing field 'reach'");
         }
+        if (json.containsKey("silent")) {
+            Object val = json.get("silent");
+            this.silent = ((Boolean) val).booleanValue();
+        } else {
+            throw new IncompleteMessageException("com.mobicage.to.news.AppNewsItemTO object is missing field 'silent'");
+        }
         if (json.containsKey("sort_priority")) {
             Object val = json.get("sort_priority");
             if (val instanceof Integer) {
@@ -223,6 +230,7 @@ public class AppNewsItemTO implements com.mobicage.rpc.IJSONable {
         obj.put("qr_code_caption", this.qr_code_caption);
         obj.put("qr_code_content", this.qr_code_content);
         obj.put("reach", this.reach);
+        obj.put("silent", this.silent);
         obj.put("sort_priority", this.sort_priority);
         obj.put("sort_timestamp", this.sort_timestamp);
         obj.put("timestamp", this.timestamp);
