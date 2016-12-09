@@ -63,7 +63,6 @@ import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.MenuItemPresser;
 import com.mobicage.rogerthat.plugins.friends.MenuItemPressingActivity;
 import com.mobicage.rogerthat.plugins.friends.PokingActivity;
-import com.mobicage.rogerthat.plugins.friends.ServiceSearchActivity;
 import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
@@ -84,6 +83,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
+import me.leolin.shortcutbadger.ShortcutBadger;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public abstract class ServiceBoundActivity extends AppCompatActivity implements Pausable, ServiceBound,
@@ -785,6 +785,14 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         }
     }
 
+    private void updateShortcutBadgeCount() {
+        int count = 0;
+        for (Long c : mService.badges.values()) {
+            count += c.longValue();
+        }
+        ShortcutBadger.applyCount(mService, count);
+    }
+
     private void setupBadges() {
         if (mService == null)
             return;
@@ -792,6 +800,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         for (Map.Entry<String, Long> entry : mService.badges.entrySet()) {
             updateBadge(entry.getKey(), entry.getValue());
         }
+        updateShortcutBadgeCount();
     }
 
     public void updateBadgeCount(String key, long count) {
@@ -801,6 +810,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         }
         mService.badges.put(key, count);
         updateBadge(key, count);
+        updateShortcutBadgeCount();
     }
 
     private void updateBadge(String key, long count) {
