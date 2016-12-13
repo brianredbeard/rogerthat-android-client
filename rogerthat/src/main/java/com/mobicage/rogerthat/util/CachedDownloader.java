@@ -268,9 +268,11 @@ public class CachedDownloader {
             @Override
             protected void safeRun() throws Exception {
                 ConfigurationProvider configProvider = mMainService.getConfigurationProvider();
-                Configuration cfg = configProvider.getConfiguration(CONFIGKEY);
-                cfg.put(CONFIG_LAST_CLEANUP, System.currentTimeMillis());
-                configProvider.updateConfigurationLater(CONFIGKEY, cfg);
+                if (configProvider != null) {
+                    Configuration cfg = configProvider.getConfiguration(CONFIGKEY);
+                    cfg.put(CONFIG_LAST_CLEANUP, System.currentTimeMillis());
+                    configProvider.updateConfigurationLater(CONFIGKEY, cfg);
+                }
             }
         });
     }
