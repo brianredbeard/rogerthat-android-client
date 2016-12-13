@@ -20,6 +20,7 @@ package com.mobicage.rogerthat.plugins.news;
 
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -107,6 +108,8 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
     private long mUpdatedSince;
     private long mBadgeCount;
     private long mNewUpdatedSinceTimestamp;
+    private boolean mIsSyncing;
+    private long mSyncedNewsCount;
 
     public NewsPlugin(final MainService pMainService, ConfigurationProvider pConfigProvider, final DatabaseManager pDatabaseManager) {
         T.UI();
@@ -167,7 +170,7 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
                         L.d("Syncing news - NOK (is open)");
                     } else {
                         L.d("Syncing news - OK");
-                        getNews(true, false);
+                        getNews(true, false, true);
                     }
 
                     scheduleSyncNews();
@@ -228,6 +231,10 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
     }
 
     public boolean getNews(boolean isRefresh, boolean initial) {
+        return getNews(isRefresh, initial, false);
+    }
+
+    public boolean getNews(boolean isRefresh, boolean initial, boolean sync) {
         if (isRefresh) {
             if (mGetNewsCursor != null) {
                 // News is still loading
@@ -235,6 +242,7 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
             }
             mNewUpdatedSinceTimestamp = System.currentTimeMillis() / 1000;
             mIsLoadingInitial = initial;
+            mIsSyncing = sync;
         }
         SafeRunnable runnable = new SafeRunnable() {
             @Override
@@ -268,6 +276,7 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
         long[] newIds = new long[resultNewIds.size()];
         for (int i = 0; i < resultNewIds.size(); i++) {
             newIds[i] = resultNewIds.get(i);
+            mSyncedNewsCount += 1;
         }
 
         long[] updatedIds = new long[resultUpdatedIds.size()];
@@ -285,6 +294,13 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
             mGetNewsCursor = newCursor;
             getNews(false, false);
         } else {
+            if (mIsSyncing) {
+                if (mSyncedNewsCount > 0) {
+                    createNewsCountNotification();
+                }
+            }
+            mSyncedNewsCount = 0;
+            mIsSyncing = false;
             mIsLoadingInitial = false;
             mGetNewsCursor = null;
             putUpdatedSinceTimestamp(mNewUpdatedSinceTimestamp);
@@ -474,6 +490,29 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
         getNewsItems(ids);
     }
 
+    private void createNewsCountNotification() {
+        Activity currentActivity = UIUtils.getTopActivity(mMainService);
+        if (currentActivity instanceof NewsActivity || currentActivity instanceof NewsPinnedActivity) {
+            return;
+        }
+        String title = mMainService.getString(R.string.app_name);
+        String message = mMainService.getString(R.string.new_items_available);
+        int notificationId = R.integer.news_sync;
+        boolean withSound = true;
+        boolean withVibration = true;
+        boolean withLight = true;
+        boolean autoCancel = true;
+        int icon = R.drawable.notification_icon;
+        int notificationNumber = 0;
+        String tickerText = null;
+        long timestamp = mMainService.currentTimeMillis();
+
+        UIUtils.doNotification(mMainService, title, message, notificationId,
+                MainActivity.ACTION_NOTIFICATION_NEW_NEWS, withSound, withVibration, withLight, autoCancel, icon,
+                notificationNumber, null, null, tickerText, timestamp, Notification.PRIORITY_LOW, null, null,
+                null, NotificationCompat.CATEGORY_EVENT);
+    }
+
     public void createNewsNotification(final AppNewsItemTO newsItem) {
         if (newsItem.silent) {
             return;
@@ -501,12 +540,13 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
         int count = 0;
         Bitmap largeIcon = mMainService.getPlugin(FriendsPlugin.class).getAvatarBitmap(newsItem.sender.email);
         UIUtils.doNotification(mMainService, notificationTitle, notificationText, UIUtils.getNotificationId(newsItem.id, true),
-                MainActivity.ACTION_NOTIFICATION_NEW_NEWS, true, false, true, true, R.drawable.notification_icon,
+                MainActivity.ACTION_NOTIFICATION_NEW_NEWS, true, true, true, true, R.drawable.notification_icon,
                 count, b, null, mMainService.currentTimeMillis(), NotificationCompat.PRIORITY_DEFAULT, null,
                 longNotificationText, largeIcon, NotificationCompat.CATEGORY_PROMO);
     }
 
     public void removeNotification(long newsId) {
+        UIUtils.cancelNotification(mMainService, R.integer.news_sync);
         UIUtils.cancelNotification(mMainService, newsId);
     }
 
@@ -533,6 +573,7 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
             calendar.set(Calendar.HOUR_OF_DAY, 20);
             calendar.set(Calendar.MINUTE, 00);
         }
+
         alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), alarmIntent);
     }
 
