@@ -55,6 +55,7 @@
     <string name="attachment_name_image">&lt;imagen&gt;</string>
     <string name="attachment_name_video">&lt;Vídeo&gt;</string>
     <string name="authenticate">Autenticar</string>
+    <string name="identify">Identificar</string>
     <string name="authenticate_first">Es necesario autenticarse antes de poder continuar.</string>
     <string name="authenticate_via_your_oauth_account">Autenticarse usando su cuenta de \'%1$s\'</string>
     <string name="back">Espalda</string>

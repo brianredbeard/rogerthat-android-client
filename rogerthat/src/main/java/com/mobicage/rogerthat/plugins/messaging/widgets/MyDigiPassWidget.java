@@ -27,16 +27,14 @@ import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.ScaleDrawable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -201,12 +199,13 @@ public class MyDigiPassWidget extends Widget implements OnMDPAuthenticationListe
     private MyDigiPassWidgetResult mResult;
     private List<MdpRow> mMdpData;
     private ImageView mImageView;
-    private Button mAuthenticateBtn;
+    private LinearLayout mAuthenticateView;
     private ProgressDialog mProgressDialog;
     private ListView mResultListView;
     private MdpAdapter mResultAdapter = new MdpAdapter();
     private Typeface mFontAwesomeTypeFace;
     private MDPMobile mMdpMobile;
+    private TextView mMdpTextView;
 
     public MyDigiPassWidget(Context context) {
         super(context);
@@ -218,8 +217,8 @@ public class MyDigiPassWidget extends Widget implements OnMDPAuthenticationListe
 
     @Override
     public void initializeWidget() {
-        mAuthenticateBtn = (Button) findViewById(R.id.authenticate_btn);
-        mAuthenticateBtn.setOnClickListener(new SafeViewOnClickListener() {
+        mAuthenticateView = (LinearLayout) findViewById(R.id.authenticate_view);
+        mAuthenticateView.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
                 authenticate();
@@ -231,16 +230,8 @@ public class MyDigiPassWidget extends Widget implements OnMDPAuthenticationListe
         mProgressDialog.setMessage(mActivity.getString(R.string.processing));
         mProgressDialog.setCancelable(false);
 
-        // Scale the mdp icon based on the button height
-        @SuppressWarnings("deprecation")
-        Drawable drawable = getResources().getDrawable(R.drawable.mdp_icon);
-        drawable.setBounds(0, 0, (int) (drawable.getIntrinsicWidth() * 0.5),
-            (int) (drawable.getIntrinsicHeight() * 0.5));
-        final int size = 2 * mAuthenticateBtn.getHeight() / 3;
-        ScaleDrawable sd = new ScaleDrawable(drawable, 0, size, size);
-        mAuthenticateBtn.setCompoundDrawables(sd.getDrawable(), null, null, null);
-
         mImageView = (ImageView) findViewById(R.id.image_view);
+        mMdpTextView = (TextView) findViewById(R.id.mdp_text_view);
         mResultListView = (ListView) findViewById(R.id.list_view);
         mResultListView.setAdapter(mResultAdapter);
         mResultListView.setScrollContainer(false);
@@ -294,7 +285,7 @@ public class MyDigiPassWidget extends Widget implements OnMDPAuthenticationListe
                         dialog.dismiss();
                     }
                 });
-                builder.setPositiveButton(mAuthenticateBtn.getText(), new DialogInterface.OnClickListener() {
+                builder.setPositiveButton(mMdpTextView.getText(), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.dismiss();
@@ -463,7 +454,7 @@ public class MyDigiPassWidget extends Widget implements OnMDPAuthenticationListe
             addMdpRow(R.string.fa_home, mResult.address.getDisplayValue());
         }
 
-        mAuthenticateBtn.setVisibility(View.GONE);
+        mAuthenticateView.setVisibility(View.GONE);
         mResultListView.setVisibility(mMdpData.size() == 0 ? View.GONE : View.VISIBLE);
         mResultAdapter.notifyDataSetChanged();
 
