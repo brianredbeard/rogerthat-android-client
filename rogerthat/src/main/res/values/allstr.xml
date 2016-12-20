@@ -58,7 +58,6 @@
     <string name="attachment_can_not_be_displayed_in_your_version">The selected attachment cannot be displayed in this version of the %1$s app.</string>
     <string name="attachment_name_image">&lt;Picture&gt;</string>
     <string name="attachment_name_video">&lt;Video&gt;</string>
-    <string name="authenticate">Authenticate</string>
     <string name="identify">Identify</string>
     <string name="authenticate_first">You need to authenticate before you can continue.</string>
     <string name="authenticate_via_your_oauth_account">Authenticate using your \'%1$s\' account.</string>
