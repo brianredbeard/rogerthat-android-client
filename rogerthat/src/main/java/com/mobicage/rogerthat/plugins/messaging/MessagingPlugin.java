@@ -40,7 +40,6 @@ import android.view.ViewGroup;
 
 import com.mobicage.api.messaging.Rpc;
 import com.mobicage.rogerth.at.R;
-import com.mobicage.rogerthat.AddFriendsActivity;
 import com.mobicage.rogerthat.HomeActivity;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
@@ -127,8 +126,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-
-import me.leolin.shortcutbadger.ShortcutBadger;
 
 public class MessagingPlugin implements MobicagePlugin {
 
@@ -899,7 +896,6 @@ public class MessagingPlugin implements MobicagePlugin {
                 R.drawable.notification_icon, unreadInThreadCount, extras, null, mMainService.currentTimeMillis(),
                 priority, actionButtons, longNotificationText.toString(), largeIcon,
                 NotificationCompat.CATEGORY_MESSAGE);
-        updateUnreadCountBadge();
     }
 
     private int getNotificationIconSize() {
@@ -923,15 +919,6 @@ public class MessagingPlugin implements MobicagePlugin {
             // XXXHDPI
             return 256 - 50;
         }
-    }
-
-    /**
-     * Updates the badge shown on the app icon to reflect the total amount of messages that the user didn't see(not read) yet.
-     */
-    private void updateUnreadCountBadge() {
-        final int lastInboxOpenedTimestamp = (int) mStore.getLastInboxOpenedTimestamp();
-        final int totalUnreadCount = mStore.getTotalUnreadCount(lastInboxOpenedTimestamp);
-        ShortcutBadger.applyCount(mMainService, totalUnreadCount);
     }
 
     public void updateMessage(UpdateMessageRequestTO request) throws MessageUpdateNotAllowedException {
@@ -1358,7 +1345,6 @@ public class MessagingPlugin implements MobicagePlugin {
 
     public void removeNotificationForThread(String threadKey) {
         UIUtils.cancelNotification(mMainService, threadKey);
-        updateUnreadCountBadge();
     }
 
     public void conversationDeleted(final String threadKey) {

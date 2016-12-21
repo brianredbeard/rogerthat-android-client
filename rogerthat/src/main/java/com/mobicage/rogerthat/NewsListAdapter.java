@@ -20,7 +20,6 @@ package com.mobicage.rogerthat;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
@@ -66,7 +65,6 @@ import com.mobicage.rogerthat.util.DownloadImageTask;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
-import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
@@ -847,26 +845,18 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                             if (Friend.ACTIVE == currentExistenceStatus) {
                                 smiClickRunnable.run();
                             } else {
-                                new AlertDialog.Builder(mActivity)
-                                        .setMessage(mActivity.getString(R.string.do_you_want_to_follow_service, mNewsItem.sender.name))
-                                        .setPositiveButton(R.string.yes, new SafeDialogInterfaceOnClickListener() {
-                                            @Override
-                                            public void safeOnClick(DialogInterface dialog, int which) {
-                                                if (!mMainService.getNetworkConnectivityManager().isConnected()) {
-                                                    AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-                                                    builder.setMessage(R.string.no_internet_connection_try_again);
-                                                    builder.setPositiveButton(R.string.rogerthat, null);
-                                                    builder.create().show();
-                                                    return;
-                                                }
+                                if (!mMainService.getNetworkConnectivityManager().isConnected()) {
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
+                                    builder.setMessage(R.string.no_internet_connection_try_again);
+                                    builder.setPositiveButton(R.string.rogerthat, null);
+                                    builder.create().show();
+                                    return;
+                                }
+                                mActivity.progressDialog.show();
+                                mActivity.expectedEmailHash = mNewsItem.sender.email;
 
-                                                mActivity.progressDialog.show();
-                                                mActivity.expectedEmailHash = mNewsItem.sender.email;
-
-                                                mExecuteAfterBecameFriends = smiClickRunnable;
-                                                mFriendsPlugin.inviteFriend(mNewsItem.sender.email, null, null, false);
-                                            }
-                                        }).setNegativeButton(R.string.no, null).create().show();
+                                mExecuteAfterBecameFriends = smiClickRunnable;
+                                mFriendsPlugin.inviteFriend(mNewsItem.sender.email, null, null, false);
                             }
                         } else if (Message.MC_POKE_PREFIX.equals(buttonAction)) {
                             mNewsPlugin.saveNewsStatistics(new long[]{mNewsItem.id}, NewsPlugin.STATISTIC_ACTION);

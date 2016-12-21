@@ -196,6 +196,7 @@
     <string name="ibeacon_usage_store">Store your location</string>
     <string name="ibeacon_usage_track_location_without_concent">Track your location without your prior consent</string>
     <string name="ibeacon_usage_used_for">The %1$s app uses your location to:</string>
+    <string name="identify">Identify</string>
     <string name="initializing">Initializing…</string>
     <string name="install">Install</string>
     <string name="install_mdp">Please install MYDIGIPASS Authenticator for Mobile before proceeding.</string>
