@@ -94,9 +94,6 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     private final static String UPDATE_CAUSE_REACH = "reach";
     private final static String UPDATE_CAUSE_ROGER = "roger";
 
-    public final static int FLAG_ACTION_ROGERTHAT = 1;
-    public final static int FLAG_ACTION_FOLLOW = 2;
-
     private final static long CACHE_SIZE = 50;
     private final static long BATCH_SIZE = 10;
 
@@ -730,8 +727,8 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
             mActions.removeAllViews();
             int totalButtonCount = 0;
             int currentButton = 0;
-            boolean rogerthatButtonEnabled = SystemUtils.isFlagEnabled(mNewsItem.flags, FLAG_ACTION_ROGERTHAT);
-            boolean followButtonEnabled = SystemUtils.isFlagEnabled(mNewsItem.flags, FLAG_ACTION_FOLLOW);
+            boolean rogerthatButtonEnabled = SystemUtils.isFlagEnabled(mNewsItem.flags, NewsItem.FLAG_ACTION_ROGERTHAT);
+            boolean followButtonEnabled = SystemUtils.isFlagEnabled(mNewsItem.flags, NewsItem.FLAG_ACTION_FOLLOW);
 
             if (rogerthatButtonEnabled) {
                 totalButtonCount++;
@@ -768,7 +765,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 background.setColor(ContextCompat.getColor(mActivity, backgroundColor));
                 rogerthatButton.setBackground(background);
 
-                if (SystemUtils.isFlagEnabled(mNewsItem.flags, FLAG_ACTION_FOLLOW) || mNewsItem.buttons.length > 0) {
+                if (followButtonEnabled || mNewsItem.buttons.length > 0) {
                     ViewGroup.MarginLayoutParams marginParams = (ViewGroup.MarginLayoutParams) rogerthatButton.getLayoutParams();
                     marginParams.setMargins(0, 0, getMarginLeft(totalButtonCount, currentButton), 0);
                 }

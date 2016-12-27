@@ -37,7 +37,7 @@ public class FakeNewsActivity extends NewsActivity {
     private AppNewsItemTO createNewsItem(int id, String title, String message, String broadcast_type, String email,
                                          String sender, NewsActionButtonTO[] buttons, String[] users_that_rogered,
                                          long type, int timestamp, int sortTimestamp, int sortPriority,
-                                         String qrCodeContent, String qrCodeCaption, int flags, String imageUrl) {
+                                         String qrCodeContent, String qrCodeCaption, long flags, String imageUrl) {
         AppNewsItemTO newsItem = new AppNewsItemTO();
         newsItem.id = id;
         newsItem.title = title;
@@ -72,7 +72,7 @@ public class FakeNewsActivity extends NewsActivity {
         newsPlugin = mService.getPlugin(NewsPlugin.class);
         friendsPlugin = mService.getPlugin(FriendsPlugin.class);
         // Insert some fake news items in the database
-        int flags = NewsListAdapter.FLAG_ACTION_FOLLOW | NewsListAdapter.FLAG_ACTION_ROGERTHAT;
+        long flags = NewsItem.FLAG_ACTION_FOLLOW | NewsItem.FLAG_ACTION_ROGERTHAT;
         int now = (int) System.currentTimeMillis();
         NewsActionButtonTO actionButton = new NewsActionButtonTO();
         actionButton.action = "https://google.com";

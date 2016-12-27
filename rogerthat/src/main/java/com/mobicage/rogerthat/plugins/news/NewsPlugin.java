@@ -45,6 +45,7 @@ import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.net.NetworkConnectivityManager;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
+import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.TestUtils;
 import com.mobicage.rogerthat.util.ui.UIUtils;
@@ -514,11 +515,8 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
     }
 
     public void createNewsNotification(final AppNewsItemTO newsItem) {
-        if (newsItem.silent) {
-            return;
-        }
-        Activity currentActivity = UIUtils.getTopActivity(mMainService);
-        if (currentActivity instanceof NewsActivity || currentActivity instanceof NewsPinnedActivity) {
+        if (SystemUtils.isFlagEnabled(newsItem.flags, NewsItem.FLAG_SILENT)
+                || UIUtils.getTopActivity(mMainService) instanceof NewsActivity) {
             return;
         }
 

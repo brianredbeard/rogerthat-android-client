@@ -22,8 +22,12 @@ import com.mobicage.to.news.AppNewsItemTO;
 @SuppressWarnings("unchecked")
 public class NewsItem extends AppNewsItemTO {
 
-    public static long TYPE_NORMAL = 1;
-    public static long TYPE_QR_CODE = 2;
+    public static final long TYPE_NORMAL = 1;
+    public static final long TYPE_QR_CODE = 2;
+
+    public static final long FLAG_ACTION_ROGERTHAT = 1;
+    public static final long FLAG_ACTION_FOLLOW = 2;
+    public static final long FLAG_SILENT = 4;
 
     public boolean read;
     public boolean pinned;
