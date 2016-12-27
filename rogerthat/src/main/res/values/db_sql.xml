@@ -484,17 +484,18 @@ ORDER BY ms.acked_timestamp DESC
     <string name="sql_news_update_disabled">UPDATE news SET disabled = ? WHERE id = ?</string>
     <string name="sql_news_delete_buttons">DELETE FROM news_buttons WHERE news_id = ?</string>
     <string name="sql_news_delete_rogerthat_users">DELETE FROM news_rogered_users WHERE news_id = ?</string>
-    <string name="sql_news_count_pinned">SELECT COUNT(id) FROM news WHERE pinned = 1</string>
     <string name="sql_news_reindex">UPDATE news SET sort_key = ((127 - sort_priority) &lt;&lt; 48) + sort_timestamp, reindex = 0 WHERE reindex = 1</string>
     <string name="sql_news_update_sort_priority">UPDATE news SET sort_priority = ?, reindex = 1 WHERE id = ? AND sort_priority != ?</string>
+    <string name="sql_news_count_pinned">SELECT COUNT(id) FROM news WHERE pinned = 1</string>
     <string name="sql_news_count_items">SELECT COUNT(id) FROM news WHERE sort_key &gt;= (1 &lt;&lt; 48)</string>
     <string name="sql_news_get_news_before">SELECT id, sort_key, is_partial FROM news WHERE sort_key &gt; ? ORDER BY sort_key ASC LIMIT ?</string>
     <string name="sql_news_get_news_after">SELECT id, sort_key, is_partial FROM news WHERE sort_key &lt; ? and sort_key &gt;= (1 &lt;&lt; 48) ORDER BY sort_key DESC LIMIT ?</string>
+    <string name="sql_news_unread_since">SELECT sender_email, broadcast_type FROM news WHERE read = 0 and timestamp > ? ORDER BY sender_email, broadcast_type</string>
     <string name="sql_news_count_pinned_items">SELECT COUNT(id) FROM news WHERE pinned = 1 AND sort_key &gt;= (1 &lt;&lt; 48)</string>
     <string name="sql_news_count_pinned_items_search">SELECT COUNT(id) FROM news WHERE pinned = 1 AND sort_key &gt;= (1 &lt;&lt; 48) AND (sender_name LIKE ? OR title LIKE ? OR message LIKE ? OR broadcast_type LIKE ? OR qr_code_caption LIKE ?)</string>
     <string name="sql_news_get_pinned_news_before">SELECT id, sort_key, is_partial FROM news WHERE pinned = 1 AND sort_key &gt; ? AND (sender_name LIKE ? OR title LIKE ? OR message LIKE ? OR broadcast_type LIKE ? OR qr_code_caption LIKE ?) ORDER BY sort_key ASC LIMIT ?</string>
     <string name="sql_news_get_pinned_news_after">SELECT id, sort_key, is_partial FROM news WHERE pinned = 1 AND sort_key &lt; ? and sort_key &gt;= (1 &lt;&lt; 48) AND (sender_name LIKE ? OR title LIKE ? OR message LIKE ? OR broadcast_type LIKE ? OR qr_code_caption LIKE ?) ORDER BY sort_key DESC LIMIT ?</string>
-    <string name="sql_news_clear_all">DELETE FROM news;</string>
+    <string name="sql_news_clear_all">DELETE FROM news</string>
 
     <!-- iOS-only queries -->
     <string name="sql_friend_count_by_type">SELECT COUNT(*) FROM friend WHERE (existence = 0 OR existence = 4) AND \"type\" = ?</string>
