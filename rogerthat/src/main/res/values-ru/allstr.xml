@@ -56,6 +56,7 @@
     <string name="attachment_can_not_be_displayed_in_your_version">Выбранное вложение не может быть отображено в этой версии приложения %1$s.</string>
     <string name="attachment_name_image">&lt;Picture&gt;</string>
     <string name="attachment_name_video">&lt;Video&gt;</string>
+    <string name="authenticate">Подтвердить личность</string>
     <string name="authenticate_first">Чтобы продолжить, вам необходимо подтвердить вашу личность.</string>
     <string name="authenticate_via_your_oauth_account">Подтвердите личность, используя ваш аккаунт %1$s.</string>
     <string name="back">Назад</string>
@@ -189,6 +190,7 @@
     <string name="ibeacon_usage_store">Сохранить ваше местоположение</string>
     <string name="ibeacon_usage_track_location_without_concent">Отслеживать мое местоположение без предварительного согласия</string>
     <string name="ibeacon_usage_used_for">Приложение %1$s использует ваше местоположение, чтобы:</string>
+    <string name="identify">идентифицировать</string>
     <string name="initializing">Инициализация…</string>
     <string name="install">Установить</string>
     <string name="install_mdp">Чтобы продолжить, установите приложение MYDIGIPASS Authenticator for Mobile.</string>

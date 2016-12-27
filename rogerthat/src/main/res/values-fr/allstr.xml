@@ -58,6 +58,7 @@
     <string name="attachment_can_not_be_displayed_in_your_version">Le document sélectionné ne peut pas être affiché dans cette version de %1$s application.</string>
     <string name="attachment_name_image">&lt;Image&gt;</string>
     <string name="attachment_name_video">&lt;Vidéo&gt;</string>
+    <string name="authenticate">Authentifier</string>
     <string name="authenticate_first">Avant de commencer, merci de vous authentifier.</string>
     <string name="authenticate_via_your_oauth_account">Authentifier en utilisant votre compte \'%1$s\'</string>
     <string name="back">Arrière</string>
@@ -193,6 +194,7 @@
     <string name="ibeacon_usage_store">Sauvegarder votre position.</string>
     <string name="ibeacon_usage_track_location_without_concent">Repérer votre position sans votre consentement préalable.</string>
     <string name="ibeacon_usage_used_for">%1$s utilise votre position pour:</string>
+    <string name="identify">Identifier</string>
     <string name="initializing">Initialisation…</string>
     <string name="install">Installer</string>
     <string name="install_mdp">S\'il vous plaît installer MYDIGIPASS Authenticator Mobile avant de poursuivre.</string>

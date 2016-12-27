@@ -166,6 +166,7 @@
     <string name="ibeacon_usage_store">Guardar sua localização.</string>
     <string name="ibeacon_usage_track_location_without_concent">Rastrear sua localização sem consentimento prévio.</string>
     <string name="ibeacon_usage_used_for">%1$s utiliza sua localização para:</string>
+    <string name="identify">Identificar</string>
     <string name="invitation_acception_failure">Ocorreu um erro ao aceitar o convite. Tente novamente.</string>
     <string name="invitation_sent_successfully">Convite enviado com sucesso.</string>
     <string name="invitation_successfully_accepted">Convite de %1$s aceito com sucesso.</string>

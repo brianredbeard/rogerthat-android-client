@@ -54,7 +54,7 @@
     <string name="attachment_can_not_be_displayed_in_your_version">El adjunto seleccionado no puede visualizarse en esta versión de la aplicación %1$s.</string>
     <string name="attachment_name_image">&lt;imagen&gt;</string>
     <string name="attachment_name_video">&lt;Vídeo&gt;</string>
-    <string name="identify">Identificar</string>
+    <string name="authenticate">Autenticar</string>
     <string name="authenticate_first">Es necesario autenticarse antes de poder continuar.</string>
     <string name="authenticate_via_your_oauth_account">Autenticarse usando su cuenta de \'%1$s\'</string>
     <string name="back">Espalda</string>
@@ -75,6 +75,7 @@
     <string name="check_in_at">Le gustaría hacer Check-in en %1$s?</string>
     <string name="check_in_title">¿Check-in?</string>
     <string name="chip_number">Nº de chip</string>
+    <string name="click_magnifying_glass_to_search_services">Haz clic en la lupa para buscar servicios en tu vecindario.</string>
     <string name="colleagues">Colegas</string>
     <string name="community_service">Servicios comunitarios</string>
     <string name="complete_your_profile">Completa tu perfil</string>
@@ -137,7 +138,7 @@
     <string name="fb_wall_post_caption">Únete a mi en %1$s!</string>
     <string name="fb_wall_post_description">Saludos, escanee my identificación %1$s para conectar conmigo en %1$s.</string>
     <string name="female">Femenino</string>
-    <string name="file_downloaded">El archivo se descargó</string>
+    <string name="file_downloaded">Archivo descargado</string>
     <string name="find_colleagues">Encontrar colegas</string>
     <string name="find_contacts">Encontrar contactos</string>
     <string name="find_from_facebook">Buscar contactos de Facebook</string>
@@ -181,6 +182,7 @@
     <string name="ibeacon_usage_store">Almacene su ubicación</string>
     <string name="ibeacon_usage_track_location_without_concent">Seguimiento de su ubicación sin su consentimiento previo</string>
     <string name="ibeacon_usage_used_for">%1$s utiliza su ubicación para:</string>
+    <string name="identify">Identificate</string>
     <string name="initializing">Inicializando ...</string>
     <string name="install">Instalar</string>
     <string name="install_mdp">Por favor, instale MYDIGIPASS Authenticator para móviles antes de proceder.</string>
@@ -262,8 +264,11 @@
     <string name="nextButton">Siguiente</string>
     <string name="next_in_thread">Mensajes siguientes en esta conversación</string>
     <string name="no">No</string>
+    <string name="no_associations_found">Todavía no sigues ninguna asociación en %1$s.</string>
     <string name="no_camera_available">Necesita una cámara para hacer esto.</string>
     <string name="no_camera_available_title">Cámara no disponible</string>
+    <string name="no_care_institutions_found">Todavía no sigues ninguna institución de salud en %1$s.</string>
+    <string name="no_community_services_found">Todavía no sigues ningún servicio comunitario en %1$s.</string>
     <string name="no_contacts_with_email_found">No se han podido encontrar contactos telefónicos que dispongan de una dirección de correo electrónico.</string>
     <string name="no_friends_found">Aún no dispone de contactos en %1$s.</string>
     <string name="no_friends_locations_found">No se han encontrado ubicaciones.</string>
@@ -271,6 +276,7 @@
     <string name="no_gps_location_fetched_title">Localizacion aún no recuperada</string>
     <string name="no_idea">No lo sé</string>
     <string name="no_internet_connection_try_again">No dispone de acceso a Internet. Por favor, compruebe su configuración de red e inténtelo de nuevo.</string>
+    <string name="no_merchants_found">Todavía no sigues ningún comerciante en %1$s.</string>
     <string name="no_network_available_when_online_transfer_continues">Red no disponible, la transferencia continuará cuando esté conectado a una red.</string>
     <string name="no_network_available_when_online_transfer_continues_tilte">Red no disponible</string>
     <string name="no_network_available_when_wifi_online_transfer_continues">Red no disponible, la transferencia continuará cuando esté conectado a WIFI.</string>
@@ -278,6 +284,7 @@
     <string name="no_photo_selected_tilte">Foto no seleccionada</string>
     <string name="no_rogerthat_qr">El código QR escaneado no pertenece a %2$s.\n\n%1$s</string>
     <string name="no_saved_messages_found">No se han encontrado mensajes guardados.</string>
+    <string name="no_services_found">Todavía no sigues ningún servicio en %1$s.</string>
     <string name="no_wifi_available_when_online_transfer_continues">WIFI no disponible, la transferencia continuará cuando se conecte a WIFI o cambie su configuración de manera que no necesite transferirse por WIFI.</string>
     <string name="no_wifi_available_when_online_transfer_continues_tilte">WIFI no disponible</string>
     <string name="normal">Normal</string>
