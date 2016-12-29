@@ -225,23 +225,28 @@ public class CachedDownloader {
         }
     }
 
-    public File getCachedFilePath(String url) {
-        String urlHash = getHash(url);
+    public File getCachedFilePath(final String url) {
+        final String urlHash = getHash(url);
         File file = getCachedDownloadDir();
-        file = new File(file, urlHash);
+        final File file2 = new File(file, urlHash);
 
-        if (file.exists()) {
-            updateModificationDate(file);
-            return file;
+        if (file2.exists()) {
+            updateModificationDate(file2);
+            return file2;
         }
 
         if (mQueue.contains(urlHash)) {
             return null;
         }
 
-        final DownloadTask downloadTask = new DownloadTask(urlHash, url, file);
-        mQueue.add(urlHash);
-        downloadTask.execute(url);
+        mMainService.runOnUIHandler(new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                final DownloadTask downloadTask = new DownloadTask(urlHash, url, file2);
+                mQueue.add(urlHash);
+                downloadTask.execute(url);
+            }
+        });
 
         return null;
     }

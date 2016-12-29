@@ -905,18 +905,7 @@ public class AdvancedOrderWidget extends Widget {
         });
 
         if (!TextUtils.isEmptyOrWhitespace(row.imageUrl)) {
-            if (mCachedDownloader.isStorageAvailable()) {
-                File cachedFile = mCachedDownloader.getCachedFilePath(row.imageUrl);
-                if (cachedFile != null) {
-                    Bitmap bm = BitmapFactory.decodeFile(cachedFile.getAbsolutePath());
-                    imageView.setImageBitmap(bm);
-                    imageView.setVisibility(View.VISIBLE);
-                } else {
-                    // item started downloading intent when ready
-                }
-            } else {
-                new DownloadImageTask(imageView).execute(row.imageUrl);
-            }
+            new DownloadImageTask(mCachedDownloader, imageView, false, mActivity, 0).execute(row.imageUrl);
         }
 
         mActivity.getMainService().postOnUIHandler(new SafeRunnable() {

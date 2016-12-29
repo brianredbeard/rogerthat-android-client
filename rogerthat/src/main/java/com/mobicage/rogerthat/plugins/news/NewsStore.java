@@ -25,6 +25,7 @@ import android.database.sqlite.SQLiteStatement;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainService;
+import com.mobicage.rogerthat.util.DebugUtils;
 import com.mobicage.rogerthat.util.db.DatabaseManager;
 import com.mobicage.rogerthat.util.db.Transaction;
 import com.mobicage.rogerthat.util.db.TransactionHelper;
@@ -42,6 +43,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import static com.mobicage.rogerthat.util.db.DBUtils.bindString;
 
@@ -533,6 +535,7 @@ public class NewsStore implements Closeable {
     }
 
     private List<NewsItemIndex> getNewsItemsFromCursor(Cursor c) {
+        T.dontCare();
         List<NewsItemIndex> newsItems = new ArrayList<>();
         try {
             if (!c.moveToFirst()) {
@@ -547,16 +550,21 @@ public class NewsStore implements Closeable {
         return newsItems;
     }
 
-    public List<NewsItemIndex> getNewsBefore(long sortKey, long count) {
-        T.UI();
-        final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_news_get_news_before),
-                new String[]{"" + sortKey, "" + count});
+    public List<NewsItemIndex> getNewsBefore(final long sortKey, final long count) {
+        T.dontCare();
+        return DebugUtils.profile("NewsStore.getNewsBefore()", new Callable<List<NewsItemIndex>>() {
+            @Override
+            public List<NewsItemIndex> call() throws Exception {
+                final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_news_get_news_before),
+                        new String[]{"" + sortKey, "" + count});
 
-        return getNewsItemsFromCursor(c);
+                return getNewsItemsFromCursor(c);
+            }
+        });
     }
 
     public List<NewsItemIndex> getNewsBefore(long sortKey, long count, String qry) {
-        T.UI();
+        T.dontCare();
         String query = "%" + qry + "%";
         final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_news_get_pinned_news_before),
                 new String[]{"" + sortKey, query, query, query, query, query, "" + count});
@@ -564,18 +572,22 @@ public class NewsStore implements Closeable {
         return getNewsItemsFromCursor(c);
     }
 
-    public List<NewsItemIndex> getNewsAfter(long sortKey, long count) {
-        T.UI();
+    public List<NewsItemIndex> getNewsAfter(final long sortKey, final long count) {
+        T.dontCare();
+        return DebugUtils.profile("NewsStore.getNewsAfter()", new Callable<List<NewsItemIndex>>() {
+            @Override
+            public List<NewsItemIndex> call() throws Exception {
+                final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_news_get_news_after),
+                        new String[]{"" + sortKey, "" + count});
 
-        final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_news_get_news_after),
-                new String[]{"" + sortKey, "" + count});
-
-        return getNewsItemsFromCursor(c);
+                return getNewsItemsFromCursor(c);
+            }
+        });
     }
 
 
     public List<NewsItemIndex> getNewsAfter(long sortKey, long count, String qry) {
-        T.UI();
+        T.dontCare();
         String query = "%" + qry + "%";
         final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_news_get_pinned_news_after),
                 new String[]{"" + sortKey, query, query, query, query, query, "" + count});
@@ -614,6 +626,7 @@ public class NewsStore implements Closeable {
     }
 
     private NewsItemIndex readNewsItemIndex(Cursor c) {
+        T.dontCare();
         NewsItemIndex newsItemIndex = new NewsItemIndex();
         newsItemIndex.id = c.getLong(0);
         newsItemIndex.sortKey = c.getLong(1);

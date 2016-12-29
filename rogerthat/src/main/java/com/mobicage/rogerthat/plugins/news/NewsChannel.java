@@ -91,15 +91,15 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
     private int mPort;
     private Channel mChannel;
     private EventLoopGroup mEventLoopGroup;
-    private boolean mIsConnected;
+    private volatile boolean mIsConnected;
     private ConfigurationProvider mConfigurationProvider;
     private boolean mIsRetryingToConnect = false;
-    private boolean mAuthenticated = false;
+    private volatile boolean mAuthenticated = false;
     private Timer mKeepAliveTimer;
 
-    private Set<Long> mReadsToSend = new HashSet<>();
-    private Set<Long> mRogersToSend = new HashSet<>();
-    private List<String> mStashedCommands = new ArrayList<>();
+    private final Set<Long> mReadsToSend = new HashSet<>();
+    private final Set<Long> mRogersToSend = new HashSet<>();
+    private final List<String> mStashedCommands = new ArrayList<>();
 
     public boolean isConnected() {
         return mIsConnected;
@@ -278,13 +278,14 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
     }
 
     private void sendCommand(Command command, String data) {
+        T.dontCare(); //
         String line = String.format("%s: %s", command, data);
         if (CloudConstants.NEWS_CHANNEL_SSL && mAuthenticated && mIsConnected) {
             sendLine(line);
         } else if (!CloudConstants.NEWS_CHANNEL_SSL && mIsConnected) {
             sendLine(line);
         } else {
-            // Stash commands when not connected/authenticated. Will be send once authenticated.
+            // Stash commands when not connected/authenticated. Will be sent once authenticated.
             mStashedCommands.add(line);
         }
     }
@@ -454,6 +455,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
     }
 
     public void statsNews(List<Long> newsIds) {
+        T.dontCare();
         sendCommand(Command.NEWS_STATS, android.text.TextUtils.join(" ", newsIds));
     }
 

@@ -24,34 +24,24 @@ import android.graphics.BitmapFactory;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeAsyncTask;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
 
+import java.io.File;
 import java.io.InputStream;
 
 
 public class DownloadImageTask extends SafeAsyncTask<String, Void, Bitmap> {
-    boolean rounded;
-    int topRadius;
-    ImageView bmImage;
-    Context context;
+    private boolean rounded;
+    private int topRadius;
+    private ImageView bmImage;
+    private Context context;
+    private CachedDownloader cachedDownloader;
 
-    public DownloadImageTask(ImageView bmImage) {
-        this.bmImage = bmImage;
-        this.rounded = false;
-        this.context = null;
-        this.topRadius = 0;
-    }
-
-    public DownloadImageTask(ImageView bmImage, boolean rounded) {
-        this.bmImage = bmImage;
-        this.rounded = rounded;
-        this.context = null;
-        this.topRadius = 0;
-    }
-
-    public DownloadImageTask(ImageView bmImage, boolean rounded, Context context, int topRadius) {
+    public DownloadImageTask(CachedDownloader cachedDownloader, ImageView bmImage, boolean rounded, Context context, int topRadius) {
+        this.cachedDownloader = cachedDownloader;
         this.bmImage = bmImage;
         this.rounded = rounded;
         this.context = context;
@@ -61,27 +51,43 @@ public class DownloadImageTask extends SafeAsyncTask<String, Void, Bitmap> {
     @Override
     protected Bitmap safeDoInBackground(String... urls) {
         String urldisplay = urls[0];
-        Bitmap mIcon11 = null;
         try {
-            InputStream in = new java.net.URL(urldisplay).openStream();
-            mIcon11 = BitmapFactory.decodeStream(in);
+            final Bitmap bitmap;
+            if (cachedDownloader.isStorageAvailable()) {
+                File cachedFile = cachedDownloader.getCachedFilePath(urldisplay);
+                if (cachedFile != null) {
+                    bitmap = BitmapFactory.decodeFile(cachedFile.getAbsolutePath());
+                } else {
+                    // item started downloading intent when ready
+                    bitmap = null;
+                }
+            } else {
+                bitmap = BitmapFactory.decodeStream(new java.net.URL(urldisplay).openStream());
+            }
+            if (bitmap != null) {
+                if (rounded && topRadius > 0)
+                    return ImageHelper.getRoundTopCornerBitmap(this.context, bitmap, topRadius);
+                else if (rounded)
+                    return ImageHelper.getRoundedCornerAvatar(bitmap);
+            }
+            return bitmap;
         } catch (Exception e) {
             L.d("DownloadImageTask error", e);
+            return null;
         }
-        return mIcon11;
     }
 
     @Override
     protected void onPostExecute(Bitmap result) {
         if (result != null) {
-            if (rounded && topRadius > 0) {
-                bmImage.setImageBitmap(ImageHelper.getRoundTopCornerBitmap(this.context, result, topRadius));
-            } else if (rounded) {
-                bmImage.setImageBitmap(ImageHelper.getRoundedCornerAvatar(result));
-            } else {
-                bmImage.setImageBitmap(result);
-            }
+            bmImage.setImageBitmap(result);
             bmImage.setVisibility(View.VISIBLE);
+        } else {
+            if (rounded) {
+                bmImage.setImageResource(R.drawable.news_image_placeholder_rounded);
+            } else {
+                bmImage.setImageResource(R.drawable.news_image_placeholder);
+            }
         }
     }
 }

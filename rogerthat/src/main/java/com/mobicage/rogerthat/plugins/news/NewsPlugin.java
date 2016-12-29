@@ -39,6 +39,7 @@ import com.mobicage.rogerthat.config.Configuration;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
 import com.mobicage.rogerthat.plugins.MobicagePlugin;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
+import com.mobicage.rogerthat.util.DebugUtils;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.db.DatabaseManager;
 import com.mobicage.rogerthat.util.logging.L;
@@ -66,6 +67,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Callable;
 
 
 public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
@@ -454,21 +456,32 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
         return mBadgeCount;
     }
 
-    public List<NewsItemIndex> getNewsBefore(long sortKey, long count, String qry) {
-        T.UI();
-        List<NewsItemIndex> newsItems = qry == null ? mStore.getNewsBefore(sortKey, count) : mStore.getNewsBefore(sortKey, count, qry);
-        loadNewsItems(newsItems);
-        return newsItems;
+    public List<NewsItemIndex> getNewsBefore(final long sortKey, final long count, final String qry) {
+        T.dontCare();
+        return DebugUtils.profile("NewsPlugin.getNewsBefore()", new Callable<List<NewsItemIndex>>() {
+            @Override
+            public List<NewsItemIndex> call() throws Exception {
+                List<NewsItemIndex> newsItems = qry == null ? mStore.getNewsBefore(sortKey, count) : mStore.getNewsBefore(sortKey, count, qry);
+                loadNewsItems(newsItems);
+                return newsItems;
+            }
+        });
     }
 
-    public List<NewsItemIndex> getNewsAfter(long sortKey, long count, String qry) {
-        T.UI();
-        List<NewsItemIndex> newsItems = qry == null ? mStore.getNewsAfter(sortKey, count) : mStore.getNewsAfter(sortKey, count, qry);
-        loadNewsItems(newsItems);
-        return newsItems;
+    public List<NewsItemIndex> getNewsAfter(final long sortKey, final long count, final String qry) {
+        T.dontCare();
+        return DebugUtils.profile("NewsPlugin.getNewsAfter()", new Callable<List<NewsItemIndex>>() {
+            @Override
+            public List<NewsItemIndex> call() throws Exception {
+                List<NewsItemIndex> newsItems = qry == null ? mStore.getNewsAfter(sortKey, count) : mStore.getNewsAfter(sortKey, count, qry);
+                loadNewsItems(newsItems);
+                return newsItems;
+            }
+        });
     }
 
     private void loadNewsItems(List<NewsItemIndex> newsItems) {
+        T.dontCare();
         if (TestUtils.isRunningTest()) {
             return;
         }
