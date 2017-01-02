@@ -299,6 +299,9 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
         } else {
             if (mIsSyncing) {
                 if (mSyncedNewsCount > 0) {
+                    mBadgeCount = mSyncedNewsCount;
+                    storeBadgeCount();
+                    updateBadge();
                     createNewsCountNotification();
                 }
             }

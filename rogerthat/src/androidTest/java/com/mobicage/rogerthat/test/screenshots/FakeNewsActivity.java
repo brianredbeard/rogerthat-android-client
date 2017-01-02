@@ -162,7 +162,7 @@ public class FakeNewsActivity extends NewsActivity {
                 itemImageUrl2,
                 sampleItemAvatarId2);
         AppNewsItemTO fakeNews1 = createNewsItem(1,
-                getString(R.string.sample_news_item_title_1),
+                null,
                 getString(R.string.sample_news_item_message_1),
                 getString(R.string.news),
                 "sample.service@rogerthat.net",
@@ -174,7 +174,7 @@ public class FakeNewsActivity extends NewsActivity {
                 now,
                 10,
                 "{'c':5629499534213120}",
-                null,
+                getString(R.string.sample_news_item_title_1),
                 flags,
                 itemImageUrl1,
                 sampleItemAvatarId1);
