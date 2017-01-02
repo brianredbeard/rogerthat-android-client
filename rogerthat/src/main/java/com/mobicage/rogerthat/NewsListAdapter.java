@@ -75,7 +75,6 @@ import com.mobicage.rogerthat.util.time.TimeUtils;
 import com.mobicage.rogerthat.util.ui.ScaleImageView;
 import com.mobicage.rogerthat.util.ui.TestUtils;
 import com.mobicage.rogerthat.util.ui.UIUtils;
-import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.to.news.NewsActionButtonTO;
 
 import java.util.ArrayList;
@@ -251,12 +250,15 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 String action = intent.getAction();
                 if (CachedDownloader.CACHED_DOWNLOAD_AVAILABLE_INTENT.equals(action)) {
                     String url = intent.getStringExtra("url");
-                    if (!url.equals(mNewsItem.image_url)) {
+
+                    if (url.equals(mNewsItem.image_url)) {
+                        new DownloadImageTask(mActivity.getCachedDownloader(), mImage, mNewsItemIndex.usersThatRogered.size() == 0, mActivity, TOP_RADIUS).execute(url);
                         return null;
                     }
+                    if (url.equals(mNewsItem.getAvatarUrl())) {
+                        new DownloadImageTask(mActivity.getCachedDownloader(), mServiceAvatar, true, mActivity, 0).execute(mNewsItem.getAvatarUrl());
+                    }
 
-                    new DownloadImageTask(mActivity.getCachedDownloader(), mImage,
-                            mNewsItemIndex.usersThatRogered.size() == 0, mActivity, TOP_RADIUS).execute(url);
                     return null;
                 } else if (NewsPlugin.PINNED_NEWS_ITEM_INTENT.equals(action)) {
                     if (mActivity instanceof NewsPinnedActivity) {
@@ -892,7 +894,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         private void setupAvatar() {
             Bitmap avatar = mActivity.friendsPlugin.getStore().getAvatarBitmap(mNewsItem.sender.email);
             if (avatar == null) {
-                new DownloadImageTask(mActivity.getCachedDownloader(), mServiceAvatar, true, mActivity, 0).execute(CloudConstants.CACHED_AVATAR_URL_PREFIX + mNewsItem.sender.avatar_id);
+                new DownloadImageTask(mActivity.getCachedDownloader(), mServiceAvatar, true, mActivity, 0).execute(mNewsItem.getAvatarUrl());
             } else {
                 mServiceAvatar.setImageBitmap(avatar);
             }

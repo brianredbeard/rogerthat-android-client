@@ -84,7 +84,11 @@ public class DownloadImageTask extends SafeAsyncTask<String, Void, Bitmap> {
             bmImage.setVisibility(View.VISIBLE);
         } else {
             if (rounded) {
-                bmImage.setImageResource(R.drawable.news_image_placeholder_rounded);
+                if (topRadius > 0) {
+                    bmImage.setImageResource(R.drawable.news_image_placeholder_rounded);
+                } else {
+                    bmImage.setImageResource(R.drawable.news_avatar_placeholder);
+                }
             } else {
                 bmImage.setImageResource(R.drawable.news_image_placeholder);
             }

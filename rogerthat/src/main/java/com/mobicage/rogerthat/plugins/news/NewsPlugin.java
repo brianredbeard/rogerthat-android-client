@@ -389,7 +389,7 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
     }
 
     public void addUser(long newsId, String email) {
-        T.BIZZ();
+        T.dontCare();
         mStore.addUser(newsId, email);
         setNewsItemSortPriority(newsId, SORT_PRIORITY_FRIEND_ROGERED);
     }
