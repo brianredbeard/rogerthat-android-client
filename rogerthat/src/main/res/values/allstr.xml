@@ -336,6 +336,7 @@
     <string name="processing_invitation">Processing %1$s invitation…</string>
     <string name="processing_scan">Processing scan…</string>
     <string name="profile">Profile</string>
+    <string name="promo">Promo</string>
     <string name="qr_call_tel">Do you wish to call %1$s?</string>
     <string name="qr_open_url">Do you wish to open the following web page:\n\n%1$s</string>
     <string name="reach">Reach:</string>
@@ -412,12 +413,10 @@
     <string name="rogerthat">Roger that</string>
     <string name="rogerthat_system">Rogerthat System</string>
     <string name="rogerthat_welcome_enterprise">Welcome to the %1$s app.\n\nBefore you can get started you need to register your user account.</string>
-    <string name="sample_news_item_message_1">A free aperitif at a cozy dinner with tasty tapas!\n\nThis offer is valid until the end of January 2017.</string>
-    <string name="sample_news_item_message_2">We wish you a merry Christmas and offer you a Christmas present worth 5 euros.\nWhen purchasing a minumum amount of 25 euro you will immediately receive a one-time € 5 discount.\nIn grattitude for the many years of trust.\nOffer valid from 17/12/2016 till 31/01/2017.</string>
-    <string name="sample_news_item_title_1">Scan this coupon at La Tapa Canaria and receive...</string>
-    <string name="sample_news_item_title_2">Christmas gift of € 5</string>
-    <string name="website">Website</string>
-    <string name="promo">Promo</string>
+    <string name="sample_news_message_1">A free aperitif at a cozy dinner with tasty tapas!\n\nThis offer is valid until the end of January 2017.</string>
+    <string name="sample_news_message_2">We wish you a merry Christmas and offer you a Christmas present worth 5 euros.\nWhen purchasing a minumum amount of 25 euro you will immediately receive a one-time € 5 discount.\nIn grattitude for the many years of trust.\nOffer valid from 17/12/2016 till 31/01/2017.</string>
+    <string name="sample_news_title_1">Scan this coupon at La Tapa Canaria and receive...</string>
+    <string name="sample_news_title_2">Christmas gift of € 5</string>
     <string name="save">Save</string>
     <string name="save_canned_message_dialog_title">Provide a name for the saved message</string>
     <string name="save_canned_message_no_name">no name</string>
@@ -525,6 +524,7 @@
     <string name="validation_failed">Invalid input</string>
     <string name="view_my_profile">View my profile</string>
     <string name="warning">Warning</string>
+    <string name="website">Website</string>
     <string name="wont_store_data">Don\'t worry, we\'ll never store this data.</string>
     <string name="x_min_ago">%1$s min ago</string>
     <string name="x_new_items_available">%1$d new items available</string>

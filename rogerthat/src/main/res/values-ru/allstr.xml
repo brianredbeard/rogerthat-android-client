@@ -403,12 +403,6 @@
     <string name="rogerthat">Так точно</string>
     <string name="rogerthat_system">Система Rogerthat</string>
     <string name="rogerthat_welcome_enterprise">Добро пожаловать в приложение %1$s.\n\nЧтобы начать работу, вам необходимо зарегистрировать ваш аккаунт пользователя.</string>
-    <string name="sample_news_item_message_1">Новости — хороший способ привлечь внимание клиентов.</string>
-    <string name="sample_news_item_message_2">Придите и добавьте баллы на вашу мобильную карту лояльности, чтобы выиграть бесплатный ужин из 3 блюд для 2 персон.</string>
-    <string name="sample_news_item_sender_1">Пример услуги</string>
-    <string name="sample_news_item_sender_2">Пример ресторана</string>
-    <string name="sample_news_item_title_1">Это пример заголовка новости</string>
-    <string name="sample_news_item_title_2">Сканируйте вашу мобильную карту лояльности и выиграйте ужин на 2 персоны!</string>
     <string name="save">Сохранить</string>
     <string name="save_canned_message_dialog_title">Укажите название для сохраненного сообщения</string>
     <string name="save_canned_message_no_name">нет имени</string>
@@ -515,6 +509,7 @@
     <string name="validation_failed">Некорректно введенные данные</string>
     <string name="view_my_profile">Смотреть мой профиль</string>
     <string name="warning">Предупреждение</string>
+    <string name="website">Веб-сайт</string>
     <string name="wont_store_data">Не волнуйтесь, мы не будем хранить эти данные.</string>
     <string name="x_min_ago">%1$s мин. назад</string>
     <string name="x_new_items_available">Доступно новых элементов: %1$d </string>

@@ -145,8 +145,8 @@ public class FakeNewsActivity extends NewsActivity {
         NewsActionButtonTO[] actionButtons = new NewsActionButtonTO[]{actionButton};
 
         AppNewsItemTO fakeNews2 = createNewsItem(2,
-                getString(R.string.sample_news_item_title_2),
-                getString(R.string.sample_news_item_message_2),
+                getString(R.string.sample_news_title_2),
+                getString(R.string.sample_news_message_2),
                 getString(R.string.promo),
                 "sample.service@rogerthat.net",
                 "La Tapa Canaria",
@@ -163,7 +163,7 @@ public class FakeNewsActivity extends NewsActivity {
                 sampleItemAvatarId2);
         AppNewsItemTO fakeNews1 = createNewsItem(1,
                 null,
-                getString(R.string.sample_news_item_message_1),
+                getString(R.string.sample_news_message_1),
                 getString(R.string.news),
                 "sample.service@rogerthat.net",
                 "Aquarium Neon",
@@ -174,7 +174,7 @@ public class FakeNewsActivity extends NewsActivity {
                 now,
                 10,
                 "{'c':5629499534213120}",
-                getString(R.string.sample_news_item_title_1),
+                getString(R.string.sample_news_title_1),
                 flags,
                 itemImageUrl1,
                 sampleItemAvatarId1);

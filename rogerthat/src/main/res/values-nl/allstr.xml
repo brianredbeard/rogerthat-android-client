@@ -336,6 +336,7 @@
     <string name="processing_invitation">Vriendschapsverzoek verwerken…</string>
     <string name="processing_scan">Scan verwerken…</string>
     <string name="profile">Profiel</string>
+    <string name="promo">Promo</string>
     <string name="qr_call_tel">Wenst u te bellen naar %1$s?</string>
     <string name="qr_open_url">Wenst u de volgende web pagina te openen:\n\n%1$s</string>
     <string name="reach">Bereik:</string>
@@ -412,12 +413,10 @@
     <string name="rogerthat">Roger that</string>
     <string name="rogerthat_system">Rogerthat Systeem</string>
     <string name="rogerthat_welcome_enterprise">Welkom bij de %1$s app. \n\nVoordat u van start kunt moet je eerst uw account registreren.</string>
-    <string name="sample_news_item_message_1">Nieuwsberichten zijn een fijne manier om je klanten te bereiken.</string>
-    <string name="sample_news_item_message_2">Laat je mobiele getrouwheidskaart aan de kassa scannen en win een 3-gangenmenu voor 2 personen.</string>
-    <string name="sample_news_item_sender_1">Voorbeeld dienst</string>
-    <string name="sample_news_item_sender_2">Voorbeeld restaurant</string>
-    <string name="sample_news_item_title_1">Dit is een voorbeeld van een titel voor een nieuwsbericht</string>
-    <string name="sample_news_item_title_2">Scan je mobiele getrouwheidskaart en win een diner voor 2 personen!</string>
+    <string name="sample_news_message_1">Gratis onze huisaperitief voor jou en jouw gezelschap bij een gezellig dineetje van lekkere tapas!\n\nDeze actie is geldig tot eind januari 2017</string>
+    <string name="sample_news_message_2">Wij wensen u prettige feesten en bieden u een KERSTGESCHENK aan ter waarde van 5 euro.\n\nBij aankoop voor een bedrag van minimum 25 euro ontvangt u 5€ directe éénmalige korting.\n\nUit dank voor het jarenlange vertrouwen. \nActie geldig van 17/12/2016 tem 31/01/2017</string>
+    <string name="sample_news_title_1">Scan deze coupon bij La Tapa Canaria en ontvang ...</string>
+    <string name="sample_news_title_2">KERSTGESCHENK van 5€</string>
     <string name="save">Bewaren</string>
     <string name="save_canned_message_dialog_title">Geef een naam voor het standaard bericht</string>
     <string name="save_canned_message_no_name">zonder naam</string>
@@ -525,6 +524,7 @@
     <string name="validation_failed">Ongeldige input</string>
     <string name="view_my_profile">Mijn profiel bekijken</string>
     <string name="warning">Waarschuwing</string>
+    <string name="website">Website</string>
     <string name="wont_store_data">We gebruiken deze gegevens enkel om uw contacten te vinden. We houden ze niet bij.</string>
     <string name="x_min_ago">%1$s min geleden</string>
     <string name="x_new_items_available">%1$d nieuwe items beschikbaar</string>
