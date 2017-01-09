@@ -410,12 +410,6 @@
     <string name="rogerthat">Roger that</string>
     <string name="rogerthat_system">Système Rogerthat</string>
     <string name="rogerthat_welcome_enterprise">Bienvenue sur  l\'application %1$s. \n\nAvant de commencer, merci de vous inscrire.</string>
-    <string name="sample_news_item_message_1">Les nouvelles sont une bonne façon de toucher vos clients.</string>
-    <string name="sample_news_item_message_2">Numérisez votre carte de fidélité mobile à la caisse et tentez de remporter un dîner 3 services pour 2 personnes.</string>
-    <string name="sample_news_item_sender_1">Service d\'échantillons</string>
-    <string name="sample_news_item_sender_2">Exemple de restaurant</string>
-    <string name="sample_news_item_title_1">Ceci est un exemple de titre d\'actualité</string>
-    <string name="sample_news_item_title_2">Numérisez votre carte de fidélité mobile et tentez de remporter un dîner pour 2 personnes !</string>
     <string name="save">Sauvegarder</string>
     <string name="save_canned_message_dialog_title">Fournir un nom pour le message archivé</string>
     <string name="save_canned_message_no_name">aucun nom</string>
@@ -523,6 +517,7 @@
     <string name="validation_failed">Entrée est invalide</string>
     <string name="view_my_profile">Montrer mon profil</string>
     <string name="warning">Avertissement</string>
+    <string name="website">Site Internet</string>
     <string name="wont_store_data">Ne vous inquiétez pas. Nous n\'enregistrons pas ces données.</string>
     <string name="x_min_ago">Il y a %1$s min</string>
     <string name="x_new_items_available">%1$d nouveaux messages disponibles</string>

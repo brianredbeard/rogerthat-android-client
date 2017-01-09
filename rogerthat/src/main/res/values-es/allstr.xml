@@ -82,6 +82,7 @@
     <string name="compose_short">Redactar</string>
     <string name="configure_new_canned_message">Crear un borrador de mensaje</string>
     <string name="confirm_remove_friend">¿Está seguro que desea desvincular a %1$s?</string>
+    <string name="confirm_remove_service">¿Seguro que quieres dejar de seguir el servicio %1$s?</string>
     <string name="contacts">Contactos</string>
     <string name="contacts_found_1">1 contacto en %1$s</string>
     <string name="contacts_found_more">%1$d contactos en %2$s</string>
@@ -365,6 +366,7 @@
     <string name="registration_welcome">Bienvenido/a a %1$s!</string>
     <string name="remove_canned_button">¿Desea eliminar el botón \"%1$s\" de la lista?</string>
     <string name="remove_friend">Desvincular</string>
+    <string name="remove_service">Dejar de seguir servicio</string>
     <string name="repair">Reparar</string>
     <string name="replied_at">%1$s respondió a las %2$s.</string>
     <string name="reply">Responder</string>
@@ -376,7 +378,6 @@
     <string name="rogerthat">Entendido</string>
     <string name="rogerthat_system">Sistema Rogerthat</string>
     <string name="rogerthat_welcome_enterprise">Bienvenido a la aplicación de %1$s.\n\nAntes de empezar es necesario registrarse en su cuenta.</string>
-    <string name="sample_news_item_sender_1">servicio ejemplo</string>
     <string name="save">Guardar</string>
     <string name="save_canned_message_dialog_title">Por favor, introduce un nombre para guardar el borrador del mensaje</string>
     <string name="save_canned_message_no_name">sin título</string>
@@ -461,6 +462,7 @@
     <string name="unable_to_create_attachment_directory">Ha ocurrido un error. Compruebe la disponibilidad de su tarjeta SD.</string>
     <string name="unable_to_create_images_directory">Podría no crear el directorio de imágenes de %1$s.</string>
     <string name="unable_to_read_write_sd_card">Ha ocurrido un error. Compruebe la disponibilidad de su tarjeta SD.</string>
+    <string name="unfollow">Dejar de seguir</string>
     <string name="unknown">Desconocido</string>
     <string name="unrecognized_scan_result">No se reconoce el contenido del resultado escaneado.</string>
     <string name="unsubscribe">Darse de baja</string>
@@ -478,6 +480,7 @@
     <string name="validation_failed">Entrada inválida</string>
     <string name="view_my_profile">Ver mi perfil</string>
     <string name="warning">¡Advertencia!</string>
+    <string name="website">Sitio web</string>
     <string name="wont_store_data">No se preocupe, no almacenaremos esta información.</string>
     <string name="x_min_ago">Hace %1$s min</string>
     <string name="yes">Sí</string>

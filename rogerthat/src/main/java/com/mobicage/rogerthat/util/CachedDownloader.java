@@ -17,27 +17,11 @@
  */
 package com.mobicage.rogerthat.util;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.params.HttpClientParams;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
 import android.os.PowerManager;
 
-import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.config.Configuration;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
@@ -47,6 +31,21 @@ import com.mobicage.rogerthat.util.system.SafeAsyncTask;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.params.HttpClientParams;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CachedDownloader {
 
@@ -210,7 +209,7 @@ public class CachedDownloader {
         return mExternalStorageWriteable;
     }
 
-    private File getCachedDownloadDir() {
+    public File getCachedDownloadDir() {
         File file = IOUtils.getFilesDirectory(mMainService);
         try {
             createDirIfNotExists(file);
@@ -225,23 +224,28 @@ public class CachedDownloader {
         }
     }
 
-    public File getCachedFilePath(String url) {
-        String urlHash = getHash(url);
+    public File getCachedFilePath(final String url) {
+        final String urlHash = getHash(url);
         File file = getCachedDownloadDir();
-        file = new File(file, urlHash);
+        final File file2 = new File(file, urlHash);
 
-        if (file.exists()) {
-            updateModificationDate(file);
-            return file;
+        if (file2.exists()) {
+            updateModificationDate(file2);
+            return file2;
         }
 
         if (mQueue.contains(urlHash)) {
             return null;
         }
 
-        final DownloadTask downloadTask = new DownloadTask(urlHash, url, file);
-        mQueue.add(urlHash);
-        downloadTask.execute(url);
+        mMainService.runOnUIHandler(new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                final DownloadTask downloadTask = new DownloadTask(urlHash, url, file2);
+                mQueue.add(urlHash);
+                downloadTask.execute(url);
+            }
+        });
 
         return null;
     }

@@ -17,6 +17,7 @@
  */
 package com.mobicage.rogerthat.plugins.news;
 
+import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.to.news.AppNewsItemTO;
 
 @SuppressWarnings("unchecked")
@@ -35,5 +36,11 @@ public class NewsItem extends AppNewsItemTO {
     public boolean disabled;
     public boolean isPartial;
     public long sortKey;
+
+    public String getAvatarUrl() {
+        if (isPartial)
+            return null;
+        return CloudConstants.CACHED_AVATAR_URL_PREFIX + sender.avatar_id;
+    }
 
 }

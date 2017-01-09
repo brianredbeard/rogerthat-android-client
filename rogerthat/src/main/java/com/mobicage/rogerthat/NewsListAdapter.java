@@ -23,10 +23,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.LongSparseArray;
@@ -61,23 +61,22 @@ import com.mobicage.rogerthat.plugins.news.NewsItem;
 import com.mobicage.rogerthat.plugins.news.NewsItemIndex;
 import com.mobicage.rogerthat.plugins.news.NewsPlugin;
 import com.mobicage.rogerthat.util.CachedDownloader;
+import com.mobicage.rogerthat.util.DebugUtils;
 import com.mobicage.rogerthat.util.DownloadImageTask;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.system.SafeAsyncTask;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.time.TimeUtils;
-import com.mobicage.rogerthat.util.ui.ImageHelper;
 import com.mobicage.rogerthat.util.ui.ScaleImageView;
 import com.mobicage.rogerthat.util.ui.TestUtils;
 import com.mobicage.rogerthat.util.ui.UIUtils;
-import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.to.news.NewsActionButtonTO;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -95,7 +94,8 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     private final static String UPDATE_CAUSE_ROGER = "roger";
 
     private final static long CACHE_SIZE = 50;
-    private final static long BATCH_SIZE = 10;
+    private final static long BATCH_SIZE = 15;
+    private final static long BACKGROUND_FETCH_THRESHOLD = 10;
 
     private NewsActivity mActivity;
     private final MainService mMainService;
@@ -110,6 +110,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
 
     private int mMinPosition;
     private int mMaxPosition;
+    private final int TOP_RADIUS;
 
     public NewsListAdapter(NewsActivity activity, MainService mainService) {
         mActivity = activity;
@@ -119,6 +120,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         MyIdentity myIdentity = mainService.getIdentityStore().getIdentity();
         mMyEmail = myIdentity.getEmail();
         mMyName = myIdentity.getDisplayName();
+        TOP_RADIUS = UIUtils.convertDipToPixels(mActivity, 30);
 
         refreshView();
     }
@@ -237,6 +239,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         private NewsItemIndex mNewsItemIndex;
         private final String mMyEmail;
         private final String mMyName;
+        private final int TOP_RADIUS;
 
         private SafeRunnable mExecuteAfterBecameFriends;
 
@@ -247,21 +250,15 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 String action = intent.getAction();
                 if (CachedDownloader.CACHED_DOWNLOAD_AVAILABLE_INTENT.equals(action)) {
                     String url = intent.getStringExtra("url");
-                    if (!url.equals(mNewsItem.image_url)) {
+
+                    if (url.equals(mNewsItem.image_url)) {
+                        new DownloadImageTask(mActivity.getCachedDownloader(), mImage, mNewsItemIndex.usersThatRogered.size() == 0, mActivity, TOP_RADIUS).execute(url);
                         return null;
                     }
-
-                    File cachedFile = mActivity.getCachedDownloader().getCachedFilePath(url);
-                    if (cachedFile != null) {
-                        Bitmap bm = BitmapFactory.decodeFile(cachedFile.getAbsolutePath());
-                        Bitmap image = bm;
-                        if (mNewsItemIndex.usersThatRogered.size() == 0) {
-                            int topRadius = UIUtils.convertDipToPixels(mActivity, 30);
-                            image = ImageHelper.getRoundTopCornerBitmap(mMainService, bm, topRadius);
-                        }
-                        mImage.setImageBitmap(image);
-                        mImage.setVisibility(View.VISIBLE);
+                    if (url.equals(mNewsItem.getAvatarUrl())) {
+                        new DownloadImageTask(mActivity.getCachedDownloader(), mServiceAvatar, true, mActivity, 0).execute(mNewsItem.getAvatarUrl());
                     }
+
                     return null;
                 } else if (NewsPlugin.PINNED_NEWS_ITEM_INTENT.equals(action)) {
                     if (mActivity instanceof NewsPinnedActivity) {
@@ -337,7 +334,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
 
         public ViewHolder(MainService mainService, NewsActivity context, NewsListAdapter nla,
                           View itemView, NewsPlugin newsPlugin, FriendsPlugin friendsPlugin,
-                          MessagingPlugin messagingPlugin, String myEmail, String myName) {
+                          MessagingPlugin messagingPlugin, String myEmail, String myName, int topRadius) {
             super(itemView);
 
             mPartialItem = itemView.findViewById(R.id.partial_item);
@@ -388,6 +385,8 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                     mActivity.setSelection(mPosition);
                 }
             });
+
+            TOP_RADIUS = topRadius;
 
             final IntentFilter filter = new IntentFilter(CachedDownloader.CACHED_DOWNLOAD_AVAILABLE_INTENT);
             filter.addAction(NewsPlugin.PINNED_NEWS_ITEM_INTENT);
@@ -886,31 +885,8 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 mImage.setVisibility(View.GONE);
                 return false;
             } else {
-                mImage.setVisibility(View.VISIBLE);
-                int corderRadius = UIUtils.convertDipToPixels(mActivity, 30);
-                boolean shouldRoundCorners = mNewsItemIndex.usersThatRogered.size() == 0;
-                if (mActivity.getCachedDownloader().isStorageAvailable()) {
-                    File cachedFile = mActivity.getCachedDownloader().getCachedFilePath(mNewsItem.image_url);
-                    if (cachedFile != null) {
-                        Bitmap bm = BitmapFactory.decodeFile(cachedFile.getAbsolutePath());
-                        if (shouldRoundCorners) {
-                            mImage.setImageBitmap(ImageHelper.getRoundTopCornerBitmap(mMainService, bm, corderRadius));
-                        } else {
-                            mImage.setImageBitmap(bm);
-                        }
-                    } else {
-                        // item started downloading intent when ready
-                        if (shouldRoundCorners) {
-                            mImage.setImageResource(R.drawable.news_image_placeholder_rounded);
-                        } else {
-                            mImage.setImageResource(R.drawable.news_image_placeholder);
-                        }
-                    }
-                } else if (shouldRoundCorners) {
-                    new DownloadImageTask(mImage, true, mMainService, corderRadius).execute(mNewsItem.image_url);
-                } else {
-                    new DownloadImageTask(mImage).execute(mNewsItem.image_url);
-                }
+                new DownloadImageTask(mActivity.getCachedDownloader(), mImage,
+                        mNewsItemIndex.usersThatRogered.size() == 0, mActivity, TOP_RADIUS).execute(mNewsItem.image_url);
             }
             return true;
         }
@@ -918,7 +894,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         private void setupAvatar() {
             Bitmap avatar = mActivity.friendsPlugin.getStore().getAvatarBitmap(mNewsItem.sender.email);
             if (avatar == null) {
-                new DownloadImageTask(mServiceAvatar, true).execute(CloudConstants.CACHED_AVATAR_URL_PREFIX + mNewsItem.sender.avatar_id);
+                new DownloadImageTask(mActivity.getCachedDownloader(), mServiceAvatar, true, mActivity, 0).execute(mNewsItem.getAvatarUrl());
             } else {
                 mServiceAvatar.setImageBitmap(avatar);
             }
@@ -986,13 +962,18 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         }
 
         private void updateNewsItem() {
-            mNewsItem = mNewsPlugin.getStore().getNewsItem(mNewsItem.id);
+            DebugUtils.profile("NewsStore.getNewsItem()", new Runnable() {
+                @Override
+                public void run() {
+                    mNewsItem = mNewsPlugin.getStore().getNewsItem(mNewsItem.id);
 
-            for (String friendEmail : mNewsItem.users_that_rogered) {
-                if (!mNewsItemIndex.usersThatRogered.contains(friendEmail)) {
-                    mNewsItemIndex.usersThatRogered.add(friendEmail);
+                    for (String friendEmail : mNewsItem.users_that_rogered) {
+                        if (!mNewsItemIndex.usersThatRogered.contains(friendEmail)) {
+                            mNewsItemIndex.usersThatRogered.add(friendEmail);
+                        }
+                    }
                 }
-            }
+            });
         }
 
         private void updateReach() {
@@ -1022,11 +1003,51 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = mActivity.getLayoutInflater().inflate(R.layout.news_list_item, parent, false);
         ViewHolder vh = new ViewHolder(mMainService, mActivity, this, v, mActivity.newsPlugin,
-                mActivity.friendsPlugin, mMessagingPlugin, mMyEmail, mMyName);
+                mActivity.friendsPlugin, mMessagingPlugin, mMyEmail, mMyName, TOP_RADIUS);
 
         mViewHolders.add(vh);
         return vh;
     }
+
+    private class FillCacheParams {
+        public final long sortKey;
+        public final String pinnedSearchQry;
+
+        public FillCacheParams(long sortKey, String pinnedSearchQry) {
+            this.sortKey = sortKey;
+            this.pinnedSearchQry = pinnedSearchQry;
+        }
+    }
+
+    private class FillCacheInFrontTask extends SafeAsyncTask<FillCacheParams, Void, List<NewsItemIndex>> {
+        @Override
+        protected List<NewsItemIndex> safeDoInBackground(FillCacheParams... params) {
+            T.dontCare();
+            return mActivity.newsPlugin.getNewsBefore(params[0].sortKey, BATCH_SIZE, params[0].pinnedSearchQry);
+        }
+
+        @Override
+        protected void onPostExecute(List<NewsItemIndex> result) {
+            T.UI();
+            addNewsItemsToFront(result);
+        }
+    }
+    private FillCacheInFrontTask mFillCacheInFrontTask;
+
+    private class FillCacheInEndTask extends SafeAsyncTask<FillCacheParams, Void, List<NewsItemIndex>> {
+        @Override
+        protected List<NewsItemIndex> safeDoInBackground(FillCacheParams... params) {
+            T.dontCare();
+            return mActivity.newsPlugin.getNewsAfter(params[0].sortKey, BATCH_SIZE, params[0].pinnedSearchQry);
+        }
+
+        @Override
+        protected void onPostExecute(List<NewsItemIndex> result) {
+            T.UI();
+            addNewsItemsToEnd(result);
+        }
+    }
+    private FillCacheInEndTask mFillCacheInEndTask;
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
@@ -1038,35 +1059,36 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         }
 
         if (position < mMinPosition) {
+            if (mFillCacheInFrontTask != null && mFillCacheInFrontTask.getStatus() != AsyncTask.Status.FINISHED) {
+                mFillCacheInFrontTask.cancel(true);
+                mFillCacheInFrontTask = null;
+            }
             List<NewsItemIndex> newsItems = mActivity.newsPlugin.getNewsBefore(mNewsItemsByPosition.get(mMinPosition).sortKey, BATCH_SIZE, mActivity.pinnedSearchQry);
-            int pos = mMinPosition;
-            for (NewsItemIndex ni : newsItems) {
-                mNewsItemsByPosition.put(--pos, ni);
-                mNewsItemsById.put(ni.id, ni);
-            }
-            mMinPosition = pos;
-            while (mNewsItemsByPosition.size() > CACHE_SIZE) {
-                NewsItemIndex ni = mNewsItemsByPosition.get(mMaxPosition);
-                mNewsItemsByPosition.remove(mMaxPosition--);
-                mNewsItemsById.remove(ni.id);
-            }
+            addNewsItemsToFront(newsItems);
         } else if (position > mMaxPosition) {
             if (mMinPosition < 0)
                 mMinPosition = 0;
+            if (mFillCacheInEndTask != null && mFillCacheInEndTask.getStatus() != AsyncTask.Status.FINISHED) {
+                mFillCacheInEndTask.cancel(true);
+                mFillCacheInEndTask = null;
+            }
             NewsItemIndex newsItemIndex = mNewsItemsByPosition.get(mMaxPosition);
             long sortKey = newsItemIndex == null ? Long.MAX_VALUE : newsItemIndex.sortKey;
             List<NewsItemIndex> newsItems = mActivity.newsPlugin.getNewsAfter(sortKey, BATCH_SIZE, mActivity.pinnedSearchQry);
-            int pos = mMaxPosition;
-            for (NewsItemIndex ni : newsItems) {
-                mNewsItemsByPosition.put(++pos, ni);
-                mNewsItemsById.put(ni.id, ni);
-            }
-            mMaxPosition = pos;
-            while (mNewsItemsByPosition.size() > CACHE_SIZE) {
-                NewsItemIndex ni = mNewsItemsByPosition.get(mMinPosition);
-                mNewsItemsByPosition.remove(mMinPosition++);
-                mNewsItemsById.remove(ni.id);
-            }
+            addNewsItemsToEnd(newsItems);
+        }
+
+        if ((position - BACKGROUND_FETCH_THRESHOLD) <= mMinPosition && mMinPosition > 0
+                && (mFillCacheInFrontTask == null || mFillCacheInFrontTask.getStatus() == AsyncTask.Status.FINISHED)) {
+            mFillCacheInFrontTask = new FillCacheInFrontTask();
+            mFillCacheInFrontTask.execute(new FillCacheParams(mNewsItemsByPosition.get(mMinPosition).sortKey, mActivity.pinnedSearchQry));
+        }
+        if ((position + BACKGROUND_FETCH_THRESHOLD) >= mMaxPosition
+                && (mFillCacheInEndTask == null || mFillCacheInEndTask.getStatus() == AsyncTask.Status.FINISHED )) {
+            NewsItemIndex newsItemIndex = mNewsItemsByPosition.get(mMaxPosition);
+            long sortKey = newsItemIndex == null ? Long.MAX_VALUE : newsItemIndex.sortKey;
+            mFillCacheInEndTask = new FillCacheInEndTask();
+            mFillCacheInEndTask.execute(new FillCacheParams(sortKey, mActivity.pinnedSearchQry));
         }
 
         String logMessage = "onBindViewHolder for:\n- position: " + position + "\n- mMinPosition: " + mMinPosition + "\n- mMaxPosition: " + mMaxPosition + "\n- newsitem size: " + mNewsItemsByPosition.size() + "\n- adapter size: " + getItemCount();
@@ -1076,6 +1098,34 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         } else {
             L.d(logMessage);
             holder.setNewsItem(position, mActivity.newsStore.getNewsItem(ni.id), ni);
+        }
+    }
+
+    private void addNewsItemsToEnd(List<NewsItemIndex> newsItems) {
+        int pos = mMaxPosition;
+        for (NewsItemIndex ni : newsItems) {
+            mNewsItemsByPosition.put(++pos, ni);
+            mNewsItemsById.put(ni.id, ni);
+        }
+        mMaxPosition = pos;
+        while (mNewsItemsByPosition.size() > CACHE_SIZE) {
+            NewsItemIndex ni = mNewsItemsByPosition.get(mMinPosition);
+            mNewsItemsByPosition.remove(mMinPosition++);
+            mNewsItemsById.remove(ni.id);
+        }
+    }
+
+    private void addNewsItemsToFront(List<NewsItemIndex> newsItems) {
+        int pos = mMinPosition;
+        for (NewsItemIndex ni : newsItems) {
+            mNewsItemsByPosition.put(--pos, ni);
+            mNewsItemsById.put(ni.id, ni);
+        }
+        mMinPosition = pos;
+        while (mNewsItemsByPosition.size() > CACHE_SIZE) {
+            NewsItemIndex ni = mNewsItemsByPosition.get(mMaxPosition);
+            mNewsItemsByPosition.remove(mMaxPosition--);
+            mNewsItemsById.remove(ni.id);
         }
     }
 }
