@@ -29,9 +29,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.MyIdentity;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.plugins.friends.Friend;
+import com.mobicage.rogerthat.plugins.friends.FriendSearchActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
+import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -44,8 +47,6 @@ public class ChatInfoActivity extends ServiceBoundActivity {
 
     public static final String CHAT_KEY = "parent_message_key";
     private String mChatKey;
-    private Message mChat;
-    private Friend mChatOwner;
 
     public static Intent createIntent(Context context, String chatKey) {
         Intent intent = new Intent(context, ChatInfoActivity.class);
@@ -65,18 +66,30 @@ public class ChatInfoActivity extends ServiceBoundActivity {
     protected void onServiceBound() {
         final MessagingPlugin messagingPlugin = mService.getPlugin(MessagingPlugin.class);
         final FriendsPlugin friendsPlugin = mService.getPlugin(FriendsPlugin.class);
-        mChat = messagingPlugin.getStore().getFullMessageByKey(mChatKey);
-        mChatOwner = friendsPlugin.getStore().getFriend(mChat.sender);
-        if (mChatOwner == null)
-            findViewById(R.id.chat_owner).setVisibility(View.GONE);
-        else {
-            ((ImageView) findViewById(R.id.avatar_image_view)).setImageBitmap(mChatOwner.getAvatarBitmap());
-            ((TextView) findViewById(R.id.chat_owner_name)).setText(mChatOwner.getDisplayName());
+        final Message chat = messagingPlugin.getStore().getFullMessageByKey(mChatKey);
+
+        MyIdentity myIdentity = mService.getIdentityStore().getIdentity();
+        if (myIdentity.getEmail().equals(chat.sender)) {
+            ((ImageView) findViewById(R.id.avatar_image_view)).setImageBitmap(myIdentity.getAvatarBitmap());
+            ((TextView) findViewById(R.id.chat_owner_name)).setText(myIdentity.getDisplayName());
+        } else {
+            Friend chatOwner = friendsPlugin.getStore().getFriend(chat.sender);
+            if (chatOwner == null)
+                findViewById(R.id.chat_owner).setVisibility(View.GONE);
+            else {
+                ((ImageView) findViewById(R.id.avatar_image_view)).setImageBitmap(chatOwner.getAvatarBitmap());
+                ((TextView) findViewById(R.id.chat_owner_name)).setText(chatOwner.getDisplayName());
+            }
         }
-        JSONObject details = (JSONObject) JSONValue.parse(mChat.message);
+
+        JSONObject details = (JSONObject) JSONValue.parse(chat.message);
         List<ChatItem> items = new ArrayList<ChatItem>();
-        items.add(new ChatItem(getString(R.string.topic), (String) details.get("t")));
-        items.add(new ChatItem(getString(R.string.description), (String) details.get("d")));
+        if (details.containsKey("t")) {
+            items.add(new ChatItem(getString(R.string.topic), (String) details.get("t")));
+        }
+        if (details.containsKey("d")) {
+            items.add(new ChatItem(getString(R.string.description), (String) details.get("d")));
+        }
         JSONArray chatInfo = (JSONArray) details.get("i");
         if (chatInfo != null) {
             items.add(null);
