@@ -29,6 +29,7 @@ import android.net.Uri;
 import android.provider.ContactsContract;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
+import android.text.InputType;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -356,8 +357,9 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
         telRadio.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
-                mActionView.setText("tel://");
+                mActionView.setText("");
                 mActionView.setVisibility(View.VISIBLE);
+                mActionView.setInputType(InputType.TYPE_CLASS_PHONE);
                 actionHelpButton.setVisibility(View.VISIBLE);
                 actionHelpButton.setImageDrawable(new IconicsDrawable(mService, FontAwesome.Icon.faw_address_book_o).color(iconColor).sizeDp(24));
             }
@@ -365,8 +367,9 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
         geoRadio.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
-                mActionView.setText("geo://");
+                mActionView.setText("");
                 mActionView.setVisibility(View.VISIBLE);
+                mActionView.setInputType(InputType.TYPE_CLASS_TEXT);
                 actionHelpButton.setVisibility(View.VISIBLE);
                 actionHelpButton.setImageDrawable(new IconicsDrawable(mService, FontAwesome.Icon.faw_map_marker).color(iconColor).sizeDp(24));
             }
@@ -376,6 +379,7 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
             public void safeOnClick(View v) {
                 mActionView.setText("http://");
                 mActionView.setVisibility(View.VISIBLE);
+                mActionView.setInputType(InputType.TYPE_CLASS_TEXT);
                 actionHelpButton.setVisibility(View.GONE);
             }
         });
@@ -406,13 +410,26 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
 
                         CannedButton cannedButton;
                         if (!noneRadio.isChecked()) {
-                            Matcher action = actionPattern.matcher(mActionView.getText());
+                            String actionText = mActionView.getText().toString();
+                            if ("".equals(caption.trim())) {
+                                UIUtils.showLongToast(SendMessageButtonActivity.this,
+                                        getString(R.string.action_not_valid));
+                                return;
+                            }
+                            if (telRadio.isChecked()) {
+                                actionText = "tel://" + actionText;
+                            } else if (geoRadio.isChecked()) {
+                                actionText = "geo://" + actionText;
+                            }
+
+                            Matcher action = actionPattern.matcher(actionText);
                             if (!action.matches()) {
                                 UIUtils.showLongToast(SendMessageButtonActivity.this,
                                         getString(R.string.action_not_valid));
                                 return;
                             }
                             cannedButton = new CannedButton(caption, "".equals(action.group(2)) ? null : action.group());
+
                         } else {
                             cannedButton = new CannedButton(caption, null);
                         }
