@@ -63,6 +63,8 @@ import com.mobicage.to.system.SettingsTO;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -272,9 +274,25 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
 
     public void processGetNews(final String newCursor, final AppNewsInfoTO[] partialNewsItems) {
         T.BIZZ();
+
+        Map<Long, AppNewsInfoTO> partialNewsItemsMap = new HashMap<>();
+        for (int i = 0; i < partialNewsItems.length; i++) {
+            AppNewsInfoTO partialNewsItem = partialNewsItems[i];
+            partialNewsItemsMap.put(partialNewsItem.id, partialNewsItem);
+        }
+
         Map<String, List<Long>> result = mStore.savePartialNewsItems(partialNewsItems);
         List<Long> resultNewIds = result.get("new");
         List<Long> resultUpdatedIds = result.get("updated");
+
+        FriendsPlugin friendsPlugin = mMainService.getPlugin(FriendsPlugin.class);
+        for (Iterator<Long> it = resultNewIds.listIterator(); it.hasNext();) {
+            Long newsId = it.next();
+            AppNewsInfoTO partialNewsItem = partialNewsItemsMap.get(newsId);
+            if (friendsPlugin.isBroadcastTypeDisabled(partialNewsItem.sender_email, partialNewsItem.broadcast_type)) {
+                it.remove();
+            }
+        }
 
         long[] newIds = new long[resultNewIds.size()];
         for (int i = 0; i < resultNewIds.size(); i++) {
@@ -665,6 +683,11 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
     public void newsPush(final AppNewsItemTO newsItem) {
         T.BIZZ();
         if (mStore.insertNewsItem(newsItem)) {
+            FriendsPlugin friendsPlugin = mMainService.getPlugin(FriendsPlugin.class);
+            if (friendsPlugin.isBroadcastTypeDisabled(newsItem.sender.email, newsItem.broadcast_type)) {
+                return;
+            }
+
             increaseBadgeCount();
             Intent intent = new Intent(NewsPlugin.NEW_NEWS_ITEM_INTENT);
             intent.putExtra("id", newsItem.id);

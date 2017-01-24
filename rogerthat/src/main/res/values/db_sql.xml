@@ -468,8 +468,8 @@ ORDER BY ms.acked_timestamp DESC
     <string name="sql_services_count_by_organization_type">SELECT COUNT(*) FROM (SELECT IFNULL(category_id, email) AS category FROM friend WHERE type=2 AND (existence = 0 OR existence = 4) AND organization_type=? GROUP BY category)</string>
 
     <!-- news -->
-    <string name="sql_news_insert_partial_item">INSERT INTO news (id, version, sort_timestamp, sort_priority, sort_key, reindex, is_partial) values (?, ?, ?, ?, (((127 - ?) &lt;&lt; 48) + ?), ?, 1)</string>
-    <string name="sql_news_update_partial_item">UPDATE news set version = ?, sort_timestamp = ?, sort_priority = ?, is_partial = 1, sort_key = (((127 - ?) &lt;&lt; 48) + ?), reindex = ? WHERE id = ?</string>
+    <string name="sql_news_insert_partial_item">INSERT INTO news (id, version, sort_timestamp, sort_priority, sort_key, reindex, is_partial, sender_email, broadcast_type) values (?, ?, ?, ?, (((127 - ?) &lt;&lt; 48) + ?), ?, 1, ?, ?)</string>
+    <string name="sql_news_update_partial_item">UPDATE news set version = ?, sort_timestamp = ?, sort_priority = ?, is_partial = 1, sort_key = (((127 - ?) &lt;&lt; 48) + ?), reindex = ?, sender_email = ?, broadcast_type = ? WHERE id = ?</string>
     <string name="sql_news_insert_item">INSERT INTO news (id, \"timestamp\", sender_email, sender_name, sender_avatar_id, title, message, image_url, broadcast_type, reach, qr_code_content, qr_code_caption, version, flags, type, \"read\", pinned, rogered, disabled, sort_timestamp, sort_priority, sort_key, is_partial, reindex) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, (((127 - ?) &lt;&lt; 48) + ?), 0, 1)</string>
     <string name="sql_news_update_item">UPDATE news set \"timestamp\" = ?, sender_email = ?, sender_name = ?, sender_avatar_id = ?, title = ?, message = ?, image_url = ?, broadcast_type = ?, \"reach\" = ?, qr_code_content= ?, qr_code_caption = ?, version = ?, flags = ?, type = ?, is_partial = 0 WHERE id = ?</string>
     <string name="sql_news_insert_button">INSERT OR REPLACE INTO news_buttons (news_id, id, caption, \"action\", flow_params, \"index\") VALUES (?,?,?,?,?,?)</string>

@@ -159,6 +159,8 @@ public class NewsStore implements Closeable {
                             mInsertPartialNewsItem.bindLong(5, sortPriority);
                             mInsertPartialNewsItem.bindLong(6, partialNewsItem.sort_timestamp + extraSeconds);
                             mInsertPartialNewsItem.bindLong(7, newsCount > 0 ? 1 : 0);
+                            mInsertPartialNewsItem.bindString(8, partialNewsItem.sender_email);
+                            bindString(mInsertPartialNewsItem, 9, partialNewsItem.broadcast_type);
                             mInsertPartialNewsItem.execute();
                             newIds.add(partialNewsItem.id);
                             break;
@@ -170,8 +172,10 @@ public class NewsStore implements Closeable {
                                 mUpdatePartialNewsItem.bindLong(4, sortPriority);
                                 mUpdatePartialNewsItem.bindLong(5, partialNewsItem.sort_timestamp + extraSeconds);
                                 mUpdatePartialNewsItem.bindLong(6, newsCount > 0 ? 1 : 0);
+                                mUpdatePartialNewsItem.bindString(7, partialNewsItem.sender_email);
+                                bindString(mUpdatePartialNewsItem, 8, partialNewsItem.broadcast_type);
                                 // WHERE
-                                mUpdatePartialNewsItem.bindLong(7, partialNewsItem.id);
+                                mUpdatePartialNewsItem.bindLong(9, partialNewsItem.id);
                                 if (mUpdatePartialNewsItem.executeUpdateDelete() == 1) {
                                     updatedIds.add(partialNewsItem.id);
                                     break;

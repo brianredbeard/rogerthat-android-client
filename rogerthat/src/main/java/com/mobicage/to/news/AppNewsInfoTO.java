@@ -25,7 +25,9 @@ import java.util.Map;
 
 public class AppNewsInfoTO implements com.mobicage.rpc.IJSONable {
 
+    public String broadcast_type;
     public long id;
+    public String sender_email;
     public long sort_priority;
     public long sort_timestamp;
     public long version;
@@ -34,6 +36,12 @@ public class AppNewsInfoTO implements com.mobicage.rpc.IJSONable {
     }
 
     public AppNewsInfoTO(Map<String, Object> json) throws IncompleteMessageException {
+        if (json.containsKey("broadcast_type")) {
+            Object val = json.get("broadcast_type");
+            this.broadcast_type = (String) val;
+        } else {
+            this.broadcast_type = null;
+        }
         if (json.containsKey("id")) {
             Object val = json.get("id");
             if (val instanceof Integer) {
@@ -43,6 +51,12 @@ public class AppNewsInfoTO implements com.mobicage.rpc.IJSONable {
             }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.news.AppNewsInfoTO object is missing field 'id'");
+        }
+        if (json.containsKey("sender_email")) {
+            Object val = json.get("sender_email");
+            this.sender_email = (String) val;
+        } else {
+            this.sender_email = null;
         }
         if (json.containsKey("sort_priority")) {
             Object val = json.get("sort_priority");
@@ -79,7 +93,9 @@ public class AppNewsInfoTO implements com.mobicage.rpc.IJSONable {
     @Override
     public Map<String, Object> toJSONMap() {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
+        obj.put("broadcast_type", this.broadcast_type);
         obj.put("id", this.id);
+        obj.put("sender_email", this.sender_email);
         obj.put("sort_priority", this.sort_priority);
         obj.put("sort_timestamp", this.sort_timestamp);
         obj.put("version", this.version);
