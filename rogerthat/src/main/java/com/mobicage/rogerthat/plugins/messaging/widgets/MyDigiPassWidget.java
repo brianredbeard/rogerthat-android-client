@@ -41,6 +41,7 @@ import android.widget.TextView;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mobicage.api.messaging.Rpc;
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.plugins.messaging.MyDigiPassWidgetResult;
@@ -101,6 +102,21 @@ public class MyDigiPassWidget extends Widget implements OnMDPAuthenticationListe
 
     public static final String MDP_REDIRECT_URI = "mdp-" + CloudConstants.APP_ID + "://x-callback-url/mdp_callback";
     private static final int MAX_COLLAPSED_ROWS = 3;
+
+    private boolean mCollapsed = true;
+    private String mCurrentState = null;
+    private String mScope;
+    private List<String> mScopes;
+    private MyDigiPassWidgetResult mResult;
+    private List<MdpRow> mMdpData;
+    private ImageView mImageView;
+    private LinearLayout mAuthenticateView;
+    private ProgressDialog mProgressDialog;
+    private ListView mResultListView;
+    private MdpAdapter mResultAdapter = new MdpAdapter();
+    private Typeface mFontAwesomeTypeFace;
+    private MDPMobile mMdpMobile;
+    private TextView mMdpTextView;
 
     private static class MdpRow {
         public int faIcon;
@@ -192,21 +208,6 @@ public class MyDigiPassWidget extends Widget implements OnMDPAuthenticationListe
         }
     }
 
-    private boolean mCollapsed = true;
-    private String mCurrentState = null;
-    private String mScope;
-    private List<String> mScopes;
-    private MyDigiPassWidgetResult mResult;
-    private List<MdpRow> mMdpData;
-    private ImageView mImageView;
-    private LinearLayout mAuthenticateView;
-    private ProgressDialog mProgressDialog;
-    private ListView mResultListView;
-    private MdpAdapter mResultAdapter = new MdpAdapter();
-    private Typeface mFontAwesomeTypeFace;
-    private MDPMobile mMdpMobile;
-    private TextView mMdpTextView;
-
     public MyDigiPassWidget(Context context) {
         super(context);
     }
@@ -224,6 +225,8 @@ public class MyDigiPassWidget extends Widget implements OnMDPAuthenticationListe
                 authenticate();
             }
         });
+
+
 
         mProgressDialog = new ProgressDialog(mActivity);
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
@@ -503,6 +506,7 @@ public class MyDigiPassWidget extends Widget implements OnMDPAuthenticationListe
             @Override
             protected Boolean safeDoInBackground(Object... params) {
                 final HttpGet request = new HttpGet(CloudConstants.MDP_SESSION_INIT_URL);
+                request.setHeader("User-Agent", MainService.getUserAgent(mActivity));
                 addCredentials(request);
 
                 final InputStream responseContent;

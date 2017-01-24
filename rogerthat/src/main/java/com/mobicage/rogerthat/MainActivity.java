@@ -46,6 +46,7 @@ import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
 import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
 import com.mobicage.rogerthat.registration.ContentBrandingRegistrationActivity;
 import com.mobicage.rogerthat.registration.DetectedBeaconActivity;
+import com.mobicage.rogerthat.registration.OauthRegistrationActivity;
 import com.mobicage.rogerthat.registration.RegistrationActivity2;
 import com.mobicage.rogerthat.registration.RegistrationWizard2;
 import com.mobicage.rogerthat.registration.YSAAARegistrationActivity;
@@ -578,6 +579,13 @@ public class MainActivity extends ServiceBoundActivity {
             intent.setData(qrUri);
             intent.setFlags(flags);
             L.d("Starting YSAAARegistrationActivity");
+            startActivity(intent);
+            finish();
+        } else if (AppConstants.getRegistrationType() == AppConstants.REGISTRATION_TYPE_FULL_OAUTH) {
+            final Intent intent = new Intent(this, OauthRegistrationActivity.class);
+            intent.setData(qrUri);
+            intent.setFlags(flags);
+            L.d("Starting OauthRegistrationActivity");
             startActivity(intent);
             finish();
         } else {

@@ -67,7 +67,7 @@ import com.mobicage.to.beacon.BeaconRegionTO;
 import com.mobicage.to.beacon.GetBeaconRegionsResponseTO;
 import com.mobicage.to.location.BeaconDiscoveredRequestTO;
 
-public class RegistrationWizard2 extends Wizard {
+public class RegistrationWizard2 extends AbstractRegistrationWizard {
 
     public final static String INTENT_GOT_BEACON_REGIONS = "com.mobicage.rogerthat.registration.gotBeaconReagions";
 
@@ -78,15 +78,7 @@ public class RegistrationWizard2 extends Wizard {
     public static final String REGISTRATION_STEP_FACEBOOK_LOGIN = "2a";
     public static final String REGISTRATION_STEP_EMAIL_LOGIN = "2b";
 
-    // Pickleable fields
-    private Credentials mCredentials = null;
-    private String mEmail = null;
-    private long mTimestamp = 0;
-    private String mRegistrationId = null;
-    private boolean mInGoogleAuthenticationProcess = false;
     private boolean mInstallationIdSent = false;
-    private String mInstallationId = null;
-    private String mDeviceId = null;
     private GetBeaconRegionsResponseTO mBeaconRegions = null;
     private Set<String> mDetectedBeacons = null;
 
@@ -149,21 +141,21 @@ public class RegistrationWizard2 extends Wizard {
     public void writePickle(DataOutput out) throws IOException {
         T.UI();
         super.writePickle(out);
-        boolean set = mCredentials != null;
+        boolean set = getCredentials() != null;
         out.writeBoolean(set);
         if (set) {
-            out.writeInt(mCredentials.getPickleClassVersion());
-            mCredentials.writePickle(out);
+            out.writeInt(getCredentials().getPickleClassVersion());
+            getCredentials().writePickle(out);
         }
-        set = mEmail != null;
+        set = getEmail() != null;
         out.writeBoolean(set);
         if (set)
-            out.writeUTF(mEmail);
-        out.writeLong(mTimestamp);
-        out.writeUTF(mRegistrationId);
-        out.writeBoolean(mInGoogleAuthenticationProcess);
-        out.writeUTF(mInstallationId);
-        out.writeUTF(mDeviceId);
+            out.writeUTF(getEmail());
+        out.writeLong(getTimestamp());
+        out.writeUTF(getRegistrationId());
+        out.writeBoolean(getInGoogleAuthenticationProcess());
+        out.writeUTF(getInstallationId());
+        out.writeUTF(getDeviceId());
         set = mBeaconRegions != null;
         out.writeBoolean(set);
         if (set)
@@ -186,18 +178,18 @@ public class RegistrationWizard2 extends Wizard {
         super.readFromPickle(version, in);
         boolean set = in.readBoolean();
         if (set)
-            mCredentials = new Credentials(new Pickle(in.readInt(), in));
+            setCredentials(new Credentials(new Pickle(in.readInt(), in)));
         set = in.readBoolean();
-        mEmail = set ? in.readUTF() : null;
-        mTimestamp = in.readLong();
-        mRegistrationId = in.readUTF();
-        mInGoogleAuthenticationProcess = in.readBoolean();
-        mInstallationId = in.readUTF();
+        setEmail(set ? in.readUTF() : null);
+        setTimestamp(in.readLong());
+        setRegistrationId(in.readUTF());
+        setInGoogleAuthenticationProcess(in.readBoolean());
+        setInstallationId(in.readUTF());
         // A version bump was forgotten when serializing mDeviceId, so we need a try/catch
         try {
-            mDeviceId = in.readUTF();
+            setDeviceId(in.readUTF());
         } catch (EOFException e) {
-            mDeviceId = null;
+            setDeviceId(null);
         }
         if (version >= 2) {
             try {
@@ -226,46 +218,6 @@ public class RegistrationWizard2 extends Wizard {
         }
     }
 
-    public Credentials getCredentials() {
-        T.UI();
-        return mCredentials;
-    }
-
-    public void setCredentials(final Credentials credentials) {
-        T.UI();
-        mCredentials = credentials;
-    }
-
-    public String getEmail() {
-        T.UI();
-        return mEmail;
-    }
-
-    public void setEmail(final String email) {
-        T.UI();
-        mEmail = email;
-    }
-
-    public long getTimestamp() {
-        return mTimestamp;
-    }
-
-    public String getRegistrationId() {
-        return mRegistrationId;
-    }
-
-    public String getInstallationId() {
-        return mInstallationId;
-    }
-
-    public void setDeviceId(final String deviceId) {
-        T.UI();
-        mDeviceId = deviceId;
-    }
-
-    public String getDeviceId() {
-        return mDeviceId;
-    }
 
     public BeaconRegionTO[] getBeaconRegions() {
         if (mBeaconRegions == null)
@@ -300,7 +252,7 @@ public class RegistrationWizard2 extends Wizard {
 
     public void init(final MainService mainService) {
         T.UI();
-        mInstallationId = UUID.randomUUID().toString();
+        setInstallationId(UUID.randomUUID().toString());
         reInit();
         requestBeaconRegions(mainService);
    }
@@ -319,9 +271,10 @@ public class RegistrationWizard2 extends Wizard {
                     HttpClient httpClient = HTTPUtil.getHttpClient(10000, 3);
                     final HttpPost httpPost = new HttpPost(CloudConstants.REGISTRATION_REGISTER_INSTALL_URL);
                     httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
+                    httpPost.setHeader("User-Agent", MainService.getUserAgent(mainService));
                     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
                     formParams.add(new BasicNameValuePair("version", MainService.getVersion(mainService)));
-                    formParams.add(new BasicNameValuePair("install_id", mInstallationId));
+                    formParams.add(new BasicNameValuePair("install_id", getInstallationId()));
                     formParams.add(new BasicNameValuePair("platform", "android"));
                     formParams.add(new BasicNameValuePair("language", Locale.getDefault().getLanguage()));
                     formParams.add(new BasicNameValuePair("country", Locale.getDefault().getCountry()));
@@ -335,7 +288,7 @@ public class RegistrationWizard2 extends Wizard {
                         return true;
                     }
                     httpPost.setEntity(entity);
-                    L.d("Sending installation id: " + mInstallationId);
+                    L.d("Sending installation id: " + getInstallationId());
                     try {
                         HttpResponse response = httpClient.execute(httpPost);
                         L.d("Installation id sent");
@@ -407,16 +360,8 @@ public class RegistrationWizard2 extends Wizard {
 
     public void reInit() {
         T.UI();
-        mTimestamp = System.currentTimeMillis() / 1000;
-        mRegistrationId = UUID.randomUUID().toString();
+        setTimestamp(System.currentTimeMillis() / 1000);
+        setRegistrationId(UUID.randomUUID().toString());
         save();
-    }
-
-    public boolean getInGoogleAuthenticationProcess() {
-        return mInGoogleAuthenticationProcess;
-    }
-
-    public void setInGoogleAuthenticationProcess(boolean value) {
-        this.mInGoogleAuthenticationProcess = value;
     }
 }

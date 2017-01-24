@@ -206,15 +206,18 @@ public class App extends MultiDexApplication implements Thread.UncaughtException
     static boolean logErrorToServer(final JSONObject error) {
         Credentials credentials = null;
         MainService mainService = MainService.getInstance();
-        if (mainService != null)
+        if (mainService != null) {
             try {
                 credentials = mainService.getCredentials();
             } catch (Exception e) {
                 L.d("Could not load credentials", e);
             }
+        }
 
         final HttpPost httpPost = new HttpPost(CloudConstants.LOG_ERROR_URL);
         httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
+        httpPost.setHeader("User-Agent", MainService.getUserAgent(mainService));
+
         if (credentials != null) {
             httpPost.setHeader("X-MCTracker-User",
                 Base64.encodeBytes(credentials.getUsername().getBytes(), Base64.DONT_BREAK_LINES));

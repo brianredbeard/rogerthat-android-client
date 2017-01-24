@@ -686,12 +686,18 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
     }
 
     public static String getVersion(Context context) {
-        try {
-            return context.getPackageManager().getPackageInfo(context.getPackageName(), PackageManager.GET_META_DATA).versionName;
-        } catch (NameNotFoundException e) {
-            L.bug(e);
+        if (context != null) {
+            try {
+                return context.getPackageManager().getPackageInfo(context.getPackageName(), PackageManager.GET_META_DATA).versionName;
+            } catch (NameNotFoundException e) {
+                L.bug(e);
+            }
         }
         return "1.0.0.BUG";
+    }
+
+    public static String getUserAgent(Context context) {
+        return CloudConstants.APP_ID + "/" + getVersion(context);
     }
 
     private void readVersion() {

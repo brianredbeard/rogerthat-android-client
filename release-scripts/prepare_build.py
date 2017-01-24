@@ -658,9 +658,15 @@ def convert_config():
     if registration_type == 1:
         registration_type = 'REGISTRATION_TYPE_DEFAULT'
         registration_type_oauth_domain = 'dummy'
+        registration_type_oauth_url = 'dummy'
     elif registration_type == 2:
         registration_type = 'REGISTRATION_TYPE_OAUTH'
         registration_type_oauth_domain = doc['APP_CONSTANTS']['REGISTRATION_TYPE_OAUTH_DOMAIN']
+        registration_type_oauth_url = 'dummy'
+    elif registration_type == 3:
+        registration_type = 'REGISTRATION_TYPE_FULL_OAUTH'
+        registration_type_oauth_domain = 'dummy'
+        registration_type_oauth_url = doc['APP_CONSTANTS']['REGISTRATION_TYPE_OAUTH_URL']
     else:
         raise Exception('Invalid registration type %d' % registration_type)
 
@@ -684,7 +690,9 @@ public class AppConstants {
 
     public static final int REGISTRATION_TYPE_DEFAULT = 1;
     public static final int REGISTRATION_TYPE_OAUTH = 2;
+    public static final int REGISTRATION_TYPE_FULL_OAUTH = 3;
     public static final String REGISTRATION_TYPE_OAUTH_DOMAIN = "%(registration_type_oauth_domain)s";
+    public static final String REGISTRATION_TYPE_OAUTH_URL = "%(registration_type_oauth_url)s";
     public static int getRegistrationType() {
         return %(registration_type)s;
     };
@@ -758,6 +766,7 @@ public class AppConstants {
            app_service_guid=app_service_guid,
            registration_type=registration_type,
            registration_type_oauth_domain=registration_type_oauth_domain,
+           registration_type_oauth_url=registration_type_oauth_url,
            registration_asks_location_permission=registration_asks_location_permission)
 
     path = os.path.join(SRC_JAVA_DIR, "com", "mobicage", "rpc", "config")

@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.http.HttpEntity;
@@ -54,21 +55,14 @@ import com.mobicage.rogerthat.util.system.SafeAsyncTask;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.Credentials;
 import com.mobicage.rpc.config.CloudConstants;
+import com.mobicage.to.location.BeaconDiscoveredRequestTO;
 
-public class YSAAARegistrationWizard implements Pickleable {
+public class YSAAARegistrationWizard extends AbstractRegistrationWizard {
 
     private final static String CONFIG_PICKLED_WIZARD_KEY = "YSAAARegistrationWizard";
 
-    // Pickleable fields
     private ConfigurationProvider mCfgProvider;
-
-    private Credentials mCredentials = null;
-    private String mEmail = null;
-    private long mTimestamp = 0;
-    private String mRegistrationId = null;
     private boolean mInstallationIdSent = false;
-    private String mInstallationId = null;
-    private String mDeviceId = null;
     private final static Integer PICKLE_CLASS_VERSION = 1;
 
     public static YSAAARegistrationWizard getWizard(final MainService mainService, final String deviceId) {
@@ -127,20 +121,20 @@ public class YSAAARegistrationWizard implements Pickleable {
     @Override
     public void writePickle(DataOutput out) throws IOException {
         T.UI();
-        boolean set = mCredentials != null;
+        boolean set = getCredentials() != null;
         out.writeBoolean(set);
         if (set) {
-            out.writeInt(mCredentials.getPickleClassVersion());
-            mCredentials.writePickle(out);
+            out.writeInt(getCredentials().getPickleClassVersion());
+            getCredentials().writePickle(out);
         }
-        set = mEmail != null;
+        set = getEmail() != null;
         out.writeBoolean(set);
         if (set)
-            out.writeUTF(mEmail);
-        out.writeLong(mTimestamp);
-        out.writeUTF(mRegistrationId);
-        out.writeUTF(mInstallationId);
-        out.writeUTF(mDeviceId);
+            out.writeUTF(getEmail());
+        out.writeLong(getTimestamp());
+        out.writeUTF(getRegistrationId());
+        out.writeUTF(getInstallationId());
+        out.writeUTF(getDeviceId());
     }
 
     @Override
@@ -148,63 +142,22 @@ public class YSAAARegistrationWizard implements Pickleable {
         T.UI();
         boolean set = in.readBoolean();
         if (set)
-            mCredentials = new Credentials(new Pickle(in.readInt(), in));
+            setCredentials(new Credentials(new Pickle(in.readInt(), in)));
         set = in.readBoolean();
-        mEmail = set ? in.readUTF() : null;
-        mTimestamp = in.readLong();
-        mRegistrationId = in.readUTF();
-        mInstallationId = in.readUTF();
-        mDeviceId = in.readUTF();
+        setEmail(set ? in.readUTF() : null);
+        setTimestamp(in.readLong());
+        setRegistrationId(in.readUTF());
+        setInstallationId(in.readUTF());
+        setDeviceId(in.readUTF());
     }
 
     private void setConfigProvider(ConfigurationProvider configProvider) {
         mCfgProvider = configProvider;
     }
 
-    public Credentials getCredentials() {
-        T.UI();
-        return mCredentials;
-    }
-
-    public void setCredentials(final Credentials credentials) {
-        T.UI();
-        mCredentials = credentials;
-    }
-
-    public String getEmail() {
-        T.UI();
-        return mEmail;
-    }
-
-    public void setEmail(final String email) {
-        T.UI();
-        mEmail = email;
-    }
-
-    public long getTimestamp() {
-        return mTimestamp;
-    }
-
-    public String getRegistrationId() {
-        return mRegistrationId;
-    }
-
-    public String getInstallationId() {
-        return mInstallationId;
-    }
-
-    public void setDeviceId(final String deviceId) {
-        T.UI();
-        mDeviceId = deviceId;
-    }
-
-    public String getDeviceId() {
-        return mDeviceId;
-    }
-
     public void init(final MainService mainService) {
         T.UI();
-        mInstallationId = UUID.randomUUID().toString();
+        setInstallationId(UUID.randomUUID().toString());
         reInit();
         new SafeAsyncTask<Object, Object, Object>() {
 
@@ -215,9 +168,10 @@ public class YSAAARegistrationWizard implements Pickleable {
                     HttpClient httpClient = HTTPUtil.getHttpClient(10000, 3);
                     final HttpPost httpPost = new HttpPost(CloudConstants.REGISTRATION_REGISTER_INSTALL_URL);
                     httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
+                    httpPost.setHeader("User-Agent", MainService.getUserAgent(mainService));
                     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
                     formParams.add(new BasicNameValuePair("version", MainService.getVersion(mainService)));
-                    formParams.add(new BasicNameValuePair("install_id", mInstallationId));
+                    formParams.add(new BasicNameValuePair("install_id", getInstallationId()));
                     formParams.add(new BasicNameValuePair("platform", "android"));
                     formParams.add(new BasicNameValuePair("language", Locale.getDefault().getLanguage()));
                     formParams.add(new BasicNameValuePair("country", Locale.getDefault().getCountry()));
@@ -231,7 +185,7 @@ public class YSAAARegistrationWizard implements Pickleable {
                         return true;
                     }
                     httpPost.setEntity(entity);
-                    L.d("Sending installation id: " + mInstallationId);
+                    L.d("Sending installation id: " + getInstallationId());
                     try {
                         HttpResponse response = httpClient.execute(httpPost);
                         L.d("Installation id sent");
@@ -300,9 +254,12 @@ public class YSAAARegistrationWizard implements Pickleable {
 
     public void reInit() {
         T.UI();
-        mTimestamp = System.currentTimeMillis() / 1000;
-        mRegistrationId = UUID.randomUUID().toString();
+        setTimestamp(System.currentTimeMillis() / 1000);
+        setRegistrationId(UUID.randomUUID().toString());
         save();
     }
 
+    public Set<BeaconDiscoveredRequestTO> getDetectedBeacons() {
+        return null;
+    }
 }

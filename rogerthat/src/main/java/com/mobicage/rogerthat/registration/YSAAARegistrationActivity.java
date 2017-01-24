@@ -47,9 +47,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Looper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -59,13 +56,10 @@ import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.Installation;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
-import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
 import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
-import com.mobicage.rogerthat.plugins.system.MobileInfo;
-import com.mobicage.rogerthat.plugins.system.SystemPlugin;
 import com.mobicage.rogerthat.util.GoogleServicesUtils;
 import com.mobicage.rogerthat.util.GoogleServicesUtils.GCMRegistrationIdFoundCallback;
 import com.mobicage.rogerthat.util.Security;
@@ -80,21 +74,15 @@ import com.mobicage.rpc.Credentials;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.rpc.newxmpp.XMPPConfigurationFactory;
 
-public class YSAAARegistrationActivity extends ServiceBoundActivity {
+public class YSAAARegistrationActivity extends AbstractRegistrationActivity {
 
     private static final int XMPP_CHECK_DELAY_MILLIS = 5000;
     private static final int XMPP_MAX_NUM_ATTEMPTS = 8;
     private static final int HTTP_RETRY_COUNT = 3;
     private static final int HTTP_TIMEOUT = 10000;
 
-    private HandlerThread mWorkerThread;
-    private Looper mWorkerLooper;
-    private Handler mWorkerHandler;
-    private Handler mUIHandler;
     private YSAAARegistrationWizard mWiz;
     private HttpClient mHttpClient;
-
-    private String mGCMRegistrationId = "";
 
     private TextView mStatusLbl;
     private ProgressBar mProgressBar;
@@ -105,9 +93,7 @@ public class YSAAARegistrationActivity extends ServiceBoundActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         T.UI();
-        createWorkerThread();
-        mUIHandler = new Handler();
-        T.setUIThread("YSAAARegistrationActivity.onCreate()");
+        init(this);
         mHttpClient = HTTPUtil.getHttpClient(HTTP_TIMEOUT, HTTP_RETRY_COUNT);
 
         // TODO: This has to be improved.
@@ -149,11 +135,12 @@ public class YSAAARegistrationActivity extends ServiceBoundActivity {
         setContentView(R.layout.ysaaa_registration);
 
         mWiz = YSAAARegistrationWizard.getWizard(mService, Installation.id(this));
+        setWizard(mWiz);
         if (CloudConstants.USE_GCM_KICK_CHANNEL && GoogleServicesUtils.checkPlayServices(this, true)) {
             GoogleServicesUtils.registerGCMRegistrationId(mService, new GCMRegistrationIdFoundCallback() {
                 @Override
                 public void idFound(String registrationId) {
-                    mGCMRegistrationId = registrationId;
+                    setGCMRegistrationId(registrationId);
                 }
             });
         }
@@ -196,7 +183,7 @@ public class YSAAARegistrationActivity extends ServiceBoundActivity {
         TimerTask timerTask = new TimerTask() {
             @Override
             public void run() {
-                mUIHandler.post(new SafeRunnable() {
+                runOnUI(new SafeRunnable() {
                     @Override
                     protected void safeRun() throws Exception {
                         T.UI();
@@ -239,7 +226,7 @@ public class YSAAARegistrationActivity extends ServiceBoundActivity {
         final String registrationId = mWiz.getRegistrationId();
         final String installId = mWiz.getInstallationId();
 
-        mWorkerHandler.post(new SafeRunnable() {
+        runOnWorker(new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
                 T.REGISTRATION();
@@ -263,7 +250,7 @@ public class YSAAARegistrationActivity extends ServiceBoundActivity {
                     nameValuePairs.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
                     nameValuePairs.add(new BasicNameValuePair("use_xmpp_kick", CloudConstants.USE_XMPP_KICK_CHANNEL
                         + ""));
-                    nameValuePairs.add(new BasicNameValuePair("GCM_registration_id", mGCMRegistrationId));
+                    nameValuePairs.add(new BasicNameValuePair("GCM_registration_id", getGCMRegistrationId()));
                     httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
                     // Execute HTTP Post Request
@@ -273,7 +260,7 @@ public class YSAAARegistrationActivity extends ServiceBoundActivity {
                     HttpEntity entity = response.getEntity();
 
                     if (entity == null) {
-                        mUIHandler.post(showErrorDialog);
+                        runOnUI(showErrorDialog);
                         return;
                     }
 
@@ -285,7 +272,7 @@ public class YSAAARegistrationActivity extends ServiceBoundActivity {
                         if (statusCode == 500 && responseMap != null) {
                             final String errorMessage = (String) responseMap.get("error");
                             if (errorMessage != null) {
-                                mUIHandler.post(new SafeRunnable() {
+                                runOnUI(new SafeRunnable() {
                                     @Override
                                     protected void safeRun() throws Exception {
                                         T.UI();
@@ -305,14 +292,14 @@ public class YSAAARegistrationActivity extends ServiceBoundActivity {
                                 return;
                             }
                         }
-                        mUIHandler.post(showErrorDialog);
+                        runOnUI(showErrorDialog);
                         return;
                     }
                     JSONObject account = (JSONObject) responseMap.get("account");
                     final String email = (String) responseMap.get("email");
                     final RegistrationInfo info = new RegistrationInfo(email, new Credentials((String) account
                         .get("account"), (String) account.get("password")));
-                    mUIHandler.post(new SafeRunnable() {
+                    runOnUI(new SafeRunnable() {
                         @Override
                         protected void safeRun() throws Exception {
                             T.UI();
@@ -327,42 +314,10 @@ public class YSAAARegistrationActivity extends ServiceBoundActivity {
 
                 } catch (Exception e) {
                     L.d(e);
-                    mUIHandler.post(showErrorDialog);
+                    runOnUI(showErrorDialog);
                 }
             }
         });
-    }
-
-    private void createWorkerThread() {
-        T.UI();
-        mWorkerThread = new HandlerThread("rogerthat_registration_worker");
-        mWorkerThread.start();
-        mWorkerLooper = mWorkerThread.getLooper();
-        mWorkerHandler = new Handler(mWorkerLooper);
-        mWorkerHandler.post(new SafeRunnable() {
-            @Override
-            public void safeRun() {
-                T.setRegistrationThread("RegistrationProcedureActivity.createWorkerThread()");
-            }
-        });
-    }
-
-    private void closeWorkerThread() {
-        T.UI();
-        final Looper looper = mWorkerHandler.getLooper();
-        if (looper != null)
-            looper.quit();
-
-        try {
-            mWorkerThread.join();
-        } catch (InterruptedException e) {
-            L.bug(e);
-        }
-
-        mWorkerHandler = null;
-        mWorkerThread = null;
-        T.resetRegistrationThreadId();
-
     }
 
     private void tryConnect(final int attempt, final String statusMessage, final RegistrationInfo info) {
@@ -423,15 +378,15 @@ public class YSAAARegistrationActivity extends ServiceBoundActivity {
                     postFinishRegistration(info.mCredentials.getUsername(), info.mCredentials.getPassword(),
                         CloudConstants.APP_SERVICE_GUID, null);
 
-                    mUIHandler.post(new SafeRunnable(pausable) {
+                    runOnUI(new SafeRunnable(pausable) {
 
                         @Override
                         protected void safeRun() throws Exception {
                             T.UI();
                             mWiz.setCredentials(info.mCredentials);
 
-                            if (CloudConstants.USE_GCM_KICK_CHANNEL && !"".equals(mGCMRegistrationId)) {
-                                GoogleServicesUtils.saveGCMRegistrationId(mService, mGCMRegistrationId);
+                            if (CloudConstants.USE_GCM_KICK_CHANNEL && !"".equals(getGCMRegistrationId())) {
+                                GoogleServicesUtils.saveGCMRegistrationId(mService, getGCMRegistrationId());
                             }
 
                             mService.setCredentials(mWiz.getCredentials());
@@ -448,7 +403,7 @@ public class YSAAARegistrationActivity extends ServiceBoundActivity {
 
                 } catch (Exception e) {
                     L.d("Exception while trying to end the registration process", e);
-                    mUIHandler.post(new SafeRunnable(pausable) {
+                    runOnUI(new SafeRunnable(pausable) {
 
                         @Override
                         protected void safeRun() throws Exception {
@@ -460,14 +415,14 @@ public class YSAAARegistrationActivity extends ServiceBoundActivity {
             }
         };
         if (attempt == 1) {
-            mWorkerHandler.post(runnable);
+            runOnWorker(runnable);
         } else {
-            mWorkerHandler.postDelayed(runnable, XMPP_CHECK_DELAY_MILLIS);
+            runDelayedOnWorker(runnable, XMPP_CHECK_DELAY_MILLIS);
         }
     }
 
     private void startCheckingIfAppReady(final Pausable pausable) {
-        mUIHandler.postDelayed(new SafeRunnable(pausable) {
+        runDelayedOnUI(new SafeRunnable(pausable) {
             @Override
             protected void safeRun() throws Exception {
                 T.UI();
@@ -484,7 +439,7 @@ public class YSAAARegistrationActivity extends ServiceBoundActivity {
             mTimer.cancel();
             mProgressBar.setProgress(100);
 
-            mUIHandler.postDelayed(new SafeRunnable() {
+            runDelayedOnUI(new SafeRunnable() {
                 @Override
                 protected void safeRun() throws Exception {
                     T.UI();
@@ -499,13 +454,6 @@ public class YSAAARegistrationActivity extends ServiceBoundActivity {
         }
     }
 
-    private String getMobileInfo() {
-        T.REGISTRATION();
-        MobileInfo info = SystemPlugin.gatherMobileInfo(mService);
-        String json = JSONValue.toJSONString(info.toJSONMap());
-        return json;
-    }
-
     @SuppressWarnings("unchecked")
     private void postFinishRegistration(final String username, final String password, final String invitorCode,
         final String invitorSecret) throws ClientProtocolException, IOException {
@@ -514,6 +462,7 @@ public class YSAAARegistrationActivity extends ServiceBoundActivity {
         HttpClient httpClient = HTTPUtil.getHttpClient();
         final HttpPost httpPost = new HttpPost(CloudConstants.REGISTRATION_FINISH_URL);
         httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
+        httpPost.setHeader("User-Agent", MainService.getUserAgent(mService));
         List<NameValuePair> formParams = new ArrayList<NameValuePair>();
         formParams.add(new BasicNameValuePair("mobileInfo", mobileInfo));
         formParams.add(new BasicNameValuePair("account", username));

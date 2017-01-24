@@ -781,6 +781,7 @@ public class HttpCommunicator {
         L.d("Sending HTTP request to " + mCurrentServerUrl + " : " + requestString);
         mHttpPostRequest = new HttpPost(mCurrentServerUrl);
         mHttpPostRequest.setHeader("Content-type", "application/json-rpc; charset=\"utf-8\"");
+        mHttpPostRequest.setHeader("User-Agent", MainService.getUserAgent(mMainService));
         mHttpPostRequest.setHeader("X-MCTracker-User", mBase64Username);
         mHttpPostRequest.setHeader("X-MCTracker-Pass", mBase64Password);
 

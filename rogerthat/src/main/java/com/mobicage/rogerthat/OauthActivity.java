@@ -42,14 +42,18 @@ public class OauthActivity extends Activity {
 
     public static final String FINISHED_OAUTH = "com.mobicage.rogerthat.FINISHED_OAUTH";
 
+    public static String BUILD_URL = "build_url";
     public static String STATE = "state";
     public static String CLIENT_ID = "client_id";
     public static String OAUTH_URL = "oauth_url";
     public static String SCOPES = "scopes";
 
-    public static String RESULT = "result";
-    public static String SUCCESS = "success";
+    public static String RESULT_STATE = "result_stae";
+    public static String RESULT_CODE = "result_code";
+    public static String RESULT_ERROR_MESSAGE = "result_error_message";
+    public static String RESULT_SUCCESS = "result_success";
 
+    private boolean mBuildUrl;
     private String mState;
     private String mClientId;
     private String mOauthUrl;
@@ -67,29 +71,33 @@ public class OauthActivity extends Activity {
         mWebview = (WebView) findViewById(R.id.webview);
 
         Intent intent = getIntent();
+        mBuildUrl = intent.getBooleanExtra(OauthActivity.BUILD_URL, true);
         mState = intent.getStringExtra(OauthActivity.STATE);
         mClientId = intent.getStringExtra(OauthActivity.CLIENT_ID);
         mOauthUrl = intent.getStringExtra(OauthActivity.OAUTH_URL);
         mScopes = intent.getStringExtra(OauthActivity.SCOPES);
 
         Uri.Builder builder = Uri.parse(mOauthUrl).buildUpon();
-        builder.appendQueryParameter("state", mState);
-        builder.appendQueryParameter("client_id", mClientId);
-        builder.appendQueryParameter("scope", mScopes);
-        builder.appendQueryParameter("redirect_uri", getCallbackUrl());
-        builder.appendQueryParameter("response_type", "code");
+        if (mBuildUrl) {
+            builder.appendQueryParameter("state", mState);
+            builder.appendQueryParameter("client_id", mClientId);
+            builder.appendQueryParameter("scope", mScopes);
+            builder.appendQueryParameter("redirect_uri", getCallbackUrl());
+            builder.appendQueryParameter("response_type", "code");
+        }
+
         final String url = builder.build().toString();
 
 
         WebSettings webviewSettings = mWebview.getSettings();
         webviewSettings.setJavaScriptEnabled(true);
+        webviewSettings.setDomStorageEnabled(true);
 
         webviewSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
 
         if (Build.VERSION.SDK_INT <= 18) {
             mWebview.getSettings().setSavePassword(false);
         }
-
 
         mWebview.setWebViewClient(new WebViewClient() {
 
@@ -106,12 +114,15 @@ public class OauthActivity extends Activity {
                     Uri uri = Uri.parse(url);
 
                     String code = uri.getQueryParameter("code");
+                    String state = uri.getQueryParameter("state");
                     if (!TextUtils.isEmpty(code)) {
                         L.d("Code: " + code);
+                        L.d("State: " + state);
 
                         Intent resultIntent = new Intent(OauthActivity.FINISHED_OAUTH);
-                        resultIntent.putExtra(OauthActivity.RESULT, code);
-                        resultIntent.putExtra(OauthActivity.SUCCESS, true);
+                        resultIntent.putExtra(OauthActivity.RESULT_CODE, code);
+                        resultIntent.putExtra(OauthActivity.RESULT_STATE, state);
+                        resultIntent.putExtra(OauthActivity.RESULT_SUCCESS, true);
                         setResult(Activity.RESULT_OK, resultIntent);
                         finish();
 
@@ -122,8 +133,8 @@ public class OauthActivity extends Activity {
                         L.d("errorMsg: " + errorDescription);
 
                         Intent resultIntent = new Intent(OauthActivity.FINISHED_OAUTH);
-                        resultIntent.putExtra(OauthActivity.RESULT, errorDescription);
-                        resultIntent.putExtra(OauthActivity.SUCCESS, false);
+                        resultIntent.putExtra(OauthActivity.RESULT_ERROR_MESSAGE, errorDescription);
+                        resultIntent.putExtra(OauthActivity.RESULT_SUCCESS, false);
                         setResult(Activity.RESULT_OK, resultIntent);
                         finish();
                     }
@@ -146,8 +157,12 @@ public class OauthActivity extends Activity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK:
-                setResult(Activity.RESULT_CANCELED);
-                finish();
+                if (mBuildUrl) {
+                    setResult(Activity.RESULT_CANCELED);
+                    finish();
+                } else if (mWebview.canGoBack()){
+                    mWebview.goBack();
+                }
                 return true;
         }
         return super.onKeyDown(keyCode, event);
@@ -158,8 +173,8 @@ public class OauthActivity extends Activity {
     }
 
     static boolean isRedirectUriFound(String uri, String redirectUri) {
-        Uri u = null;
-        Uri r = null;
+        Uri u;
+        Uri r;
         try {
             u = Uri.parse(uri);
             r = Uri.parse(redirectUri);

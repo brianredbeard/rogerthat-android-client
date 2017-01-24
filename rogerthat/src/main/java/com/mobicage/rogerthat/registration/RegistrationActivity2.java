@@ -31,9 +31,6 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -64,15 +61,11 @@ import com.facebook.FacebookException;
 import com.facebook.login.LoginResult;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.Installation;
-import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.OauthActivity;
-import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.config.Configuration;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
 import com.mobicage.rogerthat.plugins.scan.ProcessScanActivity;
-import com.mobicage.rogerthat.plugins.system.MobileInfo;
-import com.mobicage.rogerthat.plugins.system.SystemPlugin;
 import com.mobicage.rogerthat.plugins.trackme.BeaconRegion;
 import com.mobicage.rogerthat.registration.AccountManager.Account;
 import com.mobicage.rogerthat.util.FacebookUtils;
@@ -88,15 +81,12 @@ import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
-import com.mobicage.rogerthat.util.ui.Pausable;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rogerthat.util.ui.Wizard;
 import com.mobicage.rpc.Credentials;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
-import com.mobicage.rpc.newxmpp.XMPPConfigurationFactory;
 import com.mobicage.to.beacon.BeaconRegionTO;
-import com.mobicage.to.location.BeaconDiscoveredRequestTO;
 
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconManager;
@@ -117,10 +107,6 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
-import org.jivesoftware.smack.ConnectionConfiguration;
-import org.jivesoftware.smack.Logger;
-import org.jivesoftware.smack.XMPPConnection;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
@@ -130,7 +116,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -139,17 +124,13 @@ import java.util.UUID;
 import javax.net.ssl.SSLException;
 
 
-public class RegistrationActivity2 extends ServiceBoundActivity {
+public class RegistrationActivity2 extends AbstractRegistrationActivity {
 
-    private static final int XMPP_CHECK_DELAY_MILLIS = 5000;
-    private static final int XMPP_MAX_NUM_ATTEMPTS = 8;
     private static final int PIN_LENGTH = 4;
     private static final int HTTP_RETRY_COUNT = 3;
     private static final int HTTP_TIMEOUT = 10000;
 
     public static final String QRSCAN_CONFIGKEY = "QR_SCAN";
-    public static final String INVITOR_CODE_CONFIGKEY = "invitor_code";
-    public static final String INVITOR_SECRET_CONFIGKEY = "invitor_secret";
     public static final String OPENED_URL_CONFIGKEY = "opened_url";
 
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
@@ -165,19 +146,12 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
 
     private Intent mNotYetProcessedIntent = null;
 
-    private HandlerThread mWorkerThread;
-    private Handler mWorkerHandler;
-    private Handler mUIHandler;
     private RegistrationWizard2 mWiz;
     private AutoCompleteTextView mEnterEmailAutoCompleteTextView;
     private EditText mEnterPinEditText;
-    private List<Account> mAccounts;
     private HttpClient mHttpClient;
 
-    private boolean mAgeAndGenderSet = true;
-    private String mDiscoveredBeacons = null;
     private BeaconManager mBeaconManager;
-    private String mGCMRegistrationId = "";
 
     private BroadcastReceiver mBroadcastReceiver = new SafeBroadcastReceiver() {
         @Override
@@ -209,9 +183,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
         super.onCreate(savedInstanceState);
 
         T.UI();
-        createWorkerThread();
-        mUIHandler = new Handler();
-        T.setUIThread("RegistrationProcedureActivity.onCreate()");
+        init(this);
         setTitle(R.string.registration_title);
 
         mHttpClient = HTTPUtil.getHttpClient(HTTP_TIMEOUT, HTTP_RETRY_COUNT);
@@ -221,8 +193,6 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
         registerReceiver(mBroadcastReceiver, filter);
-
-        startRegistrationService();
 
         // TODO: This has to be improved.
         // If the app relies on GCM the user should not be able to register.
@@ -300,14 +270,6 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
         builder.setMessage(getString(R.string.friend_invitation_register_first, invitorName));
         builder.setPositiveButton(R.string.rogerthat, null);
         builder.create().show();
-    }
-
-    private void startRegistrationService() {
-        startService(new Intent(this, RegistrationService.class));
-    }
-
-    private void stopRegistrationService() {
-        stopService(new Intent(this, RegistrationService.class));
     }
 
     private void showNotification() {
@@ -504,6 +466,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
 
         mWiz = RegistrationWizard2.getWizard(mService);
         mWiz.setFlipper((ViewFlipper) findViewById(R.id.registration_viewFlipper));
+        setWizard(mWiz);
         setFinishHandler();
         addAgreeTOSHandler();
         addIBeaconUsageHandler();
@@ -523,7 +486,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
             GoogleServicesUtils.registerGCMRegistrationId(mService, new GCMRegistrationIdFoundCallback() {
                 @Override
                 public void idFound(String registrationId) {
-                    mGCMRegistrationId = registrationId;
+                    setGCMRegistrationId(registrationId);
                 }
             });
         }
@@ -606,7 +569,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
             }
         };
 
-        mWorkerHandler.post(new SafeRunnable() {
+        runOnWorker(new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
                 T.REGISTRATION();
@@ -629,7 +592,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                     nameValuePairs.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
                     nameValuePairs.add(new BasicNameValuePair("use_xmpp_kick", CloudConstants.USE_XMPP_KICK_CHANNEL
                             + ""));
-                    nameValuePairs.add(new BasicNameValuePair("GCM_registration_id", mGCMRegistrationId));
+                    nameValuePairs.add(new BasicNameValuePair("GCM_registration_id", getGCMRegistrationId()));
 
                     httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
@@ -640,7 +603,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                     HttpEntity entity = response.getEntity();
 
                     if (entity == null) {
-                        mUIHandler.post(showErrorDialog);
+                        runOnUI(showErrorDialog);
                         return;
                     }
 
@@ -652,7 +615,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                         if (statusCode == 500 && responseMap != null) {
                             final String errorMessage = (String) responseMap.get("error");
                             if (errorMessage != null) {
-                                mUIHandler.post(new SafeRunnable() {
+                                runOnUI(new SafeRunnable() {
                                     @Override
                                     protected void safeRun() throws Exception {
                                         T.UI();
@@ -668,16 +631,16 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                                 return;
                             }
                         }
-                        mUIHandler.post(showErrorDialog);
+                        runOnUI(showErrorDialog);
                         return;
                     }
                     JSONObject account = (JSONObject) responseMap.get("account");
                     final String email = (String) responseMap.get("email");
-                    mAgeAndGenderSet = (Boolean) responseMap.get("age_and_gender_set");
+                    setAgeAndGenderSet((Boolean) responseMap.get("age_and_gender_set"));
 
                     final RegistrationInfo info = new RegistrationInfo(email, new Credentials((String) account
                             .get("account"), (String) account.get("password")));
-                    mUIHandler.post(new SafeRunnable() {
+                    runOnUI(new SafeRunnable() {
                         @Override
                         protected void safeRun() throws Exception {
                             T.UI();
@@ -694,7 +657,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
 
                 } catch (Exception e) {
                     L.d(e);
-                    mUIHandler.post(showErrorDialog);
+                    runOnUI(showErrorDialog);
                 }
             }
         });
@@ -724,7 +687,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
             }
         };
 
-        mWorkerHandler.post(new SafeRunnable() {
+        runOnWorker(new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
                 T.REGISTRATION();
@@ -746,7 +709,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                     nameValuePairs.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
                     nameValuePairs.add(new BasicNameValuePair("use_xmpp_kick", CloudConstants.USE_XMPP_KICK_CHANNEL
                             + ""));
-                    nameValuePairs.add(new BasicNameValuePair("GCM_registration_id", mGCMRegistrationId));
+                    nameValuePairs.add(new BasicNameValuePair("GCM_registration_id", getGCMRegistrationId()));
 
                     httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
@@ -757,7 +720,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                     HttpEntity entity = response.getEntity();
 
                     if (entity == null) {
-                        mUIHandler.post(showErrorDialog);
+                        runOnUI(showErrorDialog);
                         return;
                     }
 
@@ -769,7 +732,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                         if (statusCode == 500 && responseMap != null) {
                             final String errorMessage = (String) responseMap.get("error");
                             if (errorMessage != null) {
-                                mUIHandler.post(new SafeRunnable() {
+                                runOnUI(new SafeRunnable() {
                                     @Override
                                     protected void safeRun() throws Exception {
                                         T.UI();
@@ -785,7 +748,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                                 return;
                             }
                         }
-                        mUIHandler.post(showErrorDialog);
+                        runOnUI(showErrorDialog);
                         return;
                     }
 
@@ -807,13 +770,13 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
 
                 } catch (Exception e) {
                     L.d(e);
-                    mUIHandler.post(showErrorDialog);
+                    runOnUI(showErrorDialog);
                 }
             }
         });
     }
 
-    private void registerWithOauthCode(final String code) {
+    private void registerWithOauthCode(final String code, final String state) {
         final String timestamp = "" + mWiz.getTimestamp();
         final String deviceId = mWiz.getDeviceId();
         final String registrationId = mWiz.getRegistrationId();
@@ -837,13 +800,13 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
             }
         };
 
-        mWorkerHandler.post(new SafeRunnable() {
+        runOnWorker(new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
                 T.REGISTRATION();
                 String version = "1";
                 String signature = Security.sha256(version + " " + installId + " " + timestamp + " " + deviceId + " "
-                        + registrationId + " " + code + CloudConstants.REGISTRATION_MAIN_SIGNATURE);
+                        + registrationId + " " + code + state + CloudConstants.REGISTRATION_MAIN_SIGNATURE);
 
                 HttpPost httppost = new HttpPost(CloudConstants.REGISTRATION_OAUTH_REGISTERED_URL);
                 try {
@@ -857,10 +820,11 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                     nameValuePairs.add(new BasicNameValuePair("language", Locale.getDefault().getLanguage()));
                     nameValuePairs.add(new BasicNameValuePair("country", Locale.getDefault().getCountry()));
                     nameValuePairs.add(new BasicNameValuePair("code", code));
+                    nameValuePairs.add(new BasicNameValuePair("state", state));
                     nameValuePairs.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
                     nameValuePairs.add(new BasicNameValuePair("use_xmpp_kick", CloudConstants.USE_XMPP_KICK_CHANNEL
                             + ""));
-                    nameValuePairs.add(new BasicNameValuePair("GCM_registration_id", mGCMRegistrationId));
+                    nameValuePairs.add(new BasicNameValuePair("GCM_registration_id", getGCMRegistrationId()));
 
                     httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
@@ -871,7 +835,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                     HttpEntity entity = response.getEntity();
 
                     if (entity == null) {
-                        mUIHandler.post(showErrorDialog);
+                        runOnUI(showErrorDialog);
                         return;
                     }
 
@@ -883,7 +847,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                         if (statusCode == 500 && responseMap != null) {
                             final String errorMessage = (String) responseMap.get("error");
                             if (errorMessage != null) {
-                                mUIHandler.post(new SafeRunnable() {
+                                runOnUI(new SafeRunnable() {
                                     @Override
                                     protected void safeRun() throws Exception {
                                         T.UI();
@@ -899,7 +863,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                                 return;
                             }
                         }
-                        mUIHandler.post(showErrorDialog);
+                        runOnUI(showErrorDialog);
                         return;
                     }
 
@@ -907,10 +871,10 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
 
                     JSONObject account = (JSONObject) responseMap.get("account");
                     final String email = (String) responseMap.get("email");
-                    mAgeAndGenderSet = (Boolean) responseMap.get("age_and_gender_set");
+                    setAgeAndGenderSet((Boolean) responseMap.get("age_and_gender_set"));
                     final RegistrationInfo info = new RegistrationInfo(email, new Credentials((String) account
                             .get("account"), (String) account.get("password")));
-                    mUIHandler.post(new SafeRunnable() {
+                    runOnUI(new SafeRunnable() {
                         @Override
                         protected void safeRun() throws Exception {
                             T.UI();
@@ -927,7 +891,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
 
                 } catch (Exception e) {
                     L.d(e);
-                    mUIHandler.post(showErrorDialog);
+                    runOnUI(showErrorDialog);
                 }
             }
         });
@@ -957,9 +921,9 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
         T.UI();
         final boolean getAccountsPermissionWasGranted = mService.isPermitted(Manifest.permission.GET_ACCOUNTS);
         if (getAccountsPermissionWasGranted) {
-            mAccounts = new AccountManager(this).getAccounts();
+            setAccounts(new AccountManager(this).getAccounts());
             List<String> emails = new ArrayList<String>();
-            for (Account account : mAccounts) {
+            for (Account account : getAccounts()) {
                 if (RegexPatterns.EMAIL.matcher(account.name).matches() && !emails.contains(account.name))
                     emails.add(account.name);
             }
@@ -1002,11 +966,11 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
 
         if (requestCode == START_OAUTH_REQUEST_CODE) {
             if (resultCode == Activity.RESULT_OK) {
-                if (data.getBooleanExtra(OauthActivity.SUCCESS, false)) {
-                    registerWithOauthCode(data.getStringExtra(OauthActivity.RESULT));
+                if (data.getBooleanExtra(OauthActivity.RESULT_SUCCESS, false)) {
+                    registerWithOauthCode(data.getStringExtra(OauthActivity.RESULT_CODE), data.getStringExtra(OauthActivity.RESULT_STATE));
                 } else {
                     final AlertDialog.Builder builder = new AlertDialog.Builder(RegistrationActivity2.this);
-                    builder.setMessage(data.getStringExtra(OauthActivity.RESULT));
+                    builder.setMessage(data.getStringExtra(OauthActivity.RESULT_ERROR_MESSAGE));
                     builder.setPositiveButton(R.string.rogerthat, null);
                     builder.create().show();
                 }
@@ -1049,7 +1013,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
         final String registrationId = mWiz.getRegistrationId();
         final String deviceId = mWiz.getDeviceId();
 
-        mWorkerHandler.post(new SafeRunnable() {
+        runOnWorker(new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
                 T.REGISTRATION();
@@ -1071,7 +1035,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                     nameValuePairs.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
                     nameValuePairs.add(new BasicNameValuePair("use_xmpp_kick", CloudConstants.USE_XMPP_KICK_CHANNEL
                             + ""));
-                    nameValuePairs.add(new BasicNameValuePair("GCM_registration_id", mGCMRegistrationId));
+                    nameValuePairs.add(new BasicNameValuePair("GCM_registration_id", getGCMRegistrationId()));
 
                     httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
@@ -1080,7 +1044,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                     int statusCode = response.getStatusLine().getStatusCode();
                     HttpEntity entity = response.getEntity();
                     if (statusCode != 200 || entity == null) {
-                        mUIHandler.post(showErrorDialog);
+                        runOnUI(showErrorDialog);
                         return;
                     }
                     @SuppressWarnings("unchecked")
@@ -1092,8 +1056,8 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                         final RegistrationInfo info = new RegistrationInfo(email, new Credentials((String) account
                                 .get("account"), (String) account.get("password")));
 
-                        mAgeAndGenderSet = (Boolean) responseMap.get("age_and_gender_set");
-                        mUIHandler.post(new SafeRunnable() {
+                        setAgeAndGenderSet((Boolean) responseMap.get("age_and_gender_set"));
+                        runOnUI(new SafeRunnable() {
                             @Override
                             protected void safeRun() throws Exception {
                                 T.UI();
@@ -1108,7 +1072,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                     } else {
 
                         final long attempts_left = (Long) responseMap.get("attempts_left");
-                        mUIHandler.post(new SafeRunnable() {
+                        runOnUI(new SafeRunnable() {
                             @Override
                             protected void safeRun() throws Exception {
                                 T.UI();
@@ -1137,7 +1101,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                     }
                 } catch (Exception e) {
                     L.d(e);
-                    mUIHandler.post(showErrorDialog);
+                    runOnUI(showErrorDialog);
                 }
             }
         });
@@ -1327,33 +1291,8 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
     private void setFinishHandler() {
         mWiz.setOnFinish(new SafeRunnable() {
 
-            private void startMainActivity() {
-                Intent intent = new Intent(RegistrationActivity2.this, MainActivity.class);
-                intent.setAction(MainActivity.ACTION_REGISTERED);
-                startActivity(intent);
-                RegistrationActivity2.this.finish();
-            }
-
             private void showPopup(Configuration cfg) {
-                if (mDiscoveredBeacons != null) {
-                    Intent intent = new Intent(RegistrationActivity2.this, MainActivity.class);
-                    intent.setAction(MainActivity.ACTION_SHOW_DETECTED_BEACONS);
-                    intent.putExtra(DetectedBeaconActivity.EXTRA_DETECTED_BEACONS, mDiscoveredBeacons);
-                    intent.putExtra(DetectedBeaconActivity.EXTRA_AGE_AND_GENDER_SET, mAgeAndGenderSet);
-                    intent.setFlags(MainActivity.FLAG_CLEAR_STACK_SINGLE_TOP);
-                    startActivity(intent);
-                    RegistrationActivity2.this.finish();
-                    return;
-                }
-                if (AppConstants.PROFILE_SHOW_GENDER_AND_BIRTHDATE && !mAgeAndGenderSet) {
-                    Intent intent = new Intent(RegistrationActivity2.this, MainActivity.class);
-                    intent.setAction(MainActivity.ACTION_COMPLETE_PROFILE);
-                    intent.setFlags(MainActivity.FLAG_CLEAR_STACK_SINGLE_TOP);
-                    startActivity(intent);
-                    RegistrationActivity2.this.finish();
-                    return;
-                }
-                startMainActivity();
+                startMainActivity(false);
             }
 
             @Override
@@ -1375,7 +1314,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                 if (cfg != null && cfg.get(INVITOR_SECRET_CONFIGKEY, null) != null
                         && cfg.get(INVITOR_CODE_CONFIGKEY, null) != null) {
                     // User pressed an invitation link with secret
-                    startMainActivity();
+                    startMainActivity(true);
                 } else {
                     showPopup(cfg);
                 }
@@ -1386,218 +1325,6 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
     @Override
     protected void onServiceUnbound() {
 
-    }
-
-    private void createWorkerThread() {
-        T.UI();
-        mWorkerThread = new HandlerThread("rogerthat_registration_worker");
-        mWorkerThread.start();
-        mWorkerHandler = new Handler(mWorkerThread.getLooper());
-        mWorkerHandler.post(new SafeRunnable() {
-            @Override
-            public void safeRun() {
-                T.setRegistrationThread("RegistrationProcedureActivity.createWorkerThread()");
-            }
-        });
-    }
-
-    private void closeWorkerThread() {
-        T.UI();
-        final Looper looper = mWorkerHandler.getLooper();
-        if (looper != null)
-            looper.quit();
-
-        try {
-            mWorkerThread.join();
-        } catch (InterruptedException e) {
-            L.bug(e);
-        }
-
-        mWorkerHandler = null;
-        mWorkerThread = null;
-        T.resetRegistrationThreadId();
-
-    }
-
-    private void tryConnect(final ProgressDialog pd, final int attempt, final String statusMessage,
-                            final RegistrationInfo info) {
-        T.UI();
-        final Pausable pausable = this;
-
-        if (attempt > XMPP_MAX_NUM_ATTEMPTS) {
-            pd.dismiss();
-
-            new AlertDialog.Builder(RegistrationActivity2.this).setMessage(getString(R.string.registration_error))
-                    .setCancelable(true).setPositiveButton(R.string.try_again, null).create().show();
-            mWiz.reInit();
-            mWiz.goBackToPrevious();
-            return;
-        }
-        pd.setMessage(statusMessage + attempt);
-        if (!pd.isShowing())
-            pd.show();
-        L.d("Registration attempt #" + attempt);
-
-        final String xmppServiceName = info.mCredentials.getXmppServiceName();
-        final String xmppAccount = info.mCredentials.getXmppAccount();
-        final String xmppPassword = info.mCredentials.getPassword();
-
-        final ConfigurationProvider cp = mService.getConfigurationProvider();
-        Configuration cfg = cp.getConfiguration(RegistrationWizard2.CONFIGKEY);
-        final String invitorCode = (cfg == null) ? null : cfg.get(INVITOR_CODE_CONFIGKEY, null);
-        final String invitorSecret = (cfg == null) ? null : cfg.get(INVITOR_SECRET_CONFIGKEY, null);
-
-        Runnable runnable = new SafeRunnable() {
-
-            @Override
-            public void safeRun() {
-                T.REGISTRATION();
-                try {
-
-                    if (CloudConstants.USE_XMPP_KICK_CHANNEL) {
-
-                        final ConnectionConfiguration xmppConfig = new XMPPConfigurationFactory(cp,
-                                mService.getNetworkConnectivityManager(), null)
-                                .getSafeXmppConnectionConfiguration(xmppServiceName);
-                        final XMPPConnection xmppCon = new XMPPConnection(xmppConfig);
-
-                        xmppCon.setLogger(new Logger() {
-                            @Override
-                            public void log(String message) {
-                                L.d(message);
-                            }
-                        });
-                        xmppCon.connect();
-                        xmppCon.login(xmppAccount, xmppPassword);
-
-                        final Thread t2 = new Thread(new SafeRunnable() {
-                            @Override
-                            protected void safeRun() throws Exception {
-                                L.d("REG Before disconnect (on separate thread) - xmpp-" + xmppCon.hashCode());
-                                xmppCon.disconnect();
-                                L.d("REG After disconnect (on separate thread) - xmpp-" + xmppCon.hashCode());
-                            }
-                        });
-                        t2.setDaemon(true);
-                        t2.start();
-
-                    }
-
-                    postFinishRegistration(info.mCredentials.getUsername(), info.mCredentials.getPassword(),
-                            invitorCode, invitorSecret);
-
-                    mUIHandler.post(new SafeRunnable(pausable) {
-
-                        @Override
-                        protected void safeRun() throws Exception {
-                            T.UI();
-                            mWiz.setCredentials(info.mCredentials);
-
-                            if (CloudConstants.USE_GCM_KICK_CHANNEL && !"".equals(mGCMRegistrationId)) {
-                                GoogleServicesUtils.saveGCMRegistrationId(mService, mGCMRegistrationId);
-                            }
-
-                            mService.setCredentials(mWiz.getCredentials());
-                            mService.setRegisteredInConfig(true);
-
-                            final Intent launchServiceIntent = new Intent(RegistrationActivity2.this, MainService.class);
-                            launchServiceIntent.putExtra(MainService.START_INTENT_JUST_REGISTERED, true);
-                            launchServiceIntent.putExtra(MainService.START_INTENT_MY_EMAIL, mWiz.getEmail());
-                            RegistrationActivity2.this.startService(launchServiceIntent);
-                            stopRegistrationService();
-                            pd.dismiss();
-
-                            mWiz.finish(); // finish
-                        }
-                    });
-
-                } catch (Exception e) {
-                    L.d("Exception while trying to end the registration process", e);
-                    mUIHandler.post(new SafeRunnable(pausable) {
-
-                        @Override
-                        protected void safeRun() throws Exception {
-                            T.UI();
-                            tryConnect(pd, attempt + 1, statusMessage, info);
-                        }
-                    });
-                }
-            }
-        };
-        if (attempt == 1) {
-            mWorkerHandler.post(runnable);
-        } else {
-            mWorkerHandler.postDelayed(runnable, XMPP_CHECK_DELAY_MILLIS);
-        }
-    }
-
-    private String getMobileInfo() {
-        T.REGISTRATION();
-        MobileInfo info = SystemPlugin.gatherMobileInfo(mService);
-        String json = JSONValue.toJSONString(info.toJSONMap());
-        return json;
-    }
-
-    @SuppressWarnings("unchecked")
-    private void postFinishRegistration(final String username, final String password, final String invitorCode,
-                                        final String invitorSecret) throws ClientProtocolException, IOException {
-        T.REGISTRATION();
-        final String mobileInfo = getMobileInfo();
-        HttpClient httpClient = HTTPUtil.getHttpClient();
-        final HttpPost httpPost = new HttpPost(CloudConstants.REGISTRATION_FINISH_URL);
-        httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
-        List<NameValuePair> formParams = new ArrayList<NameValuePair>();
-        formParams.add(new BasicNameValuePair("mobileInfo", mobileInfo));
-        formParams.add(new BasicNameValuePair("account", username));
-        formParams.add(new BasicNameValuePair("password", password));
-        formParams.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
-        org.json.simple.JSONArray accounts = new org.json.simple.JSONArray();
-        if (mAccounts != null) {
-            for (Account acc : mAccounts) {
-                Map<String, String> jacc = new LinkedHashMap<String, String>();
-                jacc.put("type", acc.type);
-                jacc.put("name", acc.name);
-                accounts.add(jacc);
-            }
-        }
-        formParams.add(new BasicNameValuePair("accounts", accounts.toString()));
-
-        formParams.add(new BasicNameValuePair("invitor_code", invitorCode));
-        formParams.add(new BasicNameValuePair("invitor_secret", invitorSecret));
-
-        org.json.simple.JSONArray beacons = new org.json.simple.JSONArray();
-        for (BeaconDiscoveredRequestTO bdr : mWiz.getDetectedBeacons()) {
-            beacons.add(bdr.toJSONMap());
-        }
-        formParams.add(new BasicNameValuePair("beacons", beacons.toString()));
-
-        httpPost.setEntity(new UrlEncodedFormEntity(formParams, HTTP.UTF_8));
-        L.d("before http final post");
-        HttpResponse response = httpClient.execute(httpPost);
-        L.d("after http final post");
-        final int responseCode = response.getStatusLine().getStatusCode();
-        if (responseCode != HttpStatus.SC_OK) {
-            throw new IOException("HTTP request resulted in status code " + responseCode);
-        }
-
-        L.d("finish_registration call sent");
-        HttpEntity httpEntity = response.getEntity();
-        if (httpEntity == null) {
-            throw new IOException("Response of '/unauthenticated/mobi/registration/finish' was null");
-        }
-
-        final Map<String, Object> responseMap = (Map<String, Object>) JSONValue.parse(new InputStreamReader(httpEntity
-                .getContent()));
-        if (responseMap == null) {
-            throw new IOException("HTTP request responseMap was null");
-        }
-
-        JSONArray beaconRegions = (JSONArray) responseMap.get("discovered_beacons");
-        if (beaconRegions != null && beaconRegions.size() > 0) {
-            mDiscoveredBeacons = JSONValue.toJSONString(beaconRegions);
-        } else {
-            mDiscoveredBeacons = null;
-        }
     }
 
     private void sendRegistrationRequest(final String email) {
@@ -1622,7 +1349,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
         final String registrationId = mWiz.getRegistrationId();
         final String deviceId = mWiz.getDeviceId();
 
-        mWorkerHandler.post(new SafeRunnable() {
+        runOnWorker(new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
                 T.REGISTRATION();
@@ -1651,7 +1378,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
 
                     int statusCode = response.getStatusLine().getStatusCode();
                     if (statusCode == 200) {
-                        mUIHandler.post(new SafeRunnable() {
+                        runOnUI(new SafeRunnable() {
                             @Override
                             protected void safeRun() throws Exception {
                                 T.UI();
@@ -1665,7 +1392,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                     } else if (statusCode == 502) {
 
                         final HttpEntity entity = response.getEntity();
-                        mUIHandler.post(new SafeRunnable() {
+                        runOnUI(new SafeRunnable() {
                             @Override
                             protected void safeRun() throws Exception {
                                 T.UI();
@@ -1698,15 +1425,15 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
                             }
                         });
                     } else {
-                        mUIHandler.post(showErrorDialog);
+                        runOnUI(showErrorDialog);
                     }
 
                 } catch (ClientProtocolException e) {
                     L.d(e);
-                    mUIHandler.post(showErrorDialog);
+                    runOnUI(showErrorDialog);
                 } catch (IOException e) {
                     L.d(e);
-                    mUIHandler.post(showErrorDialog);
+                    runOnUI(showErrorDialog);
                 }
             }
         });
@@ -1732,6 +1459,7 @@ public class RegistrationActivity2 extends ServiceBoundActivity {
             protected Object safeDoInBackground(Object... params) {
                 final HttpPost httpPost = new HttpPost(CloudConstants.REGISTRATION_LOG_STEP_URL);
                 httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
+                httpPost.setHeader("User-Agent", MainService.getUserAgent(RegistrationActivity2.this));
                 List<NameValuePair> formParams = new ArrayList<NameValuePair>();
                 formParams.add(new BasicNameValuePair("step", step));
                 formParams.add(new BasicNameValuePair("install_id", mWiz.getInstallationId()));

@@ -23,9 +23,6 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Looper;
 import android.support.v4.app.ActivityCompat;
 import android.view.View;
 import android.widget.Button;
@@ -36,10 +33,7 @@ import com.mobicage.rogerthat.ContentBrandingMainActivity;
 import com.mobicage.rogerthat.Installation;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
-import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
-import com.mobicage.rogerthat.plugins.system.MobileInfo;
-import com.mobicage.rogerthat.plugins.system.SystemPlugin;
 import com.mobicage.rogerthat.util.GoogleServicesUtils;
 import com.mobicage.rogerthat.util.GoogleServicesUtils.GCMRegistrationIdFoundCallback;
 import com.mobicage.rogerthat.util.Security;
@@ -78,7 +72,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class ContentBrandingRegistrationActivity extends ServiceBoundActivity {
+public class ContentBrandingRegistrationActivity extends AbstractRegistrationActivity {
 
     public static final int MY_PERMISSIONS_REQUEST_CAMERA = 1;
     private static final int MARKET_INSTALL_RESULT = 60000;
@@ -89,25 +83,18 @@ public class ContentBrandingRegistrationActivity extends ServiceBoundActivity {
     private static final int HTTP_RETRY_COUNT = 3;
     private static final int HTTP_TIMEOUT = 10000;
 
-    private HandlerThread mWorkerThread;
-    private Looper mWorkerLooper;
-    private Handler mWorkerHandler;
-    private Handler mUIHandler;
     private ContentBrandingRegistrationWizard mWiz;
     private HttpClient mHttpClient;
     private ProgressDialog mProgressDialog = null;
 
     private LinearLayout mProgressContainer;
     private LinearLayout mButtonContainer;
-    private String mGCMRegistrationId = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         T.UI();
-        createWorkerThread();
-        mUIHandler = new Handler();
-        T.setUIThread("ContentBrandingRegistrationActivity.onCreate()");
+        init(this);
         mHttpClient = HTTPUtil.getHttpClient(HTTP_TIMEOUT, HTTP_RETRY_COUNT);
 
         // TODO: This has to be improved.
@@ -171,12 +158,12 @@ public class ContentBrandingRegistrationActivity extends ServiceBoundActivity {
         });
 
         mWiz = ContentBrandingRegistrationWizard.getWizard(mService, Installation.id(this));
-
+        setWizard(mWiz);
         if (CloudConstants.USE_GCM_KICK_CHANNEL && GoogleServicesUtils.checkPlayServices(this, true)) {
             GoogleServicesUtils.registerGCMRegistrationId(mService, new GCMRegistrationIdFoundCallback() {
                 @Override
                 public void idFound(String registrationId) {
-                    mGCMRegistrationId = registrationId;
+                    setGCMRegistrationId(registrationId);
                 }
             });
         }
@@ -264,7 +251,7 @@ public class ContentBrandingRegistrationActivity extends ServiceBoundActivity {
             }
         };
 
-        mWorkerHandler.post(new SafeRunnable() {
+        runOnWorker(new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
                 T.REGISTRATION();
@@ -288,7 +275,7 @@ public class ContentBrandingRegistrationActivity extends ServiceBoundActivity {
                     nameValuePairs.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
                     nameValuePairs.add(new BasicNameValuePair("use_xmpp_kick", CloudConstants.USE_XMPP_KICK_CHANNEL
                         + ""));
-                    nameValuePairs.add(new BasicNameValuePair("GCM_registration_id", mGCMRegistrationId));
+                    nameValuePairs.add(new BasicNameValuePair("GCM_registration_id", getGCMRegistrationId()));
                     httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
                     // Execute HTTP Post Request
@@ -298,7 +285,7 @@ public class ContentBrandingRegistrationActivity extends ServiceBoundActivity {
                     HttpEntity entity = response.getEntity();
 
                     if (entity == null) {
-                        mUIHandler.post(showErrorDialog);
+                        runOnUI(showErrorDialog);
                         return;
                     }
 
@@ -310,7 +297,7 @@ public class ContentBrandingRegistrationActivity extends ServiceBoundActivity {
                         if (statusCode == 500 && responseMap != null) {
                             final String errorMessage = (String) responseMap.get("error");
                             if (errorMessage != null) {
-                                mUIHandler.post(new SafeRunnable() {
+                                runOnUI(new SafeRunnable() {
                                     @Override
                                     protected void safeRun() throws Exception {
                                         T.UI();
@@ -327,14 +314,14 @@ public class ContentBrandingRegistrationActivity extends ServiceBoundActivity {
                                 return;
                             }
                         }
-                        mUIHandler.post(showErrorDialog);
+                        runOnUI(showErrorDialog);
                         return;
                     }
                     JSONObject account = (JSONObject) responseMap.get("account");
                     final String email = (String) responseMap.get("email");
                     final RegistrationInfo info = new RegistrationInfo(email, new Credentials((String) account
                         .get("account"), (String) account.get("password")));
-                    mUIHandler.post(new SafeRunnable() {
+                    runOnUI(new SafeRunnable() {
                         @Override
                         protected void safeRun() throws Exception {
                             T.UI();
@@ -349,42 +336,10 @@ public class ContentBrandingRegistrationActivity extends ServiceBoundActivity {
 
                 } catch (Exception e) {
                     L.d(e);
-                    mUIHandler.post(showErrorDialog);
+                    runOnUI(showErrorDialog);
                 }
             }
         });
-    }
-
-    private void createWorkerThread() {
-        T.UI();
-        mWorkerThread = new HandlerThread("rogerthat_registration_worker");
-        mWorkerThread.start();
-        mWorkerLooper = mWorkerThread.getLooper();
-        mWorkerHandler = new Handler(mWorkerLooper);
-        mWorkerHandler.post(new SafeRunnable() {
-            @Override
-            public void safeRun() {
-                T.setRegistrationThread("RegistrationProcedureActivity.createWorkerThread()");
-            }
-        });
-    }
-
-    private void closeWorkerThread() {
-        T.UI();
-        final Looper looper = mWorkerHandler.getLooper();
-        if (looper != null)
-            looper.quit();
-
-        try {
-            mWorkerThread.join();
-        } catch (InterruptedException e) {
-            L.bug(e);
-        }
-
-        mWorkerHandler = null;
-        mWorkerThread = null;
-        T.resetRegistrationThreadId();
-
     }
 
     private void tryConnect(final int attempt, final String statusMessage, final RegistrationInfo info) {
@@ -446,15 +401,15 @@ public class ContentBrandingRegistrationActivity extends ServiceBoundActivity {
 
                     postFinishRegistration(info.mCredentials.getUsername(), info.mCredentials.getPassword(), null, null);
 
-                    mUIHandler.post(new SafeRunnable(pausable) {
+                    runOnUI(new SafeRunnable(pausable) {
 
                         @Override
                         protected void safeRun() throws Exception {
                             T.UI();
                             mWiz.setCredentials(info.mCredentials);
 
-                            if (CloudConstants.USE_GCM_KICK_CHANNEL && !"".equals(mGCMRegistrationId)) {
-                                GoogleServicesUtils.saveGCMRegistrationId(mService, mGCMRegistrationId);
+                            if (CloudConstants.USE_GCM_KICK_CHANNEL && !"".equals(getGCMRegistrationId())) {
+                                GoogleServicesUtils.saveGCMRegistrationId(mService, getGCMRegistrationId());
                             }
 
                             mService.setCredentials(mWiz.getCredentials());
@@ -475,7 +430,7 @@ public class ContentBrandingRegistrationActivity extends ServiceBoundActivity {
 
                 } catch (Exception e) {
                     L.d("Exception while trying to end the registration process", e);
-                    mUIHandler.post(new SafeRunnable(pausable) {
+                    runOnUI(new SafeRunnable(pausable) {
 
                         @Override
                         protected void safeRun() throws Exception {
@@ -487,17 +442,10 @@ public class ContentBrandingRegistrationActivity extends ServiceBoundActivity {
             }
         };
         if (attempt == 1) {
-            mWorkerHandler.post(runnable);
+            runOnWorker(runnable);
         } else {
-            mWorkerHandler.postDelayed(runnable, XMPP_CHECK_DELAY_MILLIS);
+            runDelayedOnWorker(runnable, XMPP_CHECK_DELAY_MILLIS);
         }
-    }
-
-    private String getMobileInfo() {
-        T.REGISTRATION();
-        MobileInfo info = SystemPlugin.gatherMobileInfo(mService);
-        String json = JSONValue.toJSONString(info.toJSONMap());
-        return json;
     }
 
     @SuppressWarnings("unchecked")
@@ -508,6 +456,7 @@ public class ContentBrandingRegistrationActivity extends ServiceBoundActivity {
         HttpClient httpClient = HTTPUtil.getHttpClient();
         final HttpPost httpPost = new HttpPost(CloudConstants.REGISTRATION_FINISH_URL);
         httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
+        httpPost.setHeader("User-Agent", MainService.getUserAgent(mService));
         List<NameValuePair> formParams = new ArrayList<NameValuePair>();
         formParams.add(new BasicNameValuePair("mobileInfo", mobileInfo));
         formParams.add(new BasicNameValuePair("account", username));

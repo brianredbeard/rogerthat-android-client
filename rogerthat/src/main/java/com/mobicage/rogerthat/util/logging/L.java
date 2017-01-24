@@ -175,6 +175,7 @@ public class L {
                                     try {
                                         HttpPost httpPostRequest = new HttpPost(CloudConstants.LOG_ERROR_URL);
                                         httpPostRequest.setHeader("Content-Type", "application/x-www-form-urlencoded");
+                                        httpPostRequest.setHeader("User-Agent", MainService.getUserAgent(sMainService));
 
                                         RegistrationWizard2 wiz = RegistrationWizard2.getWizard(sMainService);
 

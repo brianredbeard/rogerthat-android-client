@@ -32,7 +32,9 @@ public class AppConstants {
 
     public static final int REGISTRATION_TYPE_DEFAULT = 1;
     public static final int REGISTRATION_TYPE_OAUTH = 2;
+    public static final int REGISTRATION_TYPE_FULL_OAUTH = 3;
     public static final String REGISTRATION_TYPE_OAUTH_DOMAIN = "dummy";
+    public static final String REGISTRATION_TYPE_OAUTH_URL = "dummy";
     public static int getRegistrationType() {
         return REGISTRATION_TYPE_DEFAULT;
     };
