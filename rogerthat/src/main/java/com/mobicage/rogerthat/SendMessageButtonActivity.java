@@ -159,7 +159,7 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
                                     .getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NUMBER));
                             String name = c.getString(c
                                     .getColumnIndexOrThrow(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME));
-                            mActionView.setText("tel://" + number);
+                            mActionView.setText(number);
                             if (mCaptionView.getText().equals(""))
                                 mCaptionView.setText(getString(R.string.caption_call, new Object[]{name}));
                         } catch (IllegalArgumentException e) {
@@ -170,8 +170,7 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
                 break;
             case GET_LOCATION:
                 if (resultCode == Activity.RESULT_OK) {
-                    mActionView.setText("geo://" + data.getDoubleExtra("latitude", 0) + ","
-                            + data.getDoubleExtra("longitude", 0));
+                    mActionView.setText(data.getDoubleExtra("latitude", 0) + "," + data.getDoubleExtra("longitude", 0));
                 }
                 break;
         }
