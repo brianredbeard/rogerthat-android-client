@@ -312,7 +312,7 @@
     <string name="not_authenticated">No autenticado</string>
     <string name="not_yet_received">Aún no se ha recibido</string>
     <string name="not_yet_replied">Aún no se ha respondido</string>
-    <string name="notification_settings">Notificaciones</string>
+    <string name="notification_settings">Ajustes de notificaciones</string>
     <string name="ok">Aceptar</string>
     <string name="one_updated_message">1 mensaje actualizado.</string>
     <string name="open_attachments_before_signing">Por favor, revisa los documentos adjuntos antes de firmar</string>
