@@ -689,7 +689,7 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
                 return;
             }
 
-            if (friendsPlugin.getStore().getExistence(newsItem.sender.email) == Friend.ACTIVE) {
+            if (friendsPlugin.getStore().getExistence(newsItem.sender.email) != Friend.ACTIVE) {
                 return;
             }
 

@@ -55,7 +55,7 @@ public class NewsCallReceiver implements com.mobicage.capi.news.IClientRpc {
         FriendsPlugin friendsPlugin = mMainService.getPlugin(FriendsPlugin.class);
         boolean showNewsItem = !friendsPlugin.isBroadcastTypeDisabled(request.news_item.sender.email, request.news_item.broadcast_type);
 
-        if (showNewsItem && friendsPlugin.getStore().getExistence(request.news_item.sender.email) == Friend.ACTIVE) {
+        if (showNewsItem && friendsPlugin.getStore().getExistence(request.news_item.sender.email) != Friend.ACTIVE) {
             showNewsItem = false;
         }
 
