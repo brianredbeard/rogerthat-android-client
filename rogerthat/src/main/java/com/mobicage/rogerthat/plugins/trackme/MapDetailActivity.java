@@ -26,13 +26,15 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
-import com.google.android.maps.GeoPoint;
-import com.google.android.maps.MapView;
-import com.google.android.maps.OverlayItem;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MyIdentity;
 import com.mobicage.rogerthat.ServiceBoundMapActivity;
-import com.mobicage.rogerthat.plugins.friends.DrawableItemizedOverlay;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
 
@@ -43,7 +45,6 @@ public class MapDetailActivity extends ServiceBoundMapActivity {
     public static String VERIFY = "verify";
     public static String VERIFIED = "verified";
 
-    private MapView mMapView;
     private float mLocationLatitude;
     private float mLocationLongitude;
     private MyIdentity mIdentity;
@@ -56,10 +57,8 @@ public class MapDetailActivity extends ServiceBoundMapActivity {
         setContentView(R.layout.map_dialog);
         setTitle(R.string.friends_map);
 
-        mMapView = (MapView) findViewById(R.id.map);
-
-        mMapView.getController().setZoom(14);
-        mMapView.setVisibility(View.VISIBLE);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
     }
 
     @Override
@@ -69,20 +68,12 @@ public class MapDetailActivity extends ServiceBoundMapActivity {
         final Intent intent = getIntent();
         mLocationLatitude = intent.getFloatExtra(LATITUDE, -1);
         mLocationLongitude = intent.getFloatExtra(LONGITUDE, -1);
+        zoomToPosition();
 
-        mMapView.getOverlays().clear();
-        DrawableItemizedOverlay overlay = new DrawableItemizedOverlay(getOverlayAvatar(mIdentity), this);
-
-        GeoPoint point = new GeoPoint((int) (mLocationLatitude * 1000000), (int) (mLocationLongitude * 1000000));
-        OverlayItem overlayitem = new OverlayItem(point, getString(R.string.you_are_here), null);
-        overlay.addOverlay(overlayitem);
-        mMapView.getOverlays().add(overlay);
-        mMapView.getController().setCenter(point);
-
-        final Toolbar bar = (Toolbar) findViewById(R.id.toolbar);
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (intent.getBooleanExtra(VERIFY, false)) {
 
-            bar.setNavigationOnClickListener(new View.OnClickListener() {
+            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     finish();
@@ -93,9 +84,7 @@ public class MapDetailActivity extends ServiceBoundMapActivity {
             mapVerify.setVisibility(View.VISIBLE);
             setTitle(R.string.validate_discovered_location);
             Button mapYes = (Button) findViewById(R.id.map_yes);
-            mapYes.setVisibility(View.VISIBLE);
             Button mapNo = (Button) findViewById(R.id.map_no);
-            mapNo.setVisibility(View.VISIBLE);
 
             mapYes.setOnClickListener(new SafeViewOnClickListener() {
                 @Override
@@ -121,7 +110,7 @@ public class MapDetailActivity extends ServiceBoundMapActivity {
                 }
             });
         } else {
-            bar.setVisibility(View.GONE);
+            toolbar.setVisibility(View.GONE);
         }
     }
 
@@ -131,18 +120,29 @@ public class MapDetailActivity extends ServiceBoundMapActivity {
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
-
-    @Override
-    public void finish() {
-        super.finish();
-    }
-
-    @Override
-    protected boolean isRouteDisplayed() {
+    public boolean onMyLocationButtonClick() {
+        // Return false so that we don't consume the event and the default behavior still occurs
+        // (the camera animates to the user's current position).
         return false;
+    }
+
+    private void zoomToPosition() {
+        if (mMap != null) {
+            mMap.clear();
+            LatLng position = new LatLng(mLocationLatitude, mLocationLongitude);
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(position, 14);
+            MarkerOptions markerOptions = new MarkerOptions()
+                    .position(position)
+                    .title(getString(R.string.you_are_here))
+                    .icon(getAvatarBitmapDescriptor(mIdentity));
+            mMap.addMarker(markerOptions);
+            mMap.animateCamera(cameraUpdate);
+        }
+    }
+
+    public void onMapReady(GoogleMap map) {
+        super.onMapReady(map);
+        zoomToPosition();
     }
 
 }

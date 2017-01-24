@@ -1,5 +1,4 @@
 /keystore/debug.keystore
-/rogerthat/src/main/res/values/secrets.xml
 *~
 *.bak
 *.swp
@@ -37,5 +36,4 @@ CustomCloudConstants.java
 .idea/gradle.xml
 .idea/libraries
 
-build
-.idea/gradle.xml
+build/

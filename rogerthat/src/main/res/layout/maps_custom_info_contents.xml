@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layoutDirection="locale"
+              android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/title"
+        fontPath="fonts/lato_bold.ttf"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Title of info window"/>
+
+    <TextView
+        android:id="@+id/snippet"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Multiline info\ngoes here"/>
+</LinearLayout>

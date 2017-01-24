@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
 
     <android.support.v7.widget.Toolbar
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -15,45 +16,59 @@
         android:background="@color/mc_background_color"
         app:navigationIcon="?attr/homeAsUpIndicator"
         app:title="@string/validate_discovered_location"
-        android:elevation="5dp"
-        />
+        android:elevation="5dp"/>
 
-    <LinearLayout
-        android:id="@+id/map_verify"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginTop="5dp"
-        android:visibility="gone"
-        android:orientation="horizontal" >
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                 android:layout_width="match_parent"
+                 android:layout_height="match_parent">
 
-        <android.support.v7.widget.AppCompatButton
-            android:id="@+id/map_yes"
-            android:layout_width="wrap_content"
+        <fragment
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/map"
+            class="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <LinearLayout
+            android:id="@+id/map_verify"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/yes"
-            android:theme="@style/ButtonTheme"
-            android:visibility="gone" />
+            android:layout_gravity="bottom"
+            android:layout_marginTop="5dp"
+            android:background="#88FFFFFF"
+            android:orientation="vertical"
+            android:padding="8dp"
+            android:visibility="gone"
+            tools:visibility="visible">
 
-        <android.support.v7.widget.AppCompatButton
-            android:id="@+id/map_no"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/no"
-            android:theme="@style/ButtonTheme"
-            android:visibility="gone" />
-    </LinearLayout>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="8dp"
+                android:gravity="center"
+                android:text="@string/validate_discovered_location"/>
 
-    <com.google.android.maps.MapView
-        android:id="@+id/map"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/toolbar"
-        android:layout_above="@id/map_verify"
-        android:clickable="true"
-        android:visibility="gone"
-        android:apiKey="@string/google_maps_debug_api_key" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <android.support.v7.widget.AppCompatButton
+                    android:id="@+id/map_yes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/yes"
+                    android:theme="@style/ButtonTheme"/>
+
+                <android.support.v7.widget.AppCompatButton
+                    android:id="@+id/map_no"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no"
+                    android:theme="@style/ButtonTheme"/>
+            </LinearLayout>
+        </LinearLayout>
+    </FrameLayout>
 
 </RelativeLayout>

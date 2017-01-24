@@ -17,16 +17,9 @@
  */
 package com.mobicage.rogerthat;
 
-import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-import org.json.simple.JSONValue;
-
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -38,17 +31,21 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
 import android.view.View;
-import android.widget.ProgressBar;
+import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.google.android.maps.GeoPoint;
-import com.google.android.maps.MapView;
-import com.google.android.maps.OverlayItem;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.mobicage.rogerth.at.R;
-import com.mobicage.rogerthat.plugins.friends.DrawableItemizedOverlay;
 import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.util.logging.L;
@@ -60,30 +57,46 @@ import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.to.activity.GeoPointWithTimestampTO;
 import com.mobicage.to.location.LocationResultRequestTO;
 
+import org.json.simple.JSONValue;
+
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
 public class FriendsLocationActivity extends ServiceBoundMapActivity {
 
-    private static final int PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 1;
-
     private FriendsPlugin mFriendsPlugin;
-    private MapView mFriendMap;
-    private RelativeLayout mLoadingLayout;
-    private ProgressBar mLoadingProgressbar;
-    private TextView mNoLocationsFoundTextView;
+    private FrameLayout mFriendMapLayout;
+    private RelativeLayout mNoFriendsLocationFoundLayout;
     private List<LocationResultRequestTO> mLocations;
     private List<String> mAdded;
+    private LocationListener mLocationListener = null;
+    private ProgressDialog mProgressDialog;
+    private ArrayList<Marker> mMarkers;
+    private Toast mToast;
+
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mLocations = new ArrayList<>();
         setContentView(R.layout.map);
-        mLocations = new ArrayList<LocationResultRequestTO>();
-        mAdded = new ArrayList<String>();
-        mFriendMap = (MapView) findViewById(R.id.friend_map);
-        mFriendMap.setBuiltInZoomControls(true);
+        mAdded = new ArrayList<>();
+        mMarkers = new ArrayList<>();
+        mFriendMapLayout = (FrameLayout) findViewById(R.id.friend_map_layout);
+        mNoFriendsLocationFoundLayout = (RelativeLayout) findViewById(R.id.no_friend_locations_found);
 
-        mLoadingLayout = (RelativeLayout) findViewById(R.id.loading_layout);
-        mLoadingProgressbar = (ProgressBar) findViewById(R.id.loading_progressbar);
-        mNoLocationsFoundTextView = (TextView) findViewById(R.id.no_friend_locations_found);
+        // Show progress dialog until one or more locations are fetched.
+        mProgressDialog = new ProgressDialog(FriendsLocationActivity.this);
+        mProgressDialog.setTitle(getString(R.string.updating_location));
+        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        mProgressDialog.setIndeterminate(true);
+        mProgressDialog.show();
+
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.friend_map);
+        mapFragment.getMapAsync(this);
     }
 
     private BroadcastReceiver mBroadcastReceiver = new SafeBroadcastReceiver() {
@@ -96,7 +109,7 @@ public class FriendsLocationActivity extends ServiceBoundMapActivity {
                 try {
                     @SuppressWarnings("unchecked")
                     LocationResultRequestTO location = new LocationResultRequestTO(
-                        (Map<String, Object>) JSONValue.parse(locationStr));
+                            (Map<String, Object>) JSONValue.parse(locationStr));
                     mLocations.add(location);
 
                     displayLocations();
@@ -105,66 +118,98 @@ public class FriendsLocationActivity extends ServiceBoundMapActivity {
                 }
 
             }
-            return new String[] { intent.getAction() };
+            return new String[]{intent.getAction()};
         }
 
     };
     private LocationManager mLocationManager;
     private MyIdentity mMyIdentity;
 
+    @Override
+    public void onMapReady(GoogleMap map) {
+        super.onMapReady(map);
+        // Use a custom info window adapter to handle multiple lines of text in the info window contents.
+        map.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+
+            @Override
+            public View getInfoWindow(Marker marker) {
+                // Return null here, so that getInfoContents() is called next.
+                return null;
+            }
+
+            @Override
+            public View getInfoContents(Marker marker) {
+                // Inflate the layouts for the info window, title and snippet.
+                View infoWindow = getLayoutInflater().inflate(R.layout.maps_custom_info_contents, null);
+
+                TextView title = (TextView) infoWindow.findViewById(R.id.title);
+                title.setText(marker.getTitle());
+
+                TextView snippet = (TextView) infoWindow.findViewById(R.id.snippet);
+                snippet.setText(marker.getSnippet());
+
+                return infoWindow;
+            }
+        });
+    }
+
     private void displayLocations() {
         T.UI();
-        mLoadingProgressbar.setVisibility(View.GONE);
-        mLoadingLayout.setVisibility(View.GONE);
-        mFriendMap.setVisibility(View.VISIBLE);
-        // Calculate bounds
-        double maxLat = Double.MIN_VALUE;
-        double minLat = Double.MAX_VALUE;
-        double maxLon = Double.MIN_VALUE;
-        double minLon = Double.MAX_VALUE;
-        for (LocationResultRequestTO fl : mLocations) {
-            if (fl.location.latitude > maxLat)
-                maxLat = fl.location.latitude;
-            if (fl.location.latitude < minLat)
-                minLat = fl.location.latitude;
-            if (fl.location.longitude > maxLon)
-                maxLon = fl.location.longitude;
-            if (fl.location.longitude < minLon)
-                minLon = fl.location.longitude;
-        }
-        mFriendMap.getController().zoomToSpan((int) ((maxLat - minLat)), (int) ((maxLon - minLon)));
-        GeoPoint center = new GeoPoint((int) ((maxLat + minLat) / 2), (int) ((maxLon + minLon) / 2));
-        mFriendMap.getController().setCenter(center);
-        for (LocationResultRequestTO fl : mLocations) {
-            if (mAdded.contains(fl.friend))
+        mFriendMapLayout.setVisibility(View.VISIBLE);
+        mProgressDialog.hide();
+        LatLngBounds.Builder coordinateBounds = new LatLngBounds.Builder();
+
+        // One marker per friend, and one for yourself
+        outerloop:
+        for (LocationResultRequestTO locationResult : mLocations) {
+            double lat = (double) locationResult.location.latitude / 1000000;
+            double lon = (double) locationResult.location.longitude / 1000000;
+            LatLng coordinate = new LatLng(lat, lon);
+            coordinateBounds.include(coordinate);
+            // For our own location, simply update the marker's position
+            if (mAdded.contains(locationResult.friend) && locationResult.friend.equals(mMyIdentity.getEmail())) {
+                for (Marker marker : mMarkers) {
+                    if (marker.getTitle().equals(mMyIdentity.getDisplayName())) {
+                        marker.setPosition(coordinate);
+                        continue outerloop;
+                    }
+                }
+            } else if (mAdded.contains(locationResult.friend)) {
                 continue;
-            mAdded.add(fl.friend);
-
-            if (fl.friend.equals(mMyIdentity.getEmail())) {
-                DrawableItemizedOverlay overlay = new DrawableItemizedOverlay(getAvatar(mMyIdentity), this);
-                GeoPoint point = new GeoPoint((int) (fl.location.latitude), (int) (fl.location.longitude));
-                Date date = new Date(fl.location.timestamp * 1000);
-                OverlayItem overlayitem = new OverlayItem(point, mMyIdentity.getName(), getString(
-                    R.string.friend_map_marker, DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
-                        .format(date), fl.location.accuracy));
-                overlay.addOverlay(overlayitem);
-                mFriendMap.getOverlays().add(overlay);
-            } else {
-                Friend friend = mFriendsPlugin.getStore().getExistingFriend(fl.friend);
-
-                DrawableItemizedOverlay overlay = new DrawableItemizedOverlay(getAvatar(friend), this);
-                GeoPoint point = new GeoPoint((int) (fl.location.latitude), (int) (fl.location.longitude));
-                Date date = new Date(fl.location.timestamp * 1000);
-                OverlayItem overlayitem = new OverlayItem(point, friend.getDisplayName(), getString(
-                    R.string.friend_map_marker, DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
-                        .format(date), fl.location.accuracy));
-                overlay.addOverlay(overlayitem);
-                mFriendMap.getOverlays().add(overlay);
             }
+            mAdded.add(locationResult.friend);
+            BitmapDescriptor avatar;
+            String title;
+            Date date = new Date(locationResult.location.timestamp * 1000);
+            String dateString = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(date);
+            String trackedAtText = getString(R.string.friend_map_marker, dateString, locationResult.location.accuracy);
+            if (locationResult.friend.equals(mMyIdentity.getEmail())) {
+                avatar = getAvatarBitmapDescriptor(mMyIdentity);
+                title = mMyIdentity.getDisplayName();
+            } else {
+                Friend friend = mFriendsPlugin.getStore().getExistingFriend(locationResult.friend);
+                avatar = getAvatarBitmapDescriptor(friend);
+                title = friend.name;
+            }
+            MarkerOptions markerOptions = new MarkerOptions()
+                    .position(coordinate)
+                    .title(title)
+                    .snippet(trackedAtText)
+                    .icon(avatar);
+            mMarkers.add(mMap.addMarker(markerOptions));
+
         }
-        if (mAdded.size() == 1 && mAdded.get(0).equals(mMyIdentity.getEmail()))
-            UIUtils.showLongToast(this,
-                    getString(R.string.your_location_displayed_friend_have_contacted_for_their_location));
+
+        if (mAdded.size() == 1 && mAdded.get(0).equals(mMyIdentity.getEmail())) {
+            if (mToast == null) {
+                mToast = UIUtils.showLongToast(this,
+                        getString(R.string.your_location_displayed_friend_have_contacted_for_their_location));
+            }
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mMarkers.get(0).getPosition(), 14));
+        } else {
+            // Zoom in/out to fit all positions on the screen when a position of one of our friends is updated
+            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(coordinateBounds.build(), 250));
+        }
     }
 
     @Override
@@ -173,14 +218,15 @@ public class FriendsLocationActivity extends ServiceBoundMapActivity {
         mFriendsPlugin = mService.getPlugin(FriendsPlugin.class);
         if (!mFriendsPlugin.scheduleAllFriendsLocationRetrieval()) {
             new AlertDialog.Builder(this).setMessage(getString(R.string.get_friends_location_failed))
-                .setPositiveButton(R.string.ok, new SafeDialogInterfaceOnClickListener() {
-                    @Override
-                    public void safeOnClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        mLoadingProgressbar.setVisibility(View.GONE);
-                        mNoLocationsFoundTextView.setVisibility(View.VISIBLE);
-                    }
-                }).create().show();
+                    .setPositiveButton(R.string.ok, new SafeDialogInterfaceOnClickListener() {
+                        @Override
+                        public void safeOnClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            mProgressDialog.hide();
+                            mNoFriendsLocationFoundLayout.setVisibility(View.VISIBLE);
+                            mFriendMapLayout.setVisibility(View.GONE);
+                        }
+                    }).create().show();
         }
         IntentFilter filter = new IntentFilter(FriendsPlugin.FRIEND_LOCATION_RECEIVED_INTENT);
         registerReceiver(mBroadcastReceiver, filter);
@@ -190,8 +236,7 @@ public class FriendsLocationActivity extends ServiceBoundMapActivity {
         if (mService.isPermitted(Manifest.permission.ACCESS_FINE_LOCATION)) {
             getMyLocation();
         } else {
-            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSION_REQUEST_ACCESS_FINE_LOCATION);
+            enableMyLocation();
         }
     }
 
@@ -207,6 +252,51 @@ public class FriendsLocationActivity extends ServiceBoundMapActivity {
     }
 
     private void getMyLocation() {
+        if (mLocationListener == null) {
+            mLocationListener = new LocationListener() {
+
+                @Override
+                public void onStatusChanged(String provider, int status, Bundle extras) {
+                }
+
+                @Override
+                public void onProviderEnabled(String provider) {
+                }
+
+                @Override
+                public void onProviderDisabled(String provider) {
+                }
+
+                @SuppressWarnings("MissingPermission")
+                @Override
+                public void onLocationChanged(Location location) {
+                    LocationResultRequestTO locationResult = new LocationResultRequestTO();
+                    locationResult.location = new GeoPointWithTimestampTO();
+                    locationResult.location.accuracy = (int) location.getAccuracy();
+                    locationResult.location.latitude = (int) (location.getLatitude() * 1000000);
+                    locationResult.location.longitude = (int) (location.getLongitude() * 1000000);
+                    locationResult.location.timestamp = System.currentTimeMillis() / 1000;
+                    locationResult.friend = mMyIdentity.getEmail();
+                    boolean modified = false;
+                    for (LocationResultRequestTO result : mLocations) {
+                        if (result.friend.equals(mMyIdentity.getEmail())) {
+                            result.location = locationResult.location;
+                            modified = true;
+                        }
+                    }
+                    if (!modified) {
+                        mLocations.add(locationResult);
+                    }
+                    enableMyLocation();
+                    displayLocations();
+                    if (modified && locationResult.location.accuracy < 20) {
+                        // accurate enough, stop updates
+                        mLocationManager.removeUpdates(mLocationListener);
+                        mMap.setMyLocationEnabled(false);
+                    }
+                }
+            };
+        }
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         if (mLocationManager != null) {
             String bestProvider = mLocationManager.getBestProvider(new Criteria(), true);
@@ -233,37 +323,9 @@ public class FriendsLocationActivity extends ServiceBoundMapActivity {
     }
 
     @Override
-    protected boolean isRouteDisplayed() {
+    public boolean onMyLocationButtonClick() {
+        // Return false so that we don't consume the event and the default behavior still occurs
+        // (the camera animates to the user's current position).
         return false;
     }
-
-    private LocationListener mLocationListener = new LocationListener() {
-
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-        }
-
-        @Override
-        public void onProviderEnabled(String provider) {
-        }
-
-        @Override
-        public void onProviderDisabled(String provider) {
-        }
-
-        @Override
-        public void onLocationChanged(Location location) {
-            mLocationManager.removeUpdates(mLocationListener);
-            LocationResultRequestTO locationResult = new LocationResultRequestTO();
-            locationResult.location = new GeoPointWithTimestampTO();
-            locationResult.location.accuracy = (int) location.getAccuracy();
-            locationResult.location.latitude = (int) (location.getLatitude() * 1000000);
-            locationResult.location.longitude = (int) (location.getLongitude() * 1000000);
-            locationResult.location.timestamp = System.currentTimeMillis() / 1000;
-            locationResult.friend = mMyIdentity.getEmail();
-            mLocations.add(locationResult);
-            displayLocations();
-        }
-    };
-
 }

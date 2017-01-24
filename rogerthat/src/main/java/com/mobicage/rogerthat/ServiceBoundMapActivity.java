@@ -18,11 +18,7 @@
 
 package com.mobicage.rogerthat;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
-
+import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
@@ -33,38 +29,55 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
-import android.view.Gravity;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 
-import com.google.android.maps.MapActivity;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnMyLocationButtonClickListener;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendAvatar;
-import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
-import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.Pausable;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
+
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
-public abstract class ServiceBoundMapActivity extends MapActivity implements Pausable, ServiceBound {
+public abstract class ServiceBoundMapActivity extends AppCompatActivity implements Pausable, ServiceBound,
+        OnMapReadyCallback,
+        ActivityCompat.OnRequestPermissionsResultCallback,
+        OnMyLocationButtonClickListener {
 
+    /**
+     * Request code for location permission request.
+     *
+     * @see #onRequestPermissionsResult(int, String[], int[])
+     */
+    protected static final int PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 1;
     public static final long MAX_TRANSMIT = 10 * 1000;
 
     private Drawable mUnknownAvatar;
@@ -73,8 +86,8 @@ public abstract class ServiceBoundMapActivity extends MapActivity implements Pau
     protected MainService mService; // Owned by UI thread
     protected boolean mServiceIsBound = false; // Owned by UI thread
     private boolean mPaused = false; // Owned by UI thread
-    final private Queue<SafeRunnable> mWorkQueue = new LinkedList<SafeRunnable>();
-    private Map<Integer, SafeRunnable[]> mPermissionRequests = new HashMap<Integer, SafeRunnable[]>();
+    final private Queue<SafeRunnable> mWorkQueue = new LinkedList<>();
+    private Map<Integer, SafeRunnable[]> mPermissionRequests = new HashMap<>();
 
     private BroadcastReceiver closeActivityListener = new SafeBroadcastReceiver() {
         @Override
@@ -92,6 +105,8 @@ public abstract class ServiceBoundMapActivity extends MapActivity implements Pau
     private SafeRunnable mTransmitTimeoutRunnable;
 
     private ConnectivityManager mConnectivityManager;
+
+    public GoogleMap mMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -256,28 +271,30 @@ public abstract class ServiceBoundMapActivity extends MapActivity implements Pau
 
     protected abstract void onServiceUnbound();
 
-    protected Drawable getAvatar(Friend friend) {
-        if (friend.avatar == null)
-            return mUnknownAvatar;
-        return FriendAvatar.getAvatar(this, friend);
+    protected BitmapDescriptor getAvatarBitmapDescriptor(Friend friend) {
+        Drawable avatar;
+        if (friend.avatar == null) {
+            avatar = mUnknownAvatar;
+        } else {
+            avatar = FriendAvatar.getAvatar(this, friend);
+        }
+        return getBitmapDescriptor(avatar);
+
     }
 
-    protected Drawable getAvatar(MyIdentity identity) {
-        if (identity.getAvatar() == null)
-            return mUnknownAvatar;
-        return FriendAvatar.getAvatar(this, identity);
+    protected BitmapDescriptor getAvatarBitmapDescriptor(MyIdentity identity) {
+        Drawable avatar;
+        if (identity.getAvatar() == null) {
+            avatar = mUnknownAvatar;
+        } else {
+            avatar = FriendAvatar.getAvatar(this, identity);
+        }
+        return getBitmapDescriptor(avatar);
     }
 
-    public Drawable getOverlayAvatar(Friend friend) {
-        if (friend.avatar == null)
-            return mICDachboardAvatar;
-        return getAvatar(friend);
-    }
-
-    public Drawable getOverlayAvatar(MyIdentity identity) {
-        if (identity.getAvatar() == null)
-            return mICDachboardAvatar;
-        return getAvatar(identity);
+    private BitmapDescriptor getBitmapDescriptor(Drawable drawable) {
+        Bitmap b = ((BitmapDrawable) drawable).getBitmap();
+        return BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(b, 100, 100, false));
     }
 
     @Override
@@ -385,4 +402,26 @@ public abstract class ServiceBoundMapActivity extends MapActivity implements Pau
         }
         return super.onOptionsItemSelected(item);
     }
+
+
+    public void enableMyLocation() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Permission to access the location is missing.
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSION_REQUEST_ACCESS_FINE_LOCATION);
+        } else if (mMap != null) {
+            // Access to the location has been granted to the app.
+            mMap.setMyLocationEnabled(true);
+        }
+    }
+
+    @Override
+    public void onMapReady(GoogleMap map) {
+        mMap = map;
+
+        mMap.setOnMyLocationButtonClickListener(this);
+        enableMyLocation();
+    }
+
 }

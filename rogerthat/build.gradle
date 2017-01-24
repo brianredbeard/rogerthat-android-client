@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 'Google Inc.:Google APIs:23'
-    buildToolsVersion '24.0.1'
+    compileSdkVersion 25
+    buildToolsVersion '25.0.2'
     useLibrary 'org.apache.http.legacy'
     defaultConfig {
         applicationId "com.mobicage.rogerth.at"
         minSdkVersion 16
-        targetSdkVersion 24
+        targetSdkVersion 25
         multiDexEnabled true
         lintOptions {
             checkReleaseBuilds false
@@ -15,8 +15,9 @@ android {
         }
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [
-                "app_id": "rogerthat",
-                "facebook_content_provider_id": "188033791211994"
+                "app_id"                      : "rogerthat",
+                "facebook_content_provider_id": "188033791211994",
+                "google_maps_api_key"         : google_maps_api_key
         ]
     }
 
@@ -70,13 +71,14 @@ repositories {
 }
 
 dependencies {
-    compile 'com.android.support:support-v4:25.0.0'
-    compile 'com.android.support:appcompat-v7:25.0.0'
-    compile 'com.android.support:design:25.0.0'
+    compile "com.android.support:support-v4:25.1.0"
+    compile 'com.android.support:appcompat-v7:25.1.0'
+    compile 'com.android.support:design:25.1.0'
     compile 'com.android.support:multidex:1.0.1'
-    compile 'com.android.support:customtabs:25.0.0'
-    compile 'com.google.android.gms:play-services-base:6.5.87'
-    compile 'com.google.android.gms:play-services-location:6.5.87'
+    compile 'com.android.support:customtabs:25.1.0'
+    compile 'com.google.android.gms:play-services-location:10.0.1'
+    compile 'com.google.android.gms:play-services-gcm:10.0.1'
+    compile 'com.google.android.gms:play-services-maps:10.0.1'
     compile 'com.facebook.android:facebook-android-sdk:4.5.0'
     compile 'org.mozilla:rhino:1.7.7.1'
     compile files('libs/asmack_stripped.jar')
@@ -99,7 +101,7 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     androidTestCompile ('com.android.support.test.espresso:espresso-web:2.2.2')
-    androidTestCompile('tools.fastlane:screengrab:0.5.6')
-    androidTestCompile 'com.android.support:support-annotations:25.0.0'
+    androidTestCompile('tools.fastlane:screengrab:1.0.1')
+    androidTestCompile 'com.android.support:support-annotations:25.1.0'
     androidTestCompile 'junit:junit:4.12'
 }

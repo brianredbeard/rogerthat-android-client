@@ -1,41 +1,35 @@
 <LinearLayout
-	android:layout_width="fill_parent"
-	android:layout_height="fill_parent"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
 	android:orientation="vertical"
 	xmlns:android="http://schemas.android.com/apk/res/android">
 
-	<com.google.android.maps.MapView
-		android:id="@+id/friend_map"
-		android:layout_width="fill_parent"
-		android:layout_height="fill_parent"
-		android:clickable="true"
-		android:visibility="gone"
-		android:apiKey="@string/google_maps_debug_api_key" />
+	<FrameLayout
+		android:id="@+id/friend_map_layout"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent">
+
+		<fragment
+			android:id="@+id/friend_map"
+			class="com.google.android.gms.maps.SupportMapFragment"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"/>
+	</FrameLayout>
 
 	<RelativeLayout
-		android:id="@+id/loading_layout"
-		android:layout_width="fill_parent"
-		android:layout_height="fill_parent">
-
-		<ProgressBar
-			android:id="@+id/loading_progressbar"
-			android:indeterminate="true"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_centerInParent="true"
-			android:layout_centerHorizontal="true"
-			android:layout_centerVertical="true"></ProgressBar>
+		android:id="@+id/no_friend_locations_found"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:visibility="gone">
 
 		<TextView
-			android:id="@+id/no_friend_locations_found"
 			android:textSize="16sp"
 			android:text="@string/no_friends_locations_found"
-			android:visibility="gone"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_centerInParent="true"
 			android:layout_centerHorizontal="true"
-			android:layout_centerVertical="true"></TextView>
+			android:layout_centerVertical="true"/>
 
 	</RelativeLayout>
 

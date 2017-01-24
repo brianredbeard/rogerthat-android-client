@@ -14,9 +14,9 @@
 #
 # @@license_version:1.1@@
 
-import yaml
-import shutil
 import os
+import yaml
+
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
@@ -39,10 +39,6 @@ def main():
                 file_contents = file_contents.replace('dummy_dashboard_email', app_config['APP_CONSTANTS']['DASHBOARD_EMAIL'])
                 file_contents = file_contents.replace('dummy_email_encryption_key', app_config['APP_CONSTANTS']['EMAIL_HASH_ENCRYPTION_KEY'])
             cloud_constants.write(file_contents)
-
-    secrets_dest = os.path.join(CURRENT_PATH, 'rogerthat', 'src', 'main', 'res', 'values', 'secrets.xml')
-    if not os.path.exists(secrets_dest):
-        shutil.copy2(os.path.join(CURRENT_PATH, '.bootstrap_data', 'secrets.xml'), secrets_dest)
 
 if __name__ == "__main__":
     main()
