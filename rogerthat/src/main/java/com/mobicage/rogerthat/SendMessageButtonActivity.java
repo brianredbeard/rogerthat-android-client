@@ -337,16 +337,27 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
         mCaptionView = (EditText) dialog.findViewById(R.id.button_caption);
         mActionView = (EditText) dialog.findViewById(R.id.button_action);
         final ImageButton actionHelpButton = (ImageButton) dialog.findViewById(R.id.action_help_button);
+        final RadioButton noneRadio = (RadioButton) dialog.findViewById(R.id.action_none);
         final RadioButton telRadio = (RadioButton) dialog.findViewById(R.id.action_tel);
         final RadioButton geoRadio = (RadioButton) dialog.findViewById(R.id.action_geo);
         final RadioButton wwwRadio = (RadioButton) dialog.findViewById(R.id.action_www);
-        telRadio.setChecked(true);
+        noneRadio.setChecked(true);
+        mActionView.setVisibility(View.GONE);
+        actionHelpButton.setVisibility(View.GONE);
         final int iconColor = ContextCompat.getColor(mService, R.color.mc_primary_icon);
         actionHelpButton.setImageDrawable(new IconicsDrawable(mService, FontAwesome.Icon.faw_address_book_o).color(iconColor).sizeDp(24));
+        noneRadio.setOnClickListener(new SafeViewOnClickListener() {
+            @Override
+            public void safeOnClick(View v) {
+                mActionView.setVisibility(View.GONE);
+                actionHelpButton.setVisibility(View.GONE);
+            }
+        });
         telRadio.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
                 mActionView.setText("tel://");
+                mActionView.setVisibility(View.VISIBLE);
                 actionHelpButton.setVisibility(View.VISIBLE);
                 actionHelpButton.setImageDrawable(new IconicsDrawable(mService, FontAwesome.Icon.faw_address_book_o).color(iconColor).sizeDp(24));
             }
@@ -355,6 +366,7 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
             @Override
             public void safeOnClick(View v) {
                 mActionView.setText("geo://");
+                mActionView.setVisibility(View.VISIBLE);
                 actionHelpButton.setVisibility(View.VISIBLE);
                 actionHelpButton.setImageDrawable(new IconicsDrawable(mService, FontAwesome.Icon.faw_map_marker).color(iconColor).sizeDp(24));
             }
@@ -363,6 +375,7 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
             @Override
             public void safeOnClick(View v) {
                 mActionView.setText("http://");
+                mActionView.setVisibility(View.VISIBLE);
                 actionHelpButton.setVisibility(View.GONE);
             }
         });
@@ -384,20 +397,26 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
                 .setPositiveButton(getString(R.string.ok), new SafeDialogInterfaceOnClickListener() {
                     @Override
                     public void safeOnClick(DialogInterface di, int which) {
-                        Matcher action = actionPattern.matcher(mActionView.getText());
-                        if (!action.matches()) {
-                            UIUtils.showLongToast(SendMessageButtonActivity.this,
-                                    getString(R.string.action_not_valid));
-                            return;
-                        }
                         String caption = mCaptionView.getText().toString();
                         if ("".equals(caption.trim())) {
                             UIUtils.showLongToast(SendMessageButtonActivity.this,
                                     getString(R.string.caption_required));
                             return;
                         }
-                        CannedButton cannedButton = new CannedButton(caption, "".equals(action.group(2)) ? null
-                                : action.group());
+
+                        CannedButton cannedButton;
+                        if (!noneRadio.isChecked()) {
+                            Matcher action = actionPattern.matcher(mActionView.getText());
+                            if (!action.matches()) {
+                                UIUtils.showLongToast(SendMessageButtonActivity.this,
+                                        getString(R.string.action_not_valid));
+                                return;
+                            }
+                            cannedButton = new CannedButton(caption, "".equals(action.group(2)) ? null : action.group());
+                        } else {
+                            cannedButton = new CannedButton(caption, null);
+                        }
+
                         mCannedButtons.add(cannedButton);
                         cannedButton.setSelected(true);
                         mCannedButtonAdapter.notifyDataSetChanged();
