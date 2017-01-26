@@ -38,6 +38,7 @@ import com.mobicage.rogerthat.NewsPinnedActivity;
 import com.mobicage.rogerthat.config.Configuration;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
 import com.mobicage.rogerthat.plugins.MobicagePlugin;
+import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.util.DebugUtils;
 import com.mobicage.rogerthat.util.TextUtils;
@@ -685,6 +686,10 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
         if (mStore.insertNewsItem(newsItem)) {
             FriendsPlugin friendsPlugin = mMainService.getPlugin(FriendsPlugin.class);
             if (friendsPlugin.isBroadcastTypeDisabled(newsItem.sender.email, newsItem.broadcast_type)) {
+                return;
+            }
+
+            if (friendsPlugin.getStore().getExistence(newsItem.sender.email) != Friend.ACTIVE) {
                 return;
             }
 

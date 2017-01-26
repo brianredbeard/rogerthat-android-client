@@ -26,23 +26,56 @@
         android:layout_height="wrap_content"
         android:text="@string/button_action"/>
 	<RadioGroup
-		android:layout_width="fill_parent"
+		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
+		android:layout_marginTop="10dp"
+		android:layout_marginBottom="10dp"
+		android:gravity="center"
 		android:orientation="horizontal">
 		<RadioButton
-			android:id="@+id/action_tel"
-			android:layout_width="wrap_content"
+			android:id="@+id/action_none"
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:button="@null"
+			android:padding="5dp"
+			android:checked="true"
+			android:gravity="center"
+			android:background="@drawable/rbtn_selector"
+			android:textColor="@drawable/rbtn_textcolor_selector"
+			android:text="-" />
+		<RadioButton
+			android:id="@+id/action_tel"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:button="@null"
+			android:padding="5dp"
+			android:gravity="center"
+			android:background="@drawable/rbtn_selector"
+			android:textColor="@drawable/rbtn_textcolor_selector"
 			android:text="@string/action_tel" />
 		<RadioButton
 			android:id="@+id/action_geo"
-			android:layout_width="wrap_content"
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:button="@null"
+			android:padding="5dp"
+			android:gravity="center"
+			android:background="@drawable/rbtn_selector"
+			android:textColor="@drawable/rbtn_textcolor_selector"
 			android:text="@string/action_geo" />
 		<RadioButton
 			android:id="@+id/action_www"
-			android:layout_width="wrap_content"
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:button="@null"
+			android:padding="5dp"
+			android:gravity="center"
+			android:background="@drawable/rbtn_selector"
+			android:textColor="@drawable/rbtn_textcolor_selector"
 			android:text="@string/action_www" />
 	</RadioGroup>
 	<RelativeLayout
@@ -58,6 +91,7 @@
             android:layout_alignParentTop="true"
             android:background="@null"
             android:foreground="?attr/selectableItemBackground"
+			android:visibility="gone"
             app:ico_color="@color/mc_primary_icon"
             app:ico_icon="@string/faw_address_book_o"
             app:ico_size="24dp"/>
@@ -71,6 +105,7 @@
             android:imeOptions="actionDone"
             android:inputType="textUri"
             android:maxLines="1"
+			android:visibility="gone"
             tools:text="tel://"/>
 	</RelativeLayout>
 </LinearLayout>
