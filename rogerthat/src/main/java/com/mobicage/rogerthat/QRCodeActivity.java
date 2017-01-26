@@ -160,6 +160,7 @@ public class QRCodeActivity extends ServiceBoundActivity {
                 return true;
             case R.id.delete_qr_code:
                 new AlertDialog.Builder(this)
+                        .setTitle(R.string.delete_qr_code)
                         .setMessage(R.string.confirm_delete_qr_code)
                         .setPositiveButton(R.string.yes, new SafeDialogInterfaceOnClickListener() {
                             @Override

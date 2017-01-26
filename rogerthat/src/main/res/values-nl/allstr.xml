@@ -109,6 +109,7 @@
     <string name="delete_conversations">Conversaties verwijderen</string>
     <string name="delete_group">Groep verwijderen</string>
     <string name="delete_group_message">Wens je groep \"%1$s\" te verwijderen?</string>
+    <string name="delete_qr_code">QR code verwijderen</string>
     <string name="description">Beschrijving</string>
     <string name="deselect_all">Niets selecteren</string>
     <string name="detected_services_title">%1$s detecteerde de volgende diensten op deze locatie. Selecteer de diensten die u wilt toevoegen in uw %1$s app.</string>

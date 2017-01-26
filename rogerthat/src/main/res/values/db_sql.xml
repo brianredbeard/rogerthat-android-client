@@ -499,7 +499,7 @@ ORDER BY ms.acked_timestamp DESC
 
     <!-- my qr codes -->
     <string name="sql_qr_insert">INSERT INTO my_qr_codes (content, name) VALUES (?, ?)</string>
-    <string name="sql_qr_select">SELECT content, name FROM my_qr_codes</string>
+    <string name="sql_qr_select">SELECT content, name FROM my_qr_codes ORDER BY name COLLATE NOCASE</string>
     <string name="sql_qr_delete">DELETE FROM my_qr_codes WHERE content=? AND name=?</string>
 
     <!-- iOS-only queries -->

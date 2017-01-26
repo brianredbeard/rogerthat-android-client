@@ -109,6 +109,7 @@
     <string name="delete_conversations">Eliminar conversaciones</string>
     <string name="delete_group">Delegar grupo</string>
     <string name="delete_group_message">¿Quieres remover el grupo \"%1$s\"?</string>
+    <string name="delete_qr_code">Eliminar código QR</string>
     <string name="description">Descripción</string>
     <string name="deselect_all">Desmarcar todo</string>
     <string name="detected_services_title">%1$s detecta los siguientes servicios en este lugar. Seleccione los servicios que desee agregar en su aplicación %1$s.</string>
