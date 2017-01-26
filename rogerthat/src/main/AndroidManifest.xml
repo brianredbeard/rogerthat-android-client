@@ -190,7 +190,13 @@
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.QRCodeActivity"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.mobicage.rogerthat.AddQRCodeActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.mobicage.rogerthat.QRCodesActivity"
+            android:screenOrientation="portrait"/>
         <activity
             android:name="com.mobicage.rogerthat.NewsActivity"
             android:screenOrientation="portrait">

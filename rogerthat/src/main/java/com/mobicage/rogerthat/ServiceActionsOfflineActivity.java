@@ -137,7 +137,7 @@ public class ServiceActionsOfflineActivity extends FriendsActivity {
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.services_menu, menu);
-        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_search).color(Color.DKGRAY).sizeDp(18));
+        addIconToMenuItem(menu, R.id.find_services, FontAwesome.Icon.faw_search);
         return true;
     }
 

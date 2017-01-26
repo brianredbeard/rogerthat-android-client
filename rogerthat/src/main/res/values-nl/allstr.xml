@@ -34,6 +34,7 @@
     <string name="activity_service_poked">Dienst is gecontacteerd.</string>
     <string name="activity_updated_friend">Vriend gewijzigd.</string>
     <string name="add">Toevoegen</string>
+    <string name="add_another_qr_code">Je kan andere ID\'s toevoegen aan deze app. Druk op de \"Scannen\" knop en houd je ID voor de camera om de QR-code te scannen.</string>
     <string name="add_recipients">Kies minstens één ontvanger</string>
     <string name="add_this_to_your_saved_items">Voeg dit toe aan je opgeslagen items</string>
     <string name="add_to_my_services">Voeg toe aan deze app</string>
@@ -86,6 +87,7 @@
     <string name="complete_your_profile">Vervolledig uw profiel</string>
     <string name="compose_short">Nieuw bericht</string>
     <string name="configure_new_canned_message">Schrijf nieuw standaard bericht</string>
+    <string name="confirm_delete_qr_code">Bent u zeker dat u deze QR code wil verwijderen?</string>
     <string name="confirm_remove_friend">Wil je %1$s verwijderen als vriend?</string>
     <string name="confirm_remove_service">Wil je dienst %1$s ontvolgen?</string>
     <string name="contacts">Contacten</string>
@@ -122,6 +124,7 @@
     <string name="edit_profile">Profiel aanpassen</string>
     <string name="email">E-mail</string>
     <string name="emergency">Noodgevallen</string>
+    <string name="empty_name">De naam mag niet leeg zijn</string>
     <string name="enabled">Ingeschakeld</string>
     <string name="enabled_summary">Achtergrond modus</string>
     <string name="enabled_title">Achtergrond</string>
@@ -264,6 +267,7 @@
     <string name="missing_gender">Geslacht ontbreekt</string>
     <string name="mobicagecloud_url">https://rogerth.at</string>
     <string name="more">Meer</string>
+    <string name="my_ids">Mijn ID\'s</string>
     <string name="n_updated_messages">%1$d aangepaste berichten.</string>
     <string name="name">Naam</string>
     <string name="name_required">Naam is verplicht</string>
@@ -337,7 +341,9 @@
     <string name="processing_scan">Scan verwerken…</string>
     <string name="profile">Profiel</string>
     <string name="promo">Promo</string>
+    <string name="provide_qr_code_name">Geef een naam aan de QR-code</string>
     <string name="qr_call_tel">Wenst u te bellen naar %1$s?</string>
+    <string name="qr_code_scanned">QR-code gescand</string>
     <string name="qr_open_url">Wenst u de volgende web pagina te openen:\n\n%1$s</string>
     <string name="reach">Bereik:</string>
     <string name="read_less">Minder lezen ...</string>

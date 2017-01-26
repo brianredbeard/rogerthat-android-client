@@ -23,9 +23,6 @@
         android:id="@+id/qrcode"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
         android:layout_marginBottom="15dp"
         android:layout_marginTop="15dp"
         android:adjustViewBounds="true" />

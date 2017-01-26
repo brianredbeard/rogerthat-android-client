@@ -321,21 +321,24 @@ public class UserFriendsActivity extends FriendsActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.friends_menu, menu);
 
-        switch (AppConstants.FRIENDS_CAPTION) {
-            case COLLEAGUES:
-                menu.getItem(0).setTitle(R.string.find_colleagues);
-                break;
-            case CONTACTS:
-                menu.getItem(0).setTitle(R.string.find_contacts);
-                break;
-            case FRIENDS:
-            default:
-                menu.getItem(0).setTitle(R.string.invite_friends_short);
-                break;
+        MenuItem findItem = menu.findItem(R.id.find_friends);
+        if (findItem != null) {
+            switch (AppConstants.FRIENDS_CAPTION) {
+                case COLLEAGUES:
+                    findItem.setTitle(R.string.find_colleagues);
+                    break;
+                case CONTACTS:
+                    findItem.setTitle(R.string.find_contacts);
+                    break;
+                case FRIENDS:
+                default:
+                    findItem.setTitle(R.string.invite_friends_short);
+                    break;
+            }
         }
 
-        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_search).color(Color.DKGRAY).sizeDp(18));
-        menu.getItem(1).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_street_view).color(Color.DKGRAY).sizeDp(18));
+        addIconToMenuItem(menu, R.id.find_friends, FontAwesome.Icon.faw_search);
+        addIconToMenuItem(menu, R.id.friend_map, FontAwesome.Icon.faw_street_view);
         return true;
     }
 

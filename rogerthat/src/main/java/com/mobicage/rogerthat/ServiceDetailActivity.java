@@ -97,7 +97,7 @@ public class ServiceDetailActivity extends FriendDetailActivity {
         if (SystemUtils.isFlagEnabled(mFriend.flags, FriendsPlugin.FRIEND_NOT_REMOVABLE))
             return result;
 
-        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_trash).color(Color.DKGRAY).sizeDp(18));
+        addIconToMenuItem(menu, R.id.remove_friend,FontAwesome.Icon.faw_trash);
         return result;
     }
 

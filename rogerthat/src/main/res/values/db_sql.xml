@@ -497,6 +497,11 @@ ORDER BY ms.acked_timestamp DESC
     <string name="sql_news_get_pinned_news_after">SELECT id, sort_key, is_partial FROM news WHERE pinned = 1 AND sort_key &lt; ? and sort_key &gt;= (1 &lt;&lt; 48) AND (sender_name LIKE ? OR title LIKE ? OR message LIKE ? OR broadcast_type LIKE ? OR qr_code_caption LIKE ?) ORDER BY sort_key DESC LIMIT ?</string>
     <string name="sql_news_clear_all">DELETE FROM news</string>
 
+    <!-- my qr codes -->
+    <string name="sql_qr_insert">INSERT INTO my_qr_codes (content, name) VALUES (?, ?)</string>
+    <string name="sql_qr_select">SELECT content, name FROM my_qr_codes</string>
+    <string name="sql_qr_delete">DELETE FROM my_qr_codes WHERE content=? AND name=?</string>
+
     <!-- iOS-only queries -->
     <string name="sql_friend_count_by_type">SELECT COUNT(*) FROM friend WHERE (existence = 0 OR existence = 4) AND \"type\" = ?</string>
     <string name="sql_friend_update_email_hash">UPDATE friend SET email_hash = ? WHERE email = ?</string>

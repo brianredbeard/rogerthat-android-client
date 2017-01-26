@@ -19,7 +19,9 @@
 package com.mobicage.rogerthat.plugins.system;
 
 import java.io.Closeable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import android.database.Cursor;
@@ -36,6 +38,9 @@ public class SystemStore implements Closeable {
     private final SQLiteStatement mUpdateJSEmbeddedPacket;
     private final SQLiteStatement mDeleteJSEmbeddedPacket;
 
+    private final SQLiteStatement mQRInsert;
+    private final SQLiteStatement mQRDelete;
+
     private final MainService mMainService;
     private final SQLiteDatabase mDb;
 
@@ -46,6 +51,9 @@ public class SystemStore implements Closeable {
 
         mUpdateJSEmbeddedPacket = mDb.compileStatement(mMainService.getString(R.string.sql_insert_js_embedding));
         mDeleteJSEmbeddedPacket = mDb.compileStatement(mMainService.getString(R.string.sql_delete_js_embedding));
+
+        mQRInsert = mDb.compileStatement(mMainService.getString(R.string.sql_qr_insert));
+        mQRDelete = mDb.compileStatement(mMainService.getString(R.string.sql_qr_delete));
     }
 
     @Override
@@ -53,6 +61,9 @@ public class SystemStore implements Closeable {
         T.UI();
         mUpdateJSEmbeddedPacket.close();
         mDeleteJSEmbeddedPacket.close();
+
+        mQRInsert.close();
+        mQRDelete.close();
     }
 
     public Map<String, JSEmbedding> getJSEmbeddedPackets() {
@@ -86,5 +97,37 @@ public class SystemStore implements Closeable {
     public void deleteJSEmbeddedPacket(final String name) {
         mDeleteJSEmbeddedPacket.bindString(1, name);
         mDeleteJSEmbeddedPacket.execute();
+    }
+
+    void insertQR(final QRCode qrCode) {
+        T.UI();
+        mQRInsert.bindString(1, qrCode.content);
+        mQRInsert.bindString(2, qrCode.name);
+        mQRInsert.execute();
+    }
+
+    void deleteQR(final QRCode qrCode) {
+        T.UI();
+        mQRDelete.bindString(1,qrCode.content);
+        mQRDelete.bindString(2,qrCode.name);
+        mQRDelete.execute();
+    }
+
+    List<QRCode> listQRs() {
+        T.UI();
+        List<QRCode> qrCodes = new ArrayList<>();
+        final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_qr_select), new String[] {});
+        try {
+            if (c.moveToFirst()) {
+                do {
+                    final String content = c.getString(0);
+                    final String name = c.getString(1);
+                    qrCodes.add(new QRCode(name, content));
+                } while (c.moveToNext());
+            }
+        } finally {
+            c.close();
+        }
+        return qrCodes;
     }
 }

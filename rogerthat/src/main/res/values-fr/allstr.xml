@@ -34,6 +34,7 @@
     <string name="activity_service_poked">Poke envoyé au service.</string>
     <string name="activity_updated_friend">Ami mis à jour.</string>
     <string name="add">Ajouter</string>
+    <string name="add_another_qr_code">Vous pouvez ajouter d\'autres IDs à cette application. Appuyez sur le bouton \"Scanner\" et maintenez votre ID en face de la caméra pour scanner le code QR.</string>
     <string name="add_recipients">Ajoutez au moins un destinataire</string>
     <string name="add_this_to_your_saved_items">Ajoutez cet élément à vos éléments sauvegardés</string>
     <string name="add_to_my_services">Ajouter cette application</string>
@@ -86,6 +87,7 @@
     <string name="complete_your_profile">Complétez votre profil</string>
     <string name="compose_short">Nouveau message</string>
     <string name="configure_new_canned_message">Créer un nouveau message standard</string>
+    <string name="confirm_delete_qr_code">Êtes-vous sûr de vouloir supprimer ce code QR?</string>
     <string name="confirm_remove_friend">Voulez-vous vraiment ne plus être l\'ami de %1$s?</string>
     <string name="contacts">Contacts</string>
     <string name="contacts_found_1">1 contact utilise %1$s</string>
@@ -120,6 +122,7 @@
     <string name="edit_profile">Modifier votre profil</string>
     <string name="email">E-mail</string>
     <string name="emergency">Urgences</string>
+    <string name="empty_name">Un nom est requis</string>
     <string name="enabled">Activé</string>
     <string name="enabled_summary">Lancer en arrière-plan</string>
     <string name="enabled_title">Mode arrière-plan</string>
@@ -262,6 +265,7 @@
     <string name="missing_gender">Sexe manquant</string>
     <string name="mobicagecloud_url">https://rogerth.at</string>
     <string name="more">Autre</string>
+    <string name="my_ids">Mes IDs</string>
     <string name="n_updated_messages">%1$d messages mis à jour</string>
     <string name="name">Nom</string>
     <string name="name_required">Un nom est requis</string>
@@ -334,7 +338,9 @@
     <string name="processing_invitation">Traitement de l\'invitation %1$s…</string>
     <string name="processing_scan">Traitement du code QR…</string>
     <string name="profile">Profil</string>
+    <string name="provide_qr_code_name">Donnez un nom au code QR</string>
     <string name="qr_call_tel">Voulez-vous appeler %1$s?</string>
+    <string name="qr_code_scanned">Le code QR est scanné</string>
     <string name="qr_open_url">Voulez-vous ouvrir la page Web suivante:\n\n%1$s</string>
     <string name="reach">Atteindre :</string>
     <string name="read_less">Afficher moins…</string>

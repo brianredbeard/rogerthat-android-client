@@ -58,7 +58,7 @@ public class UserDetailActivity extends FriendDetailActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         T.UI();
         boolean result = super.onCreateOptionsMenu(menu);
-        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_trash).color(Color.DKGRAY).sizeDp(18));
+        addIconToMenuItem(menu, R.id.remove_friend, FontAwesome.Icon.faw_trash);
         return result;
     }
 

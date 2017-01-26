@@ -19,6 +19,7 @@
 package com.mobicage.rogerthat.plugins.system;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
@@ -57,6 +58,9 @@ public class SystemPlugin implements MobicagePlugin {
     public static final String ASSET_CHAT_BACKGROUND = "ChatBackgroundImage";
     public static final String SYSTEM_PLUGIN_MUST_REFRESH_JS_EMBEDDING = "com.mobicage.rogerthat.plugins.system.SYSTEM_PLUGIN_MUST_REFRESH_JS_EMBEDDING";
     public static final String SYSTEM_PLUGIN_MUST_DOWNLOAD_ASSETS = "com.mobicage.rogerthat.plugins.system.SYSTEM_PLUGIN_MUST_DOWNLOAD_ASSETS";
+
+    public static final String QR_CODE_ADDED_INTENT = "QR_CODE_ADDED_INTENT";
+    public static final String QR_CODE_DELETED_INTENT = "QR_CODE_DELETED_INTENT ";
 
     private static final String CONFIGKEY = "com.mobicage.rogerthat.plugins.system";
     private static final String HEARTBEAT_INFO = "heartbeat_info";
@@ -341,4 +345,27 @@ public class SystemPlugin implements MobicagePlugin {
         }
         return bitmap;
     }
+
+    public void createQRCode(final QRCode qrCode) {
+        mStore.insertQR(qrCode);
+
+        Intent intent = new Intent(QR_CODE_ADDED_INTENT);
+        intent.putExtra("content", qrCode.content);
+        intent.putExtra("name", qrCode.name);
+        mMainService.sendBroadcast(intent);
+    }
+
+    public void deleteQRCode(final QRCode qrCode) {
+        mStore.deleteQR(qrCode);
+
+        Intent intent = new Intent(QR_CODE_DELETED_INTENT);
+        intent.putExtra("content", qrCode.content);
+        intent.putExtra("name", qrCode.name);
+        mMainService.sendBroadcast(intent);
+    }
+
+    public List<QRCode> listQRCodes() {
+        return mStore.listQRs();
+    }
+
 }

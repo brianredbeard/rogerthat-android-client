@@ -3,18 +3,8 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/scan"
-        android:title="@string/scan"
-        app:showAsAction="ifRoom"/>
-
-    <item
         android:id="@+id/add_qr_code"
         android:title="@string/add"
-        app:showAsAction="ifRoom"/>
-
-    <item
-        android:id="@+id/delete_qr_code"
-        android:title="@string/delete"
         app:showAsAction="ifRoom"/>
 
 </menu>

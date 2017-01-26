@@ -1066,7 +1066,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.message_menu, menu);
-        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_bell).color(Color.DKGRAY).sizeDp(18));
+        addIconToMenuItem(menu, R.id.show_notification_settings, FontAwesome.Icon.faw_bell);
         return true;
     }
 

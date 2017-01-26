@@ -18,64 +18,80 @@
 
 package com.mobicage.rogerthat;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.zxing.WriterException;
+import com.google.zxing.client.android.Contents;
+import com.google.zxing.client.android.Intents;
+import com.google.zxing.client.android.encode.QRCodeEncoder;
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mobicage.rogerth.at.R;
-import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
+import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
+import com.mobicage.rogerthat.plugins.system.QRCode;
+import com.mobicage.rogerthat.plugins.system.SystemPlugin;
 import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
+import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
+import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.T;
+import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.AppConstants;
 
 public class QRCodeActivity extends ServiceBoundActivity {
 
-    protected String mAction;
-
-    private static final String[] UPDATE_VIEW_INTENTS = new String[]{FriendsPlugin.FRIENDS_LIST_REFRESHED,
-            FriendsPlugin.FRIEND_ADDED_INTENT, FriendsPlugin.FRIEND_MARKED_FOR_REMOVAL_INTENT,
-            FriendsPlugin.FRIEND_REMOVED_INTENT};
-
     private BroadcastReceiver mBroadcastReceiver;
-
     private IdentityStore mIdentityStore;
-    private MyIdentity mIdentity;
-
+    private QRCode mCustomQRCode = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Intent intent = getIntent();
-        mAction = intent.getStringExtra(ServiceActionsOfflineActivity.ACTION);
-
         setContentView(R.layout.qr_code);
         setActivityName("qrcode");
-        setTitle(getString(R.string.passport, getString(R.string.app_name)));
+
+        final Intent intent = getIntent();
+        final String qrContent = intent.getStringExtra("content");
+        final String qrName = intent.getStringExtra("name");
+        if (qrContent != null && qrName != null) {
+            mCustomQRCode = new QRCode(qrName, qrContent);
+            setTitle(mCustomQRCode.name);
+        } else {
+            setTitle(getString(R.string.passport, getString(R.string.app_name)));
+        }
     }
 
     @Override
     protected void onServiceBound() {
         mIdentityStore = mService.getIdentityStore();
-        mBroadcastReceiver = getBroadCastReceiver();
-
-        IntentFilter filter = new IntentFilter(IdentityStore.IDENTITY_CHANGED_INTENT);
-        registerReceiver(mBroadcastReceiver, filter);
 
         final TextView headerTextView = (TextView) findViewById(R.id.loyalty_text);
-        headerTextView.setText(getString(AppConstants.HOMESCREEN_QRCODE_HEADER, getString(R.string.app_name)));
+        if (mCustomQRCode == null) {
+            headerTextView.setText(getString(AppConstants.HOMESCREEN_QRCODE_HEADER, getString(R.string.app_name)));
 
-        updateView();
+            showIdentityQRCode();
+        } else {
+            headerTextView.setVisibility(View.GONE);
+            showCustomQRCode();
+        }
+
+        mBroadcastReceiver = getBroadCastReceiver();
+        IntentFilter intentFilter = new IntentFilter(IdentityStore.IDENTITY_CHANGED_INTENT);
+        intentFilter.addAction(SystemPlugin.QR_CODE_ADDED_INTENT);
+        registerReceiver(mBroadcastReceiver, intentFilter);
     }
 
     @Override
@@ -83,15 +99,21 @@ public class QRCodeActivity extends ServiceBoundActivity {
         unregisterReceiver(mBroadcastReceiver);
     }
 
-
     private BroadcastReceiver getBroadCastReceiver() {
         return new SafeBroadcastReceiver() {
 
             @Override
             public String[] onSafeReceive(Context context, Intent intent) {
-                String action = intent.getAction();
+                final String action = intent.getAction();
                 L.i("onSafeReceive: " + action);
-                updateView();
+
+                if (IdentityStore.IDENTITY_CHANGED_INTENT.equals(action)) {
+                    showIdentityQRCode();
+                } else if (SystemPlugin.QR_CODE_ADDED_INTENT.equals(action)) {
+                    finish();
+                    startActivity(new Intent(QRCodeActivity.this, QRCodesActivity.class));
+                }
+
                 return null;
             }
 
@@ -102,30 +124,88 @@ public class QRCodeActivity extends ServiceBoundActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         T.UI();
         super.onCreateOptionsMenu(menu);
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.qrcode_menu, menu);
+        getMenuInflater().inflate(R.menu.qrcode_menu, menu);
+
+        final boolean addItemVisible = getIntent().getBooleanExtra("show_add_button", true);
+        final boolean deleteItemVisible = !addItemVisible && mCustomQRCode != null;
+        final boolean scanItemVisible = mCustomQRCode == null;
+
+        final MenuItem scanItem = menu.findItem(R.id.scan);
+        scanItem.setVisible(scanItemVisible);
+        addIconToMenuItem(scanItem, FontAwesome.Icon.faw_camera);
+
+        final MenuItem addItem = menu.findItem(R.id.add_qr_code);
+        addItem.setVisible(addItemVisible);
+        addIconToMenuItem(addItem, FontAwesome.Icon.faw_plus);
+
+        final MenuItem deleteItem = menu.findItem(R.id.delete_qr_code);
+        deleteItem.setVisible(deleteItemVisible);
+        addIconToMenuItem(deleteItem, FontAwesome.Icon.faw_trash);
+
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         T.UI();
-
         switch (item.getItemId()) {
             case R.id.scan:
-                ActivityUtils.goToScanActivity(QRCodeActivity.this, false, null);
+                Intent scanIntent = new Intent(this, ScanTabActivity.class);
+                scanIntent.setAction(ScanTabActivity.START_SCANNER_INTENT_ACTION);
+                startActivity(scanIntent);
+                return true;
+            case R.id.add_qr_code:
+                Intent intent = new Intent(this, AddQRCodeActivity.class);
+                startActivity(intent);
+                return true;
+            case R.id.delete_qr_code:
+                new AlertDialog.Builder(this)
+                        .setMessage(R.string.confirm_delete_qr_code)
+                        .setPositiveButton(R.string.yes, new SafeDialogInterfaceOnClickListener() {
+                            @Override
+                            public void safeOnClick(DialogInterface dialog, int which) {
+                                mService.getPlugin(SystemPlugin.class).deleteQRCode(mCustomQRCode);
+                                dialog.dismiss();
+                                finish();
+                            }
+                        })
+                        .setNegativeButton(R.string.no, new SafeDialogInterfaceOnClickListener() {
+                            @Override
+                            public void safeOnClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        })
+                        .show();
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void updateView() {
-        mIdentity = mIdentityStore.getIdentity();
-
-        ImageView imageView = ((ImageView) findViewById(R.id.qrcode));
+    private void showIdentityQRCode() {
+        MyIdentity mIdentity = mIdentityStore.getIdentity();
+        final ImageView imageView = ((ImageView) findViewById(R.id.qrcode));
         final Bitmap qrBitmap = mIdentity.getQRBitmap();
         if (qrBitmap != null) {
             imageView.setImageBitmap(qrBitmap);
         }
     }
+
+    private void showCustomQRCode() {
+        final ImageView imageView = ((ImageView) findViewById(R.id.qrcode));
+
+        Intent intent = new Intent();
+        intent.setAction(Intents.Encode.ACTION);
+        intent.putExtra(Intents.Encode.TYPE, Contents.Type.TEXT);
+        intent.putExtra(Intents.Encode.DATA, mCustomQRCode.content);
+        final Bitmap bitmap;
+        try {
+            QRCodeEncoder qrCodeEncoder = new QRCodeEncoder(this, intent, UIUtils.getDisplayWidth(this) / 2, false);
+            bitmap = qrCodeEncoder.encodeAsBitmap();
+        } catch (WriterException e) {
+            UIUtils.showLongToast(this, R.string.error_please_try_again);
+            return;
+        }
+        imageView.setImageBitmap(bitmap);
+    }
+
 }

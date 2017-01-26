@@ -670,7 +670,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (mFBCallbackMgr != null ) {
+        if (mFBCallbackMgr != null) {
             mFBCallbackMgr.onActivityResult(requestCode, resultCode, data);
         }
     }
@@ -870,5 +870,19 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
 
     public Toolbar getToolbar() {
         return mToolbar;
+    }
+
+    public boolean addIconToMenuItem(Menu menu, int itemId, FontAwesome.Icon faIcon) {
+        MenuItem item = menu.findItem(itemId);
+        if (item == null) {
+            return false;
+        }
+
+        addIconToMenuItem(item, faIcon);
+        return true;
+    }
+
+    public void addIconToMenuItem(MenuItem item, FontAwesome.Icon faIcon) {
+        item.setIcon(new IconicsDrawable(this).icon(faIcon).color(Color.DKGRAY).sizeDp(18));
     }
 }

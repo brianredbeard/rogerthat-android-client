@@ -34,6 +34,7 @@
     <string name="activity_service_poked">En ejecución.</string>
     <string name="activity_updated_friend">Contacto actualizado.</string>
     <string name="add">Añadir</string>
+    <string name="add_another_qr_code">Se pueden añadir otros IDs para esta app. Presione el botón de escaneo y mantenga su ID en frente de la cámara para escanear el código QR.</string>
     <string name="add_recipients">Añadir destinatarios antes de continuar</string>
     <string name="add_this_to_your_saved_items">Agregar esto a tus elementos guardados</string>
     <string name="add_to_my_services">Añadir a isso app</string>
@@ -86,6 +87,7 @@
     <string name="complete_your_profile">Completa tu perfil</string>
     <string name="compose_short">Redactar</string>
     <string name="configure_new_canned_message">Crear un borrador de mensaje</string>
+    <string name="confirm_delete_qr_code">¿Está seguro de que desea borrar el código QR?</string>
     <string name="confirm_remove_friend">¿Estás seguro que deseas desvincular a %1$s?</string>
     <string name="confirm_remove_service">¿Seguro que quieres dejar de seguir el servicio %1$s?</string>
     <string name="contacts">Contactos</string>
@@ -122,6 +124,7 @@
     <string name="edit_profile">Edita tu perfil</string>
     <string name="email">Dirección de correo electrónico</string>
     <string name="emergency">Emergencias</string>
+    <string name="empty_name">El campo nombre no puede estar vacío</string>
     <string name="enabled">Habilitado</string>
     <string name="enabled_summary">Ejecutar como servicio en segundo plano</string>
     <string name="enabled_title">Ocultar servicio</string>
@@ -264,6 +267,7 @@
     <string name="missing_gender">De género no se encuentra </string>
     <string name="mobicagecloud_url">https://rogerth.at</string>
     <string name="more">Más</string>
+    <string name="my_ids">Mis IDs</string>
     <string name="n_updated_messages">%1$d mensajes actualizados.</string>
     <string name="name">Nombre</string>
     <string name="name_required">Nombre requerido</string>
@@ -337,7 +341,9 @@
     <string name="processing_scan">Buscando…</string>
     <string name="profile">Perfil</string>
     <string name="promo">Patrocinio</string>
+    <string name="provide_qr_code_name">Proporcionar un nombre para el código QR</string>
     <string name="qr_call_tel">¿Desea llamar a %1$s?</string>
+    <string name="qr_code_scanned">Escaner de códigos QR</string>
     <string name="qr_open_url">¿Desea abrir el sitio web:\n\n%1$s</string>
     <string name="reach">Alcance:</string>
     <string name="read_less">Leer menos...</string>

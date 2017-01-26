@@ -31,9 +31,11 @@ import com.commonsware.cwac.cam2.Facing;
 import com.commonsware.cwac.cam2.FlashMode;
 import com.commonsware.cwac.cam2.VideoRecorderActivity;
 import com.mobicage.rogerthat.MainActivity;
+import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.MoreActivity;
 import com.mobicage.rogerthat.NewsActivity;
 import com.mobicage.rogerthat.QRCodeActivity;
+import com.mobicage.rogerthat.QRCodesActivity;
 import com.mobicage.rogerthat.ServiceActionsOfflineActivity;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.ServiceFriendsActivity;
@@ -51,6 +53,7 @@ import com.mobicage.rogerthat.plugins.history.HistoryListActivity;
 import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
 import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
 import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
+import com.mobicage.rogerthat.plugins.system.SystemPlugin;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rpc.config.AppConstants;
@@ -104,7 +107,8 @@ public class ActivityUtils {
         return null;
     }
 
-    public static boolean goToActivity(final ServiceBoundActivity context, final ServiceBoundActivity.NavigationItem ni, final boolean clearStack, final Bundle extras) {
+    public static boolean goToActivity(final ServiceBoundActivity context, final ServiceBoundActivity.NavigationItem ni,
+                                       final boolean clearStack, final Bundle extras) {
         if (ni.actionType == null) {
             ActivityUtils.goToActivity(context, ni.action, clearStack, ni.collapse, extras);
         } else if ("action".equals(ni.actionType)) {
@@ -145,7 +149,8 @@ public class ActivityUtils {
         return true;
     }
 
-    public static boolean goToActivity(ServiceBoundActivity context, String activityName, boolean clearStack, boolean collapse, Bundle extras) {
+    public static boolean goToActivity(ServiceBoundActivity context, String activityName, boolean clearStack,
+                                       boolean collapse, Bundle extras) {
         if ("news".equals(activityName)) {
             goToActivity(context, NewsActivity.class, clearStack, extras);
         } else if ("messages".equals(activityName)) {
@@ -175,7 +180,7 @@ public class ActivityUtils {
         } else if ("stream".equals(activityName)) {
             goToActivity(context, HistoryListActivity.class, clearStack, extras);
         } else if ("qrcode".equals(activityName)) {
-            goToActivity(context, QRCodeActivity.class, clearStack, extras);
+            goToQRActivity(context, clearStack, extras);
         } else {
             L.bug("unknown goToActivity: " + activityName);
             return false;
@@ -246,6 +251,18 @@ public class ActivityUtils {
         goToActivity(context, FriendSearchActivity.class, clearStack, extras);
     }
 
+    private static void goToQRActivity(ServiceBoundActivity context, boolean clearStack, Bundle extras) {
+        Class<?> cls = QRCodeActivity.class;
+        MainService mainService = context.getMainService();
+        if (mainService != null) {
+            final SystemPlugin systemPlugin = mainService.getPlugin(SystemPlugin.class);
+            if (systemPlugin.listQRCodes().size() > 0) {
+                cls = QRCodesActivity.class;
+            }
+        }
+        goToActivity(context, cls, clearStack, extras);
+    }
+
     private static void setupMenuItemPresser(final ServiceBoundActivity context, final String serviceEmail) {
         if (context.menuItemPresser != null) {
             context.menuItemPresser.stop();
@@ -304,8 +321,8 @@ public class ActivityUtils {
                 .flashModes(FlashMode.values())
                 .updateMediaStore()
                 .onError(new ResultReceiver(null) {
-                    protected void onReceiveResult (int resultCode,
-                                                    Bundle resultData) {
+                    protected void onReceiveResult(int resultCode,
+                                                   Bundle resultData) {
                         L.bug("Failure in CameraActivity.\nError: r" + resultData.toString());
                     }
                 })
@@ -321,8 +338,8 @@ public class ActivityUtils {
                 .updateMediaStore()
                 .quality(AbstractCameraActivity.Quality.LOW)
                 .onError(new ResultReceiver(null) {
-                    protected void onReceiveResult (int resultCode,
-                                                    Bundle resultData) {
+                    protected void onReceiveResult(int resultCode,
+                                                   Bundle resultData) {
                         L.bug("Failure in CameraActivity.\nError: r" + resultData.toString());
                     }
                 })

@@ -469,7 +469,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
             MenuItem item = menu.getItem(i);
             switch (item.getItemId()) {
                 case R.id.saved:
-                    item.setVisible(newsStore == null ? false : newsStore.countNewsPinnedItems() > 0);
+                    item.setVisible(newsStore != null && newsStore.countNewsPinnedItems() > 0);
                     break;
             }
         }
@@ -482,7 +482,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
         T.UI();
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.news_menu, menu);
-        menu.getItem(0).setIcon(new IconicsDrawable(this).icon(FontAwesome.Icon.faw_thumb_tack).color(Color.DKGRAY).sizeDp(18));
+        addIconToMenuItem(menu, R.id.add_qr_code, FontAwesome.Icon.faw_plus);
         return true;
     }
 
