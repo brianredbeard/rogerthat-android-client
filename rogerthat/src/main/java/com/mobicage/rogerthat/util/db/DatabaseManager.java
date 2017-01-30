@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Mobicage NV
+ * Copyright 2017 Mobicage NV
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @@license_version:1.1@@
+ * @@license_version:1.2@@
  */
 
 package com.mobicage.rogerthat.util.db;
@@ -21,6 +21,7 @@ package com.mobicage.rogerthat.util.db;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.List;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteCursor;
@@ -30,6 +31,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQuery;
 
 import com.mobicage.rogerthat.MainService;
+import com.mobicage.rogerthat.util.IOUtils;
 import com.mobicage.rogerthat.util.db.updates.IDbUpdater;
 import com.mobicage.rogerthat.util.db.updates.Updates;
 import com.mobicage.rogerthat.util.logging.L;
@@ -38,7 +40,7 @@ import com.mobicage.rogerthat.util.system.T;
 public class DatabaseManager implements Closeable {
 
     private final static String DB_NAME = "mc.db";
-    private final static int DB_VERSION = 74;
+    private final static int DB_VERSION = 75;
 
     private final MainService mMainService;
     private final SQLiteDatabase mDb;
@@ -79,7 +81,7 @@ public class DatabaseManager implements Closeable {
             super(mainService, dbName, new SQLiteDatabase.CursorFactory() {
                 @Override
                 public Cursor newCursor(SQLiteDatabase db, SQLiteCursorDriver masterQuery, String editTable,
-                    SQLiteQuery query) {
+                                        SQLiteQuery query) {
                     // L.d("SQL: " + query.toString());
                     return new SQLiteCursor(db, masterQuery, editTable, query);
                 }
@@ -102,15 +104,16 @@ public class DatabaseManager implements Closeable {
         private void updateDB(final SQLiteDatabase db, final int current, final int next) {
             T.UI();
             L.d("Upgrading db from " + current + " to " + next);
-            Updates updates = new Updates();
+            final List<String> sqlLines = getSql("db/update_" + current + "_to_" + next + ".sql");
+
+            final Updates updates = new Updates();
             IDbUpdater updater = updates.getUpdater(next);
             updater.preUpdate(mMainService, db);
-            final String sql = getSql("db/update_" + current + "_to_" + next + ".sql");
-            if (sql != null) {
-                String[] sql_parts = sql.split("\n");
+
+            if (sqlLines != null) {
                 StringBuilder sb = new StringBuilder();
-                for (String sql_part : sql_parts) {
-                    final String line = sql_part.trim();
+                for (String sqlPart : sqlLines) {
+                    final String line = sqlPart.trim();
                     if (line.startsWith("--"))
                         continue;
                     sb.append(line);
@@ -126,26 +129,13 @@ public class DatabaseManager implements Closeable {
             updater.postUpdate(mMainService, db);
         }
 
-        private String getSql(final String filename) {
+        private List<String> getSql(final String filename) {
             T.UI();
-            final InputStreamReader reader;
             try {
-                reader = new InputStreamReader(mMainService.getAssets().open(filename));
-                try {
-                    final StringBuilder sb = new StringBuilder();
-                    final char[] buf = new char[1024];
-                    int bytes_read = reader.read(buf);
-                    while (bytes_read != -1) {
-                        sb.append(buf, 0, bytes_read);
-                        bytes_read = reader.read(buf);
-                    }
-                    return sb.toString();
-                } finally {
-                    reader.close();
-                }
+                return IOUtils.readAllLines(new InputStreamReader(mMainService.getAssets().open(filename)));
             } catch (IOException e) {
                 L.d("Asset " + filename + " not found!");
-                return null;
+                throw new RuntimeException(e);
             }
         }
 

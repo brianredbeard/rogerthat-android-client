@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Mobicage NV
+ * Copyright 2017 Mobicage NV
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @@license_version:1.1@@
+ * @@license_version:1.2@@
  */
 
 package com.mobicage.rogerthat.plugins.friends;
@@ -21,9 +21,12 @@ package com.mobicage.rogerthat.plugins.friends;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 
 import com.mobicage.api.services.Rpc;
 import com.mobicage.rogerth.at.R;
@@ -32,6 +35,7 @@ import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.plugins.messaging.BrandingFailureException;
 import com.mobicage.rogerthat.plugins.messaging.FriendsThreadActivity;
+import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.plugins.messaging.ServiceMessageDetailActivity;
 import com.mobicage.rogerthat.plugins.messaging.mfr.EmptyStaticFlowException;
@@ -40,9 +44,12 @@ import com.mobicage.rogerthat.plugins.messaging.mfr.MessageFlowRun;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
+import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
+import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.ResponseHandler;
+import com.mobicage.to.friends.ServiceMenuItemLinkTO;
 import com.mobicage.to.friends.ServiceMenuItemTO;
 import com.mobicage.to.service.PressMenuIconRequestTO;
 import com.mobicage.to.service.PressMenuIconResponseTO;
@@ -155,8 +162,13 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
         itemPressed(item, menuGeneration, null, null, resultHandler);
     }
 
-    public void itemPressed(final ServiceMenuItemTO item, final long menuGeneration, final Bundle extras, final String flowParams,
-                            final ResultHandler resultHandler) {
+    public void itemPressed(final ServiceMenuItemTO item, final long menuGeneration, final Bundle extras,
+                            final String flowParams, final ResultHandler resultHandler) {
+        itemPressed(item, menuGeneration, extras, flowParams, resultHandler, false);
+    }
+
+    private void itemPressed(final ServiceMenuItemTO item, final long menuGeneration, final Bundle extras,
+                             final String flowParams, final ResultHandler resultHandler, final boolean confirmed) {
         mItem = item;
         mResultHandler = resultHandler == null ? mDefaultResultHandler : resultHandler;
 
@@ -176,6 +188,63 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
             return;
         }
 
+        if (!confirmed && askConfirmationIfNeeded(item, menuGeneration, extras, flowParams, resultHandler)) {
+            return;
+        }
+
+        final PressMenuIconRequestTO request = poke(item, menuGeneration);
+
+        if (item.link != null) {
+            openLink(item.link);
+        } else if (item.screenBranding != null) {
+            openBranding(item, extras);
+        } else if (item.staticFlowHash != null) {
+            startLocalFlow(item, request, flowParams);
+        } else {
+            poked();
+        }
+    }
+
+    private boolean askConfirmationIfNeeded(final ServiceMenuItemTO item, final long menuGeneration,
+                                            final Bundle extras, final String flowParams,
+                                            final ResultHandler resultHandler) {
+        if (item.link == null) {
+            return false;
+        }
+
+        final Map<String, String> actionInfo = mService.getPlugin(MessagingPlugin.class).getButtonActionInfo(item.link.url);
+        final String buttonAction = actionInfo.get("androidAction");
+
+        if (buttonAction == null) {
+            return false;
+        }
+
+        final boolean confirmationNeeded = Message.MC_CONFIRM_PREFIX.equals(buttonAction);
+        if (confirmationNeeded) {
+            final AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
+            builder.setTitle(R.string.message_confirm);
+            builder.setMessage(actionInfo.get("androidUrl"));
+            builder.setPositiveButton(R.string.yes, new SafeDialogInterfaceOnClickListener() {
+                @Override
+                public void safeOnClick(DialogInterface dialog, int which) {
+                    com.mobicage.rogerthat.util.system.T.UI();
+                    dialog.dismiss();
+                    itemPressed(item, menuGeneration, extras, flowParams, resultHandler, true);
+                }
+            });
+            builder.setNegativeButton(R.string.no, new SafeDialogInterfaceOnClickListener() {
+                @Override
+                public void safeOnClick(DialogInterface dialog, int which) {
+                    com.mobicage.rogerthat.util.system.T.UI();
+                    dialog.dismiss();
+                }
+            });
+            builder.create().show();
+        }
+        return confirmationNeeded;
+    }
+
+    private PressMenuIconRequestTO poke(ServiceMenuItemTO item, long menuGeneration) {
         mContextMatch = "MENU_" + UUID.randomUUID().toString();
         PressMenuIconRequestTO request = new PressMenuIconRequestTO();
         request.coords = item.coords;
@@ -198,14 +267,7 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
                 stop();
             }
         }
-
-        if (item.screenBranding != null) {
-            openBranding(item, extras);
-        } else if (item.staticFlowHash != null) {
-            startLocalFlow(item, request, flowParams);
-        } else {
-            poked();
-        }
+        return request;
     }
 
     private void poked() {
@@ -280,6 +342,27 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
         intent.putExtra(ActionScreenActivity.ITEM_COORDS, item.coords);
         intent.putExtra(ActionScreenActivity.CONTEXT_MATCH, mContextMatch);
         intent.putExtra(ActionScreenActivity.RUN_IN_BACKGROUND, item.runInBackground);
+        mActivity.startActivity(intent);
+        mResultHandler.onSuccess();
+        stop();
+    }
+
+    private void openLink(final ServiceMenuItemLinkTO link) {
+        final Map<String, String> actionInfo = mService.getPlugin(MessagingPlugin.class).getButtonActionInfo(link.url);
+        L.d("actionInfo: " + actionInfo);
+        final String buttonAction = actionInfo.get("androidAction");
+
+        if (buttonAction == null) {
+            UIUtils.showAlertDialog(mActivity, R.string.warning, R.string.feature_not_supported);
+            return;
+        }
+
+        if (Message.MC_CONFIRM_PREFIX.equals(buttonAction)) {
+            // The action is unknown or the confirmation is already asked
+            return;
+        }
+
+        final Intent intent = new Intent(buttonAction, Uri.parse(actionInfo.get("androidUrl")));
         mActivity.startActivity(intent);
         mResultHandler.onSuccess();
         stop();

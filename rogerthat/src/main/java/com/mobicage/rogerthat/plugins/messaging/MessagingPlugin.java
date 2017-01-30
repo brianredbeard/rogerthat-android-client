@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Mobicage NV
+ * Copyright 2017 Mobicage NV
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @@license_version:1.1@@
+ * @@license_version:1.2@@
  */
 
 package com.mobicage.rogerthat.plugins.messaging;
@@ -576,15 +576,7 @@ public class MessagingPlugin implements MobicagePlugin {
         return null;
     }
 
-    public Map<String, String> getButtonActionInfo(ButtonTO button) {
-        return getButtonActionInfo(button.action);
-    }
-
-    public Map<String, String> getButtonActionInfo(NewsActionButtonTO button) {
-        return getButtonActionInfo(button.action);
-    }
-
-    private Map<String, String> getButtonActionInfo(String action) {
+    public Map<String, String> getButtonActionInfo(String action) {
         String buttonAction = null;
         String buttonUrl = null;
 

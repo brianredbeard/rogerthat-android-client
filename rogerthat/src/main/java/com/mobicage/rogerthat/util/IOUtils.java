@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Mobicage NV
+ * Copyright 2017 Mobicage NV
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @@license_version:1.1@@
+ * @@license_version:1.2@@
  */
 
 package com.mobicage.rogerthat.util;
@@ -29,7 +29,6 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -112,8 +111,12 @@ public class IOUtils {
     }
 
     public static List<String> readAllLinesFromFile(final File f) throws IOException {
+        return readAllLines(new FileReader(f));
+    }
+
+    public static List<String> readAllLines(final InputStreamReader reader) throws IOException {
         final List<String> lines = new ArrayList<String>();
-        final BufferedReader br = new BufferedReader(new FileReader(f));
+        final BufferedReader br = new BufferedReader(reader);
         try {
             String line = br.readLine();
             while (line != null) {

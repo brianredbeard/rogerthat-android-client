@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Mobicage NV
+ * Copyright 2017 Mobicage NV
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @@license_version:1.1@@
+ * @@license_version:1.2@@
  */
 package com.mobicage.rogerthat;
 
@@ -813,7 +813,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 currentButton++;
                 final NewsActionButtonTO button = mNewsItem.buttons[i];
 
-                Map<String, String> actionInfo = mMessagingPlugin.getButtonActionInfo(button);
+                Map<String, String> actionInfo = mMessagingPlugin.getButtonActionInfo(button.action);
                 final String buttonAction = actionInfo.get("androidAction");
                 final String buttonUrl = actionInfo.get("androidUrl");
 

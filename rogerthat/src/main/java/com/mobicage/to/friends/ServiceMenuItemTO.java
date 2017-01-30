@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Mobicage NV
+ * Copyright 2017 Mobicage NV
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @@license_version:1.1@@
+ * @@license_version:1.2@@
  */
 
 package com.mobicage.to.friends;
@@ -25,6 +25,7 @@ import java.util.Map;
 
 public class ServiceMenuItemTO implements com.mobicage.rpc.IJSONable {
 
+    public com.mobicage.to.friends.ServiceMenuItemLinkTO link;
     public long action;
     public long[] coords;
     public String hashedTag;
@@ -41,7 +42,14 @@ public class ServiceMenuItemTO implements com.mobicage.rpc.IJSONable {
     public ServiceMenuItemTO() {
     }
 
+    @SuppressWarnings("unchecked")
     public ServiceMenuItemTO(Map<String, Object> json) throws IncompleteMessageException {
+        if (json.containsKey("link")) {
+            Object val = json.get("link");
+            this.link = val == null ? null : new com.mobicage.to.friends.ServiceMenuItemLinkTO((Map<String, Object>) val);
+        } else {
+            this.link = null;
+        }
         if (json.containsKey("action")) {
             Object val = json.get("action");
             if (val instanceof Integer) {
@@ -50,7 +58,7 @@ public class ServiceMenuItemTO implements com.mobicage.rpc.IJSONable {
                 this.action = ((Long) val).longValue();
             }
         } else {
-            throw new IncompleteMessageException("com.mobicage.to.friends.ServiceMenuItemTO object is missing field 'action'");
+            this.action = 0;
         }
         if (json.containsKey("coords")) {
             org.json.simple.JSONArray val_arr = (org.json.simple.JSONArray) json.get("coords");
@@ -112,7 +120,7 @@ public class ServiceMenuItemTO implements com.mobicage.rpc.IJSONable {
                 }
             }
         } else {
-            throw new IncompleteMessageException("com.mobicage.to.friends.ServiceMenuItemTO object is missing field 'roles'");
+            this.roles = new long[0];
         }
         if (json.containsKey("runInBackground")) {
             Object val = json.get("runInBackground");
@@ -138,6 +146,7 @@ public class ServiceMenuItemTO implements com.mobicage.rpc.IJSONable {
     @SuppressWarnings("unchecked")
     public Map<String, Object> toJSONMap() {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
+        obj.put("link", this.link == null ? null : this.link.toJSONMap());
         obj.put("action", this.action);
         if (this.coords == null) {
             obj.put("coords", null);
