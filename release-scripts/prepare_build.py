@@ -41,6 +41,7 @@ import app_utils
 ANDROID_SRC_DIR = os.path.join(CURRENT_DIR, '..', 'rogerthat', 'src')
 SRC_JAVA_DIR = os.path.join(ANDROID_SRC_DIR, 'main', 'java')
 TEST_SRC_JAVA_DIR = os.path.join(ANDROID_SRC_DIR, 'androidTest', 'java')
+TEST_RES_DIR = os.path.join(ANDROID_SRC_DIR, 'androidTest', 'res')
 SRC_RES_DIR = os.path.join(ANDROID_SRC_DIR, 'main', 'res')
 
 MAIN_APP_ID = "rogerthat"
@@ -170,9 +171,10 @@ def quoted_str_or_null(s):
 def rename_package():
     rogerthat_build_gradle = os.path.join(ANDROID_SRC_DIR, '..', 'build.gradle')
     facebook_app_id = doc["APP_CONSTANTS"].get("FACEBOOK_APP_ID")
+    package_sufix = APP_ID.replace('-', '.')
+
     with open(rogerthat_build_gradle, 'r+') as f:
         s = f.read()
-        package_sufix = APP_ID.replace('-', '.')
         if APP_ID != 'rogerthat':
             s = s.replace('com.mobicage.rogerth.at', 'com.mobicage.rogerthat')
         s = s.replace("applicationIdSuffix '.debug'", "applicationIdSuffix '.%s.debug'" % package_sufix)
@@ -223,6 +225,19 @@ def rename_package():
         f.seek(0)
         f.write(s)
         f.truncate()
+
+    if APP_ID != 'rogerthat':
+        for d in (TEST_RES_DIR, TEST_SRC_JAVA_DIR):
+            for directory, _, files in os.walk(d):
+                for file_name in files:
+                    file_path = os.path.join(directory, file_name)
+                    with open(file_path, 'r+') as f:
+                        s = f.read()
+                        f.seek(0)
+                        s = s.replace('com.mobicage.rogerth.at.debug.test.R',
+                                      'com.mobicage.rogerthat.%s.debug.test.R' % package_sufix)
+                        f.write(s)
+                        f.truncate()
 
 
 def create_notification_icon(android_icon_filename, android_notification_icon_filename):
