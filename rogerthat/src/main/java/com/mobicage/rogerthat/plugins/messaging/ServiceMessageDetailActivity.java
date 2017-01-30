@@ -801,7 +801,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
             return;
         }
 
-        Map<String, String> actionInfo = mMessagingPlugin.getButtonActionInfo(button);
+        Map<String, String> actionInfo = mMessagingPlugin.getButtonActionInfo(button.action);
         final String buttonAction = actionInfo.get("androidAction");
         final String buttonUrl = actionInfo.get("androidUrl");
 

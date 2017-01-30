@@ -29,7 +29,6 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -112,8 +111,12 @@ public class IOUtils {
     }
 
     public static List<String> readAllLinesFromFile(final File f) throws IOException {
+        return readAllLines(new FileReader(f));
+    }
+
+    public static List<String> readAllLines(final InputStreamReader reader) throws IOException {
         final List<String> lines = new ArrayList<String>();
-        final BufferedReader br = new BufferedReader(new FileReader(f));
+        final BufferedReader br = new BufferedReader(reader);
         try {
             String line = br.readLine();
             while (line != null) {

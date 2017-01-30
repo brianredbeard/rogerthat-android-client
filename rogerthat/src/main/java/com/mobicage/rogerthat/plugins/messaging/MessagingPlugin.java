@@ -576,15 +576,7 @@ public class MessagingPlugin implements MobicagePlugin {
         return null;
     }
 
-    public Map<String, String> getButtonActionInfo(ButtonTO button) {
-        return getButtonActionInfo(button.action);
-    }
-
-    public Map<String, String> getButtonActionInfo(NewsActionButtonTO button) {
-        return getButtonActionInfo(button.action);
-    }
-
-    private Map<String, String> getButtonActionInfo(String action) {
+    public Map<String, String> getButtonActionInfo(String action) {
         String buttonAction = null;
         String buttonUrl = null;
 

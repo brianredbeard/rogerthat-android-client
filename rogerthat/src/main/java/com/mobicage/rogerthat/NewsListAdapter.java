@@ -813,7 +813,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 currentButton++;
                 final NewsActionButtonTO button = mNewsItem.buttons[i];
 
-                Map<String, String> actionInfo = mMessagingPlugin.getButtonActionInfo(button);
+                Map<String, String> actionInfo = mMessagingPlugin.getButtonActionInfo(button.action);
                 final String buttonAction = actionInfo.get("androidAction");
                 final String buttonUrl = actionInfo.get("androidUrl");
 

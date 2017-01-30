@@ -642,7 +642,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             buttonView.setEnabled(canEdit);
             buttonView.setTextColor(ContextCompat.getColor(mService, canEdit ? R.color.mc_white : R.color.mc_default_text));
 
-            Map<String, String> actionInfo = mMessagingPlugin.getButtonActionInfo(button);
+            Map<String, String> actionInfo = mMessagingPlugin.getButtonActionInfo(button.action);
             final String buttonAction = actionInfo.get("androidAction");
             final String buttonUrl = actionInfo.get("androidUrl");
 

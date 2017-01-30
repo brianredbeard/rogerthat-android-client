@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Mobicage NV
+ * Copyright 2017 Mobicage NV
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @@license_version:1.1@@
+ * @@license_version:1.2@@
  */
 
 package com.mobicage.rpc;
@@ -549,6 +549,13 @@ public class Parser {
         if (value == null)
             return null;
         return new com.mobicage.to.friends.RequestShareLocationResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.friends.ServiceMenuItemLinkTO ComMobicageToFriendsServiceMenuItemLinkTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.friends.ServiceMenuItemLinkTO((Map<String, Object>) value);
     }
 
     @SuppressWarnings("unchecked")

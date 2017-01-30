@@ -50,6 +50,7 @@ import com.mobicage.to.friends.FriendTO;
 import com.mobicage.to.friends.GetAvatarRequestTO;
 import com.mobicage.to.friends.GetCategoryRequestTO;
 import com.mobicage.to.friends.GetUserInfoResponseTO;
+import com.mobicage.to.friends.ServiceMenuItemLinkTO;
 import com.mobicage.to.friends.ServiceMenuItemTO;
 import com.mobicage.to.friends.UpdateFriendResponseTO;
 import com.mobicage.to.service.GetMenuIconRequestTO;
@@ -95,7 +96,7 @@ public class FriendStore implements Closeable {
 
         public IllegalFriendVersionComparisonException(long[] versionsInDB, long[] versionsFromServer) {
             super("Can not compare when versionsInDB " + versionsInDB + " length is greater than versionsFromServer "
-                + versionsFromServer);
+                    + versionsFromServer);
         }
     }
 
@@ -186,13 +187,13 @@ public class FriendStore implements Closeable {
         mFriendNameCache = new SimpleCache<String, String>(200, 120);
 
         mGetLocationSharingFriendCountUI = mDb.compileStatement(mMainService
-            .getString(R.string.sql_friend_count_friends_sharing_location));
-        mGetFriendName = new MultiThreadedSQLStatement(mDb, new int[] { T.UI, T.BIZZ },
-            mMainService.getString(R.string.sql_friend_get_name_by_email));
+                .getString(R.string.sql_friend_count_friends_sharing_location));
+        mGetFriendName = new MultiThreadedSQLStatement(mDb, new int[]{T.UI, T.BIZZ},
+                mMainService.getString(R.string.sql_friend_get_name_by_email));
 
         mGetIsFriendUI = mDb.compileStatement(mMainService.getString(R.string.sql_friend_is_friend));
         mGetEmailByEmailHashUI = mDb.compileStatement(mMainService
-            .getString(R.string.sql_friend_get_email_by_email_hash));
+                .getString(R.string.sql_friend_get_email_by_email_hash));
 
         mInsertFriendHTTP = mDb.compileStatement(mMainService.getString(R.string.sql_friend_insert));
         mUpdateFriendAvatarHTTP = mDb.compileStatement(mMainService.getString(R.string.sql_friend_update_avatar));
@@ -200,42 +201,42 @@ public class FriendStore implements Closeable {
         mUpdateFriendHTTP = mDb.compileStatement(mMainService.getString(R.string.sql_friend_update));
         mUpdateFriendInfoHTTP = mDb.compileStatement(mMainService.getString(R.string.sql_friend_update_info));
         mDeleteAllServiceMenusHTTP = mDb.compileStatement(mMainService
-            .getString(R.string.sql_friend_clear_all_service_menu));
+                .getString(R.string.sql_friend_clear_all_service_menu));
         mUpdateFriendShareLocationHTTP = mDb.compileStatement(mMainService
-            .getString(R.string.sql_friend_update_share_location));
+                .getString(R.string.sql_friend_update_share_location));
         mUpdateFriendExistenceHTTP = mDb.compileStatement(mMainService.getString(R.string.sql_friend_update_existence));
         mUpdateFriendExistenceAndClearVersionHTTP = mDb.compileStatement(mMainService
-            .getString(R.string.sql_friend_update_existence_and_clear_version));
+                .getString(R.string.sql_friend_update_existence_and_clear_version));
 
         mInsertInvitationSecretHTTP = mDb.compileStatement(mMainService
-            .getString(R.string.sql_friend_invitation_secret_insert));
+                .getString(R.string.sql_friend_invitation_secret_insert));
         mGetInvitationSecretUI = mDb
-            .compileStatement(mMainService.getString(R.string.sql_friend_invitation_secret_get));
+                .compileStatement(mMainService.getString(R.string.sql_friend_invitation_secret_get));
         mDeleteInvitationSecretUI = mDb.compileStatement(mMainService
-            .getString(R.string.sql_friend_invitation_secret_delete));
+                .getString(R.string.sql_friend_invitation_secret_delete));
         mCountInvitationSecretUI = mDb.compileStatement(mMainService
-            .getString(R.string.sql_friend_invitation_secret_count));
+                .getString(R.string.sql_friend_invitation_secret_count));
 
         mInsertPendingInvitationUI = mDb.compileStatement(mMainService
-            .getString(R.string.sql_friend_pending_invitation_insert));
+                .getString(R.string.sql_friend_pending_invitation_insert));
         mRemovePendingInvitationUI = mDb.compileStatement(mMainService
-            .getString(R.string.sql_friend_pending_invitation_remove));
+                .getString(R.string.sql_friend_pending_invitation_remove));
 
         mDeleteServiceMenuHTTP = mDb.compileStatement(mMainService.getString(R.string.sql_friend_delete_service_menu));
         mInsertServiceMenuHTTP = mDb.compileStatement(mMainService.getString(R.string.sql_friend_insert_service_menu));
         mCheckMenuIconAvailableHTTP = mDb.compileStatement(mMainService
-            .getString(R.string.sql_friend_check_menu_icon_available));
+                .getString(R.string.sql_friend_check_menu_icon_available));
         mInsertMenuIconHTTP = mDb.compileStatement(mMainService.getString(R.string.sql_friend_insert_menu_icon));
         mDeleteMenuIconHTTP = mDb.compileStatement(mMainService.getString(R.string.sql_friend_delete_menu_icon));
         mCountUnprocessedMessageForSenderHTTP = mDb.compileStatement(mMainService
-            .getString(R.string.sql_message_get_unprocessed_message_count_for_sender));
+                .getString(R.string.sql_message_get_unprocessed_message_count_for_sender));
 
         mGetStaticFlowUI = mDb.compileStatement(mMainService.getString(R.string.sql_friend_static_flow_get));
         mCheckStaticFlowAvailableHTTP = mDb.compileStatement(mMainService
-            .getString(R.string.sql_friend_static_flow_check_available));
+                .getString(R.string.sql_friend_static_flow_check_available));
 
-        mInsertStaticFlow = new MultiThreadedSQLStatement(mDb, new int[] { T.UI, T.BIZZ },
-            mMainService.getString(R.string.sql_friend_static_flow_insert));
+        mInsertStaticFlow = new MultiThreadedSQLStatement(mDb, new int[]{T.UI, T.BIZZ},
+                mMainService.getString(R.string.sql_friend_static_flow_insert));
         mDeleteStaticFlowHTTP = mDb.compileStatement(mMainService.getString(R.string.sql_friend_static_flow_delete));
 
         mCategoryInsertHTTP = mDb.compileStatement(mMainService.getString(R.string.sql_friend_category_insert));
@@ -243,7 +244,7 @@ public class FriendStore implements Closeable {
 
         mServiceApiCallInsertHTTP = mDb.compileStatement(mMainService.getString(R.string.sql_service_api_call_insert));
         mServiceApiCallSetResultHTTP = mDb.compileStatement(mMainService
-            .getString(R.string.sql_service_api_call_set_result));
+                .getString(R.string.sql_service_api_call_set_result));
         mServiceApiCallRemoveUI = mDb.compileStatement(mMainService.getString(R.string.sql_service_api_call_remove));
 
         mServiceUserDataUpdateBIZZ = mDb.compileStatement(mMainService.getString(R.string.sql_friend_set_user_data));
@@ -259,25 +260,25 @@ public class FriendStore implements Closeable {
 
         mFriendUpdateEmailHashBizz = mDb.compileStatement(mainService.getString(R.string.sql_friend_update_email_hash));
 
-        mInsertGroup = new MultiThreadedSQLStatement(mDb, new int[] { T.UI, T.BIZZ },
-            mMainService.getString(R.string.sql_insert_group));
+        mInsertGroup = new MultiThreadedSQLStatement(mDb, new int[]{T.UI, T.BIZZ},
+                mMainService.getString(R.string.sql_insert_group));
         mUpdateGroupUI = mDb.compileStatement(mMainService.getString(R.string.sql_update_group));
         mDeleteGroupUI = mDb.compileStatement(mMainService.getString(R.string.sql_delete_group));
         mDeleteGroupMembersUI = mDb.compileStatement(mMainService.getString(R.string.sql_delete_group_members));
-        mInsertGroupMember = new MultiThreadedSQLStatement(mDb, new int[] { T.UI, T.BIZZ },
-            mMainService.getString(R.string.sql_insert_group_member));
+        mInsertGroupMember = new MultiThreadedSQLStatement(mDb, new int[]{T.UI, T.BIZZ},
+                mMainService.getString(R.string.sql_insert_group_member));
         mDeleteGroupMemberUI = mDb.compileStatement(mMainService.getString(R.string.sql_delete_group_member));
         mClearGroupBIZZ = mDb.compileStatement(mMainService.getString(R.string.sql_clear_group));
         mClearEmptyGroupBIZZ = mDb.compileStatement(mMainService.getString(R.string.sql_clear_empty_group));
         mClearGroupMemberBIZZ = mDb.compileStatement(mMainService.getString(R.string.sql_clear_group_member));
         mClearGroupMemberByEmailBIZZ = mDb.compileStatement(mMainService
-            .getString(R.string.sql_clear_group_member_by_email));
+                .getString(R.string.sql_clear_group_member_by_email));
         mInsertGroupAvatarBIZZ = mDb.compileStatement(mMainService.getString(R.string.sql_insert_group_avatar));
         mInsertGroupAvatarHashBIZZ = mDb
-            .compileStatement(mMainService.getString(R.string.sql_insert_group_avatar_hash));
+                .compileStatement(mMainService.getString(R.string.sql_insert_group_avatar_hash));
 
         mCountServicesByOrganizationType = mDb.compileStatement(mMainService
-            .getString(R.string.sql_services_count_by_organization_type));
+                .getString(R.string.sql_services_count_by_organization_type));
         mCountServices = mDb.compileStatement(mMainService
                 .getString(R.string.sql_services_count));
 
@@ -391,7 +392,7 @@ public class FriendStore implements Closeable {
         final List<String> emails = new ArrayList<String>();
 
         final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_friend_get_emails_by_type),
-            new String[] { friendType + "" });
+                new String[]{friendType + ""});
         try {
             if (c.moveToFirst()) {
                 do {
@@ -413,7 +414,7 @@ public class FriendStore implements Closeable {
     public Friend getExistingFriend(final String email) {
         T.dontCare();
         final Cursor curs = mDb.rawQuery(mMainService.getString(R.string.sql_friend_get_existing_by_email),
-            new String[] { email });
+                new String[]{email});
         try {
             if (!curs.moveToFirst())
                 return null;
@@ -426,7 +427,7 @@ public class FriendStore implements Closeable {
     public Friend getFriend(final String email) {
         T.dontCare();
         final Cursor curs = mDb.rawQuery(mMainService.getString(R.string.sql_friend_get_by_email),
-            new String[] { email });
+                new String[]{email});
         try {
             if (!curs.moveToFirst())
                 return null;
@@ -440,7 +441,7 @@ public class FriendStore implements Closeable {
     public int getFriendType(final String email) {
         T.dontCare();
         final SQLiteStatement stmt = mDb
-            .compileStatement(mMainService.getString(R.string.sql_friend_get_type_by_email));
+                .compileStatement(mMainService.getString(R.string.sql_friend_get_type_by_email));
         stmt.bindString(1, email);
 
         try {
@@ -461,7 +462,7 @@ public class FriendStore implements Closeable {
     private byte[] getAvatar(String email) {
         T.dontCare();
         final Cursor curs = mDb.rawQuery(mMainService.getString(R.string.sql_friend_get_avatar_by_email),
-            new String[] { email });
+                new String[]{email});
         try {
             if (!curs.moveToFirst()) {
                 return null;
@@ -546,7 +547,7 @@ public class FriendStore implements Closeable {
             if (versionsInDB.length > friend.versions.length) {
                 response.updated = false;
                 response.reason = "There are more versions in the local DB than versions on the server. "
-                    + getFriendUpateSummary(friend, versionsInDB);
+                        + getFriendUpateSummary(friend, versionsInDB);
                 return response;
             } else {
                 // Check that versions in DB are not greater than versions from server
@@ -555,9 +556,9 @@ public class FriendStore implements Closeable {
                     if (comparisonResult == 1) {
                         // versionsInDB > versionsFromServer
                         throw new IllegalFriendVersionBumpException(
-                            "Version length difference between local DB and server, "
-                                + "AND one or more versions in local DB are greater than versions on the server. "
-                                + getFriendUpateSummary(friend, versionsInDB));
+                                "Version length difference between local DB and server, "
+                                        + "AND one or more versions in local DB are greater than versions on the server. "
+                                        + getFriendUpateSummary(friend, versionsInDB));
                     } else {
                         // We can continue. A version field has been added. Eg from [1, 1] to [1, 1, 0].
                         response.updated = true;
@@ -574,7 +575,7 @@ public class FriendStore implements Closeable {
                     } else {
                         response.updated = false;
                         response.reason = "One or more versions in local DB are greater than or equal to versions on "
-                            + "the server. " + getFriendUpateSummary(friend, versionsInDB);
+                                + "the server. " + getFriendUpateSummary(friend, versionsInDB);
                         return response;
                     }
                 }
@@ -616,7 +617,7 @@ public class FriendStore implements Closeable {
 
     public int getExistence(final String email) {
         final Cursor cursor = mDb.rawQuery(mMainService.getString(R.string.sql_friend_get_existence),
-            new String[] { email });
+                new String[]{email});
         try {
             if (!cursor.moveToFirst()) {
                 return Friend.NOT_FOUND;
@@ -631,187 +632,187 @@ public class FriendStore implements Closeable {
         T.BIZZ();
 
         UpdateFriendResponseTO response = TransactionHelper.runInTransaction(mDb, "updateFriend",
-            new Transaction<UpdateFriendResponseTO>() {
-                @Override
-                protected UpdateFriendResponseTO run() {
-                    UpdateFriendResponseTO response = shouldUpdateFriend(friend);
-                    if (!response.updated) {
-                        return response;
-                    }
+                new Transaction<UpdateFriendResponseTO>() {
+                    @Override
+                    protected UpdateFriendResponseTO run() {
+                        UpdateFriendResponseTO response = shouldUpdateFriend(friend);
+                        if (!response.updated) {
+                            return response;
+                        }
 
-                    requestFriendCategoryIfNeeded(friend);
+                        requestFriendCategoryIfNeeded(friend);
 
-                    final boolean userDataUpdated;
-                    final boolean serviceDataUpdated;
+                        final boolean userDataUpdated;
+                        final boolean serviceDataUpdated;
 
-                    // Check if service data has changed
-                    if (friend.type == FriendsPlugin.FRIEND_TYPE_SERVICE) {
-                        String[] data = getServiceData(friend.email);
-                        if (data != null) {
-                            userDataUpdated = !android.text.TextUtils.equals(data[0], friend.userData);
-                            serviceDataUpdated = !android.text.TextUtils.equals(data[1], friend.appData);
+                        // Check if service data has changed
+                        if (friend.type == FriendsPlugin.FRIEND_TYPE_SERVICE) {
+                            String[] data = getServiceData(friend.email);
+                            if (data != null) {
+                                userDataUpdated = !android.text.TextUtils.equals(data[0], friend.userData);
+                                serviceDataUpdated = !android.text.TextUtils.equals(data[1], friend.appData);
+                            } else {
+                                userDataUpdated = false;
+                                serviceDataUpdated = false;
+                            }
                         } else {
                             userDataUpdated = false;
                             serviceDataUpdated = false;
                         }
-                    } else {
-                        userDataUpdated = false;
-                        serviceDataUpdated = false;
-                    }
 
-                    final String friendDisplayName;
-                    if (!TextUtils.isEmptyOrWhitespace(friend.name)) {
-                        friendDisplayName = friend.name;
-                    } else if (!TextUtils.isEmptyOrWhitespace(friend.qualifiedIdentifier)) {
-                        friendDisplayName = friend.qualifiedIdentifier;
-                    } else {
-                        friendDisplayName = friend.email;
-                    }
-                    mUpdateFriendHTTP.bindString(1, friendDisplayName);
-                    mUpdateFriendHTTP.bindLong(2, friend.avatarId);
-                    mUpdateFriendHTTP.bindLong(3, friend.shareLocation ? 1 : 0);
-                    mUpdateFriendHTTP.bindLong(4, friend.sharesLocation ? 1 : 0);
-                    mUpdateFriendHTTP.bindLong(5, friend.type);
-                    if (friend.description == null)
-                        mUpdateFriendHTTP.bindNull(6);
-                    else
-                        mUpdateFriendHTTP.bindString(6, friend.description);
-
-                    if (TextUtils.isEmptyOrWhitespace(friend.descriptionBranding))
-                        mUpdateFriendHTTP.bindNull(7);
-                    else
-                        mUpdateFriendHTTP.bindString(7, friend.descriptionBranding);
-
-                    if (friend.pokeDescription == null)
-                        mUpdateFriendHTTP.bindNull(8);
-                    else
-                        mUpdateFriendHTTP.bindString(8, friend.pokeDescription);
-
-                    if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.branding))
-                        mUpdateFriendHTTP.bindNull(9);
-                    else
-                        mUpdateFriendHTTP.bindString(9, friend.actionMenu.branding);
-
-                    if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.phoneNumber))
-                        mUpdateFriendHTTP.bindNull(10);
-                    else
-                        mUpdateFriendHTTP.bindString(10, friend.actionMenu.phoneNumber);
-
-                    boolean hasNoShareImageUrl = friend.actionMenu == null
-                        || TextUtils.isEmptyOrWhitespace(friend.actionMenu.shareImageUrl);
-                    mUpdateFriendHTTP.bindLong(11, hasNoShareImageUrl ? 0 : 1);
-
-                    mUpdateFriendHTTP.bindLong(12, friend.generation);
-
-                    if (hasNoShareImageUrl)
-                        mUpdateFriendHTTP.bindNull(13);
-                    else
-                        mUpdateFriendHTTP.bindString(13, friend.actionMenu.shareImageUrl);
-
-                    if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.shareDescription))
-                        mUpdateFriendHTTP.bindNull(14);
-                    else
-                        mUpdateFriendHTTP.bindString(14, friend.actionMenu.shareDescription);
-
-                    if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.shareCaption))
-                        mUpdateFriendHTTP.bindNull(15);
-                    else
-                        mUpdateFriendHTTP.bindString(15, friend.actionMenu.shareCaption);
-
-                    if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.shareLinkUrl))
-                        mUpdateFriendHTTP.bindNull(16);
-                    else
-                        mUpdateFriendHTTP.bindString(16, friend.actionMenu.shareLinkUrl);
-
-                    if (TextUtils.isEmptyOrWhitespace(friend.qualifiedIdentifier))
-                        mUpdateFriendHTTP.bindNull(17);
-                    else
-                        mUpdateFriendHTTP.bindString(17, friend.qualifiedIdentifier);
-
-                    if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.aboutLabel))
-                        mUpdateFriendHTTP.bindNull(18);
-                    else
-                        mUpdateFriendHTTP.bindString(18, friend.actionMenu.aboutLabel);
-
-                    if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.messagesLabel))
-                        mUpdateFriendHTTP.bindNull(19);
-                    else
-                        mUpdateFriendHTTP.bindString(19, friend.actionMenu.messagesLabel);
-
-                    if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.callLabel))
-                        mUpdateFriendHTTP.bindNull(20);
-                    else
-                        mUpdateFriendHTTP.bindString(20, friend.actionMenu.callLabel);
-
-                    if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.shareLabel))
-                        mUpdateFriendHTTP.bindNull(21);
-                    else
-                        mUpdateFriendHTTP.bindString(21, friend.actionMenu.shareLabel);
-
-                    if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.callConfirmation))
-                        mUpdateFriendHTTP.bindNull(22);
-                    else
-                        mUpdateFriendHTTP.bindString(22, friend.actionMenu.callConfirmation);
-
-                    if (TextUtils.isEmptyOrWhitespace(friend.userData))
-                        mUpdateFriendHTTP.bindNull(23);
-                    else
-                        mUpdateFriendHTTP.bindString(23, friend.userData);
-
-                    if (TextUtils.isEmptyOrWhitespace(friend.appData))
-                        mUpdateFriendHTTP.bindNull(24);
-                    else
-                        mUpdateFriendHTTP.bindString(24, friend.appData);
-
-                    if (TextUtils.isEmptyOrWhitespace(friend.category_id))
-                        mUpdateFriendHTTP.bindNull(25);
-                    else
-                        mUpdateFriendHTTP.bindString(25, friend.category_id);
-
-                    if (TextUtils.isEmptyOrWhitespace(friend.broadcastFlowHash))
-                        mUpdateFriendHTTP.bindNull(26);
-                    else
-                        mUpdateFriendHTTP.bindString(26, friend.broadcastFlowHash);
-
-                    mUpdateFriendHTTP.bindLong(27, friend.organizationType);
-                    mUpdateFriendHTTP.bindLong(28, friend.callbacks);
-                    mUpdateFriendHTTP.bindLong(29, friend.flags);
-                    mUpdateFriendHTTP.bindString(30, getStringFromVersions(friend.versions));
-
-                    if (TextUtils.isEmptyOrWhitespace(friend.profileData))
-                        mUpdateFriendHTTP.bindNull(31);
-                    else
-                        mUpdateFriendHTTP.bindString(31, friend.profileData);
-
-                    if (TextUtils.isEmptyOrWhitespace(friend.contentBrandingHash))
-                        mUpdateFriendHTTP.bindNull(32);
-                    else
-                        mUpdateFriendHTTP.bindString(32, friend.contentBrandingHash);
-
-                    bindString(mUpdateFriendHTTP, 33, getActions(friend));
-
-                    // Where clause
-                    mUpdateFriendHTTP.bindString(34, friend.email);
-                    mUpdateFriendHTTP.execute();
-
-                    mFriendNameCache.put(friend.email, friendDisplayName);
-
-                    rebuildServiceMenu(friend, true);
-
-                    TransactionHelper.onTransactionCommitted(new SafeRunnable() {
-
-                        @Override
-                        protected void safeRun() throws Exception {
-                            if (userDataUpdated || serviceDataUpdated) {
-                                broadcastServiceDataUpdated(friend.email, userDataUpdated, serviceDataUpdated);
-                            }
-
-                            downloadAvatar(friend);
+                        final String friendDisplayName;
+                        if (!TextUtils.isEmptyOrWhitespace(friend.name)) {
+                            friendDisplayName = friend.name;
+                        } else if (!TextUtils.isEmptyOrWhitespace(friend.qualifiedIdentifier)) {
+                            friendDisplayName = friend.qualifiedIdentifier;
+                        } else {
+                            friendDisplayName = friend.email;
                         }
-                    });
-                    return response;
-                }
-            });
+                        mUpdateFriendHTTP.bindString(1, friendDisplayName);
+                        mUpdateFriendHTTP.bindLong(2, friend.avatarId);
+                        mUpdateFriendHTTP.bindLong(3, friend.shareLocation ? 1 : 0);
+                        mUpdateFriendHTTP.bindLong(4, friend.sharesLocation ? 1 : 0);
+                        mUpdateFriendHTTP.bindLong(5, friend.type);
+                        if (friend.description == null)
+                            mUpdateFriendHTTP.bindNull(6);
+                        else
+                            mUpdateFriendHTTP.bindString(6, friend.description);
+
+                        if (TextUtils.isEmptyOrWhitespace(friend.descriptionBranding))
+                            mUpdateFriendHTTP.bindNull(7);
+                        else
+                            mUpdateFriendHTTP.bindString(7, friend.descriptionBranding);
+
+                        if (friend.pokeDescription == null)
+                            mUpdateFriendHTTP.bindNull(8);
+                        else
+                            mUpdateFriendHTTP.bindString(8, friend.pokeDescription);
+
+                        if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.branding))
+                            mUpdateFriendHTTP.bindNull(9);
+                        else
+                            mUpdateFriendHTTP.bindString(9, friend.actionMenu.branding);
+
+                        if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.phoneNumber))
+                            mUpdateFriendHTTP.bindNull(10);
+                        else
+                            mUpdateFriendHTTP.bindString(10, friend.actionMenu.phoneNumber);
+
+                        boolean hasNoShareImageUrl = friend.actionMenu == null
+                                || TextUtils.isEmptyOrWhitespace(friend.actionMenu.shareImageUrl);
+                        mUpdateFriendHTTP.bindLong(11, hasNoShareImageUrl ? 0 : 1);
+
+                        mUpdateFriendHTTP.bindLong(12, friend.generation);
+
+                        if (hasNoShareImageUrl)
+                            mUpdateFriendHTTP.bindNull(13);
+                        else
+                            mUpdateFriendHTTP.bindString(13, friend.actionMenu.shareImageUrl);
+
+                        if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.shareDescription))
+                            mUpdateFriendHTTP.bindNull(14);
+                        else
+                            mUpdateFriendHTTP.bindString(14, friend.actionMenu.shareDescription);
+
+                        if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.shareCaption))
+                            mUpdateFriendHTTP.bindNull(15);
+                        else
+                            mUpdateFriendHTTP.bindString(15, friend.actionMenu.shareCaption);
+
+                        if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.shareLinkUrl))
+                            mUpdateFriendHTTP.bindNull(16);
+                        else
+                            mUpdateFriendHTTP.bindString(16, friend.actionMenu.shareLinkUrl);
+
+                        if (TextUtils.isEmptyOrWhitespace(friend.qualifiedIdentifier))
+                            mUpdateFriendHTTP.bindNull(17);
+                        else
+                            mUpdateFriendHTTP.bindString(17, friend.qualifiedIdentifier);
+
+                        if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.aboutLabel))
+                            mUpdateFriendHTTP.bindNull(18);
+                        else
+                            mUpdateFriendHTTP.bindString(18, friend.actionMenu.aboutLabel);
+
+                        if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.messagesLabel))
+                            mUpdateFriendHTTP.bindNull(19);
+                        else
+                            mUpdateFriendHTTP.bindString(19, friend.actionMenu.messagesLabel);
+
+                        if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.callLabel))
+                            mUpdateFriendHTTP.bindNull(20);
+                        else
+                            mUpdateFriendHTTP.bindString(20, friend.actionMenu.callLabel);
+
+                        if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.shareLabel))
+                            mUpdateFriendHTTP.bindNull(21);
+                        else
+                            mUpdateFriendHTTP.bindString(21, friend.actionMenu.shareLabel);
+
+                        if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.callConfirmation))
+                            mUpdateFriendHTTP.bindNull(22);
+                        else
+                            mUpdateFriendHTTP.bindString(22, friend.actionMenu.callConfirmation);
+
+                        if (TextUtils.isEmptyOrWhitespace(friend.userData))
+                            mUpdateFriendHTTP.bindNull(23);
+                        else
+                            mUpdateFriendHTTP.bindString(23, friend.userData);
+
+                        if (TextUtils.isEmptyOrWhitespace(friend.appData))
+                            mUpdateFriendHTTP.bindNull(24);
+                        else
+                            mUpdateFriendHTTP.bindString(24, friend.appData);
+
+                        if (TextUtils.isEmptyOrWhitespace(friend.category_id))
+                            mUpdateFriendHTTP.bindNull(25);
+                        else
+                            mUpdateFriendHTTP.bindString(25, friend.category_id);
+
+                        if (TextUtils.isEmptyOrWhitespace(friend.broadcastFlowHash))
+                            mUpdateFriendHTTP.bindNull(26);
+                        else
+                            mUpdateFriendHTTP.bindString(26, friend.broadcastFlowHash);
+
+                        mUpdateFriendHTTP.bindLong(27, friend.organizationType);
+                        mUpdateFriendHTTP.bindLong(28, friend.callbacks);
+                        mUpdateFriendHTTP.bindLong(29, friend.flags);
+                        mUpdateFriendHTTP.bindString(30, getStringFromVersions(friend.versions));
+
+                        if (TextUtils.isEmptyOrWhitespace(friend.profileData))
+                            mUpdateFriendHTTP.bindNull(31);
+                        else
+                            mUpdateFriendHTTP.bindString(31, friend.profileData);
+
+                        if (TextUtils.isEmptyOrWhitespace(friend.contentBrandingHash))
+                            mUpdateFriendHTTP.bindNull(32);
+                        else
+                            mUpdateFriendHTTP.bindString(32, friend.contentBrandingHash);
+
+                        bindString(mUpdateFriendHTTP, 33, getActions(friend));
+
+                        // Where clause
+                        mUpdateFriendHTTP.bindString(34, friend.email);
+                        mUpdateFriendHTTP.execute();
+
+                        mFriendNameCache.put(friend.email, friendDisplayName);
+
+                        rebuildServiceMenu(friend, true);
+
+                        TransactionHelper.onTransactionCommitted(new SafeRunnable() {
+
+                            @Override
+                            protected void safeRun() throws Exception {
+                                if (userDataUpdated || serviceDataUpdated) {
+                                    broadcastServiceDataUpdated(friend.email, userDataUpdated, serviceDataUpdated);
+                                }
+
+                                downloadAvatar(friend);
+                            }
+                        });
+                        return response;
+                    }
+                });
 
         return response;
     }
@@ -919,7 +920,7 @@ public class FriendStore implements Closeable {
 
     private ServiceMenu getMenuDetails(String email) {
         final Cursor curz = mDb.rawQuery(mMainService.getString(R.string.sql_friend_get_menu_details),
-            new String[] { email });
+                new String[]{email});
         try {
             if (!curz.moveToFirst()) {
                 return null;
@@ -963,6 +964,14 @@ public class FriendStore implements Closeable {
         smi.action = curs.getLong(i++);
         smi.iconName = curs.getString(i++);
         smi.iconColor = curs.getString(i++);
+
+        final String url = curs.getString(i++);
+        final boolean external = curs.getLong(i++) == 1;
+        if (!TextUtils.isEmptyOrWhitespace(url)) {
+            smi.link = new ServiceMenuItemLinkTO();
+            smi.link.url = url;
+            smi.link.external = external;
+        }
         if (!UIUtils.isSupportedFontawesomeIcon(smi.iconName)) {
             smi.icon = curs.getBlob(blobIndex);
         }
@@ -972,10 +981,10 @@ public class FriendStore implements Closeable {
     private void populateMenuItems(String email, ServiceMenu menu, Integer page) {
         final Cursor curs;
         if (page == null) {
-            curs = mDb.rawQuery(mMainService.getString(R.string.sql_friend_get_full_menu), new String[] { email });
+            curs = mDb.rawQuery(mMainService.getString(R.string.sql_friend_get_full_menu), new String[]{email});
         } else {
             curs = mDb
-                .rawQuery(mMainService.getString(R.string.sql_friend_get_menu), new String[] { email, "" + page });
+                    .rawQuery(mMainService.getString(R.string.sql_friend_get_menu), new String[]{email, "" + page});
         }
         try {
             if (!curs.moveToFirst()) {
@@ -1075,7 +1084,7 @@ public class FriendStore implements Closeable {
     public String getStaticFlow(final String staticFlowHash) throws IOException {
         T.UI();
         final Cursor curs = mDb.rawQuery(mMainService.getString(R.string.sql_friend_static_flow_get),
-            new String[] { staticFlowHash });
+                new String[]{staticFlowHash});
 
         try {
             if (!curs.moveToFirst())
@@ -1089,7 +1098,7 @@ public class FriendStore implements Closeable {
 
     public String[] getServiceData(final String email) {
         T.dontCare();
-        final Cursor curs = mDb.rawQuery(mMainService.getString(R.string.sql_friend_data_get), new String[] { email });
+        final Cursor curs = mDb.rawQuery(mMainService.getString(R.string.sql_friend_data_get), new String[]{email});
 
         try {
             if (!curs.moveToFirst())
@@ -1098,7 +1107,7 @@ public class FriendStore implements Closeable {
             String userDataString = curs.getString(0);
             String appDataString = curs.getString(1);
 
-            return new String[] { userDataString, appDataString };
+            return new String[]{userDataString, appDataString};
         } finally {
             curs.close();
         }
@@ -1147,6 +1156,13 @@ public class FriendStore implements Closeable {
             mInsertServiceMenuHTTP.bindLong(12, item.action);
             bindString(mInsertServiceMenuHTTP, 13, item.iconName);
             bindString(mInsertServiceMenuHTTP, 14, item.iconColor);
+            if (item.link == null || TextUtils.isEmptyOrWhitespace(item.link.url)) {
+                mInsertServiceMenuHTTP.bindNull(15);
+                mInsertServiceMenuHTTP.bindLong(16, 0);
+            } else {
+                mInsertServiceMenuHTTP.bindString(15, item.link.url);
+                mInsertServiceMenuHTTP.bindLong(16, item.link.external ? 1 : 0);
+            }
             mInsertServiceMenuHTTP.execute();
 
             if (!UIUtils.isSupportedFontawesomeIcon(item.iconName) && !isMenuIconAvailable(item.iconHash)) {
@@ -1226,7 +1242,7 @@ public class FriendStore implements Closeable {
 
     public Cursor getFriendsByCategoryListCursor(final String categoryId) {
         return mDb.rawQuery(mMainService.getString(R.string.sql_friends_by_category_cursor),
-            new String[] { categoryId });
+                new String[]{categoryId});
     }
 
     public Cursor getServiceFriendListCursor() {
@@ -1238,7 +1254,7 @@ public class FriendStore implements Closeable {
             return getServiceFriendListCursor();
         }
         return mDb.rawQuery(mMainService.getString(R.string.sql_services_get_organization_type),
-            new String[] { organizationType + "" });
+                new String[]{organizationType + ""});
     }
 
     public Cursor getServiceActionsListCursor(String action) {
@@ -1263,7 +1279,7 @@ public class FriendStore implements Closeable {
         SparseIntArray result = new SparseIntArray();
 
         final Cursor cursor = mDb.rawQuery(
-            mMainService.getString(R.string.sql_services_count_grouped_by_organization_type), null);
+                mMainService.getString(R.string.sql_services_count_grouped_by_organization_type), null);
 
         try {
             if (cursor.moveToFirst()) {
@@ -1285,7 +1301,7 @@ public class FriendStore implements Closeable {
         List<String> emails = new ArrayList<String>();
 
         final Cursor cursor = mDb.rawQuery(mMainService.getString(R.string.sql_services_get_organization_type),
-            new String[] { organizationType + "" });
+                new String[]{organizationType + ""});
 
         try {
             if (cursor.moveToFirst()) {
@@ -1375,7 +1391,7 @@ public class FriendStore implements Closeable {
     /**
      * private convenience function to add a friend to the friend table. !! should only be called from a transactional
      * context which also updates the generation. !!
-     * 
+     *
      * @param friend
      * @param existence
      */
@@ -1424,7 +1440,7 @@ public class FriendStore implements Closeable {
             mInsertFriendHTTP.bindString(13, friend.actionMenu.phoneNumber);
 
         boolean hasNoShareImageUrl = friend.actionMenu == null
-            || TextUtils.isEmptyOrWhitespace(friend.actionMenu.shareImageUrl);
+                || TextUtils.isEmptyOrWhitespace(friend.actionMenu.shareImageUrl);
         mInsertFriendHTTP.bindLong(14, hasNoShareImageUrl ? 0 : 1);
 
         mInsertFriendHTTP.bindLong(15, friend.generation);
@@ -1651,7 +1667,7 @@ public class FriendStore implements Closeable {
     }
 
     public long insertServiceApiCall(final String service, final String item, final String method, final String tag,
-        final long status) {
+                                     final long status) {
         T.BIZZ();
         int i = 1;
         mServiceApiCallInsertHTTP.bindString(i++, service);
@@ -1663,46 +1679,46 @@ public class FriendStore implements Closeable {
     }
 
     public ServiceApiCallbackResult setServiceApiCallResult(final long id, final String error, final String result,
-        final long status) {
+                                                            final long status) {
         T.BIZZ();
         return TransactionHelper.runInTransaction(mDb, "setServiceApiCallResult",
-            new Transaction<ServiceApiCallbackResult>() {
+                new Transaction<ServiceApiCallbackResult>() {
 
-                @Override
-                protected ServiceApiCallbackResult run() {
-                    ServiceApiCallbackResult r;
-                    final Cursor curs = mDb.rawQuery(mMainService.getString(R.string.sql_service_api_call_get_by_id),
-                        new String[] { Long.toString(id) });
-                    try {
-                        if (!curs.moveToFirst())
-                            return null;
-                        int i = 0;
-                        final String service = curs.getString(i++);
-                        final String item = curs.getString(i++);
-                        final String method = curs.getString(i++);
-                        final String tag = curs.getString(i++);
-                        r = new ServiceApiCallbackResult(id, service, item, method, result, error, tag);
-                    } finally {
-                        curs.close();
-                    }
+                    @Override
+                    protected ServiceApiCallbackResult run() {
+                        ServiceApiCallbackResult r;
+                        final Cursor curs = mDb.rawQuery(mMainService.getString(R.string.sql_service_api_call_get_by_id),
+                                new String[]{Long.toString(id)});
+                        try {
+                            if (!curs.moveToFirst())
+                                return null;
+                            int i = 0;
+                            final String service = curs.getString(i++);
+                            final String item = curs.getString(i++);
+                            final String method = curs.getString(i++);
+                            final String tag = curs.getString(i++);
+                            r = new ServiceApiCallbackResult(id, service, item, method, result, error, tag);
+                        } finally {
+                            curs.close();
+                        }
 
-                    int i = 1;
-                    if (result == null) {
-                        mServiceApiCallSetResultHTTP.bindNull(i++);
-                    } else {
-                        mServiceApiCallSetResultHTTP.bindString(i++, result);
+                        int i = 1;
+                        if (result == null) {
+                            mServiceApiCallSetResultHTTP.bindNull(i++);
+                        } else {
+                            mServiceApiCallSetResultHTTP.bindString(i++, result);
+                        }
+                        if (error == null) {
+                            mServiceApiCallSetResultHTTP.bindNull(i++);
+                        } else {
+                            mServiceApiCallSetResultHTTP.bindString(i++, error);
+                        }
+                        mServiceApiCallSetResultHTTP.bindLong(i++, status);
+                        mServiceApiCallSetResultHTTP.bindLong(i++, id);
+                        mServiceApiCallSetResultHTTP.execute();
+                        return r;
                     }
-                    if (error == null) {
-                        mServiceApiCallSetResultHTTP.bindNull(i++);
-                    } else {
-                        mServiceApiCallSetResultHTTP.bindString(i++, error);
-                    }
-                    mServiceApiCallSetResultHTTP.bindLong(i++, status);
-                    mServiceApiCallSetResultHTTP.bindLong(i++, id);
-                    mServiceApiCallSetResultHTTP.execute();
-                    return r;
-                }
-            });
+                });
     }
 
     public List<ServiceApiCallbackResult> getServiceApiCallbackResultsByItem(final String service, final String item) {
@@ -1710,7 +1726,7 @@ public class FriendStore implements Closeable {
         List<ServiceApiCallbackResult> results = new ArrayList<ServiceApiCallbackResult>();
 
         final Cursor cursor = mDb.rawQuery(mMainService.getString(R.string.sql_service_api_call_get_results),
-            new String[] { service, item });
+                new String[]{service, item});
         try {
             if (cursor.moveToFirst()) {
                 do {
@@ -1759,7 +1775,7 @@ public class FriendStore implements Closeable {
     }
 
     public void updateServiceData(String serviceEmail, String userDataJsonString, String appDataJsonString,
-        boolean mustBroadcastIntent) {
+                                  boolean mustBroadcastIntent) {
         T.BIZZ();
         final boolean userDataUpdated = userDataJsonString != null;
         final boolean appDataUpdated = appDataJsonString != null;
@@ -1783,7 +1799,7 @@ public class FriendStore implements Closeable {
     }
 
     private void broadcastServiceDataUpdated(final String email, final boolean userDataUpdated,
-        final boolean serviceDataUpdated) {
+                                             final boolean serviceDataUpdated) {
         Intent intent = new Intent(FriendsPlugin.SERVICE_DATA_UPDATED);
         intent.putExtra("email", email);
         intent.putExtra("user_data", userDataUpdated);
@@ -1793,7 +1809,7 @@ public class FriendStore implements Closeable {
 
     public ServiceMenuItemDetails getBroadcastServiceMenuItem(String email) {
         final Cursor cursor = mDb.rawQuery(mMainService.getString(R.string.sql_friend_get_broadcast_flow_for_mfr),
-            new String[] { email });
+                new String[]{email});
         try {
             if (!cursor.moveToFirst()) {
                 return null;
@@ -1941,7 +1957,7 @@ public class FriendStore implements Closeable {
     }
 
     public Cursor getGroupMemberListCursor(String guid) {
-        return mDb.rawQuery(mMainService.getString(R.string.sql_group_member_list_group), new String[] { guid });
+        return mDb.rawQuery(mMainService.getString(R.string.sql_group_member_list_group), new String[]{guid});
     }
 
     public Friend readGroupMemberFromCursor(Cursor cursor) {
@@ -1955,7 +1971,7 @@ public class FriendStore implements Closeable {
     public Group getGroup(String guid) {
         T.UI();
         Group g = null;
-        final Cursor cursor = mDb.rawQuery(mMainService.getString(R.string.sql_get_group), new String[] { guid });
+        final Cursor cursor = mDb.rawQuery(mMainService.getString(R.string.sql_get_group), new String[]{guid});
 
         try {
             if (cursor.moveToFirst()) {
