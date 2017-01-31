@@ -358,7 +358,8 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
         }
 
         if (Message.MC_CONFIRM_PREFIX.equals(buttonAction)) {
-            // The action is unknown or the confirmation is already asked
+            // The confirmation is already asked
+            poked();
             return;
         }
 
