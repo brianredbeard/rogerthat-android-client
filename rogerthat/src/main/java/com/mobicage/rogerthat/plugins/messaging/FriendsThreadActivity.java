@@ -36,6 +36,7 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.AppCompatButton;
+import android.text.method.LinkMovementMethod;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -45,6 +46,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.ImageView;
@@ -92,6 +94,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import in.uncod.android.bypass.Bypass;
 import thirdparty.nishantnair.FlowLayout;
 import thirdparty.nishantnair.FlowLayoutRTL;
 
@@ -101,6 +104,8 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
     public static final String MESSAGE_FLAGS = "message_flags";
 
     private final static String HINT_SWIPE = "com.mobicage.rogerthat.plugins.messaging.FriendsThreadActivity.HINT_SWIPE";
+
+
 
     private boolean mScrollToBottomOnUpdate = false;
     private String mParentMessageKey;
@@ -116,6 +121,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
     private Set<String> mRenderedMessages;
 
     private SendMessageView mSendMessageView;
+    private InputMethodManager InputMethodManager;
     private Map<String, MessageMemberStatus> memberStatusTOMap = new HashMap<>();
 
     private int _1_DP_IN_PX;
@@ -203,6 +209,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         scrollToBeAckedPosition(getCursor());
 
         String memberFilter = getIntent().getStringExtra(MessagingPlugin.MEMBER_FILTER);
+        InputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         Slider instance = new Slider(this, this,
             new LeftSwiper(this, mMessagingPlugin, mParentMessageKey, memberFilter), new RightSwiper(this,
                 mMessagingPlugin, mParentMessageKey, memberFilter));
@@ -210,7 +217,9 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             @Override
             public boolean onDoubleTap(MotionEvent event) {
                 if (mSendMessageView.getVisibility() == View.VISIBLE) {
-                    mSendMessageView.showKeyboard();
+                    if (InputMethodManager != null){
+                        mSendMessageView.showKeyboard();
+                    }
                 }
                 return true;
             }
@@ -241,7 +250,9 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
     @Override
     protected void onServiceUnbound() {
         mSendMessageView.hideKeyboard();
+
     }
+
 
     @Override
     protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
@@ -754,8 +765,11 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             if (message.message == null || "".equals(message.message)) {
                 messageView.setVisibility(View.GONE);
             } else {
+                Bypass bypass = new Bypass();
+                CharSequence string = bypass.markdownToSpannable(message.message);
                 messageView.setVisibility(View.VISIBLE);
-                messageView.setText(message.message);
+                messageView.setText(string);
+                messageView.setMovementMethod(LinkMovementMethod.getInstance());
             }
         }
 

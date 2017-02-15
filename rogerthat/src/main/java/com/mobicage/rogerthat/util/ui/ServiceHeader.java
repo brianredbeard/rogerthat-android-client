@@ -20,6 +20,7 @@ package com.mobicage.rogerthat.util.ui;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.text.method.LinkMovementMethod;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -30,6 +31,8 @@ import android.widget.TextView;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.util.TextUtils;
+
+import in.uncod.android.bypass.Bypass;
 
 import static com.mobicage.rogerthat.util.ui.ImageHelper.getRoundedCornerAvatar;
 
@@ -53,7 +56,10 @@ public class ServiceHeader {
             messageView.setVisibility(View.GONE);
         } else {
             messageView.setVisibility(View.VISIBLE);
-            messageView.setText(brandingResult.message);
+            Bypass bypass = new Bypass();
+            CharSequence string = bypass.markdownToSpannable(brandingResult.message);
+            messageView.setText(string);
+            messageView.setMovementMethod(LinkMovementMethod.getInstance());
         }
         logoImage.setVisibility(View.VISIBLE);
         logoImage.setImageBitmap(logo);

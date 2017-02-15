@@ -33,6 +33,7 @@ import android.support.v4.util.LongSparseArray;
 import android.support.v7.widget.RecyclerView;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.method.LinkMovementMethod;
 import android.text.style.StyleSpan;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -83,6 +84,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import in.uncod.android.bypass.Bypass;
 
 public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHolder> {
 
@@ -520,7 +523,10 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 mReadmore.setVisibility(View.GONE);
             } else {
                 mText.setVisibility(View.VISIBLE);
-                mText.setText(mNewsItem.message);
+                Bypass bypass = new Bypass();
+                CharSequence string = bypass.markdownToSpannable(mNewsItem.message);
+                mText.setText(string);
+                mText.setMovementMethod(LinkMovementMethod.getInstance());
                 mMainService.postOnUIHandler(new SafeRunnable() {
                     @Override
                     protected void safeRun() throws Exception {

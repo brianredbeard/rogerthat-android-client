@@ -287,7 +287,7 @@ public class UIUtils {
         if (imm == null)
             L.d("No input method manager");
         else
-            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+            imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
     }
 
     // Based on

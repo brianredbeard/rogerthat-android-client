@@ -35,6 +35,7 @@ import android.os.Environment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.AppCompatButton;
+import android.text.method.LinkMovementMethod;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -104,6 +105,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeSet;
 
+import in.uncod.android.bypass.Bypass;
 import thirdparty.nishantnair.FlowLayout;
 
 public class ServiceMessageDetailActivity extends ServiceBoundActivity {
@@ -411,7 +413,10 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
             messageView.setVisibility(View.GONE);
         } else {
             messageView.setVisibility(View.VISIBLE);
-            messageView.setText(mCurrentMessage.message);
+            Bypass bypass = new Bypass();
+            CharSequence string = bypass.markdownToSpannable(mCurrentMessage.message);
+            messageView.setText(string);
+            messageView.setMovementMethod(LinkMovementMethod.getInstance());
             web.setVisibility(View.GONE);
         }
 
