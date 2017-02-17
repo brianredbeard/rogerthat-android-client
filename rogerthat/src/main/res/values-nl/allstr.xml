@@ -132,7 +132,7 @@
     <string name="enter_pin_to_sign">Gelieve uw pincode in te geven om de bijgevoegde document(en) te ondertekenen.</string>
     <string name="enter_search_query">Geef een zoekopdracht in</string>
     <string name="error_find_from_addressbook">Adresboek kon niet gescand worden. Probeer het later opnieuw.</string>
-    <string name="error_find_from_facebook">Facebook vrienden konden niet gevonden worden. Probeer het later opnieuw.</string>
+    <string name="error_find_from_facebook">Facebook vrienden voor %1$s konden niet gevonden worden. Probeer het later opnieuw.</string>
     <string name="error_load_facebook_friends">Een fout is opgetreden tijdens het laden van jouw Facebook vrienden.</string>
     <string name="error_please_try_again">Er is een fout opgetreden. Gelieve opnieuw te proberen.</string>
     <string name="error_recommend_on_fb">Er is een fout opgetreden tijdens het inlogging in je Facebook account. Probeer opnieuw.</string>
@@ -283,9 +283,9 @@
     <string name="new_message_long">Nieuw bericht schrijven</string>
     <string name="new_message_short">Nieuw bericht</string>
     <string name="news">Nieuws</string>
-    <string name="news_members_1">%1$s heeft dit bericht gerogerd</string>
-    <string name="news_members_and_x_others">%1$s en %2$s anderen hebben dit bericht gerogerd.</string>
-    <string name="news_members_x">%1$s hebben dit bericht gerogerd.</string>
+    <string name="news_members_1">%1$s vindt dit bericht leuk.</string>
+    <string name="news_members_and_x_others">%1$s en %2$s anderen vinden dit bericht leuk.</string>
+    <string name="news_members_x">%1$s vinden dit bericht leuk.</string>
     <string name="nextButton">Volgende</string>
     <string name="next_in_thread">Nieuwere berichten in deze conversatie</string>
     <string name="no">Nee</string>

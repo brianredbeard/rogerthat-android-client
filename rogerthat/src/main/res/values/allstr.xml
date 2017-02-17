@@ -283,9 +283,9 @@
     <string name="new_message_long">Compose new message</string>
     <string name="new_message_short">New message</string>
     <string name="news">News</string>
-    <string name="news_members_1">%1$s Rogered this message.</string>
-    <string name="news_members_and_x_others">%1$s and %2$s others Rogered this message.</string>
-    <string name="news_members_x">%1$s Rogered this message.</string>
+    <string name="news_members_1">%1$s liked this message.</string>
+    <string name="news_members_and_x_others">%1$s and %2$s others liked this message.</string>
+    <string name="news_members_x">%1$s liked this message.</string>
     <string name="nextButton">Next</string>
     <string name="next_in_thread">Next messages in this conversation</string>
     <string name="no">No</string>

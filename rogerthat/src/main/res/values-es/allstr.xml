@@ -46,7 +46,7 @@
     <string name="add_via_facebook_notification">Resultado de la búsqueda de contactos de Facebook mediante %1$s.</string>
     <string name="add_via_facebook_waiting">Recibirás una notificación cuando tus contactos de Facebook sean comprobados.</string>
     <string name="address">Dirección</string>
-    <string name="agenda">Eventos</string>
+    <string name="agenda">Agenda</string>
     <string name="alarm_sound">Tono de alarma</string>
     <string name="alarm_sound_custom">Personalizado</string>
     <string name="alarm_sound_default">Sonido por defecto</string>
@@ -283,9 +283,9 @@
     <string name="new_message_long">Crear mensaje nuevo</string>
     <string name="new_message_short">Mensaje nuevo</string>
     <string name="news">Noticias</string>
-    <string name="news_members_1">%1$s ha entendido este mensaje.</string>
-    <string name="news_members_and_x_others">%1$s y %2$s otros han entendido este mensaje.</string>
-    <string name="news_members_x">%1$s ha entendido este mensaje.</string>
+    <string name="news_members_1">%1$s le gusta este mensaje.</string>
+    <string name="news_members_and_x_others">%1$s y %2$s les gusta este mensaje.</string>
+    <string name="news_members_x">%1$s les gusta este mensaje.</string>
     <string name="nextButton">Siguiente</string>
     <string name="next_in_thread">Mensajes siguientes en esta conversación</string>
     <string name="no">No</string>
