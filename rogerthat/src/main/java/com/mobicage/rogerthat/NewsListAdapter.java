@@ -746,7 +746,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 currentButton++;
                 final Button rogerthatButton = (Button) mLayoutInflater.inflate(R.layout.news_list_item_action, mActions, false);
                 mActions.addView(rogerthatButton);
-                rogerthatButton.setText(mActivity.getString(R.string.rogerthat));
+                rogerthatButton.setText(mActivity.getString(R.string.like));
 
                 final GradientDrawable background = new GradientDrawable();
                 background.setCornerRadii(getCorners(totalButtonCount, currentButton));
