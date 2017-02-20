@@ -282,7 +282,7 @@
     <string name="news">Nouvelles</string>
     <string name="news_members_1">%1$s a aimé ce message.</string>
     <string name="news_members_and_x_others">%1$s et %2$s autres aimé ce message.</string>
-    <string name="news_members_x">%1$s aimé ce message.</string>
+    <string name="news_members_x">%1$s ont aimé ce message.</string>
     <string name="nextButton">Suivant</string>
     <string name="next_in_thread">Messages suivants dans cette conversation</string>
     <string name="no">Non</string>
