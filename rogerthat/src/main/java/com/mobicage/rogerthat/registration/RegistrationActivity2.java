@@ -20,7 +20,6 @@ package com.mobicage.rogerthat.registration;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -51,6 +50,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -59,6 +59,8 @@ import android.widget.ViewFlipper;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.login.LoginResult;
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.Installation;
 import com.mobicage.rogerthat.MainService;
@@ -86,6 +88,7 @@ import com.mobicage.rogerthat.util.ui.Wizard;
 import com.mobicage.rpc.Credentials;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
+import com.mobicage.rpc.config.LookAndFeelConstants;
 import com.mobicage.to.beacon.BeaconRegionTO;
 
 import org.altbeacon.beacon.Beacon;
@@ -123,6 +126,7 @@ import java.util.UUID;
 
 import javax.net.ssl.SSLException;
 
+// TODO: this class still has lots of duplicated code
 
 public class RegistrationActivity2 extends AbstractRegistrationActivity {
 
@@ -262,14 +266,11 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
     }
 
     private void popupRegisterFirst(Uri uri) {
-        String invitorName = uri.getQueryParameter("u");
-        if (invitorName != null)
-            invitorName = invitorName.replaceAll("\\+", " ");
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(getString(R.string.friend_invitation_register_first, invitorName));
-        builder.setPositiveButton(R.string.rogerthat, null);
-        builder.create().show();
+        String userName = uri.getQueryParameter("u");
+        if (userName != null)
+            userName = userName.replaceAll("\\+", " ");
+        String message = getString(R.string.friend_invitation_register_first, userName);
+        UIUtils.showDialog(this, null, message);
     }
 
     private void showNotification() {
@@ -384,11 +385,8 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                         if (loginResult.getAccessToken().getPermissions().contains("email")) {
                             registerWithAccessToken(loginResult.getAccessToken().getToken());
                         } else {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(RegistrationActivity2.this);
-                            builder.setMessage(R.string.facebook_registration_email_missing);
-                            builder.setPositiveButton(R.string.rogerthat, null);
-                            AlertDialog dialog = builder.create();
-                            dialog.show();
+                            String message = getString(R.string.facebook_registration_email_missing);
+                            UIUtils.showDialog(RegistrationActivity2.this, null, message);
                         }
                     }
 
@@ -399,11 +397,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                     @Override
                     public void onError(FacebookException error) {
                         L.bug("Facebook SDK error during registration", error);
-                        AlertDialog.Builder builder = new AlertDialog.Builder(RegistrationActivity2.this);
-                        builder.setMessage(R.string.error_please_try_again);
-                        builder.setPositiveButton(R.string.rogerthat, null);
-                        AlertDialog dialog = builder.create();
-                        dialog.show();
+                        UIUtils.showErrorPleaseRetryDialog(RegistrationActivity2.this);
                     }
                 };
 
@@ -490,6 +484,11 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                 }
             });
         }
+
+        // Colours
+        int primaryIconColor = LookAndFeelConstants.getPrimaryColor(this);
+        ((ImageView) findViewById(R.id.ibeacon_usage_icon)).setImageDrawable(new IconicsDrawable(mService,
+                FontAwesome.Icon.faw_compass).color(primaryIconColor).sizeDp(75));
     }
 
     private void initLocationUsageStep() {
@@ -550,22 +549,15 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
         final String deviceId = mWiz.getDeviceId();
         final String registrationId = mWiz.getRegistrationId();
         final String installId = mWiz.getInstallationId();
-        // Make call to Rogerthat webfarm
-        final ProgressDialog progressDialog = new ProgressDialog(RegistrationActivity2.this);
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        progressDialog.setMessage(getString(R.string.registration_activating_account, getString(R.string.app_name)));
-        progressDialog.setCancelable(false);
-        progressDialog.show();
+        // Make call to Rogerthat
+        String message = getString(R.string.registration_activating_account, getString(R.string.app_name));
+        final ProgressDialog progressDialog = showProgressDialog(message);
         final SafeRunnable showErrorDialog = new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
                 T.UI();
                 progressDialog.dismiss();
-                AlertDialog.Builder builder = new AlertDialog.Builder(RegistrationActivity2.this);
-                builder.setMessage(R.string.registration_facebook_error);
-                builder.setPositiveButton(R.string.rogerthat, null);
-                AlertDialog dialog = builder.create();
-                dialog.show();
+                UIUtils.showDialog(RegistrationActivity2.this, null, R.string.registration_facebook_error);
             }
         };
 
@@ -620,12 +612,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                                     protected void safeRun() throws Exception {
                                         T.UI();
                                         progressDialog.dismiss();
-                                        AlertDialog.Builder builder = new AlertDialog.Builder(
-                                                RegistrationActivity2.this);
-                                        builder.setMessage(errorMessage);
-                                        builder.setPositiveButton(R.string.rogerthat, null);
-                                        AlertDialog dialog = builder.create();
-                                        dialog.show();
+                                        UIUtils.showDialog(RegistrationActivity2.this, null, errorMessage);
                                     }
                                 });
                                 return;
@@ -663,27 +650,23 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
         });
     }
 
+    private ProgressDialog showProgressDialog(String message) {
+        return UIUtils.showProgressDialog(RegistrationActivity2.this, null, message, true, false);
+    }
+
     private void getOauthRegistrationInfo() {
         final String timestamp = "" + mWiz.getTimestamp();
         final String deviceId = mWiz.getDeviceId();
         final String registrationId = mWiz.getRegistrationId();
         final String installId = mWiz.getInstallationId();
-        // Make call to Rogerthat webfarm
-        final ProgressDialog progressDialog = new ProgressDialog(RegistrationActivity2.this);
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        progressDialog.setMessage(getString(R.string.loading));
-        progressDialog.setCancelable(false);
-        progressDialog.show();
+        // Make call to Rogerthat
+        final ProgressDialog progressDialog = showProgressDialog(getString(R.string.loading));
         final SafeRunnable showErrorDialog = new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
                 T.UI();
                 progressDialog.dismiss();
-                AlertDialog.Builder builder = new AlertDialog.Builder(RegistrationActivity2.this);
-                builder.setMessage(R.string.registration_error);
-                builder.setPositiveButton(R.string.rogerthat, null);
-                AlertDialog dialog = builder.create();
-                dialog.show();
+                UIUtils.showDialog(RegistrationActivity2.this, null, R.string.registration_error);
             }
         };
 
@@ -737,12 +720,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                                     protected void safeRun() throws Exception {
                                         T.UI();
                                         progressDialog.dismiss();
-                                        AlertDialog.Builder builder = new AlertDialog.Builder(
-                                                RegistrationActivity2.this);
-                                        builder.setMessage(errorMessage);
-                                        builder.setPositiveButton(R.string.rogerthat, null);
-                                        AlertDialog dialog = builder.create();
-                                        dialog.show();
+                                        UIUtils.showDialog(RegistrationActivity2.this, null, errorMessage);
                                     }
                                 });
                                 return;
@@ -781,22 +759,14 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
         final String deviceId = mWiz.getDeviceId();
         final String registrationId = mWiz.getRegistrationId();
         final String installId = mWiz.getInstallationId();
-        // Make call to Rogerthat webfarm
-        final ProgressDialog progressDialog = new ProgressDialog(RegistrationActivity2.this);
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        progressDialog.setMessage(getString(R.string.loading));
-        progressDialog.setCancelable(false);
-        progressDialog.show();
+        // Make call to Rogerthat
+        final ProgressDialog progressDialog = showProgressDialog(getString(R.string.loading));
         final SafeRunnable showErrorDialog = new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
                 T.UI();
                 progressDialog.dismiss();
-                AlertDialog.Builder builder = new AlertDialog.Builder(RegistrationActivity2.this);
-                builder.setMessage(R.string.registration_error);
-                builder.setPositiveButton(R.string.rogerthat, null);
-                AlertDialog dialog = builder.create();
-                dialog.show();
+                UIUtils.showDialog(RegistrationActivity2.this, null, R.string.registration_error);
             }
         };
 
@@ -852,12 +822,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                                     protected void safeRun() throws Exception {
                                         T.UI();
                                         progressDialog.dismiss();
-                                        AlertDialog.Builder builder = new AlertDialog.Builder(
-                                                RegistrationActivity2.this);
-                                        builder.setMessage(errorMessage);
-                                        builder.setPositiveButton(R.string.rogerthat, null);
-                                        AlertDialog dialog = builder.create();
-                                        dialog.show();
+                                        UIUtils.showDialog(RegistrationActivity2.this, null, errorMessage);
                                     }
                                 });
                                 return;
@@ -969,10 +934,9 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                 if (data.getBooleanExtra(OauthActivity.RESULT_SUCCESS, false)) {
                     registerWithOauthCode(data.getStringExtra(OauthActivity.RESULT_CODE), data.getStringExtra(OauthActivity.RESULT_STATE));
                 } else {
-                    final AlertDialog.Builder builder = new AlertDialog.Builder(RegistrationActivity2.this);
-                    builder.setMessage(data.getStringExtra(OauthActivity.RESULT_ERROR_MESSAGE));
-                    builder.setPositiveButton(R.string.rogerthat, null);
-                    builder.create().show();
+                    String message = data.getStringExtra(OauthActivity.RESULT_ERROR_MESSAGE);
+                    UIUtils.showDialog(this, null, message);
+
                 }
             }
         }
@@ -983,29 +947,18 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
         final String pin = mEnterPinEditText.getText().toString();
         // Validate pin code
         if (!RegexPatterns.PIN.matcher(pin).matches()) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(RegistrationActivity2.this);
-            builder.setMessage(R.string.registration_invalid_pin);
-            builder.setPositiveButton(R.string.rogerthat, null);
-            AlertDialog dialog = builder.create();
-            dialog.show();
+            UIUtils.showDialog(this, null, R.string.registration_invalid_pin);
             return;
         }
-        // Make call to Rogerthat webfarm
-        final ProgressDialog progressDialog = new ProgressDialog(RegistrationActivity2.this);
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        progressDialog.setMessage(getString(R.string.registration_activating_account, getString(R.string.app_name)));
-        progressDialog.setCancelable(false);
-        progressDialog.show();
+        // Make call to Rogerthat
+        final String message = getString(R.string.registration_activating_account, getString(R.string.app_name));
+        final ProgressDialog progressDialog = showProgressDialog(message);
         final SafeRunnable showErrorDialog = new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
                 T.UI();
                 progressDialog.dismiss();
-                AlertDialog.Builder builder = new AlertDialog.Builder(RegistrationActivity2.this);
-                builder.setMessage(R.string.registration_sending_pin_error);
-                builder.setPositiveButton(R.string.rogerthat, null);
-                AlertDialog dialog = builder.create();
-                dialog.show();
+                UIUtils.showDialog(RegistrationActivity2.this, null, R.string.registration_sending_pin_error);
             }
         };
         final String email = mWiz.getEmail();
@@ -1078,22 +1031,17 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                                 T.UI();
                                 progressDialog.dismiss();
                                 if (attempts_left > 0) {
-                                    AlertDialog.Builder builder = new AlertDialog.Builder(RegistrationActivity2.this);
-                                    builder.setMessage(getString(R.string.registration_incorrect_pin, email));
-                                    builder.setTitle(getString(R.string.registration_incorrect_pin_dialog_title));
-                                    builder.setPositiveButton(R.string.rogerthat, null);
-                                    AlertDialog dialog = builder.create();
-                                    dialog.show();
+                                    String title = getString(R.string.registration_incorrect_pin_dialog_title);
+                                    String message = getString(R.string.registration_incorrect_pin, email);
+                                    UIUtils.showDialog(RegistrationActivity2.this, title, message);
                                     mEnterPinEditText.setText("");
                                 } else {
                                     hideNotification();
-                                    new AlertDialog.Builder(RegistrationActivity2.this)
-                                            .setMessage(getString(R.string.registration_no_attempts_left))
-                                            .setCancelable(true).setPositiveButton(R.string.try_again, null).create()
-                                            .show();
+                                    String message = getString(R.string.registration_no_attempts_left);
+                                    String positiveCaption = getString(R.string.try_again);
+                                    UIUtils.showDialog(RegistrationActivity2.this, null, message, positiveCaption, null, null, null);
                                     mWiz.reInit();
                                     mWiz.goBackToPrevious();
-                                    return;
                                 }
                             }
                         });
@@ -1113,11 +1061,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
 
         // Validate input
         if (!RegexPatterns.EMAIL.matcher(email).matches()) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(RegistrationActivity2.this);
-            builder.setMessage(R.string.registration_email_not_valid);
-            builder.setPositiveButton(R.string.rogerthat, null);
-            AlertDialog dialog = builder.create();
-            dialog.show();
+            UIUtils.showDialog(RegistrationActivity2.this, null, R.string.registration_email_not_valid);
             return;
         }
         // Check network connectivity
@@ -1328,21 +1272,13 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
     }
 
     private void sendRegistrationRequest(final String email) {
-        final ProgressDialog progressDialog = new ProgressDialog(RegistrationActivity2.this);
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        progressDialog.setMessage(getString(R.string.registration_sending_email, email));
-        progressDialog.setCancelable(true);
-        progressDialog.show();
+        final ProgressDialog progressDialog = showProgressDialog(getString(R.string.registration_sending_email, email));
         final SafeRunnable showErrorDialog = new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
                 T.UI();
                 progressDialog.dismiss();
-                AlertDialog.Builder builder = new AlertDialog.Builder(RegistrationActivity2.this);
-                builder.setMessage(R.string.error_please_try_again);
-                builder.setPositiveButton(R.string.rogerthat, null);
-                AlertDialog dialog = builder.create();
-                dialog.show();
+                UIUtils.showErrorPleaseRetryDialog(RegistrationActivity2.this);
             }
         };
         final String timestamp = "" + mWiz.getTimestamp();
@@ -1397,9 +1333,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                             protected void safeRun() throws Exception {
                                 T.UI();
                                 progressDialog.dismiss();
-                                AlertDialog.Builder builder = new AlertDialog.Builder(RegistrationActivity2.this);
-
-                                boolean stringSet = false;
+                                String message = null;
                                 if (entity != null) {
                                     @SuppressWarnings("unchecked")
                                     final Map<String, Object> responseMap = (Map<String, Object>) org.json.simple
@@ -1409,19 +1343,15 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                                     if (responseMap != null) {
                                         String result = (String) responseMap.get("result");
                                         if (result != null) {
-                                            builder.setMessage(result);
-                                            stringSet = true;
+                                            message = result;
                                         }
                                     }
                                 }
 
-                                if (!stringSet) {
-                                    builder.setMessage(R.string.registration_email_not_valid);
+                                if (message == null) {
+                                    message = getString(R.string.registration_email_not_valid);
                                 }
-
-                                builder.setPositiveButton(R.string.rogerthat, null);
-                                AlertDialog dialog = builder.create();
-                                dialog.show();
+                                UIUtils.showDialog(RegistrationActivity2.this, null, message);
                             }
                         });
                     } else {

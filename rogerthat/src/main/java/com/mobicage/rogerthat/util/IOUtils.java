@@ -23,6 +23,8 @@ import android.os.Build;
 import android.os.Environment;
 
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.plugins.messaging.BrandingFailureException;
+import com.mobicage.rogerthat.util.system.T;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -57,6 +59,22 @@ public class IOUtils {
 
     public static boolean shouldCheckExternalStorageAvailable() {
         return Build.VERSION.SDK_INT < Build.VERSION_CODES.M;
+    }
+
+    public static void createDirIfNotExists(Context context, File file) throws IOException {
+        T.dontCare();
+        if (!file.exists()) {
+            if (!file.mkdirs())
+                throw new IOException(context.getString(R.string.failed_to_create_directory, file.getAbsolutePath()));
+        }
+    }
+
+    public static void createDirIfNotExistsBranding(Context context, File file) throws BrandingFailureException {
+        T.dontCare();
+        if (!file.exists()) {
+            if (!file.mkdirs())
+                throw new BrandingFailureException(context.getString(R.string.failed_to_create_directory, file.getAbsolutePath()));
+        }
     }
 
     public static void deleteRecursive(File fileOrDirectory) {

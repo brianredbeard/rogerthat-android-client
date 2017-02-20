@@ -17,15 +17,12 @@
  */
 package com.mobicage.rogerthat;
 
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -50,7 +47,6 @@ import com.mobicage.rogerthat.plugins.news.NewsStore;
 import com.mobicage.rogerthat.plugins.scan.GetUserInfoResponseHandler;
 import com.mobicage.rogerthat.plugins.scan.ProcessScanActivity;
 import com.mobicage.rogerthat.util.CachedDownloader;
-import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.net.NetworkConnectivityManager;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
@@ -59,6 +55,7 @@ import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.TestUtils;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.IncompleteMessageException;
+import com.mobicage.rpc.config.LookAndFeelConstants;
 import com.mobicage.to.friends.GetUserInfoRequestTO;
 import com.mobicage.to.friends.GetUserInfoResponseTO;
 import com.mobicage.to.news.NewsInfoTO;
@@ -86,7 +83,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
 
     private boolean mIsConnectedToInternet = false;
 
-    protected ProgressDialog progressDialog;
+    protected ProgressDialog mProgressDialog;
 
     private Set<Long> mNewNewsItems = new HashSet<>();
     private long mIdToShowAtTop = -1;
@@ -102,11 +99,9 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.news);
-
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage(getString(R.string.loading));
-        progressDialog.setIndeterminate(true);
-        progressDialog.setCancelable(true);
+        String message = getString(R.string.loading);
+        mProgressDialog = UIUtils.showProgressDialog(this, null, message, true, true, null, ProgressDialog
+                .STYLE_SPINNER, false);
 
         swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -119,7 +114,8 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
             }
         });
 
-        swipeContainer.setColorSchemeResources(R.color.mc_primary_color, R.color.mc_secondary_color);
+        swipeContainer.setColorSchemeColors(LookAndFeelConstants.getPrimaryColor(this), LookAndFeelConstants
+                .getPrimaryIconColor(this));
 
         Intent i = getIntent();
         mIdToShowAtTop = i.getLongExtra("id", -1);
@@ -227,7 +223,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
 
     private void processFriendInfoReceived(Intent intent) {
         if (expectedEmailHash != null && expectedEmailHash.equals(intent.getStringExtra(ProcessScanActivity.EMAILHASH))) {
-            progressDialog.dismiss();
+            mProgressDialog.dismiss();
 
             if (intent.getBooleanExtra(ProcessScanActivity.SUCCESS, true)) {
                 Intent launchIntent = new Intent(NewsActivity.this, ServiceDetailActivity.class);
@@ -249,7 +245,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
                 launchIntent.putExtra(ServiceDetailActivity.GET_USER_INFO_RESULT, JSONValue.toJSONString(item.toJSONMap()));
                 startActivity(launchIntent);
             } else {
-                showError(intent);
+                UIUtils.showErrorDialog(this, intent);
             }
         }
     }
@@ -408,46 +404,8 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
         nla.refreshView();
     }
 
-    private void showErrorToast() {
-        UIUtils.showLongToast(NewsActivity.this, getString(R.string.scanner_communication_failure));
-    }
-
-    private void showError(Intent intent) {
-        final String errorMessage = intent.getStringExtra(ProcessScanActivity.ERROR_MESSAGE);
-        if (TextUtils.isEmptyOrWhitespace(errorMessage)) {
-            showErrorToast();
-        } else {
-            final String errorCaption = intent.getStringExtra(ProcessScanActivity.ERROR_CAPTION);
-            final String errorAction = intent.getStringExtra(ProcessScanActivity.ERROR_ACTION);
-            final String errorTitle = intent.getStringExtra(ProcessScanActivity.ERROR_TITLE);
-
-            final AlertDialog.Builder builder = new AlertDialog.Builder(NewsActivity.this);
-            builder.setTitle(errorTitle);
-            builder.setMessage(errorMessage);
-            builder.setNegativeButton(R.string.rogerthat, new AlertDialog.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            });
-
-            if (!TextUtils.isEmptyOrWhitespace(errorCaption) && !TextUtils.isEmptyOrWhitespace(errorAction)) {
-                builder.setPositiveButton(errorCaption, new AlertDialog.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(errorAction));
-                        startActivity(intent);
-                        dialog.dismiss();
-                    }
-                });
-            }
-
-            builder.show();
-        }
-    }
-
     protected void requestFriendInfoByEmailHash(String emailHash) {
-        progressDialog.show();
+        mProgressDialog.show();
 
         final GetUserInfoRequestTO request = new GetUserInfoRequestTO();
         request.code = emailHash;

@@ -17,7 +17,6 @@
  */
 package com.mobicage.rogerthat.plugins.messaging;
 
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -64,7 +63,7 @@ import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
 import com.mobicage.rogerthat.plugins.system.SystemPlugin;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
-import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
+import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
@@ -76,6 +75,7 @@ import com.mobicage.rogerthat.util.ui.Slider;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.rpc.config.AppConstants;
+import com.mobicage.rpc.config.LookAndFeelConstants;
 import com.mobicage.to.messaging.ButtonTO;
 import com.mobicage.to.messaging.MemberStatusTO;
 import com.mobicage.to.messaging.MessageTO;
@@ -170,7 +170,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         filter2.addAction(BrandingMgr.ATTACHMENT_AVAILABLE_INTENT);
         filter2.addAction(MessagingPlugin.THREAD_MODIFIED_INTENT);
         filter2.addAction(FriendsPlugin.FRIEND_INFO_RECEIVED_INTENT);
-        filter2.addAction(BrandingMgr.ASSET_AVAILABLE_INTENT);
+        filter2.addAction(SystemPlugin.ASSET_AVAILABLE_INTENT);
         registerReceiver(mReceiver, filter2);
     }
 
@@ -239,8 +239,10 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
     }
 
     private void setThreadBackground() {
-        Bitmap background = mService.getPlugin(SystemPlugin.class).getAppAsset(SystemPlugin.ASSET_CHAT_BACKGROUND);
-        if (background != null) {
+        Bitmap background = SystemPlugin.getAppAsset(mService, SystemPlugin.ASSET_CHAT_BACKGROUND);
+        if (background == null) {
+            findViewById(R.id.thread_container).setBackgroundResource(R.color.mc_background_color);
+        } else {
             BitmapDrawable backgroundDrawable = new BitmapDrawable(getResources(), background);
             backgroundDrawable.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
             findViewById(R.id.thread_container).setBackground(backgroundDrawable);
@@ -358,9 +360,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                 onToolbarClicked();
                 return true;
             case R.id.help:
-                new AlertDialog.Builder(FriendsThreadActivity.this).setTitle(R.string.help)
-                    .setMessage(getString(R.string.message_thread_help)).setPositiveButton(getString(R.string.ok), null)
-                    .create().show();
+                UIUtils.showDialog(FriendsThreadActivity.this, R.string.help, R.string.message_thread_help);
                 return true;
             case R.id.delete_conversation:
                 mMessagingPlugin.removeConversationFromList(this, mParentMessageKey);
@@ -421,8 +421,8 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                     return new String[] { intent.getAction() };
                 }
             }
-            if (BrandingMgr.ASSET_AVAILABLE_INTENT.equals(intent.getAction())) {
-                String kind = intent.getStringExtra(BrandingMgr.ASSET_KIND);
+            if (SystemPlugin.ASSET_AVAILABLE_INTENT.equals(intent.getAction())) {
+                String kind = intent.getStringExtra(SystemPlugin.ASSET_KIND);
                 if (SystemPlugin.ASSET_CHAT_BACKGROUND.equals(kind)) {
                     setThreadBackground();
                 }
@@ -519,7 +519,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                     attachmentsDir = mMessagingPlugin.attachmentsDir(threadKey, message.key);
                 } catch (IOException e) {
                     L.d("Unable to create attachment directory", e);
-                    UIUtils.showAlertDialog(mService, "", R.string.unable_to_read_write_sd_card);
+                    UIUtils.showDialog(mService, "", R.string.unable_to_read_write_sd_card);
                     return;
                 }
 
@@ -702,25 +702,16 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                 }
 
                 private void askConfirmation(final MessageTO message, final ButtonTO button, final String text) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(FriendsThreadActivity.this);
-                    builder.setTitle(R.string.message_confirm);
-                    builder.setMessage(text);
-                    builder.setPositiveButton(R.string.yes, new SafeDialogInterfaceOnClickListener() {
+                    String title = getString(R.string.message_confirm);
+                    SafeDialogClick onPositiveClick = new SafeDialogClick() {
                         @Override
-                        public void safeOnClick(DialogInterface dialog, int which) {
-                            T.UI();
+                        public void safeOnClick(DialogInterface dialog, int id) {
                             dialog.dismiss();
                             ackMessage(message, button);
                         }
-                    });
-                    builder.setNegativeButton(R.string.no, new SafeDialogInterfaceOnClickListener() {
-                        @Override
-                        public void safeOnClick(DialogInterface dialog, int which) {
-                            T.UI();
-                            dialog.dismiss();
-                        }
-                    });
-                    builder.create().show();
+                    };
+                    UIUtils.showDialog(FriendsThreadActivity.this, title, text, R.string.yes, onPositiveClick,
+                            R.string.no, null);
                 }
             });
             ViewGroup members = (ViewGroup) buttonContainer.findViewById(R.id.members);
@@ -796,9 +787,8 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                     public boolean onLongClick(View v) {
                         if (!isSender)
                             return false;
-                        final ProgressDialog dialog = ProgressDialog.show(FriendsThreadActivity.this, "",
+                        final ProgressDialog dialog = UIUtils.showProgressDialog(FriendsThreadActivity.this, null,
                             getString(R.string.locking), true, false);
-                        dialog.show();
                         mMessagingPlugin.lockMessage(message, new SafeRunnable() {
                             @Override
                             protected void safeRun() throws Exception {
@@ -843,6 +833,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
 
             // Set textual info ontop of message balloon
             TextView messageInfo = (TextView) view.findViewById(R.id.message_info);
+            messageInfo.setTextColor(LookAndFeelConstants.getPrimaryColor(mService));
             String senderName;
             if (isSender) {
                 senderName = getString(R.string.__me_as_sender);
@@ -926,14 +917,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                         mFriendsPlugin.launchDetailActivity(FriendsThreadActivity.this, friendEmail);
                     } else {
                         if ((contactType & FriendsPlugin.NON_FRIEND) == FriendsPlugin.NON_FRIEND) {
-                            new AlertDialog.Builder(FriendsThreadActivity.this)
-                                .setMessage(getString(R.string.invite_as_friend, new Object[] { friendEmail }))
-                                .setPositiveButton(R.string.yes, new SafeDialogInterfaceOnClickListener() {
-                                    @Override
-                                    public void safeOnClick(DialogInterface dialog, int which) {
-                                        mFriendsPlugin.inviteFriend(friendEmail, null, null, true);
-                                    }
-                                }).setNegativeButton(R.string.no, null).create().show();
+                            UIUtils.showNotConnectedToFriendDialog(mService, mFriendsPlugin, friendEmail);
                         }
                     }
                 }

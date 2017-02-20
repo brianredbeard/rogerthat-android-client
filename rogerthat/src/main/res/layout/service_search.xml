@@ -28,15 +28,12 @@
             android:layout_gravity="right|center_vertical"
             android:background="@null"
             android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
-            app:ico_color="@color/mc_primary_icon"
-            app:ico_icon="@string/faw_search"
-            app:ico_size="24dp" />
+            android:layout_marginRight="5dp" />
     </LinearLayout>
 
     <HorizontalScrollView
         android:id="@+id/search_category_scroll_container"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/mc_background_color"
         android:scrollbars="none">
@@ -50,11 +47,10 @@
         </LinearLayout>
     </HorizontalScrollView>
 
-
     <com.mobicage.rogerthat.util.ui.SafeViewFlipper
         android:id="@+id/search_result_lists"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:background="@color/mc_background_color"/>
 
 </LinearLayout>

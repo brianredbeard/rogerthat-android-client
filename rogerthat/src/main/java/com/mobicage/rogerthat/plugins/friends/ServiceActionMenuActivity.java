@@ -18,10 +18,8 @@
 package com.mobicage.rogerthat.plugins.friends;
 
 import android.Manifest;
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -67,7 +65,6 @@ import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
-import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
@@ -146,7 +143,7 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
         lightSchemeTextColor = ContextCompat.getColor(this, android.R.color.primary_text_light);
 
         if (intent.getBooleanExtra(SHOW_ERROR_POPUP, false))
-            UIUtils.showAlertDialog(this, null, R.string.error_please_try_again);
+            UIUtils.showErrorPleaseRetryDialog(this);
 
         goToMessagingActivityIfNeeded(intent);
     }
@@ -216,15 +213,15 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
                     switch (x) {
                     case 0:
                         cell.icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_info).color(iconColor).sizeDp(24).paddingDp(5));
-                        UIUtils.setIconBackground(cell.icon, iconBackgroundColor);
+                        UIUtils.setBackgroundColor(cell.icon, iconBackgroundColor);
                         break;
                     case 1:
                         cell.icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_envelope).color(iconColor).sizeDp(24).paddingDp(5));
-                        UIUtils.setIconBackground(cell.icon, iconBackgroundColor);
+                        UIUtils.setBackgroundColor(cell.icon, iconBackgroundColor);
                         break;
                     case 2:
                         cell.icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_phone).color(iconColor).sizeDp(24).paddingDp(5));
-                        UIUtils.setIconBackground(cell.icon, iconBackgroundColor);
+                        UIUtils.setBackgroundColor(cell.icon, iconBackgroundColor);
                         break;
                     case 3:
                         View p = (View) cell.icon.getParent();
@@ -234,7 +231,7 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
                             iconName = FontAwesome.Icon.faw_qrcode;
                         }
                         cell.icon.setImageDrawable(new IconicsDrawable(this, iconName).color(iconColor).sizeDp(24).paddingDp(5));
-                        UIUtils.setIconBackground(cell.icon, iconBackgroundColor);
+                        UIUtils.setBackgroundColor(cell.icon, iconBackgroundColor);
                         break;
 
                     default:
@@ -375,13 +372,13 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
             if (UIUtils.isSupportedFontawesomeIcon(item.iconName)) {
                 Drawable icon = UIUtils.getIconFromString(this, item.iconName).color(brandingBackgroundColor).sizeDp(24).paddingDp(5);
                 cell.icon.setImageDrawable(icon);
-                UIUtils.setIconBackground(cell.icon, menuItemColor);
+                UIUtils.setBackgroundColor(cell.icon, menuItemColor);
             } else if (item.icon == null) {
                 L.d(String.format("Font awesome icon not set and icon content not found." +
                         "\nService: %s, iconName: %s", email, item.iconName));
             } else {
                 cell.icon.setImageBitmap(BitmapFactory.decodeByteArray(item.icon, 0, item.icon.length));
-                UIUtils.setIconBackground(cell.icon, brandingBackgroundColor);
+                UIUtils.setBackgroundColor(cell.icon, brandingBackgroundColor);
             }
             p.setVisibility(View.VISIBLE);
             cell.label.setText(item.label);
@@ -410,17 +407,17 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
 
         if (page == 0) {
             cells[0][0].icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_info).color(brandingBackgroundColor).sizeDp(24).paddingDp(5));
-            UIUtils.setIconBackground(cells[0][0].icon, defaultMenuItemColor);
+            UIUtils.setBackgroundColor(cells[0][0].icon, defaultMenuItemColor);
             cells[1][0].icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_envelope).color(brandingBackgroundColor).sizeDp(24).paddingDp(5));
-            UIUtils.setIconBackground(cells[1][0].icon, defaultMenuItemColor);
+            UIUtils.setBackgroundColor(cells[1][0].icon, defaultMenuItemColor);
             cells[2][0].icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_phone).color(brandingBackgroundColor).sizeDp(24).paddingDp(5));
-            UIUtils.setIconBackground(cells[2][0].icon, defaultMenuItemColor);
+            UIUtils.setBackgroundColor(cells[2][0].icon, defaultMenuItemColor);
             if (CloudConstants.isYSAAA()) {
                 cells[3][0].icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_qrcode).color(brandingBackgroundColor).sizeDp(24).paddingDp(5));
             } else {
                 cells[3][0].icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_thumbs_up).color(brandingBackgroundColor).sizeDp(24).paddingDp(5));
             }
-            UIUtils.setIconBackground(cells[3][0].icon, defaultMenuItemColor);
+            UIUtils.setBackgroundColor(cells[3][0].icon, defaultMenuItemColor);
         }
 
         if (menu.maxPage > 0) {
@@ -637,18 +634,10 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
                     Intent callIntent = SystemUtils.getActionDialIntent(ServiceActionMenuActivity.this);
                     if (callIntent == null) {
                         // No phone ability on device
-                        AlertDialog.Builder builder = new AlertDialog.Builder(ServiceActionMenuActivity.this);
-                        builder.setMessage(TextUtils.isEmptyOrWhitespace(menu.callConfirmation) ? getString(
-                            R.string.caption_call, menu.phoneNumber) : menu.callConfirmation);
-                        builder.setCancelable(true);
-                        builder.setTitle(R.string.call_service);
-                        builder.setPositiveButton(R.string.rogerthat, new SafeDialogInterfaceOnClickListener() {
-                            @Override
-                            public void safeOnClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        });
-                        builder.create().show();
+                        String title = getString(R.string.call_service);
+                        String message = TextUtils.isEmptyOrWhitespace(menu.callConfirmation) ?
+                                getString(R.string.caption_call, menu.phoneNumber) : menu.callConfirmation;
+                        UIUtils.showDialog(ServiceActionMenuActivity.this, title, message);
                     } else {
                         callIntent.setData(Uri.parse("tel://" + menu.phoneNumber));
                         startActivity(callIntent);

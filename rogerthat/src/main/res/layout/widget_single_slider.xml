@@ -22,17 +22,4 @@
         android:padding="8dip"
         tools:progress="50"></SeekBar>
 
-    <SeekBar
-        android:id="@+id/seek_bar_white"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:padding="8dip"
-        android:layout_weight="1"
-        android:progressTint="@color/mc_white"
-        android:thumbTint="@color/mc_white"
-        android:visibility="gone"
-        tools:progress="50"
-        tools:visibility="visible">
-    </SeekBar>
-
 </com.mobicage.rogerthat.plugins.messaging.widgets.SingleSliderWidget>

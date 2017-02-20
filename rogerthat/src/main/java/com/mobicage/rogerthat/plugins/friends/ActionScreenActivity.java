@@ -71,6 +71,7 @@ import com.google.zxing.client.android.CaptureActivity;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainService;
+import com.mobicage.rogerthat.NavigationItem;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.plugins.history.HistoryItem;
 import com.mobicage.rogerthat.plugins.messaging.AttachmentViewerActivity;
@@ -543,7 +544,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             final String action = params.has("action") ? params.getString("action") : null;
             final String title = params.has("title") ? params.getString("title") : null;
 
-            ServiceBoundActivity.NavigationItem ni = new ServiceBoundActivity.NavigationItem(FontAwesome.Icon.faw_question_circle_o, actionType, action, title, false);
+            NavigationItem ni = new NavigationItem(FontAwesome.Icon.faw_question_circle_o, actionType, action, title, false);
 
             String errorMessage = ActivityUtils.canOpenNavigationItem(ActionScreenActivity.this, ni);
             Map<String, Object> error = null;
@@ -1438,7 +1439,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                                 JSONValue.toJSONString(result));
                         } else {
                             Map<String, Object> result = new HashMap<String, Object>();
-                            final String errorMessge = intent.getStringExtra(ProcessScanActivity.ERROR_MESSAGE);
+                            final String errorMessge = intent.getStringExtra(UIUtils.ERROR_MESSAGE);
                             result.put("status", "error");
                             result.put("content", errorMessge);
                             executeJS(false, "if (typeof rogerthat !== 'undefined') rogerthat._qrCodeScanned(%s)",

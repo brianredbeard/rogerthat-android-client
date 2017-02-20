@@ -19,13 +19,19 @@
 package com.mobicage.rogerthat.plugins.messaging.widgets;
 
 import android.content.Context;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Checkable;
+import android.widget.CheckedTextView;
 import android.widget.TextView;
 
+import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
+import com.mobicage.rogerthat.util.ui.UIUtils;
+import com.mobicage.rpc.config.LookAndFeelConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,14 +52,20 @@ public abstract class AbstractSelectWidget extends Widget {
     public void initializeWidget() {
         List<String> defaults = getDefaultValues();
 
+        int primaryColor = LookAndFeelConstants.getPrimaryColor(mActivity);
+
         for (Map<String, String> choice : (List<Map<String, String>>) mWidgetMap.get("choices")) {
             View v = LayoutInflater.from(getContext()).inflate(getTextViewResourceId(), null);
-            final TextView tv = (TextView) v;
-            ((Checkable) tv).setChecked(defaults.contains(choice.get("value")));
-            tv.setText(choice.get("label"));
-            tv.setTextColor(mTextColor);
-            tv.setOnClickListener(getItemOnClickListener((Checkable) tv));
-            addView(tv);
+            final CheckedTextView ctv = (CheckedTextView) v;
+
+            if (mColorScheme != BrandingMgr.ColorScheme.DARK) {
+                UIUtils.setColors(primaryColor, ctv);
+            }
+            ctv.setChecked(defaults.contains(choice.get("value")));
+            ctv.setText(choice.get("label"));
+            ctv.setTextColor(mTextColor);
+            ctv.setOnClickListener(getItemOnClickListener(ctv));
+            addView(ctv);
         }
     }
 

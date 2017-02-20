@@ -181,11 +181,11 @@ public class BrandingMgr implements Pickleable, Closeable {
             this.attemptsLeft = 3;
         }
 
-        public BrandedItem(UpdateAppAssetRequestTO appAsset) {
+        public BrandedItem(UpdateAppAssetRequestTO appAsset, String url) {
             this.type = TYPE_APP_ASSET;
             this.status = STATUS_TODO;
             this.object = appAsset;
-            this.brandingKey = appAsset.kind;
+            this.brandingKey = url;
             this.attemptsLeft = 3;
         }
 
@@ -327,8 +327,7 @@ public class BrandingMgr implements Pickleable, Closeable {
                 } else if (type == TYPE_APP_ASSET) {
                     UpdateAppAssetRequestTO asset = (UpdateAppAssetRequestTO) object;
                     UpdateAppAssetRequestTO otherAsset = (UpdateAppAssetRequestTO) other.object;
-                    if (!(asset.kind.equals(otherAsset.kind) && asset.url.equals(otherAsset.kind)
-                            && asset.scale_x == otherAsset.scale_x)) {
+                    if (!asset.kind.equals(otherAsset.kind)) {
                         return false;
                     }
                 }
@@ -433,8 +432,6 @@ public class BrandingMgr implements Pickleable, Closeable {
     public static final String SERVICE_EMAIL = "email";
     public static final String BRANDING_KEY = "branding";
     public static final String ATTACHMENT_AVAILABLE_INTENT = "com.mobicage.rogerthat.plugins.messaging.ATTACHMENT_AVAILABLE_INTENT";
-    public static final String ASSET_AVAILABLE_INTENT = "com.mobicage.rogerthat.plugins.messaging.ASSET_AVAILABLE_INTENT";
-    public static final String ASSET_KIND = "asset_kind";
     public static final String THREAD_KEY = "thread_key";
     public static final String MESSAGE_KEY = "message_key";
     public static final String ATTACHMENT_URL_HASH = "attachment_url_hash";
@@ -686,9 +683,9 @@ public class BrandingMgr implements Pickleable, Closeable {
         return queue(new BrandedItem(BrandedItem.TYPE_ATTACHMENT, attachment, attachment.download_url));
     }
 
-    public boolean queue(UpdateAppAssetRequestTO assetRequestTO) {
+    public boolean queue(UpdateAppAssetRequestTO assetRequestTO, String url) {
         T.dontCare();
-        return queue(new BrandedItem(assetRequestTO));
+        return queue(new BrandedItem(assetRequestTO, url));
     }
 
     public boolean queueGenericBranding(String brandingKey) {
@@ -914,8 +911,8 @@ public class BrandingMgr implements Pickleable, Closeable {
                         if (item.status == BrandedItem.STATUS_DELETED) {
                             return;
                         }
-                        Intent intent = new Intent(ASSET_AVAILABLE_INTENT);
-                        intent.putExtra(ASSET_KIND, updateAppAssetRequestTO.kind);
+                        Intent intent = new Intent(SystemPlugin.ASSET_AVAILABLE_INTENT);
+                        intent.putExtra(SystemPlugin.ASSET_KIND, updateAppAssetRequestTO.kind);
                         mMainService.sendBroadcast(intent);
 
                         deleteItemFromQueue(item);
@@ -1598,7 +1595,7 @@ public class BrandingMgr implements Pickleable, Closeable {
             dstFile = getAttachmentFile(attachment);
         } else if (item.type == BrandedItem.TYPE_APP_ASSET) {
             final UpdateAppAssetRequestTO assetRequestTO = (UpdateAppAssetRequestTO) item.object;
-            dstFile = getAssetFile(assetRequestTO.kind);
+            dstFile = getAssetFile(mMainService, assetRequestTO.kind);
         } else {
             dstFile = getBrandingFile(item.brandingKey);
         }
@@ -1661,12 +1658,10 @@ public class BrandingMgr implements Pickleable, Closeable {
             if (item.type == BrandedItem.TYPE_JS_EMBEDDING_PACKET) {
                 JSEmbeddingItemTO packet = (JSEmbeddingItemTO) item.object;
                 url = CloudConstants.JS_EMBEDDING_URL_PREFIX + packet.name;
-            } else if (item.type == BrandedItem.TYPE_LOCAL_FLOW_ATTACHMENT || item.type == BrandedItem.TYPE_ATTACHMENT) {
+            } else if (item.type == BrandedItem.TYPE_LOCAL_FLOW_ATTACHMENT
+                    || item.type == BrandedItem.TYPE_ATTACHMENT
+                    || item.type == BrandedItem.TYPE_APP_ASSET) {
                 url = item.brandingKey;
-            } else if (item.type == BrandedItem.TYPE_APP_ASSET) {
-                UpdateAppAssetRequestTO updateAppAssetRequestTO = (UpdateAppAssetRequestTO) item.object;
-                float pictureSize = UIUtils.getDisplayWidth(mMainService) * updateAppAssetRequestTO.scale_x;
-                url = updateAppAssetRequestTO.url + "=s" + Math.min(1600, Math.round(pictureSize));
             } else {
                 url = CloudConstants.BRANDING_URL_PREFIX + item.brandingKey;
             }
@@ -1816,9 +1811,9 @@ public class BrandingMgr implements Pickleable, Closeable {
     private File getBrandingRootDirectory() throws BrandingFailureException {
         T.dontCare();
         File file = IOUtils.getFilesDirectory(mMainService);
-        createDirIfNotExists(file);
+        IOUtils.createDirIfNotExistsBranding(mMainService, file);
         file = new File(file, "brandings");
-        createDirIfNotExists(file);
+        IOUtils.createDirIfNotExistsBranding(mMainService, file);
         return file;
     }
 
@@ -1830,7 +1825,7 @@ public class BrandingMgr implements Pickleable, Closeable {
 
     private File getJSEmbeddingUnpackDirectory(File brandingDir, String packet) throws BrandingFailureException {
         File file = new File(brandingDir, packet);
-        createDirIfNotExists(file);
+        IOUtils.createDirIfNotExistsBranding(mMainService, file);
         return file;
     }
 
@@ -1838,30 +1833,30 @@ public class BrandingMgr implements Pickleable, Closeable {
         T.dontCare();
         File dir = getJSEmbeddingRootDirectory();
         File file = new File(dir, packet);
-        createDirIfNotExists(file);
+        IOUtils.createDirIfNotExistsBranding(mMainService, file);
         return file;
     }
 
     private File getJSEmbeddingRootDirectory() throws BrandingFailureException {
         T.dontCare();
         File file = new File(mMainService.getFilesDir(), "javascript");
-        createDirIfNotExists(file);
+        IOUtils.createDirIfNotExistsBranding(mMainService, file);
         return file;
     }
 
-    private File getAssetsRootDirectory() throws BrandingFailureException {
+    private static File getAssetsRootDirectory(Context context) throws BrandingFailureException {
         T.dontCare();
-        File directory = new File(mMainService.getFilesDir(), "assets");
-        createDirIfNotExists(directory);
+        File directory = new File(context.getFilesDir(), "assets");
+        IOUtils.createDirIfNotExistsBranding(context, directory);
         return directory;
     }
 
     private File getAttachmentsRootDirectory() throws BrandingFailureException {
         T.dontCare();
         File file = IOUtils.getFilesDirectory(mMainService);
-        createDirIfNotExists(file);
+        IOUtils.createDirIfNotExistsBranding(mMainService, file);
         file = new File(file, "attachments");
-        createDirIfNotExists(file);
+        IOUtils.createDirIfNotExistsBranding(mMainService, file);
         return file;
     }
 
@@ -1869,7 +1864,7 @@ public class BrandingMgr implements Pickleable, Closeable {
         T.dontCare();
         File dir = getAttachmentsRootDirectory();
         File file = new File(dir, threadKey);
-        createDirIfNotExists(file);
+        IOUtils.createDirIfNotExistsBranding(mMainService, file);
         return file;
     }
 
@@ -1877,7 +1872,7 @@ public class BrandingMgr implements Pickleable, Closeable {
         T.dontCare();
         File dir = getAttachmentsThreadDirectory(threadKey);
         File file = new File(dir, messageKey);
-        createDirIfNotExists(file);
+        IOUtils.createDirIfNotExistsBranding(mMainService, file);
         return file;
     }
 
@@ -1904,23 +1899,14 @@ public class BrandingMgr implements Pickleable, Closeable {
         return new File(dir, attachmentUrlHash);
     }
 
-    public File getAssetFile(String kind) throws BrandingFailureException {
-        File dir = getAssetsRootDirectory();
+    public static File getAssetFile(Context context, String kind) throws BrandingFailureException {
+        File dir = getAssetsRootDirectory(context);
         return new File(dir, kind);
     }
 
     private File getLocalFlowContentFile(String threadKey) throws BrandingFailureException {
         T.dontCare();
         return new File(getAttachmentsThreadDirectory(threadKey), ".content");
-    }
-
-    private void createDirIfNotExists(File file) throws BrandingFailureException {
-        T.dontCare();
-        if (!file.exists()) {
-            if (!file.mkdir())
-                throw new BrandingFailureException(mContext.getString(R.string.failed_to_create_directory,
-                    file.getAbsolutePath()));
-        }
     }
 
     protected void save() {

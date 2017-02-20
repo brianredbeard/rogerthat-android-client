@@ -19,7 +19,6 @@
 package com.mobicage.rogerthat;
 
 import android.Manifest;
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -46,6 +45,7 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SectionIndexer;
 import android.widget.TextView;
@@ -72,7 +72,7 @@ import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.sms.SMSManager;
 import com.mobicage.rogerthat.util.system.SafeAsyncTask;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
-import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
+import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
@@ -85,6 +85,7 @@ import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
+import com.mobicage.rpc.config.LookAndFeelConstants;
 import com.mobicage.to.friends.FacebookRogerthatProfileMatchTO;
 import com.mobicage.to.friends.FindRogerthatUsersViaEmailResponseTO;
 import com.mobicage.to.friends.FindRogerthatUsersViaFacebookResponseTO;
@@ -349,11 +350,18 @@ public class AddFriendsActivity extends ServiceBoundActivity {
 
         for (int v = 0; v < views.length; v++) {
             final int x = v;
+            LinearLayout view = (LinearLayout) findViewById(views[v]);
             if (views[v] == R.id.facebook_layout && AppConstants.FACEBOOK_APP_ID == null) {
-                findViewById(views[v]).setVisibility(View.GONE);
+                view.setVisibility(View.GONE);
                 continue;
             }
-            findViewById(views[v]).setOnClickListener(new SafeViewOnClickListener() {
+            ImageView iconView = (ImageView) view.getChildAt(0);
+            View indicator = view.getChildAt(1);
+            // For some reason the color of this icon is already correct, but it shouldn't be. We're setting it here
+            // just to be sure
+            UIUtils.setBackgroundColor(iconView, LookAndFeelConstants.getPrimaryColor(this));
+            indicator.setBackgroundColor(LookAndFeelConstants.getPrimaryColor(this));
+            view.setOnClickListener(new SafeViewOnClickListener() {
                 @Override
                 public void safeOnClick(View v) {
                     if (x != mViewFlipper.getDisplayedChild()) {
@@ -402,7 +410,8 @@ public class AddFriendsActivity extends ServiceBoundActivity {
 
         switch (child) {
         case 0:
-            ((Button) findViewById(R.id.add_via_contacts_button)).setOnClickListener(btnOnClickListener);
+            Button btn0 = (Button) findViewById(R.id.add_via_contacts_button);
+            btn0.setOnClickListener(btnOnClickListener);
             break;
         case 1: // Static page with only text and spinner
             break;
@@ -410,7 +419,8 @@ public class AddFriendsActivity extends ServiceBoundActivity {
             displayContactsResult((String) context);
             break;
         case 3:
-            ((Button) findViewById(R.id.add_via_contacts_try_again)).setOnClickListener(btnOnClickListener);
+            Button btn3 = (Button) findViewById(R.id.add_via_contacts_try_again);
+            btn3.setOnClickListener(btnOnClickListener);
             break;
         default:
             break;
@@ -585,11 +595,12 @@ public class AddFriendsActivity extends ServiceBoundActivity {
     }
 
     private void askToPostOnWall() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(AddFriendsActivity.this);
-        builder.setMessage(getString(R.string.fb_ask_post_on_wall, getString(R.string.app_name)));
-        builder.setPositiveButton(R.string.post, new SafeDialogInterfaceOnClickListener() {
+        String message = getString(R.string.fb_ask_post_on_wall, getString(R.string.app_name));
+        String positiveCaption = getString(R.string.post);
+        String negativeCaption = getString(R.string.cancel);
+        SafeDialogClick onPositiveClick = new SafeDialogClick() {
             @Override
-            public void safeOnClick(DialogInterface dialog, int which) {
+            public void safeOnClick(DialogInterface dialog, int id) {
                 if (!mService.getNetworkConnectivityManager().isConnected()) {
                     UIUtils.showNoNetworkDialog(AddFriendsActivity.this);
                     return;
@@ -598,16 +609,17 @@ public class AddFriendsActivity extends ServiceBoundActivity {
                 mCfg.put(FB_POST_ON_WALL, false);
                 mService.getConfigurationProvider().updateConfigurationNow(CONFIG, mCfg);
             }
-        });
-        builder.setNegativeButton(R.string.cancel, new SafeDialogInterfaceOnClickListener() {
+        };
+        SafeDialogClick onNegativeClick = new SafeDialogClick() {
             @Override
-            public void safeOnClick(DialogInterface dialog, int which) {
+            public void safeOnClick(DialogInterface dialog, int id) {
                 findRogerthatUsersViaFacebook();
                 mCfg.put(FB_POST_ON_WALL, false);
                 mService.getConfigurationProvider().updateConfigurationNow(CONFIG, mCfg);
             }
-        });
-        builder.create().show();
+        };
+        UIUtils.showDialog(AddFriendsActivity.this, null, message, positiveCaption, onPositiveClick, negativeCaption,
+                onNegativeClick);
     }
 
     private void postOnWall() {
@@ -679,11 +691,7 @@ public class AddFriendsActivity extends ServiceBoundActivity {
 
                             @Override
                             public void onError(FacebookException error) {
-                                AlertDialog.Builder builder = new AlertDialog.Builder(AddFriendsActivity.this);
-                                builder.setCancelable(true);
-                                builder.setMessage(R.string.error_recommend_on_fb);
-                                builder.setPositiveButton(R.string.rogerthat, null);
-                                builder.create().show();
+                                UIUtils.showDialog(AddFriendsActivity.this, null, R.string.error_recommend_on_fb);
                             }
                         }, true);
             }
@@ -691,7 +699,8 @@ public class AddFriendsActivity extends ServiceBoundActivity {
 
         switch (child) {
         case 0:
-            findViewById(R.id.add_via_facebook_button).setOnClickListener(btnOnclickListener);
+            Button btn0 = (Button) findViewById(R.id.add_via_facebook_button);
+            btn0.setOnClickListener(btnOnclickListener);
             break;
 
         case 1: // Static page with only text and spinner
@@ -701,7 +710,8 @@ public class AddFriendsActivity extends ServiceBoundActivity {
             break;
         case 3:
             ((TextView) findViewById(R.id.add_via_facebook_error)).setText((String) context);
-            findViewById(R.id.add_via_facebook_try_again).setOnClickListener(btnOnclickListener);
+            Button btn3 = (Button) findViewById(R.id.add_via_facebook_try_again);
+            btn3.setOnClickListener(btnOnclickListener);
             break;
         default:
             break;
@@ -809,14 +819,12 @@ public class AddFriendsActivity extends ServiceBoundActivity {
                         UIUtils.showLongToast(AddFriendsActivity.this, getString(R.string.friend_invite_failed));
                     }
                 } else {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(AddFriendsActivity.this);
-                    builder.setMessage(R.string.registration_email_not_valid);
-                    builder.setPositiveButton(R.string.rogerthat, null);
-                    builder.create().show();
+                    UIUtils.showDialog(AddFriendsActivity.this, null, R.string.registration_email_not_valid);
                 }
             }
         };
-        ((Button) findViewById(R.id.add_via_email_button)).setOnClickListener(onClickListener);
+        Button btn = (Button)  findViewById(R.id.add_via_email_button);
+        btn.setOnClickListener(onClickListener);
 
         emailText.setOnEditorActionListener(new OnEditorActionListener() {
             @Override

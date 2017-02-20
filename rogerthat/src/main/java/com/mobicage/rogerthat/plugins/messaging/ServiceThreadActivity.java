@@ -17,10 +17,8 @@
  */
 package com.mobicage.rogerthat.plugins.messaging;
 
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
@@ -45,7 +43,6 @@ import com.mobicage.rogerthat.ServiceBoundCursorListActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.messaging.widgets.Widget;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
-import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
@@ -279,14 +276,7 @@ public class ServiceThreadActivity extends ServiceBoundCursorListActivity {
                             mFriendsPlugin.launchDetailActivity(ServiceThreadActivity.this, message.sender);
                         } else {
                             if ((contactType & FriendsPlugin.NON_FRIEND) == FriendsPlugin.NON_FRIEND) {
-                                new AlertDialog.Builder(ServiceThreadActivity.this)
-                                    .setMessage(getString(R.string.invite_as_friend, new Object[] { message.sender }))
-                                    .setPositiveButton(R.string.yes, new SafeDialogInterfaceOnClickListener() {
-                                        @Override
-                                        public void safeOnClick(DialogInterface dialog, int which) {
-                                            mFriendsPlugin.inviteFriend(message.sender, null, null, true);
-                                        }
-                                    }).setNegativeButton(R.string.no, null).create().show();
+                                UIUtils.showNotConnectedToFriendDialog(mService, mFriendsPlugin, message.sender);
                             }
                         }
                     }

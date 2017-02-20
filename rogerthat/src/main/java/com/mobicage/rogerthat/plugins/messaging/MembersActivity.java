@@ -18,8 +18,6 @@
 
 package com.mobicage.rogerthat.plugins.messaging;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.view.View;
@@ -35,8 +33,8 @@ import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
-import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
+import com.mobicage.rogerthat.util.ui.UIUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -90,14 +88,7 @@ public class MembersActivity extends ServiceBoundActivity {
                         mFriendsPlugin.launchDetailActivity(MembersActivity.this, mMembers[position]);
                     } else {
                         if ((contactType & FriendsPlugin.NON_FRIEND) == FriendsPlugin.NON_FRIEND) {
-                            new AlertDialog.Builder(MembersActivity.this)
-                                    .setMessage(getString(R.string.invite_as_friend, new Object[] { mMembers[position] }))
-                                    .setPositiveButton(R.string.yes, new SafeDialogInterfaceOnClickListener() {
-                                        @Override
-                                        public void safeOnClick(DialogInterface dialog, int which) {
-                                            mFriendsPlugin.inviteFriend(mMembers[position], null, null, true);
-                                        }
-                                    }).setNegativeButton(R.string.no, null).create().show();
+                            UIUtils.showNotConnectedToFriendDialog(mService, mFriendsPlugin, mMembers[position]);
                         }
                     }
                 }

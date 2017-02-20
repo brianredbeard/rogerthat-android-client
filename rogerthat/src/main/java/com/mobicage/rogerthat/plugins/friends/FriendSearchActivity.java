@@ -44,6 +44,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.FriendDetailOrInviteActivity;
 import com.mobicage.rogerthat.MyIdentity;
@@ -57,6 +59,7 @@ import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.IncompleteMessageException;
+import com.mobicage.rpc.config.LookAndFeelConstants;
 import com.mobicage.to.friends.FindFriendItemTO;
 import com.mobicage.to.friends.FindFriendResponseTO;
 
@@ -127,6 +130,7 @@ public class FriendSearchActivity extends ServiceBoundActivity {
         });
 
         final ImageButton searchButton = (ImageButton) findViewById(R.id.search_button);
+        searchButton.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_search).color(LookAndFeelConstants.getPrimaryIconColor(this)).sizeDp(24));
         searchButton.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
@@ -219,7 +223,7 @@ public class FriendSearchActivity extends ServiceBoundActivity {
                         }
 
                         if (!TextUtils.isEmptyOrWhitespace(mResponseTO.error_string)) {
-                            UIUtils.showAlertDialog(FriendSearchActivity.this, null, mResponseTO.error_string);
+                            UIUtils.showDialog(FriendSearchActivity.this, null, mResponseTO.error_string);
                             return new String[] { action };
                         }
                         mSearchInfo.cursor = mResponseTO.cursor;
@@ -261,15 +265,17 @@ public class FriendSearchActivity extends ServiceBoundActivity {
 
     private void launchFindFriendsCall(String cursor) {
         if (mFriendsPlugin.searchFriend(mSearchString, cursor)) {
-            if (cursor == null)
-                mProgressDialog = ProgressDialog.show(this, null, getString(R.string.searching), true, true);
+            if (cursor == null) {
+                String message = getString(R.string.searching);
+                mProgressDialog = UIUtils.showProgressDialog(this, null, message);
+            }
         } else {
             showSearchFailedDialog();
         }
     }
 
     private void showSearchFailedDialog() {
-        UIUtils.showAlertDialog(this, null, R.string.error_search);
+        UIUtils.showDialog(this, null, R.string.error_search);
     }
 
     private void clearSearches() {
@@ -313,7 +319,10 @@ public class FriendSearchActivity extends ServiceBoundActivity {
         public View getView(int position, View convertView, ViewGroup parent) {
 
             if (position == mItems.size() && mSearchInfo.cursor != null) {
-                return getLayoutInflater().inflate(R.layout.list_loading_more_indicator, null);
+                View loadingView = getLayoutInflater().inflate(R.layout.list_loading_more_indicator, null);
+                ProgressBar progressBar = (ProgressBar) loadingView.findViewById(R.id.loading_list_progress_bar);
+                UIUtils.setColors(mService, progressBar);
+                return loadingView;
             }
 
             final FindFriendItemTO item = mItems.get(position);

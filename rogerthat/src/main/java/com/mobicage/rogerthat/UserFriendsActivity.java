@@ -18,8 +18,6 @@
 
 package com.mobicage.rogerthat;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -43,11 +41,12 @@ import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.messaging.MessagingFilterActivity;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.util.logging.L;
-import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
+import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.AppConstants;
+import com.mobicage.rpc.config.LookAndFeelConstants;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -215,6 +214,7 @@ public class UserFriendsActivity extends FriendsActivity {
 
     private void handleDetails(final View listItem) {
         ImageView details = (ImageView) listItem.findViewById(R.id.details);
+        details.setImageDrawable(new IconicsDrawable(UserFriendsActivity.this, FontAwesome.Icon.faw_user).color(LookAndFeelConstants.getPrimaryIconColor(UserFriendsActivity.this)).sizeDp(28));
         details.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -230,6 +230,7 @@ public class UserFriendsActivity extends FriendsActivity {
 
     private void handleSend(final View listItem, final Friend friend) {
         ImageView newMessage = (ImageView) listItem.findViewById(R.id.send);
+        newMessage.setImageDrawable(new IconicsDrawable(UserFriendsActivity.this, FontAwesome.Icon.faw_envelope).color(LookAndFeelConstants.getPrimaryIconColor(UserFriendsActivity.this)).sizeDp(28));
         newMessage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -242,6 +243,7 @@ public class UserFriendsActivity extends FriendsActivity {
 
     private void handleHistory(final View listItem, final Friend friend) {
         ImageView history = (ImageView) listItem.findViewById(R.id.history);
+        history.setImageDrawable(new IconicsDrawable(UserFriendsActivity.this, FontAwesome.Icon.faw_history).color(LookAndFeelConstants.getPrimaryIconColor(UserFriendsActivity.this)).sizeDp(28));
         history.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -254,6 +256,7 @@ public class UserFriendsActivity extends FriendsActivity {
 
     private void handleLocation(final View listItem, final Friend friend) {
         ImageView location = (ImageView) listItem.findViewById(R.id.location);
+        location.setImageDrawable(new IconicsDrawable(UserFriendsActivity.this, FontAwesome.Icon.faw_map_marker).color(LookAndFeelConstants.getPrimaryIconColor(UserFriendsActivity.this)).sizeDp(28));
         location.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -276,9 +279,9 @@ public class UserFriendsActivity extends FriendsActivity {
                         }
                     }, 1000);
                 } else {
-                    SafeDialogInterfaceOnClickListener onPositiveClickListener = new SafeDialogInterfaceOnClickListener() {
+                    SafeDialogClick onPositiveClickListener = new SafeDialogClick() {
                         @Override
-                        public void safeOnClick(DialogInterface dialog, int which) {
+                        public void safeOnClick(DialogInterface dialog, int id) {
                             dialog.dismiss();
                             mFriendsPlugin.requestFriendShareLocation(friend.email, null);
                             UIUtils.showLongToast(UserFriendsActivity.this,
@@ -286,27 +289,19 @@ public class UserFriendsActivity extends FriendsActivity {
                         }
                     };
 
-                    SafeDialogInterfaceOnClickListener onNegativeClickListener = new SafeDialogInterfaceOnClickListener() {
+                    SafeDialogClick onNegativeClickListener = new SafeDialogClick() {
                         @Override
-                        public void safeOnClick(DialogInterface dialog, int which) {
+                        public void safeOnClick(DialogInterface dialog, int id) {
                             dialog.dismiss();
                         }
                     };
-
-                    Dialog dialog = new AlertDialog.Builder(UserFriendsActivity.this)
-                        .setMessage(getString(R.string.dialog_request_location_sharing, friend.name))
-                        .setCancelable(true).setPositiveButton(R.string.yes, onPositiveClickListener)
-                        .setNegativeButton(R.string.no, onNegativeClickListener).create();
-                    dialog.setCanceledOnTouchOutside(true);
-                    dialog.show();
+                    String message = getString(R.string.dialog_request_location_sharing, friend.name);
+                    UIUtils.showDialog(UserFriendsActivity.this, null, message, R.string.yes, onPositiveClickListener,
+                            R.string.no, onNegativeClickListener)
+                            .setCancelable(true);
                 }
             }
         });
-    }
-
-    @Override
-    protected String getHelpMessage() {
-        return null;
     }
 
     @Override

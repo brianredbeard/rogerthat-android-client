@@ -19,14 +19,12 @@
 package com.mobicage.rogerthat.plugins.friends;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 
 import com.mobicage.api.services.Rpc;
 import com.mobicage.rogerth.at.R;
@@ -44,9 +42,8 @@ import com.mobicage.rogerthat.plugins.messaging.mfr.MessageFlowRun;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
-import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
+import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
-import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.to.friends.ServiceMenuItemLinkTO;
@@ -221,25 +218,15 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
 
         final boolean confirmationNeeded = Message.MC_CONFIRM_PREFIX.equals(buttonAction);
         if (confirmationNeeded) {
-            final AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-            builder.setTitle(R.string.message_confirm);
-            builder.setMessage(actionInfo.get("androidUrl"));
-            builder.setPositiveButton(R.string.yes, new SafeDialogInterfaceOnClickListener() {
+            SafeDialogClick onPositiveclick = new SafeDialogClick() {
                 @Override
-                public void safeOnClick(DialogInterface dialog, int which) {
-                    com.mobicage.rogerthat.util.system.T.UI();
-                    dialog.dismiss();
+                public void safeOnClick(DialogInterface di, int id) {
+                    di.dismiss();
                     itemPressed(item, menuGeneration, extras, flowParams, resultHandler, true);
                 }
-            });
-            builder.setNegativeButton(R.string.no, new SafeDialogInterfaceOnClickListener() {
-                @Override
-                public void safeOnClick(DialogInterface dialog, int which) {
-                    com.mobicage.rogerthat.util.system.T.UI();
-                    dialog.dismiss();
-                }
-            });
-            builder.create().show();
+            };
+            String title = mActivity.getString(R.string.message_confirm);
+            UIUtils.showDialog(mActivity, title, actionInfo.get("androidUrl"), R.string.yes, onPositiveclick, R.string.no, null);
         }
         return confirmationNeeded;
     }
@@ -307,10 +294,7 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
             JsMfr.executeMfr(mfr, userInput, mService, true);
         } catch (EmptyStaticFlowException ex) {
             mActivity.completeTransmit(null);
-            AlertDialog.Builder builder = new AlertDialog.Builder(mService);
-            builder.setMessage(ex.getMessage());
-            builder.setPositiveButton(R.string.rogerthat, null);
-            builder.create().show();
+            UIUtils.showDialog(mService, null, ex.getMessage());
             mService.getPlugin(FriendsPlugin.class).requestStaticFlow(request.service, item);
         }
     }
@@ -353,7 +337,7 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
         final String buttonAction = actionInfo.get("androidAction");
 
         if (buttonAction == null) {
-            UIUtils.showAlertDialog(mActivity, R.string.warning, R.string.feature_not_supported);
+            UIUtils.showDialog(mActivity, R.string.warning, R.string.feature_not_supported);
             return;
         }
 
@@ -407,7 +391,7 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
                 mActivity.completeTransmit(new SafeRunnable() {
                     @Override
                     protected void safeRun() throws Exception {
-                        UIUtils.showAlertDialog(mActivity, null, R.string.error_please_try_again);
+                        UIUtils.showErrorPleaseRetryDialog(mActivity);
                     }
                 });
                 mResultHandler.onError();

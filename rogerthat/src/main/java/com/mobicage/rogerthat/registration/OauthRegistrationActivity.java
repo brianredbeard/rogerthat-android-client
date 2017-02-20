@@ -19,7 +19,6 @@
 package com.mobicage.rogerthat.registration;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -176,10 +175,7 @@ public class OauthRegistrationActivity extends AbstractRegistrationActivity {
                 } else {
                     String errorMessage = data.getStringExtra(OauthActivity.RESULT_ERROR_MESSAGE);
                     mErrorTextView.setText(errorMessage);
-                    final AlertDialog.Builder builder = new AlertDialog.Builder(OauthRegistrationActivity.this);
-                    builder.setMessage(errorMessage);
-                    builder.setPositiveButton(R.string.rogerthat, null);
-                    builder.create().show();
+                    UIUtils.showDialog(OauthRegistrationActivity.this, null, errorMessage);
                 }
             }
         }
@@ -201,22 +197,15 @@ public class OauthRegistrationActivity extends AbstractRegistrationActivity {
         final String deviceId = mWiz.getDeviceId();
         final String registrationId = mWiz.getRegistrationId();
         final String installId = mWiz.getInstallationId();
-        // Make call to Rogerthat webfarm
-        final ProgressDialog progressDialog = new ProgressDialog(OauthRegistrationActivity.this);
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        progressDialog.setMessage(getString(R.string.loading));
-        progressDialog.setCancelable(false);
-        progressDialog.show();
+        // Make call to Rogerthat
+        final ProgressDialog progressDialog = UIUtils.showProgressDialog(OauthRegistrationActivity.this, null,
+                getString(R.string.loading), true, false);
         final SafeRunnable showErrorDialog = new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
                 T.UI();
                 progressDialog.dismiss();
-                AlertDialog.Builder builder = new AlertDialog.Builder(OauthRegistrationActivity.this);
-                builder.setMessage(R.string.registration_error);
-                builder.setPositiveButton(R.string.rogerthat, null);
-                AlertDialog dialog = builder.create();
-                dialog.show();
+                UIUtils.showDialog(OauthRegistrationActivity.this, null, R.string.registration_error);
             }
         };
 
@@ -282,12 +271,7 @@ public class OauthRegistrationActivity extends AbstractRegistrationActivity {
                                     protected void safeRun() throws Exception {
                                         T.UI();
                                         mErrorTextView.setText(errorMessage);
-                                        AlertDialog.Builder builder = new AlertDialog.Builder(
-                                                OauthRegistrationActivity.this);
-                                        builder.setMessage(errorMessage);
-                                        builder.setPositiveButton(R.string.rogerthat, null);
-                                        AlertDialog dialog = builder.create();
-                                        dialog.show();
+                                        UIUtils.showDialog(OauthRegistrationActivity.this, null, errorMessage);
                                     }
                                 });
                                 return;

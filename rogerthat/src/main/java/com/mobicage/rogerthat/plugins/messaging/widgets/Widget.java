@@ -31,6 +31,7 @@ import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.plugins.messaging.ServiceMessageDetailActivity;
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.IJSONable;
 
 import java.util.HashMap;

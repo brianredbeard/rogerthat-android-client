@@ -18,10 +18,6 @@
 
 package com.mobicage.rogerthat.plugins.scan;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
-
 import android.content.Intent;
 
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
@@ -29,9 +25,14 @@ import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.pickle.PickleException;
 import com.mobicage.rogerthat.util.system.T;
+import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.IResponse;
 import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.to.service.GetServiceActionInfoResponseTO;
+
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 
 public class GetServiceActionInfoRH extends ResponseHandler<GetServiceActionInfoResponseTO> {
 
@@ -89,10 +90,10 @@ public class GetServiceActionInfoRH extends ResponseHandler<GetServiceActionInfo
                 intent.putExtra(ProcessScanActivity.SUCCESS, true);
             } else {
                 intent.putExtra(ProcessScanActivity.SUCCESS, false);
-                intent.putExtra(ProcessScanActivity.ERROR_MESSAGE, resp.error.message);
-                intent.putExtra(ProcessScanActivity.ERROR_TITLE, resp.error.title);
-                intent.putExtra(ProcessScanActivity.ERROR_CAPTION, resp.error.caption);
-                intent.putExtra(ProcessScanActivity.ERROR_ACTION, resp.error.action);
+                intent.putExtra(UIUtils.ERROR_MESSAGE, resp.error.message);
+                intent.putExtra(UIUtils.ERROR_TITLE, resp.error.title);
+                intent.putExtra(UIUtils.ERROR_CAPTION, resp.error.caption);
+                intent.putExtra(UIUtils.ERROR_ACTION, resp.error.action);
             }
 
             mMainService.sendBroadcast(intent);

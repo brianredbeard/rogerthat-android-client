@@ -17,32 +17,6 @@
  */
 package com.mobicage.rogerthat.registration;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HTTP;
-import org.jivesoftware.smack.ConnectionConfiguration;
-import org.jivesoftware.smack.Logger;
-import org.jivesoftware.smack.XMPPConnection;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -73,6 +47,31 @@ import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.Credentials;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.rpc.newxmpp.XMPPConfigurationFactory;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
+import org.jivesoftware.smack.ConnectionConfiguration;
+import org.jivesoftware.smack.Logger;
+import org.jivesoftware.smack.XMPPConnection;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class YSAAARegistrationActivity extends AbstractRegistrationActivity {
 
@@ -207,13 +206,7 @@ public class YSAAARegistrationActivity extends AbstractRegistrationActivity {
         final SafeRunnable showErrorDialog = new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
-                T.UI();
-                AlertDialog.Builder builder = new AlertDialog.Builder(YSAAARegistrationActivity.this);
-                builder.setMessage(R.string.error_please_try_again);
-                builder.setPositiveButton(R.string.rogerthat, null);
-                AlertDialog dialog = builder.create();
-                dialog.show();
-
+                UIUtils.showErrorPleaseRetryDialog(YSAAARegistrationActivity.this);
                 mTimer.cancel();
                 mProgressBar.setVisibility(View.GONE);
                 mStatusLbl.setText(R.string.error_please_try_again);
@@ -276,12 +269,7 @@ public class YSAAARegistrationActivity extends AbstractRegistrationActivity {
                                     @Override
                                     protected void safeRun() throws Exception {
                                         T.UI();
-                                        AlertDialog.Builder builder = new AlertDialog.Builder(
-                                            YSAAARegistrationActivity.this);
-                                        builder.setMessage(errorMessage);
-                                        builder.setPositiveButton(R.string.rogerthat, null);
-                                        AlertDialog dialog = builder.create();
-                                        dialog.show();
+                                        UIUtils.showDialog(YSAAARegistrationActivity.this, null, errorMessage);
 
                                         mTimer.cancel();
                                         mProgressBar.setVisibility(View.GONE);
@@ -329,9 +317,7 @@ public class YSAAARegistrationActivity extends AbstractRegistrationActivity {
             mProgressBar.setVisibility(View.GONE);
             mStatusLbl.setText(R.string.registration_error);
             mRetryBtn.setVisibility(View.VISIBLE);
-
-            new AlertDialog.Builder(YSAAARegistrationActivity.this).setMessage(getString(R.string.registration_error))
-                .setCancelable(true).setPositiveButton(R.string.rogerthat, null).create().show();
+            UIUtils.showDialog(YSAAARegistrationActivity.this, null, R.string.registration_error);
             mWiz.reInit();
             return;
         }

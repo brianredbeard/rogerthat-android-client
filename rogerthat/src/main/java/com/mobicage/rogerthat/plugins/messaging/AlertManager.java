@@ -331,7 +331,7 @@ public class AlertManager extends BroadcastReceiver implements Closeable, OnShar
 
     private boolean isRogerthatTopActivity() {
         T.UI();
-        final Activity topActivity = UIUtils.getTopActivity(mMainService);
+        final Activity topActivity = UIUtils.getTopActivity();
         if (topActivity == null)
             return false;
         return mMainService.getPackageName().equals(topActivity.getPackageName());

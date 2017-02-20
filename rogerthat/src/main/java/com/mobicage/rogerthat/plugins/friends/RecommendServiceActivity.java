@@ -19,7 +19,6 @@
 package com.mobicage.rogerthat.plugins.friends;
 
 import android.Manifest;
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -71,6 +70,7 @@ import com.mobicage.rogerthat.util.ui.Slider.Swiper;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
+import com.mobicage.rpc.config.LookAndFeelConstants;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -303,7 +303,14 @@ public class RecommendServiceActivity extends ServiceBoundActivity {
 
         for (int v = 0; v < views.length; v++) {
             final int x = v;
-            findViewById(views[v]).setOnClickListener(new SafeViewOnClickListener() {
+            LinearLayout view = (LinearLayout) findViewById(views[v]);
+            ImageView iconView = (ImageView) view.getChildAt(0);
+            View indicator = view.getChildAt(1);
+            // For some reason the color of this icon is already correct, but it shouldn't be. We're setting it here
+            // just to be sure
+            UIUtils.setBackgroundColor(iconView, LookAndFeelConstants.getPrimaryColor(this));
+            indicator.setBackgroundColor(LookAndFeelConstants.getPrimaryColor(this));
+            view.setOnClickListener(new SafeViewOnClickListener() {
                 @Override
                 public void safeOnClick(View v) {
                     if (x != mViewFlipper.getDisplayedChild()) {
@@ -368,26 +375,20 @@ public class RecommendServiceActivity extends ServiceBoundActivity {
             @Override
             public void safeOnClick(View v) {
                 String email = emailText.getText().toString().trim();
+                int message;
                 if (RegexPatterns.EMAIL.matcher(email).matches()) {
                     mFriendsPlugin.shareService(mServiceEmail, email);
                     emailText.setText(null);
                     UIUtils.hideKeyboard(RecommendServiceActivity.this, emailText);
-
-                    AlertDialog.Builder builder = new AlertDialog.Builder(RecommendServiceActivity.this);
-                    builder.setMessage(R.string.service_recommendation_sent);
-                    builder.setPositiveButton(R.string.rogerthat, null);
-                    builder.create().show();
+                    message = R.string.service_recommendation_sent;
                 } else {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(RecommendServiceActivity.this);
-                    builder.setMessage(R.string.registration_email_not_valid);
-                    builder.setPositiveButton(R.string.rogerthat, null);
-                    builder.create().show();
+                    message = R.string.registration_email_not_valid;
                 }
+                UIUtils.showDialog(RecommendServiceActivity.this, null, message);
             }
         };
 
-        ((Button) findViewById(R.id.recommend_email_button)).setOnClickListener(onClickListener);
-
+        findViewById(R.id.recommend_email_button).setOnClickListener(onClickListener);
         emailText.setOnEditorActionListener(new OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
@@ -460,11 +461,7 @@ public class RecommendServiceActivity extends ServiceBoundActivity {
     }
 
     private void showFacebookErrorPopup() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setCancelable(true);
-        builder.setMessage(R.string.error_recommend_on_fb);
-        builder.setPositiveButton(R.string.rogerthat, null);
-        builder.create().show();
+        UIUtils.showDialog(this, null, R.string.error_recommend_on_fb);
     }
 
     private Bitmap getAvatarBitmap(Friend friend) {
@@ -500,7 +497,7 @@ public class RecommendServiceActivity extends ServiceBoundActivity {
                 if (mFriendsPlugin.shareService(mServiceEmail, friend.email)) {
                     mCurrentRecommendations.add(friend.email);
                 } else {
-                    UIUtils.showAlertDialog(RecommendServiceActivity.this, null, R.string.error_please_try_again);
+                    UIUtils.showErrorPleaseRetryDialog(RecommendServiceActivity.this);
                 }
             }
         });

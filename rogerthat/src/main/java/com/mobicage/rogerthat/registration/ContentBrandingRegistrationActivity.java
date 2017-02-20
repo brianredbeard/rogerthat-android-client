@@ -18,7 +18,6 @@
 package com.mobicage.rogerthat.registration;
 
 import android.Manifest;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -177,8 +176,8 @@ public class ContentBrandingRegistrationActivity extends AbstractRegistrationAct
         }
 
         if (mProgressDialog == null) {
-            mProgressDialog = ProgressDialog.show(ContentBrandingRegistrationActivity.this, null,
-                    getString(R.string.opening_camera), true, true, null);
+            mProgressDialog = UIUtils.showProgressDialog(ContentBrandingRegistrationActivity.this, null,
+                    getString(R.string.opening_camera));
         }
 
         SafeRunnable runnable = new SafeRunnable() {
@@ -243,11 +242,7 @@ public class ContentBrandingRegistrationActivity extends AbstractRegistrationAct
                 T.UI();
                 mProgressContainer.setVisibility(View.GONE);
                 mButtonContainer.setVisibility(View.VISIBLE);
-                AlertDialog.Builder builder = new AlertDialog.Builder(ContentBrandingRegistrationActivity.this);
-                builder.setMessage(R.string.error_please_try_again);
-                builder.setPositiveButton(R.string.rogerthat, null);
-                AlertDialog dialog = builder.create();
-                dialog.show();
+                UIUtils.showErrorPleaseRetryDialog(ContentBrandingRegistrationActivity.this);
             }
         };
 
@@ -303,12 +298,8 @@ public class ContentBrandingRegistrationActivity extends AbstractRegistrationAct
                                         T.UI();
                                         mProgressContainer.setVisibility(View.GONE);
                                         mButtonContainer.setVisibility(View.VISIBLE);
-                                        AlertDialog.Builder builder = new AlertDialog.Builder(
-                                            ContentBrandingRegistrationActivity.this);
-                                        builder.setMessage(errorMessage);
-                                        builder.setPositiveButton(R.string.rogerthat, null);
-                                        AlertDialog dialog = builder.create();
-                                        dialog.show();
+                                        UIUtils.showDialog(ContentBrandingRegistrationActivity.this, null,
+                                                errorMessage);
                                     }
                                 });
                                 return;
@@ -327,10 +318,9 @@ public class ContentBrandingRegistrationActivity extends AbstractRegistrationAct
                             T.UI();
                             mWiz.setEmail(email);
                             mWiz.save();
-                            tryConnect(
-                                1,
-                                getString(R.string.registration_establish_connection, email,
-                                    getString(R.string.app_name)) + " ", info);
+                            String message = getString(R.string.registration_establish_connection, email,
+                                    getString(R.string.app_name));
+                            tryConnect(1, message, info);
                         }
                     });
 
@@ -349,9 +339,9 @@ public class ContentBrandingRegistrationActivity extends AbstractRegistrationAct
         if (attempt > XMPP_MAX_NUM_ATTEMPTS) {
             mProgressContainer.setVisibility(View.GONE);
             mButtonContainer.setVisibility(View.VISIBLE);
-            new AlertDialog.Builder(ContentBrandingRegistrationActivity.this)
-                .setMessage(getString(R.string.registration_error)).setCancelable(true)
-                .setPositiveButton(R.string.try_again, null).create().show();
+            String message = getString(R.string.registration_error);
+            UIUtils.showDialog(ContentBrandingRegistrationActivity.this, null, message, getString(R.string.try_again),
+                    null, null, null);
             mWiz.reInit();
             return;
         }

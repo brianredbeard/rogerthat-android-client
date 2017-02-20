@@ -170,7 +170,6 @@
     <string name="friend_share_location">Kan mijn locatie zien</string>
     <string name="friend_sms_invitation">Beste %1$s,\n\nIk nodig u uit om met mij te communiceren via %4$s.\n\nStap 1. Installeer de smartphone app:\n%2$s\n\nStap 2. Connecteer mij:\n%3$s</string>
     <string name="friend_sms_invitation_no_url">Beste %1$s\n\nIk nodig u uit om te communiceren met mij via %3$s. Dit is een cool communicatieplatform voor web en smartphone!\n\nInstalleer de %3$s app: %2$s</string>
-    <string name="friends_getting_started_title">Aan de slag</string>
     <string name="friends_map">Vriendenkaart</string>
     <string name="gender">Geslacht</string>
     <string name="get_current_coordinates">Vraag GPS coördinaten op van je huidige locatie</string>

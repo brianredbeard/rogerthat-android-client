@@ -163,18 +163,18 @@
                 </ImageView>
 
                 <EditText
-                    android:id="@+id/update_group_name_value"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:textSize="16sp"
-                    fontPath="fonts/lato_bold.ttf"
-                    android:background="@null"
-                    android:layout_toLeftOf="@+id/update_group_name_edit"
-                    android:layout_toRightOf="@+id/update_group_name_text"
-                    android:layout_centerInParent="true"
-                    android:inputType="text"
-                    android:singleLine="true" />
+					android:id="@+id/update_group_name_value"
+					fontPath="fonts/lato_bold.ttf"
+					android:layout_width="fill_parent"
+					android:layout_height="wrap_content"
+					android:layout_centerInParent="true"
+					android:layout_marginLeft="10dp"
+					android:layout_toLeftOf="@+id/update_group_name_edit"
+					android:layout_toRightOf="@+id/update_group_name_text"
+					android:background="@null"
+					android:inputType="text"
+					android:maxLines="1"
+					android:textSize="16sp"/>
             </RelativeLayout>
 
            <ListView

@@ -25,7 +25,7 @@ import shutil
 import sys
 import tempfile
 import yaml
-from PIL import Image, ImageDraw
+from PIL import Image
 from xml.dom import minidom
 
 logging.basicConfig(
@@ -305,32 +305,19 @@ package com.mobicage.rpc.config;
 
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mobicage.rogerth.at.R;
-import com.mobicage.rogerthat.ServiceBoundActivity;
+import com.mobicage.rogerthat.NavigationItem;
 
 public class NavigationConstants {
 
-    public static ServiceBoundActivity.NavigationItem[] getNavigationItems() {
-        return new ServiceBoundActivity.NavigationItem[]{''' % dict(LICENSE=LICENSE)
+    public static NavigationItem[] getNavigationItems() {
+        return new NavigationItem[]{''' % dict(LICENSE=LICENSE)
 
     for i, item in enumerate(homescreen_items):
-        icon_file_name = "menu_%s.png" % (i)
-        source_file = os.path.join(APP_DIR, "build", icon_file_name)
-        app_utils.download_icon(item["icon"], "#FFFFFF", 512, source_file)
-        foreground_image = Image.open(source_file)
-
-        background_image = Image.new('RGBA', (1024, 1024))
-        draw = ImageDraw.Draw(background_image)
-        draw.ellipse((124, 124, 900, 900), fill="#%s" % doc["HOMESCREEN"]["color"],
-                     outline="#%s" % doc["HOMESCREEN"]["color"])
-
-        background_image.paste(foreground_image, (262, 262), mask=foreground_image)
-        background_image.save(source_file)
-        generate_resource_images(source_file, 0.2, 1)
-
+        icon_name = item["icon"].replace("-", "_").replace("fa_", "faw_")
         action, action_type = get_action(item)
         output += '''
-            new ServiceBoundActivity.NavigationItem(R.drawable.menu_%(i)s, %(action_type)s, %(action)s, R.string.%(string_id)s, %(collapse)s),''' % dict(
-            i=i,
+                new NavigationItem(FontAwesome.Icon.%(icon_name)s, %(action_type)s, %(action)s, R.string.%(string_id)s, %(collapse)s),''' % dict(
+            icon_name=icon_name,
             action_type=action_type,
             action=action,
             string_id=strings_map[item['text']],
@@ -340,15 +327,15 @@ public class NavigationConstants {
         };
     }
 
-    public static ServiceBoundActivity.NavigationItem[] getNavigationFooterItems() {
-        return new ServiceBoundActivity.NavigationItem[]{'''
+    public static NavigationItem[] getNavigationFooterItems() {
+        return new NavigationItem[]{'''
 
     if doc.get('TOOLBAR') and doc['TOOLBAR'].get('items'):
         for i, item in enumerate(doc['TOOLBAR']['items']):
             icon_name = item["icon"].replace("-", "_").replace("fa_", "faw_")
             action, action_type = get_action(item)
             output += '''
-                new ServiceBoundActivity.NavigationItem(FontAwesome.Icon.%(icon_name)s, %(action_type)s, %(action)s, R.string.%(string_id)s, %(collapse)s),''' % dict(
+                new NavigationItem(FontAwesome.Icon.%(icon_name)s, %(action_type)s, %(action)s, R.string.%(string_id)s, %(collapse)s),''' % dict(
                     icon_name=icon_name,
                     action_type=action_type,
                     action=action,
@@ -442,7 +429,7 @@ def convert_config():
                 output += 'simulateMenuItemPress(AppConstants.APP_EMAIL, new long[] { %s });' % (', '.join(map(str, item["coords"])))
             else:
                 action, action_type = get_action(item)
-                output += 'goToActivity(new ServiceBoundActivity.NavigationItem(R.drawable.menu_0, %(action_type)s, %(action)s, R.string.%(string_id)s, %(collapse)s));' % dict(
+                output += 'goToActivity(new ServiceBoundActivity.NavigationItem(FontAwesome.Icon.faw_question, %(action_type)s, %(action)s, R.string.%(string_id)s, %(collapse)s));' % dict(
                     action_type=action_type,
                     action=action,
                     string_id=strings_map[item['text']],

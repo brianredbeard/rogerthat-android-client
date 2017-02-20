@@ -78,7 +78,6 @@
                 android:layout_marginTop="4dp"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:singleLine="true"
                 android:textSize="14sp"
                 tools:text="Message content goes here. Long text should not overlap"
                 tools:visibility="visible" />
@@ -100,10 +99,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
-                android:paddingLeft="10dp"
-                app:ico_color="@color/mc_primary_color"
-                app:ico_icon="@string/faw_check"
-                app:ico_size="15dp"/>
+                android:paddingLeft="10dp"/>
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

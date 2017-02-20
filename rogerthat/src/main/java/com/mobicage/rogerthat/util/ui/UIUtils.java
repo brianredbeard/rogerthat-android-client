@@ -23,9 +23,11 @@ import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -35,10 +37,20 @@ import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Point;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.ShapeDrawable;
 import android.media.ThumbnailUtils;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore.Video.Thumbnails;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.TextInputLayout;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v4.widget.CompoundButtonCompat;
 import android.support.v7.app.NotificationCompat;
 import android.view.Display;
 import android.view.Gravity;
@@ -48,10 +60,19 @@ import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CheckedTextView;
+import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -61,13 +82,17 @@ import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
+import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.news.NewsPlugin;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.config.AppConstants;
+import com.mobicage.rpc.config.LookAndFeelConstants;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -78,6 +103,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class UIUtils {
 
+    public static final String ERROR_MESSAGE = "error_message";
+    public static final String ERROR_TITLE = "error_title";
+    public static final String ERROR_CAPTION = "error_caption";
+    public static final String ERROR_ACTION = "error_action";
     private final static float UNINITIALIZED_PIXEL_SCALE = -1;
     private final static int UNINITIALIZED_PIXEL_WIDTH = -1;
 
@@ -357,8 +386,7 @@ public class UIUtils {
         }
         Resources resources = activity.getResources();
         message.setText(resources.getString(hintResource, args));
-
-        new AlertDialog.Builder(activity)
+        AlertDialog dialog = new AlertDialog.Builder(activity)
             .setOnCancelListener(new DialogInterface.OnCancelListener() {
                 @Override
                 public void onCancel(DialogInterface dialog) {
@@ -381,33 +409,195 @@ public class UIUtils {
                             onDismissHandler.run();
                         }
                     }
-                }).create().show();
+                }).create();
+        dialog.show();
+        int buttonId = mainService.getResources().getIdentifier("android:id/button1", null, null);
+        ((Button) dialog.findViewById(buttonId)).setTextColor(LookAndFeelConstants.getPrimaryColor(activity));
         return true;
     }
 
-    public static Activity getTopActivity(final MainService mainService) {
+    public static Activity getTopActivity() {
         if (sActivities.size() == 0)
             return null;
 
         return sActivities.get(sActivities.size() - 1);
     }
 
-    public static AlertDialog showAlertDialog(Context ctx, final int titleResource, final int messageResource) {
-        return UIUtils.showAlertDialog(ctx, ctx.getString(titleResource), ctx.getString(messageResource));
+    // Lots of overloads for convenience
+
+    public static AlertDialog showDialog(Context ctx, final int titleResource, final int messageResource) {
+        return UIUtils.showDialog(ctx, ctx.getString(titleResource), ctx.getString(messageResource));
     }
 
-    public static AlertDialog showAlertDialog(Context ctx, final String title, final int messageResource) {
-        return UIUtils.showAlertDialog(ctx, title, ctx.getString(messageResource));
+    public static AlertDialog showDialog(Context ctx, final String title, final int messageResource) {
+        return UIUtils.showDialog(ctx, title, ctx.getString(messageResource));
     }
 
-    public static AlertDialog showAlertDialog(Context ctx, final String title, final String message) {
+    public static AlertDialog showDialog(Context ctx, final String title, final String messageResource) {
+        return UIUtils.showDialog(ctx, title, messageResource, null, null, null);
+    }
+
+
+    public static AlertDialog showDialog(Context ctx, final String title, final String message,
+                                         SafeDialogClick onPositiveButtonClickListener) {
+        return UIUtils.showDialog(ctx, title, message, onPositiveButtonClickListener, null, null);
+    }
+
+    public static AlertDialog showDialog(Context ctx, String title, String message,
+                                         SafeDialogClick onPositiveButtonClick, String errorCaption,
+                                         SafeDialogClick onNegativeButtonClick) {
+        String positiveButtonText = ctx.getString(R.string.rogerthat);
+        return UIUtils.showDialog(ctx, title, message, positiveButtonText, onPositiveButtonClick, errorCaption,
+                onNegativeButtonClick);
+    }
+
+
+    public static AlertDialog showDialog(Context ctx, String title, String message, String[] items, SafeDialogClick itemsOnClickListener) {
         AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
-        builder.setPositiveButton(R.string.rogerthat, null);
-        builder.setMessage(message);
-        builder.setTitle(title);
+        if (title != null) {
+            builder.setTitle(title);
+        }
+        if (message != null) {
+            builder.setMessage(message);
+        }
+        builder.setItems(items, itemsOnClickListener);
         AlertDialog dialog = builder.create();
         dialog.show();
+        UIUtils.setDialogButtonColors(ctx, dialog);
         return dialog;
+    }
+
+    public static AlertDialog showDialog(Context ctx, String title, String message,int positiveButtonCaption,
+                                         SafeDialogClick onPositiveClickListener, int negativeButtonCaption,
+                                         SafeDialogClick onNegativeClickListener) {
+        String positiveCaption = ctx.getString(positiveButtonCaption);
+        String negativeCaption = ctx.getString(negativeButtonCaption);
+        return UIUtils.showDialog(ctx, title, message, positiveCaption, onPositiveClickListener, negativeCaption,
+                onNegativeClickListener);
+    }
+
+    public static AlertDialog showDialog(Context ctx, String title, String message, int positiveButtonCaption,
+                                         SafeDialogClick onPositiveClickListener, int negativeButtonCaption,
+                                         SafeDialogClick onNegativeClickListener, View view, boolean show) {
+        String positiveCaption = ctx.getString(positiveButtonCaption);
+        String negativeCaption = ctx.getString(negativeButtonCaption);
+        return UIUtils.showDialog(ctx, title, message, positiveCaption, onPositiveClickListener, negativeCaption,
+                onNegativeClickListener, view, show);
+    }
+
+    public static AlertDialog showDialog(Context ctx, String title, String message, String positiveCaption,
+                                         SafeDialogClick onPositiveButtonClick, String negativeCaption,
+                                         SafeDialogClick onNegativeButtonClick) {
+        return UIUtils.showDialog(ctx, title, message, positiveCaption, onPositiveButtonClick, negativeCaption,
+                onNegativeButtonClick, null, true);
+    }
+
+    public static AlertDialog showDialog(Context ctx, String title, String message, int positiveButtonCaption,
+                                         SafeDialogClick onPositiveButtonClick, int negativeButtonCaption,
+                                         SafeDialogClick onNegativeButtonClick, View view) {
+        String positiveCaption = ctx.getString(positiveButtonCaption);
+        String negativeCaption = ctx.getString(negativeButtonCaption);
+        return UIUtils.showDialog(ctx, title, message, positiveCaption, onPositiveButtonClick, negativeCaption,
+                onNegativeButtonClick, view, true);
+    }
+
+    public static AlertDialog showDialog(Context ctx, String title, String message, String positiveCaption,
+                                         SafeDialogClick onPositiveButtonClick, String negativeCaption,
+                                         SafeDialogClick onNegativeButtonClick, View view) {
+        return UIUtils.showDialog(ctx, title, message, positiveCaption, onPositiveButtonClick, negativeCaption,
+                onNegativeButtonClick, view, true);
+    }
+
+    public static AlertDialog showDialog(final Context ctx, String title, String message, String positiveCaption,
+                                         SafeDialogClick onPositiveButtonClick, String negativeCaption,
+                                         SafeDialogClick onNegativeButtonClick, View view, boolean show) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
+        if (title != null) {
+            builder.setTitle(title);
+        }
+        if (message != null) {
+            builder.setMessage(message);
+        }
+        builder.setPositiveButton(positiveCaption, onPositiveButtonClick);
+        if (negativeCaption != null) {
+            builder.setNegativeButton(negativeCaption, onNegativeButtonClick);
+        }
+        if (view != null) {
+            builder.setView(view);
+        }
+        final AlertDialog dialog = builder.create();
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+             @Override
+             public void onShow(DialogInterface dialogInterface) {
+                 UIUtils.setDialogButtonColors(ctx, dialog);
+             }
+        });
+        if (show) {
+            dialog.show();
+        }
+        return dialog;
+    }
+
+    public static void showErrorDialog(final Activity activity, Intent intent) {
+        final String errorMessage = intent.getStringExtra(ERROR_MESSAGE);
+        if (TextUtils.isEmptyOrWhitespace(errorMessage)) {
+            activity.finish();
+            UIUtils.showErrorToast(activity, activity.getString(R.string.scanner_communication_failure));
+        } else {
+            final String errorCaption = intent.getStringExtra(ERROR_CAPTION);
+            final String errorAction = intent.getStringExtra(ERROR_ACTION);
+            final String errorTitle = intent.getStringExtra(ERROR_TITLE);
+
+            SafeDialogClick positiveButtonListener = new SafeDialogClick() {
+                @Override
+                public void safeOnClick(DialogInterface dialog, int id) {
+                    dialog.dismiss();
+                    activity.finish();
+                }
+            };
+            SafeDialogClick negativeButtonListener = null;
+            if (!TextUtils.isEmptyOrWhitespace(errorCaption) && !TextUtils.isEmptyOrWhitespace(errorAction)) {
+                negativeButtonListener = new SafeDialogClick() {
+                    @Override
+                    public void safeOnClick(DialogInterface dialog, int id) {
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(errorAction));
+                        dialog.dismiss();
+                        activity.finish();
+                        activity.startActivity(intent);
+                    }
+                };
+            }
+            UIUtils.showDialog(activity, errorTitle, errorMessage, positiveButtonListener, errorCaption,
+                    negativeButtonListener);
+        }
+    }
+
+
+    public static void showErrorToast(Context context, String message) {
+        UIUtils.showLongToast(context, message);
+    }
+
+    public static void setDialogButtonColors(Context ctx, AlertDialog dialog) {
+        int primaryColor = LookAndFeelConstants.getPrimaryColor(ctx);
+        // This may or may not change in different SDK versions
+        int buttonId1 = ctx.getResources().getIdentifier("android:id/button1", null, null);
+        ((Button) dialog.findViewById(buttonId1)).setTextColor(primaryColor);
+        int buttonId2 = ctx.getResources().getIdentifier("android:id/button2", null, null);
+        ((Button) dialog.findViewById(buttonId2)).setTextColor(primaryColor);
+        int buttonId3 = ctx.getResources().getIdentifier("android:id/button3", null, null);
+        ((Button) dialog.findViewById(buttonId3)).setTextColor(primaryColor);
+    }
+
+    public static AlertDialog showNotConnectedToFriendDialog(final Context context, final FriendsPlugin friendsPlugin,
+                                                             final String friendEmail) {
+        String message = context.getString(R.string.invite_as_friend, friendEmail);
+        SafeDialogClick positiveClick = new SafeDialogClick() {
+            @Override
+            public void safeOnClick(DialogInterface dialog, int id) {
+                friendsPlugin.inviteFriend(friendEmail, null, null, true);
+            }
+        };
+        return UIUtils.showDialog(context, null, message, R.string.yes, positiveClick, R.string.no, null);
     }
 
     public static int getDisplayWidth(Context ctx) {
@@ -515,7 +705,7 @@ public class UIUtils {
     }
 
     public static void showErrorPleaseRetryDialog(Context context) {
-        showAlertDialog(context, null, R.string.error_please_try_again);
+        showDialog(context, null, R.string.error_please_try_again);
     }
 
     public static boolean isSupportedFontawesomeIcon(String iconName) {
@@ -540,9 +730,195 @@ public class UIUtils {
         return new IconicsDrawable(context, icon);
     }
 
-    public static void setIconBackground(ImageView imageView, int backgroundColor) {
-        GradientDrawable background = (GradientDrawable) imageView.getBackground();
-        background.setColor(backgroundColor);
+    public static void setBackgroundColor(View view, int backgroundColor) {
+        Drawable background = view.getBackground();
+        if (background instanceof ShapeDrawable) {
+            ShapeDrawable shapeDrawable = (ShapeDrawable) background;
+            shapeDrawable.getPaint().setColor(backgroundColor);
+        } else if (background instanceof GradientDrawable) {
+            GradientDrawable gradientDrawable = (GradientDrawable) background;
+            gradientDrawable.setColor(backgroundColor);
+        } else if (background instanceof ColorDrawable) {
+            // alpha value may need to be set again after this call
+            ColorDrawable colorDrawable = (ColorDrawable) background;
+            colorDrawable.setColor(backgroundColor);
+        } else {
+            L.e("Unknown background type to set color on: " + view.getClass());
+        }
+    }
+
+    public static ProgressDialog showProgressDialog(Context context, CharSequence title, CharSequence message) {
+        return UIUtils.showProgressDialog(context, title, message, true, true, null);
+    }
+
+    public static ProgressDialog showProgressDialog(Context context, CharSequence title, CharSequence message,
+                                                    boolean indeterminate, boolean cancelable) {
+        return UIUtils.showProgressDialog(context, title, message, indeterminate, cancelable, null);
+    }
+
+    public static ProgressDialog showProgressDialog(Context context, CharSequence title, CharSequence message,
+                                                    boolean indeterminate, boolean cancelable,
+                                                    DialogInterface.OnCancelListener onCancelListener) {
+        return UIUtils.showProgressDialog(context, title, message, indeterminate, cancelable, onCancelListener,
+                ProgressDialog.STYLE_SPINNER, true);
+    }
+
+    public static ProgressDialog showProgressDialog(final Context context, CharSequence title, CharSequence message,
+                                                    boolean indeterminate, boolean cancelable,
+                                                    DialogInterface.OnCancelListener onCancelListener,
+                                                    int progressStyle, boolean show) {
+        ProgressDialog dialog = new ProgressDialog(context);
+        dialog.setTitle(title);
+        dialog.setMessage(message);
+        dialog.setIndeterminate(indeterminate);
+        dialog.setCancelable(cancelable);
+        dialog.setProgressNumberFormat(null);
+        dialog.setProgressPercentFormat(null);
+        dialog.setOnCancelListener(onCancelListener);
+        dialog.setProgressStyle(progressStyle);
+        dialog.setOnShowListener(new ProgressDialog.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                ProgressDialog progressDialog = (ProgressDialog) dialog;
+                ProgressBar progressBar = (ProgressBar) progressDialog.findViewById(android.R.id.progress);
+                UIUtils.setColors(context, progressBar);
+            }
+        });
+        if (show) {
+            dialog.show();
+        }
+        return dialog;
+    }
+
+    private static void colorEditText(EditText view, String fieldNameRes, String fieldNameDrawable, int color,
+                                      boolean isArray) {
+        try {
+            // Get the cursor resource id
+            final Field field = TextView.class.getDeclaredField(fieldNameRes);
+            field.setAccessible(true);
+            int drawableCursorResId = field.getInt(view);
+
+            // Get the editor
+            final Field editor = TextView.class.getDeclaredField("mEditor");
+            editor.setAccessible(true);
+            Object cursorEditor = editor.get(view);
+
+            // Get the drawable and set a color filter
+            Drawable drawable = ContextCompat.getDrawable(view.getContext(), drawableCursorResId);
+            drawable.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+
+            // Set the drawables
+            final Field drawableField = cursorEditor.getClass().getDeclaredField(fieldNameDrawable);
+            drawableField.setAccessible(true);
+            if (isArray) {
+                Drawable[] drawables = {drawable, drawable};
+                drawableField.set(cursorEditor, drawables);
+            } else {
+                drawableField.set(cursorEditor, drawable);
+            }
+        } catch (IllegalAccessException e) {
+            L.bug(e);
+        } catch (NoSuchFieldException e) {
+            L.bug(e);
+        }
+    }
+
+    /**
+     * Use reflection to change cursor color since there is no build-in method to set this
+     *
+     * @param view  EditText to set the color on
+     * @param color AARRGGBB
+     */
+    private static void setCursorColor(EditText view, int color) {
+        UIUtils.colorEditText(view, "mCursorDrawableRes", "mCursorDrawable", color, true);
+        UIUtils.colorEditText(view, "mTextSelectHandleLeftRes", "mSelectHandleLeft", color, false);
+        UIUtils.colorEditText(view, "mTextSelectHandleRightRes", "mSelectHandleRight", color, false);
+        UIUtils.colorEditText(view, "mTextSelectHandleRes", "mSelectHandleCenter", color, false);
+    }
+
+    private static void colorTextInputLayout(TextInputLayout textInputLayout, int color) {
+        try {
+            ColorStateList colorStateList = new ColorStateList(new int[][]{{0}}, new int[]{color});
+            Field fDefaultTextColor = TextInputLayout.class.getDeclaredField("mDefaultTextColor");
+            fDefaultTextColor.setAccessible(true);
+            fDefaultTextColor.set(textInputLayout, colorStateList);
+
+            Field fFocusedTextColor = TextInputLayout.class.getDeclaredField("mFocusedTextColor");
+            fFocusedTextColor.setAccessible(true);
+            fFocusedTextColor.set(textInputLayout, colorStateList);
+        } catch (IllegalAccessException e) {
+            L.bug(e);
+        } catch (NoSuchFieldException e) {
+            L.bug(e);
+        }
+    }
+
+    public static void setColors(Context context, View... views) {
+        int primaryColor = LookAndFeelConstants.getPrimaryColor(context);
+        setColors(primaryColor, views);
+    }
+
+    public static void setColors(int color, View... views) {
+        for (View view : views) {
+            if (view instanceof CheckBox) {
+                CheckBox checkbox = (CheckBox) view;
+                CompoundButtonCompat.setButtonTintList(checkbox, ColorStateList.valueOf(color));
+            } else if (view instanceof FloatingActionButton) {
+                //noinspection RedundantCast
+                ((FloatingActionButton) view).setBackgroundTintList(ColorStateList.valueOf(color));
+            } else if (view instanceof Button || view instanceof ImageButton) {
+                Drawable background = view.getBackground();
+                if (background != null) {
+                    background.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+                }
+            } else if (view instanceof TextInputLayout) {
+                UIUtils.colorTextInputLayout((TextInputLayout) view, color);
+                // TODO: EditText's who are a child of TextInputLayout their line isn't colored correctly
+            } else if (view instanceof EditText) {
+                EditText editText = (EditText) view;
+                editText.setHighlightColor(color); // When selecting text
+                editText.setHintTextColor(color); // Text for the  hint message
+                // Line under the textfield
+                Drawable background = editText.getBackground();
+                if (background != null) {
+                    DrawableCompat.setTint(background, color);
+                    editText.setBackground(background);
+                }
+                UIUtils.setCursorColor(editText, color);
+            } else if (view instanceof CheckedTextView) {
+                CheckedTextView ctv = (CheckedTextView) view;
+                Drawable d = ctv.getCheckMarkDrawable();
+                d.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+            } else if (view instanceof TextView) {
+                ((TextView) view).setLinkTextColor(color);
+            } else if (view instanceof SeekBar) {
+                SeekBar sb = (SeekBar) view;
+                Drawable progress = sb.getProgressDrawable();
+                if (progress != null) {
+                    progress.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+                }
+                Drawable thumb = sb.getThumb();
+                if (thumb != null) {
+                    thumb.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+                }
+            } else if (view instanceof ProgressBar) {
+                ((ProgressBar) view).getIndeterminateDrawable().setColorFilter(color, PorterDuff.Mode.SRC_IN);
+            } else {
+                L.d("Not coloring view: " + view.toString());
+            }
+        }
+    }
+
+    public static void setColorsRecursive(Context context, ViewGroup viewGroup) {
+        for (int i = 0; i < viewGroup.getChildCount(); i++) {
+            final View view = viewGroup.getChildAt(i);
+            if (!(view instanceof FrameLayout) && !(view instanceof LinearLayout) && !(view instanceof
+                    RelativeLayout)) {
+                UIUtils.setColors(context, view);
+            } else if (view instanceof ViewGroup) {
+                UIUtils.setColorsRecursive(context, (ViewGroup) view);
+            }
+        }
     }
 }
 

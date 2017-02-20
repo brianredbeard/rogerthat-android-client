@@ -37,11 +37,12 @@ import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.util.logging.L;
-import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
+import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.ResponseHandler;
+import com.mobicage.rpc.config.LookAndFeelConstants;
 import com.mobicage.to.messaging.forms.LongWidgetResultTO;
 import com.mobicage.to.messaging.forms.SubmitDateSelectFormRequestTO;
 import com.mobicage.to.messaging.forms.SubmitDateSelectFormResponseTO;
@@ -68,9 +69,7 @@ public class DateSelectWidget extends Widget {
     private String mMode;
     private String mFormat;
     private TextView mTextView;
-    private AlertDialog mDatePickerDialog;
     private DatePicker mDatePicker;
-    private AlertDialog mTimePickerDialog;
     private TimePicker mTimePicker;
     private Calendar mCal;
     private boolean mIgnoreDateOrTimeChanges = false;
@@ -108,10 +107,12 @@ public class DateSelectWidget extends Widget {
         mPickDate = (ImageButton) findViewById(R.id.pick_date);
         mPickTime = (ImageButton) findViewById(R.id.pick_time);
 
+        int iconColor = LookAndFeelConstants.getPrimaryIconColor(mActivity);
         if (mColorScheme == BrandingMgr.ColorScheme.DARK) {
-            mPickDate.setImageDrawable(new IconicsDrawable(mActivity, FontAwesome.Icon.faw_calendar_o).color(mTextColor).sizeDp(24));
-            mPickTime.setImageDrawable(new IconicsDrawable(mActivity, FontAwesome.Icon.faw_clock_o).color(mTextColor).sizeDp(24));
+            iconColor = mTextColor;
         }
+        mPickDate.setImageDrawable(new IconicsDrawable(mActivity, FontAwesome.Icon.faw_calendar_o).color(iconColor).sizeDp(24));
+        mPickTime.setImageDrawable(new IconicsDrawable(mActivity, FontAwesome.Icon.faw_clock_o).color(iconColor).sizeDp(24));
 
         mCal = Calendar.getInstance();
         mCal.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -159,8 +160,8 @@ public class DateSelectWidget extends Widget {
         }
 
         if (mPickDate.getVisibility() == View.VISIBLE) {
-            final View dialog = mActivity.getLayoutInflater().inflate(R.layout.ds_date_picker, null);
-            mDatePicker = (DatePicker) dialog.findViewById(R.id.date_picker);
+            final View dialogView = mActivity.getLayoutInflater().inflate(R.layout.ds_date_picker, null);
+            mDatePicker = (DatePicker) dialogView.findViewById(R.id.date_picker);
             mDatePicker.setDescendantFocusability(DatePicker.FOCUS_BLOCK_DESCENDANTS);
             mDatePicker.init(mCal.get(Calendar.YEAR), mCal.get(Calendar.MONTH), mCal.get(Calendar.DAY_OF_MONTH),
                     new DatePicker.OnDateChangedListener() {
@@ -170,33 +171,25 @@ public class DateSelectWidget extends Widget {
                         }
                     }
             );
-            mDatePickerDialog = new AlertDialog.Builder(mActivity)
-                    .setView(dialog)
-                    .setPositiveButton(mActivity.getString(R.string.ok), new SafeDialogInterfaceOnClickListener() {
-                        @Override
-                        public void safeOnClick(DialogInterface di, int which) {
-                            // Workaround for android 5.0 not triggering the changed listener
-                            datePickerChanged(mDatePicker.getYear(), mDatePicker.getMonth(), mDatePicker.getDayOfMonth());
-
-                        }
-                    }).setNegativeButton(mActivity.getString(R.string.cancel), new SafeDialogInterfaceOnClickListener() {
-                        @Override
-                        public void safeOnClick(DialogInterface dialog, int which) {
-                        }
-                    }).create();
-            mDatePickerDialog.setCanceledOnTouchOutside(true);
-
+            final SafeDialogClick positiveClick = new SafeDialogClick() {
+                @Override
+                public void safeOnClick(DialogInterface di, int id) {
+                    // Workaround for android 5.0 not triggering the changed listener
+                    datePickerChanged(mDatePicker.getYear(), mDatePicker.getMonth(), mDatePicker.getDayOfMonth());
+                }
+            };
+            final AlertDialog datePickerDialog = UIUtils.showDialog(mActivity, null, null, R.string.ok, positiveClick, R.string.cancel, null, dialogView, false);
             mPickDate.setOnClickListener(new SafeViewOnClickListener() {
                 @Override
                 public void safeOnClick(View v) {
-                    mDatePickerDialog.show();
+                    datePickerDialog.show();
                 }
             });
         }
 
         if (mPickTime.getVisibility() == View.VISIBLE) {
-            final View dialog = mActivity.getLayoutInflater().inflate(R.layout.ds_time_picker, null);
-            mTimePicker = (TimePicker) dialog.findViewById(R.id.time_picker);
+            final View dialogView = mActivity.getLayoutInflater().inflate(R.layout.ds_time_picker, null);
+            mTimePicker = (TimePicker) dialogView.findViewById(R.id.time_picker);
             mTimePicker.setDescendantFocusability(TimePicker.FOCUS_BLOCK_DESCENDANTS);
             mTimePicker.setIs24HourView(android.text.format.DateFormat.is24HourFormat(getContext()));
             mTimePicker.setCurrentHour(mCal.get(Calendar.HOUR_OF_DAY));
@@ -208,25 +201,19 @@ public class DateSelectWidget extends Widget {
                 }
             });
 
-            mTimePickerDialog = new AlertDialog.Builder(mActivity)
-                    .setView(dialog)
-                    .setPositiveButton(mActivity.getString(R.string.ok), new SafeDialogInterfaceOnClickListener() {
-                        @Override
-                        public void safeOnClick(DialogInterface di, int which) {
-                            // Workaround for android 5.0 not triggering the changed listener
-                            timePickerChanged(mTimePicker.getCurrentHour(), mTimePicker.getCurrentMinute());
-                        }
-                    }).setNegativeButton(mActivity.getString(R.string.cancel), new SafeDialogInterfaceOnClickListener() {
-                        @Override
-                        public void safeOnClick(DialogInterface dialog, int which) {
-                        }
-                    }).create();
-            mTimePickerDialog.setCanceledOnTouchOutside(true);
+            final SafeDialogClick onPositiveClick = new SafeDialogClick() {
+                @Override
+                public void safeOnClick(DialogInterface di, int id) {
+                    // Workaround for android 5.0 not triggering the changed listener
+                    timePickerChanged(mTimePicker.getCurrentHour(), mTimePicker.getCurrentMinute());
+                }
+            };
 
+            final AlertDialog timePickerDialog = UIUtils.showDialog(mActivity, null, null, R.string.ok, onPositiveClick, R.string.cancel, null, dialogView, false);
             mPickTime.setOnClickListener(new SafeViewOnClickListener() {
                 @Override
                 public void safeOnClick(View v) {
-                    mTimePickerDialog.show();
+                    timePickerDialog.show();
                 }
             });
         }

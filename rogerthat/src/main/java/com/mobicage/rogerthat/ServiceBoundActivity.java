@@ -18,7 +18,7 @@
 
 package com.mobicage.rogerthat;
 
-import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -27,15 +27,15 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.support.design.internal.NavigationMenuView;
-import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
@@ -49,10 +49,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.facebook.CallbackManager;
@@ -63,18 +65,19 @@ import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.MenuItemPresser;
 import com.mobicage.rogerthat.plugins.friends.MenuItemPressingActivity;
 import com.mobicage.rogerthat.plugins.friends.PokingActivity;
+import com.mobicage.rogerthat.plugins.system.SystemPlugin;
 import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
+import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.Pausable;
 import com.mobicage.rogerthat.util.ui.UIUtils;
-import com.mobicage.rpc.config.AppConstants;
-import com.mobicage.rpc.config.NavigationConstants;
+import com.mobicage.rpc.config.LookAndFeelConstants;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -107,13 +110,21 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
                 String key = intent.getStringExtra("key");
                 long count = intent.getLongExtra("count", 0);
                 updateBadgeCount(key, count);
+            } else if (SystemPlugin.ASSET_AVAILABLE_INTENT.equals(intent.getAction())) {
+                String kind = intent.getStringExtra(SystemPlugin.ASSET_KIND);
+                if (LookAndFeelConstants.getAssetKindOfHeaderImage().equals(kind)) {
+                    setHeaderImage();
+                }
+            } else if (SystemPlugin.LOOK_AND_FEEL_UPDATED_INTENT.equals(intent.getAction())) {
+                mNavigationListViewAdapter.setmNavigationItems(LookAndFeelConstants.getNavigationItems(context));
+                mNavigationListViewAdapter.notifyDataSetChanged();
+                showNavigationToolbar();
             }
 
             return null;
         }
     };
-    private AlertDialog mTransmitProgressDialog;
-    private ProgressBar mTransmitProgressBar;
+    private ProgressDialog mTransmitProgressDialog;
     private long mTransmitStart = 0;
 
     private SafeRunnable mTransmitTimeoutRunnable;
@@ -134,32 +145,20 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
     private String mActivityName;
 
     public MenuItemPresser menuItemPresser;
-    private boolean mShowDrawer = false;
     private boolean mShowDrawerIcon = false;
 
-    private Map<String, Integer> mBadgePositionsNavigationDrawer = new HashMap<>();
+    private Map<String, Long> mBadgeCountNavigationDrawer = new HashMap<>();
     private Map<String, Integer> mBadgePositionsNavigationFooter = new HashMap<>();
+    private NavigationListViewAdapter mNavigationListViewAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         T.setUIThread("ServiceBoundActivity.onCreate()");
-
-        ServiceBoundActivity.NavigationItem[] navigationItems = NavigationConstants.getNavigationItems();
-        for (int i = 0; i < navigationItems.length; i++) {
-            if (navigationItems[i].actionType == null) {
-                mBadgePositionsNavigationDrawer.put(navigationItems[i].action, i);
-            } else {
-                mBadgePositionsNavigationDrawer.put(navigationItems[i].actionType + "|" + navigationItems[i].action, i);
-            }
-        }
-
-        ServiceBoundActivity.NavigationItem[] navigationFooterItems = NavigationConstants.getNavigationFooterItems();
+        mNavigationListViewAdapter = new NavigationListViewAdapter(this);
+        mNavigationListViewAdapter.setmNavigationItems(LookAndFeelConstants.getNavigationItems(this));
+        NavigationItem[] navigationFooterItems = LookAndFeelConstants.getNavigationFooterItems(this);
         for (int i = 0; i < navigationFooterItems.length; i++) {
-            if (navigationFooterItems[i].actionType == null) {
-                mBadgePositionsNavigationFooter.put(navigationFooterItems[i].action, i);
-            } else {
-                mBadgePositionsNavigationFooter.put(navigationFooterItems[i].actionType + "|" + navigationFooterItems[i].action, i);
-            }
+            mBadgePositionsNavigationFooter.put(navigationFooterItems[i].actionWithType(), i);
         }
 
         LayoutInflaterCompat.setFactory(getLayoutInflater(), new IconicsLayoutInflater(getDelegate()));
@@ -169,21 +168,21 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
 
         IntentFilter filter = new IntentFilter(MainService.CLOSE_ACTIVITY_INTENT);
         filter.addAction(MainService.UPDATE_BADGE_INTENT);
+        filter.addAction(SystemPlugin.ASSET_AVAILABLE_INTENT);
+        filter.addAction(SystemPlugin.LOOK_AND_FEEL_UPDATED_INTENT);
         registerReceiver(intentListener, filter);
         doBindService();
 
         mConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 
-        View progressDialog = getLayoutInflater().inflate(R.layout.progressdialog, null);
-        mTransmitProgressDialog = new AlertDialog.Builder(this).setTitle(R.string.transmitting).setView(progressDialog).create();
-        mTransmitProgressBar = (ProgressBar) progressDialog.findViewById(R.id.progress_bar);
-        mTransmitProgressDialog.setCancelable(true);
-        mTransmitProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+        DialogInterface.OnCancelListener onCancelListener = new DialogInterface.OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialog) {
                 completeTransmit(null);
             }
-        });
+        };
+        mTransmitProgressDialog = UIUtils.showProgressDialog(this, null, getString(R.string.transmitting), true,
+                true, onCancelListener, ProgressDialog.STYLE_HORIZONTAL, false);
     }
 
     @Override
@@ -201,6 +200,11 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         doUnbindService();
     }
 
+    /**
+     * TODO: this is mildly infuriating UX. Should be an indeterminate spinner
+     *
+     * @param onTimeout function to execute on timeout
+     */
     public void showTransmitting(final SafeRunnable onTimeout) {
         runOnUiThread(new SafeRunnable() {
             @Override
@@ -208,7 +212,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
                 T.UI();
                 mTransmitTimeoutRunnable = onTimeout;
                 mTransmitStart = System.currentTimeMillis();
-                mTransmitProgressBar.setProgress(0);
+                mTransmitProgressDialog.setProgress(0);
                 mTransmitProgressDialog.show();
                 mService.postDelayedOnUIHandler(mIncreaseProgress, 100);
             }
@@ -227,7 +231,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
                 T.UI();
                 mTransmitProgressDialog.dismiss();
                 mService.removeFromUIHandler(mIncreaseProgress);
-                mTransmitProgressBar.setProgress(100);
+                mTransmitProgressDialog.setProgress(100);
                 if (afterComplete != null && mService != null) {
                     mService.postDelayedOnUIHandler(new SafeRunnable() {
                         @Override
@@ -247,7 +251,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
             if (mTransmitProgressDialog.isShowing()) {
                 int completenessLevel = (int) ((System.currentTimeMillis() - mTransmitStart) * 100 / MAX_TRANSMIT);
                 if (completenessLevel < 100) {
-                    mTransmitProgressBar.setProgress(completenessLevel);
+                    mTransmitProgressDialog.setProgress(completenessLevel);
                     if (mService != null)
                         mService.postDelayedOnUIHandler(mIncreaseProgress, 100);
                 } else {
@@ -259,15 +263,16 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
     };
 
     public void showActionScheduledDialog() {
-        new AlertDialog.Builder(ServiceBoundActivity.this).setMessage(R.string.action_scheduled)
-                .setPositiveButton(R.string.rogerthat, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        if (mTransmitTimeoutRunnable != null)
-                            mTransmitTimeoutRunnable.run();
-                    }
-                }).create().show();
+        String message = getString(R.string.action_scheduled);
+        SafeDialogClick onPositiveClick = new SafeDialogClick() {
+            @Override
+            public void safeOnClick(DialogInterface dialog, int id) {
+                dialog.dismiss();
+                if (mTransmitTimeoutRunnable != null)
+                    mTransmitTimeoutRunnable.run();
+            }
+        };
+        UIUtils.showDialog(ServiceBoundActivity.this, null, message, onPositiveClick);
     }
 
     public boolean checkConnectivity() {
@@ -462,6 +467,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
 
     @Override
     public void setContentView(int layoutResID) {
+        mActivityName = null;
         setContentView(getLayoutInflater().inflate(R.layout.navigation_view, null));
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -493,49 +499,56 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         mDrawerToggle.syncState();
 
         Intent intent = getIntent();
-        mShowDrawer = intent.getBooleanExtra("show_drawer", false);
+        boolean showDrawer = intent.getBooleanExtra("show_drawer", false);
         mShowDrawerIcon = intent.getBooleanExtra("show_drawer_icon", false);
 
-        if (mShowDrawer) {
+        if (showDrawer) {
             openNavigationView();
         }
+        setHeaderImage();
+        ListView menuItemListview = (ListView) findViewById(R.id.navigation_items_listview);
+        menuItemListview.setAdapter(mNavigationListViewAdapter);
+        menuItemListview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                NavigationItem navigationItem = (NavigationItem) parent.getItemAtPosition(position);
+                simulateNavigationItemClick(navigationItem);
+            }
+        });
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        final Menu menu = navigationView.getMenu();
-        ServiceBoundActivity.NavigationItem[] navigationItems = NavigationConstants.getNavigationItems();
-        for (int i = 0; i < navigationItems.length; i++) {
-            final NavigationItem ni = navigationItems[i];
-            menu.add(i, i, i, ni.labelTextId).setIcon(ni.iconId).setCheckable(true).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem item) {
-                    simulateNavigationItemClick(ni);
-                    return true;
-                }
-            }).setActionView(R.layout.navigation_menu_counter);
-        }
-        // Adding 2 spacer items such that the footer view doesn't overlap the last item(s)
-        menu.add(navigationItems.length, navigationItems.length, navigationItems.length, "").setCheckable(false);
-        menu.add(navigationItems.length, navigationItems.length + 1, navigationItems.length + 1, "").setCheckable(false);
-        navigationView.setItemIconTintList(null);
-        NavigationMenuView navigationMenuView = (NavigationMenuView) navigationView.getChildAt(0);
-        if (navigationMenuView != null) {
-            navigationMenuView.setVerticalScrollBarEnabled(false);
-        }
+        showNavigationToolbar();
 
+        if (mShowDrawerIcon) {
+            setupBadges();
+        } else {
+            setNavigationBarBurgerVisible(false, true);
+        }
+        UIUtils.setColorsRecursive(this, (ViewGroup) child);
+    }
+
+    private void showNavigationToolbar() {
         LinearLayout navigationFooter = (LinearLayout) findViewById(R.id.nav_view_footer);
-        ServiceBoundActivity.NavigationItem[] navigationFooterItems = NavigationConstants.getNavigationFooterItems();
+
+        GradientDrawable shape = new GradientDrawable(GradientDrawable.Orientation.BOTTOM_TOP,
+                new int[]{LookAndFeelConstants.getPrimaryColorDark(this), LookAndFeelConstants.getPrimaryColor(this)});
+        shape.setShape(GradientDrawable.RECTANGLE);
+        navigationFooter.setBackground(shape);
+
+        NavigationItem[] navigationFooterItems = LookAndFeelConstants.getNavigationFooterItems(this);
         if (navigationFooterItems.length > 0) {
             navigationFooter.removeAllViews();
             LayoutInflater li = getLayoutInflater();
             for (final NavigationItem ni : navigationFooterItems) {
                 View footerItem = li.inflate(R.layout.navigation_footer_item, navigationFooter, false);
-                if (ni.actionType == null) {
-                    footerItem.setTag(ni.action);
-                } else {
-                    footerItem.setTag(ni.actionType + "|" + ni.action);
-                }
+                footerItem.setTag(ni.actionWithType());
                 ImageButton imageButton = (ImageButton) footerItem.findViewById(R.id.image);
                 imageButton.setOnClickListener(new SafeViewOnClickListener() {
+                    @Override
+                    public void safeOnClick(View v) {
+                        simulateNavigationItemClick(ni);
+                    }
+                });
+                footerItem.setOnClickListener(new SafeViewOnClickListener() {
                     @Override
                     public void safeOnClick(View v) {
                         simulateNavigationItemClick(ni);
@@ -550,86 +563,41 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         } else {
             navigationFooter.setVisibility(View.GONE);
         }
-
-        if (mShowDrawerIcon) {
-            setupBadges();
-        } else {
-            setNavigationBarBurgerVisible(false, true);
-        }
     }
 
     private void simulateNavigationItemClick(NavigationItem ni) {
-        String activityName = ni.action;
-        if (ni.actionType != null) {
-            activityName = ni.actionType + "|" + ni.action;
-        }
+        String activityName = ni.actionWithType();
         closeNavigationView();
         if (activityName.equals(mActivityName)) {
             return;
         }
-        mService.postDelayedOnUIHandler(new SafeRunnable() {
-            @Override
-            protected void safeRun() throws Exception {
-                activateCurrentNavigationItem();
-            }
-        }, 250);
-
         Bundle extras = new Bundle();
         extras.putBoolean("show_drawer_icon", true);
         ActivityUtils.goToActivity(ServiceBoundActivity.this, ni, true, extras);
     }
 
-    public static class NavigationItem {
-        public FontAwesome.Icon icon;
-        public int iconId;
-        public String actionType;
-        public String action;
-        public int labelTextId;
-        public String labelText;
-        public boolean collapse;
-
-        public NavigationItem(FontAwesome.Icon icon, String actionType, String action, int labelTextId, boolean collapse) {
-            super();
-            this.icon = icon;
-            this.iconId = 0;
-            this.actionType = actionType;
-            this.action = action;
-            this.labelTextId = labelTextId;
-            this.labelText = null;
-            this.collapse = collapse;
-        }
-
-        public NavigationItem(FontAwesome.Icon icon, String actionType, String action, String labelText, boolean collapse) {
-            super();
-            this.icon = icon;
-            this.iconId = 0;
-            this.actionType = actionType;
-            this.action = action;
-            this.labelTextId = 0;
-            this.labelText = labelText;
-            this.collapse = collapse;
-        }
-
-        public NavigationItem(int iconId, String actionType, String action, int labelTextId, boolean collapse) {
-            super();
-            this.icon = null;
-            this.iconId = iconId;
-            this.actionType = actionType;
-            this.action = action;
-            this.labelTextId = labelTextId;
-            this.labelText = null;
-            this.collapse = collapse;
-        }
-    }
-
     @Override
     public void setContentView(View view) {
         super.setContentView(view);
+        UIUtils.setColorsRecursive(this, (ViewGroup) view);
     }
 
     @Override
     public void setContentView(View view, ViewGroup.LayoutParams params) {
         super.setContentView(view, params);
+        UIUtils.setColorsRecursive(this, (ViewGroup) view);
+    }
+
+    private void setHeaderImage() {
+        String kind = LookAndFeelConstants.getAssetKindOfHeaderImage();
+
+        Bitmap background = SystemPlugin.getAppAsset(this, kind);
+        ImageView headerImage = (ImageView) findViewById(R.id.nav_header);
+        if (background == null) {
+            headerImage.setImageResource(R.drawable.homescreen_header);
+        } else {
+            headerImage.setImageBitmap(background);
+        }
     }
 
     public boolean askPermissionIfNeeded(final String permission, final int requestCode, final SafeRunnable onGranted,
@@ -688,46 +656,25 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         getDrawer().closeDrawer(GravityCompat.START);
     }
 
+    public String getActivityName() {
+        return mActivityName;
+    }
+
     public void setActivityName(String activityName) {
         mActivityName = activityName;
         activateCurrentNavigationItem();
     }
 
     private void activateCurrentNavigationItem() {
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        if (navigationView == null)
-            return;
-
-        Menu menu = navigationView.getMenu();
-        if (menu == null)
-            return;
-
-        int order = -1;
-        if (mActivityName != null) {
-            ServiceBoundActivity.NavigationItem[] navigationItems = NavigationConstants.getNavigationItems();
-            for (int i = 0; i < navigationItems.length; i++) {
-                final NavigationItem ni = navigationItems[i];
-                if (ni.actionType == null && ni.action.equals(mActivityName)) {
-                    order = i;
-                    break;
-                } else if (ni.actionType != null && mActivityName.equals(ni.actionType + "|" + ni.action)) {
-                    order = i;
-                    break;
-                }
-            }
-        }
-        if (order >= 0) {
-            menu.getItem(order).setChecked(true);
-        } else {
-            for (int i = 0; i < menu.size(); i++) {
-                menu.getItem(i).setChecked(false);
-            }
-        }
-
         if (TextUtils.isEmptyOrWhitespace(mActivityName))
             return;
 
         LinearLayout navigationFooter = (LinearLayout) findViewById(R.id.nav_view_footer);
+        if (navigationFooter == null)
+            return;
+
+        mNavigationListViewAdapter.notifyDataSetChanged();
+
         if (navigationFooter.getVisibility() == View.GONE)
             return;
 
@@ -769,16 +716,12 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         // override this method if you want to subscribe to this click
     }
 
-    public void onNavigationHeaderBurgerClicked(View v) {
-        closeNavigationView();
-    }
-
     public void onNavigationHeaderImageClicked(View v) {
         closeNavigationView();
 
         Bundle extras = new Bundle();
         extras.putBoolean("show_drawer_icon", true);
-        if (AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.messaging) {
+        if (LookAndFeelConstants.getHomesActivityLayout(this) == R.layout.messaging) {
             ActivityUtils.goToActivity(ServiceBoundActivity.this, "messages", true, false, extras);
         } else {
             ActivityUtils.goToActivity(ServiceBoundActivity.this, "news", true, false, extras);
@@ -813,39 +756,22 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         updateShortcutBadgeCount();
     }
 
+    public Long getBadgeCount(String key) {
+        if (mBadgeCountNavigationDrawer.containsKey(key)) {
+            return mBadgeCountNavigationDrawer.get(key);
+        } else {
+            return 0L;
+        }
+    }
+
     private void updateBadge(String key, long count) {
         if (!mShowDrawerIcon)
             return;
 
-        boolean foundBadge = false;
-        if (mBadgePositionsNavigationDrawer.containsKey(key)) {
-            foundBadge = true;
-
-            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-            if (navigationView == null)
-                return;
-
-            Menu menu = navigationView.getMenu();
-            if (menu == null)
-                return;
-
-            int index = mBadgePositionsNavigationDrawer.get(key);
-            if (menu.size() <= index)
-                return;
-
-            View v = menu.getItem(index).getActionView();
-            TextView badge = (TextView) v.findViewById(R.id.badge);
-            if (count > 0) {
-                badge.setText(count > 9 ? "9+" : String.valueOf(count));
-                badge.setVisibility(View.VISIBLE);
-            } else {
-                badge.setVisibility(View.GONE);
-            }
-        }
+        mBadgeCountNavigationDrawer.put(key, count);
+        mNavigationListViewAdapter.notifyDataSetChanged();
 
         if (mBadgePositionsNavigationFooter.containsKey(key)) {
-            foundBadge = true;
-
             LinearLayout navigationFooter = (LinearLayout) findViewById(R.id.nav_view_footer);
             if (navigationFooter == null)
                 return;
@@ -857,14 +783,11 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
             TextView badge = (TextView) navigationFooter.getChildAt(index).findViewById(R.id.badge);
             if (count > 0) {
                 badge.setText(count > 9 ? "9+" : String.valueOf(count));
+                badge.setTextColor(LookAndFeelConstants.getPrimaryColor(this));
                 badge.setVisibility(View.VISIBLE);
             } else {
                 badge.setVisibility(View.GONE);
             }
-        }
-
-        if (!foundBadge) {
-            L.e("updateBadge failed for: " + key);
         }
     }
 

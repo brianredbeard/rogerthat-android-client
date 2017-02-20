@@ -33,14 +33,18 @@ import com.mobicage.rogerthat.config.ConfigurationProvider;
 import com.mobicage.rogerthat.plugins.MobicagePlugin;
 import com.mobicage.rogerthat.plugins.messaging.BrandingFailureException;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
+import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.db.DatabaseManager;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.net.NetworkConnectivityManager;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
+import com.mobicage.rogerthat.util.ui.UIUtils;
+import com.mobicage.rpc.config.LookAndFeelConstants;
 import com.mobicage.to.app.GetAppAssetRequestTO;
 import com.mobicage.to.app.UpdateAppAssetRequestTO;
+import com.mobicage.to.app.UpdateLookAndFeelRequestTO;
 import com.mobicage.to.js_embedding.JSEmbeddingItemTO;
 import com.mobicage.to.system.HeartBeatRequestTO;
 import com.mobicage.to.system.SettingsTO;
@@ -58,7 +62,9 @@ public class SystemPlugin implements MobicagePlugin {
     public static final String ASSET_CHAT_BACKGROUND = "ChatBackgroundImage";
     public static final String SYSTEM_PLUGIN_MUST_REFRESH_JS_EMBEDDING = "com.mobicage.rogerthat.plugins.system.SYSTEM_PLUGIN_MUST_REFRESH_JS_EMBEDDING";
     public static final String SYSTEM_PLUGIN_MUST_DOWNLOAD_ASSETS = "com.mobicage.rogerthat.plugins.system.SYSTEM_PLUGIN_MUST_DOWNLOAD_ASSETS";
-
+    public static final String ASSET_AVAILABLE_INTENT = "com.mobicage.rogerthat.plugins.system.ASSET_AVAILABLE_INTENT";
+    public static final String ASSET_KIND = "asset_kind";
+    public static final String LOOK_AND_FEEL_UPDATED_INTENT = "com.mobicage.rogerthat.plugins.system.LOOK_AND_FEEL_UPDATED_INTENT";
     public static final String QR_CODE_ADDED_INTENT = "QR_CODE_ADDED_INTENT";
     public static final String QR_CODE_DELETED_INTENT = "QR_CODE_DELETED_INTENT ";
 
@@ -311,13 +317,17 @@ public class SystemPlugin implements MobicagePlugin {
         if (url == null) {
             File file = null;
             try {
-                file = mBrandingMgr.getAssetFile(kind);
+                file = mBrandingMgr.getAssetFile(mMainService, kind);
             } catch (BrandingFailureException e) {
                 L.bug(e);
             }
             if (file != null) {
                 boolean fileDeleted = file.delete();
                 L.d("Asset " + kind + " deleted:" + fileDeleted);
+
+                Intent intent = new Intent(ASSET_AVAILABLE_INTENT);
+                intent.putExtra(ASSET_KIND, kind);
+                mMainService.sendBroadcast(intent);
             }
 
         } else {
@@ -325,14 +335,16 @@ public class SystemPlugin implements MobicagePlugin {
             packet.kind = kind;
             packet.url = url;
             packet.scale_x = scaleX;
-            mBrandingMgr.queue(packet);
+
+            float pictureSize = UIUtils.getDisplayWidth(mMainService) * packet.scale_x;
+            mBrandingMgr.queue(packet, packet.url + "=s" + Math.min(1600, Math.round(pictureSize)));
         }
     }
 
-    public Bitmap getAppAsset(String kind) {
+    public static Bitmap getAppAsset(Context context, String kind) {
         Bitmap bitmap = null;
         try {
-            File file = mBrandingMgr.getAssetFile(kind);
+            File file = BrandingMgr.getAssetFile(context, kind);
 
             if (file.exists()) {
                 BitmapFactory.Options options = new BitmapFactory.Options();
@@ -368,4 +380,35 @@ public class SystemPlugin implements MobicagePlugin {
         return mStore.listQRs();
     }
 
+    public void updateLookAndFeel(UpdateLookAndFeelRequestTO request) {
+        LookAndFeelConstants.saveDynamicLookAndFeel(mMainService, request.look_and_feel);
+
+        String kind = LookAndFeelConstants.getAssetKindOfHeaderImage();
+        if (request.look_and_feel == null
+                || TextUtils.isEmptyOrWhitespace(request.look_and_feel.homescreen.header_image_url)) {
+            File file = null;
+            try {
+                file = mBrandingMgr.getAssetFile(mMainService, kind);
+            } catch (BrandingFailureException e) {
+                L.bug(e);
+            }
+            if (file != null) {
+                boolean fileDeleted = file.delete();
+                L.d("Asset " + kind + " deleted:" + fileDeleted);
+
+                Intent intent = new Intent(ASSET_AVAILABLE_INTENT);
+                intent.putExtra(ASSET_KIND, kind);
+                mMainService.sendBroadcast(intent);
+            }
+        } else {
+            UpdateAppAssetRequestTO packet = new UpdateAppAssetRequestTO();
+            packet.kind = kind;
+            packet.url = request.look_and_feel.homescreen.header_image_url;
+            packet.scale_x = 0;
+
+            mBrandingMgr.queue(packet, request.look_and_feel.homescreen.header_image_url);
+        }
+
+        mMainService.sendBroadcast(new Intent(LOOK_AND_FEEL_UPDATED_INTENT));
+    }
 }

@@ -18,7 +18,6 @@
 package com.mobicage.rogerthat.plugins.messaging;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -44,7 +43,6 @@ import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeAsyncTask;
-import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
@@ -164,25 +162,7 @@ public class AttachmentViewerActivity extends ServiceBoundActivity {
             mProgressDialog.dismiss();
             L.d("onPostExecute: " + result);
             if (result == mContext.DOWNLOAD_FAILED) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                builder.setMessage(R.string.error_please_try_again);
-                builder.setCancelable(true);
-                builder.setTitle(null);
-                builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                    @Override
-                    public void onCancel(DialogInterface dialog) {
-                        dialog.dismiss();
-                        mContext.finish();
-                    }
-                });
-                builder.setPositiveButton(R.string.rogerthat, new SafeDialogInterfaceOnClickListener() {
-                    @Override
-                    public void safeOnClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        mContext.finish();
-                    }
-                });
-                builder.create().show();
+                UIUtils.showErrorPleaseRetryDialog(mContext);
                 removeAttachment();
             } else if (result == mContext.DOWNLOAD_CANCELLED) {
                 removeAttachment();
@@ -243,12 +223,8 @@ public class AttachmentViewerActivity extends ServiceBoundActivity {
     @Override
     protected void onServiceBound() {
         T.UI();
-
-        mProgressDialog = new ProgressDialog(AttachmentViewerActivity.this);
-        mProgressDialog.setMessage(mService.getString(R.string.downloading));
-        mProgressDialog.setIndeterminate(true);
-        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        mProgressDialog.setCancelable(true);
+        mProgressDialog = UIUtils.showProgressDialog(this, null, getString(R.string.downloading), true, true, null,
+                ProgressDialog.STYLE_HORIZONTAL, false);
 
         mMessagingPlugin = mService.getPlugin(MessagingPlugin.class);
 
@@ -300,7 +276,7 @@ public class AttachmentViewerActivity extends ServiceBoundActivity {
             mAttachmentsDir = mMessagingPlugin.attachmentsDir(mThreadKey, null);
         } catch (IOException e) {
             L.d("Unable to create attachment directory", e);
-            UIUtils.showAlertDialog(this, "", R.string.unable_to_read_write_sd_card);
+            UIUtils.showDialog(this, "", R.string.unable_to_read_write_sd_card);
             return;
         }
 
@@ -313,7 +289,7 @@ public class AttachmentViewerActivity extends ServiceBoundActivity {
                 mAttachmentsDir = mMessagingPlugin.attachmentsDir(mThreadKey, mMessageKey);
             } catch (IOException e) {
                 L.d("Unable to create attachment directory", e);
-                UIUtils.showAlertDialog(this, "", R.string.unable_to_read_write_sd_card);
+                UIUtils.showDialog(this, "", R.string.unable_to_read_write_sd_card);
                 return;
             }
 
@@ -387,26 +363,7 @@ public class AttachmentViewerActivity extends ServiceBoundActivity {
                 public boolean onError(MediaPlayer mp, int what, int extra) {
                     L.e("Could not play video, what " + what + ", extra " + extra + ", content_type " + mContentType
                         + ", and url " + mDownloadUrl);
-
-                    AlertDialog.Builder builder = new AlertDialog.Builder(AttachmentViewerActivity.this);
-                    builder.setMessage(R.string.error_please_try_again);
-                    builder.setCancelable(true);
-                    builder.setTitle(null);
-                    builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                        @Override
-                        public void onCancel(DialogInterface dialog) {
-                            dialog.dismiss();
-                            finish();
-                        }
-                    });
-                    builder.setPositiveButton(R.string.rogerthat, new SafeDialogInterfaceOnClickListener() {
-                        @Override
-                        public void safeOnClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                            finish();
-                        }
-                    });
-                    builder.create().show();
+                    UIUtils.showErrorPleaseRetryDialog(AttachmentViewerActivity.this);
                     return true;
                 }
             });

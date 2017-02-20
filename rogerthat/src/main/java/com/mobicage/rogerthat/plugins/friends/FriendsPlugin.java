@@ -20,7 +20,6 @@ package com.mobicage.rogerthat.plugins.friends;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -49,6 +48,7 @@ import com.mobicage.rogerthat.util.db.TransactionWithoutResult;
 import com.mobicage.rogerthat.util.geo.GeoLocationProvider;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.net.NetworkConnectivityManager;
+import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
@@ -1153,45 +1153,47 @@ public class FriendsPlugin implements MobicagePlugin {
     public void removeFriendFromList(final Activity activity, final Friend friend) {
         T.UI();
         final boolean isService = friend.type == FriendsPlugin.FRIEND_TYPE_SERVICE;
-        final int title = isService ? R.string.remove_service : R.string.remove_friend;
-        final int message = isService ? R.string.confirm_remove_service : R.string.confirm_remove_friend;
-        final int positiveBtn = isService ? R.string.unfollow : R.string.remove_friend;
-        new AlertDialog.Builder(activity).setTitle(title)
-            .setMessage((activity.getString(message, friend.getDisplayName())))
-            .setPositiveButton(positiveBtn, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    T.UI();
-                    if (!scheduleFriendRemoval(friend.email)) {
-                        UIUtils.showLongToast(activity, (activity.getString(isService ? R.string.service_remove_failed
+        final String title = activity.getString(isService ? R.string.remove_service : R.string.remove_friend);
+        final String message = activity.getString(isService ? R.string.confirm_remove_service : R.string
+                .confirm_remove_friend, friend.getDisplayName());
+        final String positiveBtn = activity.getString(isService ? R.string.unfollow : R.string.remove_friend);
+        final String negativeButtonCaption = activity.getString(R.string.cancel);
+        SafeDialogClick positiveClick = new SafeDialogClick() {
+            @Override
+            public void safeOnClick(DialogInterface dialog, int id) {
+                if (!scheduleFriendRemoval(friend.email)) {
+                    UIUtils.showLongToast(activity, (activity.getString(isService ? R.string.service_remove_failed
                             : R.string.friend_remove_failed)));
-                        L.d("removeFriend failed");
-                    } else {
-                        L.d("removeFriend succeeded");
-                    }
-                    dialog.dismiss();
+                    L.d("removeFriend failed");
+                } else {
+                    L.d("removeFriend succeeded");
                 }
-            }).setNegativeButton(R.string.cancel, null).create().show();
+                dialog.dismiss();
+            }
+        };
+        UIUtils.showDialog(activity, title, message, positiveBtn, positiveClick, negativeButtonCaption, null);
     }
 
     public void removeGroupFromList(final Activity activity, final Group group) {
         T.UI();
-        new AlertDialog.Builder(activity).setTitle(R.string.delete_group)
-            .setMessage((activity.getString(R.string.delete_group_message, group.name)))
-            .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    T.UI();
-                    mStore.deleteGroup(group.guid);
-                    deleteGroup(group.guid);
+        final String title = activity.getString(R.string.delete_group);
+        final String message = activity.getString(R.string.delete_group_message, group.name);
+        final String positiveCaption = activity.getString(R.string.delete);
+        final String negativeCaption = activity.getString(R.string.cancel);
+        final SafeDialogClick positiveClick = new SafeDialogClick() {
+            @Override
+            public void safeOnClick(DialogInterface dialog, int id) {
+                mStore.deleteGroup(group.guid);
+                deleteGroup(group.guid);
 
-                    Intent intent = new Intent(FriendsPlugin.GROUP_REMOVED);
-                    intent.putExtra("guid", group.guid);
-                    mMainService.sendBroadcast(intent);
-                    L.d("deleteGroup succeeded");
-                    dialog.dismiss();
-                }
-            }).setNegativeButton(R.string.cancel, null).create().show();
+                Intent intent = new Intent(FriendsPlugin.GROUP_REMOVED);
+                intent.putExtra("guid", group.guid);
+                mMainService.sendBroadcast(intent);
+                L.d("deleteGroup succeeded");
+                dialog.dismiss();
+            }
+        };
+        UIUtils.showDialog(activity, title, message, positiveCaption, positiveClick, negativeCaption, null);
     }
 
     public void updateProfile(final String newProfileName, final byte[] newAvatar, final String accessToken,

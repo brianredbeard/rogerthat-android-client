@@ -188,7 +188,7 @@ public class FriendSelectWidget extends Widget {
     @Override
     public boolean proceedWithSubmit(final String buttonId) {
         if (mSelectionRequired && Message.POSITIVE.equals(buttonId) && mSelectedFriends.size() == 0) {
-            UIUtils.showAlertDialog(mActivity, R.string.activity_error, R.string.friend_selection_is_required);
+            UIUtils.showDialog(mActivity, R.string.activity_error, R.string.friend_selection_is_required);
             return false;
         }
         return true;

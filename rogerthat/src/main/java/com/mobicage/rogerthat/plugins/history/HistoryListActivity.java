@@ -50,9 +50,10 @@ public class HistoryListActivity extends ServiceBoundCursorListActivity implemen
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         T.UI();
-        setContentView(R.layout.activity);
-        setListView((ListView) findViewById(R.id.activity_list));
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity);
+        setActivityName("stream");
+        setListView((ListView) findViewById(R.id.activity_list));
     }
 
     @Override

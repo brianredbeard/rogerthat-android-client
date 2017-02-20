@@ -41,7 +41,9 @@ import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
+import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.AppConstants;
+import com.mobicage.rpc.config.LookAndFeelConstants;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -177,6 +179,9 @@ public class SendMessageContactActivity extends ServiceBoundActivity {
         final ImageView friendAdded = ((ImageView) view.findViewById(R.id.friend_status));
         friendAdded.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_check).color(Color.WHITE).sizeDp(12));
         friendAdded.setVisibility(View.VISIBLE);
+
+        // Colours
+        UIUtils.setBackgroundColor(friendAdded, LookAndFeelConstants.getPrimaryColor(this));
 
         TextView name = (TextView) recipient.findViewById(R.id.friend_name);
         name.setText(friend.name);

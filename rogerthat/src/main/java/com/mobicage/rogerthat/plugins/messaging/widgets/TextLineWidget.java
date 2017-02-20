@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.speech.RecognizerIntent;
+import android.support.v4.content.ContextCompat;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.util.AttributeSet;
@@ -33,14 +34,18 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.api.messaging.Rpc;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.rpc.config.AppConstants;
+import com.mobicage.rpc.config.LookAndFeelConstants;
 import com.mobicage.to.messaging.forms.SubmitTextLineFormRequestTO;
 import com.mobicage.to.messaging.forms.SubmitTextLineFormResponseTO;
 import com.mobicage.to.messaging.forms.UnicodeWidgetResultTO;
@@ -85,12 +90,11 @@ public class TextLineWidget extends Widget {
 
     @Override
     public void initializeWidget() {
+        mEditText = (EditText) findViewById(R.id.edit_text);
         if (mColorScheme == BrandingMgr.ColorScheme.DARK) {
-            findViewById(R.id.edit_text).setVisibility(View.GONE);
-            mEditText = (EditText) findViewById(R.id.edit_text_white);
-            mEditText.setVisibility(View.VISIBLE);
+            UIUtils.setColors(ContextCompat.getColor(mActivity, R.color.mc_white), mEditText);
         } else {
-            mEditText = (EditText) findViewById(R.id.edit_text);
+            UIUtils.setColors(mActivity, mEditText);
         }
         mEditText.setTextColor(mTextColor);
         mEditText.setText((String) mWidgetMap.get("value"));
@@ -101,7 +105,11 @@ public class TextLineWidget extends Widget {
 
         ImageButton btnSpeak = (ImageButton) findViewById(R.id.btn_speak);
         if (AppConstants.SPEECH_TO_TEXT && isSpeechRecognitionActivityPresented(mActivity)) {
+            IconicsDrawable icon = new IconicsDrawable(mActivity, FontAwesome.Icon.faw_microphone)
+                    .color(LookAndFeelConstants.getPrimaryIconColor(mActivity))
+                    .sizeDp(20);
             btnSpeak.setVisibility(View.VISIBLE);
+            btnSpeak.setImageDrawable(icon);
             btnSpeak.setOnClickListener(new OnClickListener() {
 
                 @Override

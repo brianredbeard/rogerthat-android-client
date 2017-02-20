@@ -33,14 +33,12 @@ import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
-import android.preference.PreferenceActivity;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+import android.widget.Button;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
@@ -49,6 +47,7 @@ import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.config.AppConstants;
+import com.mobicage.rpc.config.LookAndFeelConstants;
 
 public class SettingsActivity extends ServiceBoundPreferenceActivity {
 
@@ -182,7 +181,12 @@ public class SettingsActivity extends ServiceBoundPreferenceActivity {
                 }
             }
         });
-        builder.create().show();
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        int buttonId1 = getResources().getIdentifier("android:id/button1", null, null);
+        ((Button) dialog.findViewById(buttonId1)).setTextColor(LookAndFeelConstants.getPrimaryColor(this));
+        int buttonId2 = getResources().getIdentifier("android:id/button2", null, null);
+        ((Button) dialog.findViewById(buttonId2)).setTextColor(LookAndFeelConstants.getPrimaryColor(this));
     }
 
     @Override

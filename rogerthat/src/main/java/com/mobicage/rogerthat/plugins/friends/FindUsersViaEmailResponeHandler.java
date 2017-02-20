@@ -40,7 +40,7 @@ public class FindUsersViaEmailResponeHandler extends ResponseHandler<FindRogerth
 
     private boolean isAddFriendsVisisble() {
         T.UI();
-        return UIUtils.getTopActivity(mMainService) instanceof AddFriendsActivity;
+        return UIUtils.getTopActivity() instanceof AddFriendsActivity;
     }
 
     private void doNotification() {

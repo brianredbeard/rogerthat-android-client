@@ -7,13 +7,13 @@
     android:orientation="vertical">
 
     <LinearLayout
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="5dp" >
 
         <EditText
             android:id="@+id/search_text"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:imeOptions="actionSearch"
@@ -24,10 +24,7 @@
             android:layout_width="100dp"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:background="@null"
-            app:ico_color="@color/mc_primary_icon"
-            app:ico_icon="@string/faw_search"
-            app:ico_size="30dp" />
+            android:background="@null" />
     </LinearLayout>
 
     <ListView

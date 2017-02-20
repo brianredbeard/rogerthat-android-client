@@ -17,7 +17,6 @@
  */
 package com.mobicage.rogerthat;
 
-import android.app.AlertDialog;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.View;
@@ -131,14 +130,6 @@ public abstract class FriendsActivity extends ServiceBoundCursorListActivity {
     }
 
     protected abstract void createCursor();
-
-    protected abstract String getHelpMessage();
-
-    protected void showHelp() {
-        T.UI();
-        new AlertDialog.Builder(FriendsActivity.this).setTitle(R.string.friends_getting_started_title)
-            .setMessage(getHelpMessage()).setPositiveButton(getString(R.string.ok), null).create().show();
-    }
 
     @Override
     protected void onServiceUnbound() {

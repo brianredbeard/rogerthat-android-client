@@ -18,7 +18,6 @@
 package com.mobicage.rogerthat;
 
 import android.Manifest;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -50,7 +49,7 @@ import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
-import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
+import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.IncompleteMessageException;
@@ -89,11 +88,8 @@ public class FriendsLocationActivity extends ServiceBoundMapActivity {
         mNoFriendsLocationFoundLayout = (RelativeLayout) findViewById(R.id.no_friend_locations_found);
 
         // Show progress dialog until one or more locations are fetched.
-        mProgressDialog = new ProgressDialog(FriendsLocationActivity.this);
-        mProgressDialog.setTitle(getString(R.string.updating_location));
-        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        mProgressDialog.setIndeterminate(true);
-        mProgressDialog.show();
+        String title = getString(R.string.updating_location);
+        UIUtils.showProgressDialog(this, title, null, true, true, null, ProgressDialog.STYLE_HORIZONTAL, true);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.friend_map);
         mapFragment.getMapAsync(this);
@@ -217,16 +213,18 @@ public class FriendsLocationActivity extends ServiceBoundMapActivity {
         T.UI();
         mFriendsPlugin = mService.getPlugin(FriendsPlugin.class);
         if (!mFriendsPlugin.scheduleAllFriendsLocationRetrieval()) {
-            new AlertDialog.Builder(this).setMessage(getString(R.string.get_friends_location_failed))
-                    .setPositiveButton(R.string.ok, new SafeDialogInterfaceOnClickListener() {
-                        @Override
-                        public void safeOnClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                            mProgressDialog.hide();
-                            mNoFriendsLocationFoundLayout.setVisibility(View.VISIBLE);
-                            mFriendMapLayout.setVisibility(View.GONE);
-                        }
-                    }).create().show();
+            String message = getString(R.string.get_friends_location_failed);
+            String positiveCaption = getString(R.string.ok);
+            SafeDialogClick positiveClick = new SafeDialogClick() {
+                @Override
+                public void safeOnClick(DialogInterface dialog, int id) {
+                    dialog.dismiss();
+                    mProgressDialog.hide();
+                    mNoFriendsLocationFoundLayout.setVisibility(View.VISIBLE);
+                    mFriendMapLayout.setVisibility(View.GONE);
+                }
+            };
+            UIUtils.showDialog(this, null, message, positiveCaption, positiveClick, null, null);
         }
         IntentFilter filter = new IntentFilter(FriendsPlugin.FRIEND_LOCATION_RECEIVED_INTENT);
         registerReceiver(mBroadcastReceiver, filter);

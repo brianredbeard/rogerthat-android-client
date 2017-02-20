@@ -34,11 +34,7 @@
 
 package com.mobicage.rogerthat.plugins.messaging.widgets;
 
-import java.util.Locale;
-import java.util.Map;
-
 import android.Manifest;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -62,15 +58,19 @@ import com.mobicage.rogerthat.plugins.trackme.MapDetailActivity;
 import com.mobicage.rogerthat.util.geo.GeoLocationListener;
 import com.mobicage.rogerthat.util.geo.GeoLocationReceiver;
 import com.mobicage.rogerthat.util.logging.L;
-import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
+import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
+import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.to.messaging.forms.LocationWidgetResultTO;
 import com.mobicage.to.messaging.forms.SubmitGPSLocationFormRequestTO;
 import com.mobicage.to.messaging.forms.SubmitGPSLocationFormResponseTO;
+
+import java.util.Locale;
+import java.util.Map;
 
 public class GPSLocationWidget extends Widget {
 
@@ -126,10 +126,9 @@ public class GPSLocationWidget extends Widget {
         PowerManager powerManager = (PowerManager) mActivity.getSystemService(Context.POWER_SERVICE);
         mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG);
 
-        mProgressDialog = new ProgressDialog(mActivity);
-        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        mProgressDialog.setMessage(mActivity.getString(R.string.updating_location));
-        mProgressDialog.setCancelable(false);
+        final String message = mActivity.getString(R.string.updating_location);
+        mProgressDialog = UIUtils.showProgressDialog(mActivity, null, message, true, false, null, ProgressDialog
+                .STYLE_SPINNER, false);
 
         mGetLocation.setOnClickListener(new SafeViewOnClickListener() {
             @Override
@@ -143,27 +142,22 @@ public class GPSLocationWidget extends Widget {
                 final SafeRunnable onDenied = new SafeRunnable() {
                     @Override
                     protected void safeRun() throws Exception {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-                        builder.setMessage(R.string.need_location_permission);
-                        builder.setTitle(R.string.need_location_permission_title);
-                        builder.setPositiveButton(R.string.go_to_app_settings, new SafeDialogInterfaceOnClickListener
+                        String title = mActivity.getString(R.string.need_location_permission_title);
+                        String message = mActivity.getString(R.string.need_location_permission);
+                        SafeDialogClick onPositiveClick = new SafeDialogClick
                                 () {
                             @Override
-                            public void safeOnClick(DialogInterface dialog, int which) {
+                            public void safeOnClick(DialogInterface dialog, int id) {
                                 Intent intent = new Intent();
                                 intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                                 Uri uri = Uri.fromParts("package", mActivity.getPackageName(), null);
                                 intent.setData(uri);
                                 mActivity.startActivity(intent);
                             }
-                        });
-                        builder.setNegativeButton(R.string.cancel, new SafeDialogInterfaceOnClickListener() {
-                            @Override
-                            public void safeOnClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        });
-                        builder.create().show();
+                        };
+                        UIUtils.showDialog(mActivity, title, message, R.string.go_to_app_settings, onPositiveClick, R
+                                        .string.cancel,
+                                null);
                     }
                 };
                 if (!mActivity.askPermissionIfNeeded(Manifest.permission.ACCESS_FINE_LOCATION,
@@ -208,8 +202,7 @@ public class GPSLocationWidget extends Widget {
             }
 
             try {
-                mLocationManager
-                        .requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, mGPSGeoLocationListener);
+                mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, mGPSGeoLocationListener);
             } catch (SecurityException e) {
                 L.bug(e); // Should never happen
             }
@@ -253,18 +246,15 @@ public class GPSLocationWidget extends Widget {
     }
 
     private void showGotoLocationSettings() {
-        new AlertDialog.Builder(mActivity).setMessage(R.string.gps_is_not_enabled)
-            .setPositiveButton(R.string.yes, new SafeDialogInterfaceOnClickListener() {
-                @Override
-                public void safeOnClick(DialogInterface dialog, int which) {
-                    Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                    mActivity.startActivityForResult(intent, LOCATION_SETTINGS);
-                }
-            }).setNegativeButton(R.string.no, new SafeDialogInterfaceOnClickListener() {
-                @Override
-                public void safeOnClick(DialogInterface dialog, int which) {
-                }
-            }).create().show();
+        String message = mActivity.getString(R.string.gps_is_not_enabled);
+        SafeDialogClick onPositiveClick = new SafeDialogClick() {
+            @Override
+            public void safeOnClick(DialogInterface dialog, int id) {
+                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                mActivity.startActivityForResult(intent, LOCATION_SETTINGS);
+            }
+        };
+        UIUtils.showDialog(mActivity, null, message, R.string.yes, onPositiveClick, R.string.no, null);
     }
 
     private LocationWidgetResultTO createLocationResult(Location location) {
@@ -285,10 +275,7 @@ public class GPSLocationWidget extends Widget {
             mWakeLock.release();
         }
         if (showError) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-            builder.setMessage(R.string.error_please_try_again);
-            builder.setPositiveButton(R.string.rogerthat, null);
-            builder.create().show();
+            UIUtils.showErrorPleaseRetryDialog(mActivity);
         }
     }
 
@@ -412,16 +399,9 @@ public class GPSLocationWidget extends Widget {
     public boolean proceedWithSubmit(final String buttonId) {
         if (Message.POSITIVE.equals(buttonId)) {
             if (mLocationResult == null) {
-                AlertDialog.Builder ad = new AlertDialog.Builder(mActivity);
-                ad.setTitle(mActivity.getString(R.string.no_gps_location_fetched_title));
-                ad.setMessage(mActivity.getString(R.string.no_gps_location_fetched_summary));
-                ad.setPositiveButton(mActivity.getString(R.string.ok), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.dismiss();
-                    }
-                });
-                ad.show();
+                String title = mActivity.getString(R.string.no_gps_location_fetched_title);
+                String message = mActivity.getString(R.string.no_gps_location_fetched_summary);
+                UIUtils.showDialog(mActivity, title, message);
                 return false;
             }
         }

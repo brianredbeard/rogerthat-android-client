@@ -58,9 +58,9 @@ public class QRCodesActivity extends ServiceBoundActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.qr_codes);
         setActivityName("qrcode");
         setTitle(R.string.my_ids);
-        setContentView(R.layout.qr_codes);
     }
 
     @Override

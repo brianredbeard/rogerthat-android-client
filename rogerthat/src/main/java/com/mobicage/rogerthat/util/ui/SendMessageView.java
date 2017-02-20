@@ -73,7 +73,7 @@ import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.pickle.PickleException;
 import com.mobicage.rogerthat.util.pickle.Pickler;
 import com.mobicage.rogerthat.util.system.SafeAsyncTask;
-import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
+import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
@@ -696,14 +696,14 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
         mActivity.startActivityForResult(chooserIntent, PICK_VIDEO);
     }
 
+    private ProgressDialog showProcessing() {
+        String message = mActivity.getString(R.string.processing);
+        return UIUtils.showProgressDialog(mActivity, null, message, true, false);
+    }
+
     private void copyVideoFile(final Uri selectedVideo) {
         final ContentResolver cr = mActivity.getContentResolver();
-
-        final ProgressDialog progressDialog = new ProgressDialog(mActivity);
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        progressDialog.setMessage(mActivity.getString(R.string.processing));
-        progressDialog.setCancelable(false);
-        progressDialog.show();
+        final ProgressDialog progressDialog = showProcessing();
 
         new SafeAsyncTask<Object, Object, Boolean>() {
             @Override
@@ -763,11 +763,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
 
     private void copyImageFile(final Uri selectedImage) {
         final ContentResolver cr = mActivity.getContentResolver();
-        final ProgressDialog progressDialog = new ProgressDialog(mActivity);
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        progressDialog.setMessage(mActivity.getString(R.string.processing));
-        progressDialog.setCancelable(false);
-        progressDialog.show();
+        final ProgressDialog progressDialog = showProcessing();
 
         new SafeAsyncTask<Object, Object, Boolean>() {
             @Override
@@ -978,30 +974,23 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
                 priorityNormalBtn.setChecked(true);
             }
 
-            AlertDialog alertDialog = new AlertDialog.Builder(mActivity)
-                    .setTitle(R.string.priority)
-                    .setView(dialog)
-                    .setPositiveButton(mActivity.getString(R.string.ok), new SafeDialogInterfaceOnClickListener() {
-                        @Override
-                        public void safeOnClick(DialogInterface di, int which) {
-                            if (priorityHighBtn.isChecked()) {
-                                mPriority = Message.PRIORITY_HIGH;
-                            } else if (priorityUrgentBtn.isChecked()) {
-                                mPriority = Message.PRIORITY_URGENT;
-                            } else if (priorityUrgentWithAlarmBtn.isChecked()) {
-                                mPriority = Message.PRIORITY_URGENT_WITH_ALARM;
-                            } else {
-                                mPriority = Message.PRIORITY_NORMAL;
-                            }
-                            initImageButtonsNavigation();
-                        }
-                    }).setNegativeButton(mActivity.getString(R.string.cancel), new SafeDialogInterfaceOnClickListener() {
-                        @Override
-                        public void safeOnClick(DialogInterface dialog, int which) {
-                        }
-                    }).create();
-            alertDialog.setCanceledOnTouchOutside(true);
-            alertDialog.show();
+            String title = mActivity.getString(R.string.priority);
+            SafeDialogClick onPositiveClick = new SafeDialogClick() {
+                @Override
+                public void safeOnClick(DialogInterface di, int id) {
+                    if (priorityHighBtn.isChecked()) {
+                        mPriority = Message.PRIORITY_HIGH;
+                    } else if (priorityUrgentBtn.isChecked()) {
+                        mPriority = Message.PRIORITY_URGENT;
+                    } else if (priorityUrgentWithAlarmBtn.isChecked()) {
+                        mPriority = Message.PRIORITY_URGENT_WITH_ALARM;
+                    } else {
+                        mPriority = Message.PRIORITY_NORMAL;
+                    }
+                    initImageButtonsNavigation();
+                }
+            };
+            UIUtils.showDialog(mActivity, title, null, R.string.ok, onPositiveClick, R.string.cancel, null, dialog);
 
         } else if (IMAGE_BUTTON_STICKY == key) {
             hideKeyboard();
@@ -1009,32 +998,18 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
 
             final RadioButton stickyDisabled = ((RadioButton) dialog.findViewById(R.id.sticky_disabled));
             final RadioButton stickyEnabled = ((RadioButton) dialog.findViewById(R.id.sticky_enabled));
+            stickyEnabled.setChecked(mIsSticky);
+            stickyDisabled.setChecked(!mIsSticky);
 
-            stickyDisabled.setChecked(false);
-            stickyEnabled.setChecked(false);
-
-            if (mIsSticky) {
-                stickyEnabled.setChecked(true);
-            } else {
-                stickyDisabled.setChecked(true);
-            }
-
-            AlertDialog alertDialog = new AlertDialog.Builder(mActivity)
-                    .setTitle(R.string.sticky)
-                    .setView(dialog)
-                    .setPositiveButton(mActivity.getString(R.string.ok), new SafeDialogInterfaceOnClickListener() {
-                        @Override
-                        public void safeOnClick(DialogInterface di, int which) {
-                            mIsSticky = stickyEnabled.isChecked();
-                            initImageButtonsNavigation();
-                        }
-                    }).setNegativeButton(mActivity.getString(R.string.cancel), new SafeDialogInterfaceOnClickListener() {
-                        @Override
-                        public void safeOnClick(DialogInterface dialog, int which) {
-                        }
-                    }).create();
-            alertDialog.setCanceledOnTouchOutside(true);
-            alertDialog.show();
+            String title = mActivity.getString(R.string.sticky);
+            SafeDialogClick onPositiveClick = new SafeDialogClick() {
+                @Override
+                public void safeOnClick(DialogInterface di, int id) {
+                    mIsSticky = stickyEnabled.isChecked();
+                    initImageButtonsNavigation();
+                }
+            };
+            UIUtils.showDialog(mActivity, title, null, R.string.ok, onPositiveClick, R.string.cancel, null, dialog);
 
         } else if (IMAGE_BUTTON_MORE == key) {
             hideKeyboard();
@@ -1064,17 +1039,10 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
                 items.add(new PickMoreItem(k, getImageResourceForKey(k), t));
             }
             pickMsgMore.setAdapter(new ListAdapter(mActivity, items));
-
-            final AlertDialog alertDialog = new AlertDialog.Builder(mActivity)
-                    .setTitle(R.string.more)
-                    .setView(dialog)
-                    .setNegativeButton(mActivity.getString(R.string.cancel), new SafeDialogInterfaceOnClickListener() {
-                        @Override
-                        public void safeOnClick(DialogInterface dialog, int which) {
-                        }
-                    }).create();
-            alertDialog.setCanceledOnTouchOutside(true);
-            alertDialog.show();
+            String title = mActivity.getString(R.string.more);
+            String negativeCaption = mActivity.getString(R.string.cancel);
+            final AlertDialog alertDialog = UIUtils.showDialog(mActivity, title, null, null, null, negativeCaption,
+                    null, dialog);
 
             pickMsgMore.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
@@ -1154,7 +1122,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
                         mKey);
             } catch (IOException e) {
                 L.d("Unable to create attachment directory", e);
-                UIUtils.showAlertDialog(mMainService, "", R.string.unable_to_read_write_sd_card);
+                UIUtils.showDialog(mMainService, null, R.string.unable_to_read_write_sd_card);
                 return;
             }
 
@@ -1165,7 +1133,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
                     mTmpUploadFile.delete();
                 } catch (IOException e) {
                     L.d("Unable to move file to attachment directory");
-                    UIUtils.showAlertDialog(mMainService, "", R.string.unable_to_read_write_sd_card);
+                    UIUtils.showDialog(mMainService, null, R.string.unable_to_read_write_sd_card);
                     return;
                 }
             }

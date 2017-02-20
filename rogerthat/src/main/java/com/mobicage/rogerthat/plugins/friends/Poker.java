@@ -24,13 +24,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 
 import com.mobicage.rogerth.at.R;
-import com.mobicage.rogerthat.AbstractHomeActivity;
 import com.mobicage.rogerthat.MainService;
-import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.plugins.messaging.FriendsThreadActivity;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.plugins.messaging.ServiceMessageDetailActivity;
-import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SystemUtils;
@@ -74,7 +71,7 @@ public class Poker<T extends Activity & PokingActivity> extends SafeBroadcastRec
             mActivity.completeTransmit(new SafeRunnable() {
                 @Override
                 protected void safeRun() throws Exception {
-                    UIUtils.showAlertDialog(mActivity, null, R.string.scanner_communication_failure);
+                    UIUtils.showDialog(mActivity, null, R.string.scanner_communication_failure);
                     mResultHandler.onTimeout();
                     stop();
                 }

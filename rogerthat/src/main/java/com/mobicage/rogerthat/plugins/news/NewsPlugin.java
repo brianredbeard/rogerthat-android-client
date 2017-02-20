@@ -171,7 +171,7 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
                         });
                     }
                 } else if (SYNC_NEWS_INTENT.equals(action)){
-                    Activity currentActivity = UIUtils.getTopActivity(mMainService);
+                    Activity currentActivity = UIUtils.getTopActivity();
                     if (currentActivity instanceof NewsActivity || currentActivity instanceof NewsPinnedActivity) {
                         L.d("Syncing news - NOK (is open)");
                     } else {
@@ -451,7 +451,7 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
     }
 
     public void increaseBadgeCount() {
-        Activity currentActivity = UIUtils.getTopActivity(mMainService);
+        Activity currentActivity = UIUtils.getTopActivity();
         if (currentActivity instanceof NewsActivity || currentActivity instanceof NewsPinnedActivity) {
             return;
         }
@@ -527,7 +527,7 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
     }
 
     private void createNewsCountNotification() {
-        Activity currentActivity = UIUtils.getTopActivity(mMainService);
+        Activity currentActivity = UIUtils.getTopActivity();
         if (currentActivity instanceof NewsActivity || currentActivity instanceof NewsPinnedActivity) {
             return;
         }
@@ -551,7 +551,7 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
 
     public void createNewsNotification(final AppNewsItemTO newsItem) {
         if (SystemUtils.isFlagEnabled(newsItem.flags, NewsItem.FLAG_SILENT)
-                || UIUtils.getTopActivity(mMainService) instanceof NewsActivity) {
+                || UIUtils.getTopActivity() instanceof NewsActivity) {
             return;
         }
 

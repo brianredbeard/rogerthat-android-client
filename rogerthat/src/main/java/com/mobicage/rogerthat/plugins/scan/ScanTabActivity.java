@@ -28,26 +28,20 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
 import com.mobicage.rogerth.at.R;
-import com.mobicage.rogerthat.HomeActivity;
-import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.ServiceBoundActivity;
-import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
-import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
-import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
-import com.mobicage.rpc.config.AppConstants;
 
 public class ScanTabActivity extends ServiceBoundActivity {
 

@@ -29,7 +29,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
@@ -173,10 +172,12 @@ public abstract class ServiceBoundPreferenceActivity extends PreferenceActivity 
     @Override
     public void setContentView(View view) {
         super.setContentView(view);
+        UIUtils.setColors(this, view);
     }
 
     @Override
     public void setContentView(View view, ViewGroup.LayoutParams params) {
         super.setContentView(view, params);
+        UIUtils.setColors(this, view);
     }
 }

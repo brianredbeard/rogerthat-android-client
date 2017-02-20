@@ -19,24 +19,20 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:padding="2dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="5dp"
         android:background="@null"
-        android:foreground="?attr/selectableItemBackground"
-        app:ico_color="@color/mc_primary_icon"
-        app:ico_icon="@string/faw_calendar_o"
-        app:ico_size="24dp" />
+        android:foreground="?attr/selectableItemBackground" />
 
     <ImageButton
         android:id="@+id/pick_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
+        android:padding="2dp"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="5dp"
         android:background="@null"
-        android:foreground="?attr/selectableItemBackground"
-        android:padding="2dp"
-        app:ico_color="@color/mc_primary_icon"
-        app:ico_icon="@string/faw_clock_o"
-        app:ico_size="24dp" />
+        android:foreground="?attr/selectableItemBackground" />
 
 </com.mobicage.rogerthat.plugins.messaging.widgets.DateSelectWidget>

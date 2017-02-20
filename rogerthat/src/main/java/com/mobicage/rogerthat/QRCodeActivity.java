@@ -41,11 +41,9 @@ import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
 import com.mobicage.rogerthat.plugins.system.QRCode;
 import com.mobicage.rogerthat.plugins.system.SystemPlugin;
-import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
-import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
-import com.mobicage.rogerthat.util.system.SafeRunnable;
+import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.AppConstants;
@@ -159,24 +157,23 @@ public class QRCodeActivity extends ServiceBoundActivity {
                 startActivity(intent);
                 return true;
             case R.id.delete_qr_code:
-                new AlertDialog.Builder(this)
-                        .setTitle(R.string.delete_qr_code)
-                        .setMessage(R.string.confirm_delete_qr_code)
-                        .setPositiveButton(R.string.yes, new SafeDialogInterfaceOnClickListener() {
-                            @Override
-                            public void safeOnClick(DialogInterface dialog, int which) {
-                                mService.getPlugin(SystemPlugin.class).deleteQRCode(mCustomQRCode);
-                                dialog.dismiss();
-                                finish();
-                            }
-                        })
-                        .setNegativeButton(R.string.no, new SafeDialogInterfaceOnClickListener() {
-                            @Override
-                            public void safeOnClick(DialogInterface dialog, int which) {
-                                dialog.cancel();
-                            }
-                        })
-                        .show();
+                String title = getString(R.string.delete_qr_code);
+                String message = getString(R.string.confirm_delete_qr_code);
+                String positiveCaption = getString(R.string.save);
+                String negativeCaption = getString(R.string.no);
+                SafeDialogClick positiveClick = new SafeDialogClick() {
+                    @Override
+                    public void safeOnClick(DialogInterface di, int id) {
+                        mService.getPlugin(SystemPlugin.class).deleteQRCode(mCustomQRCode);
+                        di.dismiss();
+                        finish();
+                    }
+                };
+
+                AlertDialog alertDialog = UIUtils.showDialog(this, title, message, positiveCaption,
+                        positiveClick, negativeCaption, null);
+                alertDialog.setCanceledOnTouchOutside(true);
+
                 return true;
         }
         return super.onOptionsItemSelected(item);

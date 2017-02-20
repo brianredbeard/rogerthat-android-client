@@ -33,6 +33,7 @@ import com.commonsware.cwac.cam2.VideoRecorderActivity;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.MoreActivity;
+import com.mobicage.rogerthat.NavigationItem;
 import com.mobicage.rogerthat.NewsActivity;
 import com.mobicage.rogerthat.QRCodeActivity;
 import com.mobicage.rogerthat.QRCodesActivity;
@@ -71,7 +72,7 @@ public class ActivityUtils {
         context.startActivity(i);
     }
 
-    public static String canOpenNavigationItem(ServiceBoundActivity context, ServiceBoundActivity.NavigationItem ni) {
+    public static String canOpenNavigationItem(ServiceBoundActivity context, NavigationItem ni) {
         if (ni.actionType == null) {
             if ("news".equals(ni.action)) {
             } else if ("messages".equals(ni.action)) {
@@ -107,8 +108,7 @@ public class ActivityUtils {
         return null;
     }
 
-    public static boolean goToActivity(final ServiceBoundActivity context, final ServiceBoundActivity.NavigationItem ni,
-                                       final boolean clearStack, final Bundle extras) {
+    public static boolean goToActivity(final ServiceBoundActivity context, final NavigationItem ni, final boolean clearStack, final Bundle extras) {
         if (ni.actionType == null) {
             ActivityUtils.goToActivity(context, ni.action, clearStack, ni.collapse, extras);
         } else if ("action".equals(ni.actionType)) {

@@ -20,7 +20,6 @@ package com.mobicage.rogerthat;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -94,6 +93,7 @@ public class GroupDetailActivity extends ServiceBoundActivity {
     private Cursor mCursorGroups = null;
 
     private final int PERMISSION_REQUEST_CAMERA = 1;
+    private EditText mUpdateGroupName;
 
     private void updateGroupForEdit() {
         T.UI();
@@ -101,7 +101,6 @@ public class GroupDetailActivity extends ServiceBoundActivity {
         final ImageView editBtn = (ImageView) findViewById(R.id.edit_group);
         final RelativeLayout updateGroupName = ((RelativeLayout) findViewById(R.id.update_group_name));
         final LinearLayout updateGroupAvatar = ((LinearLayout) findViewById(R.id.update_group_avatar));
-        final EditText newGroupName = ((EditText) findViewById(R.id.update_group_name_value));
         final ImageView newGroupAvatar = ((ImageView) findViewById(R.id.update_group_avatar_img));
         final Button updateAvatarBtn = (Button) findViewById(R.id.update_avatar);
         final Button cancelBtn = (Button) findViewById(R.id.cancel);
@@ -123,9 +122,9 @@ public class GroupDetailActivity extends ServiceBoundActivity {
             updateGroupName.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (newGroupName.requestFocus()) {
-                        int pos = newGroupName.getText().length();
-                        newGroupName.setSelection(pos);
+                    if (mUpdateGroupName.requestFocus()) {
+                        int pos = mUpdateGroupName.getText().length();
+                        mUpdateGroupName.setSelection(pos);
                         UIUtils.showKeyboard(getApplicationContext());
                     }
                 }
@@ -135,7 +134,7 @@ public class GroupDetailActivity extends ServiceBoundActivity {
                 @Override
                 public void onClick(View v) {
                     getNewAvatar(true);
-                    UIUtils.hideKeyboard(getApplicationContext(), newGroupName);
+                    UIUtils.hideKeyboard(getApplicationContext(), mUpdateGroupName);
                 }
             };
 
@@ -173,7 +172,7 @@ public class GroupDetailActivity extends ServiceBoundActivity {
                 mPhotoSelected = false;
                 mGroup.avatar = byteArray;
             }
-            mGroup.name = newGroupName.getText().toString();
+            mGroup.name = mUpdateGroupName.getText().toString();
             mFriendsPlugin.getStore().updateGroup(mGroup.guid, mGroup.name, mGroup.avatar, null);
             mFriendsPlugin.putGroup(mGroup);
 
@@ -330,8 +329,8 @@ public class GroupDetailActivity extends ServiceBoundActivity {
         }
         mGroup = mFriendsPlugin.getStore().getGroup(guid);
         mBackupMembers = new ArrayList<String>(mGroup.members);
+        mUpdateGroupName = ((EditText) findViewById(R.id.update_group_name_value));
         updateView();
-
     }
 
     @Override
@@ -364,23 +363,20 @@ public class GroupDetailActivity extends ServiceBoundActivity {
 
         final TextView nameView = (TextView) findViewById(R.id.friend_name);
         nameView.setText(mGroup.name);
-        final EditText newGroupName = ((EditText) findViewById(R.id.update_group_name_value));
-        newGroupName.setText(mGroup.name);
+        mUpdateGroupName.setText(mGroup.name);
 
         final Button saveBtn = (Button) findViewById(R.id.save_group);
         saveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mEditing) {
-                    if (newGroupName.getText().length() == 0) {
-                        new AlertDialog.Builder(GroupDetailActivity.this).setMessage(R.string.name_required)
-                            .setPositiveButton(R.string.rogerthat, null).create().show();
+                    if (mUpdateGroupName.getText().length() == 0) {
+                        UIUtils.showDialog(GroupDetailActivity.this, null, R.string.name_required);
                         return;
                     }
 
                     if (mGroup.members.size() == 0) {
-                        new AlertDialog.Builder(GroupDetailActivity.this).setMessage(R.string.members_are_required)
-                            .setPositiveButton(R.string.rogerthat, null).create().show();
+                        UIUtils.showDialog(GroupDetailActivity.this, null, R.string.members_are_required);
                         return;
                     }
                 }
@@ -448,8 +444,7 @@ public class GroupDetailActivity extends ServiceBoundActivity {
         mEditing = goToEditingMode;
         updateGroupForEdit();
         if (!mEditing) {
-            final EditText newGroupName = ((EditText) findViewById(R.id.update_group_name_value));
-            UIUtils.hideKeyboard(getApplicationContext(), newGroupName);
+            UIUtils.hideKeyboard(getApplicationContext(), mUpdateGroupName);
         }
     }
 
@@ -580,7 +575,7 @@ public class GroupDetailActivity extends ServiceBoundActivity {
                     try {
                         final TextView name = (TextView) view.findViewById(R.id.friend_name);
 
-                        String newGroupNameBackup = ((EditText) findViewById(R.id.update_group_name_value)).getText()
+                        String newGroupNameBackup = mUpdateGroupName.getText()
                             .toString();
                         Drawable newGroupAvatarBackup = ((ImageView) findViewById(R.id.update_group_avatar_img))
                             .getDrawable();
@@ -613,7 +608,7 @@ public class GroupDetailActivity extends ServiceBoundActivity {
                             ((ImageView) findViewById(R.id.update_group_avatar_img))
                                 .setImageDrawable(newGroupAvatarBackup);
                         }
-                        ((EditText) findViewById(R.id.update_group_name_value)).setText(newGroupNameBackup);
+                        mUpdateGroupName.setText(newGroupNameBackup);
                         // END
 
                         mListView.setSelectionFromTop(lastViewedPosition, topOffset);

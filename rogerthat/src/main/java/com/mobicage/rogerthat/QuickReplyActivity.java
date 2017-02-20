@@ -28,6 +28,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.mobicage.rogerth.at.R;
@@ -38,6 +39,7 @@ import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.ResponseHandler;
+import com.mobicage.rpc.config.LookAndFeelConstants;
 import com.mobicage.to.messaging.AttachmentTO;
 import com.mobicage.to.messaging.ButtonTO;
 import com.mobicage.to.messaging.SendMessageRequestTO;
@@ -70,7 +72,9 @@ public class QuickReplyActivity extends ServiceBoundActivity {
         mMessagingPlugin = mService.getPlugin(MessagingPlugin.class);
         FriendsPlugin mFriendsPlugin = mService.getPlugin(FriendsPlugin.class);
         ImageView avatarView = (ImageView) findViewById(R.id.quick_reply_avatar);
+        LinearLayout headerView = (LinearLayout) findViewById(R.id.quick_reply_header);
         avatarView.setImageBitmap(mFriendsPlugin.getAvatarBitmap(mSender));
+        headerView.setBackgroundColor(LookAndFeelConstants.getPrimaryColor(this));
     }
 
     @Override

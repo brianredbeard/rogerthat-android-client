@@ -39,7 +39,6 @@
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     app:elevation="4dp"
-                    app:backgroundTint="@color/mc_primary_color"
                     android:clickable="true"/>
 
                 <ImageButton
@@ -88,7 +87,7 @@
                     android:layout_weight="6"
                     android:gravity="right"
                     android:text="@string/birthdate"
-                    android:textColor="@color/mc_primary_color"
+                    fontPath="fonts/lato_bold.ttf"
                     android:textSize="16sp"
                     tools:text="Geboortedatum"/>
 
@@ -112,7 +111,6 @@
                     app:ico_padding="2dp"
                     app:ico_size="18dp"
                     android:visibility="invisible"
-                    tools:src="@drawable/act_friend_plus"
                     tools:visibility="visible"/>
 
             </LinearLayout>
@@ -133,7 +131,7 @@
                     android:layout_weight="6"
                     android:gravity="right"
                     android:text="@string/gender"
-                    android:textColor="@color/mc_primary_color"
+                    fontPath="fonts/lato_bold.ttf"
                     android:textSize="16sp"/>
 
                 <TextView
@@ -156,7 +154,6 @@
                     app:ico_size="18dp"
                     android:layout_weight="1"
                     android:visibility="invisible"
-                    tools:src="@drawable/act_friend_plus"
                     tools:visibility="visible"/>
 
             </LinearLayout>

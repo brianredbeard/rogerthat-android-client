@@ -194,6 +194,9 @@ public class CallReceiver {
         if ("com.mobicage.capi.system.updateJsEmbedding".equals(function)) {
             return comMobicageCapiSystemIClientRpc.updateJsEmbedding(Parser.ComMobicageToJs_embeddingUpdateJSEmbeddingRequestTO(call.arguments.get("request")));
         }
+        if ("com.mobicage.capi.system.updateLookAndFeel".equals(function)) {
+            return comMobicageCapiSystemIClientRpc.updateLookAndFeel(Parser.ComMobicageToAppUpdateLookAndFeelRequestTO(call.arguments.get("request")));
+        }
         if ("com.mobicage.capi.system.updateSettings".equals(function)) {
             return comMobicageCapiSystemIClientRpc.updateSettings(Parser.ComMobicageToSystemUpdateSettingsRequestTO(call.arguments.get("request")));
         }

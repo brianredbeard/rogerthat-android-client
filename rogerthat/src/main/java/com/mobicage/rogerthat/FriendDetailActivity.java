@@ -40,6 +40,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
@@ -56,7 +58,7 @@ import com.mobicage.rogerthat.util.RegexPatterns;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
-import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
+import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
@@ -64,6 +66,7 @@ import com.mobicage.rogerthat.util.ui.ImageHelper;
 import com.mobicage.rogerthat.util.ui.ServiceHeader;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.CloudConstants;
+import com.mobicage.rpc.config.LookAndFeelConstants;
 import com.mobicage.to.friends.FriendTO;
 import com.mobicage.to.service.StartServiceActionRequestTO;
 import com.mobicage.to.system.GetIdentityQRCodeRequestTO;
@@ -242,29 +245,30 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
         }
 
         ImageView location = (ImageView) findViewById(R.id.location);
+        location.setImageDrawable(new IconicsDrawable(FriendDetailActivity.this, FontAwesome.Icon.faw_map_marker)
+                .color(LookAndFeelConstants.getPrimaryIconColor(FriendDetailActivity.this)).sizeDp(35));
         location.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
                 T.UI();
                 if (mFriend.sharesLocation) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(FriendDetailActivity.this);
-                    builder.setTitle(R.string.friend_location_requested_title);
-                    builder.setMessage(getString(R.string.friend_location_requested_body, mFriend.name));
-                    builder.setPositiveButton(R.string.rogerthat, new SafeDialogInterfaceOnClickListener() {
+                    String title = getString(R.string.friend_location_requested_title);
+                    String message = getString(R.string.friend_location_requested_body, mFriend.name);
+                    SafeDialogClick onOkListener = new SafeDialogClick() {
                         @Override
-                        public void safeOnClick(DialogInterface dialog, int which) {
+                        public void safeOnClick(DialogInterface dialog, int id) {
                             HomeActivity.startWithLaunchInfo(FriendDetailActivity.this,
-                                HomeActivity.INTENT_VALUE_SHOW_MESSAGES);
+                                    HomeActivity.INTENT_VALUE_SHOW_MESSAGES);
                         }
-                    });
-                    builder.create().show();
+                    };
+                    UIUtils.showDialog(FriendDetailActivity.this, title, message, onOkListener);
 
                     mFriendsPlugin.scheduleSingleFriendLocationRetrieval(mFriend.email);
                 } else {
 
-                    SafeDialogInterfaceOnClickListener onPositiveClickListener = new SafeDialogInterfaceOnClickListener() {
+                    SafeDialogClick onPositiveClickListener = new SafeDialogClick() {
                         @Override
-                        public void safeOnClick(DialogInterface dialog, int which) {
+                        public void safeOnClick(DialogInterface dialog, int id) {
                             dialog.dismiss();
                             mFriendsPlugin.requestFriendShareLocation(mFriend.email, null);
                             UIUtils.showLongToast(FriendDetailActivity.this,
@@ -272,24 +276,23 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
                         }
                     };
 
-                    SafeDialogInterfaceOnClickListener onNegativeClickListener = new SafeDialogInterfaceOnClickListener() {
+                    SafeDialogClick onNegativeClickListener = new SafeDialogClick() {
                         @Override
-                        public void safeOnClick(DialogInterface dialog, int which) {
+                        public void safeOnClick(DialogInterface dialog, int id) {
                             dialog.dismiss();
                         }
                     };
 
-                    mRequestFriendToShareLocationDialog = new AlertDialog.Builder(FriendDetailActivity.this)
-                        .setMessage(getString(R.string.dialog_request_location_sharing, mFriendName))
-                        .setCancelable(true).setPositiveButton(R.string.yes, onPositiveClickListener)
-                        .setNegativeButton(R.string.no, onNegativeClickListener).create();
-                    mRequestFriendToShareLocationDialog.setCanceledOnTouchOutside(true);
-                    mRequestFriendToShareLocationDialog.show();
+                    String message = getString(R.string.dialog_request_location_sharing, mFriendName);
+                    mRequestFriendToShareLocationDialog = UIUtils.showDialog(FriendDetailActivity.this, null,
+                            message, R.string.yes, onPositiveClickListener, R.string.no, onNegativeClickListener);
                 }
             }
         });
 
         ImageView newMessage = (ImageView) findViewById(R.id.send);
+        newMessage.setImageDrawable(new IconicsDrawable(FriendDetailActivity.this, FontAwesome.Icon.faw_envelope).
+                color(LookAndFeelConstants.getPrimaryIconColor(FriendDetailActivity.this)).sizeDp(35));
         newMessage.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
@@ -300,6 +303,8 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
         });
 
         ImageView history = (ImageView) findViewById(R.id.history);
+        history.setImageDrawable(new IconicsDrawable(FriendDetailActivity.this, FontAwesome.Icon.faw_history).
+                color(LookAndFeelConstants.getPrimaryIconColor(FriendDetailActivity.this)).sizeDp(35));
         history.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
@@ -376,35 +381,39 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
             if (mFriend == null)
                 return true;
 
-            new AlertDialog.Builder(this).setMessage(getString(getUnfriendMessage(), mFriend.getDisplayName()))
-                .setPositiveButton(R.string.yes, new SafeDialogInterfaceOnClickListener() {
-                    @Override
-                    public void safeOnClick(DialogInterface dialog, int which) {
-                        T.UI();
-                        L.d("clicked menu option to remove friend");
-                        if (!mFriendsPlugin.scheduleFriendRemoval(mFriend.email)) {
-                            UIUtils.showLongToast(FriendDetailActivity.this, getString(getRemoveFailedMessage()));
-                            L.d("FriendDetailActivity - removeFriend failed");
-                        } else {
-                            L.d("FriendDetailActivity - removeFriend succeeded");
-                            mService.postOnUIHandler(new SafeRunnable() {
-                                @Override
-                                protected void safeRun() throws Exception {
-                                    T.UI();
-                                    FriendDetailActivity.this.finish();
-                                }
-                            });
-                        }
+            String message = getString(getUnfriendMessage(), mFriend.getDisplayName());
+            String positiveButtonCaption = getString(R.string.yes);
+            String negativeButtonCaption = getString(R.string.no);
+            SafeDialogClick positiveClick = new SafeDialogClick() {
+                @Override
+                public void safeOnClick(DialogInterface dialog, int id) {
+                    T.UI();
+                    L.d("clicked menu option to remove friend");
+                    if (!mFriendsPlugin.scheduleFriendRemoval(mFriend.email)) {
+                        UIUtils.showLongToast(FriendDetailActivity.this, getString(getRemoveFailedMessage()));
+                        L.d("FriendDetailActivity - removeFriend failed");
+                    } else {
+                        L.d("FriendDetailActivity - removeFriend succeeded");
+                        mService.postOnUIHandler(new SafeRunnable() {
+                            @Override
+                            protected void safeRun() throws Exception {
+                                T.UI();
+                                FriendDetailActivity.this.finish();
+                            }
+                        });
                     }
-                }).setNegativeButton(R.string.no, new SafeDialogInterfaceOnClickListener() {
-                    @Override
-                    public void safeOnClick(DialogInterface dialog, int which) {
-                        T.UI();
-                        L.d("FriendDetailActivity - removefriend - Clicked NO - do not remove friend");
-                        dialog.dismiss();
-                    }
-                }).create().show();
-
+                }
+            };
+            SafeDialogClick negativeClick = new SafeDialogClick() {
+                @Override
+                public void safeOnClick(DialogInterface dialog, int id) {
+                    T.UI();
+                    L.d("FriendDetailActivity - removefriend - Clicked NO - do not remove friend");
+                    dialog.dismiss();
+                }
+            };
+            UIUtils.showDialog(this, null, message, positiveButtonCaption, positiveClick, negativeButtonCaption,
+                    negativeClick);
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -476,15 +485,15 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
                 completeTransmit(new SafeRunnable() {
                     @Override
                     protected void safeRun() throws Exception {
-                        new AlertDialog.Builder(FriendDetailActivity.this)
-                            .setMessage(R.string.scanner_communication_failure)
-                            .setPositiveButton(R.string.rogerthat, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.dismiss();
-                                    finish();
-                                }
-                            }).create().show();
+                        SafeDialogClick onClickListener = new SafeDialogClick() {
+                            @Override
+                            public void safeOnClick(DialogInterface dialog, int id) {
+                                dialog.dismiss();
+                                finish();
+                            }
+                        };
+                        String message = getString(R.string.scanner_communication_failure);
+                        UIUtils.showDialog(FriendDetailActivity.this, null, message, onClickListener);
                     }
                 });
             }

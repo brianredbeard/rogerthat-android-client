@@ -52,7 +52,6 @@ import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.RegexPatterns;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
-import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
@@ -114,6 +113,7 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity {
         T.UI();
         super.onCreate(savedInstanceState);
         LayoutInflater inflater = getLayoutInflater();
+
 
         setContentViewWithoutNavigationBar(AppConstants.HOME_ACTIVITY_LAYOUT);
 

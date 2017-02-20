@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Based on https://github.com/socialize/android-appcompat/blob/master/res/layout/abc_list_menu_item_layout.xml-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/listPreferredItemHeightSmall"
+    android:paddingLeft="?attr/listPreferredItemPaddingLeft"
+    android:paddingRight="?attr/listPreferredItemPaddingRight">
+
+    <!--color and icon of this ImageView will be set in code -->
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:background="@drawable/tab_icon_background"
+        android:duplicateParentState="true"/>
+
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="1"
+        android:duplicateParentState="true"
+        android:ellipsize="marquee"
+        android:fadingEdge="horizontal"
+        android:maxLines="1"
+        android:paddingLeft="?attr/listPreferredItemPaddingLeft"
+        android:paddingRight="?attr/listPreferredItemPaddingRight"
+        android:textAppearance="?attr/textAppearanceListItemSmall"/>
+
+    <TextView
+        android:id="@+id/badge"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="center_vertical"
+        android:background="@drawable/badge_white"
+        android:duplicateParentState="true"
+        android:gravity="center"
+        android:textSize="12sp"
+        android:visibility="gone"/>
+
+</LinearLayout>

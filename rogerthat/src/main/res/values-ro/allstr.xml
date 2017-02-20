@@ -154,7 +154,6 @@
     <string name="friend_share_location">Se poate vedea locatia mea</string>
     <string name="friend_sms_invitation">Buna %1$s,\n\nTe-am invitat sa comunici cu mine folosind %4$s.\n\nStep 1. instalati aplicatia %4$s:\n%2$s\n\nStep 2. conectati-va cu mine:\n%3$s</string>
     <string name="friend_sms_invitation_no_url">Buna %1$s\n\nTe-am invitat sa comunici cu mine folosind %3$s. %3$s este o platforma moderna de mesagerie pentru web sau smartphone.\n\nInstalati aplicatia %3$s: %2$s</string>
-    <string name="friends_getting_started_title">Sa incepem</string>
     <string name="friends_map">Prieteni pe harta</string>
     <string name="gender">Sex</string>
     <string name="get_current_coordinates">Obtine coordonatele GPS ale locației curente</string>

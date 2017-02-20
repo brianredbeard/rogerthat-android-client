@@ -34,17 +34,8 @@
 
 package com.mobicage.rogerthat.plugins.messaging.widgets;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Map;
-
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -56,7 +47,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.AttributeSet;
@@ -64,9 +54,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
-import com.commonsware.cwac.cam2.CameraActivity;
 import com.commonsware.cwac.cam2.Facing;
-import com.commonsware.cwac.cam2.FlashMode;
 import com.mobicage.api.messaging.Rpc;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.messaging.AttachmentViewerActivity;
@@ -77,7 +65,7 @@ import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.IOUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeAsyncTask;
-import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
+import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
@@ -87,6 +75,14 @@ import com.mobicage.to.messaging.forms.SubmitPhotoUploadFormRequestTO;
 import com.mobicage.to.messaging.forms.SubmitPhotoUploadFormResponseTO;
 import com.mobicage.to.messaging.forms.UnicodeWidgetResultTO;
 import com.soundcloud.android.crop.Crop;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Map;
 
 public class PhotoUploadWidget extends Widget {
 
@@ -194,40 +190,23 @@ public class PhotoUploadWidget extends Widget {
                     if (cameraIntent != null) {
                         mActivity.startActivityForResult(cameraIntent, PICK_IMAGE);
                     } else if (!hasCamera) {
-                        AlertDialog.Builder ad = new AlertDialog.Builder(mActivity);
-                        ad.setTitle(mActivity.getString(R.string.no_camera_available_title));
-                        ad.setMessage(mActivity.getString(R.string.no_camera_available));
-                        ad.setPositiveButton(mActivity.getString(R.string.ok),
-                            new SafeDialogInterfaceOnClickListener() {
-                                @Override
-                                public void safeOnClick(DialogInterface dialog, int id) {
-                                    dialog.dismiss();
-                                }
-                            });
-                        ad.show();
+                        UIUtils.showDialog(mActivity, R.string.no_camera_available_title, R.string.no_camera_available);
                     } else if (!hasCameraPermission) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-                        builder.setMessage(R.string.need_camera_permission);
-                        builder.setTitle(R.string.need_camera_permission_title);
-                        builder.setPositiveButton(R.string.go_to_app_settings,
-                            new SafeDialogInterfaceOnClickListener() {
-                                @Override
-                                public void safeOnClick(DialogInterface dialog, int which) {
-                                    dialog.dismiss();
-                                    Intent intent = new Intent();
-                                    intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                                    Uri uri = Uri.fromParts("package", mActivity.getPackageName(), null);
-                                    intent.setData(uri);
-                                    mActivity.startActivity(intent);
-                                }
-                            });
-                        builder.setNegativeButton(R.string.cancel, new SafeDialogInterfaceOnClickListener() {
+                        String title = mActivity.getString(R.string.need_camera_permission_title);
+                        String message = mActivity.getString(R.string.need_camera_permission);
+                        SafeDialogClick onPositiveClick = new SafeDialogClick() {
                             @Override
-                            public void safeOnClick(DialogInterface dialog, int which) {
+                            public void safeOnClick(DialogInterface dialog, int id) {
                                 dialog.dismiss();
+                                Intent intent = new Intent();
+                                intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                Uri uri = Uri.fromParts("package", mActivity.getPackageName(), null);
+                                intent.setData(uri);
+                                mActivity.startActivity(intent);
                             }
-                        });
-                        builder.create().show();
+                        };
+                        UIUtils.showDialog(mActivity, title, message, R.string.go_to_app_settings, onPositiveClick,
+                                R.id.cancel, null);
                     }
                 }
             }
@@ -415,16 +394,15 @@ public class PhotoUploadWidget extends Widget {
             items = new String[] { mActivity.getString(R.string.size_actual) + " (" + size / 1000 + " KB)" };
             // don't ask
         }
-        AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-        builder.setTitle(mActivity.getString(R.string.select_size)).setItems(items,
-            new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int item) {
-                    compressPicture(mUriSavedImage, sizes[item]);
-                }
-            });
         if (size > 75000) {
-            builder.create().show();
+            String title = mActivity.getString(R.string.select_size);
+            SafeDialogClick itemsOnClickListener = new SafeDialogClick() {
+                @Override
+                public void safeOnClick(DialogInterface dialog, int id) {
+                    compressPicture(mUriSavedImage, sizes[id]);
+                }
+            };
+            UIUtils.showDialog(mActivity, title, null, items, itemsOnClickListener);
         }
     }
 
@@ -482,16 +460,7 @@ public class PhotoUploadWidget extends Widget {
         if (Message.POSITIVE.equals(buttonId)) {
             boolean imageExists = image.exists();
             if (!mPhotoSelected || !imageExists) {
-                AlertDialog.Builder ad = new AlertDialog.Builder(mActivity);
-                ad.setTitle(mActivity.getString(R.string.no_photo_selected_tilte));
-                ad.setMessage(mActivity.getString(R.string.no_photo_selected_summary));
-                ad.setPositiveButton(mActivity.getString(R.string.ok), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.dismiss();
-                    }
-                });
-                ad.show();
+                UIUtils.showDialog(mActivity, R.string.no_photo_selected_tilte, R.string.no_photo_selected_summary);
                 return false;
             }
         }

@@ -38,7 +38,7 @@ import com.mobicage.rogerthat.plugins.friends.FriendStore;
 import com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity;
 import com.mobicage.rogerthat.plugins.friends.ServiceSearchActivity;
 import com.mobicage.rogerthat.util.system.T;
-import com.mobicage.rpc.config.AppConstants;
+import com.mobicage.rpc.config.LookAndFeelConstants;
 
 public class ServiceFriendsActivity extends FriendsActivity {
 
@@ -69,7 +69,7 @@ public class ServiceFriendsActivity extends FriendsActivity {
         } else if (mOrganizationType == FriendStore.SERVICE_ORGANIZATION_TYPE_EMERGENCY) {
             mOrganizationTypeStringId = R.string.care;
             noServicesStringId = R.string.no_care_institutions_found;
-            setActivityName("care");
+            setActivityName("emergency_services");
         } else {
             mOrganizationTypeStringId = R.string.tab_services;
             noServicesStringId = R.string.no_services_found;
@@ -79,7 +79,7 @@ public class ServiceFriendsActivity extends FriendsActivity {
                 .string.click_magnifying_glass_to_search_services));
 
         ImageButton magnifyingGlass = (ImageButton) findViewById(R.id.ic_magnifying_glass);
-        magnifyingGlass.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_search).color(ContextCompat.getColor(this, R.color.mc_primary_icon)).sizeDp(200).paddingDp(20));
+        magnifyingGlass.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_search).color(LookAndFeelConstants.getPrimaryIconColor(this)).sizeDp(200).paddingDp(20));
 
         magnifyingGlass.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -110,11 +110,6 @@ public class ServiceFriendsActivity extends FriendsActivity {
             ((FriendListAdapter) getListAdapter()).changeCursor(getCursor());
             updateVisibleItems();
         }
-    }
-
-    @Override
-    protected String getHelpMessage() {
-        return null;
     }
 
     @Override

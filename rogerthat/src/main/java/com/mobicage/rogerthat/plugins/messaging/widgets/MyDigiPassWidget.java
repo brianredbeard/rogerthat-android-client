@@ -18,7 +18,6 @@
 
 package com.mobicage.rogerthat.plugins.messaging.widgets;
 
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -49,6 +48,7 @@ import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeAsyncTask;
+import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
@@ -278,24 +278,18 @@ public class MyDigiPassWidget extends Widget implements OnMDPAuthenticationListe
     public boolean proceedWithSubmit(final String buttonId) {
         if (Message.POSITIVE.equals(buttonId)) {
             if (mResult == null) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-                builder.setCancelable(true);
-                builder.setTitle(mActivity.getString(R.string.not_authenticated));
-                builder.setMessage(mActivity.getString(R.string.authenticate_first));
-                builder.setNegativeButton(mActivity.getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                String title = mActivity.getString(R.string.not_authenticated);
+                String message = mActivity.getString(R.string.authenticate_first);
+                String positiveCaption = (String) mMdpTextView.getText();
+                String negativeCaption = mActivity.getString(R.string.cancel);
+                SafeDialogClick onPositiveClick = new SafeDialogClick() {
                     @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.dismiss();
-                    }
-                });
-                builder.setPositiveButton(mMdpTextView.getText(), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
+                    public void safeOnClick(DialogInterface dialog, int id) {
                         dialog.dismiss();
                         authenticate();
                     }
-                });
-                builder.show();
+                };
+                UIUtils.showDialog(mActivity, title, message, positiveCaption, onPositiveClick, negativeCaption, null);
                 return false;
             }
         }
@@ -642,7 +636,7 @@ public class MyDigiPassWidget extends Widget implements OnMDPAuthenticationListe
                     if (Boolean.TRUE.equals(result.get("mdp_update_required"))) {
                         showInstallOrUpdateMdpDialog(error, R.string.update);
                     } else {
-                        UIUtils.showAlertDialog(mActivity, null, error);
+                        UIUtils.showDialog(mActivity, null, error);
                     }
                 }
             });
@@ -654,24 +648,14 @@ public class MyDigiPassWidget extends Widget implements OnMDPAuthenticationListe
 
     private void showInstallOrUpdateMdpDialog(final String message, final int positiveButton) {
         T.UI();
-        final AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-        builder.setCancelable(true);
-        builder.setTitle("MYDIGIPASS");
-        builder.setMessage(message);
-        builder.setNegativeButton(mActivity.getString(R.string.cancel), new DialogInterface.OnClickListener() {
+        SafeDialogClick onPositiveClick = new SafeDialogClick() {
             @Override
-            public void onClick(DialogInterface dialog, int id) {
-                dialog.dismiss();
-            }
-        });
-        builder.setPositiveButton(mActivity.getString(positiveButton), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int id) {
+            public void safeOnClick(DialogInterface dialog, int id) {
                 dialog.dismiss();
                 mMdpMobile.openStore();
             }
-        });
-        builder.show();
+        };
+        UIUtils.showDialog(mActivity, "MYDIGIPASS", message, positiveButton, onPositiveClick, R.id.cancel, null);
     }
 
     @Override

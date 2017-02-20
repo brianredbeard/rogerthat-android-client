@@ -18,16 +18,6 @@
 
 package com.mobicage.rogerthat.plugins.scan;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.jivesoftware.smack.util.Base64;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-
 import android.content.Intent;
 
 import com.mobicage.rogerthat.plugins.friends.Friend;
@@ -36,6 +26,7 @@ import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.pickle.PickleException;
 import com.mobicage.rogerthat.util.system.T;
+import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.IResponse;
 import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.rpc.config.AppConstants;
@@ -43,6 +34,16 @@ import com.mobicage.to.friends.FriendTO;
 import com.mobicage.to.friends.GetUserInfoResponseTO;
 import com.mobicage.to.friends.UserScannedRequestTO;
 import com.mobicage.to.friends.UserScannedResponseTO;
+
+import org.jivesoftware.smack.util.Base64;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class GetUserInfoResponseHandler extends ResponseHandler<GetUserInfoResponseTO> {
 
@@ -184,10 +185,10 @@ public class GetUserInfoResponseHandler extends ResponseHandler<GetUserInfoRespo
                 }
             } else {
                 intent.putExtra(ProcessScanActivity.SUCCESS, false);
-                intent.putExtra(ProcessScanActivity.ERROR_MESSAGE, theResponse.error.message);
-                intent.putExtra(ProcessScanActivity.ERROR_TITLE, theResponse.error.title);
-                intent.putExtra(ProcessScanActivity.ERROR_CAPTION, theResponse.error.caption);
-                intent.putExtra(ProcessScanActivity.ERROR_ACTION, theResponse.error.action);
+                intent.putExtra(UIUtils.ERROR_MESSAGE, theResponse.error.message);
+                intent.putExtra(UIUtils.ERROR_TITLE, theResponse.error.title);
+                intent.putExtra(UIUtils.ERROR_CAPTION, theResponse.error.caption);
+                intent.putExtra(UIUtils.ERROR_ACTION, theResponse.error.action);
             }
 
             mMainService.sendBroadcast(intent);

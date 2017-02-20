@@ -17,7 +17,6 @@
  */
 package com.mobicage.rogerthat;
 
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -76,6 +75,7 @@ import com.mobicage.rogerthat.util.time.TimeUtils;
 import com.mobicage.rogerthat.util.ui.ScaleImageView;
 import com.mobicage.rogerthat.util.ui.TestUtils;
 import com.mobicage.rogerthat.util.ui.UIUtils;
+import com.mobicage.rpc.config.LookAndFeelConstants;
 import com.mobicage.to.news.NewsActionButtonTO;
 
 import java.util.ArrayList;
@@ -308,7 +308,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                     if (mActivity.expectedEmailHash != null && mActivity.expectedEmailHash.equals(email)) {
                         final int existence = mActivity.friendsPlugin.getStore().getExistence(email);
                         if (Friend.ACTIVE == existence) {
-                            mActivity.progressDialog.dismiss();
+                            mActivity.mProgressDialog.dismiss();
                             if (mExecuteAfterBecameFriends != null) {
                                 mExecuteAfterBecameFriends.run();
                             }
@@ -404,6 +404,17 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
             mActivity.addBroadcastReceiver(mBroadcastReceiver, filter);
 
             setVisibility(false);
+
+            // Colours
+            int primaryColor = LookAndFeelConstants.getPrimaryColor(mMainService);
+            mTitle.setTextColor(primaryColor);
+            mPinButton.setImageDrawable(new IconicsDrawable(mMainService, FontAwesome.Icon.faw_thumb_tack).color
+                    (primaryColor)
+                    .sizeDp(16));
+            mDropdownButton.setImageDrawable(new IconicsDrawable(mMainService, FontAwesome.Icon.faw_angle_down).color
+                    (primaryColor)
+                    .sizeDp(16));
+            UIUtils.setColors(mMainService, mReachSpinner);
         }
 
         public void setNewsItem(final int position, final NewsItem newsItem, final NewsItemIndex ni) {
@@ -596,8 +607,9 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         }
 
         private void setupPinButton(boolean pinned) {
-            int buttonColor = ContextCompat.getColor(mActivity, pinned ? R.color.mc_white : R.color.mc_primary_color);
-            int backgroundColor = ContextCompat.getColor(mActivity, pinned ? R.color.mc_primary_color : R.color.mc_white);
+            int primaryColor = LookAndFeelConstants.getPrimaryColor(mActivity);
+            int buttonColor = pinned ? ContextCompat.getColor(mActivity, R.color.mc_white) : primaryColor;
+            int backgroundColor = pinned ? primaryColor : ContextCompat.getColor(mActivity, R.color.mc_white);
             mPinButton.setImageDrawable(new IconicsDrawable(mActivity).icon(FontAwesome.Icon.faw_thumb_tack).color(buttonColor).sizeDp(18));
             GradientDrawable background = (GradientDrawable) mPinButton.getBackground();
             background.setColor(backgroundColor);
@@ -609,34 +621,27 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 public void safeOnClick(View v) {
                     final int existenceStatus = mFriendsPlugin.getStore().getExistence(mNewsItem.sender.email);
                     LinearLayout sheetView = (LinearLayout) mLayoutInflater.inflate(R.layout.news_options, null);
+                    final View optionItem = mLayoutInflater.inflate(R.layout.news_options_item, null);
+                    final ImageView iconView = (ImageView) optionItem.findViewById(R.id.icon);
+                    final TextView titleView = (TextView) optionItem.findViewById(R.id.title);
+                    final TextView subTitleView = (TextView) optionItem.findViewById(R.id.subtitle);
+                    iconView.setImageDrawable(new IconicsDrawable(mActivity, FontAwesome.Icon.faw_thumb_tack).color(ContextCompat.getColor(mActivity, R.color.mc_default_text)).sizeDp(20).paddingDp(2));
+                    optionItem.setOnClickListener(new SafeViewOnClickListener() {
+                        @Override
+                        public void safeOnClick(View v) {
+                            mActivity.dismissBottomSheetDialog();
+                            togglePinned();
+                        }
+                    });
 
                     if (mNewsItem.pinned) {
-                        final View actionUnSave = mLayoutInflater.inflate(R.layout.news_options_item, null);
-                        ((ImageView) actionUnSave.findViewById(R.id.icon)).setImageDrawable(new IconicsDrawable(mActivity, FontAwesome.Icon.faw_thumb_tack).color(ContextCompat.getColor(mActivity, R.color.mc_default_text)).sizeDp(20).paddingDp(2));
-                        ((TextView) actionUnSave.findViewById(R.id.title)).setText(R.string.unsave);
-                        ((TextView) actionUnSave.findViewById(R.id.subtitle)).setText(R.string.remove_this_from_your_saved_items);
-                        actionUnSave.setOnClickListener(new SafeViewOnClickListener() {
-                            @Override
-                            public void safeOnClick(View v) {
-                                mActivity.dismissBottomSheetDialog();
-                                togglePinned();
-                            }
-                        });
-                        sheetView.addView(actionUnSave);
+                        titleView.setText(R.string.unsave);
+                        subTitleView.setText(R.string.remove_this_from_your_saved_items);
                     } else {
-                        final View actionSave = mLayoutInflater.inflate(R.layout.news_options_item, null);
-                        ((ImageView) actionSave.findViewById(R.id.icon)).setImageDrawable(new IconicsDrawable(mActivity, FontAwesome.Icon.faw_thumb_tack).color(ContextCompat.getColor(mActivity, R.color.mc_default_text)).sizeDp(20).paddingDp(2));
-                        ((TextView) actionSave.findViewById(R.id.title)).setText(R.string.save);
-                        ((TextView) actionSave.findViewById(R.id.subtitle)).setText(R.string.add_this_to_your_saved_items);
-                        actionSave.setOnClickListener(new SafeViewOnClickListener() {
-                            @Override
-                            public void safeOnClick(View v) {
-                                mActivity.dismissBottomSheetDialog();
-                                togglePinned();
-                            }
-                        });
-                        sheetView.addView(actionSave);
+                        titleView.setText(R.string.save);
+                        subTitleView.setText(R.string.add_this_to_your_saved_items);
                     }
+                    sheetView.addView(optionItem);
 
                     if (mActivity instanceof NewsPinnedActivity) {
                         // You cannot hide news items from pinned item list
@@ -848,13 +853,10 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                                 smiClickRunnable.run();
                             } else {
                                 if (!mMainService.getNetworkConnectivityManager().isConnected()) {
-                                    AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-                                    builder.setMessage(R.string.no_internet_connection_try_again);
-                                    builder.setPositiveButton(R.string.rogerthat, null);
-                                    builder.create().show();
+                                    UIUtils.showDialog(mActivity, null, R.string.no_internet_connection_try_again);
                                     return;
                                 }
-                                mActivity.progressDialog.show();
+                                mActivity.mProgressDialog.show();
                                 mActivity.expectedEmailHash = mNewsItem.sender.email;
 
                                 mExecuteAfterBecameFriends = smiClickRunnable;
@@ -878,7 +880,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                     }
                 });
                 GradientDrawable background = new GradientDrawable();
-                background.setColor(ContextCompat.getColor(mActivity, R.color.mc_primary_color));
+                background.setColor(LookAndFeelConstants.getPrimaryColor(mActivity));
                 background.setCornerRadii(getCorners(totalButtonCount, currentButton));
                 btn.setBackground(background);
                 ViewGroup.MarginLayoutParams marginParams = (ViewGroup.MarginLayoutParams) btn.getLayoutParams();

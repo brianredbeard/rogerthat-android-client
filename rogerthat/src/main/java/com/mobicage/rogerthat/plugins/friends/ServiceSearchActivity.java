@@ -68,6 +68,7 @@ import com.mobicage.rogerthat.util.ui.ImageHelper;
 import com.mobicage.rogerthat.util.ui.SafeViewFlipper;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rogerthat.util.ui.ViewFlipperSlider;
+import com.mobicage.rpc.config.LookAndFeelConstants;
 import com.mobicage.to.service.FindServiceCategoryTO;
 import com.mobicage.to.service.FindServiceItemTO;
 import com.mobicage.to.service.FindServiceResponseTO;
@@ -137,7 +138,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
         mSearchInfoByCategory = new HashMap<>();
         mSearchInfoByListView = new HashMap<>();
 
-        mGestureScanner = new GestureDetector(new ViewFlipperSlider(mOnSwipeLeft, mOnSwipeRight));
+        mGestureScanner = new GestureDetector(mService, new ViewFlipperSlider(mOnSwipeLeft, mOnSwipeRight));
 
         final Context ctx = this;
         final EditText editText = (EditText) findViewById(R.id.search_text);
@@ -172,6 +173,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
         });
 
         final ImageButton searchButton = (ImageButton) findViewById(R.id.search_button);
+        searchButton.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_search).color(LookAndFeelConstants.getPrimaryIconColor(this)).sizeDp(24));
         searchButton.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
@@ -205,11 +207,8 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
         } else {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST_ACCESS_FINE_LOCATION);
         }
-
-        mConnectingDialog = new ProgressDialog(this);
-        mConnectingDialog.setMessage(getString(R.string.loading));
-        mConnectingDialog.setIndeterminate(true);
-        mConnectingDialog.setCancelable(true);
+        mConnectingDialog = UIUtils.showProgressDialog(this, null, getString(R.string.loading), true, true, null,
+                ProgressDialog.STYLE_SPINNER, false);
     }
 
     @Override
@@ -331,7 +330,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
                         }
 
                         if (!TextUtils.isEmptyOrWhitespace(responseTO.error_string)) {
-                            UIUtils.showAlertDialog(ServiceSearchActivity.this, null, responseTO.error_string);
+                            UIUtils.showDialog(ServiceSearchActivity.this, null, responseTO.error_string);
                             return new String[]{action};
                         }
 
@@ -346,7 +345,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
                                 LinearLayout label = (LinearLayout) getLayoutInflater().inflate(
                                         R.layout.search_category, null);
                                 final boolean selected = mSearchCategoryLabels.getChildCount() == 0;
-                                final TextView labelTextView = setCatorySelected(label, selected);
+                                final TextView labelTextView = setSelectedCategory(label, selected);
                                 labelTextView.setText(category.category);
                                 label.setOnClickListener(new OnClickListener() {
                                     @Override
@@ -354,6 +353,11 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
                                         displayTab(mSearchCategoryLabels.indexOfChild(v));
                                     }
                                 });
+                                // Colours
+                                int primaryColor = LookAndFeelConstants.getPrimaryColor(ServiceSearchActivity.this);
+                                ((TextView) label.findViewById(R.id.category)).setTextColor(primaryColor);
+                                label.findViewById(R.id.indicator).setBackgroundColor(primaryColor);
+
                                 mSearchCategoryLabels.addView(label);
 
                                 // Add ListView
@@ -415,7 +419,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
         };
     }
 
-    private TextView setCatorySelected(LinearLayout label, final boolean selected) {
+    private TextView setSelectedCategory(LinearLayout label, final boolean selected) {
         final View labelIndicatorView = label.findViewById(R.id.indicator);
         final TextView labelTextView = (TextView) label.findViewById(R.id.category);
         labelIndicatorView.setVisibility(selected ? View.VISIBLE : View.INVISIBLE);
@@ -440,7 +444,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
             }
             final boolean selected = tab == i;
             final LinearLayout v = si.label;
-            setCatorySelected(v, selected);
+            setSelectedCategory(v, selected);
             if (selected) {
                 final HorizontalScrollView sv = (HorizontalScrollView) findViewById(R.id.search_category_scroll_container);
                 sv.post(new SafeRunnable() {
@@ -463,14 +467,14 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
     private void launchFindServiceCall(String cursor) {
         if (mFriendsPlugin.searchService(mSearchString, mOrganizationType, cursor, mAction)) {
             if (cursor == null)
-                mProgressDialog = ProgressDialog.show(this, null, getString(R.string.searching), true, true);
+                mProgressDialog = UIUtils.showProgressDialog(this, null, getString(R.string.searching));
         } else {
             showSearchFailedDialog();
         }
     }
 
     private void showSearchFailedDialog() {
-        UIUtils.showAlertDialog(this, null, R.string.error_search);
+        UIUtils.showDialog(this, null, R.string.error_search);
     }
 
     private void clearSearches() {
@@ -530,7 +534,10 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
         public View getView(int position, View convertView, ViewGroup parent) {
 
             if (position == mItems.size() && mSearchInfo.cursor != null) {
-                return getLayoutInflater().inflate(R.layout.list_loading_more_indicator, null);
+                View loadingView = getLayoutInflater().inflate(R.layout.list_loading_more_indicator, null);
+                ProgressBar progressBar = (ProgressBar) loadingView.findViewById(R.id.loading_list_progress_bar);
+                UIUtils.setColors(mService, progressBar);
+                return loadingView;
             }
 
             final FindServiceItemTO item = mItems.get(position);
@@ -579,7 +586,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
                     spinnerView.setVisibility(View.GONE);
                     statusView.setVisibility(View.VISIBLE);
                     statusView.setImageDrawable(new IconicsDrawable(ServiceSearchActivity.this).icon(FontAwesome.Icon.faw_plus).color(buttonColor).sizeDp(18));
-                    statusView.setBackgroundColor(ContextCompat.getColor(ServiceSearchActivity.this, R.color.mc_primary_color));
+                    statusView.setBackgroundColor(LookAndFeelConstants.getPrimaryColor(ServiceSearchActivity.this));
 
                     statusView.setOnClickListener(new SafeViewOnClickListener() {
                         @Override

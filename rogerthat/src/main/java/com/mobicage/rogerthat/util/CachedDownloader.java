@@ -197,14 +197,6 @@ public class CachedDownloader {
         return Security.sha256(url);
     }
 
-    private void createDirIfNotExists(File file) throws Exception {
-        T.dontCare();
-        if (!file.exists()) {
-            if (!file.mkdir())
-                throw new Exception("Failed to create directory '" + file.getAbsolutePath() + "'");
-        }
-    }
-
     public boolean isStorageAvailable() {
         return mExternalStorageWriteable;
     }
@@ -212,11 +204,11 @@ public class CachedDownloader {
     public File getCachedDownloadDir() {
         File file = IOUtils.getFilesDirectory(mMainService);
         try {
-            createDirIfNotExists(file);
+            IOUtils.createDirIfNotExists(mMainService, file);
             file = new File(file, "cached");
-            createDirIfNotExists(file);
+            IOUtils.createDirIfNotExists(mMainService, file);
             file = new File(file, "downloads");
-            createDirIfNotExists(file);
+            IOUtils.createDirIfNotExists(mMainService, file);
             return file;
         } catch (Exception e) {
             L.d(e);

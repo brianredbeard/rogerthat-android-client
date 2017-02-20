@@ -17,7 +17,6 @@
  */
 package com.mobicage.rogerthat;
 
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -26,7 +25,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
@@ -40,13 +38,13 @@ import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.history.HistoryItem;
 import com.mobicage.rogerthat.plugins.scan.GetUserInfoResponseHandler;
 import com.mobicage.rogerthat.plugins.scan.ProcessScanActivity;
-import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.AppConstants;
+import com.mobicage.rpc.config.LookAndFeelConstants;
 import com.mobicage.to.friends.GetUserInfoRequestTO;
 
 import java.util.Map;
@@ -78,7 +76,6 @@ public class FriendDetailOrInviteActivity extends ServiceBoundActivity {
     }
 
     private void initBroadcastReceiver(final IntentFilter filter) {
-
         T.UI();
 
         mBroadcastReceiver = new SafeBroadcastReceiver() {
@@ -95,7 +92,7 @@ public class FriendDetailOrInviteActivity extends ServiceBoundActivity {
                             mFriend = mFriendsPlugin.getStore().getFriend(mFriendEmail);
                             updateView();
                         } else {
-                            showError(intent);
+                            UIUtils.showErrorDialog(FriendDetailOrInviteActivity.this, intent);
                         }
 
                         return ALL_RECEIVING_INTENTS;
@@ -107,49 +104,8 @@ public class FriendDetailOrInviteActivity extends ServiceBoundActivity {
         registerReceiver(mBroadcastReceiver, filter);
     }
 
-    private void showErrorToast() {
-        UIUtils.showLongToast(FriendDetailOrInviteActivity.this, getString(R.string.scanner_communication_failure));
-    }
-
-    private void showError(Intent intent) {
-        final String errorMessage = intent.getStringExtra(ProcessScanActivity.ERROR_MESSAGE);
-        if (TextUtils.isEmptyOrWhitespace(errorMessage)) {
-            finish();
-            showErrorToast();
-        } else {
-            final String errorCaption = intent.getStringExtra(ProcessScanActivity.ERROR_CAPTION);
-            final String errorAction = intent.getStringExtra(ProcessScanActivity.ERROR_ACTION);
-            final String errorTitle = intent.getStringExtra(ProcessScanActivity.ERROR_TITLE);
-
-            final AlertDialog.Builder builder = new AlertDialog.Builder(FriendDetailOrInviteActivity.this);
-            builder.setTitle(errorTitle);
-            builder.setMessage(errorMessage);
-            builder.setNegativeButton(R.string.rogerthat, new AlertDialog.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                    finish();
-                }
-            });
-
-            if (!TextUtils.isEmptyOrWhitespace(errorCaption) && !TextUtils.isEmptyOrWhitespace(errorAction)) {
-                builder.setPositiveButton(errorCaption, new AlertDialog.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(errorAction));
-                        startActivity(intent);
-                        dialog.dismiss();
-                        finish();
-                    }
-                });
-            }
-
-            builder.show();
-        }
-    }
-
     private void startSpinner() {
-        mProgressDialog = ProgressDialog.show(this, getString(R.string.loading),
+        mProgressDialog = UIUtils.showProgressDialog(this, getString(R.string.loading),
             getString(R.string.retrieving_information), true, true, new DialogInterface.OnCancelListener() {
                 @Override
                 public void onCancel(DialogInterface dialog) {
@@ -202,6 +158,7 @@ public class FriendDetailOrInviteActivity extends ServiceBoundActivity {
                     v = getString(R.string.unknown);
                 }
                 tvKey.setText(k);
+                tvKey.setTextColor(LookAndFeelConstants.getPrimaryColor(this));
                 tvVal.setText(v);
 
                 profileDataContainer.addView(ll);

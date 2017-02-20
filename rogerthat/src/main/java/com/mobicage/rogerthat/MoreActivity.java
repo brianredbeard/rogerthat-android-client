@@ -36,6 +36,7 @@ import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.config.AppConstants;
+import com.mobicage.rpc.config.LookAndFeelConstants;
 
 public class MoreActivity extends ServiceBoundActivity {
 
@@ -165,7 +166,7 @@ public class MoreActivity extends ServiceBoundActivity {
     private void setItemsOnView(final View v, final ViewInfoHolder holder) {
         int position = rowForPosition(holder.position);
 
-        int primaryColor = getResources().getColor(R.color.mc_primary_color);
+        int primaryColor = LookAndFeelConstants.getPrimaryColor(this);
         if (position == MoreListAdapter.STREAM_ACTIVITY) {
             holder.itemAvatar.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_comment_o).color(primaryColor));
             holder.itemName.setText(R.string.stream_title);

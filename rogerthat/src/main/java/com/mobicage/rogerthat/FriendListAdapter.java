@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,11 +29,10 @@ import android.widget.AlphabetIndexer;
 import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.SectionIndexer;
 import android.widget.TextView;
 
-import com.mikepenz.fontawesome_typeface_library.FontAwesome;
-import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.Contact;
 import com.mobicage.rogerthat.plugins.friends.Friend;
@@ -44,6 +42,7 @@ import com.mobicage.rogerthat.plugins.friends.PhoneContacts;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.T;
+import com.mobicage.rogerthat.util.ui.UIUtils;
 
 // Adapter lives on UI thread
 // It can be temporarily out of date with respect to the
@@ -131,7 +130,8 @@ class FriendListAdapter extends CursorAdapter implements SectionIndexer {
 
     private void setFriendOnView(final View view, final Friend friend) {
         T.UI();
-        final View spinner = view.findViewById(R.id.friend_spinner);
+        final ProgressBar spinner = (ProgressBar) view.findViewById(R.id.friend_spinner);
+        UIUtils.setColors(mContext, spinner);
         spinner.setVisibility(friend.existenceStatus == Friend.INVITE_PENDING ? View.VISIBLE : View.GONE);
         view.findViewById(R.id.friend_existence_layout).setVisibility(spinner.getVisibility());
 

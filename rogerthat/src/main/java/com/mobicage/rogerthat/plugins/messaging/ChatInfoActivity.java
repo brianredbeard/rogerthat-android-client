@@ -32,9 +32,8 @@ import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MyIdentity;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.plugins.friends.Friend;
-import com.mobicage.rogerthat.plugins.friends.FriendSearchActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
-import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
+import com.mobicage.rpc.config.LookAndFeelConstants;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -136,7 +135,9 @@ public class ChatInfoActivity extends ServiceBoundActivity {
                 itemView = convertView;
             else
                 itemView = getLayoutInflater().inflate(R.layout.chat_info_item, null);
-            ((TextView) itemView.findViewById(R.id.title)).setText(chatItem.title);
+            TextView titleView = (TextView) itemView.findViewById(R.id.title);
+            titleView.setTextColor(LookAndFeelConstants.getPrimaryColor(this.getContext()));
+            titleView.setText(chatItem.title);
             ((TextView) itemView.findViewById(R.id.values)).setText(chatItem.value);
             return itemView;
         }

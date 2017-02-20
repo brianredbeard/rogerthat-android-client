@@ -13,6 +13,8 @@
     <color name="mc_highlight_light">#66FFFFFF</color>
     <color name="mc_gray_11">#BBBBBB</color>
     <color name="mc_gray_22">#999999</color>
+    <!--android color dim_foreground_light_inverse_disabled -->
+    <color name="mc_selected_list_item">#80BEBEBE</color>
     <color name="mc_default_text">#4D4D4D</color>
     <color name="mc_default_text_inverse">#FFFFFF</color>
     <color name="mc_highlight_background">#FFFFFFFF</color>
@@ -23,11 +25,16 @@
     <color name="mc_homescreen_background">#EBEBEB</color>
     <color name="mc_homescreen_text">#3E3E3D</color>
     <color name="mc_homescreen_divider">#3E3E3D</color>
+    <color name="mc_background_color">#EBEBEB</color>
+    <color name="mc_background_color_dark">#8d8d8d</color>
 
+    <!--Dynamic colours: these colours can be set dynamically via updateLookAndFeel so do *not* use them directly-->
+    <!--Instead, use LookAndFeelConstants.getPrimaryColor(context) etc.-->
     <color name="mc_primary_color">#84B53F</color>
     <color name="mc_primary_color_dark">#4f6c25</color>
     <color name="mc_secondary_color">#006536</color>
-    <color name="mc_background_color">#EBEBEB</color>
+    <color name="mc_primary_icon">#84B53F</color>
+    <!-- end dynamic colours -->
 
     <color name="mc_priority_high_text">#FFFFFF</color>
     <color name="mc_priority_high_background">#77CEDE</color>
@@ -50,5 +57,4 @@
     <color name="mc_default_button_disabled">#CCCCCC</color>
 
     <color name="mc_list_item_3_line">#757575</color>
-    <color name="mc_primary_icon">#84B53F</color>
 </resources>

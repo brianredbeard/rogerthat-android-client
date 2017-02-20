@@ -16,23 +16,26 @@
  * @@license_version:1.2@@
  */
 
-package com.mobicage.rogerthat.util.system;
+package com.mobicage.to.app;
 
-import android.content.DialogInterface;
+import com.mobicage.rpc.IncompleteMessageException;
 
-import com.mobicage.rogerthat.util.logging.L;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-public abstract class SafeDialogInterfaceOnClickListener implements DialogInterface.OnClickListener {
+public class UpdateLookAndFeelResponseTO implements com.mobicage.rpc.IJSONable {
 
-    public abstract void safeOnClick(DialogInterface dialog, int which);
+
+    public UpdateLookAndFeelResponseTO() {
+    }
+
+    public UpdateLookAndFeelResponseTO(Map<String, Object> json) throws IncompleteMessageException {
+    }
 
     @Override
-    final public void onClick(DialogInterface dialog, int which) {
-        try {
-            safeOnClick(dialog, which);
-        } catch (Exception e) {
-            L.bug(e);
-        }
+    public Map<String, Object> toJSONMap() {
+        Map<String, Object> obj = new LinkedHashMap<String, Object>();
+        return obj;
     }
 
 }

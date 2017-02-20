@@ -24,17 +24,16 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.InputType;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 
 import com.mobicage.rogerth.at.R;
-import com.mobicage.rogerthat.plugins.messaging.widgets.KeyboardType;
 import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
 import com.mobicage.rogerthat.plugins.system.QRCode;
 import com.mobicage.rogerthat.plugins.system.SystemPlugin;
 import com.mobicage.rogerthat.util.logging.L;
-import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
+import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
@@ -52,7 +51,8 @@ public class AddQRCodeActivity extends ServiceBoundActivity {
         setContentView(R.layout.add_qr_code);
         setTitle(getString(R.string.scan_qr_code));
 
-        findViewById(R.id.scan).setOnClickListener(new SafeViewOnClickListener() {
+        Button btn = (Button) findViewById(R.id.scan);
+        btn.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
                 showZXingActivity();
@@ -87,20 +87,23 @@ public class AddQRCodeActivity extends ServiceBoundActivity {
                     L.d("Scanned " + rawScanResult);
                     // Ask for the QR code name
                     final View view = getLayoutInflater().inflate(R.layout.add_qr_code_name, null);
-                    final AlertDialog.Builder builder = new AlertDialog.Builder(this)
-                            .setView(view)
-                            .setTitle(R.string.qr_code_scanned)
-                            .setPositiveButton(R.string.save, new SafeDialogInterfaceOnClickListener() {
-                                @Override
-                                public void safeOnClick(DialogInterface dialog, int which) {
-                                    final EditText editText = (EditText) view.findViewById(R.id.qr_code_name);
-                                    final SystemPlugin systemPlugin = mService.getPlugin(SystemPlugin.class);
-                                    systemPlugin.createQRCode(new QRCode(editText.getText().toString(), rawScanResult));
-                                    dialog.dismiss();
-                                    finish();
-                                }
-                            });
-                    builder.show();
+
+                    String message = getString(R.string.qr_code_scanned);
+                    String positiveCaption = getString(R.string.save);
+                    SafeDialogClick positiveClick = new SafeDialogClick() {
+                        @Override
+                        public void safeOnClick(DialogInterface di, int id) {
+                            final EditText editText = (EditText) view.findViewById(R.id.qr_code_name);
+                            final SystemPlugin systemPlugin = mService.getPlugin(SystemPlugin.class);
+                            systemPlugin.createQRCode(new QRCode(editText.getText().toString(), rawScanResult));
+                            di.dismiss();
+                            finish();
+                        }
+                    };
+
+                    AlertDialog alertDialog = UIUtils.showDialog(this, null, message, positiveCaption,
+                            positiveClick, null, null, view);
+                    alertDialog.setCanceledOnTouchOutside(true);
                 }
             }
         }

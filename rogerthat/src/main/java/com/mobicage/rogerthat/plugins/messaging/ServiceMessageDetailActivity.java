@@ -18,7 +18,6 @@
 package com.mobicage.rogerthat.plugins.messaging;
 
 import android.Manifest;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -79,7 +78,7 @@ import com.mobicage.rogerthat.util.IOUtils;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
-import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
+import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
@@ -174,21 +173,17 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
 
     public void showTransferingDialog() {
         T.UI();
-        mDialog = new ProgressDialog(this);
-        mDialog.setMessage(getString(R.string.transmitting));
-        mDialog.setCancelable(true);
+        mDialog = UIUtils.showProgressDialog(this, null, getString(R.string.transmitting));
         mDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.send_to_background),
-            new DialogInterface.OnClickListener() { // TODO: SafeRunnable
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    T.UI();
+                new SafeDialogClick() {
+                    @Override
+                    public void safeOnClick(DialogInterface dialog, int id) {
                     mTransfering = false;
                     dismissTransferingDialog();
                     jumpToServiceHomeScreen(null, null);
                     updateView(false);
                 }
             });
-        mDialog.show();
     }
 
     public void dismissTransferingDialog() {
@@ -555,7 +550,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
                             attachmentsDir = mMessagingPlugin.attachmentsDir(mCurrentMessage.getThreadKey(), null);
                         } catch (IOException e) {
                             L.d("Unable to create attachment directory", e);
-                            UIUtils.showAlertDialog(ServiceMessageDetailActivity.this, "",
+                            UIUtils.showDialog(ServiceMessageDetailActivity.this, null,
                                 R.string.unable_to_read_write_sd_card);
                             return;
                         }
@@ -569,7 +564,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
                                     mCurrentMessage.key);
                             } catch (IOException e) {
                                 L.d("Unable to create attachment directory", e);
-                                UIUtils.showAlertDialog(ServiceMessageDetailActivity.this, "",
+                                UIUtils.showDialog(ServiceMessageDetailActivity.this, null,
                                     R.string.unable_to_read_write_sd_card);
                                 return;
                             }
@@ -578,12 +573,8 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
                         }
 
                         if (!mService.getNetworkConnectivityManager().isConnected() && !attachmentAvailable) {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(ServiceMessageDetailActivity.this);
-                            builder.setMessage(R.string.no_internet_connection_try_again);
-                            builder.setPositiveButton(R.string.rogerthat, null);
-                            AlertDialog dialog = builder.create();
-                            dialog.show();
-                            return;
+                            int message = R.string.no_internet_connection_try_again;
+                            UIUtils.showDialog(ServiceMessageDetailActivity.this, null, message);
                         }
                         if (IOUtils.shouldCheckExternalStorageAvailable()) {
                             String state = Environment.getExternalStorageState();
@@ -592,13 +583,13 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
                             } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
                                 if (!attachmentAvailable) {
                                     L.d("Unable to write to sd-card");
-                                    UIUtils.showAlertDialog(ServiceMessageDetailActivity.this, "",
+                                    UIUtils.showDialog(ServiceMessageDetailActivity.this, null,
                                         R.string.unable_to_read_write_sd_card);
                                     return;
                                 }
                             } else {
                                 L.d("Unable to read or write to sd-card");
-                                UIUtils.showAlertDialog(ServiceMessageDetailActivity.this, "",
+                                UIUtils.showDialog(ServiceMessageDetailActivity.this, null,
                                     R.string.unable_to_read_write_sd_card);
                                 return;
                             }
@@ -620,12 +611,9 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
 
                             startActivity(i);
                         } else {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(ServiceMessageDetailActivity.this);
-                            builder.setMessage(getString(R.string.attachment_can_not_be_displayed_in_your_version,
-                                getString(R.string.app_name)));
-                            builder.setPositiveButton(R.string.rogerthat, null);
-                            AlertDialog dialog = builder.create();
-                            dialog.show();
+                            String message = getString(R.string.attachment_can_not_be_displayed_in_your_version,
+                                    getString(R.string.app_name));
+                            UIUtils.showDialog(ServiceMessageDetailActivity.this, null, message);
                         }
                     }
 
@@ -859,25 +847,16 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
     }
 
     private void askConfirmation(final ButtonTO button, final String text, final LinearLayout container) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(ServiceMessageDetailActivity.this);
-        builder.setTitle(R.string.message_confirm);
-        builder.setMessage(text);
-        builder.setPositiveButton(R.string.yes, new SafeDialogInterfaceOnClickListener() {
+        String title = getString(R.string.message_confirm);
+        SafeDialogClick onPositiveClick = new SafeDialogClick() {
             @Override
-            public void safeOnClick(DialogInterface dialog, int which) {
+            public void safeOnClick(DialogInterface dialog, int id) {
                 T.UI();
                 dialog.dismiss();
                 executeButtonClick(button, container, false);
             }
-        });
-        builder.setNegativeButton(R.string.no, new SafeDialogInterfaceOnClickListener() {
-            @Override
-            public void safeOnClick(DialogInterface dialog, int which) {
-                T.UI();
-                dialog.dismiss();
-            }
-        });
-        builder.create().show();
+        };
+        UIUtils.showDialog(this, title, text, R.string.yes, onPositiveClick, R.string.no, null);
     }
 
     private boolean buttonPressed(final ButtonTO button, final LinearLayout container) {
@@ -934,18 +913,8 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
                 if (formResult != null) {
                     String validationError = mMessagingPlugin.validateFormResult(mCurrentMessage, formResult);
                     if (validationError != null) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(ServiceMessageDetailActivity.this);
-                        builder.setTitle(R.string.validation_failed);
-                        builder.setMessage(validationError);
-                        builder.setPositiveButton(R.string.ok, new SafeDialogInterfaceOnClickListener() {
-                            @Override
-                            public void safeOnClick(DialogInterface dialog, int which) {
-                                T.UI();
-                                dialog.dismiss();
-                            }
-                        });
-                        builder.create().show();
-
+                        String title = getString(R.string.validation_failed);
+                        UIUtils.showDialog(this, title, validationError);
                         return false;
                     }
                 }
@@ -1130,14 +1099,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
                     mFriendsPlugin.launchDetailActivity(ServiceMessageDetailActivity.this, email);
                 } else {
                     if ((contactType & FriendsPlugin.NON_FRIEND) == FriendsPlugin.NON_FRIEND) {
-                        new AlertDialog.Builder(ServiceMessageDetailActivity.this)
-                            .setMessage(getString(R.string.invite_as_friend, new Object[] { email }))
-                            .setPositiveButton(R.string.yes, new SafeDialogInterfaceOnClickListener() {
-                                @Override
-                                public void safeOnClick(DialogInterface dialog, int which) {
-                                    mFriendsPlugin.inviteFriend(email, null, null, true);
-                                }
-                            }).setNegativeButton(R.string.no, null).create().show();
+                        UIUtils.showNotConnectedToFriendDialog(mService, mFriendsPlugin, email);
                     }
                 }
             }
@@ -1431,8 +1393,8 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
     }
 
     private void animateAfterAck(long expectNext) {
-        mDialog = ProgressDialog.show(ServiceMessageDetailActivity.this, "", getString(R.string.transmitting), true,
-            expectNext != 0);
+        mDialog = UIUtils.showProgressDialog(ServiceMessageDetailActivity.this, null, getString(R.string.transmitting),
+                true, expectNext != 0);
         mDialog.show();
 
         if (expectNext == 0 || (mCurrentMessage.flags & MessagingPlugin.FLAG_SENT_BY_JSMFR) == 0

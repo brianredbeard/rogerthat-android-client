@@ -19,7 +19,6 @@
 package com.mobicage.rogerthat.plugins.messaging;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -61,6 +60,7 @@ import com.mobicage.rogerthat.util.ZipUtils;
 import com.mobicage.rogerthat.util.db.DatabaseManager;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
+import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
@@ -468,21 +468,21 @@ public class MessagingPlugin implements MobicagePlugin {
     }
 
     public void removeConversationFromList(final Context context, final String threadKey) {
-        new AlertDialog.Builder(context).setTitle(R.string.message_delete_confirm)
-            .setMessage(R.string.message_delete_question)
-            .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    T.UI();
-                    if (!deleteConversation(threadKey)) {
-                        UIUtils.showLongToast(context, (context.getString(R.string.error_please_try_again)));
-                        L.d("removeMessage failed");
-                    } else {
-                        L.d("removeMessage succeeded");
-                    }
-                    dialog.dismiss();
+        String title = context.getString(R.string.message_delete_confirm);
+        String message = context.getString(R.string.message_delete_question);
+        SafeDialogClick onPositiveClick = new SafeDialogClick() {
+            @Override
+            public void safeOnClick(DialogInterface dialog, int id) {
+                if (!deleteConversation(threadKey)) {
+                    UIUtils.showErrorPleaseRetryDialog(context);
+                    L.d("removeMessage failed");
+                } else {
+                    L.d("removeMessage succeeded");
                 }
-            }).setNegativeButton(R.string.cancel, null).create().show();
+                dialog.dismiss();
+            }
+        };
+        UIUtils.showDialog(context, title, message, R.string.delete, onPositiveClick, R.string.cancel, null);
     }
 
     public Intent getNextMessageThreadActivityIntent(Context context, String messageKey, String memberFilter) {
@@ -764,7 +764,7 @@ public class MessagingPlugin implements MobicagePlugin {
         FriendsPlugin friendsPlugin = mMainService.getPlugin(FriendsPlugin.class);
         Bitmap largeIcon;
         // Don't create notification when the currently opened message thread is the same as the thread from the notification
-        Activity currentActivity = UIUtils.getTopActivity(mMainService);
+        Activity currentActivity = UIUtils.getTopActivity();
         if (currentActivity instanceof FriendsThreadActivity) {
             FriendsThreadActivity activity = (FriendsThreadActivity) currentActivity;
             if (!activity.getPaused() && threadKey.equals(activity.getParentMessageKey())) {
@@ -1729,7 +1729,7 @@ public class MessagingPlugin implements MobicagePlugin {
                 boolean isSentByJSMFR = (message.flags & FLAG_SENT_BY_JSMFR) == FLAG_SENT_BY_JSMFR;
 
                 transferQueueDelete(messageKey);
-                if (UIUtils.getTopActivity(mMainService) instanceof ServiceMessageDetailActivity) {
+                if (UIUtils.getTopActivity() instanceof ServiceMessageDetailActivity) {
                     // Send an Intent to ServiceMessageDetailActivity so it can hide the processing dialog
                     final Intent iSubmitPhotoUploadForm = new Intent(ServiceMessageDetailActivity.class.getName());
                     iSubmitPhotoUploadForm.putExtra("threadKey", parentMessageKey == null ? messageKey
@@ -2054,7 +2054,7 @@ public class MessagingPlugin implements MobicagePlugin {
         File file = IOUtils.getFilesDirectory(mMainService);
         file = new File(file, "attachments");
         file = new File(file, threadKey);
-        createDirIfNotExists(file);
+        IOUtils.createDirIfNotExists(mMainService, file);
         return file;
     }
 
@@ -2062,7 +2062,7 @@ public class MessagingPlugin implements MobicagePlugin {
         File file = attachmentTreadDir(threadKey);
         if (messageKey != null)
             file = new File(file, messageKey);
-        createDirIfNotExists(file);
+        IOUtils.createDirIfNotExists(mMainService, file);
         return file;
     }
 
@@ -2078,15 +2078,6 @@ public class MessagingPlugin implements MobicagePlugin {
     public File attachmentFile(Message message, AttachmentTO attachment) throws IOException {
         return new File(attachmentsDir(message.getThreadKey(), message.key), attachmentDownloadUrlHash(attachment
                 .download_url));
-    }
-
-    private void createDirIfNotExists(File file) throws IOException {
-        T.dontCare();
-        if (!file.exists()) {
-            if (!file.mkdirs())
-                throw new IOException(mMainService.getString(R.string.failed_to_create_directory,
-                    file.getAbsolutePath()));
-        }
     }
 
     public String createAttachmentThumbnail(final AttachmentDownload attachment) throws Exception {

@@ -94,7 +94,7 @@ public class SendMessageMessageActivity extends ServiceBoundActivity {
     }
 
     private void setThreadBackground() {
-        Bitmap background = mService.getPlugin(SystemPlugin.class).getAppAsset(SystemPlugin.ASSET_CHAT_BACKGROUND);
+        Bitmap background = SystemPlugin.getAppAsset(mService, SystemPlugin.ASSET_CHAT_BACKGROUND);
         if (background != null) {
             BitmapDrawable backgroundDrawable = new BitmapDrawable(getResources(), background);
             backgroundDrawable.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);

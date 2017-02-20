@@ -125,10 +125,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackground"
-            android:padding="10dp"
-            app:ico_color="@color/mc_primary_icon"
-            app:ico_icon="@string/faw_map_marker"
-            app:ico_size="28dp" />
+            android:padding="10dp" />
 
         <Space
             android:layout_width="0dp"
@@ -140,10 +137,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackground"
-            android:padding="10dp"
-            app:ico_color="@color/mc_primary_icon"
-            app:ico_icon="@string/faw_envelope"
-            app:ico_size="28dp" />
+            android:padding="10dp" />
 
         <Space
             android:layout_width="0dp"
@@ -155,10 +149,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackground"
-            android:padding="10dp"
-            app:ico_color="@color/mc_primary_icon"
-            app:ico_icon="@string/faw_user"
-            app:ico_size="28dp" />
+            android:padding="10dp" />
 
         <Space
             android:layout_width="0dp"
@@ -170,10 +161,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackground"
-            android:padding="10dp"
-            app:ico_color="@color/mc_primary_icon"
-            app:ico_icon="@string/faw_history"
-            app:ico_size="28dp" />
+            android:padding="10dp" />
 
         <Space
             android:layout_width="0dp"

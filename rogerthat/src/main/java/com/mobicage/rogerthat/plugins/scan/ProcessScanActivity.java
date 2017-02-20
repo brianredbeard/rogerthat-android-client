@@ -18,17 +18,6 @@
 
 package com.mobicage.rogerthat.plugins.scan;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Locale;
-import java.util.regex.Matcher;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
-
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -45,11 +34,20 @@ import com.mobicage.rogerthat.util.RegexPatterns;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
-import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
+import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.to.friends.GetUserInfoRequestTO;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Locale;
+import java.util.regex.Matcher;
 
 public class ProcessScanActivity extends ServiceBoundActivity {
 
@@ -82,10 +80,6 @@ public class ProcessScanActivity extends ServiceBoundActivity {
     public static final String SUCCESS = "success";
     public static final String STATIC_FLOW = "staticFlow";
     public static final String STATIC_FLOW_HASH = "staticFlowHash";
-    public static final String ERROR_MESSAGE = "error_message";
-    public static final String ERROR_TITLE = "error_title";
-    public static final String ERROR_CAPTION = "error_caption";
-    public static final String ERROR_ACTION = "error_action";
 
     public static final String RAWURL = "rawUrl";
     public static final String EMAILHASH = "emailHash";
@@ -164,7 +158,7 @@ public class ProcessScanActivity extends ServiceBoundActivity {
                             finish();
                             return new String[] { intent.getAction() };
                         } else {
-                            showError(intent);
+                            UIUtils.showErrorDialog(ProcessScanActivity.this, intent);
                         }
 
                     } else {
@@ -193,7 +187,7 @@ public class ProcessScanActivity extends ServiceBoundActivity {
 
                             return new String[] { intent.getAction() };
                         } else {
-                            showError(intent);
+                            UIUtils.showErrorDialog(ProcessScanActivity.this, intent);
                         }
                     } else {
                         // ignore
@@ -244,29 +238,32 @@ public class ProcessScanActivity extends ServiceBoundActivity {
     }
 
     private void scannedUnknownQR(String msg, final Intent intent) {
-        final Dialog dialog = new AlertDialog.Builder(this)
-            .setPositiveButton(R.string.yes, new SafeDialogInterfaceOnClickListener() {
-                @Override
-                public void safeOnClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                    finish();
-                    startActivity(intent);
-                }
-            }).setNegativeButton(R.string.no, new SafeDialogInterfaceOnClickListener() {
-                @Override
-                public void safeOnClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                    finish();
-                }
-            }).setOnCancelListener(new DialogInterface.OnCancelListener() {
-                @Override
-                public void onCancel(DialogInterface dialog) {
-                    finish();
-                }
-            }).setMessage(getString(R.string.no_rogerthat_qr, msg, getString(R.string.app_name)))
-            .setTitle(R.string.warning).setCancelable(true).create();
+        String title = getString(R.string.no_rogerthat_qr, msg, getString(R.string.app_name));
+        String message = getString(R.string.no_rogerthat_qr, msg, getString(R.string.app_name));
+        DialogInterface.OnCancelListener onCancelListener = new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                finish();
+            }
+        };
+        SafeDialogClick onPositiveClick = new SafeDialogClick() {
+            @Override
+            public void safeOnClick(DialogInterface dialog, int id) {
+                dialog.dismiss();
+                finish();
+                startActivity(intent);
+            }
+        };
+        SafeDialogClick onNegativeClick = new SafeDialogClick() {
+            @Override
+            public void safeOnClick(DialogInterface dialog, int id) {
+                dialog.dismiss();
+                finish();
+            }
+        };
 
-        dialog.show();
+        UIUtils.showDialog(this, title, message, R.string.yes, onPositiveClick, R.string.no, onNegativeClick)
+                .setOnCancelListener(onCancelListener);
         abortProcessing();
     }
 
@@ -307,9 +304,9 @@ public class ProcessScanActivity extends ServiceBoundActivity {
     }
 
     private void startSpinner(boolean isScan) {
-        mProgressDialog = ProgressDialog.show(this,
-            isScan ? getString(R.string.processing_scan, getString(R.string.app_name))
-                : getString(R.string.processing_invitation), getString(R.string.retrieving_information), true, true,
+        String title = getString(isScan ? R.string.processing_scan : R.string.processing_invitation);
+        String message = getString(R.string.retrieving_information);
+        mProgressDialog = UIUtils.showProgressDialog(this, title, message, true, true,
             new DialogInterface.OnCancelListener() {
                 @Override
                 public void onCancel(DialogInterface dialog) {
@@ -372,53 +369,13 @@ public class ProcessScanActivity extends ServiceBoundActivity {
 
     }
 
-    private void showErrorToast() {
-        UIUtils.showLongToast(ProcessScanActivity.this, getString(R.string.scanner_communication_failure));
-    }
-
-    private void showError(Intent intent) {
-        final String errorMessage = intent.getStringExtra(ERROR_MESSAGE);
-        if (TextUtils.isEmptyOrWhitespace(errorMessage)) {
-            finish();
-            showErrorToast();
-        } else {
-            final String errorCaption = intent.getStringExtra(ERROR_CAPTION);
-            final String errorAction = intent.getStringExtra(ERROR_ACTION);
-            final String errorTitle = intent.getStringExtra(ERROR_TITLE);
-
-            final AlertDialog.Builder builder = new AlertDialog.Builder(ProcessScanActivity.this);
-            builder.setTitle(errorTitle);
-            builder.setMessage(errorMessage);
-            builder.setNegativeButton(R.string.rogerthat, new AlertDialog.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                    finish();
-                }
-            });
-
-            if (!TextUtils.isEmptyOrWhitespace(errorCaption) && !TextUtils.isEmptyOrWhitespace(errorAction)) {
-                builder.setPositiveButton(errorCaption, new AlertDialog.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(errorAction));
-                        startActivity(intent);
-                        dialog.dismiss();
-                        finish();
-                    }
-                });
-            }
-
-            builder.show();
-        }
-    }
 
     private void processEmailHash(final String emailHash) {
         if (emailHash != null) {
             checkFriendByEmailHash(emailHash);
         } else {
             finish();
-            showErrorToast();
+            UIUtils.showErrorToast(this, getString(R.string.scanner_communication_failure));
         }
     }
 

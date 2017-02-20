@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
               xmlns:tools="http://schemas.android.com/tools"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
@@ -327,6 +326,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="28dp">
 
+                <!-- these buttons are only here as demonstration and will be removed when creating this view-->
                 <android.support.v7.widget.AppCompatButton
                     style="?attr/buttonBarButtonStyle"
                     android:layout_width="0dp"
@@ -384,10 +384,7 @@
             android:layout_height="32dp"
             android:layout_gravity="top|left"
             android:background="@drawable/news_pin_background"
-            android:padding="5dp"
-            app:ico_color="@color/mc_primary_color"
-            app:ico_icon="@string/faw_thumb_tack"
-            app:ico_size="16dp"/>
+            android:padding="5dp"/>
 
         <ImageButton
             android:id="@+id/dropdown_button"
@@ -395,10 +392,7 @@
             android:layout_height="32dp"
             android:layout_gravity="top|right"
             android:background="@drawable/news_dropdown_background"
-            android:padding="5dp"
-            app:ico_color="@color/mc_primary_color"
-            app:ico_icon="@string/faw_angle_down"
-            app:ico_size="16dp"/>
+            android:padding="5dp"/>
 
     </FrameLayout>
 </LinearLayout>

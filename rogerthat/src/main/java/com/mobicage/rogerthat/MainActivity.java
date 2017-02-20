@@ -20,6 +20,7 @@ package com.mobicage.rogerthat;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -54,12 +55,13 @@ import com.mobicage.rogerthat.util.Security;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
-import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
+import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
+import com.mobicage.rpc.config.LookAndFeelConstants;
 import com.mobicage.to.friends.ServiceMenuItemTO;
 
 import org.json.simple.JSONValue;
@@ -337,7 +339,7 @@ public class MainActivity extends ServiceBoundActivity {
                 }
             } else {
                 final Intent i;
-                if (AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.messaging || AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.news) {
+                if (LookAndFeelConstants.getHomesActivityLayout(this) == R.layout.messaging || LookAndFeelConstants.getHomesActivityLayout(this) == R.layout.news) {
                     i  = new Intent(this, MessagingActivity.class);
                 } else {
                     i  = new Intent(this, HomeActivity.class);
@@ -368,21 +370,21 @@ public class MainActivity extends ServiceBoundActivity {
 
     private void alertMustRegisterFirst() {
         // User must register first
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(R.string.register_first);
-        builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+        String message = getString(R.string.register_first);
+        SafeDialogClick onPositiveClick = new SafeDialogClick() {
+            @Override
+            public void safeOnClick(DialogInterface dialog, int id) {
+                launchRegistrationActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP);
+            }
+        };
+        DialogInterface.OnCancelListener onCancelListener = new DialogInterface.OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialog) {
                 launchRegistrationActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP);
             }
-        });
-        builder.setPositiveButton(R.string.rogerthat, new SafeDialogInterfaceOnClickListener() {
-            @Override
-            public void safeOnClick(DialogInterface dialog, int which) {
-                launchRegistrationActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP);
-            }
-        });
-        builder.create().show();
+        };
+        UIUtils.showDialog(this, null, message, onPositiveClick, null, onPositiveClick)
+                .setOnCancelListener(onCancelListener);
     }
 
     @Override
@@ -416,17 +418,14 @@ public class MainActivity extends ServiceBoundActivity {
                 mBackupIntentAfterPin = null;
                 processIntent(i);
             } else {
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setMessage(R.string.pin_required_continue);
-                builder.setPositiveButton(R.string.rogerthat, new SafeDialogInterfaceOnClickListener() {
+                String message = getString(R.string.pin_required_continue);
+                SafeDialogClick onPositiveClick = new SafeDialogClick() {
                     @Override
-                    public void safeOnClick(DialogInterface dialog, int which) {
+                    public void safeOnClick(DialogInterface dialog, int id) {
                         setupPin();
                     }
-                });
-                AlertDialog dialog = builder.create();
-                dialog.setCancelable(false);
-                dialog.show();
+                };
+                UIUtils.showDialog(this, null, message, onPositiveClick);
             }
         }
     }
@@ -556,12 +555,8 @@ public class MainActivity extends ServiceBoundActivity {
 
     private void showDownloadingDialog() {
         if (mDialog == null) {
-            mDialog = new ProgressDialog(this);
-            mDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            mDialog.setMessage(getString(R.string.downloading));
-            mDialog.setIndeterminate(true);
-            mDialog.setCancelable(false);
-            mDialog.show();
+            String message = getString(R.string.downloading);
+            mDialog = UIUtils.showProgressDialog(this, null, message, true, false);
         }
     }
 
@@ -602,9 +597,18 @@ public class MainActivity extends ServiceBoundActivity {
         if (CloudConstants.isRogerthatApp()) {
             Configuration cfg = mService.getConfigurationProvider().getConfiguration(RegistrationWizard2.CONFIGKEY);
             if (cfg != null && cfg.get(RegistrationActivity2.OPENED_URL_CONFIGKEY, null) != null) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                builder.setCancelable(true);
-                builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                // User pressed invitation/poke without secret
+                String title = getString(R.string.registration_success_title);
+                String message = getString(R.string.registration_success_without_invitation, getString(R.string.app_name));
+                SafeDialogClick onPositiveClick = new SafeDialogClick() {
+                    @Override
+                    public void safeOnClick(DialogInterface dialog, int id) {
+                        launchHomeActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP);
+                    }
+                };
+                Dialog dialog = UIUtils.showDialog(MainActivity.this, title, message, onPositiveClick);
+                dialog.setCancelable(true);
+                dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
                     @Override
                     public void onCancel(DialogInterface dialog) {
                         try {
@@ -614,18 +618,6 @@ public class MainActivity extends ServiceBoundActivity {
                         }
                     }
                 });
-                // User pressed invitation/poke without secret
-                builder.setTitle(R.string.registration_success_title);
-                builder.setMessage(getString(R.string.registration_success_without_invitation,
-                    getString(R.string.app_name)));
-                builder.setPositiveButton(R.string.rogerthat, new SafeDialogInterfaceOnClickListener() {
-                    @Override
-                    public void safeOnClick(DialogInterface dialog, int which) {
-                        launchHomeActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP);
-                    }
-                });
-                mRegistrationCompleteDialog = builder.create();
-                mRegistrationCompleteDialog.show();
             } else {
                 // All other cases
                 launchHomeActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP);
@@ -643,11 +635,11 @@ public class MainActivity extends ServiceBoundActivity {
         T.UI();
 
         final Intent homeActivityIntent;
-        if (AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.messaging) {
+        if (LookAndFeelConstants.getHomesActivityLayout(this)== R.layout.messaging) {
             homeActivityIntent  = new Intent(this, MessagingActivity.class);
             homeActivityIntent.putExtra("show_drawer", true);
             homeActivityIntent.putExtra("show_drawer_icon", true);
-        } else if (AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.news) {
+        } else if (LookAndFeelConstants.getHomesActivityLayout(this) == R.layout.news) {
             homeActivityIntent  = new Intent(this, NewsActivity.class);
             homeActivityIntent.putExtra("show_drawer", true);
             homeActivityIntent.putExtra("show_drawer_icon", true);

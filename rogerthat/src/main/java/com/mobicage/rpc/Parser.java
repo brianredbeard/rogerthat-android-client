@@ -160,6 +160,13 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
+    public static com.mobicage.to.app.ColorSettingsTO ComMobicageToAppColorSettingsTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.app.ColorSettingsTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
     public static com.mobicage.to.app.GetAppAssetRequestTO ComMobicageToAppGetAppAssetRequestTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;
@@ -174,6 +181,34 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
+    public static com.mobicage.to.app.HomeScreenSettingsTO ComMobicageToAppHomeScreenSettingsTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.app.HomeScreenSettingsTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.app.LookAndFeelTO ComMobicageToAppLookAndFeelTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.app.LookAndFeelTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.app.NavigationItemTO ComMobicageToAppNavigationItemTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.app.NavigationItemTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.app.ToolbarSettingsTO ComMobicageToAppToolbarSettingsTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.app.ToolbarSettingsTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
     public static com.mobicage.to.app.UpdateAppAssetRequestTO ComMobicageToAppUpdateAppAssetRequestTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;
@@ -185,6 +220,20 @@ public class Parser {
         if (value == null)
             return null;
         return new com.mobicage.to.app.UpdateAppAssetResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.app.UpdateLookAndFeelRequestTO ComMobicageToAppUpdateLookAndFeelRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.app.UpdateLookAndFeelRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.app.UpdateLookAndFeelResponseTO ComMobicageToAppUpdateLookAndFeelResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.app.UpdateLookAndFeelResponseTO((Map<String, Object>) value);
     }
 
     @SuppressWarnings("unchecked")

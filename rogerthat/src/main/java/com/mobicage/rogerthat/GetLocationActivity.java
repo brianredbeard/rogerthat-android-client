@@ -18,7 +18,6 @@
 package com.mobicage.rogerthat;
 
 import android.Manifest;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -40,7 +39,7 @@ import android.widget.EditText;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.trackme.MapDetailActivity;
 import com.mobicage.rogerthat.util.logging.L;
-import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
+import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
@@ -70,6 +69,30 @@ public class GetLocationActivity extends ServiceBoundActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.get_location);
+
+        mUseGPS = (CheckBox) findViewById(R.id.use_gps_provider);
+        mGetCurrentLocationButton = (Button) findViewById(R.id.get_current_location);
+        mAddress = (EditText) findViewById(R.id.address);
+        mCalculate = (Button) findViewById(R.id.calculate);
+
+        final String message = getString(R.string.updating_location);
+        DialogInterface.OnCancelListener onCancelListener = new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                T.UI();
+                if (mLocationManager != null) {
+                    try {
+                        mLocationManager.removeUpdates(mLocationListener);
+                    } catch (SecurityException e) {
+                        L.bug(e); // Should never happen
+                    }
+                }
+            }
+        };
+        mProgressDialog = UIUtils.showProgressDialog(this, null, message, true, true, onCancelListener,
+                ProgressDialog.STYLE_SPINNER, false);
+        mProgressDialog.setMax(10000);
     }
 
     @Override
@@ -96,33 +119,7 @@ public class GetLocationActivity extends ServiceBoundActivity {
     @Override
     protected void onServiceBound() {
         T.UI();
-        setContentView(R.layout.get_location);
         setTitle(R.string.get_location);
-
-        mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        mProgressDialog.setMessage(getString(R.string.updating_location));
-        mProgressDialog.setCancelable(true);
-        mProgressDialog.setCanceledOnTouchOutside(true);
-        mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                T.UI();
-                if (mLocationManager != null) {
-                    try {
-                        mLocationManager.removeUpdates(mLocationListener);
-                    } catch (SecurityException e) {
-                        L.bug(e); // Should never happen
-                    }
-                }
-            }
-        });
-        mProgressDialog.setMax(10000);
-
-        mUseGPS = (CheckBox) findViewById(R.id.use_gps_provider);
-        mGetCurrentLocationButton = (Button) findViewById(R.id.get_current_location);
-        mAddress = (EditText) findViewById(R.id.address);
-        mCalculate = (Button) findViewById(R.id.calculate);
 
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         if (mLocationManager == null) {
@@ -132,19 +129,24 @@ public class GetLocationActivity extends ServiceBoundActivity {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if (isChecked && !mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                        new AlertDialog.Builder(GetLocationActivity.this).setMessage(R.string.gps_is_not_enabled)
-                            .setPositiveButton(R.string.yes, new SafeDialogInterfaceOnClickListener() {
-                                @Override
-                                public void safeOnClick(DialogInterface dialog, int which) {
-                                    Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                                    startActivityForResult(intent, TURNING_ON_GPS);
-                                }
-                            }).setNegativeButton(R.string.no, new SafeDialogInterfaceOnClickListener() {
-                                @Override
-                                public void safeOnClick(DialogInterface dialog, int which) {
-                                    mUseGPS.setChecked(false);
-                                }
-                            }).create().show();
+                        String message = getString(R.string.gps_is_not_enabled);
+                        String positiveCaption = getString(R.string.yes);
+                        String negativeCaption = getString(R.string.no);
+                        SafeDialogClick positiveClick = new SafeDialogClick() {
+                            @Override
+                            public void safeOnClick(DialogInterface dialog, int id) {
+                                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                startActivityForResult(intent, TURNING_ON_GPS);
+                            }
+                        };
+                        SafeDialogClick negativeClick = new SafeDialogClick() {
+                            @Override
+                            public void safeOnClick(DialogInterface dialog, int id) {
+                                mUseGPS.setChecked(false);
+                            }
+                        };
+                        UIUtils.showDialog(GetLocationActivity.this, null, message, positiveCaption, positiveClick,
+                                negativeCaption, negativeClick);
                     }
                 }
             });
@@ -166,12 +168,9 @@ public class GetLocationActivity extends ServiceBoundActivity {
         mCalculate.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
-                final ProgressDialog pd = new ProgressDialog(GetLocationActivity.this);
-                pd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                pd.setMessage(getString(R.string.updating_location));
-                pd.setCancelable(false);
-                pd.setIndeterminate(true);
-                pd.show();
+                final String message = getString(R.string.updating_location);
+                final ProgressDialog pd = UIUtils.showProgressDialog(GetLocationActivity.this, null, message, true,
+                        false);
                 final String addressText = mAddress.getText().toString();
                 mService.postOnIOHandler(new SafeRunnable() {
                     @Override

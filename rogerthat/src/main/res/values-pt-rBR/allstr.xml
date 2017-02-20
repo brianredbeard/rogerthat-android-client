@@ -143,7 +143,6 @@
     <string name="friend_share_location">Posso ver minha localização</string>
     <string name="friend_sms_invitation">Olá %1$s,\n\nGostaria de convidar você para estar em contato comigo através do %4$s.\n\nPasso 1. Instale o aplicativo %4$s:\n%2$s\n\nPasso 2. Conecte-se comigo:\n%3$s</string>
     <string name="friend_sms_invitation_no_url">Olá %1$s\n\nGostaria de convidar você para estar em contato comigo através do %3$s. %3$s É uma plataforma de mensagens muito legal para Web e smartphones.\n\nInstale o aplicativo %3$s: %2$s</string>
-    <string name="friends_getting_started_title">Introdução</string>
     <string name="friends_map">Amigos no mapa</string>
     <string name="gender">Sexo</string>
     <string name="get_current_coordinates">Obter coordenadas GPS da sua localização atual</string>

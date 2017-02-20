@@ -19,12 +19,12 @@ package com.mobicage.rogerthat.registration;
 
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
@@ -40,11 +40,11 @@ import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.Pausable;
+import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.rpc.newxmpp.XMPPConfigurationFactory;
 import com.mobicage.to.location.BeaconDiscoveredRequestTO;
-
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -189,9 +189,8 @@ public abstract class AbstractRegistrationActivity extends ServiceBoundActivity 
 
         if (attempt > XMPP_MAX_NUM_ATTEMPTS) {
             pd.dismiss();
-
-            new AlertDialog.Builder(mActivity).setMessage(getString(R.string.registration_error))
-                    .setCancelable(true).setPositiveButton(R.string.try_again, null).create().show();
+            String message = getString(R.string.registration_error);
+            UIUtils.showDialog(mActivity, null, message, getString(R.string.try_again), null, null, null);
             mWizard.reInit();
             mWizard.goBackToPrevious();
             return;

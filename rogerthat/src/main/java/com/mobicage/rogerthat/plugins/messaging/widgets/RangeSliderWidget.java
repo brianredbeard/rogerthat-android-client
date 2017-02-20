@@ -30,12 +30,14 @@ import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rpc.ResponseHandler;
+import com.mobicage.rpc.config.LookAndFeelConstants;
 import com.mobicage.to.messaging.forms.FloatListWidgetResultTO;
 import com.mobicage.to.messaging.forms.SubmitRangeSliderFormRequestTO;
 import com.mobicage.to.messaging.forms.SubmitRangeSliderFormResponseTO;
 
 import org.florescu.android.rangeseekbar.RangeSeekBar;
 
+import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.UnknownFormatConversionException;
 
@@ -90,6 +92,22 @@ public class RangeSliderWidget extends Widget implements RangeSeekBar.OnRangeSee
         mRangeSeekBar.setSelectedMinValue(low);
         mRangeSeekBar.setOnRangeSeekBarChangeListener(this);
         this.onRangeSeekBarValuesChanged(mRangeSeekBar, min, max);
+        // Use reflection to set the line to the correct color
+        // Changing the color of the thumbs via code seems to be impossible so they're gray for now.
+        changeColors("defaultColor");
+        changeColors("activeColor");
+    }
+
+    private void changeColors(String varName) {
+        try {
+            final Field field = mRangeSeekBar.getClass().getDeclaredField(varName);
+            field.setAccessible(true);
+            field.set(mRangeSeekBar, LookAndFeelConstants.getPrimaryColor(mActivity));
+        } catch (IllegalAccessException e) {
+            L.bug(e);
+        } catch (NoSuchFieldException e) {
+            L.bug(e);
+        }
     }
 
     private double rounded(Double value) {
@@ -129,7 +147,7 @@ public class RangeSliderWidget extends Widget implements RangeSeekBar.OnRangeSee
     }
 
     @Override
-    public void onRangeSeekBarValuesChanged(RangeSeekBar bar, Object minValue, Object maxValue) {
+    public void onRangeSeekBarValuesChanged(RangeSeekBar bar, Number minValue, Number maxValue) {
         Double min = rounded((Double) minValue);
         Double max = rounded((Double) maxValue);
         try {
@@ -158,5 +176,4 @@ public class RangeSliderWidget extends Widget implements RangeSeekBar.OnRangeSee
             return String.format("%1$." + precision + "f - %2$." + precision + "f", lowValue, highValue);
         }
     }
-
 }

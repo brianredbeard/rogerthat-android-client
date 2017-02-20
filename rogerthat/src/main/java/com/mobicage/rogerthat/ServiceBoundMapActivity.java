@@ -19,8 +19,7 @@
 package com.mobicage.rogerthat;
 
 import android.Manifest;
-import android.app.AlertDialog;
-import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -42,7 +41,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMyLocationButtonClickListener;
@@ -81,7 +79,6 @@ public abstract class ServiceBoundMapActivity extends AppCompatActivity implemen
     public static final long MAX_TRANSMIT = 10 * 1000;
 
     private Drawable mUnknownAvatar;
-    private Drawable mICDachboardAvatar;
 
     protected MainService mService; // Owned by UI thread
     protected boolean mServiceIsBound = false; // Owned by UI thread
@@ -98,11 +95,8 @@ public abstract class ServiceBoundMapActivity extends AppCompatActivity implemen
         }
     };
 
-    private Dialog mTransmitProgressDialog;
-    private ProgressBar mTransmitProgressBar;
+    private ProgressDialog mTransmitProgressDialog;
     private long mTransmitStart = 0;
-
-    private SafeRunnable mTransmitTimeoutRunnable;
 
     private ConnectivityManager mConnectivityManager;
 
@@ -117,21 +111,18 @@ public abstract class ServiceBoundMapActivity extends AppCompatActivity implemen
         IntentFilter filter = new IntentFilter(MainService.CLOSE_ACTIVITY_INTENT);
         registerReceiver(closeActivityListener, filter);
         mUnknownAvatar = getResources().getDrawable(R.drawable.unknown_avatar);
-        mICDachboardAvatar = getResources().getDrawable(R.drawable.ic_dashboard);
         doBindService();
 
         mConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 
-        View progressDialg = getLayoutInflater().inflate(R.layout.progressdialog, null);
-        mTransmitProgressDialog = new AlertDialog.Builder(this).setTitle(R.string.transmitting).setView(progressDialg).create();
-        mTransmitProgressBar = (ProgressBar) progressDialg.findViewById(R.id.progress_bar);
-        mTransmitProgressDialog.setCancelable(true);
-        mTransmitProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+        DialogInterface.OnCancelListener onCancelListener = new DialogInterface.OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialog) {
                 completeTransmit(null);
             }
-        });
+        };
+        mTransmitProgressDialog = UIUtils.showProgressDialog(this, null, getString(R.string.transmitting), true,
+                true, onCancelListener, ProgressDialog.STYLE_HORIZONTAL, false);
     }
 
     @Override
@@ -148,15 +139,6 @@ public abstract class ServiceBoundMapActivity extends AppCompatActivity implemen
         doUnbindService();
     }
 
-    public void showTransmitting(SafeRunnable onTimeout) {
-        T.UI();
-        mTransmitTimeoutRunnable = onTimeout;
-        mTransmitStart = System.currentTimeMillis();
-        mTransmitProgressBar.setProgress(0);
-        mTransmitProgressDialog.show();
-        mService.postDelayedOnUIHandler(mIncreaseProgress, 100);
-    }
-
     public boolean isTransmitting() {
         T.UI();
         return mTransmitProgressDialog.isShowing();
@@ -166,7 +148,7 @@ public abstract class ServiceBoundMapActivity extends AppCompatActivity implemen
         T.UI();
         mTransmitProgressDialog.dismiss();
         mService.removeFromUIHandler(mIncreaseProgress);
-        mTransmitProgressBar.setProgress(100);
+        mTransmitProgressDialog.setProgress(100);
         if (afterComplete != null && mService != null) {
             mService.postDelayedOnUIHandler(new SafeRunnable() {
                 @Override
@@ -184,7 +166,7 @@ public abstract class ServiceBoundMapActivity extends AppCompatActivity implemen
             if (mTransmitProgressDialog.isShowing()) {
                 int completenessLevel = (int) ((System.currentTimeMillis() - mTransmitStart) * 100 / MAX_TRANSMIT);
                 if (completenessLevel < 100) {
-                    mTransmitProgressBar.setProgress(completenessLevel);
+                    mTransmitProgressDialog.setProgress(completenessLevel);
                     if (mService != null)
                         mService.postDelayedOnUIHandler(mIncreaseProgress, 100);
                 } else {
@@ -196,15 +178,8 @@ public abstract class ServiceBoundMapActivity extends AppCompatActivity implemen
     };
 
     public void showActionScheduledDialog() {
-        new AlertDialog.Builder(ServiceBoundMapActivity.this).setMessage(R.string.action_scheduled)
-            .setPositiveButton(R.string.rogerthat, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                    if (mTransmitTimeoutRunnable != null)
-                        mTransmitTimeoutRunnable.run();
-                }
-            }).create().show();
+        String message = getString(R.string.action_scheduled);
+        UIUtils.showDialog(ServiceBoundMapActivity.this, null, message);
     }
 
     public boolean checkConnectivity() {
@@ -364,19 +339,7 @@ public abstract class ServiceBoundMapActivity extends AppCompatActivity implemen
     public void setContentView(View view, ViewGroup.LayoutParams params) {
         super.setContentView(view, params);
     }
-
-    public boolean askPermissionIfNeeded(final String permission, final int requestCode, final SafeRunnable onGranted,
-                                         final SafeRunnable onDenied) {
-        final boolean granted = mService.isPermitted(permission);
-        if (!granted) {
-            L.i("Requesting permission: " + permission);
-            mPermissionRequests.put(requestCode, new SafeRunnable[]{onGranted, onDenied});
-
-            ActivityCompat.requestPermissions(this, new String[]{permission}, requestCode);
-        }
-        return !granted;
-    }
-
+    
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         final SafeRunnable[] runnables = mPermissionRequests.remove(requestCode);

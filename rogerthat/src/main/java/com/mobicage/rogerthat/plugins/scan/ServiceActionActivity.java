@@ -18,8 +18,6 @@
 
 package com.mobicage.rogerthat.plugins.scan;
 
-import org.jivesoftware.smack.util.Base64;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -27,7 +25,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.FriendDetailActivity;
 import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
@@ -39,6 +36,8 @@ import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.ui.UIUtils;
+
+import org.jivesoftware.smack.util.Base64;
 
 public class ServiceActionActivity extends FriendDetailActivity {
 
@@ -189,7 +188,7 @@ public class ServiceActionActivity extends FriendDetailActivity {
                     completeTransmit(new SafeRunnable() {
                         @Override
                         protected void safeRun() throws Exception {
-                            UIUtils.showAlertDialog(ServiceActionActivity.this, null, R.string.error_please_try_again);
+                            UIUtils.showErrorPleaseRetryDialog(ServiceActionActivity.this);
                         }
                     });
                     return new String[] { intent.getAction() };

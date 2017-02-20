@@ -64,7 +64,9 @@ import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.time.TimeUtils;
+import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.AppConstants;
+import com.mobicage.rpc.config.LookAndFeelConstants;
 import com.mobicage.to.messaging.MemberStatusTO;
 
 import org.json.simple.JSONObject;
@@ -552,6 +554,8 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
                 view.setTag(holder);
             }
             holder.message = message;
+            int primaryColor = LookAndFeelConstants.getPrimaryColor(mService);
+            UIUtils.setBackgroundColor(holder.messageCountView, primaryColor);
 
             final boolean dynamicChat = SystemUtils.isFlagEnabled(message.flags, MessagingPlugin.FLAG_DYNAMIC_CHAT);
             setMessageOnView(view, holder, dynamicChat);

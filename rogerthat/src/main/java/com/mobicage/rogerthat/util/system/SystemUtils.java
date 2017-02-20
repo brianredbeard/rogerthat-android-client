@@ -20,6 +20,7 @@ package com.mobicage.rogerthat.util.system;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -118,6 +119,16 @@ public class SystemUtils {
     }
 
     // End copied
+
+    public static void writeStringToFile(File file, String contents) throws IOException {
+        FileOutputStream fos = new FileOutputStream(file);
+        try {
+            fos.write(contents.getBytes("UTF8"));
+        } finally {
+            fos.flush();
+            fos.close();
+        }
+    }
 
     // Copied from http://www.exampledepot.com/egs/java.io/DeleteDir.html
     // Deletes all files and subdirectories under dir.

@@ -18,7 +18,6 @@
 
 package com.mobicage.rogerthat.plugins.messaging.widgets;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.util.AttributeSet;
@@ -30,12 +29,11 @@ import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
-import com.mobicage.rogerthat.util.IOUtils;
 import com.mobicage.rogerthat.util.Security;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
-import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.rpc.config.CloudConstants;
@@ -48,7 +46,6 @@ import org.jivesoftware.smack.util.Base64;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -118,24 +115,17 @@ public class SignWidget extends Widget {
     public boolean proceedWithSubmit(final String buttonId) {
         if (Message.POSITIVE.equals(buttonId)) {
             if (mResult == null) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-                builder.setCancelable(true);
-                builder.setMessage(mActivity.getString(R.string.sign_first));
-                builder.setNegativeButton(mActivity.getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                String message = mActivity.getString(R.string.sign_first);
+                String positiveCaption = (String) mSignBtn.getText();
+                String negativeCaption = mActivity.getString(R.string.cancel);
+                SafeDialogClick onPositiveClick = new SafeDialogClick() {
                     @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.dismiss();
-                    }
-                });
-                builder.setPositiveButton(mSignBtn.getText(), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
+                    public void safeOnClick(DialogInterface dialog, int id) {
                         dialog.dismiss();
                         sign();
                     }
-                });
-                builder.show();
-
+                };
+                UIUtils.showDialog(mActivity, null, message, positiveCaption, onPositiveClick, negativeCaption, null);
                 return false;
             }
         }
@@ -177,7 +167,7 @@ public class SignWidget extends Widget {
         for (AttachmentTO attachment : mMessage.attachments) {
             try {
                 if (!messagingPlugin.attachmentFile(mMessage, attachment).exists()) {
-                    UIUtils.showAlertDialog(mActivity, R.string.activity_error, R.string
+                    UIUtils.showDialog(mActivity, R.string.activity_error, R.string
                             .open_attachments_before_signing);
                     return;
                 }

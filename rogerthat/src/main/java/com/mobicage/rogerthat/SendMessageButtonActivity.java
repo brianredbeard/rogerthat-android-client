@@ -22,12 +22,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.ContextCompat;
 import android.text.InputType;
 import android.view.KeyEvent;
@@ -50,11 +50,12 @@ import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.pickle.Pickler;
-import com.mobicage.rogerthat.util.system.SafeDialogInterfaceOnClickListener;
+import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
+import com.mobicage.rpc.config.LookAndFeelConstants;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -87,9 +88,6 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
         setActivityName("send_message_button");
         setTitle(R.string.title_buttons);
 
-        mCaptionView = (EditText) findViewById(R.id.button_caption);
-        mActionView = (EditText) findViewById(R.id.button_action);
-
         Intent intent = getIntent();
         try {
             mCannedButtons = (CannedButtons) Pickler.createObjectFromPickle(intent.getByteArrayExtra(CANNED_BUTTONS));
@@ -106,7 +104,7 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
             finish();
         }
 
-        FloatingActionButton floatingActionButton = ((FloatingActionButton) findViewById(R.id.add));
+        FloatingActionButton floatingActionButton = (FloatingActionButton) findViewById(R.id.add);
         floatingActionButton.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_plus).color(Color.WHITE).sizeDp(24));
         floatingActionButton.setOnClickListener(new SafeViewOnClickListener() {
             @Override
@@ -283,21 +281,25 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 try {
                     final CannedButton cannedButton = (CannedButton) view.getTag();
-                    new AlertDialog.Builder(SendMessageButtonActivity.this)
-                            .setMessage(getString(R.string.remove_canned_button, cannedButton.getCaption()))
-                            .setPositiveButton(R.string.yes, new SafeDialogInterfaceOnClickListener() {
-                                @Override
-                                public void safeOnClick(DialogInterface dialog, int which) {
-                                    handled = false;
-                                    mCannedButtons.remove(cannedButton);
-                                    mCannedButtonAdapter.notifyDataSetChanged();
-                                }
-                            }).setNegativeButton(R.string.no, new SafeDialogInterfaceOnClickListener() {
+                    String message = getString(R.string.remove_canned_button, cannedButton.getCaption());
+                    String positiveCaption = getString(R.string.yes);
+                    String negativeCaption = getString(R.string.no);
+                    SafeDialogClick positiveClick = new SafeDialogClick() {
                         @Override
-                        public void safeOnClick(DialogInterface dialog, int which) {
+                        public void safeOnClick(DialogInterface dialog, int id) {
+                            handled = false;
+                            mCannedButtons.remove(cannedButton);
+                            mCannedButtonAdapter.notifyDataSetChanged();
+                        }
+                    };
+                    SafeDialogClick negativeClick = new SafeDialogClick() {
+                        @Override
+                        public void safeOnClick(DialogInterface dialog, int id) {
                             handled = true;
                         }
-                    }).create().show();
+                    };
+                    UIUtils.showDialog(SendMessageButtonActivity.this, null, message, positiveCaption, positiveClick,
+                            negativeCaption, negativeClick);
                     return handled;
                 } catch (Exception e) {
                     L.bug(e);
@@ -310,15 +312,13 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
     private void setButtonItemView(final View view, CannedButton item) {
         TextView captionTextView = (TextView) view.findViewById(R.id.caption);
         TextView actionTextView = (TextView) view.findViewById(R.id.action);
-        Resources resources = getResources();
-        captionTextView.setTextColor(resources.getColor(android.R.color.primary_text_light));
-        actionTextView.setTextColor(resources.getColor(android.R.color.secondary_text_light));
+        captionTextView.setTextColor(ContextCompat.getColor(mService, android.R.color.primary_text_light));
+        actionTextView.setTextColor(ContextCompat.getColor(mService, android.R.color.secondary_text_light));
+
         ImageView statusImageView = (ImageView) view.findViewById(R.id.status);
-        if (item.isSelected()) {
-            statusImageView.setVisibility(View.VISIBLE);
-        } else {
-            statusImageView.setVisibility(View.GONE);
-        }
+        UIUtils.setBackgroundColor(statusImageView, LookAndFeelConstants.getPrimaryColor(this));
+        statusImageView.setVisibility(item.isSelected() ? View.VISIBLE : View.GONE);
+
         captionTextView.setText(item.getCaption());
         String action = item.getAction();
         if (action == null) {
@@ -334,18 +334,18 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
 
     private void addButton() {
         final View dialog = getLayoutInflater().inflate(R.layout.new_button_dialog, null);
-        mCaptionView = (EditText) dialog.findViewById(R.id.button_caption);
+        final TextInputLayout captionViewLayout = (TextInputLayout) dialog.findViewById(R.id.button_caption);
+        mCaptionView = captionViewLayout.getEditText();
         mActionView = (EditText) dialog.findViewById(R.id.button_action);
         final ImageButton actionHelpButton = (ImageButton) dialog.findViewById(R.id.action_help_button);
         final RadioButton noneRadio = (RadioButton) dialog.findViewById(R.id.action_none);
         final RadioButton telRadio = (RadioButton) dialog.findViewById(R.id.action_tel);
         final RadioButton geoRadio = (RadioButton) dialog.findViewById(R.id.action_geo);
         final RadioButton wwwRadio = (RadioButton) dialog.findViewById(R.id.action_www);
+        final int iconColor = LookAndFeelConstants.getPrimaryIconColor(SendMessageButtonActivity.this);
         noneRadio.setChecked(true);
         mActionView.setVisibility(View.GONE);
         actionHelpButton.setVisibility(View.GONE);
-        final int iconColor = ContextCompat.getColor(mService, R.color.mc_primary_icon);
-        actionHelpButton.setImageDrawable(new IconicsDrawable(mService, FontAwesome.Icon.faw_address_book_o).color(iconColor).sizeDp(24));
         noneRadio.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
@@ -395,55 +395,54 @@ public class SendMessageButtonActivity extends ServiceBoundActivity {
                 }
             }
         });
-        AlertDialog alertDialog = new AlertDialog.Builder(SendMessageButtonActivity.this)
-                .setTitle(R.string.create_button_title).setView(dialog)
-                .setPositiveButton(getString(R.string.ok), new SafeDialogInterfaceOnClickListener() {
-                    @Override
-                    public void safeOnClick(DialogInterface di, int which) {
-                        String caption = mCaptionView.getText().toString();
-                        if ("".equals(caption.trim())) {
-                            UIUtils.showLongToast(SendMessageButtonActivity.this,
-                                    getString(R.string.caption_required));
-                            return;
-                        }
+        String message = getString(R.string.create_button_title);
+        String positiveCaption = getString(R.string.ok);
+        String negativeCaption = getString(R.string.cancel);
+        SafeDialogClick positiveClick = new SafeDialogClick() {
+            @Override
+            public void safeOnClick(DialogInterface di, int id) {
+                String caption = mCaptionView.getText().toString();
+                if ("".equals(caption.trim())) {
+                    UIUtils.showLongToast(SendMessageButtonActivity.this,
+                            getString(R.string.caption_required));
+                    return;
+                }
 
-                        CannedButton cannedButton;
-                        if (!noneRadio.isChecked()) {
-                            String actionText = mActionView.getText().toString();
-                            if ("".equals(caption.trim())) {
-                                UIUtils.showLongToast(SendMessageButtonActivity.this,
-                                        getString(R.string.action_not_valid));
-                                return;
-                            }
-                            if (telRadio.isChecked()) {
-                                actionText = "tel://" + actionText;
-                            } else if (geoRadio.isChecked()) {
-                                actionText = "geo://" + actionText;
-                            }
-
-                            Matcher action = actionPattern.matcher(actionText);
-                            if (!action.matches()) {
-                                UIUtils.showLongToast(SendMessageButtonActivity.this,
-                                        getString(R.string.action_not_valid));
-                                return;
-                            }
-                            cannedButton = new CannedButton(caption, "".equals(action.group(2)) ? null : action.group());
-
-                        } else {
-                            cannedButton = new CannedButton(caption, null);
-                        }
-
-                        mCannedButtons.add(cannedButton);
-                        cannedButton.setSelected(true);
-                        mCannedButtonAdapter.notifyDataSetChanged();
-                        mButtons.add(cannedButton.getId());
+                CannedButton cannedButton;
+                if (!noneRadio.isChecked()) {
+                    String actionText = mActionView.getText().toString();
+                    if ("".equals(caption.trim())) {
+                        UIUtils.showLongToast(SendMessageButtonActivity.this,
+                                getString(R.string.action_not_valid));
+                        return;
                     }
-                }).setNegativeButton(getString(R.string.cancel), new SafeDialogInterfaceOnClickListener() {
-                    @Override
-                    public void safeOnClick(DialogInterface dialog, int which) {
+                    if (telRadio.isChecked()) {
+                        actionText = "tel://" + actionText;
+                    } else if (geoRadio.isChecked()) {
+                        actionText = "geo://" + actionText;
                     }
-                }).create();
+
+                    Matcher action = actionPattern.matcher(actionText);
+                    if (!action.matches()) {
+                        UIUtils.showLongToast(SendMessageButtonActivity.this,
+                                getString(R.string.action_not_valid));
+                        return;
+                    }
+                    cannedButton = new CannedButton(caption, "".equals(action.group(2)) ? null : action.group());
+
+                } else {
+                    cannedButton = new CannedButton(caption, null);
+                }
+
+                mCannedButtons.add(cannedButton);
+                cannedButton.setSelected(true);
+                mCannedButtonAdapter.notifyDataSetChanged();
+                mButtons.add(cannedButton.getId());
+                di.dismiss();
+            }
+        };
+        AlertDialog alertDialog = UIUtils.showDialog(SendMessageButtonActivity.this, null, message, positiveCaption,
+                positiveClick, negativeCaption, null, dialog);
         alertDialog.setCanceledOnTouchOutside(true);
-        alertDialog.show();
     }
 }
