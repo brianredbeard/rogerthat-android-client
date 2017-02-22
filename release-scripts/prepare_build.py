@@ -462,6 +462,9 @@ def convert_config():
 
     full_width_headers = doc['APP_CONSTANTS'].get('FULL_WIDTH_HEADERS', False)
     headers_ratio = (330.0 / 960.0) if full_width_headers else (240.0 / 840.0)
+    
+    if not os.path.exists(os.path.join(APP_DIR, "build")):
+        os.makedirs(os.path.join(APP_DIR, "build"))
 
     path = os.path.join(SRC_RES_DIR, "drawable", "registration_logo.png")
     if os.path.exists(path):
