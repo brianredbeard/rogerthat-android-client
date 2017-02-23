@@ -312,7 +312,7 @@ public class NavigationConstants {
     public static NavigationItem[] getNavigationItems() {
         return new NavigationItem[]{''' % dict(LICENSE=LICENSE)
 
-    for i, item in enumerate(homescreen_items):
+    for item in homescreen_items:
         icon_name = item["icon"].replace("-", "_").replace("fa_", "faw_")
         action, action_type = get_action(item)
         output += '''
@@ -331,7 +331,7 @@ public class NavigationConstants {
         return new NavigationItem[]{'''
 
     if doc.get('TOOLBAR') and doc['TOOLBAR'].get('items'):
-        for i, item in enumerate(doc['TOOLBAR']['items']):
+        for item in doc['TOOLBAR']['items']:
             icon_name = item["icon"].replace("-", "_").replace("fa_", "faw_")
             action, action_type = get_action(item)
             output += '''
