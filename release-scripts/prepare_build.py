@@ -303,6 +303,8 @@ def generate_navigation_menu(doc, strings_map):
 
 package com.mobicage.rpc.config;
 
+import android.graphics.Color;
+
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.NavigationItem;
@@ -314,10 +316,15 @@ public class NavigationConstants {
 
     for item in homescreen_items:
         icon_name = item["icon"].replace("-", "_").replace("fa_", "faw_")
+        icon_color = 0
+        if item.get("color"):
+            icon_color = 'Color.parseColor("#%s")' % item.get("color")
+
         action, action_type = get_action(item)
         output += '''
-                new NavigationItem(FontAwesome.Icon.%(icon_name)s, %(action_type)s, %(action)s, R.string.%(string_id)s, %(collapse)s),''' % dict(
+                new NavigationItem(FontAwesome.Icon.%(icon_name)s, %(action_type)s, %(action)s, R.string.%(string_id)s, %(collapse)s, null, %(icon_color)s),''' % dict(
             icon_name=icon_name,
+            icon_color=icon_color,
             action_type=action_type,
             action=action,
             string_id=strings_map[item['text']],

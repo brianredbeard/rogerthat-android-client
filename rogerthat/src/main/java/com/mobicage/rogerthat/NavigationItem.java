@@ -41,6 +41,19 @@ public class NavigationItem {
         this.iconColor = 0;
     }
 
+    public NavigationItem(FontAwesome.Icon icon, String actionType, String action, int labelTextId, boolean collapse,
+                          String serviceEmail, int iconColor) {
+        super();
+        this.icon = icon;
+        this.actionType = actionType;
+        this.action = action;
+        this.labelTextId = labelTextId;
+        this.labelText = null;
+        this.collapse = collapse;
+        this.serviceEmail = serviceEmail;
+        this.iconColor = iconColor;
+    }
+
     public NavigationItem(FontAwesome.Icon icon, String actionType, String action, String labelText, boolean collapse,
                           String serviceEmail, int iconColor) {
         super();
