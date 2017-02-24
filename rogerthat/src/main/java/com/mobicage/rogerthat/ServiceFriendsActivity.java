@@ -44,7 +44,7 @@ public class ServiceFriendsActivity extends FriendsActivity {
 
     public static final String ORGANIZATION_TYPE = "organization_type";
     protected Integer mOrganizationType;
-    protected Integer mOrganizationTypeStringId;
+    protected String mOrganizationTypeString;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -55,26 +55,31 @@ public class ServiceFriendsActivity extends FriendsActivity {
         mOrganizationType = intent.getIntExtra(ORGANIZATION_TYPE, FriendStore.SERVICE_ORGANIZATION_TYPE_UNSPECIFIED);
         int noServicesStringId;
         if (mOrganizationType == FriendStore.SERVICE_ORGANIZATION_TYPE_NON_PROFIT) {
-            mOrganizationTypeStringId = R.string.associations;
+            mOrganizationTypeString = getString(R.string.associations);
             noServicesStringId = R.string.no_associations_found;
             setActivityName("associations");
         } else if (mOrganizationType == FriendStore.SERVICE_ORGANIZATION_TYPE_PROFIT) {
-            mOrganizationTypeStringId = R.string.merchants;
+            mOrganizationTypeString = getString(R.string.merchants);
             noServicesStringId = R.string.no_merchants_found;
             setActivityName("merchants");
         } else if (mOrganizationType == FriendStore.SERVICE_ORGANIZATION_TYPE_CITY) {
-            mOrganizationTypeStringId = R.string.community_service;
+            mOrganizationTypeString = getString(R.string.community_service);
             noServicesStringId = R.string.no_community_services_found;
             setActivityName("community_services");
         } else if (mOrganizationType == FriendStore.SERVICE_ORGANIZATION_TYPE_EMERGENCY) {
-            mOrganizationTypeStringId = R.string.care;
+            mOrganizationTypeString = getString(R.string.care);
             noServicesStringId = R.string.no_care_institutions_found;
             setActivityName("emergency_services");
         } else {
-            mOrganizationTypeStringId = R.string.tab_services;
+            mOrganizationTypeString = getString(R.string.tab_services);
             noServicesStringId = R.string.no_services_found;
             setActivityName("services");
         }
+        String title = intent.getStringExtra("title");
+        if (title != null) {
+            mOrganizationTypeString = title;
+        }
+
         noServicesTextView.setText(getString(noServicesStringId, getString(R.string.app_name)) + " " + getString(R
                 .string.click_magnifying_glass_to_search_services));
 
@@ -120,7 +125,7 @@ public class ServiceFriendsActivity extends FriendsActivity {
     @Override
     protected void onServiceBound() {
         super.onServiceBound();
-        setTitle(mOrganizationTypeStringId);
+        setTitle(mOrganizationTypeString);
     }
 
     @Override
