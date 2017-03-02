@@ -132,16 +132,24 @@ public class ActivityUtils {
             context.startActivity(i);
 
         } else if ("click".equals(ni.actionType)) {
-            if (TextUtils.isEmptyOrWhitespace(AppConstants.APP_EMAIL)) {
-                L.bug("simulateNavigationItemClick click but app_email was nog set");
+
+            final String serviceEmail;
+            if (!TextUtils.isEmptyOrWhitespace(ni.serviceEmail)) {
+                serviceEmail = ni.serviceEmail;
+            } else if (!TextUtils.isEmptyOrWhitespace(AppConstants.APP_EMAIL)) {
+                serviceEmail = AppConstants.APP_EMAIL;
+            } else {
+                L.bug("simulateNavigationItemClick click but AppConstants.APP_EMAIL was empty");
                 return false;
             }
+
             context.runOnUiThread(new SafeRunnable() {
                 @Override
                 protected void safeRun() throws Exception {
-                    ActivityUtils.goToActivityBehindTag(context, AppConstants.APP_EMAIL, ni.action, extras);
+                    ActivityUtils.goToActivityBehindTag(context, serviceEmail, ni.action, extras);
                 }
             });
+
         } else {
             L.bug("ignoring simulateNavigationItemClick: " + ni.actionType + "|" + ni.action);
             return false;
