@@ -40,10 +40,12 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -198,18 +200,19 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         final SslContext sslCtx;
         if (CloudConstants.NEWS_CHANNEL_SSL) {
             try {
-                if (!CloudConstants.NEWS_CHANNEL_MUST_VALIDATE_SSL_CERTIFICATE) {
-
-                    sslCtx = SslContextBuilder.forClient()
-                            .trustManager(InsecureTrustManagerFactory.INSTANCE).build();
-                } else {
+                if (CloudConstants.NEWS_CHANNEL_MUST_VALIDATE_SSL_CERTIFICATE) {
                     TrustManagerFactory factory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-                    factory.init(KeyStore.getInstance("AndroidCAStore"));  // Gets the default system keystore
+                    KeyStore keyStore = KeyStore.getInstance("AndroidCAStore"); // Gets the default system keystore
+                    keyStore.load(null, null);
+                    factory.init(keyStore);
                     sslCtx = SslContextBuilder.forClient()
                             .trustManager(factory)
                             .build();
+                } else {
+                    sslCtx = SslContextBuilder.forClient()
+                            .trustManager(InsecureTrustManagerFactory.INSTANCE).build();
                 }
-            } catch (SSLException | NoSuchAlgorithmException | KeyStoreException e) {
+            } catch (NoSuchAlgorithmException | KeyStoreException | CertificateException | IOException e) {
                 L.bug(e);
                 return;
             }
