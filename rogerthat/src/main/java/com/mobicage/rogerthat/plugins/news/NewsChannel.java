@@ -28,6 +28,8 @@ import com.mobicage.rogerthat.util.net.NetworkConnectivityManager;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.TestUtils;
+import com.mobicage.rogerthat.MyIdentity;
+import com.mobicage.rogerthat.IdentityStore;
 import com.mobicage.rpc.Credentials;
 import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.rpc.config.AppConstants;
@@ -99,6 +101,8 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
     private volatile boolean mAuthenticated = false;
     private Timer mKeepAliveTimer;
 
+    private IdentityStore mIdentityStore;
+
     private final Set<Long> mReadsToSend = new HashSet<>();
     private final Set<Long> mRogersToSend = new HashSet<>();
     private final List<String> mStashedCommands = new ArrayList<>();
@@ -150,6 +154,8 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         mNewsChannelCallbackHandler = handler;
         mService = handler.getMainService();
         mConfigurationProvider = configurationProvider;
+
+        mIdentityStore = mService.getIdentityStore();
 
         if (TestUtils.isRunningTest()) {
             return;
@@ -398,10 +404,17 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
 
     private void userAuthenticated() {
         mAuthenticated = true;
+        MyIdentity identity = mIdentityStore.getIdentity();
         sendCommand(Command.SET_INFO, String.format("APP %s", AppConstants.APP_ID));
-        sendCommand(Command.SET_INFO, String.format("ACCOUNT %s", mService.getIdentityStore().getIdentity().getEmail()));
+        sendCommand(Command.SET_INFO, String.format("ACCOUNT %s", identity.getEmail()));
         List<String> friendSet = mService.getPlugin(FriendsPlugin.class).getStore().getFriendSet();
         sendCommand(Command.SET_INFO, String.format("FRIENDS %s", JSONValue.toJSONString(friendSet)));
+
+        Map<String, Long> profile = new HashMap();
+        profile.put("birthdate", identity.getBirthdate());
+        profile.put("gender", identity.getGender());
+        sendCommand(Command.SET_INFO, String.format("PROFILE %s", JSONValue.toJSONString(profile)));
+
         keepAlive();
         L.d(String.format("Sending %d stashed commands", mStashedCommands.size()));
         for (String line : mStashedCommands) {
