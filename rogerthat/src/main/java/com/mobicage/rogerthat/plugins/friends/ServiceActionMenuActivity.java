@@ -118,6 +118,7 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
         setContentView(R.layout.service_action_menu);
         Intent intent = getIntent();
         email = intent.getStringExtra(SERVICE_EMAIL);
+        L.d("Service: " + email);
         setActivityName(email);
         page = intent.getIntExtra(MENU_PAGE, 0);
         activity = (RelativeLayout) findViewById(R.id.activity);
