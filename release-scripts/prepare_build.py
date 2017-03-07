@@ -528,7 +528,7 @@ def convert_config():
         os.makedirs(path)
 
     with open(os.path.join(path, "appstr.xml"), 'w+') as f:
-        f.write(output)
+        f.write(output.encode('utf-8'))
 
     ##### APP CONSTANTS #####################################
 
