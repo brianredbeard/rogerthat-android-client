@@ -399,7 +399,7 @@ def convert_config():
 
     import com.mobicage.rogerth.at.R;
     import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
-    import com.mobicage.rpc.config.AppConstants;
+    import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 
     public class HomeActivity extends AbstractHomeActivity {
 
@@ -436,7 +436,7 @@ def convert_config():
                 output += 'simulateMenuItemPress(AppConstants.APP_EMAIL, new long[] { %s });' % (', '.join(map(str, item["coords"])))
             else:
                 action, action_type = get_action(item)
-                output += 'goToActivity(new ServiceBoundActivity.NavigationItem(FontAwesome.Icon.faw_question, %(action_type)s, %(action)s, R.string.%(string_id)s, %(collapse)s));' % dict(
+                output += 'goToActivity(new NavigationItem(FontAwesome.Icon.faw_question, %(action_type)s, %(action)s, R.string.%(string_id)s, %(collapse)s));' % dict(
                     action_type=action_type,
                     action=action,
                     string_id=strings_map[item['text']],
