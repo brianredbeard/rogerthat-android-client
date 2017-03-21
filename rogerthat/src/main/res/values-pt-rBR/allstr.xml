@@ -267,7 +267,6 @@
     <string name="previous_in_thread">Mensagens anteriores desta conversa</string>
     <string name="priority">Prioritário</string>
     <string name="processing">Processando…</string>
-    <string name="processing_invitation">Processando convite de %1$s…</string>
     <string name="processing_scan">Escaneando...</string>
     <string name="qr_call_tel">Deseja telefonar para %1$s?</string>
     <string name="qr_open_url">Deseja abrir a seguinte página da Web:\n\n%1$s</string>

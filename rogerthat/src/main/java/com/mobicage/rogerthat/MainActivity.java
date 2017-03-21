@@ -656,7 +656,7 @@ public class MainActivity extends ServiceBoundActivity {
 
             String caughtUrlDuringRegistration = cfg.get(RegistrationActivity2.OPENED_URL_CONFIGKEY, null);
             if (!TextUtils.isEmptyOrWhitespace(caughtUrlDuringRegistration)) {
-                L.d("Starting HomeActivity");
+                L.d("Starting HomeActivity OPENED_URL_CONFIGKEY");
                 startActivity(homeActivityIntent);
                 finish();
 
@@ -667,7 +667,7 @@ public class MainActivity extends ServiceBoundActivity {
                 return;
 
             } else if (cfg.get(RegistrationActivity2.QRSCAN_CONFIGKEY, false)) {
-                L.d("Starting HomeActivity");
+                L.d("Starting HomeActivity QRSCAN_CONFIGKEY");
                 startActivity(homeActivityIntent);
                 finish();
 

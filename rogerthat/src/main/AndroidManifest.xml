@@ -112,18 +112,27 @@
             android:exported="true"
             android:targetActivity="com.mobicage.rogerthat.MainActivity" >
             <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data
+                    android:scheme="rogerthat" />
+            </intent-filter>
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="rogerthat" />
                 <data
-                    android:host="x-callback-url"
-                    android:scheme="mdp-${app_id}"/>
+                    android:scheme="mdp-${app_id}"
+                    android:host="x-callback-url" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
                 <data
-                    android:host="x-callback-url"
-                    android:scheme="oauth-{app_id}"/>
+                    android:scheme="oauth-${app_id}"
+                    android:host="x-callback-url" />
             </intent-filter>
         </activity-alias>
 

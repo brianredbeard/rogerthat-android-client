@@ -325,7 +325,6 @@
     <string name="previous_in_thread">Предыдущие сообщения этой беседы</string>
     <string name="priority">Приоритет</string>
     <string name="processing">Обработка…</string>
-    <string name="processing_invitation">Обработка приглашения %1$s…</string>
     <string name="processing_scan">Обработка скана…</string>
     <string name="profile">Профиль</string>
     <string name="qr_call_tel">Вы хотите позвонить %1$s?</string>

@@ -335,7 +335,6 @@
     <string name="previous_in_thread">Messages précédents dans cette conversation</string>
     <string name="priority">Priorité</string>
     <string name="processing">Traitement…</string>
-    <string name="processing_invitation">Traitement de l\'invitation %1$s…</string>
     <string name="processing_scan">Traitement du code QR…</string>
     <string name="profile">Profil</string>
     <string name="provide_qr_code_name">Donnez un nom au code QR</string>

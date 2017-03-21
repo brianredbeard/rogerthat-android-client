@@ -337,7 +337,6 @@
     <string name="previous_in_thread">Previous messages in this conversation</string>
     <string name="priority">Priority</string>
     <string name="processing">Processing…</string>
-    <string name="processing_invitation">Processing %1$s invitation…</string>
     <string name="processing_scan">Processing scan…</string>
     <string name="profile">Profile</string>
     <string name="promo">Promo</string>
