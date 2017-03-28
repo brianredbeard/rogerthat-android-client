@@ -22,7 +22,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -34,7 +33,6 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
-import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
@@ -47,6 +45,7 @@ import com.mobicage.rogerthat.plugins.news.NewsStore;
 import com.mobicage.rogerthat.plugins.scan.GetUserInfoResponseHandler;
 import com.mobicage.rogerthat.plugins.scan.ProcessScanActivity;
 import com.mobicage.rogerthat.util.CachedDownloader;
+import com.mobicage.rogerthat.util.RegexPatterns;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.net.NetworkConnectivityManager;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
@@ -117,9 +116,42 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
         swipeContainer.setColorSchemeColors(LookAndFeelConstants.getPrimaryColor(this), LookAndFeelConstants
                 .getPrimaryIconColor(this));
 
-        Intent i = getIntent();
-        mIdToShowAtTop = i.getLongExtra("id", -1);
+        processIntent(getIntent(), true);
         mBottomSheetDialog = new BottomSheetDialog(this);
+    }
+
+    private void processIntent(Intent intent, Boolean start) {
+        if (intent != null) {
+            final String url = intent.getDataString();
+            if (url != null) {
+                processUrl(url);
+            }
+            if (start) {
+                mIdToShowAtTop = intent.getLongExtra("id", -1);
+            }
+        }
+    }
+
+    private void processUrl(final String url) {
+        T.UI();
+        if (RegexPatterns.OPEN_HOME_URL.matcher(url).matches())
+            return;
+
+        if (RegexPatterns.FRIEND_INVITE_URL.matcher(url).matches()
+                || RegexPatterns.SERVICE_INTERACT_URL.matcher(url).matches()) {
+            final Intent launchIntent = new Intent(this, ProcessScanActivity.class);
+            launchIntent.putExtra(ProcessScanActivity.URL, url);
+            launchIntent.putExtra(ProcessScanActivity.SCAN_RESULT, false);
+            startActivity(launchIntent);
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if (mService != null) {
+            processIntent(intent, false);
+        }
     }
 
     @Override

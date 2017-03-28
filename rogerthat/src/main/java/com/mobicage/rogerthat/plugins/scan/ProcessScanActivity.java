@@ -304,7 +304,7 @@ public class ProcessScanActivity extends ServiceBoundActivity {
     }
 
     private void startSpinner(boolean isScan) {
-        String title = getString(isScan ? R.string.processing_scan : R.string.processing_invitation);
+        String title = getString(isScan ? R.string.processing_scan : R.string.processing);
         String message = getString(R.string.retrieving_information);
         mProgressDialog = UIUtils.showProgressDialog(this, title, message, true, true,
             new DialogInterface.OnCancelListener() {

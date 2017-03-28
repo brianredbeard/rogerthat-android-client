@@ -295,7 +295,6 @@
     <string name="previous_in_thread">Mesajul anterior din aceasta conversatie</string>
     <string name="priority">Prioritate</string>
     <string name="processing">Proceseaza…</string>
-    <string name="processing_invitation">Prelucrarea invitatiei %1$s…</string>
     <string name="processing_scan">Prelucrarea scanului…</string>
     <string name="profile">Profil</string>
     <string name="qr_call_tel">Doriti sa apelati pe %1$s?</string>

@@ -261,6 +261,34 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
                 FriendsPlugin.FRIENDS_LIST_REFRESHED};
     }
 
+    private void processIntent(Intent intent, Boolean start) {
+        if (intent != null) {
+            final String intentAction = intent.getAction();
+            if (MainActivity.ACTION_NOTIFICATION_MESSAGE_RECEIVED.equals(intentAction)) {
+                processMessageUpdatesIntent(intent);
+            } else {
+                final String url = intent.getDataString();
+                if (url != null) {
+                    processUrl(url);
+                }
+                if (start) {
+                    Bundle extras = intent.getExtras();
+                    if (extras != null) {
+                        mMemberFilter = extras.getString(MessagingPlugin.MEMBER_FILTER);
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if (mService != null) {
+            processIntent(intent, false);
+        }
+    }
+
     @Override
     protected void onServiceBound() {
         T.UI();
@@ -268,18 +296,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
         mFriendsPlugin = mService.getPlugin(FriendsPlugin.class);
         mMyEmail = mService.getIdentityStore().getIdentity().getEmail();
 
-        Intent intent = getIntent();
-        if (intent != null) {
-            final String intentAction = intent.getAction();
-            if (MainActivity.ACTION_NOTIFICATION_MESSAGE_RECEIVED.equals(intentAction)) {
-                processMessageUpdatesIntent(intent);
-            } else {
-                Bundle extras = intent.getExtras();
-                if (extras != null) {
-                    mMemberFilter = extras.getString(MessagingPlugin.MEMBER_FILTER);
-                }
-            }
-        }
+        processIntent(getIntent(), true);
 
         if (mMemberFilter == null) {
             mMessagingPlugin.inboxOpened();
