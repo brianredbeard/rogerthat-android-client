@@ -170,6 +170,7 @@
     <string name="friend_share_location">Can see my location</string>
     <string name="friend_sms_invitation">Hi %1$s,\n\nI invite you to communicate with me using %4$s.\n\nStep 1. install %4$s app:\n%2$s\n\nStep 2. connect with me:\n%3$s</string>
     <string name="friend_sms_invitation_no_url">Hi %1$s\n\nI invite you to communicate with me using %3$s. %3$s is a cool messaging platform for web and smartphone.\n\nInstall %3$s app: %2$s</string>
+    <string name="friends_getting_started_title">Getting started</string>
     <string name="friends_map">Friends on map</string>
     <string name="gender">Gender</string>
     <string name="get_current_coordinates">Get the GPS coordinates of your current location</string>

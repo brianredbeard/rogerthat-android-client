@@ -168,8 +168,9 @@
     <string name="friend_request_share_location_invitation_sent">Se ha enviado una petición de ubicación compartida a %1$s.</string>
     <string name="friend_selection_is_required">Por favor, seleccione al menos un amigo.</string>
     <string name="friend_share_location">Ver mi ubicación</string>
-    <string name="friend_sms_invitation">Hola %1$s,\n\nLe invito a comunicarse conmigo a través de %4$s.\n\nPaso 1. Instalar la aplicación %4$s:\n%2$s\n\nPaso 2. Conectar conmigo:\n%3$s</string>
+    <string name="friend_sms_invitation">Hola %1$s,\n\nLe invito a comunicarse conmigo a través de %4$s.\n\nPaso 1. Instalar desde tu móvil la aplicación %4$s:\n%2$s\n\nPaso 2. Abrir el siguiente link desde otro dispositivo y escanear con la opción \"Escanear\" del menú principal de la App el código QR que aparece en la pantalla:\n%3$s</string>
     <string name="friend_sms_invitation_no_url">Hola %1$s\n\nLe invito a comunicarse conmigo a través de %3$s. %3$s es una plataforma de mensajería moderna para navegadores web y smartphones!\n\nInstalar la aplicación %3$s: %2$s</string>
+    <string name="friends_getting_started_title">Para empezar</string>
     <string name="friends_map">Localizar contactos</string>
     <string name="gender">Género</string>
     <string name="get_current_coordinates">Obtener las coordenadas GPS de su ubicación actual</string>

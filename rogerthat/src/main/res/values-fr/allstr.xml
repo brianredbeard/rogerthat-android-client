@@ -168,6 +168,7 @@
     <string name="friend_share_location">Je partage ma position</string>
     <string name="friend_sms_invitation">Bonjour %1$s,\n\nJe vous invite afin de communiquer ensemble en utilisant %4$s\n\n1. Installez l\'application %4$s:\n%2$s\n\n2. Ajoutez moi:\n%3$s</string>
     <string name="friend_sms_invitation_no_url">Bonjour %1$s,\n\nJe vous invite afin de communiquer ensemble en utilisant %3$s.\n\nInstallation %3$s app:\n%2$s</string>
+    <string name="friends_getting_started_title">Commencez</string>
     <string name="friends_map">Amis sur la carte</string>
     <string name="gender">Sexe</string>
     <string name="get_current_coordinates">Demandez les coordonnées GPS de votre position actuelle</string>

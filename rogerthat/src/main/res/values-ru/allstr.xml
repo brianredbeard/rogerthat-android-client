@@ -162,6 +162,7 @@
     <string name="friend_share_location">Может видеть мое местоположение</string>
     <string name="friend_sms_invitation">Здравствуйте, %1$s.\n\nПриглашаю присоединиться ко мне в %4$s.\n\nШаг 1. Установите приложение %4$s:\n%2$s\n\nШаг 2. Найдите меня:\n%3$s</string>
     <string name="friend_sms_invitation_no_url">Здравствуйте, %1$s.\n\nПриглашаю присоединиться ко мне в %3$s. %3$s — отличная платформа для обмена сообщениями в интернете и на смартфонах\n\nУстановите приложение %3$s: %2$s</string>
+    <string name="friends_getting_started_title">Начало работы</string>
     <string name="friends_map">Друзья на карте</string>
     <string name="gender">Пол</string>
     <string name="get_current_coordinates">Получить GPS-координаты вашего текущего местоположения</string>
