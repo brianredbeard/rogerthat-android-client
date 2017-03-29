@@ -225,7 +225,7 @@ public class HttpCommunicator {
 
         mMainService.addHighPriorityIntent(HttpCommunicator.INTENT_HTTP_START_OUTGOING_CALLS);
 
-        if (CloudConstants.USE_GCM_KICK_CHANNEL) {
+        if (CloudConstants.USE_FIREBASE_KICK_CHANNEL) {
             final IntentFilter filter = new IntentFilter();
             filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
             filter.addAction(INTENT_SHOULD_RETRY_COMMUNICATION);
@@ -324,7 +324,7 @@ public class HttpCommunicator {
             }
         });
 
-        if (CloudConstants.USE_GCM_KICK_CHANNEL) {
+        if (CloudConstants.USE_FIREBASE_KICK_CHANNEL) {
             mMainService.unregisterReceiver(mBroadcastReceiver);
         }
 
@@ -415,7 +415,7 @@ public class HttpCommunicator {
             }
             if (!mMainService.getNetworkConnectivityManager().isConnected()) {
                 debugLog("Leaving HTTP communicate(.) because network is not connected");
-                if (CloudConstants.USE_GCM_KICK_CHANNEL)
+                if (CloudConstants.USE_FIREBASE_KICK_CHANNEL)
                     scheduleRetryCommunication();
                 wakeLockReleaseRunnable.run();
                 return;
@@ -530,7 +530,7 @@ public class HttpCommunicator {
                             broadcastHttpError();
                             loopCompleteHandler.run(false);
 
-                            if (CloudConstants.USE_GCM_KICK_CHANNEL) {
+                            if (CloudConstants.USE_FIREBASE_KICK_CHANNEL) {
                                 scheduleRetryCommunication();
                             }
 

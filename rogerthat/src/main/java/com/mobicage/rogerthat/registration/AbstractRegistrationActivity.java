@@ -25,6 +25,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
@@ -87,7 +88,6 @@ public abstract class AbstractRegistrationActivity extends ServiceBoundActivity 
     private Looper mWorkerLooper;
     private Handler mWorkerHandler;
 
-    private String mGCMRegistrationId = "";
     private boolean mAgeAndGenderSet = true;
     private List<Account> mAccounts;
     private String mDiscoveredBeacons = null;
@@ -255,8 +255,8 @@ public abstract class AbstractRegistrationActivity extends ServiceBoundActivity 
                             T.UI();
                             mWizard.setCredentials(info.mCredentials);
 
-                            if (CloudConstants.USE_GCM_KICK_CHANNEL && !"".equals(mGCMRegistrationId)) {
-                                GoogleServicesUtils.saveGCMRegistrationId(mService, mGCMRegistrationId);
+                            if (CloudConstants.USE_FIREBASE_KICK_CHANNEL && !"".equals(getFirebaseToken())) {
+                                GoogleServicesUtils.saveFirebaseRegistrationId(mService, getFirebaseToken());
                             }
 
                             mService.setCredentials(mWizard.getCredentials());
@@ -360,12 +360,8 @@ public abstract class AbstractRegistrationActivity extends ServiceBoundActivity 
         }
     }
 
-    public String getGCMRegistrationId() {
-        return mGCMRegistrationId;
-    }
-
-    public void setGCMRegistrationId(String GCMRegistrationId) {
-        mGCMRegistrationId = GCMRegistrationId;
+    public String getFirebaseToken() {
+        return FirebaseInstanceId.getInstance().getToken();
     }
 
     public void setWizard(AbstractRegistrationWizard wizard) {

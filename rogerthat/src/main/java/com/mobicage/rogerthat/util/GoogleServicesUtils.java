@@ -17,14 +17,9 @@
  */
 package com.mobicage.rogerthat.util;
 
-import java.io.IOException;
-
-import android.app.Activity;
 import android.content.pm.PackageManager.NameNotFoundException;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.config.Configuration;
 import com.mobicage.rogerthat.util.logging.L;
@@ -37,80 +32,36 @@ import com.mobicage.to.system.UpdateApplePushDeviceTokenResponseTO;
 
 public class GoogleServicesUtils {
 
-    private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
-
-    public static boolean checkPlayServices(Activity activity) {
-        return checkPlayServices(activity, false);
-    }
-
-    public static boolean checkPlayServices(Activity activity, boolean justCheck) {
-        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(activity);
-        if (resultCode != ConnectionResult.SUCCESS) {
-            if (!justCheck) {
-                if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
-                    GooglePlayServicesUtil.getErrorDialog(resultCode, activity, PLAY_SERVICES_RESOLUTION_REQUEST)
-                        .show();
-                } else {
-                    L.d("This device is not supported.");
-                    activity.finish();
-                }
-            }
-            return false;
-        }
-        return true;
-    }
-
-    public interface GCMRegistrationIdFoundCallback {
-
-        void idFound(String registrationId);
-
-    }
-
-    public static void registerGCMRegistrationId(final MainService mainService,
-        final GCMRegistrationIdFoundCallback gcmRegistrationIdFoundCallback) {
+    public static void registerFirebaseRegistrationId(final MainService mainService) {
         T.UI();
-        if (!CloudConstants.USE_GCM_KICK_CHANNEL)
+        L.i("registerFirebaseRegistrationId: 1");
+        if (!CloudConstants.USE_FIREBASE_KICK_CHANNEL)
             return;
-        final Configuration config = mainService.getConfigurationProvider().getConfiguration(MainService.CONFIG_GCM);
-        String configRegistrationId = config.get(MainService.CONFIG_GCM_REGISTRATION_ID_KEY, "");
-        String configAppVersion = config.get(MainService.CONFIG_GCM_APP_VERSION_KEY, "");
+        L.i("registerFirebaseRegistrationId: 2");
+        final Configuration config = mainService.getConfigurationProvider().getConfiguration(MainService.CONFIG_FIREBASE);
+        String configRegistrationId = config.get(MainService.CONFIG_FIREBASE_REGISTRATION_ID_KEY, "");
+        String configAppVersion = config.get(MainService.CONFIG_FIREBASE_APP_VERSION_KEY, "");
         final String appVersion = getAppVersion(mainService);
         boolean registrationNeeded = "".equals(configRegistrationId) || !configAppVersion.equals(appVersion);
         if (!registrationNeeded)
             return;
-
+        L.i("registerFirebaseRegistrationId: 3");
         SafeRunnable register = new SafeRunnable() {
 
             @Override
             protected void safeRun() throws Exception {
-                GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(mainService);
-                try {
-                    final String registrationId = gcm.register(CloudConstants.GCM_SENDER_ID);
-                    if (gcmRegistrationIdFoundCallback != null) {
-                        // If a callback is supplied, just execute the callback on the UI thread and do nothing else.
-                        mainService.postOnUIHandler(new SafeRunnable() {
-                            @Override
-                            protected void safeRun() throws Exception {
-                                gcmRegistrationIdFoundCallback.idFound(registrationId);
-                            }
-                        });
-                        return;
+                final String registrationId = FirebaseInstanceId.getInstance().getToken();
+                L.i("registerFirebaseRegistrationId: 4 - " + registrationId);
+                mainService.postOnUIHandler(new SafeRunnable() {
+                    @Override
+                    protected void safeRun() throws Exception {
+                        UpdateApplePushDeviceTokenRequestTO request = new UpdateApplePushDeviceTokenRequestTO();
+                        request.token = registrationId;
+                        com.mobicage.api.system.Rpc.updateApplePushDeviceToken(
+                            new ResponseHandler<UpdateApplePushDeviceTokenResponseTO>(), request);
+                        saveFirebaseRegistrationId(mainService, registrationId);
                     }
-                    // No callback supplied, save the registration id to the server and the configuration provider.
-                    mainService.postOnUIHandler(new SafeRunnable() {
-                        @Override
-                        protected void safeRun() throws Exception {
-                            UpdateApplePushDeviceTokenRequestTO request = new UpdateApplePushDeviceTokenRequestTO();
-                            request.token = registrationId;
-                            com.mobicage.api.system.Rpc.updateApplePushDeviceToken(
-                                new ResponseHandler<UpdateApplePushDeviceTokenResponseTO>(), request);
-                            saveGCMRegistrationId(mainService, registrationId);
-                        }
-                    });
-                } catch (IOException e) {
-                    L.d("Registration failed, retrying in 5 seconds");
-                    mainService.postDelayedOnBIZZHandler(this, 5000);
-                }
+                });
             }
         };
         mainService.postOnBIZZHandler(register);
@@ -125,12 +76,14 @@ public class GoogleServicesUtils {
         }
     }
 
-    public static void saveGCMRegistrationId(final MainService mainService, final String registrationId) {
-        final Configuration config = mainService.getConfigurationProvider().getConfiguration(MainService.CONFIG_GCM);
+    public static void saveFirebaseRegistrationId(final MainService mainService, final String registrationId) {
+        if (registrationId == null)
+            return;
+        final Configuration config = mainService.getConfigurationProvider().getConfiguration(MainService.CONFIG_FIREBASE);
         final String appVersion = getAppVersion(mainService);
-        config.put(MainService.CONFIG_GCM_REGISTRATION_ID_KEY, registrationId);
-        config.put(MainService.CONFIG_GCM_APP_VERSION_KEY, appVersion);
-        mainService.getConfigurationProvider().updateConfigurationLater(MainService.CONFIG_GCM, config);
+        config.put(MainService.CONFIG_FIREBASE_REGISTRATION_ID_KEY, registrationId);
+        config.put(MainService.CONFIG_FIREBASE_APP_VERSION_KEY, appVersion);
+        mainService.getConfigurationProvider().updateConfigurationLater(MainService.CONFIG_FIREBASE, config);
     }
 
 }

@@ -73,7 +73,6 @@ import com.mobicage.rogerthat.registration.AccountManager.Account;
 import com.mobicage.rogerthat.util.FacebookUtils;
 import com.mobicage.rogerthat.util.FacebookUtils.PermissionType;
 import com.mobicage.rogerthat.util.GoogleServicesUtils;
-import com.mobicage.rogerthat.util.GoogleServicesUtils.GCMRegistrationIdFoundCallback;
 import com.mobicage.rogerthat.util.RegexPatterns;
 import com.mobicage.rogerthat.util.Security;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
@@ -197,20 +196,6 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
         registerReceiver(mBroadcastReceiver, filter);
-
-        // TODO: This has to be improved.
-        // If the app relies on GCM the user should not be able to register.
-        if (CloudConstants.USE_GCM_KICK_CHANNEL)
-            GoogleServicesUtils.checkPlayServices(this);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // TODO: This has to be improved.
-        // If the app relies on GCM the user should not be able to register.
-        if (CloudConstants.USE_GCM_KICK_CHANNEL)
-            GoogleServicesUtils.checkPlayServices(this);
     }
 
     @Override
@@ -476,13 +461,8 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
             bindBeaconManager();
         }
 
-        if (CloudConstants.USE_GCM_KICK_CHANNEL && GoogleServicesUtils.checkPlayServices(this, true)) {
-            GoogleServicesUtils.registerGCMRegistrationId(mService, new GCMRegistrationIdFoundCallback() {
-                @Override
-                public void idFound(String registrationId) {
-                    setGCMRegistrationId(registrationId);
-                }
-            });
+        if (CloudConstants.USE_FIREBASE_KICK_CHANNEL) {
+            GoogleServicesUtils.registerFirebaseRegistrationId(mService);
         }
 
         // Colours
@@ -584,7 +564,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                     nameValuePairs.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
                     nameValuePairs.add(new BasicNameValuePair("use_xmpp_kick", CloudConstants.USE_XMPP_KICK_CHANNEL
                             + ""));
-                    nameValuePairs.add(new BasicNameValuePair("GCM_registration_id", getGCMRegistrationId()));
+                    nameValuePairs.add(new BasicNameValuePair("Firebase_registration_id", getFirebaseToken()));
 
                     httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
@@ -692,7 +672,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                     nameValuePairs.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
                     nameValuePairs.add(new BasicNameValuePair("use_xmpp_kick", CloudConstants.USE_XMPP_KICK_CHANNEL
                             + ""));
-                    nameValuePairs.add(new BasicNameValuePair("GCM_registration_id", getGCMRegistrationId()));
+                    nameValuePairs.add(new BasicNameValuePair("Firebase_registration_id", getFirebaseToken()));
 
                     httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
@@ -794,7 +774,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                     nameValuePairs.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
                     nameValuePairs.add(new BasicNameValuePair("use_xmpp_kick", CloudConstants.USE_XMPP_KICK_CHANNEL
                             + ""));
-                    nameValuePairs.add(new BasicNameValuePair("GCM_registration_id", getGCMRegistrationId()));
+                    nameValuePairs.add(new BasicNameValuePair("Firebase_registration_id", getFirebaseToken()));
 
                     httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
@@ -988,7 +968,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                     nameValuePairs.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
                     nameValuePairs.add(new BasicNameValuePair("use_xmpp_kick", CloudConstants.USE_XMPP_KICK_CHANNEL
                             + ""));
-                    nameValuePairs.add(new BasicNameValuePair("GCM_registration_id", getGCMRegistrationId()));
+                    nameValuePairs.add(new BasicNameValuePair("Firebase_registration_id", getFirebaseToken()));
 
                     httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 

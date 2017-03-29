@@ -1,4 +1,5 @@
-/keystore/debug.keystore
+keystore
+google-services.json
 *~
 *.bak
 *.swp

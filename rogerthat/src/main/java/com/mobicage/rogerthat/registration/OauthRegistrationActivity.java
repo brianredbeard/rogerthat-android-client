@@ -29,7 +29,6 @@ import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.Installation;
 import com.mobicage.rogerthat.OauthActivity;
 import com.mobicage.rogerthat.util.GoogleServicesUtils;
-import com.mobicage.rogerthat.util.GoogleServicesUtils.GCMRegistrationIdFoundCallback;
 import com.mobicage.rogerthat.util.Security;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
@@ -75,21 +74,7 @@ public class OauthRegistrationActivity extends AbstractRegistrationActivity {
         T.UI();
         init(this);
         mHttpClient = HTTPUtil.getHttpClient(HTTP_TIMEOUT, HTTP_RETRY_COUNT);
-
-        // TODO: This has to be improved.
-        // If the app relies on GCM the user should not be able to register.
-        if (CloudConstants.USE_GCM_KICK_CHANNEL)
-            GoogleServicesUtils.checkPlayServices(this);
     }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // TODO: This has to be improved.
-        // If the app relies on GCM the user should not be able to register.
-        if (CloudConstants.USE_GCM_KICK_CHANNEL)
-            GoogleServicesUtils.checkPlayServices(this);
-    };
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -127,13 +112,8 @@ public class OauthRegistrationActivity extends AbstractRegistrationActivity {
         mWiz = OauthRegistrationWizard.getWizard(mService, Installation.id(this));
         setWizard(mWiz);
 
-        if (CloudConstants.USE_GCM_KICK_CHANNEL && GoogleServicesUtils.checkPlayServices(this, true)) {
-            GoogleServicesUtils.registerGCMRegistrationId(mService, new GCMRegistrationIdFoundCallback() {
-                @Override
-                public void idFound(String registrationId) {
-                    setGCMRegistrationId(registrationId);
-                }
-            });
+        if (CloudConstants.USE_FIREBASE_KICK_CHANNEL) {
+            GoogleServicesUtils.registerFirebaseRegistrationId(mService);
         }
 
         mErrorTextView = (TextView) findViewById(R.id.error_text);
@@ -234,7 +214,7 @@ public class OauthRegistrationActivity extends AbstractRegistrationActivity {
                     nameValuePairs.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
                     nameValuePairs.add(new BasicNameValuePair("use_xmpp_kick", CloudConstants.USE_XMPP_KICK_CHANNEL
                             + ""));
-                    nameValuePairs.add(new BasicNameValuePair("GCM_registration_id", getGCMRegistrationId()));
+                    nameValuePairs.add(new BasicNameValuePair("Firebase_registration_id", getFirebaseToken()));
 
                     httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 

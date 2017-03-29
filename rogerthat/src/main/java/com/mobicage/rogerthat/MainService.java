@@ -45,6 +45,7 @@ import android.support.v7.app.NotificationCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.config.Configuration;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
@@ -167,16 +168,16 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
     private final static String CONFIG_ADJUSTED_TIME_DIFF_KEY = "adjusted_time_diff";
     private final static long CONFIG_ADJUSTED_TIME_DIFF_DEFAULT_VALUE = 0;
 
-    public final static String CONFIG_GCM = "gcm";
-    public final static String CONFIG_GCM_APP_VERSION_KEY = "app_version";
-    public final static String CONFIG_GCM_REGISTRATION_ID_KEY = "registration_id";
+    public final static String CONFIG_FIREBASE = "firebase";
+    public final static String CONFIG_FIREBASE_APP_VERSION_KEY = "app_version";
+    public final static String CONFIG_FIREBASE_REGISTRATION_ID_KEY = "registration_id";
 
     public final static String START_INTENT_FROM_ONCREATE_KEY = "fromOnCreate";
     public final static String START_INTENT_BOOTTIME_EXTRAS_KEY = "atBootTime";
     public final static String START_INTENT_BACKGROUND_DATA_SETTING_CHANGED_EXTRAS_KEY = "bgDataSetting";
     public final static String START_INTENT_JUST_REGISTERED = "justRegistered";
     public final static String START_INTENT_MY_EMAIL = "myEmail";
-    public final static String START_INTENT_GCM = "gcm";
+    public final static String START_INTENT_FCM = "fcm";
 
     public final static String CLOSE_ACTIVITY_INTENT = "com.mobicage.rogerthat.CLOSE_ACTIVITY_INTENT";
     public final static String UPDATE_BADGE_INTENT = "com.mobicage.rogerthat.UPDATE_BADGE_INTENT";
@@ -199,6 +200,8 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
     private HandlerThread mIOWorkerThread;
     private Handler mBizzHandler;
     private HandlerThread mBizzWorkerThread;
+    private Handler mNewsHandler;
+    private HandlerThread mNewsWorkerThread;
     private List<Intent> mIntentStash;
     private List<SafeRunnable> mRunnableStash;
     private Set<String> mHighPriorityIntents;
@@ -286,6 +289,9 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         mUIHandler = new Handler();
         createIOWorkerThread();
         createHttpWorkerThread();
+        if (AppConstants.NEWS_ENABLED) {
+            createNewsWorkerThread();
+        }
 
         mBinder = new MainBinder();
 
@@ -568,6 +574,17 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         Intent launchServiceIntent = new Intent(this, MainService.class);
         launchServiceIntent.putExtra(why, true);
         startService(launchServiceIntent);
+
+
+        L.e("launchFCMServiceIntent");
+        Intent launchFCMServiceIntent = new Intent(this, MyFirebaseInstanceIDService.class);
+        startService(launchFCMServiceIntent);
+
+        String token = FirebaseInstanceId.getInstance().getToken();
+        L.e("launchFCMServiceIntent: token: " + token);
+
+        // d9p8C4LEAZE:APA91bG-kBXqo5fH7zmOZA0HGFOxbbziVrr0Anc29mEWAzwzyZq4tq_3jjMe5CrCLqub2Zn3pi3qM5FgywvVw8z6TSQyFP8cKoPxyZyJkonVHJSscxm5rpJuYBv_91gRi4rJGXuWHWFf
+        // d9p8C4LEAZE:APA91bG-kBXqo5fH7zmOZA0HGFOxbbziVrr0Anc29mEWAzwzyZq4tq_3jjMe5CrCLqub2Zn3pi3qM5FgywvVw8z6TSQyFP8cKoPxyZyJkonVHJSscxm5rpJuYBv_91gRi4rJGXuWHWFf
     }
 
     public void setAdjustedTimeDiff(final long adjustedTimeDiff) {
@@ -651,6 +668,15 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         T.setBizzThread("HttpCommunicator", mBizzWorkerThread);
     }
 
+    private void createNewsWorkerThread() {
+        T.UI();
+        mNewsWorkerThread = new HandlerThread("rogerthat_news_worker");
+        mNewsWorkerThread.start();
+        final Looper looper = mNewsWorkerThread.getLooper();
+        mNewsHandler = new Handler(looper);
+        T.setNewsThread("MainService.createNewsWorkerThread()", mNewsWorkerThread);
+    }
+
     private void destroyIOWorkerThread() {
         T.UI();
         final Looper looper = mIOWorkerThread.getLooper();
@@ -685,6 +711,23 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         mBizzHandler = null;
         mBizzWorkerThread = null;
         T.resetBizzThreadId();
+    }
+
+    private void destroyNewsWorkerThread() {
+        T.UI();
+        final Looper looper = mNewsWorkerThread.getLooper();
+        if (looper != null)
+            looper.quit();
+
+        try {
+            mNewsWorkerThread.join();
+        } catch (InterruptedException e) {
+            L.bug(e);
+        }
+
+        mNewsHandler = null;
+        mNewsWorkerThread = null;
+        T.resetNewsThreadId();
     }
 
     public static String getVersion(Context context) {
@@ -759,7 +802,9 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         } else {
             mDatabaseManager.close();
         }
-
+        if (AppConstants.NEWS_ENABLED) {
+            destroyNewsWorkerThread();
+        }
         destroyHttpWorkerThread();
         destroyIOWorkerThread();
 
@@ -935,66 +980,60 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         boolean launchedByBgDataSettingChange = false;
         boolean launchedByOnCreate = false;
         boolean launchedByJustRegistered = false;
-        boolean launchedByGCM = false;
-        try {
-            if (extras != null) {
-                launchedAtBootTime = extras.getBoolean(START_INTENT_BOOTTIME_EXTRAS_KEY, false);
-                launchedByBgDataSettingChange = extras.getBoolean(
-                    START_INTENT_BACKGROUND_DATA_SETTING_CHANGED_EXTRAS_KEY, false);
-                launchedByOnCreate = extras.getBoolean(START_INTENT_FROM_ONCREATE_KEY, false);
-                launchedByJustRegistered = extras.getBoolean(START_INTENT_JUST_REGISTERED, false);
-                launchedByGCM = extras.getBoolean(START_INTENT_GCM, false);
-            }
-
-            if (launchedByGCM) {
-                kickHttpCommunication(true, "Incomming GCM");
-                return START_STICKY;
-            }
-
-            final boolean isRegisteredInConfig = getRegisteredFromConfig();
-            L.d("MainService.onStart \n  isIntentNull = " + (intent == null) + "\n  isRegisteredInConfig = "
-                + isRegisteredInConfig + "\n  launchedAtBootTime = " + launchedAtBootTime
-                + "\n  launchedByBgDataSettingChange = " + launchedByBgDataSettingChange + "\n  launchedByOnCreate = "
-                + launchedByOnCreate + "\n  launchedByJustRegistered = " + launchedByJustRegistered);
-
-            if (launchedByJustRegistered) {
-                setupNetworkProtocol();
-                final String myEmail = extras == null ? null : extras.getString(START_INTENT_MY_EMAIL);
-                initializeService(myEmail);
-            }
-
-            if (!isRegisteredInConfig) {
-                L.d("MainService.onStart() - stopping service immediately");
-                stopSelf();
-                return START_NOT_STICKY;
-            }
-
-            // start networking machinery
-            if (CloudConstants.USE_XMPP_KICK_CHANNEL)
-                mXmppKickChannel.start();
-            getPlugin(SystemPlugin.class).doHeartbeat();
-
-            if (CloudConstants.USE_GCM_KICK_CHANNEL)
-                GoogleServicesUtils.registerGCMRegistrationId(this, null);
-
-            if (launchedByOnCreate) {
-                kickHttpCommunication(true, "We just got started");
-            }
-
-            cleanupOldCachedFiles(false);
-            PendingIntent cleanupDownloadsIntent = PendingIntent.getBroadcast(this, 0, new Intent(
-                INTENT_SHOULD_CLEANUP_CACHED_FILES), 0);
-
-            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-            alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
-                + AlarmManager.INTERVAL_DAY * 7, AlarmManager.INTERVAL_DAY * 7, cleanupDownloadsIntent);
-
-            return START_STICKY;
-        } finally {
-            if (launchedByGCM) {
-                GCMReveiver.completeWakefulIntent(intent);
-            }
+        boolean launchedByFCM = false;
+        if (extras != null) {
+            launchedAtBootTime = extras.getBoolean(START_INTENT_BOOTTIME_EXTRAS_KEY, false);
+            launchedByBgDataSettingChange = extras.getBoolean(
+                START_INTENT_BACKGROUND_DATA_SETTING_CHANGED_EXTRAS_KEY, false);
+            launchedByOnCreate = extras.getBoolean(START_INTENT_FROM_ONCREATE_KEY, false);
+            launchedByJustRegistered = extras.getBoolean(START_INTENT_JUST_REGISTERED, false);
+            launchedByFCM = extras.getBoolean(START_INTENT_FCM, false);
         }
+
+        if (launchedByFCM) {
+            kickHttpCommunication(true, "Incomming FCM");
+            return START_STICKY;
+        }
+
+        final boolean isRegisteredInConfig = getRegisteredFromConfig();
+        L.d("MainService.onStart \n  isIntentNull = " + (intent == null) + "\n  isRegisteredInConfig = "
+            + isRegisteredInConfig + "\n  launchedAtBootTime = " + launchedAtBootTime
+            + "\n  launchedByBgDataSettingChange = " + launchedByBgDataSettingChange + "\n  launchedByOnCreate = "
+            + launchedByOnCreate + "\n  launchedByJustRegistered = " + launchedByJustRegistered);
+
+        if (launchedByJustRegistered) {
+            setupNetworkProtocol();
+            final String myEmail = extras == null ? null : extras.getString(START_INTENT_MY_EMAIL);
+            initializeService(myEmail);
+        }
+
+        if (!isRegisteredInConfig) {
+            L.d("MainService.onStart() - stopping service immediately");
+            stopSelf();
+            return START_NOT_STICKY;
+        }
+
+        // start networking machinery
+        if (CloudConstants.USE_XMPP_KICK_CHANNEL)
+            mXmppKickChannel.start();
+        getPlugin(SystemPlugin.class).doHeartbeat();
+
+        if (CloudConstants.USE_FIREBASE_KICK_CHANNEL)
+            GoogleServicesUtils.registerFirebaseRegistrationId(this);
+
+        if (launchedByOnCreate) {
+            kickHttpCommunication(true, "We just got started");
+        }
+
+        cleanupOldCachedFiles(false);
+        PendingIntent cleanupDownloadsIntent = PendingIntent.getBroadcast(this, 0, new Intent(
+            INTENT_SHOULD_CLEANUP_CACHED_FILES), 0);
+
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
+            + AlarmManager.INTERVAL_DAY * 7, AlarmManager.INTERVAL_DAY * 7, cleanupDownloadsIntent);
+
+        return START_STICKY;
     }
 
     private void cleanupOldCachedFiles(boolean force) {
@@ -1485,6 +1524,30 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
 
     public void removeFromBIZZHandler(SafeRunnable r) {
         mBizzHandler.removeCallbacks(r);
+    }
+
+    public void postAtFrontOfNewsHandler(SafeRunnable r) {
+        mNewsHandler.postAtFrontOfQueue(r);
+    }
+
+    public void postOnNewsHandler(SafeRunnable r) {
+        mNewsHandler.post(r);
+    }
+
+    public void runOnNewsHandler(SafeRunnable runnable) {
+        if (com.mobicage.rogerthat.util.system.T.getThreadType() == com.mobicage.rogerthat.util.system.T.NEWS) {
+            runnable.run();
+        } else {
+            postOnNewsHandler(runnable);
+        }
+    }
+
+    public void runOnNewsHandlerNow(SafeRunnable runnable) {
+        if (com.mobicage.rogerthat.util.system.T.getThreadType() == com.mobicage.rogerthat.util.system.T.NEWS) {
+            runnable.run();
+        } else {
+            postAtFrontOfNewsHandler(runnable);
+        }
     }
 
     // Owned by UI thread

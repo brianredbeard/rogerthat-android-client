@@ -99,8 +99,7 @@ public class CloudConstants {
 
     // Customizable KICK constants
     public final static boolean USE_XMPP_KICK_CHANNEL = CustomCloudConstants.USE_XMPP_KICK_CHANNEL;
-    public final static boolean USE_GCM_KICK_CHANNEL = !CustomCloudConstants.USE_XMPP_KICK_CHANNEL;
-    public final static String GCM_SENDER_ID = CustomCloudConstants.GCM_SENDER_ID;
+    public final static boolean USE_FIREBASE_KICK_CHANNEL = CustomCloudConstants.USE_FIREBASE_KICK_CHANNEL;
 
     public final static boolean NEWS_CHANNEL_SSL = CustomCloudConstants.NEWS_CHANNEL_SSL;
     public final static boolean NEWS_CHANNEL_MUST_VALIDATE_SSL_CERTIFICATE = CustomCloudConstants.NEWS_CHANNEL_MUST_VALIDATE_SSL_CERTIFICATE;

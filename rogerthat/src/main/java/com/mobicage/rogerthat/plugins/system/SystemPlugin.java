@@ -277,7 +277,7 @@ public class SystemPlugin implements MobicagePlugin {
         info.app.majorVersion = mainService.getMajorVersion();
         info.app.minorVersion = mainService.getMinorVersion();
         info.app.name = mainService.getString(R.string.app_name) + " Android";
-        info.app.type = 4;
+        info.app.type = 9;
 
         // Carrier info
         TelephonyManager telephonyManager = (TelephonyManager) mainService.getSystemService(Context.TELEPHONY_SERVICE);

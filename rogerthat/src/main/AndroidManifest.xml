@@ -5,14 +5,6 @@
           android:versionCode="2734"
           android:versionName="2.0.2734.A">
 
-    <!-- BEGIN GCM -->
-    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
-    <permission
-        android:name="${applicationId}.permission.C2D_MESSAGE"
-        android:protectionLevel="signature" />
-    <uses-permission android:name="${applicationId}.permission.C2D_MESSAGE"/>
-    <!-- END GCM -->
-
     <!-- BEGIN supports-screens -->
     <!-- END supports-screens -->
 
@@ -81,8 +73,6 @@
         <meta-data
             android:name="com.facebook.sdk.ApplicationName"
             android:value="@string/app_name"/>
-        <meta-data android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="${google_maps_api_key}"/>
@@ -553,15 +543,6 @@
                 <!--android:resource="@xml/rogerthat_widget_provider" />-->
         <!--</receiver>-->
 
-        <receiver
-            android:name="com.mobicage.rogerthat.GCMReveiver"
-            android:permission="com.google.android.c2dm.permission.SEND" >
-            <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-                <category android:name="${applicationId}"/>
-            </intent-filter>
-        </receiver>
-
         <receiver android:name="com.mobicage.rogerthat.MainBroadcastReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
@@ -576,6 +557,20 @@
         <service
             android:name="org.altbeacon.beacon.BeaconIntentProcessor"
             android:exported="false" />
+
+        <service
+            android:name="com.mobicage.rogerthat.MyFirebaseInstanceIDService">
+            <intent-filter>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
+            </intent-filter>
+        </service>
+
+        <service
+            android:name="com.mobicage.rogerthat.MyFirebaseMessagingService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
 
         <!-- BEGIN FB -->
         <provider

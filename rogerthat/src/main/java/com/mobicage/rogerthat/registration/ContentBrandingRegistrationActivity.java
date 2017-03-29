@@ -34,7 +34,6 @@ import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
 import com.mobicage.rogerthat.util.GoogleServicesUtils;
-import com.mobicage.rogerthat.util.GoogleServicesUtils.GCMRegistrationIdFoundCallback;
 import com.mobicage.rogerthat.util.Security;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
@@ -95,21 +94,7 @@ public class ContentBrandingRegistrationActivity extends AbstractRegistrationAct
         T.UI();
         init(this);
         mHttpClient = HTTPUtil.getHttpClient(HTTP_TIMEOUT, HTTP_RETRY_COUNT);
-
-        // TODO: This has to be improved.
-        // If the app relies on GCM the user should not be able to register.
-        if (CloudConstants.USE_GCM_KICK_CHANNEL)
-            GoogleServicesUtils.checkPlayServices(this);
     }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // TODO: This has to be improved.
-        // If the app relies on GCM the user should not be able to register.
-        if (CloudConstants.USE_GCM_KICK_CHANNEL)
-            GoogleServicesUtils.checkPlayServices(this);
-    };
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -158,13 +143,8 @@ public class ContentBrandingRegistrationActivity extends AbstractRegistrationAct
 
         mWiz = ContentBrandingRegistrationWizard.getWizard(mService, Installation.id(this));
         setWizard(mWiz);
-        if (CloudConstants.USE_GCM_KICK_CHANNEL && GoogleServicesUtils.checkPlayServices(this, true)) {
-            GoogleServicesUtils.registerGCMRegistrationId(mService, new GCMRegistrationIdFoundCallback() {
-                @Override
-                public void idFound(String registrationId) {
-                    setGCMRegistrationId(registrationId);
-                }
-            });
+        if (CloudConstants.USE_FIREBASE_KICK_CHANNEL) {
+            GoogleServicesUtils.registerFirebaseRegistrationId(mService);
         }
     }
 
@@ -270,7 +250,7 @@ public class ContentBrandingRegistrationActivity extends AbstractRegistrationAct
                     nameValuePairs.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
                     nameValuePairs.add(new BasicNameValuePair("use_xmpp_kick", CloudConstants.USE_XMPP_KICK_CHANNEL
                         + ""));
-                    nameValuePairs.add(new BasicNameValuePair("GCM_registration_id", getGCMRegistrationId()));
+                    nameValuePairs.add(new BasicNameValuePair("Firebase_registration_id", getFirebaseToken()));
                     httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
                     // Execute HTTP Post Request
@@ -398,8 +378,8 @@ public class ContentBrandingRegistrationActivity extends AbstractRegistrationAct
                             T.UI();
                             mWiz.setCredentials(info.mCredentials);
 
-                            if (CloudConstants.USE_GCM_KICK_CHANNEL && !"".equals(getGCMRegistrationId())) {
-                                GoogleServicesUtils.saveGCMRegistrationId(mService, getGCMRegistrationId());
+                            if (CloudConstants.USE_FIREBASE_KICK_CHANNEL && !"".equals(getFirebaseToken())) {
+                                GoogleServicesUtils.saveFirebaseRegistrationId(mService, getFirebaseToken());
                             }
 
                             mService.setCredentials(mWiz.getCredentials());
