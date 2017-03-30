@@ -48,6 +48,8 @@ public class GoogleServicesUtils {
             @Override
             protected void safeRun() throws Exception {
                 final String registrationId = FirebaseInstanceId.getInstance().getToken();
+                if (registrationId == null)
+                    return;
                 mainService.postOnUIHandler(new SafeRunnable() {
                     @Override
                     protected void safeRun() throws Exception {
