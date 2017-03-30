@@ -2,8 +2,8 @@
           xmlns:tools="http://schemas.android.com/tools"
           package="com.mobicage.rogerth.at"
           android:configChanges="orientation|screenSize"
-          android:versionCode="2734"
-          android:versionName="2.0.2734.A">
+          android:versionCode="2807"
+          android:versionName="2.0.2807.A">
 
     <!-- BEGIN supports-screens -->
     <!-- END supports-screens -->
