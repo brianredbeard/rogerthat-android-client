@@ -866,7 +866,8 @@ def generate_custom_cloud_constants(doc):
     params.update(doc['CLOUD_CONSTANTS'])
     params['USE_TRUSTSTORE'] = bool_str(params["USE_TRUSTSTORE"])
     params['USE_XMPP_KICK_CHANNEL'] = bool_str(params.get("USE_XMPP_KICK_CHANNEL", False))
-    params['GCM_SENDER_ID'] = quoted_str_or_null(params.get('GCM_SENDER_ID', None))
+    #params['GCM_SENDER_ID'] = quoted_str_or_null(params.get('GCM_SENDER_ID', None))
+    params['USE_FIREBASE_KICK_CHANNEL'] = bool_str(True) # todo ruben
     params['REGISTRATION_MAIN_SIGNATURE'] = quoted_str_or_null(doc['APP_CONSTANTS']['REGISTRATION_MAIN_SIGNATURE'])
     params['REGISTRATION_EMAIL_SIGNATURE'] = quoted_str_or_null(doc['APP_CONSTANTS']['REGISTRATION_EMAIL_SIGNATURE'])
     params['REGISTRATION_PIN_SIGNATURE'] = quoted_str_or_null(doc['APP_CONSTANTS']['REGISTRATION_PIN_SIGNATURE'])
@@ -886,8 +887,8 @@ class CustomCloudConstants {
     final static int HTTPS_PORT = %(HTTPS_PORT)s;
     final static String HTTP_BASE_URL = "%(HTTP_BASE_URL)s";
 
-    final static boolean USE_XMPP_KICK_CHANNEL = %(USE_XMPP_KICK_CHANNEL)s; // when false, kicks will arrive via GCM
-    final static String GCM_SENDER_ID = %(GCM_SENDER_ID)s;
+    final static boolean USE_XMPP_KICK_CHANNEL = %(USE_XMPP_KICK_CHANNEL)s; // when false, kicks will arrive via FCM
+    final static String USE_FIREBASE_KICK_CHANNEL = %(USE_FIREBASE_KICK_CHANNEL)s;
 
     final static String XMPP_DOMAIN = "%(XMPP_DOMAIN)s";
     final static boolean USE_TRUSTSTORE = %(USE_TRUSTSTORE)s;
