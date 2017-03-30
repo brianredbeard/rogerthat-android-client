@@ -7,9 +7,11 @@ import android.os.IBinder;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
+import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
 import com.mobicage.rogerthat.util.GoogleServicesUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
+import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 
@@ -25,18 +27,18 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService imple
 
     @Override
     public void onTokenRefresh() {
-        final String refreshedToken = FirebaseInstanceId.getInstance().getToken();
-        L.d("Refreshed token: " + refreshedToken);
-        if (!mServiceIsBound) {
-            addOnServiceBoundRunnable(new SafeRunnable() {
-                @Override
-                protected void safeRun() throws Exception {
-                    if (mService.getRegisteredFromConfig()) {
-                        GoogleServicesUtils.registerFirebaseRegistrationId(mService);
-                    }
-                }
-            });
+        SafeRunnable runnable = new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                T.UI();
+                GoogleServicesUtils.registerFirebaseRegistrationId(mService);
+            }
+        };
 
+        if (mServiceIsBound) {
+            mService.postOnIOHandler(runnable);
+        } else {
+            addOnServiceBoundRunnable(runnable);
             doBindService();
         }
     }
@@ -50,17 +52,13 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService imple
             Intent intent = new Intent(this, MainService.class);
             intent.putExtra("clazz", this.getClass().getName());
             boolean success = getApplicationContext().bindService(intent, mServiceConnection, BIND_AUTO_CREATE);
-            logMethod("doBindService : " + success);
+            logMethod("doBindService: " + success);
         }
-    }
-
-    private void onServiceBound() {
-
     }
 
     private void addOnServiceBoundRunnable(SafeRunnable runnable) {
         if (mOnServiceBoundRunnables == null) {
-            mOnServiceBoundRunnables = new ArrayList<SafeRunnable>();
+            mOnServiceBoundRunnables = new ArrayList<>();
         }
         mOnServiceBoundRunnables.add(runnable);
     }
@@ -70,12 +68,7 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService imple
         public void onServiceConnected(ComponentName className, IBinder service) {
             T.UI();
             mService = ((MainService.MainBinder) service).getService();
-            try {
-                onServiceBound();
-                mServiceIsBound = true;
-            } catch (Exception e) {
-                L.bug(e);
-            }
+            mServiceIsBound = true;
             if (mOnServiceBoundRunnables != null) {
                 for (SafeRunnable runnable : mOnServiceBoundRunnables) {
                     runnable.run();

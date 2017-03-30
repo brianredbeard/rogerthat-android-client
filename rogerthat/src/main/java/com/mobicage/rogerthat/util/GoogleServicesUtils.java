@@ -34,10 +34,8 @@ public class GoogleServicesUtils {
 
     public static void registerFirebaseRegistrationId(final MainService mainService) {
         T.UI();
-        L.i("registerFirebaseRegistrationId: 1");
         if (!CloudConstants.USE_FIREBASE_KICK_CHANNEL)
             return;
-        L.i("registerFirebaseRegistrationId: 2");
         final Configuration config = mainService.getConfigurationProvider().getConfiguration(MainService.CONFIG_FIREBASE);
         String configRegistrationId = config.get(MainService.CONFIG_FIREBASE_REGISTRATION_ID_KEY, "");
         String configAppVersion = config.get(MainService.CONFIG_FIREBASE_APP_VERSION_KEY, "");
@@ -45,13 +43,11 @@ public class GoogleServicesUtils {
         boolean registrationNeeded = "".equals(configRegistrationId) || !configAppVersion.equals(appVersion);
         if (!registrationNeeded)
             return;
-        L.i("registerFirebaseRegistrationId: 3");
         SafeRunnable register = new SafeRunnable() {
 
             @Override
             protected void safeRun() throws Exception {
                 final String registrationId = FirebaseInstanceId.getInstance().getToken();
-                L.i("registerFirebaseRegistrationId: 4 - " + registrationId);
                 mainService.postOnUIHandler(new SafeRunnable() {
                     @Override
                     protected void safeRun() throws Exception {
