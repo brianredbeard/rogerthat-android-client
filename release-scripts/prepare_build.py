@@ -888,7 +888,7 @@ class CustomCloudConstants {
     final static String HTTP_BASE_URL = "%(HTTP_BASE_URL)s";
 
     final static boolean USE_XMPP_KICK_CHANNEL = %(USE_XMPP_KICK_CHANNEL)s; // when false, kicks will arrive via FCM
-    final static String USE_FIREBASE_KICK_CHANNEL = %(USE_FIREBASE_KICK_CHANNEL)s;
+    final static boolean USE_FIREBASE_KICK_CHANNEL = %(USE_FIREBASE_KICK_CHANNEL)s;
 
     final static String XMPP_DOMAIN = "%(XMPP_DOMAIN)s";
     final static boolean USE_TRUSTSTORE = %(USE_TRUSTSTORE)s;
