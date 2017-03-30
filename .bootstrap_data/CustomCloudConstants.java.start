@@ -26,8 +26,8 @@ class CustomCloudConstants {
     final static int HTTPS_PORT = 443;
     final static String HTTP_BASE_URL = "http://rogerth.at";
 
-    final static String GCM_SENDER_ID = "17301441312";
     final static boolean USE_XMPP_KICK_CHANNEL = false; // when false, kicks will arrive via GCM
+    final static boolean USE_FIREBASE_KICK_CHANNEL = true;
 
     final static String XMPP_DOMAIN = "rogerth.at";
     final static boolean USE_TRUSTSTORE = false;
