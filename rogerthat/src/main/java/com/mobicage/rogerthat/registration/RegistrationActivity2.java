@@ -564,7 +564,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                     nameValuePairs.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
                     nameValuePairs.add(new BasicNameValuePair("use_xmpp_kick", CloudConstants.USE_XMPP_KICK_CHANNEL
                             + ""));
-                    nameValuePairs.add(new BasicNameValuePair("Firebase_registration_id", getFirebaseToken()));
+                    nameValuePairs.add(new BasicNameValuePair("firebase_registration_id", getFirebaseToken()));
 
                     httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
@@ -672,7 +672,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                     nameValuePairs.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
                     nameValuePairs.add(new BasicNameValuePair("use_xmpp_kick", CloudConstants.USE_XMPP_KICK_CHANNEL
                             + ""));
-                    nameValuePairs.add(new BasicNameValuePair("Firebase_registration_id", getFirebaseToken()));
+                    nameValuePairs.add(new BasicNameValuePair("firebase_registration_id", getFirebaseToken()));
 
                     httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
@@ -774,7 +774,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                     nameValuePairs.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
                     nameValuePairs.add(new BasicNameValuePair("use_xmpp_kick", CloudConstants.USE_XMPP_KICK_CHANNEL
                             + ""));
-                    nameValuePairs.add(new BasicNameValuePair("Firebase_registration_id", getFirebaseToken()));
+                    nameValuePairs.add(new BasicNameValuePair("firebase_registration_id", getFirebaseToken()));
 
                     httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
@@ -968,7 +968,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                     nameValuePairs.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
                     nameValuePairs.add(new BasicNameValuePair("use_xmpp_kick", CloudConstants.USE_XMPP_KICK_CHANNEL
                             + ""));
-                    nameValuePairs.add(new BasicNameValuePair("Firebase_registration_id", getFirebaseToken()));
+                    nameValuePairs.add(new BasicNameValuePair("firebase_registration_id", getFirebaseToken()));
 
                     httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
