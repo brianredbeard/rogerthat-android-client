@@ -1281,6 +1281,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                 UIUtils.showErrorPleaseRetryDialog(RegistrationActivity2.this);
             }
         };
+        mWiz.reInit();
         final String timestamp = "" + mWiz.getTimestamp();
         final String registrationId = mWiz.getRegistrationId();
         final String deviceId = mWiz.getDeviceId();
