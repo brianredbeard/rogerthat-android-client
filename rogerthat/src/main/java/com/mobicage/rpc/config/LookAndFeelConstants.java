@@ -128,7 +128,6 @@ public class LookAndFeelConstants {
             sPrimaryColor = ContextCompat.getColor(context, R.color.mc_primary_color);
             sPrimaryColorDark = ContextCompat.getColor(context, R.color.mc_primary_color_dark);
             sPrimaryIconColor = ContextCompat.getColor(context, R.color.mc_primary_icon);
-            sSecondaryColor = ContextCompat.getColor(context, R.color.mc_secondary_color);
 
             sDrawerNavigationItems = NavigationConstants.getNavigationItems();
             sFooterNavigationItems = NavigationConstants.getNavigationFooterItems();
@@ -145,7 +144,6 @@ public class LookAndFeelConstants {
             sPrimaryColor = getCustomColor(context, R.color.mc_primary_color, colors.primary_color);
             sPrimaryColorDark = getCustomColor(context, R.color.mc_primary_color_dark, colors.primary_color_dark);
             sPrimaryIconColor = getCustomColor(context, R.color.mc_primary_icon, colors.primary_icon_color);
-            sSecondaryColor = getCustomColor(context, R.color.mc_secondary_color, request.colors.secondary_color);
 
             sDrawerNavigationItems = createNavigationItems(request.homescreen.items, request.homescreen.color);
             sFooterNavigationItems = createNavigationItems(request.toolbar.items, request.homescreen.color);
@@ -202,10 +200,5 @@ public class LookAndFeelConstants {
     public static int getPrimaryIconColor(Context context) {
         setup(context, false);
         return sPrimaryIconColor;
-    }
-
-    public static int getSecondaryColor(Context context) {
-        setup(context, false);
-        return sSecondaryColor;
     }
 }

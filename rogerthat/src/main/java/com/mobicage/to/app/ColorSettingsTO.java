@@ -57,7 +57,7 @@ public class ColorSettingsTO implements com.mobicage.rpc.IJSONable {
             Object val = json.get("secondary_color");
             this.secondary_color = (String) val;
         } else {
-            throw new IncompleteMessageException("com.mobicage.to.app.ColorSettingsTO object is missing field 'secondary_color'");
+            this.secondary_color = null;
         }
         if (json.containsKey("tint_color")) {
             Object val = json.get("tint_color");

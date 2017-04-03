@@ -797,7 +797,6 @@ public class AppConstants {
     colors = dict(mc_homescreen_background='homescreen_background',
                   mc_homescreen_text='homescreen_text',
                   mc_primary_color='primary_color',
-                  mc_secondary_color='secondary_color',
                   mc_primary_icon='primary_color')
     with open(os.path.join(path, "colors.xml"), 'r+') as f:
         s = f.read()

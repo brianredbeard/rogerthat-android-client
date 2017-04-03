@@ -32,7 +32,6 @@
     <!--Instead, use LookAndFeelConstants.getPrimaryColor(context) etc.-->
     <color name="mc_primary_color">#84B53F</color>
     <color name="mc_primary_color_dark">#4f6c25</color>
-    <color name="mc_secondary_color">#006536</color>
     <color name="mc_primary_icon">#84B53F</color>
     <!-- end dynamic colours -->
 
