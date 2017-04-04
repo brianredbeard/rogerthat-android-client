@@ -271,13 +271,7 @@ def get_translation_strings():
 
 
 def get_action(item):
-    if item.get("click"):
-        action_type = "null"
-        action = quoted_str_or_null(item["click"])
-    elif item.get("tag"):
-        action_type = quoted_str_or_null("click")
-        action = quoted_str_or_null(sha256_hash(item["tag"]))
-    elif item.get("action"):
+    if item.get("action"):
         action_type = quoted_str_or_null(item["action_type"])
         if item["action_type"] in ("action", "click"):
             action = quoted_str_or_null(sha256_hash(item["action"]))
@@ -387,7 +381,7 @@ def convert_config():
         toolbar = doc.get('TOOLBAR')
         if toolbar:
             items += toolbar.get('items', [])
-        main_screen_contains_news = any((i for i in items if i['click'] == 'news'))
+        main_screen_contains_news = any((i for i in items if i['action'] == 'news'))
     else:
         color = doc["HOMESCREEN"]["color"]
 
@@ -442,15 +436,15 @@ def convert_config():
                     string_id=strings_map[item['text']],
                     collapse=bool_str(item.get('collapse', False)))
 
-                if item["click"] == "friends":
+                if item['action'] == "friends":
                     main_screen_contains_friends = True
-                elif item["click"] == "profile":
+                elif item['action'] == "profile":
                     main_screen_contains_profile = True
-                elif item["click"] == "scan":
+                elif item['action'] == "scan":
                     main_screen_contains_scan = True
-                elif item["click"] == "news":
+                elif item['action'] == "news":
                     main_screen_contains_news = True
-                elif item["click"] in SERVICE_TYPES:
+                elif item['action'] in SERVICE_TYPES:
                     main_screen_contains_services = True
             output += '''\n                    }
                 }
