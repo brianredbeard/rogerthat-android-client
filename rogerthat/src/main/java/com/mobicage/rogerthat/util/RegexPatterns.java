@@ -62,8 +62,12 @@ public class RegexPatterns {
                     "(portrait|landscape|dynamic)\"\\s*/>", Pattern.CASE_INSENSITIVE);
 
     public static final Pattern BRANDING_SHOW_HEADER = Pattern.compile(
-        "<\\s*meta\\s+property\\s*=\\s*\"rt:style:show-header\"\\s+content\\s*=\\s*\"(true|false)\"\\s*/>",
-        Pattern.CASE_INSENSITIVE);
+            "<\\s*meta\\s+property\\s*=\\s*\"rt:style:show-header\"\\s+content\\s*=\\s*\"(true|false)\"\\s*/>",
+            Pattern.CASE_INSENSITIVE);
+
+    public static final Pattern BRANDING_SHOW_NAME = Pattern.compile(
+            "<\\s*meta\\s+property\\s*=\\s*\"rt:style:show-name\"\\s+content\\s*=\\s*\"(true|false)\"\\s*/>",
+            Pattern.CASE_INSENSITIVE);
 
     public static final Pattern BRANDING_CONTENT_TYPE = Pattern.compile(
         "<\\s*meta\\s+property\\s*=\\s*\"rt:style:content-type\"\\s+content\\s*=\\s*\"([a-zA-Z0-9_/-]*)\"\\s*/>",

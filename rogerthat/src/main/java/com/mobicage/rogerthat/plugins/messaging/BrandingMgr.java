@@ -379,6 +379,7 @@ public class BrandingMgr implements Pickleable, Closeable {
         public final Integer menuItemColor;
         public final ColorScheme scheme;
         public final boolean showHeader;
+        public final boolean showName;
         public final Dimension dimension1;
         public final Dimension dimension2;
         public final String contentType;
@@ -392,7 +393,7 @@ public class BrandingMgr implements Pickleable, Closeable {
         public final String senderName;
 
         public BrandingResult(File dir, File file, File watermark, Integer color, Integer menuItemColor,
-                              ColorScheme scheme, boolean showHeader, Dimension dimension1, Dimension dimension2,
+                              ColorScheme scheme, boolean showHeader, boolean showName, Dimension dimension1, Dimension dimension2,
                               String contentType, Orientation orientation, boolean wakelockEnabled, List<String>
                                       externalUrlPatterns, DisplayType displayType, File avatar, File logo,
                               String message, String senderName) {
@@ -403,6 +404,7 @@ public class BrandingMgr implements Pickleable, Closeable {
             this.menuItemColor = menuItemColor;
             this.scheme = scheme;
             this.showHeader = showHeader;
+            this.showName= showName;
             this.dimension1 = dimension1;
             this.dimension2 = dimension2;
             this.contentType = contentType;
@@ -1076,6 +1078,7 @@ public class BrandingMgr implements Pickleable, Closeable {
             Orientation orientation = CloudConstants.isContentBrandingApp() ? Orientation.LANDSCAPE : Orientation
                     .PORTRAIT;
             boolean showHeader = true;
+            boolean showName = false;
             String contentType = null;
             boolean wakelockEnabled = false;
             ByteArrayOutputStream brandingBos = new ByteArrayOutputStream();
@@ -1083,6 +1086,7 @@ public class BrandingMgr implements Pickleable, Closeable {
             File avatarPath = null;
             String message = "";
             String senderName = "";
+            DisplayType displayType = DisplayType.WEBVIEW;
             try {
                 MessageDigest digester = MessageDigest.getInstance("SHA256");
                 DigestInputStream dis = new DigestInputStream(new BufferedInputStream(new FileInputStream(
@@ -1149,30 +1153,40 @@ public class BrandingMgr implements Pickleable, Closeable {
                 }
                 String brandingHtml = new String(brandingBytes, "UTF8");
 
+                Matcher matcher = RegexPatterns.BRANDING_SHOW_NAME.matcher(brandingHtml);
+                if (matcher.find()) {
+                    String str = matcher.group(1);
+                    showName = "true".equalsIgnoreCase(str);
+                }
+
                 switch (item.type) {
                 case BrandedItem.TYPE_MESSAGE:
                     MessageTO messageTO = (MessageTO) item.object;
                     message = messageTO.message;
+                    if (showName) {
+                        FriendsPlugin friendsPlugin = mMainService.getPlugin(FriendsPlugin.class);
+                        senderName = friendsPlugin.getName(messageTO.sender);
+                    }
+
                     brandingHtml = brandingHtml.replace(NUNTIUZ_MESSAGE,
                             TextUtils.htmlEncode(message).replace("\r", "").replace("\n", "<br>"));
-
                     brandingHtml = brandingHtml.replace(NUNTIUZ_TIMESTAMP,
                             TimeUtils.getDayTimeStr(mContext, messageTO.timestamp * 1000));
-
-                    FriendsPlugin friendsPlugin = mMainService.getPlugin(FriendsPlugin.class);
-                    senderName = friendsPlugin.getName(messageTO.sender);
                     brandingHtml = brandingHtml.replace(NUNTIUZ_IDENTITY_NAME, TextUtils.htmlEncode(senderName));
                     break;
+
                 case BrandedItem.TYPE_FRIEND:
-                    FriendTO friend = (FriendTO) item.object;
-                    // In this case Friend is fully populated
+                    FriendTO friend = (FriendTO) item.object;  // In this case Friend is fully populated
+                    message = friend.description;
+                    if (showName) {
+                        senderName = friend.name;
+                    }
+
                     brandingHtml = brandingHtml.replace(NUNTIUZ_MESSAGE, TextUtils.htmlEncode(friend.description)
                         .replace("\r", "").replace("\n", "<br>"));
-
                     brandingHtml = brandingHtml.replace(NUNTIUZ_IDENTITY_NAME, TextUtils.htmlEncode(friend.name));
-                    message = friend.description;
-                    senderName = friend.name;
                     break;
+
                 case BrandedItem.TYPE_GENERIC:
                     if (item.object instanceof FriendTO) {
                         brandingHtml = brandingHtml.replace(NUNTIUZ_IDENTITY_NAME,
@@ -1181,7 +1195,7 @@ public class BrandingMgr implements Pickleable, Closeable {
                     break;
                 }
 
-                Matcher matcher = RegexPatterns.BRANDING_BACKGROUND_COLOR.matcher(brandingHtml);
+                matcher = RegexPatterns.BRANDING_BACKGROUND_COLOR.matcher(brandingHtml);
                 if (matcher.find()) {
                     String bg = matcher.group(1);
                     if (bg.length() == 4) {
@@ -1281,7 +1295,6 @@ public class BrandingMgr implements Pickleable, Closeable {
                 }
 
 
-                DisplayType displayType = DisplayType.WEBVIEW;
                 matcher = RegexPatterns.BRANDING_DISPLAY_TYPE.matcher(brandingHtml);
                 if (matcher.find()) {
                     String type = matcher.group(1);
@@ -1300,7 +1313,7 @@ public class BrandingMgr implements Pickleable, Closeable {
                     brandingFile = new File(tmpBrandingDir, "embed.pdf");
                 }
                 return new BrandingResult(tmpBrandingDir, brandingFile, watermarkFile, backgroundColor, menuItemColor,
-                        scheme, showHeader, dimension1, dimension2, contentType, orientation, wakelockEnabled,
+                        scheme, showHeader, showName, dimension1, dimension2, contentType, orientation, wakelockEnabled,
                         externalUrlPatterns, displayType, avatarPath, logoPath, message, senderName);
             } finally {
                 brandingBos.close();
