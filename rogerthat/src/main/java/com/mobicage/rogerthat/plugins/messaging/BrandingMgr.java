@@ -379,7 +379,6 @@ public class BrandingMgr implements Pickleable, Closeable {
         public final Integer menuItemColor;
         public final ColorScheme scheme;
         public final boolean showHeader;
-        public final boolean showName;
         public final Dimension dimension1;
         public final Dimension dimension2;
         public final String contentType;
@@ -393,7 +392,7 @@ public class BrandingMgr implements Pickleable, Closeable {
         public final String senderName;
 
         public BrandingResult(File dir, File file, File watermark, Integer color, Integer menuItemColor,
-                              ColorScheme scheme, boolean showHeader, boolean showName, Dimension dimension1, Dimension dimension2,
+                              ColorScheme scheme, boolean showHeader, Dimension dimension1, Dimension dimension2,
                               String contentType, Orientation orientation, boolean wakelockEnabled, List<String>
                                       externalUrlPatterns, DisplayType displayType, File avatar, File logo,
                               String message, String senderName) {
@@ -404,7 +403,6 @@ public class BrandingMgr implements Pickleable, Closeable {
             this.menuItemColor = menuItemColor;
             this.scheme = scheme;
             this.showHeader = showHeader;
-            this.showName= showName;
             this.dimension1 = dimension1;
             this.dimension2 = dimension2;
             this.contentType = contentType;
@@ -1313,7 +1311,7 @@ public class BrandingMgr implements Pickleable, Closeable {
                     brandingFile = new File(tmpBrandingDir, "embed.pdf");
                 }
                 return new BrandingResult(tmpBrandingDir, brandingFile, watermarkFile, backgroundColor, menuItemColor,
-                        scheme, showHeader, showName, dimension1, dimension2, contentType, orientation, wakelockEnabled,
+                        scheme, showHeader, dimension1, dimension2, contentType, orientation, wakelockEnabled,
                         externalUrlPatterns, displayType, avatarPath, logoPath, message, senderName);
             } finally {
                 brandingBos.close();
