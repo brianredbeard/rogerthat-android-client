@@ -19,9 +19,7 @@
 package com.mobicage.rogerthat;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -37,12 +35,14 @@ import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendStore;
 import com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity;
 import com.mobicage.rogerthat.plugins.friends.ServiceSearchActivity;
+import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.config.LookAndFeelConstants;
 
 public class ServiceFriendsActivity extends FriendsActivity {
 
     public static final String ORGANIZATION_TYPE = "organization_type";
+
     protected Integer mOrganizationType;
     protected String mOrganizationTypeString;
 
@@ -75,13 +75,25 @@ public class ServiceFriendsActivity extends FriendsActivity {
             noServicesStringId = R.string.no_services_found;
             setActivityName("services");
         }
+
+        String customOrganizationTypeString = null;
         String title = intent.getStringExtra("title");
         if (title != null) {
+            // If the title is different than the default, then we'll use the decapitalized title in the
+            // "You don't follow any ..." message
+            if (!title.equalsIgnoreCase(mOrganizationTypeString)) {
+                customOrganizationTypeString = TextUtils.decapitalize(title);
+            }
             mOrganizationTypeString = title;
         }
 
-        noServicesTextView.setText(getString(noServicesStringId, getString(R.string.app_name)) + " " + getString(R
-                .string.click_magnifying_glass_to_search_services));
+        if (customOrganizationTypeString == null) {
+            noServicesTextView.setText(getString(noServicesStringId, getString(R.string.app_name)) + " " +
+                    getString(R.string.click_magnifying_glass_to_search_services));
+        } else {
+            noServicesTextView.setText(getString(R.string.generic_no_services_found,
+                    TextUtils.decapitalize(customOrganizationTypeString), getString(R.string.app_name)));
+        }
 
         ImageButton magnifyingGlass = (ImageButton) findViewById(R.id.ic_magnifying_glass);
         magnifyingGlass.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_search).color(LookAndFeelConstants.getPrimaryIconColor(this)).sizeDp(200).paddingDp(20));

@@ -65,4 +65,20 @@ public class TextUtils {
         }
         return fonts.get(fileName);
     }
+
+    public static String capitalize(String s) {
+        String[] splitted = s.split(" ");
+        for (int i = 0; i < splitted.length; i++) {
+            splitted[i] = splitted[i].substring(0, 1).toUpperCase() + splitted[i].substring(1, splitted[i].length());
+        }
+        return android.text.TextUtils.join(" ", splitted);
+    }
+
+    public static String decapitalize(String s) {
+        String[] splitted = s.split(" ");
+        for (int i = 0; i < splitted.length; i++) {
+            splitted[i] = splitted[i].substring(0, 1).toLowerCase() + splitted[i].substring(1, splitted[i].length());
+        }
+        return android.text.TextUtils.join(" ", splitted);
+    }
 }
