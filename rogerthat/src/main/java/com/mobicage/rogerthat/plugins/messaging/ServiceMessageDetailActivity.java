@@ -374,7 +374,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
                     br = mMessagingPlugin.getBrandingMgr().prepareBranding(mCurrentMessage);
                     if (br.displayType == BrandingMgr.DisplayType.NATIVE) {
                         web.setVisibility(View.GONE);
-                        ServiceHeader.setupNative(br, mHeaderContainer);
+                        ServiceHeader.setupNative(mService, br, mHeaderContainer);
                     } else {
                         web.setVisibility(View.VISIBLE);
                         WebSettings settings = web.getSettings();
@@ -408,9 +408,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
             messageView.setVisibility(View.GONE);
         } else {
             messageView.setVisibility(View.VISIBLE);
-            Bypass bypass = new Bypass();
-            CharSequence string = bypass.markdownToSpannable(mCurrentMessage.message);
-            messageView.setText(string);
+            messageView.setText(TextUtils.toMarkDown(mService, mCurrentMessage.message));
             messageView.setMovementMethod(LinkMovementMethod.getInstance());
             web.setVisibility(View.GONE);
         }

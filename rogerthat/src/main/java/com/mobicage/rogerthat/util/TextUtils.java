@@ -24,8 +24,11 @@ import android.graphics.Typeface;
 import java.math.BigInteger;
 import java.util.HashMap;
 
+import in.uncod.android.bypass.Bypass;
+
 public class TextUtils {
     public static HashMap<String, Typeface> fonts = new HashMap<>();
+
     private TextUtils() {
         /* cannot be instantiated */
     }
@@ -81,4 +84,11 @@ public class TextUtils {
         }
         return android.text.TextUtils.join(" ", splitted);
     }
+
+    public static CharSequence toMarkDown(Context context, String message) {
+        Bypass bypass = new Bypass(context);
+        // Duplicate newlines so it is consistent with the iOS app
+        return bypass.markdownToSpannable(message.replace("\n", "\n\n"));
+    }
+
 }

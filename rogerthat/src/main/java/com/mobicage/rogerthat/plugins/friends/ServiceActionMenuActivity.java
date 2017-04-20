@@ -306,7 +306,7 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
                     brandingBackgroundColor = br.color;
                     defaultMenuItemColor = br.menuItemColor;
                     if (br.displayType.equals(BrandingMgr.DisplayType.NATIVE)) {
-                        ServiceHeader.setupNative(br, mHeaderContainer);
+                        ServiceHeader.setupNative(mService, br, mHeaderContainer);
                         brandingWebview.setVisibility(View.GONE);
                     } else {
                         setupWebView(br, displayWidth);

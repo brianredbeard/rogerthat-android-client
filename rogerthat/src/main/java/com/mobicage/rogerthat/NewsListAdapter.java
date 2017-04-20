@@ -534,9 +534,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 mReadmore.setVisibility(View.GONE);
             } else {
                 mText.setVisibility(View.VISIBLE);
-                Bypass bypass = new Bypass();
-                CharSequence string = bypass.markdownToSpannable(mNewsItem.message);
-                mText.setText(string);
+                mText.setText(TextUtils.toMarkDown(mMainService, mNewsItem.message));
                 mText.setMovementMethod(LinkMovementMethod.getInstance());
                 mMainService.postOnUIHandler(new SafeRunnable() {
                     @Override

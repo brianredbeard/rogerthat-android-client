@@ -18,6 +18,7 @@
 
 package com.mobicage.rogerthat.util.ui;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.text.method.LinkMovementMethod;
@@ -38,7 +39,8 @@ import static com.mobicage.rogerthat.util.ui.ImageHelper.getRoundedCornerAvatar;
 
 public class ServiceHeader {
 
-    public static void setupNative(final BrandingMgr.BrandingResult brandingResult, final LinearLayout headerContainer) {
+    public static void setupNative(Context context, final BrandingMgr.BrandingResult brandingResult,
+                                   final LinearLayout headerContainer) {
         final FrameLayout imagesContainer = (FrameLayout) headerContainer.findViewById(R.id.images_container);
         final ImageView logoImage = (ImageView) headerContainer.findViewById(R.id.logo_image);
         final ImageView avatarImage = (ImageView) headerContainer.findViewById(R.id.avatar_image);
@@ -56,9 +58,7 @@ public class ServiceHeader {
             messageView.setVisibility(View.GONE);
         } else {
             messageView.setVisibility(View.VISIBLE);
-            Bypass bypass = new Bypass();
-            CharSequence string = bypass.markdownToSpannable(brandingResult.message);
-            messageView.setText(string);
+            messageView.setText(TextUtils.toMarkDown(context, brandingResult.message));
             messageView.setMovementMethod(LinkMovementMethod.getInstance());
         }
         logoImage.setVisibility(View.VISIBLE);

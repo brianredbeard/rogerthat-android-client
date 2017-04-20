@@ -61,6 +61,7 @@ import com.mobicage.rogerthat.ServiceBoundCursorListActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
 import com.mobicage.rogerthat.plugins.system.SystemPlugin;
+import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeDialogClick;
@@ -756,10 +757,8 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             if (message.message == null || "".equals(message.message)) {
                 messageView.setVisibility(View.GONE);
             } else {
-                Bypass bypass = new Bypass();
-                CharSequence string = bypass.markdownToSpannable(message.message);
                 messageView.setVisibility(View.VISIBLE);
-                messageView.setText(string);
+                messageView.setText(TextUtils.toMarkDown(mService, message.message));
                 messageView.setMovementMethod(LinkMovementMethod.getInstance());
             }
         }

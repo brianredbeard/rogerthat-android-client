@@ -539,7 +539,7 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
         }
         mDescriptionView.setVisibility(View.GONE);
         if (br.displayType == BrandingMgr.DisplayType.NATIVE) {
-            ServiceHeader.setupNative(br, mHeaderContainer);
+            ServiceHeader.setupNative(mService, br, mHeaderContainer);
             mWebview.setVisibility(View.GONE);
         } else {
             WebSettings settings = mWebview.getSettings();
