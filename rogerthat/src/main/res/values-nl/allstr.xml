@@ -8,8 +8,6 @@
     <string name="about_provided_by">Rogerthat is een product van</string>
     <string name="about_provided_by_enterprise">De %1$s app is gebouwd op</string>
     <string name="about_text">Rogerthat is een product van Mobicage.\n\nFeedback, support en in-browser messaging vind je op</string>
-    <string name="about_version">Versie 1.%1$d.%2$d.A</string>
-    <string name="about_version_debug">Versie 1.%1$d.%2$d.AD (debug)</string>
     <string name="action_geo">geo</string>
     <string name="action_not_valid">Ongeldige actie.</string>
     <string name="action_scheduled">Het netwerk is traag. Je krijgt zo snel mogelijk een bericht.</string>

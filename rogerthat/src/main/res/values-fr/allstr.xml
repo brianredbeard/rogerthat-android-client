@@ -8,8 +8,6 @@
     <string name="about_provided_by">Rogerthat est fièrement présenté par</string>
     <string name="about_provided_by_enterprise">L\'app %1$s est construite sur</string>
     <string name="about_text">Rogerthat est un produit de la société Mobicage SA.\n\n\n\nCommentaires, aide et messagerie à</string>
-    <string name="about_version">Version 1.%1$d.%2$d.A</string>
-    <string name="about_version_debug">Version 1.%1$d.%2$d.AD (debug)</string>
     <string name="action_geo">geo</string>
     <string name="action_not_valid">L\'action n\'est pas valide.</string>
     <string name="action_scheduled">Le réseau est lent. Nous revenons le plus vite possible.</string>

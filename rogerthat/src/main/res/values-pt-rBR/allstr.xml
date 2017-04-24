@@ -8,8 +8,6 @@
     <string name="about_provided_by">Rogerthat é orgulhosamente apresentado por</string>
     <string name="about_provided_by_enterprise">O aplicativo %1$s é desenvolvido por</string>
     <string name="about_text">Rogerthat é um produto de Mobicage, NV.\n\nMensagens de feedback, suporte e navegação para</string>
-    <string name="about_version">Versão 1.%1$d.%2$d.A</string>
-    <string name="about_version_debug">Versão 1.%1$d.%2$d.AD (depurar)</string>
     <string name="action_geo">geo</string>
     <string name="action_not_valid">Essa ação é inválida.</string>
     <string name="action_scheduled">Hmmm, há um certo atraso na rede. Daremos retorno em breve.</string>

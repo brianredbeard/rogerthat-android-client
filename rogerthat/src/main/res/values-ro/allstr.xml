@@ -8,8 +8,6 @@
     <string name="about_provided_by">Rogerthat este prezentat cu mandrie de</string>
     <string name="about_provided_by_enterprise">Aplicatia %1$s este construita pe</string>
     <string name="about_text">Rogerthat este un produs Mobicage, NV.\n\nFeedback-ul, suport-ul si de mesajele din browser la</string>
-    <string name="about_version">Versiunea 1.%1$d.%2$d.A</string>
-    <string name="about_version_debug">Versiunea 1.%1$d.%2$d.AD (debug)</string>
     <string name="action_geo">geo</string>
     <string name="action_not_valid">Actiunea nu este valida.</string>
     <string name="action_scheduled">Hmmm, unele intarzieri in retea. Ne vom intoarce la tine in scurt timp.</string>

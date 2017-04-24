@@ -8,8 +8,6 @@
     <string name="about_provided_by">Rogerthat is proudly presented by</string>
     <string name="about_provided_by_enterprise">The %1$s app is built on</string>
     <string name="about_text">Rogerthat is a product of Mobicage, NV.\n\nFeedback, support and in-browser messaging at</string>
-    <string name="about_version">Version 1.%1$d.%2$d.A</string>
-    <string name="about_version_debug">Version 1.%1$d.%2$d.AD (debug)</string>
     <string name="action_geo">geo</string>
     <string name="action_not_valid">The action is not valid.</string>
     <string name="action_scheduled">Hmmm, some delay on the network. We\'ll get back to you shortly.</string>

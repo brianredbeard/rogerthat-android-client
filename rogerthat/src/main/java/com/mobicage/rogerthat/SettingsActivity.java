@@ -42,6 +42,7 @@ import android.widget.Button;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
+import com.mobicage.rogerthat.util.GoogleServicesUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
@@ -110,7 +111,7 @@ public class SettingsActivity extends ServiceBoundPreferenceActivity {
     @Override
     protected void onServiceBound() {
         final Preference aboutPref = findPreference(MainService.PREFERENCE_ABOUT);
-        aboutPref.setSummary(getString(R.string.about_version, mService.getMajorVersion(), mService.getMinorVersion()));
+        aboutPref.setSummary(GoogleServicesUtils.getAppVersion(mService));
         aboutPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {

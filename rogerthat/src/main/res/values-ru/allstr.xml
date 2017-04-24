@@ -7,8 +7,6 @@
     <string name="about_provided_by">Rogerthat — продукт разработки</string>
     <string name="about_provided_by_enterprise">Приложение %1$s собрано на </string>
     <string name="about_text">Rogerthat — это продукт компании Mobicage, NV.\n\nОбратная связь, поддержка и обмен сообщениями через браузер на</string>
-    <string name="about_version">Версия 1.%1$d.%2$d.A</string>
-    <string name="about_version_debug">Версия 1.%1$d.%2$d.AD (устранены неполадки)</string>
     <string name="action_geo">geo</string>
     <string name="action_not_valid">Это некорректное действие.</string>
     <string name="action_scheduled">Хм, сеть работает слишком медленно. Мы свяжемся с вами в ближайшее время.</string>
