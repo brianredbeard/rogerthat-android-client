@@ -226,8 +226,6 @@ public class MyDigiPassWidget extends Widget implements OnMDPAuthenticationListe
             }
         });
 
-
-
         mProgressDialog = new ProgressDialog(mActivity);
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         mProgressDialog.setMessage(mActivity.getString(R.string.processing));
@@ -280,7 +278,7 @@ public class MyDigiPassWidget extends Widget implements OnMDPAuthenticationListe
             if (mResult == null) {
                 String title = mActivity.getString(R.string.not_authenticated);
                 String message = mActivity.getString(R.string.authenticate_first);
-                String positiveCaption = (String) mMdpTextView.getText();
+                String positiveCaption = mMdpTextView.getText().toString();
                 String negativeCaption = mActivity.getString(R.string.cancel);
                 SafeDialogClick onPositiveClick = new SafeDialogClick() {
                     @Override
@@ -655,7 +653,7 @@ public class MyDigiPassWidget extends Widget implements OnMDPAuthenticationListe
                 mMdpMobile.openStore();
             }
         };
-        UIUtils.showDialog(mActivity, "MYDIGIPASS", message, positiveButton, onPositiveClick, R.id.cancel, null);
+        UIUtils.showDialog(mActivity, "MYDIGIPASS", message, positiveButton, onPositiveClick, R.string.cancel, null);
     }
 
     @Override
