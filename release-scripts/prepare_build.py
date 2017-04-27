@@ -290,9 +290,6 @@ def generate_navigation_menu(doc, strings_map):
     if app_type == 'cityapp' and not homescreen_items:
         raise Exception('No homescreen items are specified in build.yaml')
 
-    if app_type == 'cityapp' and 'TOOLBAR' not in doc:
-        raise Exception('The build.yaml for this app should be migrated first')
-
     output = u'''%(LICENSE)s
 
 package com.mobicage.rpc.config;
