@@ -171,6 +171,7 @@
     <string name="friends_getting_started_title">Para empezar</string>
     <string name="friends_map">Localizar contactos</string>
     <string name="gender">Género</string>
+    <string name="generic_no_services_found">Todavía no sigues ningún %1$s en %2$s. Haz clic en la lupa para buscar %1$s en tu vecindario.</string>
     <string name="get_current_coordinates">Obtener las coordenadas GPS de su ubicación actual</string>
     <string name="get_friends_location_failed">No se puede establecer la ubicación.</string>
     <string name="get_location">Localizar</string>

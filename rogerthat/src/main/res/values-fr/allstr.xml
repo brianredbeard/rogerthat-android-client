@@ -169,6 +169,7 @@
     <string name="friends_getting_started_title">Commencez</string>
     <string name="friends_map">Amis sur la carte</string>
     <string name="gender">Sexe</string>
+    <string name="generic_no_services_found">Vous ne suivez aucun %1$s via %2$s pour le moment. Cliquez sur la loupe pour rechercher des %1$s dans votre quartier.</string>
     <string name="get_current_coordinates">Demandez les coordonnées GPS de votre position actuelle</string>
     <string name="get_friends_location_failed">Impossible de retrouver la localisation de vos contacts</string>
     <string name="get_location">Localiser</string>

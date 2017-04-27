@@ -171,6 +171,7 @@
     <string name="friends_getting_started_title">Getting started</string>
     <string name="friends_map">Friends on map</string>
     <string name="gender">Gender</string>
+    <string name="generic_no_services_found">You don\'t follow any %1$s yet in %2$s. Click the magnifying glass to search for %1$s in your neighbourhood.</string>
     <string name="get_current_coordinates">Get the GPS coordinates of your current location</string>
     <string name="get_friends_location_failed">Could not retrieve friend locations.</string>
     <string name="get_location">Get location</string>
@@ -309,7 +310,6 @@
     <string name="no_rogerthat_qr">The scanned QR code is not a %2$s QR code.\n\n%1$s</string>
     <string name="no_saved_messages_found">No saved messages found.</string>
     <string name="no_services_found">You don\'t follow any service yet in %1$s.</string>
-    <string name="generic_no_services_found">You don\'t follow any %1$s yet in %2$s. Click the magnifying glass to search for %1$s in your neighbourhood.</string>
     <string name="no_wifi_available_when_online_transfer_continues">No WIFI connection available, the transfer will continue when you connect to WIFI or change your settings so that transfers don\'t need to be transferred over WIFI.</string>
     <string name="no_wifi_available_when_online_transfer_continues_tilte">No WIFI available</string>
     <string name="normal">Normal</string>

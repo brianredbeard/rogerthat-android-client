@@ -171,6 +171,7 @@
     <string name="friends_getting_started_title">Aan de slag</string>
     <string name="friends_map">Vriendenkaart</string>
     <string name="gender">Geslacht</string>
+    <string name="generic_no_services_found">Je volgt nog geen %1$s in %2$s. Klik op het vergrootglas om %1$s in je buurt te zoeken.</string>
     <string name="get_current_coordinates">Vraag GPS coördinaten op van je huidige locatie</string>
     <string name="get_friends_location_failed">Kan locatie niet verkrijgen.</string>
     <string name="get_location">Locatie bepalen</string>
