@@ -1008,7 +1008,7 @@ public class FriendStore implements Closeable {
             }
 
             ServiceMenuItemDetails smi = readMenuItemFromCursor(new ServiceMenuItemDetails(), curs, null);
-            smi.menuGeneration = curs.getLong(10);
+            smi.menuGeneration = curs.getLong(15);
             return smi;
         } finally {
             curs.close();
