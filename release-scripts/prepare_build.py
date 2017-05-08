@@ -719,7 +719,7 @@ public class AppConstants {
     // Customized by App flavor
     public static final String APP_ID = "%(app_id)s";
     public static final int HOME_ACTIVITY_LAYOUT = %(home_activity)s;
-    public static final int HOMESCREEN_QRCODE_HEADER = R.string.%(homescreen_qrcode_header_text)s;
+    public static final int HOMESCREEN_QRCODE_HEADER = R.string.loyalty_card_description;
     public static final boolean SHOW_HOMESCREEN_FOOTER = %(show_homescreen_footer)s;
     public static final String FACEBOOK_APP_ID = %(fb_app_id)s;
     public static final boolean FACEBOOK_REGISTRATION = %(fb_registration)s;
@@ -736,7 +736,7 @@ public class AppConstants {
 
     public static final boolean REGISTRATION_ASKS_LOCATION_PERMISSION = %(registration_asks_location_permission)s;
 
-    public static final String[] PROFILE_DATA_FIELDS = new String[] { %(profile_data_fields)s };
+    public static final String[] PROFILE_DATA_FIELDS = new String[] { };
     public static final boolean PROFILE_SHOW_GENDER_AND_BIRTHDATE = %(profile_show_gender_and_birthdate)s;
 
     public static final String ABOUT_WEBSITE = "%(about_website)s";
@@ -756,7 +756,6 @@ public class AppConstants {
            app_type=app_type,
            app_id=APP_ID,
            home_activity=home_activity,
-           homescreen_qrcode_header_text=homescreen_qrcode_header_text,
            show_homescreen_footer=show_homescreen_footer,
            fb_app_id=fb_app_id,
            fb_registration=fb_registration,
@@ -769,7 +768,6 @@ public class AppConstants {
            show_profile_in_more=show_profile_in_more,
            show_scan_in_more=show_scan_in_more,
            full_width_headers=full_width_headers,
-           profile_data_fields=profile_data_fields,
            profile_show_gender_and_birthdate=profile_show_gender_and_birthdate,
            about_website=about_website,
            about_website_url=about_website_url,
@@ -866,7 +864,7 @@ def add_translations(doc):
                 all_str_f.write(s.replace('</resources>', '%s\n</resources>' % '\n'.join(added_lines)))
 
 
-def generate_custom_cloud_constants(doc):
+def generate_custom_cloud_constants(doc, debug):
     ##### CLOUD CONSTANTS ###################################
     params = dict(LICENSE=LICENSE)
     params.update(doc['CLOUD_CONSTANTS'])
@@ -877,6 +875,7 @@ def generate_custom_cloud_constants(doc):
     params['REGISTRATION_EMAIL_SIGNATURE'] = quoted_str_or_null(doc['APP_CONSTANTS']['REGISTRATION_EMAIL_SIGNATURE'])
     params['REGISTRATION_PIN_SIGNATURE'] = quoted_str_or_null(doc['APP_CONSTANTS']['REGISTRATION_PIN_SIGNATURE'])
     params['EMAIL_HASH_ENCRYPTION_KEY'] = quoted_str_or_null(doc['APP_CONSTANTS']['EMAIL_HASH_ENCRYPTION_KEY'])
+    params['DEBUG_LOGGING'] = bool_str(debug)
     output = u'''%(LICENSE)s
 
 package com.mobicage.rpc.config;
@@ -899,7 +898,7 @@ class CustomCloudConstants {
     final static boolean USE_TRUSTSTORE = %(USE_TRUSTSTORE)s;
     final static boolean XMPP_MUST_VALIDATE_SSL_CERTIFICATE = true;
     final static boolean XMPP_DEBUG = false;
-    final static boolean DEBUG_LOGGING = false;
+    final static boolean DEBUG_LOGGING = %(DEBUG_LOGGING)s;
 
     final static boolean NEWS_CHANNEL_SSL = true;
     final static boolean NEWS_CHANNEL_MUST_VALIDATE_SSL_CERTIFICATE = true;
@@ -945,13 +944,15 @@ def validate_android_manifest():
 ##### START ########################################
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2:
         raise Exception("app_id is a required argument")
 
     validate_android_manifest()
 
     APP_ID = sys.argv[1]
+    debug = sys.argv[2] != 'production' if len(sys.argv) == 3 else True
     logging.info('APP ID: %s', APP_ID)
+    logging.info('Debug build: %s', debug)
 
     APP_DIR = os.path.join(APPS_REPO_DIR, APP_ID)
 
@@ -1023,7 +1024,7 @@ if __name__ == "__main__":
         rename_package()
     else:
         logging.info('app_id was rogerthat, only limited prepare is needed')
-    generate_custom_cloud_constants(doc)
+    generate_custom_cloud_constants(doc, debug)
 
     cordova_plugins =  get('BUILD_CONSTANTS.CORDOVA.plugins', [])
     cordova.install_cordova_plugins(APP_ID, cordova_plugins)
