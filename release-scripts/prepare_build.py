@@ -25,6 +25,7 @@ import shutil
 import sys
 import tempfile
 from xml.dom import minidom
+from contextlib import closing
 
 from PIL import Image
 import yaml
@@ -608,12 +609,8 @@ def convert_config():
     elif home_screen_style == HOME_SCREEN_STYLE_2X3:
         home_activity = "R.layout.homescreen_2x3"
     elif home_screen_style == HOME_SCREEN_STYLE_3X3:
-        if doc['HOMESCREEN'].get('show_qr_code', doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_CITYPAPP):
-            home_activity = "R.layout.homescreen_3x3_with_qr_code"
-        else:
-            home_activity = "R.layout.homescreen_3x3"
+        home_activity = "R.layout.homescreen_3x3"
 
-    homescreen_qrcode_header_text = doc["HOMESCREEN"].get("qrcode_header", "loyalty_card_description")
 
     friends_enabled = bool_str(doc["APP_CONSTANTS"].get("FRIENDS_ENABLED", True))
     friends_caption = doc["APP_CONSTANTS"].get("FRIENDS_CAPTION", None)
@@ -633,7 +630,6 @@ def convert_config():
     full_width_headers = bool_str(full_width_headers)
 
     profile_settings = doc.get('PROFILE', dict())
-    profile_data_fields = ','.join(['"%s"' % s for s in profile_settings.get('DATA_FIELDS', [])])
     profile_show_gender_and_birthdate = bool_str(profile_settings.get('SHOW_GENDER_AND_BIRTHDATE', "true"))
 
 
@@ -669,7 +665,7 @@ def convert_config():
 
     if doc["APP_CONSTANTS"].get("SECURE_APP", False):
         rogerthat_build_gradle = os.path.join(ANDROID_SRC_DIR, '..', 'build.gradle')
-        with open(rogerthat_build_gradle, 'r+') as f:
+        with closing(open(rogerthat_build_gradle, 'r+')) as f:
             s = f.read()
             s = re.sub('minSdkVersion \d+', 'minSdkVersion 23', s)
 
