@@ -28,6 +28,7 @@ import android.content.Intent;
 
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.plugins.friends.EmailHashCalculator;
+import com.mobicage.rogerthat.util.GoogleServicesUtils;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
@@ -59,8 +60,7 @@ public class ScanCommunication {
     }
 
     private Header getUserAgentHeader() {
-        final String userAgentHeaderValue = USER_AGENT + " (1." + mMainService.getMajorVersion() + "."
-            + mMainService.getMinorVersion() + ")";
+        final String userAgentHeaderValue = USER_AGENT + " (" + GoogleServicesUtils.getAppVersion(mMainService) + ")";
         return new BasicHeader(CoreProtocolPNames.USER_AGENT, userAgentHeaderValue);
     }
 

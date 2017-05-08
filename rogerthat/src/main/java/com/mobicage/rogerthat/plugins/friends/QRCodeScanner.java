@@ -52,9 +52,9 @@ import com.mobicage.rogerthat.util.ui.UIUtils;
 
 public abstract class QRCodeScanner {
 
-    protected static final String CAMERA_TYPE_FRONT = "front";
-    protected static final String CAMERA_TYPE_BACK = "back";
-    protected static final Set<String> CAMERA_TYPES = new HashSet<String>(Arrays.asList(new String[] {
+    public static final String CAMERA_TYPE_FRONT = "front";
+    public static final String CAMERA_TYPE_BACK = "back";
+    public static final Set<String> CAMERA_TYPES = new HashSet<String>(Arrays.asList(new String[] {
         CAMERA_TYPE_FRONT, CAMERA_TYPE_BACK }));
 
     public QRCodeScannerCameraManager cameraManager;

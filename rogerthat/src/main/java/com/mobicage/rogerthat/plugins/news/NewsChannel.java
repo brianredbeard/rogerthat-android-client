@@ -163,7 +163,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         loadCallsFromDB();
 
         if (mService.getNetworkConnectivityManager().isConnected()) {
-            mService.runOnBIZZHandler(new SafeRunnable() {
+            mService.runOnNewsHandler(new SafeRunnable() {
                 @Override
                 protected void safeRun() throws Exception {
                     getConfiguration();
@@ -173,13 +173,14 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
     }
 
     public void internetConnected() {
-        T.BIZZ();
+        T.NEWS();
         if (mHost == null || mPort == -1) {
             getConfiguration();
         }
     }
 
     public void internetDisconnected() {
+        T.NEWS();
         disconnect();
     }
 
@@ -187,7 +188,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
         if (TestUtils.isRunningTest()) {
             return;
         }
-        T.BIZZ();
+        T.NEWS();
         if (mIsConnected) {
             L.d("Already connected to news channel");
             return;
@@ -311,6 +312,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
     }
 
     public void disconnect() {
+        T.NEWS();
         if (mChannel == null || mEventLoopGroup == null) {
             return;
         }

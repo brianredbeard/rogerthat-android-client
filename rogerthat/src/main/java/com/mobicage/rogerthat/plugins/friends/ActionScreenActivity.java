@@ -27,15 +27,9 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.hardware.Camera;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
-import android.media.MediaPlayer.OnPreparedListener;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Looper;
 import android.os.PowerManager;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.v4.content.ContextCompat;
@@ -43,7 +37,6 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
-import android.view.inputmethod.InputMethodManager;
 import android.webkit.ConsoleMessage;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
@@ -68,25 +61,18 @@ import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.widget.ShareDialog;
 import com.github.barteksc.pdfviewer.PDFView;
 import com.google.zxing.client.android.CaptureActivity;
-import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainService;
-import com.mobicage.rogerthat.NavigationItem;
 import com.mobicage.rogerthat.ServiceBoundActivity;
-import com.mobicage.rogerthat.plugins.history.HistoryItem;
 import com.mobicage.rogerthat.plugins.messaging.AttachmentViewerActivity;
 import com.mobicage.rogerthat.plugins.messaging.BrandingFailureException;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr.BrandingResult;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
-import com.mobicage.rogerthat.plugins.scan.GetUserInfoResponseHandler;
-import com.mobicage.rogerthat.plugins.scan.ProcessScanActivity;
 import com.mobicage.rogerthat.plugins.scan.ScanCommunication;
 import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
-import com.mobicage.rogerthat.plugins.trackme.DiscoveredBeaconProximity;
-import com.mobicage.rogerthat.plugins.trackme.TrackmePlugin;
-import com.mobicage.rogerthat.util.ActivityUtils;
+import com.mobicage.rogerthat.util.ActionScreenUtils;
 import com.mobicage.rogerthat.util.FacebookUtils;
 import com.mobicage.rogerthat.util.FacebookUtils.PermissionType;
 import com.mobicage.rogerthat.util.Security;
@@ -99,8 +85,6 @@ import com.mobicage.rogerthat.util.system.TaggedWakeLock;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
-import com.mobicage.rpc.newxmpp.XMPPKickChannel;
-import com.mobicage.to.friends.GetUserInfoRequestTO;
 
 import org.jivesoftware.smack.util.Base64;
 import org.json.JSONException;
@@ -161,16 +145,13 @@ public class ActionScreenActivity extends ServiceBoundActivity {
     private FriendsPlugin mFriendsPlugin;
     private Poker<ActionScreenActivity> mPoker;
 
-    private MediaPlayer mSoundMediaPlayer = null;
-    private HandlerThread mSoundThread = null;
-    private Handler mSoundHandler = null;
-
     private QRCodeScanner mQRCodeScanner = null;
     private boolean mQRCodeScannerOpen = false;
     private ScanCommunication mScanCommunication = null;
 
     private boolean mIsListeningBacklogConnectivityChanged = false;
-    private int mLastBacklogStatus = 0;
+
+    private ActionScreenUtils mActionScreenUtils;
 
     static {
         FACEBOOK_MAP_CANCEL.put("type", FACEBOOK_TYPE_CANCEL);
@@ -187,10 +168,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         @JavascriptInterface
         @SuppressWarnings("unused")
         public void hideKeyboard() {
-            InputMethodManager inputManager = (InputMethodManager) mContext
-                .getSystemService(Context.INPUT_METHOD_SERVICE);
-            inputManager.hideSoftInputFromWindow(mContext.getCurrentFocus().getWindowToken(),
-                    InputMethodManager.HIDE_NOT_ALWAYS);
+            mActionScreenUtils.hideKeyboard(mContext.getCurrentFocus().getWindowToken());
         }
 
         @JavascriptInterface
@@ -246,7 +224,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             // API
             else if ("api/resultHandlerConfigured".equals(action)) {
                 mApiResultHandlerSet = true;
-                deliverAllApiResults();
+                mActionScreenUtils.deliverAllApiResults();
             }
             // USER
             else if ("user/put".equals(action)) {
@@ -302,11 +280,8 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 return;
             }
             String requestId = params.getString("id");
-
-            TrackmePlugin trackmePlugin = mService.getPlugin(TrackmePlugin.class);
-            List<DiscoveredBeaconProximity> beaconsInReach = trackmePlugin.getBeaconsInReach(mServiceEmail);
             Map<String, Object> result = new HashMap<String, Object>();
-            result.put("beacons", beaconsInReach);
+            result.put("beacons", mActionScreenUtils.getBeaconsInReach());
             deliverResult(requestId, result, null);
         }
 
@@ -321,9 +296,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             deliverResult(requestId, result, null);
 
             if (!mIsListeningBacklogConnectivityChanged) {
-                final IntentFilter intentFilter = new IntentFilter(XMPPKickChannel.INTENT_BACKLOG_CONNECTED);
-                intentFilter.addAction(XMPPKickChannel.INTENT_BACKLOG_DISCONNECTED);
-                registerReceiver(mBroadcastReceiverBacklog, intentFilter);
+                mActionScreenUtils.startBacklogListener();
                 mIsListeningBacklogConnectivityChanged = true;
             }
         }
@@ -349,9 +322,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             }
             final String e = params.getString("e");
             if (e != null) {
-                L.bug("ScreenBrandingException:\n- Exception logged by screenBranding of " + mServiceEmail
-                        + "\n- Service menu item name: " + mItemLabel + "\n- Service menu item coords: "
-                        + Arrays.toString(mItemCoords) + "\n" + e);
+                mActionScreenUtils.logError(mServiceEmail, mItemLabel, mItemCoords, e);
             }
         }
 
@@ -499,37 +470,8 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             }
             String requestId = params.getString("id");
             final String url = params.getString("url");
-            if (mSoundHandler == null) {
-                mSoundThread = new HandlerThread("rogerthat_actionscreenactivity_sound");
-                mSoundThread.start();
-                Looper looper = mSoundThread.getLooper();
-                mSoundHandler = new Handler(looper);
-            }
-
-            mSoundHandler.post(new SafeRunnable() {
-                @Override
-                protected void safeRun() throws Exception {
-                    if (mSoundMediaPlayer != null) {
-                        mSoundMediaPlayer.release();
-                    }
-                    mSoundMediaPlayer = new MediaPlayer();
-                    try {
-                        String fileOnDisk = "file://" + mBrandingResult.dir.getAbsolutePath() + "/" + url;
-                        mSoundMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                        mSoundMediaPlayer.setDataSource(fileOnDisk);
-                        mSoundMediaPlayer.setOnPreparedListener(new OnPreparedListener() {
-
-                            @Override
-                            public void onPrepared(MediaPlayer mp) {
-                                mSoundMediaPlayer.start();
-                            }
-                        });
-                        mSoundMediaPlayer.prepare();
-                    } catch (Exception e) {
-                        L.i(e);
-                    }
-                }
-            });
+            String fileOnDisk = "file://" + mBrandingResult.dir.getAbsolutePath() + "/" + url;
+            mActionScreenUtils.playAudio(fileOnDisk);
             Map<String, Object> result = new HashMap<String, Object>();
             deliverResult(requestId, result, null);
         }
@@ -544,18 +486,13 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             final String action = params.has("action") ? params.getString("action") : null;
             final String title = params.has("title") ? params.getString("title") : null;
 
-            NavigationItem ni = new NavigationItem(FontAwesome.Icon.faw_question_circle_o, actionType, action, title, false);
-
-            String errorMessage = ActivityUtils.canOpenNavigationItem(ActionScreenActivity.this, ni);
+            String errorMessage = mActionScreenUtils.openActivity(actionType, action, title);
             Map<String, Object> error = null;
             if (errorMessage != null) {
                 error = new HashMap<>();
                 error.put("exception", errorMessage);
-            } else {
-                Bundle extras = new Bundle();
-                ActivityUtils.goToActivity(ActionScreenActivity.this, ni, false, extras);
+                return;
             }
-
             deliverResult(requestId, null, error);
         }
 
@@ -917,24 +854,18 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         }
     }
 
-    private void deliverAllApiResults() {
+    private boolean deliverApiResult(ServiceApiCallbackResult r) {
         if (!mApiResultHandlerSet) {
             L.i("apiCallResultHandler not set, thus not delivering any api call responses.");
-            return;
+            return false;
         }
-        final FriendStore store = mFriendsPlugin.getStore();
-        for (ServiceApiCallbackResult r : store.getServiceApiCallbackResultsByItem(mServiceEmail, mItemTagHash)) {
 
-            deliverApiResult(r);
-            store.removeServiceApiCall(r.id);
-        }
-    }
-
-    private void deliverApiResult(ServiceApiCallbackResult r) {
         // Using JSONValue.toJSONString on these string for null value support and quote encoding
         executeJS(false, "if (typeof rogerthat !== 'undefined') rogerthat.api._setResult(%s, %s, %s, %s)",
             JSONValue.toJSONString(r.method), JSONValue.toJSONString(r.result), JSONValue.toJSONString(r.error),
             JSONValue.toJSONString(r.tag));
+
+        return true;
     }
 
     private void deliverFacebookResult(String requestId, Map<String, Object> result, Map<String, Object> error) {
@@ -1170,23 +1101,20 @@ public class ActionScreenActivity extends ServiceBoundActivity {
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onServiceBound() {
-        final IntentFilter intentFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
-        intentFilter.addAction(FriendsPlugin.SERVICE_API_CALL_ANSWERED_INTENT);
-        intentFilter.addAction(FriendsPlugin.SERVICE_DATA_UPDATED);
-        intentFilter.addAction(FriendsPlugin.BEACON_IN_REACH);
-        intentFilter.addAction(FriendsPlugin.BEACON_OUT_OF_REACH);
 
-        intentFilter.addAction(FriendsPlugin.FRIEND_INFO_RECEIVED_INTENT);
-        intentFilter.addAction(ProcessScanActivity.URL_REDIRECTION_DONE);
 
         if (CloudConstants.isContentBrandingApp()) {
+            final IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction(BrandingMgr.SERVICE_BRANDING_AVAILABLE_INTENT);
             intentFilter.addAction(FriendsPlugin.FRIEND_UPDATE_INTENT);
+            registerReceiver(mBroadcastReceiver, intentFilter);
         }
 
-        registerReceiver(mBroadcastReceiver, intentFilter);
         mMessagingPlugin = mService.getPlugin(MessagingPlugin.class);
         mFriendsPlugin = mService.getPlugin(FriendsPlugin.class);
+
+        mActionScreenUtils = new ActionScreenUtils(this, mServiceEmail, mItemTagHash, mRunInBackground);
+        mActionScreenUtils.start(mIntentCallback);
         displayBranding();
 
         if (mQRCodeScanner != null) {
@@ -1293,35 +1221,52 @@ public class ActionScreenActivity extends ServiceBoundActivity {
 
     @Override
     protected void onServiceUnbound() {
-        unregisterReceiver(mBroadcastReceiver);
-        if (mIsListeningBacklogConnectivityChanged) {
-            unregisterReceiver(mBroadcastReceiverBacklog);
+        if (CloudConstants.isContentBrandingApp()) {
+            unregisterReceiver(mBroadcastReceiver);
         }
+        if (mIsListeningBacklogConnectivityChanged) {
+            mActionScreenUtils.stopBacklogListener();
+        }
+        mActionScreenUtils.stop();
         if (mPoker != null) {
             mPoker.stop();
         }
     }
 
-    private BroadcastReceiver mBroadcastReceiverBacklog = new SafeBroadcastReceiver() {
-        @SuppressLint("DefaultLocale")
+    private ActionScreenUtils.IntentCallback mIntentCallback = new ActionScreenUtils.IntentCallback() {
         @Override
-        public String[] onSafeReceive(final Context context, final Intent intent) {
-            if (XMPPKickChannel.INTENT_BACKLOG_CONNECTED.equals(intent.getAction())) {
-                if (mLastBacklogStatus <= 0) {
-                    mLastBacklogStatus = 1;
-                    executeJS(false,
-                        "if (typeof rogerthat !== 'undefined') rogerthat._onBackendConnectivityChanged(%s)", true);
-                }
-            } else if (XMPPKickChannel.INTENT_BACKLOG_DISCONNECTED.equals(intent.getAction())) {
-                if (mLastBacklogStatus >= 0) {
-                    mLastBacklogStatus = -1;
-                    executeJS(false,
-                        "if (typeof rogerthat !== 'undefined') rogerthat._onBackendConnectivityChanged(%s)", false);
-                }
-            } else {
-                return null;
-            }
-            return new String[] { intent.getAction() };
+        public boolean apiResult(ServiceApiCallbackResult result) {
+            return deliverApiResult(result);
+        }
+
+        @Override
+        public void userDataUpdated(String userData) {
+            executeJS(false, "if (typeof rogerthat !== 'undefined') rogerthat._userDataUpdated(%s)", userData);
+        }
+
+        @Override
+        public void serviceDataUpdated(String serviceData) {
+            executeJS(false, "if (typeof rogerthat !== 'undefined') rogerthat._serviceDataUpdated(%s)", serviceData);
+        }
+
+        @Override
+        public void onBeaconInReach(Map<String, Object> beacon) {
+            executeJS(false, "if (typeof rogerthat !== 'undefined') rogerthat._onBeaconInReach(%s)", JSONValue.toJSONString(beacon));
+        }
+
+        @Override
+        public void onBeaconOutOfReach(Map<String, Object> beacon) {
+            executeJS(false, "if (typeof rogerthat !== 'undefined') rogerthat._onBeaconOutOfReach(%s)", JSONValue.toJSONString(beacon));
+        }
+
+        @Override
+        public void qrCodeScanned(Map<String, Object> result) {
+            executeJS(false, "if (typeof rogerthat !== 'undefined') rogerthat.rogerthat._qrCodeScanned(%s)", JSONValue.toJSONString(result));
+        }
+
+        @Override
+        public void onBackendConnectivityChanged(boolean connected) {
+            executeJS(false, "if (typeof rogerthat !== 'undefined') rogerthat._onBackendConnectivityChanged(%s)", connected);
         }
     };
 
@@ -1330,174 +1275,46 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         @Override
         public String[] onSafeReceive(final Context context, final Intent intent) {
             T.UI();
-            if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
-                L.d("[BroadcastReceiver] Screen OFF");
-                if (!mRunInBackground) {
-                    finish();
-                }
-            } else if (FriendsPlugin.SERVICE_API_CALL_ANSWERED_INTENT.equals(intent.getAction())) {
-                if (mServiceEmail.equals(intent.getStringExtra("service"))
-                    && mItemTagHash.equals(intent.getStringExtra("item"))) {
-                    deliverAllApiResults();
-                }
-            } else if (FriendsPlugin.SERVICE_DATA_UPDATED.equals(intent.getAction())) {
-                if (mServiceEmail.equals(intent.getStringExtra("email"))) {
-                    final String[] data = mFriendsPlugin.getStore().getServiceData(mServiceEmail);
-                    if (intent.getBooleanExtra("user_data", false)) {
-                        executeJS(false, "if (typeof rogerthat !== 'undefined') rogerthat._userDataUpdated(%s)",
-                            data[0]);
-                    }
-                    if (intent.getBooleanExtra("service_data", false)) {
-                        executeJS(false, "if (typeof rogerthat !== 'undefined') rogerthat._serviceDataUpdated(%s)",
-                            data[1]);
-                    }
-                    return new String[] { FriendsPlugin.SERVICE_DATA_UPDATED };
-                }
-            } else if (FriendsPlugin.BEACON_IN_REACH.equals(intent.getAction())) {
-                if (mServiceEmail.equals(intent.getStringExtra("email"))) {
-                    final Map<String, Object> result = new HashMap<String, Object>();
-                    result.put("uuid", intent.getStringExtra("uuid").toLowerCase());
-                    result.put("major", "" + intent.getIntExtra("major", 0));
-                    result.put("minor", "" + intent.getIntExtra("minor", 0));
-                    result.put("tag", "" + intent.getStringExtra("tag"));
-                    result.put("proximity", "" + intent.getIntExtra("proximity", 0));
+            if (BrandingMgr.SERVICE_BRANDING_AVAILABLE_INTENT.equals(intent.getAction())) {
+                if (mServiceEmail.equals(intent.getStringExtra(BrandingMgr.SERVICE_EMAIL))) {
+                    FriendStore friendStore = mFriendsPlugin.getStore();
+                    Friend f = friendStore.getFriend(mServiceEmail);
+                    if (!f.contentBrandingHash.equals(mBrandingKey)
+                        && f.contentBrandingHash.equals(intent.getStringExtra(BrandingMgr.BRANDING_KEY))) {
+                        mBrandingKey = f.contentBrandingHash;
 
-                    executeJS(false, "if (typeof rogerthat !== 'undefined') rogerthat._onBeaconInReach(%s)",
-                        JSONValue.toJSONString(result));
-                }
-
-            } else if (FriendsPlugin.BEACON_OUT_OF_REACH.equals(intent.getAction())) {
-                if (mServiceEmail.equals(intent.getStringExtra("email"))) {
-                    final Map<String, Object> result = new HashMap<String, Object>();
-                    result.put("uuid", intent.getStringExtra("uuid").toLowerCase());
-                    result.put("major", "" + intent.getIntExtra("major", 0));
-                    result.put("minor", "" + intent.getIntExtra("minor", 0));
-                    result.put("tag", "" + intent.getStringExtra("tag"));
-                    result.put("proximity", "" + intent.getIntExtra("proximity", 0));
-
-                    executeJS(false, "if (typeof rogerthat !== 'undefined') rogerthat._onBeaconOutOfReach(%s)",
-                        JSONValue.toJSONString(result));
-                }
-            } else if (ProcessScanActivity.URL_REDIRECTION_DONE.equals(intent.getAction())) {
-
-                final String rawUrl = intent.getStringExtra(ProcessScanActivity.RAWURL);
-                final String emailHash = intent.getStringExtra(ProcessScanActivity.EMAILHASH);
-                if (rawUrl != null) {
-                    if (emailHash != null) {
-                        if (intent.hasExtra(ProcessScanActivity.POKE_ACTION)) {
-                            final Map<String, Object> result = new HashMap<String, Object>();
-                            result.put("status", "resolved");
-                            result.put("content", rawUrl);
-                            executeJS(false, "if (typeof rogerthat !== 'undefined') rogerthat._qrCodeScanned(%s)",
-                                JSONValue.toJSONString(result));
-                        } else {
-                            final GetUserInfoRequestTO request = new GetUserInfoRequestTO();
-                            request.code = emailHash;
-                            request.allow_cross_app = true;
-
-                            final GetUserInfoResponseHandler handler = new GetUserInfoResponseHandler();
-                            handler.setCode(emailHash);
-                            handler.putStringExtra(ProcessScanActivity.RAWURL, rawUrl);
-                            if (CloudConstants.isContentBrandingApp()) {
-                                handler.setSendUserScanned(true);
-                                handler.setServiceEmail(mServiceEmail);
-                            }
-
-                            try {
-                                com.mobicage.api.friends.Rpc.getUserInfo(handler, request);
-                            } catch (Exception e) {
-                                finish();
-                                mService.putInHistoryLog(getString(R.string.getuserinfo_failure), HistoryItem.ERROR);
+                        if (mBranding.getVisibility() == View.VISIBLE) {
+                            if (mQRCodeScanner != null) {
+                                mQRCodeScanner.stopScanningForQRCodes();
                             }
                         }
-                    } else {
-                        Map<String, Object> result = new HashMap<String, Object>();
-                        result.put("status", "resolved");
-                        result.put("content", rawUrl);
-                        executeJS(false, "if (typeof rogerthat !== 'undefined') rogerthat._qrCodeScanned(%s)",
-                            JSONValue.toJSONString(result));
+                        mInfoSet = false;
+                        displayBranding();
                     }
                 }
-                return new String[] { intent.getAction() };
 
-            } else if (FriendsPlugin.FRIEND_INFO_RECEIVED_INTENT.equals(intent.getAction())) {
-                final String rawUrl = intent.getStringExtra(ProcessScanActivity.RAWURL);
-                if (rawUrl != null) {
-                    final String emailHash = intent.getStringExtra(ProcessScanActivity.EMAILHASH);
-                    if (emailHash != null) {
-                        if (intent.getBooleanExtra(ProcessScanActivity.SUCCESS, true)) {
-                            Map<String, Object> userDetails = new HashMap<String, Object>();
-                            userDetails.put("email", intent.getStringExtra(ProcessScanActivity.EMAIL));
-                            userDetails.put("name", intent.getStringExtra(ProcessScanActivity.NAME));
-                            userDetails.put("appId", intent.getStringExtra(ProcessScanActivity.APP_ID));
-
-                            Map<String, Object> result = new HashMap<String, Object>();
-                            result.put("status", "resolved");
-                            result.put("content", rawUrl);
-                            result.put("userDetails", userDetails);
-                            executeJS(false, "if (typeof rogerthat !== 'undefined') rogerthat._qrCodeScanned(%s)",
-                                JSONValue.toJSONString(result));
-                        } else {
-                            Map<String, Object> result = new HashMap<String, Object>();
-                            final String errorMessge = intent.getStringExtra(UIUtils.ERROR_MESSAGE);
-                            result.put("status", "error");
-                            result.put("content", errorMessge);
-                            executeJS(false, "if (typeof rogerthat !== 'undefined') rogerthat._qrCodeScanned(%s)",
-                                JSONValue.toJSONString(result));
-                        }
-                    } else {
-                        Map<String, Object> result = new HashMap<String, Object>();
-                        result.put("status", "resolved");
-                        result.put("content", rawUrl);
-                        executeJS(false, "if (typeof rogerthat !== 'undefined') rogerthat._qrCodeScanned(%s)",
-                            JSONValue.toJSONString(result));
-                    }
-                }
-                return new String[] { intent.getAction() };
-
-            } else if (CloudConstants.isContentBrandingApp()) {
-                if (BrandingMgr.SERVICE_BRANDING_AVAILABLE_INTENT.equals(intent.getAction())) {
-                    if (mServiceEmail.equals(intent.getStringExtra(BrandingMgr.SERVICE_EMAIL))) {
-                        FriendStore friendStore = mFriendsPlugin.getStore();
-                        Friend f = friendStore.getFriend(mServiceEmail);
-                        if (!f.contentBrandingHash.equals(mBrandingKey)
-                            && f.contentBrandingHash.equals(intent.getStringExtra(BrandingMgr.BRANDING_KEY))) {
-                            mBrandingKey = f.contentBrandingHash;
-
-                            if (mBranding.getVisibility() == View.VISIBLE) {
-                                if (mQRCodeScanner != null) {
-                                    mQRCodeScanner.stopScanningForQRCodes();
-                                }
-                            }
-                            mInfoSet = false;
-                            displayBranding();
-                        }
-                    }
-
-                } else if (FriendsPlugin.FRIEND_UPDATE_INTENT.equals(intent.getAction())) {
-                    if (mServiceEmail.equals(intent.getStringExtra(BrandingMgr.SERVICE_EMAIL))) {
-                        FriendStore friendStore = mFriendsPlugin.getStore();
-                        Friend f = friendStore.getFriend(mServiceEmail);
-                        if (!f.contentBrandingHash.equals(mBrandingKey)) {
-                            BrandingMgr brandingMgr = mMessagingPlugin.getBrandingMgr();
-                            try {
-                                if (brandingMgr.isBrandingAvailable(f.contentBrandingHash)) {
-                                    mBrandingKey = f.contentBrandingHash;
-                                    if (mBranding.getVisibility() == View.VISIBLE) {
-                                        if (mQRCodeScanner != null) {
-                                            mQRCodeScanner.stopScanningForQRCodes();
-                                        }
+            } else if (FriendsPlugin.FRIEND_UPDATE_INTENT.equals(intent.getAction())) {
+                if (mServiceEmail.equals(intent.getStringExtra(BrandingMgr.SERVICE_EMAIL))) {
+                    FriendStore friendStore = mFriendsPlugin.getStore();
+                    Friend f = friendStore.getFriend(mServiceEmail);
+                    if (!f.contentBrandingHash.equals(mBrandingKey)) {
+                        BrandingMgr brandingMgr = mMessagingPlugin.getBrandingMgr();
+                        try {
+                            if (brandingMgr.isBrandingAvailable(f.contentBrandingHash)) {
+                                mBrandingKey = f.contentBrandingHash;
+                                if (mBranding.getVisibility() == View.VISIBLE) {
+                                    if (mQRCodeScanner != null) {
+                                        mQRCodeScanner.stopScanningForQRCodes();
                                     }
-                                    mInfoSet = false;
-                                    displayBranding();
                                 }
-                            } catch (BrandingFailureException e) {
-                                L.d(e);
+                                mInfoSet = false;
+                                displayBranding();
                             }
+                        } catch (BrandingFailureException e) {
+                            L.d(e);
                         }
                     }
                 }
-
             }
 
             return null;

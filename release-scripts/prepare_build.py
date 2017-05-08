@@ -24,9 +24,13 @@ import re
 import shutil
 import sys
 import tempfile
-import yaml
-from PIL import Image
 from xml.dom import minidom
+
+from PIL import Image
+import yaml
+
+import cordova
+
 
 logging.basicConfig(
         level=logging.INFO,
@@ -35,8 +39,7 @@ logging.basicConfig(
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 APPS_REPO_DIR = os.path.join(CURRENT_DIR, "..", "..", "apps", 'res')
-sys.path.append(os.path.join(CURRENT_DIR, "..", "..", "rogerthat-build", 'src'))
-import app_utils
+sys.path.append(os.path.join(CURRENT_DIR, "..", "..", "rogerthat-build", 'src')); import app_utils
 
 ANDROID_SRC_DIR = os.path.join(CURRENT_DIR, '..', 'rogerthat', 'src')
 SRC_JAVA_DIR = os.path.join(ANDROID_SRC_DIR, 'main', 'java')
@@ -44,6 +47,7 @@ TEST_SRC_JAVA_DIR = os.path.join(ANDROID_SRC_DIR, 'androidTest', 'java')
 TEST_RES_DIR = os.path.join(ANDROID_SRC_DIR, 'androidTest', 'res')
 SRC_RES_DIR = os.path.join(ANDROID_SRC_DIR, 'main', 'res')
 
+MISSING = object()
 MAIN_APP_ID = "rogerthat"
 
 APP_TYPE_ROGERTHAT = "rogerthat"
@@ -130,6 +134,21 @@ COLOURED_BUTTONS = {
 LICENSE = app_utils.get_license_header()
 
 
+def get(k, default=MISSING):
+    '''Get a dot-separated key from the build.yaml'''
+    d = doc
+    parts = k.split('.')
+    try:
+        for part in parts[:-1]:
+            d = d[part]
+        v = d[parts[-1]]
+    except KeyError:
+        if default is MISSING:
+            raise
+        return default
+    return v
+
+
 def sha256_hash(val):
     digester = hashlib.sha256()
     digester.update(val)
@@ -185,6 +204,7 @@ def rename_package():
         f.seek(0)
         f.write(s)
         f.truncate()
+
     with open(os.path.join(ANDROID_SRC_DIR, 'main', 'AndroidManifest.xml'), 'r+') as f:
         s = f.read()
 
@@ -1008,3 +1028,6 @@ if __name__ == "__main__":
     else:
         logging.info('app_id was rogerthat, only limited prepare is needed')
     generate_custom_cloud_constants(doc)
+
+    cordova_plugins =  get('BUILD_CONSTANTS.CORDOVA.plugins', [])
+    cordova.install_cordova_plugins(APP_ID, cordova_plugins)

@@ -199,6 +199,8 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
     private HandlerThread mIOWorkerThread;
     private Handler mBizzHandler;
     private HandlerThread mBizzWorkerThread;
+    private Handler mNewsHandler;
+    private HandlerThread mNewsWorkerThread;
     private List<Intent> mIntentStash;
     private List<SafeRunnable> mRunnableStash;
     private Set<String> mHighPriorityIntents;
@@ -286,6 +288,9 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         mUIHandler = new Handler();
         createIOWorkerThread();
         createHttpWorkerThread();
+        if (AppConstants.NEWS_ENABLED) {
+            createNewsWorkerThread();
+        }
 
         mBinder = new MainBinder();
 
@@ -687,6 +692,32 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         T.resetBizzThreadId();
     }
 
+    private void createNewsWorkerThread() {
+        T.UI();
+        mNewsWorkerThread = new HandlerThread("rogerthat_news_worker");
+        mNewsWorkerThread.start();
+        final Looper looper = mNewsWorkerThread.getLooper();
+        mNewsHandler = new Handler(looper);
+        T.setNewsThread("MainService.createNewsWorkerThread()", mNewsWorkerThread);
+    }
+
+    private void destroyNewsWorkerThread() {
+        T.UI();
+        final Looper looper = mNewsWorkerThread.getLooper();
+        if (looper != null)
+            looper.quit();
+
+        try {
+            mNewsWorkerThread.join();
+        } catch (InterruptedException e) {
+            L.bug(e);
+        }
+
+        mNewsHandler = null;
+        mNewsWorkerThread = null;
+        T.resetNewsThreadId();
+    }
+
     public static String getVersion(Context context) {
         if (context != null) {
             try {
@@ -758,6 +789,10 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
             showUnregisterNotification();
         } else {
             mDatabaseManager.close();
+        }
+
+        if (AppConstants.NEWS_ENABLED) {
+            destroyNewsWorkerThread();
         }
 
         destroyHttpWorkerThread();
@@ -1485,6 +1520,31 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
 
     public void removeFromBIZZHandler(SafeRunnable r) {
         mBizzHandler.removeCallbacks(r);
+    }
+
+
+    public void postAtFrontOfNewsHandler(SafeRunnable r) {
+        mNewsHandler.postAtFrontOfQueue(r);
+    }
+
+     public void postOnNewsHandler(SafeRunnable r) {
+        mNewsHandler.post(r);
+    }
+
+     public void runOnNewsHandler(SafeRunnable runnable) {
+        if (com.mobicage.rogerthat.util.system.T.getThreadType() == com.mobicage.rogerthat.util.system.T.NEWS) {
+            runnable.run();
+        } else {
+            postOnNewsHandler(runnable);
+        }
+    }
+
+     public void runOnNewsHandlerNow(SafeRunnable runnable) {
+        if (com.mobicage.rogerthat.util.system.T.getThreadType() == com.mobicage.rogerthat.util.system.T.NEWS) {
+            runnable.run();
+        } else {
+            postAtFrontOfNewsHandler(runnable);
+       }
     }
 
     // Owned by UI thread

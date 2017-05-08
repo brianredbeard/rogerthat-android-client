@@ -24,6 +24,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -41,6 +42,9 @@ import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.config.Configuration;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
+import com.mobicage.rogerthat.cordova.CordovaActionScreenActivity;
+import com.mobicage.rogerthat.cordova.CordovaPlugins;
+import com.mobicage.rogerthat.plugins.friends.ActionScreenActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.system.JSEmbedding;
 import com.mobicage.rogerthat.plugins.system.SystemPlugin;
@@ -957,6 +961,27 @@ public class BrandingMgr implements Pickleable, Closeable {
         return getBrandingFile(brandingKey).exists() || getOldBrandingFile(brandingKey).exists();
     }
 
+    private String getCleanBrandingKey(String brandingKey) {
+        String[] brandingKeyArray = brandingKey.split("-");
+        return brandingKeyArray.length == 1 ? brandingKeyArray[0] : brandingKeyArray[1];
+    }
+
+    public boolean isCordovaBranding(String brandingKey) {
+        if (brandingKey.startsWith("cordova-")) {
+            if (CordovaPlugins.PLUGINS.length == 0) {
+                L.e("App needs to be prepared when you want to use cordova");
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public Class getActionScreenActivityClass(String brandingKey) {
+        if (isCordovaBranding(brandingKey))
+            return CordovaActionScreenActivity.class;
+        return ActionScreenActivity.class;
+    }
+
     public BrandingResult prepareBranding(MessageTO message) throws BrandingFailureException {
         T.UI();
         return prepareBranding(new BrandedItem(message), false);
@@ -1006,6 +1031,11 @@ public class BrandingMgr implements Pickleable, Closeable {
             Map<String, JSEmbedding> packets = systemPlugin.getJSEmbeddedPackets();
             for (String key : packets.keySet()) {
                 final JSEmbedding packet = packets.get(key);
+                if (isCordovaBranding(item.brandingKey)) {
+                    if ("rogerthat".equals(packet.getName())) {
+                        continue;
+                    }
+                }
                 if (packet.getStatus() == JSEmbedding.STATUS_AVAILABLE) {
                     File sourceDir = getJSEmbeddingPacketDirectory(packet.getName());
                     File targetDir = getJSEmbeddingUnpackDirectory(tmpBrandingDir, packet.getName());
@@ -1045,6 +1075,10 @@ public class BrandingMgr implements Pickleable, Closeable {
 
         BrandingResult br = extractBranding(item, brandingCache, tmpDecryptFile, tmpBrandingDir);
 
+        if (isCordovaBranding(item.brandingKey)) {
+            copyAssetFolder(mMainService.getAssets(), "cordova", br.dir.getAbsolutePath());
+        }
+
         if (!aesEncrypted) {
             L.d("lazily convert " + brandingCache + " encrypted in 1.0.1012.A from DES to AES encryption");
             final File dest = getBrandingFile(item.brandingKey);
@@ -1062,6 +1096,48 @@ public class BrandingMgr implements Pickleable, Closeable {
         }
 
         return br;
+    }
+
+    private static void copyAssetFolder(AssetManager assetManager, String fromAssetPath, String toPath) {
+        try {
+            String[] files = assetManager.list(fromAssetPath);
+            if (files.length > 0) {
+                new File(toPath).mkdirs();
+                for (String file : files) {
+                    copyAssetFolder(assetManager, fromAssetPath + "/" + file, toPath + "/" + file);
+                }
+            } else {
+                copyAsset(assetManager, fromAssetPath, toPath);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void copyAsset(AssetManager assetManager, String fromAssetPath, String toPath) {
+        InputStream in = null;
+        OutputStream out = null;
+        try {
+            in = assetManager.open(fromAssetPath);
+            new File(toPath).createNewFile();
+            out = new FileOutputStream(toPath);
+            copyFile(in, out);
+            in.close();
+            in = null;
+            out.flush();
+            out.close();
+            out = null;
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void copyFile(InputStream in, OutputStream out) throws IOException {
+        byte[] buffer = new byte[1024];
+        int read;
+        while((read = in.read(buffer)) != -1){
+            out.write(buffer, 0, read);
+        }
     }
 
     private BrandingResult extractBranding(final BrandedItem item, final File encryptedBrandingFile,
@@ -1137,7 +1213,7 @@ public class BrandingMgr implements Pickleable, Closeable {
                     dis.close();
                 }
                 String hexDigest = com.mobicage.rogerthat.util.TextUtils.toHex(digester.digest());
-                if (!hexDigest.equals(item.brandingKey)) {
+                if (!hexDigest.equals(getCleanBrandingKey(item.brandingKey))) {
                     encryptedBrandingFile.delete();
                     SystemUtils.deleteDir(tmpBrandingDir);
                     throw new BrandingFailureException("Branding cache was invalid!");
@@ -1655,7 +1731,7 @@ public class BrandingMgr implements Pickleable, Closeable {
                     || item.type == BrandedItem.TYPE_APP_ASSET) {
             } else {
                 String hexDigest = com.mobicage.rogerthat.util.TextUtils.toHex(digester.digest());
-                if (!brandingKey.equals(hexDigest))
+                if (!getCleanBrandingKey(brandingKey).equals(hexDigest))
                     throw new BrandingFailureException(
                         "SHA256 digest could not be validated against branding key\nExpected " + brandingKey + "\nGot "
                             + hexDigest);

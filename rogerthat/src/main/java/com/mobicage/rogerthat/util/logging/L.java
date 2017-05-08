@@ -110,13 +110,13 @@ public class L {
 
     public static void bug(String s) {
         s = BUG + '\n' + s;
-        Log.d(TAG, s);
+        Log.d(TAG, T.getThreadName() + s);
         logToServer(s, null);
         logToXmpp("BUG", s, null);
     }
 
     public static void bug(Throwable t) {
-        Log.d(TAG, BUG, t);
+        Log.d(TAG, T.getThreadName() + BUG, t);
         logToServer(null, t);
         logToXmpp("BUG", "", t);
     }
@@ -134,7 +134,7 @@ public class L {
 
     public static void bug(String s, Throwable t) {
         s = BUG + '\n' + s;
-        Log.d(TAG, s, t);
+        Log.d(TAG, T.getThreadName() + s, t);
         logToServer(s, t);
         logToXmpp("BUG", s, t);
     }
@@ -215,80 +215,80 @@ public class L {
 
     public static void d(String s) {
         if (CloudConstants.DEBUG_LOGGING)
-            Log.d(TAG, s);
+            Log.d(TAG, T.getThreadName() + s);
 
         logToXmpp("D", s, null);
     }
 
     public static void d(Throwable t) {
         if (CloudConstants.DEBUG_LOGGING)
-            Log.d(TAG, "", t);
+            Log.d(TAG, T.getThreadName() + "", t);
 
         logToXmpp("D", "", t);
     }
 
     public static void d(String s, Throwable t) {
         if (CloudConstants.DEBUG_LOGGING)
-            Log.d(TAG, s, t);
+            Log.d(TAG, T.getThreadName() + s, t);
 
         logToXmpp("D", s, t);
     }
 
     public static void e(String s) {
-        Log.e(TAG, s);
+        Log.e(TAG, T.getThreadName() + s);
         logToXmpp("E", s, null);
     }
 
     public static void e(Throwable t) {
-        Log.e(TAG, "", t);
+        Log.e(TAG, T.getThreadName() + "", t);
         logToXmpp("E", "", t);
     }
 
     public static void e(String s, Throwable t) {
-        Log.e(TAG, s, t);
+        Log.e(TAG, T.getThreadName() + s, t);
         logToXmpp("E", s, t);
     }
 
     public static void i(String s) {
-        Log.i(TAG, s);
+        Log.i(TAG, T.getThreadName() + s);
         logToXmpp("I", s, null);
     }
 
     public static void i(Throwable t) {
-        Log.i(TAG, "", t);
+        Log.i(TAG, T.getThreadName() + "", t);
         logToXmpp("I", "", t);
     }
 
     public static void i(String s, Throwable t) {
-        Log.i(TAG, s, t);
+        Log.i(TAG, T.getThreadName() + s, t);
         logToXmpp("I", s, t);
     }
 
     public static void v(String s) {
-        Log.v(TAG, s);
+        Log.v(TAG, T.getThreadName() + s);
     }
 
     public static void v(Throwable t) {
-        Log.v(TAG, "", t);
+        Log.v(TAG, T.getThreadName() + "", t);
     }
 
     public static void v(String s, Throwable t) {
         if (CloudConstants.DEBUG_LOGGING)
-            Log.v(TAG, s, t);
+            Log.v(TAG, T.getThreadName() + s, t);
     }
 
     public static void w(String s) {
-        Log.w(TAG, s);
+        Log.w(TAG, T.getThreadName() + s);
         logToXmpp("W", s, null);
     }
 
     public static void w(Throwable t) {
-        Log.w(TAG, "", t);
+        Log.w(TAG, T.getThreadName() + "", t);
         logToXmpp("W", "", t);
     }
 
     public static void w(String s, Throwable t) {
-        Log.w(TAG, s, t);
+        Log.w(TAG, T.getThreadName() + s, t);
         logToXmpp("W", s, t);
     }
 

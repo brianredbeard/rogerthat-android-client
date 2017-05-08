@@ -31,6 +31,7 @@ public class T {
     private volatile static int sIOThreadId = UNINITIALIZED;
     private volatile static int sRegistrationThreadId = UNINITIALIZED;
     private volatile static int sBIZZThreadId = UNINITIALIZED;
+    private volatile static int sNewsThreadId = UNINITIALIZED;
 
     private volatile static int sPid = UNINITIALIZED;
 
@@ -38,6 +39,7 @@ public class T {
     public final static int IO = 2;
     public final static int REGISTRATION = 3;
     public final static int BIZZ = 5;
+    public final static int NEWS = 6;
 
     public static void checkTidLegality(int tid) {
         if (tid == -1)
@@ -55,7 +57,8 @@ public class T {
         if (sUIThreadId == UNINITIALIZED) {
             sUIThreadId = myTid;
             L.d(where + " setting UI thread id to " + sUIThreadId);
-            if (sUIThreadId == sIOThreadId || sUIThreadId == sRegistrationThreadId || sUIThreadId == sBIZZThreadId)
+            if (sUIThreadId == sIOThreadId || sUIThreadId == sRegistrationThreadId
+                    || sUIThreadId == sBIZZThreadId || sUIThreadId == sNewsThreadId)
                 L.bug("UI thread id already used! " + description());
         } else if (myTid != sUIThreadId)
             L.bug("UI Thread ID not as expected myTid(" + myTid + ") but expected (" + sUIThreadId + ")");
@@ -68,7 +71,8 @@ public class T {
         if (sIOThreadId == UNINITIALIZED) {
             sIOThreadId = myTid;
             L.d(where + " setting IO thread id to " + sIOThreadId);
-            if (sIOThreadId == sUIThreadId || sIOThreadId == sRegistrationThreadId || sIOThreadId == sBIZZThreadId)
+            if (sIOThreadId == sUIThreadId || sIOThreadId == sRegistrationThreadId
+                    || sIOThreadId == sBIZZThreadId || sIOThreadId == sNewsThreadId)
                 L.bug("IO thread id already used! " + description());
         } else if (myTid != sIOThreadId)
             L.bug("IO Thread ID not as expected myTid(" + myTid + ") but expected (" + sIOThreadId + ")");
@@ -88,7 +92,7 @@ public class T {
             sRegistrationThreadId = myTid;
             L.d(where + " setting registration thread id to " + sRegistrationThreadId);
             if (sRegistrationThreadId == sUIThreadId || sRegistrationThreadId == sIOThreadId
-                || sRegistrationThreadId == sBIZZThreadId)
+                    || sRegistrationThreadId == sBIZZThreadId || sRegistrationThreadId == sNewsThreadId)
                 L.bug("REGISTRATION thread id already used! " + description());
         } else if (myTid != sRegistrationThreadId)
             L.bug("Registration Thread ID not as expected myTid(" + myTid + ") but expected (" + sRegistrationThreadId
@@ -108,7 +112,8 @@ public class T {
         if (sBIZZThreadId == UNINITIALIZED) {
             sBIZZThreadId = myTid;
             L.d(where + " setting HTTP thread id to " + sBIZZThreadId);
-            if (sBIZZThreadId == sUIThreadId || sBIZZThreadId == sIOThreadId || sBIZZThreadId == sRegistrationThreadId)
+            if (sBIZZThreadId == sUIThreadId || sBIZZThreadId == sIOThreadId
+                    || sBIZZThreadId == sRegistrationThreadId || sBIZZThreadId == sNewsThreadId)
                 L.bug("HTTP thread id already used! " + description());
         } else if (myTid != sBIZZThreadId)
             L.bug("HTTP Thread ID not as expected myTid(" + myTid + ") but expected (" + sBIZZThreadId + ")");
@@ -119,6 +124,26 @@ public class T {
         T.UI();
         L.d("Resetting HTTP Thread Id");
         sBIZZThreadId = UNINITIALIZED;
+    }
+
+    public static void setNewsThread(String where, HandlerThread thread) {
+        int myTid = thread.getThreadId();
+        checkTidLegality(myTid);
+        if (sNewsThreadId == UNINITIALIZED) {
+            sNewsThreadId = myTid;
+            L.d(where + " setting HTTP thread id to " + sNewsThreadId);
+            if (sNewsThreadId == sUIThreadId || sNewsThreadId == sIOThreadId
+                            || sNewsThreadId == sRegistrationThreadId || sNewsThreadId == sBIZZThreadId)
+                    L.bug("HTTP thread id already used! " + description());
+        } else if (myTid != sNewsThreadId)
+            L.bug("HTTP Thread ID not as expected myTid(" + myTid + ") but expected (" + sNewsThreadId + ")");
+        setPid(where);
+    }
+
+    public static void resetNewsThreadId() {
+        T.UI();
+        L.d("Resetting News Thread Id");
+        sNewsThreadId = UNINITIALIZED;
     }
 
     private static void setPid(String where) {
@@ -159,6 +184,11 @@ public class T {
         checkPid();
     }
 
+    public static void NEWS() {
+        checkTid(NEWS);
+        checkPid();
+    }
+
     // Assert that this code is executed in process with correct pid
     public static void dontCare() {
         checkPid();
@@ -174,20 +204,24 @@ public class T {
             return BIZZ;
         if (myTid == sIOThreadId)
             return IO;
+        if (myTid == sNewsThreadId)
+            return NEWS;
         return -1;
     }
 
     public static String getThreadName() {
         int myTid = android.os.Process.myTid();
         if (myTid == sUIThreadId)
-            return "UI  ";
+            return "UI   | ";
         if (myTid == sRegistrationThreadId)
-            return "REG ";
+            return "REG  | ";
         if (myTid == sBIZZThreadId)
-            return "BIZZ";
+            return "BIZZ | ";
         if (myTid == sIOThreadId)
-            return "IO  ";
-        return "????";
+            return "IO   | ";
+        if (myTid == sNewsThreadId)
+            return "NEWS | ";
+        return "???? | ";
     }
 
     private static void checkTid(int threadType) {
@@ -212,6 +246,10 @@ public class T {
             if (myTid != sBIZZThreadId)
                 logStacktrace("HTTP thread error");
             break;
+        case NEWS:
+             if (myTid != sNewsThreadId)
+                logStacktrace("NEWS thread error");
+             break;
         default:
             L.bug("Illegal thread type in checkTid(): " + threadType);
             break;

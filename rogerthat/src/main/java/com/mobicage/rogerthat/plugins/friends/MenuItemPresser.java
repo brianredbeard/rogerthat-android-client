@@ -31,7 +31,9 @@ import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.AbstractHomeActivity;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.ServiceBoundActivity;
+import com.mobicage.rogerthat.cordova.CordovaActionScreenActivity;
 import com.mobicage.rogerthat.plugins.messaging.BrandingFailureException;
+import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.FriendsThreadActivity;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
@@ -303,8 +305,9 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
         final MessagingPlugin messagingPlugin = mService.getPlugin(MessagingPlugin.class);
 
         boolean brandingAvailable = false;
+        BrandingMgr brandingMgr = messagingPlugin.getBrandingMgr();
         try {
-            brandingAvailable = messagingPlugin.getBrandingMgr().isBrandingAvailable(item.screenBranding);
+            brandingAvailable = brandingMgr.isBrandingAvailable(item.screenBranding);
         } catch (BrandingFailureException e) {
             // ignore
         }
@@ -314,8 +317,7 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
             friendsPlugin.getStore().addMenuDetails(friend);
             messagingPlugin.getBrandingMgr().queue(friend);
         }
-
-        Intent intent = new Intent(mService, ActionScreenActivity.class);
+        Intent intent = new Intent(mService, brandingMgr.getActionScreenActivityClass(item.screenBranding));
         if (extras != null) {
             intent.putExtras(extras);
         }

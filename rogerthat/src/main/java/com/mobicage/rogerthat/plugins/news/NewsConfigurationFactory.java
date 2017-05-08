@@ -25,6 +25,7 @@ import com.mobicage.rogerthat.config.ConfigurationProvider;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.net.NetworkConnectivityManager;
+import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.SDCardLogger;
 import com.mobicage.rpc.config.CloudConstants;
 
@@ -144,7 +145,7 @@ public class NewsConfigurationFactory {
     }
 
     public DNSUtil.HostAddress getSafeNewsConnectionHost(final boolean hasFailed) throws NewsConfigurationException, NewsConfigurationConnectionException {
-
+        T.NEWS();
         debuglog("Creating new News connection");
 
         if (!mConnectivityManager.isConnected()) {
