@@ -88,7 +88,7 @@ def _get_plugin_urls(plugin):
 
 def install_cordova_plugins(app_id, cordova_plugins):
 
-    if subprocess.call(['type', 'cordova'], stdout=subprocess.PIPE, stderr=subprocess.PIPE) != 0:
+    if subprocess.call(['which', 'cordova'], stdout=subprocess.PIPE, stderr=subprocess.PIPE) != 0:
         raise Exception('The `cordova` command is not found. Install it using `npm install -g cordova`.')
 
     plugins = ['cordova-plugin-compat', 'cordova-plugin-whitelist', 'cordova-rogerthat-plugin']
