@@ -99,7 +99,7 @@ def install_cordova_plugins(app_id, cordova_plugins):
             raise Exception('The `%s` plugin is not found.' % cordova_plugin)
         plugins.append(cordova_plugin)
 
-        output = u'''%(LICENSE)s
+    output = u'''%(LICENSE)s
 
 package com.mobicage.rogerthat.cordova;
 
