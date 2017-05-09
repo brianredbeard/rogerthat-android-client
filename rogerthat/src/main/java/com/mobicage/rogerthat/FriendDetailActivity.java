@@ -254,14 +254,7 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
                 if (mFriend.sharesLocation) {
                     String title = getString(R.string.friend_location_requested_title);
                     String message = getString(R.string.friend_location_requested_body, mFriend.name);
-                    SafeDialogClick onOkListener = new SafeDialogClick() {
-                        @Override
-                        public void safeOnClick(DialogInterface dialog, int id) {
-                            HomeActivity.startWithLaunchInfo(FriendDetailActivity.this,
-                                    HomeActivity.INTENT_VALUE_SHOW_MESSAGES);
-                        }
-                    };
-                    UIUtils.showDialog(FriendDetailActivity.this, title, message, onOkListener);
+                    UIUtils.showDialog(FriendDetailActivity.this, title, message, null);
 
                     mFriendsPlugin.scheduleSingleFriendLocationRetrieval(mFriend.email);
                 } else {
