@@ -255,8 +255,8 @@ def rename_package():
                     with open(file_path, 'r+') as f:
                         s = f.read()
                         f.seek(0)
-                        s = s.replace('com.mobicage.rogerth.at.debug.test.R',
-                                      'com.mobicage.rogerthat.%s.debug.test.R' % package_sufix)
+                        s = s.replace('com.mobicage.rogerth.at.test.R',
+                                      'com.mobicage.rogerthat.%s.test.R' % package_sufix)
                         f.write(s)
                         f.truncate()
 

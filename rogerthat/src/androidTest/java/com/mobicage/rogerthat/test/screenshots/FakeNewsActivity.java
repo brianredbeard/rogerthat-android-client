@@ -121,10 +121,10 @@ public class FakeNewsActivity extends NewsActivity {
         long sampleItemAvatarId1 = 5782144819396608L;
         long sampleItemAvatarId2 = 4995569435017216L;
 
-        int sampleItem1HeaderFile1 = com.mobicage.rogerth.at.debug.test.R.drawable.sample_news_header1;
-        int sampleItem1HeaderFile2 = com.mobicage.rogerth.at.debug.test.R.drawable.sample_news_header2;
-        int sampleItem1AvatarFile1 = com.mobicage.rogerth.at.debug.test.R.drawable.sample_news_avatar1;
-        int sampleItem1AvatarFile2 = com.mobicage.rogerth.at.debug.test.R.drawable.sample_news_avatar2;
+        int sampleItem1HeaderFile1 = com.mobicage.rogerth.at.test.R.drawable.sample_news_header1;
+        int sampleItem1HeaderFile2 = com.mobicage.rogerth.at.test.R.drawable.sample_news_header2;
+        int sampleItem1AvatarFile1 = com.mobicage.rogerth.at.test.R.drawable.sample_news_avatar1;
+        int sampleItem1AvatarFile2 = com.mobicage.rogerth.at.test.R.drawable.sample_news_avatar2;
 
         String itemImageUrl1 = CloudConstants.HTTPS_BASE_URL + "/unauthenticated/news/image/41157003";
         String itemImageUrl2 = CloudConstants.HTTPS_BASE_URL + "/unauthenticated/news/image/44387003";
