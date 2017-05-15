@@ -579,6 +579,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                     nameValuePairs.add(new BasicNameValuePair("signature", signature));
                     nameValuePairs.add(new BasicNameValuePair("install_id", installId));
                     nameValuePairs.add(new BasicNameValuePair("access_token", accessToken));
+                    nameValuePairs.add(new BasicNameValuePair("platform", "android"));
                     nameValuePairs.add(new BasicNameValuePair("language", Locale.getDefault().getLanguage()));
                     nameValuePairs.add(new BasicNameValuePair("country", Locale.getDefault().getCountry()));
                     nameValuePairs.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
@@ -687,6 +688,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                     nameValuePairs.add(new BasicNameValuePair("registration_id", registrationId));
                     nameValuePairs.add(new BasicNameValuePair("signature", signature));
                     nameValuePairs.add(new BasicNameValuePair("install_id", installId));
+                    nameValuePairs.add(new BasicNameValuePair("platform", "android"));
                     nameValuePairs.add(new BasicNameValuePair("language", Locale.getDefault().getLanguage()));
                     nameValuePairs.add(new BasicNameValuePair("country", Locale.getDefault().getCountry()));
                     nameValuePairs.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
@@ -787,6 +789,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                     nameValuePairs.add(new BasicNameValuePair("registration_id", registrationId));
                     nameValuePairs.add(new BasicNameValuePair("signature", signature));
                     nameValuePairs.add(new BasicNameValuePair("install_id", installId));
+                    nameValuePairs.add(new BasicNameValuePair("platform", "android"));
                     nameValuePairs.add(new BasicNameValuePair("language", Locale.getDefault().getLanguage()));
                     nameValuePairs.add(new BasicNameValuePair("country", Locale.getDefault().getCountry()));
                     nameValuePairs.add(new BasicNameValuePair("code", code));
@@ -986,6 +989,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                     nameValuePairs.add(new BasicNameValuePair("pin_signature", pinSignature));
                     nameValuePairs.add(new BasicNameValuePair("request_id", UUID.randomUUID().toString()));
                     nameValuePairs.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
+                    nameValuePairs.add(new BasicNameValuePair("platform", "android"));
                     nameValuePairs.add(new BasicNameValuePair("use_xmpp_kick", CloudConstants.USE_XMPP_KICK_CHANNEL
                             + ""));
                     nameValuePairs.add(new BasicNameValuePair("GCM_registration_id", getGCMRegistrationId()));
@@ -1305,6 +1309,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                     nameValuePairs.add(new BasicNameValuePair("request_signature", requestSignature));
                     nameValuePairs.add(new BasicNameValuePair("install_id", mWiz.getInstallationId()));
                     nameValuePairs.add(new BasicNameValuePair("request_id", UUID.randomUUID().toString()));
+                    nameValuePairs.add(new BasicNameValuePair("platform", "android"));
                     nameValuePairs.add(new BasicNameValuePair("language", Locale.getDefault().getLanguage()));
                     nameValuePairs.add(new BasicNameValuePair("country", Locale.getDefault().getCountry()));
                     nameValuePairs.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
