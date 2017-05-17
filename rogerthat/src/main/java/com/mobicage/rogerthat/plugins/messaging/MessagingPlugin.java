@@ -56,7 +56,6 @@ import com.mobicage.rogerthat.plugins.messaging.widgets.Widget;
 import com.mobicage.rogerthat.util.IOUtils;
 import com.mobicage.rogerthat.util.Security;
 import com.mobicage.rogerthat.util.TextUtils;
-import com.mobicage.rogerthat.util.ZipUtils;
 import com.mobicage.rogerthat.util.db.DatabaseManager;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
@@ -126,6 +125,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.zip.DeflaterInputStream;
 
 public class MessagingPlugin implements MobicagePlugin {
 
@@ -1888,7 +1888,7 @@ public class MessagingPlugin implements MobicagePlugin {
                     MessageDigest complete = MessageDigest.getInstance("SHA-256");
                     DigestInputStream dis = new DigestInputStream(in, complete);
                     try {
-                        ZipUtils.DeflaterInputStream dos = new ZipUtils.DeflaterInputStream(dis);
+                        DeflaterInputStream dos = new DeflaterInputStream(dis);
                         try {
                             UploadChunkRequestTO chunkRequest = null;
                             int chunkNumber = 0;
