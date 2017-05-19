@@ -168,10 +168,9 @@ def generate_resource_images(source_file_name, size, height_width_ratio):
     im1_heigth_width_ratio_str = "%.2f" % im1_heigth_width_ratio
     height_width_ratio_str = "%.2f" % height_width_ratio
     if im1_heigth_width_ratio_str != height_width_ratio_str:
-        pass
-        #raise Exception(
-        #        "Cannot generate resource images for %s ratio does not match (IMG:%s, GIVEN:%s)" % (
-        #            source_file_name, im1_heigth_width_ratio_str, height_width_ratio_str))
+        raise Exception(
+                "Cannot generate resource images for %s ratio does not match (IMG:%s, GIVEN:%s)" % (
+                    source_file_name, im1_heigth_width_ratio_str, height_width_ratio_str))
 
     for drawable_folder_name, screen_width in SCREEN_SIZES.iteritems():
         width = int(screen_width * size)
