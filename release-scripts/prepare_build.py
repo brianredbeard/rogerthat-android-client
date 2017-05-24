@@ -167,7 +167,7 @@ def generate_resource_images(source_file_name, size, height_width_ratio):
 
     im1_heigth_width_ratio_str = "%.2f" % im1_heigth_width_ratio
     height_width_ratio_str = "%.2f" % height_width_ratio
-    if im1_heigth_width_ratio_str != height_width_ratio_str:
+    if im1_heigth_width_ratio < (height_width_ratio - 0.1) or im1_heigth_width_ratio > (height_width_ratio + 0.1):
         raise Exception(
                 "Cannot generate resource images for %s ratio does not match (IMG:%s, GIVEN:%s)" % (
                     source_file_name, im1_heigth_width_ratio_str, height_width_ratio_str))
@@ -481,7 +481,7 @@ def convert_config():
 
     full_width_headers = doc['APP_CONSTANTS'].get('FULL_WIDTH_HEADERS', False)
     headers_ratio = (330.0 / 960.0) if full_width_headers else (240.0 / 840.0)
-    
+
     if not os.path.exists(os.path.join(APP_DIR, "build")):
         os.makedirs(os.path.join(APP_DIR, "build"))
 
