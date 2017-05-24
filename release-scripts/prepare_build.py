@@ -848,10 +848,18 @@ def add_translations(doc):
         return
 
     for language, entries in translations.iteritems():
-        values_dir = 'values'
         if language != 'en':
-            values_dir += '-' + language
-        xml_path = os.path.join(SRC_RES_DIR, values_dir, 'allstr.xml')
+            xml_path = os.path.join(SRC_RES_DIR, 'values-' + language, 'allstr.xml')
+            split = language.split('-')
+            if not os.path.exists(xml_path) and len(split) == 2:
+                # e.g. nl-nl => nl
+                xml_path = os.path.join(SRC_RES_DIR, 'values-' + split[0] , 'allstr.xml')
+                if not os.path.exists(xml_path):
+                    logging.warn('No translation file exists for language %s, not adding custom translations.', language)
+                    continue
+        else:
+            xml_path = os.path.join(SRC_RES_DIR, 'values', 'allstr.xml')
+
         added_lines = list()
         for entry in entries:
             added_lines.append('    <string name="%s">%s</string>' % (entry['name'],
