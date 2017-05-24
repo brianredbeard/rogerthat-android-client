@@ -97,7 +97,7 @@ public class Test1Register {
         onView(withId(R.id.login_via_email))
                 .perform(click());
         onView(isRoot())
-                .perform(waitUntilExists(withId(R.id.registration_enter_pin), 2000));
+                .perform(waitUntilExists(withId(R.id.registration_enter_pin), 5000));
         onView(withId(R.id.registration_enter_pin))
                 .perform(typeText("0666"));
     }
