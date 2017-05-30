@@ -307,6 +307,7 @@ def get_action(item):
 
 def generate_navigation_menu(doc, strings_map):
     app_type = doc.get('APP_CONSTANTS')['APP_TYPE']
+    homescreen_color = doc['HOMESCREEN'].get('color', None)
     homescreen_items = doc['HOMESCREEN'].get('items', [])
     if app_type == 'cityapp' and not homescreen_items:
         raise Exception('No homescreen items are specified in build.yaml')
@@ -331,6 +332,8 @@ public class NavigationConstants {
         icon_color = 0
         if item.get("color"):
             icon_color = 'Color.parseColor("#%s")' % item.get("color")
+        elif homescreen_color:
+            icon_color = 'Color.parseColor("#%s")' % homescreen_color
 
         action, action_type = get_action(item)
         output += '''
