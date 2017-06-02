@@ -341,6 +341,7 @@
     <string name="profile">Profile</string>
     <string name="promo">Promo</string>
     <string name="provide_qr_code_name">Provide a name for the QR code</string>
+    <string name="qr_code">QR code</string>
     <string name="qr_call_tel">Do you wish to call %1$s?</string>
     <string name="qr_code_scanned">QR code scanned</string>
     <string name="qr_open_url">Do you wish to open the following web page:\n\n%1$s</string>
