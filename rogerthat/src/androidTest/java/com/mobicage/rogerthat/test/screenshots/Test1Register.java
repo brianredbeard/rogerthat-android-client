@@ -20,9 +20,9 @@ package com.mobicage.rogerthat.test.screenshots;
 
 import android.Manifest;
 import android.app.Activity;
-import android.os.Build;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.espresso.Espresso;
+import android.support.test.espresso.NoMatchingViewException;
 import android.support.test.espresso.PerformException;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
@@ -30,7 +30,7 @@ import android.view.WindowManager;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.registration.RegistrationActivity2;
-import com.mobicage.rogerthat.test.ui_test_helpers.PermissionGranter;
+import com.mobicage.rogerthat.test.ui_test_helpers.PermissionsRule;
 import com.mobicage.rogerthat.util.logging.L;
 
 import org.junit.Before;
@@ -44,9 +44,9 @@ import tools.fastlane.screengrab.locale.LocaleTestRule;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.action.ViewActions.typeText;
-import static android.support.test.espresso.matcher.ViewMatchers.isRoot;
+import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static com.mobicage.rogerthat.test.ui_test_helpers.UiTestHelpers.waitUntilExists;
 
 @RunWith(AndroidJUnit4.class)
 public class Test1Register {
@@ -55,6 +55,9 @@ public class Test1Register {
 
     @Rule
     public ActivityTestRule<RegistrationActivity2> activityTestRule = new ActivityTestRule<>(RegistrationActivity2.class);
+    @Rule
+    public final PermissionsRule permissionsRule = new PermissionsRule(
+            new String[]{Manifest.permission.READ_CONTACTS, Manifest.permission.ACCESS_COARSE_LOCATION});
 
     @UiThreadTest
     @Before
@@ -85,20 +88,31 @@ public class Test1Register {
         } catch (PerformException ex) {
             L.i("Not clicking 'agree to TOS because it was already clicked'");
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            onView(withId(R.id.registration_beacon_usage_continue))
-                    .perform(click());
-            PermissionGranter.allowPermissionsIfNeeded(Manifest.permission.ACCESS_COARSE_LOCATION);
-        }
         // Fill in email field
-        onView(withId(R.id.registration_enter_email))
-                .perform(typeText("apple.review@rogerth.at"));
-        Espresso.closeSoftKeyboard();
-        onView(withId(R.id.login_via_email))
-                .perform(click());
-        onView(isRoot())
-                .perform(waitUntilExists(withId(R.id.registration_enter_pin), 5000));
-        onView(withId(R.id.registration_enter_pin))
-                .perform(typeText("0666"));
+        try {
+            onView(withId(R.id.registration_enter_email))
+                    .perform(typeText("apple.review@rogerth.at"));
+            Espresso.closeSoftKeyboard();
+            onView(withId(R.id.login_via_email))
+                    .perform(click());
+        } catch (PerformException ignored) {
+        }
+        int tries = 0;
+        // tries 100 times, max 10 sec
+        while (true) {
+            tries++;
+            try {
+                onView(withId(R.id.registration_enter_pin))
+                        .check(matches(isDisplayed()))
+                        .perform(typeText("0666"));
+                return;
+            } catch (NoMatchingViewException ignored) {
+                if (tries > 100) {
+                    throw ignored;
+                } else {
+                    Thread.sleep(100);
+                }
+            }
+        }
     }
 }

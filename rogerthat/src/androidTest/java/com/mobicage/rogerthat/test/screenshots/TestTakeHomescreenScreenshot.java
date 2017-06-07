@@ -20,16 +20,17 @@ package com.mobicage.rogerthat.test.screenshots;
 
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
-import android.test.UiThreadTest;
 
 import com.mobicage.rogerthat.MainActivity;
 
+import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import tools.fastlane.screengrab.Screengrab;
+import tools.fastlane.screengrab.UiAutomatorScreenshotStrategy;
 import tools.fastlane.screengrab.locale.LocaleTestRule;
 
 @RunWith(AndroidJUnit4.class)
@@ -41,9 +42,13 @@ public class TestTakeHomescreenScreenshot {
     @Rule
     public ActivityTestRule<MainActivity> activityTestRule = new ActivityTestRule<>(MainActivity.class);
 
+    @Before
+    public void setup() throws Throwable {
+        Screengrab.setDefaultScreenshotStrategy(new UiAutomatorScreenshotStrategy());
+    }
+
     @SuppressWarnings("ConstantConditions")
     @Test
-    @UiThreadTest
     public void takeHomeScreenScreenshot(){
         // homescreen will be news with the sidebar open for apps with news and else the old homescreen with icons
         Screengrab.screenshot("homescreen");

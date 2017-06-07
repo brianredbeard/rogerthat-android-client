@@ -23,17 +23,18 @@ import android.content.Intent;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
-import android.test.UiThreadTest;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rpc.config.AppConstants;
 
+import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import tools.fastlane.screengrab.Screengrab;
+import tools.fastlane.screengrab.UiAutomatorScreenshotStrategy;
 import tools.fastlane.screengrab.locale.LocaleTestRule;
 
 
@@ -47,8 +48,12 @@ public class TestNewsActivity {
     @Rule
     public ActivityTestRule<FakeNewsActivity> activityTestRule = new ActivityTestRule<>(FakeNewsActivity.class, true, false);
 
+    @Before
+    public void setup() throws Throwable {
+        Screengrab.setDefaultScreenshotStrategy(new UiAutomatorScreenshotStrategy());
+    }
+
     @Test
-    @UiThreadTest
     public void takeNewsScreenshot() {
 
         if (AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.news) {
