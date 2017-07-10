@@ -45,11 +45,7 @@ PLUGINS = {
         "dependencies": []
     },
     "cordova-rogerthat-plugin": {
-        "url": "https://github.com/rogerthat-platform/cordova-rogerthat-plugin#public_keys",
-        "dependencies": []
-    },
-    "cordova-rogerthat-payments-plugin": {
-        "url": "https://github.com/rogerthat-platform/cordova-rogerthat-payments-plugin#test",
+        "url": "https://github.com/rogerthat-platform/cordova-rogerthat-plugin#master",
         "dependencies": []
     },
     "cordova-plugin-file": {
