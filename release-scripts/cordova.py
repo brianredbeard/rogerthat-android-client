@@ -37,7 +37,7 @@ LICENSE = app_utils.get_license_header()
 
 PLUGINS = {
     "cordova-plugin-compat": {
-        "url": "https://github.com/rogerthat-platform/cordova-plugin-compat#1.1.0",
+        "url": "cordova-plugin-compat@1.1.0",
         "dependencies": []
     },
     "cordova-plugin-whitelist": {
@@ -45,13 +45,21 @@ PLUGINS = {
         "dependencies": []
     },
     "cordova-rogerthat-plugin": {
-        "url": "https://github.com/rogerthat-platform/cordova-rogerthat-plugin#master",
+        "url": "https://github.com/rogerthat-platform/cordova-rogerthat-plugin#public_keys",
+        "dependencies": []
+    },
+    "cordova-rogerthat-payments-plugin": {
+        "url": "https://github.com/rogerthat-platform/cordova-rogerthat-payments-plugin#test",
+        "dependencies": []
+    },
+    "cordova-plugin-file": {
+        "url": "https://github.com/rogerthat-platform/cordova-plugin-file#rt/4.3.3",
         "dependencies": []
     },
     "cordova-plugin-media": {
         "url": "https://github.com/rogerthat-platform/cordova-plugin-media#rt/3.0.1",
         "dependencies": [
-            "https://github.com/rogerthat-platform/cordova-plugin-file#rt/4.3.3"
+            "cordova-plugin-file"
         ]
     },
     "cordova-plugin-contacts": {
@@ -73,9 +81,27 @@ PLUGINS = {
     "cordova-plugin-globeconnect": {
         "url": "https://github.com/rogerthat-platform/cordova-plugin-globeconnect#master:/cordova-plugin-globeconnect",
         "dependencies": [
-            "https://github.com/rogerthat-platform/cordova-plugin-add-swift-support#1.6.2",
-            "https://github.com/rogerthat-platform/cordova-plugin-inappbrowser#1.7.1"
+            "cordova-plugin-add-swift-support",
+            "cordova-plugin-inappbrowser"
         ]
+    },
+    "cordova-plugin-add-swift-support": {
+        "url": "https://github.com/rogerthat-platform/cordova-plugin-add-swift-support#1.6.2"
+    },
+    "cordova-plugin-statusbar": {
+        "url": "cordova-plugin-statusbar@2.2.3"
+    },
+    "cordova-plugin-splashscreen": {
+        "url": "cordova-plugin-splashscreen@4.0.3"
+    },
+    'cordova-plugin-inappbrowser': {
+        'url': 'cordova-plugin-inappbrowser@1.7.1'
+    },
+    'cordova-plugin-browsertab': {
+        'url': 'cordova-plugin-browsertab@0.2.0'
+    },
+    'cordova-plugin-app-version': {
+        'url': 'cordova-plugin-app-version@0.1.9'
     }
 }
 
