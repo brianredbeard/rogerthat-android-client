@@ -237,29 +237,24 @@ public class HttpProtocol {
     }
 
     private void process(RpcResult response) {
-
         T.BIZZ();
-
         final IResponseHandler<?> responseHandler;
-
         try {
             responseHandler = mBacklog.getResponseHandler(response.callId);
             if (responseHandler == null) {
                 L.d("Ignoring incoming result for unknown callId " + response.callId);
-                return;
             } else {
                 L.d("Process incoming response " + responseHandler.getFunction() + " / " + response.callId);
                 responseHandler.setService(mMainService);
                 ResponseReceiverHandler.handle(response, responseHandler);
-                mBacklog.deleteItem(response.callId);
-                onResponseProcessed(response.callId);
             }
         } catch (PickleException e) {
             L.bug("Could not unpickle original call context for " + response.callId, e);
         } catch (Exception e) {
             L.bug("Error during response processing for " + response.callId, e);
         }
-
+        mBacklog.deleteItem(response.callId);
+        onResponseProcessed(response.callId);
     }
 
     private void processAck(String callid) {

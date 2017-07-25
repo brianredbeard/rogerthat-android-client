@@ -53,24 +53,19 @@ public class NewsCallReceiver implements com.mobicage.capi.news.IClientRpc {
         NewNewsResponseTO response = new NewNewsResponseTO();
 
         FriendsPlugin friendsPlugin = mMainService.getPlugin(FriendsPlugin.class);
-        boolean showNewsItem = !friendsPlugin.isBroadcastTypeDisabled(request.news_item.sender.email, request.news_item.broadcast_type);
+        if (mPlugin.getStore().insertNewsItem(request.news_item)) {
+            if (friendsPlugin.isBroadcastTypeDisabled(request.news_item.sender.email, request.news_item.broadcast_type)) {
+                return response;
+            }
 
-        if (showNewsItem && friendsPlugin.getStore().getExistence(request.news_item.sender.email) != Friend.ACTIVE) {
-            showNewsItem = false;
-        }
-
-        if (mPlugin.getStore().getNewsItem(request.news_item.id) == null) {
-            mPlugin.getStore().insertNewsItem(request.news_item);
-            if (showNewsItem) {
-                mPlugin.increaseBadgeCount();
+            if (friendsPlugin.getStore().getExistence(request.news_item.sender.email) != Friend.ACTIVE) {
+                return response;
             }
         } else {
             return response;
         }
 
-        if (!showNewsItem) {
-            return response;
-        }
+        mPlugin.increaseBadgeCount();
 
         Intent intent = new Intent(NewsPlugin.NEW_NEWS_ITEM_INTENT);
         intent.putExtra("id", request.news_item.id);

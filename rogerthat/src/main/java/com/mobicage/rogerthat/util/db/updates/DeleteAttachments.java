@@ -21,16 +21,12 @@ package com.mobicage.rogerthat.util.db.updates;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.mobicage.rogerthat.MainService;
-import com.mobicage.rogerthat.plugins.system.SystemPlugin;
+import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 
-public class RequestJsEmbeddingsPostUpdate implements IDbUpdater {
-
-    @Override
-    public void preUpdate(MainService mainService, SQLiteDatabase db) {
-    }
+public class DeleteAttachments implements IDbUpdater {
 
     @Override
     public void postUpdate(MainService mainService, SQLiteDatabase db) {
-        mainService.registerPluginDBUpdate(SystemPlugin.class, SystemPlugin.SYSTEM_PLUGIN_MUST_REFRESH_JS_EMBEDDING);
+        mainService.registerPluginDBUpdate(BrandingMgr.class, BrandingMgr.MUST_DELETE_ATTACHMENTS_INTENT);
     }
 }

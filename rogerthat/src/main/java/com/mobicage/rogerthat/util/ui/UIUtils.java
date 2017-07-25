@@ -79,6 +79,7 @@ import android.widget.Toast;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.App;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
@@ -416,6 +417,13 @@ public class UIUtils {
         return true;
     }
 
+    public static boolean isRogerthatTopActivity() {
+        final Activity topActivity = UIUtils.getTopActivity();
+        if (topActivity == null)
+            return false;
+        return App.getContext().getPackageName().equals(topActivity.getPackageName());
+    }
+
     public static Activity getTopActivity() {
         if (sActivities.size() == 0)
             return null;
@@ -624,6 +632,9 @@ public class UIUtils {
     }
 
     public static Bitmap createThumbnail(Bitmap source, int maxWidthOrHeight) {
+        if (source == null) {
+            return null;
+        }
         final int w;
         final int h;
         if (source.getWidth() > source.getHeight()) {
@@ -819,7 +830,7 @@ public class UIUtils {
         } catch (IllegalAccessException e) {
             L.bug(e);
         } catch (NoSuchFieldException e) {
-            L.bug(e);
+            L.e("NoSuchFieldException for " + fieldNameRes, e);
         }
     }
 

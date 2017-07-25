@@ -1648,6 +1648,14 @@ public class MessagingPlugin implements MobicagePlugin {
         T.UI();
 
         MessageFlowRun mfr = mStore.getMessageFlowRun(threadKey);
+        if (mfr == null) {
+            L.bug("MessageFlowRun not found for threadKey: " + threadKey);
+            return;
+        }
+        if (TextUtils.isEmptyOrWhitespace(mfr.staticFlowHash)) {
+            L.bug("MessageFlowRun staticFlowHash was empty for threadKey: " + threadKey);
+            return;
+        }
 
         Map<String, Object> userInput = new HashMap<String, Object>();
         userInput.put("request", request);

@@ -120,35 +120,30 @@ public class PhotoUploadWidget extends Widget {
         mSourceButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(final View v) {
+                final SafeRunnable runnableContinue = new SafeRunnable() {
+                    @Override
+                    protected void safeRun() throws Exception {
+                        getPicture();
+                    }
+                };
+
+                final SafeRunnable runnableCheckStorage = new SafeRunnable() {
+                    @Override
+                    protected void safeRun() throws Exception {
+                        if (mActivity.askPermissionIfNeeded(Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                ServiceMessageDetailActivity.PERMISSION_REQUEST_PHOTO_UPLOAD_WIDGET, runnableContinue, null))
+                            return;
+                        runnableContinue.run();
+                    }
+                };
+
                 if (TRUE.equals(mWidgetMap.get("camera"))) {
-
-                    final SafeRunnable runnableContinue = new SafeRunnable() {
-                        @Override
-                        protected void safeRun() throws Exception {
-                            getPicture();
-                        }
-                    };
-
-                    final SafeRunnable runnableCheckStorage = new SafeRunnable() {
-                        @Override
-                        protected void safeRun() throws Exception {
-                            if (mActivity.askPermissionIfNeeded(Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                                    ServiceMessageDetailActivity.PERMISSION_REQUEST_PHOTO_UPLOAD_WIDGET, runnableContinue, null))
-                                return;
-                            getPicture();
-                        }
-                    };
-
                     if (mActivity.askPermissionIfNeeded(Manifest.permission.CAMERA,
                             ServiceMessageDetailActivity.PERMISSION_REQUEST_PHOTO_UPLOAD_WIDGET, runnableCheckStorage, null))
                         return;
-
-                    if (mActivity.askPermissionIfNeeded(Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                            ServiceMessageDetailActivity.PERMISSION_REQUEST_PHOTO_UPLOAD_WIDGET, runnableContinue, null))
-                        return;
                 }
 
-                getPicture();
+                runnableCheckStorage.run();
             }
 
             private void getPicture() {
@@ -355,8 +350,10 @@ public class PhotoUploadWidget extends Widget {
         mImagePreview.setImageDrawable(d);
 
         if (!USER_QUALITY.equals(mQuality)) {
-            if (!BEST_QUALITY.equals(mQuality) && mQuality != null) {
-                compressPicture(mUriSavedImage, Long.parseLong(mQuality));
+            if (BEST_QUALITY.equals(mQuality) || mQuality == null) {
+                IOUtils.compressPicture(mUriSavedImage, 0);
+            } else {
+                IOUtils.compressPicture(mUriSavedImage, Long.parseLong(mQuality));
             }
         } else {
             pickSizePhoto(mUriSavedImage);
@@ -399,41 +396,10 @@ public class PhotoUploadWidget extends Widget {
             SafeDialogClick itemsOnClickListener = new SafeDialogClick() {
                 @Override
                 public void safeOnClick(DialogInterface dialog, int id) {
-                    compressPicture(mUriSavedImage, sizes[id]);
+                    IOUtils.compressPicture(mUriSavedImage, sizes[id]);
                 }
             };
             UIUtils.showDialog(mActivity, title, null, items, itemsOnClickListener);
-        }
-    }
-
-    private void compressPicture(Uri uri, long maxSize) {
-        try {
-            File file = new File(uri.getPath());
-            long size = file.length();
-            if (size > maxSize) {
-                int sampleSize = Math.round((size / maxSize));
-                if (sampleSize > 1) {
-                    BitmapFactory.Options bounds = new BitmapFactory.Options();
-                    Bitmap imgBitmap;
-                    double cs;
-                    do {
-                        imgBitmap = null;
-                        sampleSize = (int) Math.pow(2, Math.ceil(Math.log(sampleSize) / Math.log(2)));
-                        bounds.inSampleSize = sampleSize;
-                        imgBitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), bounds);
-                        sampleSize++;
-                        cs = bounds.outWidth * bounds.outHeight;
-                    } while (cs > maxSize + maxSize / 2);
-                    FileOutputStream fOut = new FileOutputStream(file);
-                    try {
-                        imgBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fOut);
-                    } finally {
-                        fOut.close();
-                    }
-                }
-            }
-        } catch (Exception e) {
-            L.e("compressPicture exception", e);
         }
     }
 

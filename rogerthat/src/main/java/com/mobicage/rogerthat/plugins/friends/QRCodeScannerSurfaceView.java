@@ -81,9 +81,9 @@ public class QRCodeScannerSurfaceView extends QRCodeScanner implements SurfaceHo
             showOpenPreviewForQrCodes();
 
         } catch (IOException ioe) {
-            L.bug("Unexpected RuntimeException initializing SurfaceView camera", ioe);
+            L.e("Unexpected RuntimeException initializing SurfaceView camera", ioe);
         } catch (RuntimeException e) {
-            L.bug("Unexpected RuntimeException initializing SurfaceView camera", e);
+            L.e("Unexpected RuntimeException initializing SurfaceView camera", e);
         }
     }
 

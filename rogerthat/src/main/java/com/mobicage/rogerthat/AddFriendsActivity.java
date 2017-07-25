@@ -448,7 +448,7 @@ public class AddFriendsActivity extends ServiceBoundActivity {
         rtFriendEmails.add(getMyIdentity().getEmail());
 
         // Get list of Contacts for the matched results
-        List<Contact> matches = new ArrayList<Contact>(responseTO.matched_addresses.length);
+        List<Contact> matches = new ArrayList<>(responseTO.matched_addresses.length);
         for (String email : responseTO.matched_addresses) {
             if (rtFriendEmails.contains(email))
                 continue; // We are already friend with the found match
@@ -492,7 +492,7 @@ public class AddFriendsActivity extends ServiceBoundActivity {
         SeparatedListAdapter adapter = new SeparatedListAdapter(this);
 
         String resultTitle;
-        final int l = responseTO.matched_addresses.length;
+        final int l = matches.size();
         if (l == 0) {
             resultTitle = getString(R.string.contacts_found_none, getString(R.string.app_name));
         } else if (l == 1) {

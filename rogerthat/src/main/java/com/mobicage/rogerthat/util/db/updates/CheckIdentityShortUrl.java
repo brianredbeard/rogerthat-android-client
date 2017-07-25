@@ -23,15 +23,12 @@ import android.database.sqlite.SQLiteDatabase;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 
-public class Update32 implements IDbUpdater {
-
-    @Override
-    public void preUpdate(MainService mainService, SQLiteDatabase db) {
-    }
+public class CheckIdentityShortUrl implements IDbUpdater {
 
     @Override
     public void postUpdate(MainService mainService, SQLiteDatabase db) {
         mainService.registerPluginDBUpdate(FriendsPlugin.class,
-            FriendsPlugin.FRIENDS_PLUGIN_MUST_GET_INVITATION_SECRETS);
+            FriendsPlugin.FRIENDS_PLUGIN_MUST_CHECK_IDENTITY_SHORTURL);
     }
+
 }

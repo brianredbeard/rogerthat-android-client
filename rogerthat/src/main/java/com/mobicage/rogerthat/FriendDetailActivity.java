@@ -451,7 +451,7 @@ public abstract class FriendDetailActivity extends ServiceBoundActivity {
         final String staticFlow = getStaticFlow();
         final String staticFlowHash = getStaticFlowHash();
 
-        if (staticFlow != null && staticFlowHash != null) {
+        if (!TextUtils.isEmptyOrWhitespace(staticFlow) && staticFlowHash != null) {
             mFriendsPlugin.getStore().storeStaticFlow(mFriend.email, staticFlow, staticFlowHash);
 
             MessageFlowRun mfr = new MessageFlowRun();

@@ -251,13 +251,18 @@ public class CachedDownloader {
             File dir = getCachedDownloadDir();
             if (dir != null) {
                 final long lastMonth = System.currentTimeMillis() - (30L * 86400L * 1000L);
+                long count = 0;
+                long totalCount = 0;
                 for (File file : dir.listFiles()) {
+                    totalCount += 1;
                     if (file.lastModified() < lastMonth) {
+                        count += 1;
                         if (!file.delete()) {
-                            L.bug("Failed to delete old cached file with urlHash '" + file.getName() + "'");
+                            L.e("Failed to delete old cached file with urlHash '" + file.getName() + "'");
                         }
                     }
                 }
+                L.d("cleanupOldCachedDownloads removed " + count + "/" + totalCount + " items");
             }
         }
         mMainService.postOnUIHandler(new SafeRunnable() {

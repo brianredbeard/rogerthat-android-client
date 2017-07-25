@@ -23,6 +23,7 @@ import com.mobicage.rogerthat.util.pickle.PickleException;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.IResponse;
 import com.mobicage.rpc.ResponseHandler;
+import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.to.news.GetNewsResponseTO;
 
 import java.io.DataInput;
@@ -46,6 +47,10 @@ public class GetNewsResponseHandler extends ResponseHandler<GetNewsResponseTO> {
     @Override
     public void handle(IResponse<GetNewsResponseTO> response) {
         T.BIZZ();
+        if (!AppConstants.NEWS_ENABLED) {
+            L.e("GetNewsResponseHandler triggered when news was disabled...");
+            return;
+        }
         try {
             GetNewsResponseTO resp = response.getResponse();
             NewsPlugin newsPlugin = mMainService.getPlugin(NewsPlugin.class);

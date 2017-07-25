@@ -23,8 +23,6 @@ import android.database.sqlite.SQLiteDatabase;
 
 public interface IDbUpdater {
 
-    void preUpdate(MainService mainService, SQLiteDatabase db);
-
     void postUpdate(MainService mainService, SQLiteDatabase db);
 
 }

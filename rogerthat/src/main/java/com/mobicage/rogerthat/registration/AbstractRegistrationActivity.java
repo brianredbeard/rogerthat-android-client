@@ -89,7 +89,6 @@ public abstract class AbstractRegistrationActivity extends ServiceBoundActivity 
 
     private String mGCMRegistrationId = "";
     private boolean mAgeAndGenderSet = true;
-    private List<Account> mAccounts;
     private String mDiscoveredBeacons = null;
 
     public void init(Activity activity) {
@@ -308,20 +307,8 @@ public abstract class AbstractRegistrationActivity extends ServiceBoundActivity 
         formParams.add(new BasicNameValuePair("password", password));
         formParams.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
 
-        org.json.simple.JSONArray accounts = new org.json.simple.JSONArray();
-        if (getAccounts() != null) {
-            for (Account acc : getAccounts()) {
-                Map<String, String> jacc = new LinkedHashMap<String, String>();
-                jacc.put("type", acc.type);
-                jacc.put("name", acc.name);
-                accounts.add(jacc);
-            }
-        }
-        formParams.add(new BasicNameValuePair("accounts", accounts.toString()));
-
         formParams.add(new BasicNameValuePair("invitor_code", invitorCode));
         formParams.add(new BasicNameValuePair("invitor_secret", invitorSecret));
-
 
         org.json.simple.JSONArray beacons = new org.json.simple.JSONArray();
         if (mWizard.getDetectedBeacons() != null) {
@@ -370,14 +357,6 @@ public abstract class AbstractRegistrationActivity extends ServiceBoundActivity 
 
     public void setWizard(AbstractRegistrationWizard wizard) {
         mWizard = wizard;
-    }
-
-    public void setAccounts(List<Account> accounts) {
-        mAccounts = accounts;
-    }
-
-    public List<Account> getAccounts() {
-        return mAccounts;
     }
 
     public String getDiscoveredBeacons() {

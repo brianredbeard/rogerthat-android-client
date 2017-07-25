@@ -32,39 +32,35 @@ public class Updates {
     }
 
     public void initUpdates() {
-        mUpdates.put(19, new RequestFriendSetPostUpdate());
-        mUpdates.put(21, new RequestFriendSetPostUpdate());
-        mUpdates.put(23, new RequestFriendSetPostUpdate());
-        mUpdates.put(26, new Update26());
-        mUpdates.put(28, new Update28());
-        mUpdates.put(32, new Update32());
-        mUpdates.put(33, new RequestFriendSetPostUpdate());
-        mUpdates.put(36, new RequestFriendSetPostUpdate());
-        mUpdates.put(38, new Update38());
-        mUpdates.put(43, new RequestFriendSetPostUpdate());
-        mUpdates.put(45, new RequestIdentityPostUpdate());
-        mUpdates.put(48, new RequestFriendSetPostUpdate());
-        mUpdates.put(49, new RequestFriendSetPostUpdate());
-        mUpdates.put(50, new RequestFriendSetPostUpdate());
-        mUpdates.put(51, new RequestIdentityPostUpdate());
-        mUpdates.put(55, new RequestJsEmbeddingsPostUpdate());
-        mUpdates.put(57, new RequestFriendSetPostUpdate());
-        mUpdates.put(58, new RequestFriendSetPostUpdate());
-        mUpdates.put(59, new Update59());
-        mUpdates.put(60, new Update60());
-        mUpdates.put(62, new RequestJsEmbeddingsPostUpdate());
-        mUpdates.put(65, new Update65());
-        mUpdates.put(69, new Update69());
-        mUpdates.put(71, new RequestIdentityQRCodePostUpdate());
-        mUpdates.put(72, new Update72());
+        mUpdates.put(19, new RequestFriendSet());
+        mUpdates.put(21, new RequestFriendSet());
+        mUpdates.put(23, new RequestFriendSet());
+        mUpdates.put(26, new UpdateMessageTimestamp());
+        mUpdates.put(28, new UpdateMessageTimestamp());
+        mUpdates.put(32, new RequestInvitationSecrets());
+        mUpdates.put(33, new RequestFriendSet());
+        mUpdates.put(36, new RequestFriendSet());
+        mUpdates.put(38, new CheckIdentityShortUrl());
+        mUpdates.put(43, new RequestFriendSet());
+        mUpdates.put(45, new RequestIdentity());
+        mUpdates.put(48, new RequestFriendSet());
+        mUpdates.put(49, new RequestFriendSet());
+        mUpdates.put(50, new RequestFriendSet());
+        mUpdates.put(51, new RequestIdentity());
+        mUpdates.put(55, new RequestJsEmbeddings());
+        mUpdates.put(57, new RequestFriendSet());
+        mUpdates.put(58, new RequestFriendSet());
+        mUpdates.put(59, new RequestGroups());
+        mUpdates.put(60, new RequestBeaconRegions());
+        mUpdates.put(62, new RequestJsEmbeddings());
+        mUpdates.put(65, new RequestUpdateEmailHashes());
+        mUpdates.put(69, new DeleteAttachments());
+        mUpdates.put(71, new RequestIdentityQRCode());
+        mUpdates.put(72, new RequestFriendsAndAssets());
     }
 
     public IDbUpdater getUpdater(int version) {
         return mUpdates.get(version, new IDbUpdater() {
-            @Override
-            public void preUpdate(MainService mainService, SQLiteDatabase db) {
-            }
-
             @Override
             public void postUpdate(MainService mainService, SQLiteDatabase db) {
             }

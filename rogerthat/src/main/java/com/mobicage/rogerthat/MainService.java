@@ -134,7 +134,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
 
     public final static String PREFERENCES_UPDATE_INTENT = "com.mobicage.rogerthat.PREFERENCES_UPDATE";
     public final static String INTENT_BEACON_SERVICE_CONNECTED = "com.mobicage.rogerthat.BEACON_SERVICE_CONNECTED";
-    private final static String INTENT_SHOULD_CLEANUP_CACHED_FILES = "com.mobicage.rogerthat.INTENT_SHOULD_CLEANUP_CACHED_FILES";
+    private final static String INTENT_SHOULD_CLEANUP = "com.mobicage.rogerthat.INTENT_SHOULD_CLEANUP";
 
     public final static String PREFERENCES_KEY = "general_settings";
     public final static String PREFERENCE_TRACKING = "tracking";
@@ -325,7 +325,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
 
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
-        filter.addAction(INTENT_SHOULD_CLEANUP_CACHED_FILES);
+        filter.addAction(INTENT_SHOULD_CLEANUP);
         registerReceiver(mBroadcastReceiver, filter);
 
         final PowerManager pow = (PowerManager) getSystemService(POWER_SERVICE);
@@ -392,8 +392,8 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
                 mScreenIsOn = true;
             } else if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
                 mScreenIsOn = false;
-            } else if (INTENT_SHOULD_CLEANUP_CACHED_FILES.equals(intent.getAction())) {
-                cleanupOldCachedFiles(true);
+            } else if (INTENT_SHOULD_CLEANUP.equals(intent.getAction())) {
+                cleanup(true);
             }
             return null;
         }
@@ -1016,9 +1016,9 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
                 kickHttpCommunication(true, "We just got started");
             }
 
-            cleanupOldCachedFiles(false);
+            cleanup(false);
             PendingIntent cleanupDownloadsIntent = PendingIntent.getBroadcast(this, 0, new Intent(
-                INTENT_SHOULD_CLEANUP_CACHED_FILES), 0);
+                    INTENT_SHOULD_CLEANUP), 0);
 
             AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
             alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
@@ -1032,7 +1032,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         }
     }
 
-    private void cleanupOldCachedFiles(boolean force) {
+    private void cleanup(boolean force) {
         if (!force) {
             long lastWeek = System.currentTimeMillis() - (7 * 86400 * 1000);
             Configuration cfg = mConfigProvider.getConfiguration(CachedDownloader.CONFIGKEY);
@@ -1041,11 +1041,33 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
                 return;
             }
         }
+
+        cleanupOldCachedFiles();
+        cleanupOldBrandings();
+    }
+
+    private void cleanupOldCachedFiles() {
         final CachedDownloader cachedDownloader = CachedDownloader.getInstance(this);
         postOnBIZZHandler(new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
                 cachedDownloader.cleanupOldCachedDownloads();
+            }
+        });
+    }
+
+    private void cleanupOldBrandings() {
+        if (CloudConstants.isContentBrandingApp()) {
+            return;
+        }
+        if (CloudConstants.isYSAAA()) {
+            return;
+        }
+
+        postOnBIZZHandler(new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                getPlugin(FriendsPlugin.class).cleanupOldBrandings();
             }
         });
     }

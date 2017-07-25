@@ -86,9 +86,9 @@ public class QRCodeScannerTextureView extends QRCodeScanner implements TextureVi
             showOpenPreviewForQrCodes();
 
         } catch (IOException ioe) {
-            L.bug("Unexpected IOException initializing TextureView camera", ioe);
+            L.e("Unexpected IOException initializing TextureView camera", ioe);
         } catch (RuntimeException e) {
-            L.bug("Unexpected RuntimeException initializing TextureView camera", e);
+            L.e("Unexpected RuntimeException initializing TextureView camera", e);
         }
     }
 

@@ -207,10 +207,13 @@ public class JsMfr {
             L.bug("Failed to unzip static flow " + mfr.staticFlowHash, e);
             return;
         }
-        if (throwIfNotReady && TextUtils.isEmptyOrWhitespace(htmlString)) {
-            throw new EmptyStaticFlowException(
-                mainService.getString(R.string.this_screen_is_not_yet_downloaded_check_network));
+        if (TextUtils.isEmptyOrWhitespace(htmlString)) {
+            if (throwIfNotReady) {
+                throw new EmptyStaticFlowException(mainService.getString(R.string.this_screen_is_not_yet_downloaded_check_network));
+            }
+            return;
         }
+
         Map<String, Object> request = (Map<String, Object>) userInput.get("request");
 
         String serviceEmail = (String) request.get("service");

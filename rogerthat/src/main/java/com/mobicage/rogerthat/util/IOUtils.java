@@ -19,12 +19,18 @@
 package com.mobicage.rogerthat.util;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.messaging.BrandingFailureException;
+import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.T;
+import com.mobicage.rogerthat.util.ui.ImageHelper;
+import com.soundcloud.android.crop.CropUtil;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -180,6 +186,45 @@ public class IOUtils {
         }
 
         return digest.digest();
+    }
+
+    public static void compressPicture(Uri uri, long maxSize) {
+        try {
+            File file = new File(uri.getPath());
+            long size = file.length();
+            BitmapFactory.Options bounds = new BitmapFactory.Options();
+            Bitmap imgBitmap;
+            if (maxSize == 0) {
+                maxSize = size;
+            }
+            int sampleSize = Math.round((size / maxSize));
+            L.d("compressPicture size: " + size);
+            if (size > maxSize && sampleSize > 1) {
+                double cs;
+                do {
+                    sampleSize = (int) Math.pow(2, Math.ceil(Math.log(sampleSize) / Math.log(2)));
+                    bounds.inSampleSize = sampleSize;
+                    imgBitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), bounds);
+                    sampleSize++;
+                    cs = bounds.outWidth * bounds.outHeight;
+                } while (cs > maxSize + maxSize / 2);
+            } else {
+                bounds.inSampleSize =  1;
+                imgBitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), bounds);
+            }
+
+            final int exifRotation = CropUtil.getExifRotation(file);
+            imgBitmap = ImageHelper.rotateBitmap(imgBitmap, exifRotation);
+
+            FileOutputStream fOut = new FileOutputStream(file);
+            try {
+                imgBitmap.compress(Bitmap.CompressFormat.JPEG, 80, fOut);
+            } finally {
+                fOut.close();
+            }
+        } catch (Exception e) {
+            L.e("compressPicture exception", e);
+        }
     }
 
 }

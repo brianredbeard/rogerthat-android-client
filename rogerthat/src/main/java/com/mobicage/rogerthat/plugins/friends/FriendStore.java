@@ -68,8 +68,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.mobicage.rogerthat.util.db.DBUtils.bindString;
 
@@ -80,6 +82,8 @@ public class FriendStore implements Closeable {
     public final static int SERVICE_ORGANIZATION_TYPE_PROFIT = 2;
     public final static int SERVICE_ORGANIZATION_TYPE_CITY = 3;
     public final static int SERVICE_ORGANIZATION_TYPE_EMERGENCY = 4;
+
+    private static final String DISABLED_BROADCAST_TYPES_USER_DATA_KEY = "__rt__disabledBroadcastTypes";
 
     public final static BitmapHolder FRIEND_WITHOUT_AVATAR = new BitmapHolder(null);
 
@@ -279,8 +283,7 @@ public class FriendStore implements Closeable {
 
         mCountServicesByOrganizationType = mDb.compileStatement(mMainService
                 .getString(R.string.sql_services_count_by_organization_type));
-        mCountServices = mDb.compileStatement(mMainService
-                .getString(R.string.sql_services_count));
+        mCountServices = mDb.compileStatement(mMainService.getString(R.string.sql_services_count));
 
         mPhoneContacts = new PhoneContacts(mMainService.getContentResolver());
 
@@ -541,46 +544,46 @@ public class FriendStore implements Closeable {
             response.updated = false;
             response.reason = friend.email + " is not in the local friendSet";
             return response;
-        } else {
-            long[] versionsInDB = getFriendVersions(friend.email);
+        }
 
-            if (versionsInDB.length > friend.versions.length) {
-                response.updated = false;
-                response.reason = "There are more versions in the local DB than versions on the server. "
-                        + getFriendUpateSummary(friend, versionsInDB);
-                return response;
+        long[] versionsInDB = getFriendVersions(friend.email);
+
+        if (versionsInDB.length > friend.versions.length) {
+            response.updated = false;
+            response.reason = "There are more versions in the local DB than versions on the server. "
+                    + getFriendUpateSummary(friend, versionsInDB);
+            return response;
+        }
+
+        // Check that versions in DB are not greater than versions from server
+        int comparisonResult = compareFriendVersions(versionsInDB, friend.versions);
+        if (versionsInDB.length < friend.versions.length) {
+            if (comparisonResult == 1) {
+                // versionsInDB > versionsFromServer
+                throw new IllegalFriendVersionBumpException(
+                        "Version length difference between local DB and server, "
+                                + "AND one or more versions in local DB are greater than versions on the server. "
+                                + getFriendUpateSummary(friend, versionsInDB));
             } else {
-                // Check that versions in DB are not greater than versions from server
-                int comparisonResult = compareFriendVersions(versionsInDB, friend.versions);
-                if (versionsInDB.length < friend.versions.length) {
-                    if (comparisonResult == 1) {
-                        // versionsInDB > versionsFromServer
-                        throw new IllegalFriendVersionBumpException(
-                                "Version length difference between local DB and server, "
-                                        + "AND one or more versions in local DB are greater than versions on the server. "
-                                        + getFriendUpateSummary(friend, versionsInDB));
-                    } else {
-                        // We can continue. A version field has been added. Eg from [1, 1] to [1, 1, 0].
-                        response.updated = true;
-                        response.reason = null;
-                        return response;
-                    }
-                } else {
-                    // versionsInDB.length == friend.versions.length
-                    if (comparisonResult == -1) {
-                        // versionsInDB < versionsFromServer
-                        response.updated = true;
-                        response.reason = null;
-                        return response;
-                    } else {
-                        response.updated = false;
-                        response.reason = "One or more versions in local DB are greater than or equal to versions on "
-                                + "the server. " + getFriendUpateSummary(friend, versionsInDB);
-                        return response;
-                    }
-                }
+                // We can continue. A version field has been added. Eg from [1, 1] to [1, 1, 0].
+                response.updated = true;
+                response.reason = null;
+                return response;
             }
         }
+
+        // versionsInDB.length == friend.versions.length
+        if (comparisonResult != -1) {
+            // versionsInDB >= versionsFromServer
+            response.updated = false;
+            response.reason = "One or more versions in local DB are greater than or equal to versions on "
+                    + "the server. " + getFriendUpateSummary(friend, versionsInDB);
+            return response;
+        }
+
+        response.updated = true;
+        response.reason = null;
+        return response;
     }
 
     public void addInvitedService(final Friend service) {
@@ -1927,8 +1930,8 @@ public class FriendStore implements Closeable {
         }
 
         for (int i = 0; i < versionsInDB.length; i++) {
-            long versionInDB = Long.valueOf(versionsInDB[i]);
-            long versionFromServer = Long.valueOf(versionsFromServer[i]);
+            long versionInDB = versionsInDB[i];
+            long versionFromServer = versionsFromServer[i];
 
             if (versionInDB > versionFromServer) {
                 return 1;
@@ -2118,14 +2121,11 @@ public class FriendStore implements Closeable {
         String userDataString = getUserData(serviceEmail);
         Map<String, Object> userData = userDataString == null ? new HashMap<String, Object>() : (Map<String, Object>) JSONValue.parse(userDataString);
 
-        JSONArray disabledBroadcastTypes;
-        if (userData.containsKey("__rt__disabledBroadcastTypes")) {
-            disabledBroadcastTypes = (JSONArray) userData.get("__rt__disabledBroadcastTypes");
-        } else {
+        JSONArray disabledBroadcastTypes = (JSONArray) userData.get(DISABLED_BROADCAST_TYPES_USER_DATA_KEY);
+        if (disabledBroadcastTypes == null) {
             disabledBroadcastTypes = new JSONArray();
-        }
-
-        if (disabledBroadcastTypes.contains(broadcastType)) {
+            userData.put(DISABLED_BROADCAST_TYPES_USER_DATA_KEY, disabledBroadcastTypes);
+        } else if (disabledBroadcastTypes.contains(broadcastType)) {
             return null;
         }
 
@@ -2140,9 +2140,30 @@ public class FriendStore implements Closeable {
         T.dontCare(); // T.UI or T.BIZZ
         String userDataString = getUserData(serviceEmail);
         Map<String, Object> userData = userDataString == null ? new HashMap<String, Object>() : (Map<String, Object>) JSONValue.parse(userDataString);
-        if (userData.containsKey("__rt__disabledBroadcastTypes")) {
-            return (JSONArray) userData.get("__rt__disabledBroadcastTypes");
+        JSONArray disabledBroadcastTypes = (JSONArray) userData.get(DISABLED_BROADCAST_TYPES_USER_DATA_KEY);
+        return disabledBroadcastTypes == null ? new JSONArray() : disabledBroadcastTypes;
+    }
+
+    public Set<String> listBrandingsInUse() {
+        T.BIZZ();
+        final Set<String> brandings = new HashSet<>();
+
+        final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_friend_brandings_in_use), null);
+        try {
+            if (c.moveToFirst()) {
+                do {
+                    for (int i = 0; i < 3; i++) {
+                        String branding = c.getString(i);
+                        if (branding != null) {
+                            brandings.add(branding);
+                        }
+                    }
+                } while (c.moveToNext());
+            }
+        } finally {
+            c.close();
         }
-        return new JSONArray();
+
+        return brandings;
     }
 }

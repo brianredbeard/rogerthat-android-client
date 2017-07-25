@@ -209,16 +209,7 @@ public class SystemPlugin implements MobicagePlugin {
                         if (pluginDBUpdates.contains(
                             SYSTEM_PLUGIN_MUST_REFRESH_JS_EMBEDDING)) {
 
-                            // Set an empty array in the DB to clear all packets
-                            updateJSEmbeddedPackets(new JSEmbeddingItemTO[0]);
-
-                            final com.mobicage.to.js_embedding.GetJSEmbeddingRequestTO request = new com.mobicage.to.js_embedding.GetJSEmbeddingRequestTO();
-                            final GetJSEmbeddingResponseHandler responseHandler = new GetJSEmbeddingResponseHandler();
-                            try {
-                                com.mobicage.api.system.Rpc.getJsEmbedding(responseHandler, request);
-                            } catch (Exception e) {
-                                L.bug(e);
-                            }
+                            refreshJsEmdedding();
 
                             mMainService.clearPluginDBUpdate(SystemPlugin.class,
                                 SYSTEM_PLUGIN_MUST_REFRESH_JS_EMBEDDING);
@@ -234,6 +225,19 @@ public class SystemPlugin implements MobicagePlugin {
                 });
             }
         });
+    }
+
+    public void refreshJsEmdedding() {
+        // Set an empty array in the DB to clear all packets
+        updateJSEmbeddedPackets(new JSEmbeddingItemTO[0]);
+
+        final com.mobicage.to.js_embedding.GetJSEmbeddingRequestTO request = new com.mobicage.to.js_embedding.GetJSEmbeddingRequestTO();
+        final GetJSEmbeddingResponseHandler responseHandler = new GetJSEmbeddingResponseHandler();
+        try {
+            com.mobicage.api.system.Rpc.getJsEmbedding(responseHandler, request);
+        } catch (Exception e) {
+            L.bug(e);
+        }
     }
 
     public boolean getWifiOnlyDownloads() {

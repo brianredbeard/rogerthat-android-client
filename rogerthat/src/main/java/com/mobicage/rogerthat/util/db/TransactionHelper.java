@@ -25,6 +25,8 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
+import com.mobicage.rogerthat.util.ui.UIUtils;
+import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
 
 @SuppressWarnings("serial")
@@ -98,8 +100,8 @@ public class TransactionHelper {
                 onRollbackedRunnables.set(null);
 
                 final long duration = System.currentTimeMillis() - start;
-                if (duration > 5000) {
-                    L.bug("Transaction with name \"" + name + "\" took " + duration + " milliseconds!");
+                if (duration > 5000 && UIUtils.isRogerthatTopActivity()) {
+                    L.bug("Transaction in foreground with name \"" + name + "\" took " + duration + " milliseconds!");
                 }
 
                 if (CloudConstants.DEBUG_LOGGING) {

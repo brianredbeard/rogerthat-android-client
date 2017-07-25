@@ -35,6 +35,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.os.ParcelFileDescriptor;
 import android.text.TextUtils;
 import android.util.SparseIntArray;
 
@@ -880,7 +881,11 @@ public class BrandingMgr implements Pickleable, Closeable {
                                     } finally {
                                         stream.close();
                                     }
-                                    tmpFile.renameTo(attachmentFile);
+                                    if (!tmpFile.renameTo(attachmentFile)) {
+                                        IOUtils.copyFile(tmpFile, attachmentFile);
+                                        tmpFile.delete();
+                                    }
+
                                 }
 
                             } catch (Exception e) {
@@ -1029,29 +1034,33 @@ public class BrandingMgr implements Pickleable, Closeable {
         if (jsEnabled) {
             SystemPlugin systemPlugin = mMainService.getPlugin(SystemPlugin.class);
             Map<String, JSEmbedding> packets = systemPlugin.getJSEmbeddedPackets();
-            for (String key : packets.keySet()) {
-                final JSEmbedding packet = packets.get(key);
-                if (isCordovaBranding(item.brandingKey)) {
-                    if ("rogerthat".equals(packet.getName())) {
-                        continue;
+            if (packets.size() > 0) {
+                for (String key : packets.keySet()) {
+                    final JSEmbedding packet = packets.get(key);
+                    if (isCordovaBranding(item.brandingKey)) {
+                        if ("rogerthat".equals(packet.getName())) {
+                            continue;
+                        }
+                    }
+                    if (packet.getStatus() == JSEmbedding.STATUS_AVAILABLE) {
+                        File sourceDir = getJSEmbeddingPacketDirectory(packet.getName());
+                        File targetDir = getJSEmbeddingUnpackDirectory(tmpBrandingDir, packet.getName());
+                        try {
+                            L.i("Copying JSEmbedding packet: " + packet.getName());
+                            IOUtils.copyDirectory(sourceDir, targetDir);
+                        } catch (IOException e) {
+                            L.bug("Could not copy js embedding packet '" + packet.getName() + "'.", e);
+                        }
+                    } else {
+                        L.bug("JSEmbedding packet '" + packet.getName() + "' not downloaded yet. ");
+                        JSEmbeddingItemTO jseito = new JSEmbeddingItemTO();
+                        jseito.name = packet.getName();
+                        jseito.hash = packet.getEmeddingHash();
+                        queue(jseito);
                     }
                 }
-                if (packet.getStatus() == JSEmbedding.STATUS_AVAILABLE) {
-                    File sourceDir = getJSEmbeddingPacketDirectory(packet.getName());
-                    File targetDir = getJSEmbeddingUnpackDirectory(tmpBrandingDir, packet.getName());
-                    try {
-                        L.i("Copying JSEmbedding packet: " + packet.getName());
-                        IOUtils.copyDirectory(sourceDir, targetDir);
-                    } catch (IOException e) {
-                        L.bug("Could not copy js embedding packet '" + packet.getName() + "'.", e);
-                    }
-                } else {
-                    L.bug("JSEmbedding packet '" + packet.getName() + "' not downloaded yet. ");
-                    JSEmbeddingItemTO jseito = new JSEmbeddingItemTO();
-                    jseito.name = packet.getName();
-                    jseito.hash = packet.getEmeddingHash();
-                    queue(jseito);
-                }
+            } else {
+                systemPlugin.refreshJsEmdedding();
             }
         }
 
@@ -1608,7 +1617,7 @@ public class BrandingMgr implements Pickleable, Closeable {
         }
     };
 
-    private File getDownloadedFile(final Long downloadId) throws DownloadNotCompletedException {
+    private ParcelFileDescriptor getDownloadedFile(final Long downloadId) throws DownloadNotCompletedException {
         final DownloadManager dwnlMgr = getDownloadManager();
         final Cursor cursor = dwnlMgr.query(new Query().setFilterById(downloadId));
         try {
@@ -1620,8 +1629,11 @@ public class BrandingMgr implements Pickleable, Closeable {
             final int status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
             switch (status) {
             case DownloadManager.STATUS_SUCCESSFUL:
-                final String filePath = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_FILENAME));
-                return new File(filePath);
+                try {
+                    return dwnlMgr.openDownloadedFile(downloadId);
+                } catch (FileNotFoundException e) {
+                    return null;
+                }
             case DownloadManager.STATUS_FAILED:
                 return null;
             default: // Not completed
@@ -1634,9 +1646,9 @@ public class BrandingMgr implements Pickleable, Closeable {
     }
 
     private void downloadCompleted(final Long downloadId) throws BrandingFailureException {
-        final File downloadedFile;
+        final ParcelFileDescriptor pfd;
         try {
-            downloadedFile = getDownloadedFile(downloadId);
+            pfd = getDownloadedFile(downloadId);
         } catch (DownloadNotCompletedException e) {
             return;
         }
@@ -1652,11 +1664,11 @@ public class BrandingMgr implements Pickleable, Closeable {
             }
 
             boolean success;
-            if (downloadedFile == null) {
+            if (pfd == null) {
                 success = false;
             } else {
                 try {
-                    storeDownloadedBranding(downloadedFile, item);
+                    storeDownloadedBranding(pfd, item);
                     success = true;
                 } catch (Exception e) {
                     success = false;
@@ -1669,28 +1681,48 @@ public class BrandingMgr implements Pickleable, Closeable {
         }
     }
 
-    private void storeDownloadedBranding(File tmpFile, BrandedItem item) throws BrandingFailureException, IOException {
-        final File dstFile;
+    private File getDestinationFile(BrandedItem item) throws BrandingFailureException {
         if (item.type == BrandedItem.TYPE_JS_EMBEDDING_PACKET) {
             final JSEmbeddingItemTO packet = (JSEmbeddingItemTO) item.object;
-            dstFile = getJSEmbeddingPacketFile(packet.name);
+            return getJSEmbeddingPacketFile(packet.name);
         } else if (item.type == BrandedItem.TYPE_LOCAL_FLOW_ATTACHMENT) {
             final StartFlowRequest flow = (StartFlowRequest) item.object;
-            dstFile = getAttachmentFile(flow.thread_key, attachmentDownloadUrlHash(item.brandingKey));
+            return getAttachmentFile(flow.thread_key, attachmentDownloadUrlHash(item.brandingKey));
         } else if (item.type == BrandedItem.TYPE_ATTACHMENT) {
             final AttachmentDownload attachment = (AttachmentDownload) item.object;
-            dstFile = getAttachmentFile(attachment);
+            return getAttachmentFile(attachment);
         } else if (item.type == BrandedItem.TYPE_APP_ASSET) {
             final UpdateAppAssetRequestTO assetRequestTO = (UpdateAppAssetRequestTO) item.object;
-            dstFile = getAssetFile(mMainService, assetRequestTO.kind);
+            return getAssetFile(mMainService, assetRequestTO.kind);
         } else {
-            dstFile = getBrandingFile(item.brandingKey);
+            return getBrandingFile(item.brandingKey);
         }
+    }
+
+    private void storeDownloadedBranding(File tmpFile, BrandedItem item) throws BrandingFailureException, IOException {
+        final File dstFile = getDestinationFile(item);
 
         if (!tmpFile.renameTo(dstFile)) {
             IOUtils.copyFile(tmpFile, dstFile);
-            if (!item.usesDownloadManager()) {
-                tmpFile.delete();
+            tmpFile.delete();
+        }
+    }
+
+    private void storeDownloadedBranding(ParcelFileDescriptor pfd, BrandedItem item) throws BrandingFailureException, IOException {
+        final File dstFile = getDestinationFile(item);
+
+
+        InputStream is = new FileInputStream(pfd.getFileDescriptor());
+        if (is != null) {
+            try {
+                OutputStream out = new FileOutputStream(dstFile);
+                try {
+                    IOUtils.copy(is, out, 1024);
+                } finally {
+                    out.close();
+                }
+            } finally {
+                is.close();
             }
         }
     }
@@ -1895,7 +1927,7 @@ public class BrandingMgr implements Pickleable, Closeable {
         return new File(dir, branding + ".branding");
     }
 
-    private File getBrandingRootDirectory() throws BrandingFailureException {
+    public File getBrandingRootDirectory() throws BrandingFailureException {
         T.dontCare();
         File file = IOUtils.getFilesDirectory(mMainService);
         IOUtils.createDirIfNotExistsBranding(mMainService, file);
@@ -1999,6 +2031,7 @@ public class BrandingMgr implements Pickleable, Closeable {
     protected void save() {
         T.dontCare();
         synchronized (mLock) {
+            L.d("BrandingMgr items in queue: " + mQueue.size());
             String serializedMgr;
             try {
                 serializedMgr = Base64.encodeBytes(Pickler.getPickleFromObject(this));

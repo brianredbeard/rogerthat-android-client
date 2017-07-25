@@ -23,15 +23,11 @@ import android.database.sqlite.SQLiteDatabase;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 
-public class Update59 implements IDbUpdater {
-
-    @Override
-    public void preUpdate(MainService mainService, SQLiteDatabase db) {
-    }
+public class RequestIdentityQRCode implements IDbUpdater {
 
     @Override
     public void postUpdate(MainService mainService, SQLiteDatabase db) {
-        mainService.registerPluginDBUpdate(FriendsPlugin.class, FriendsPlugin.FRIENDS_PLUGIN_MUST_GET_GROUPS);
-
+        mainService.registerPluginDBUpdate(FriendsPlugin.class, FriendsPlugin.FRIENDS_PLUGIN_MUST_REFRESH_IDENTITY_QR_CODE);
     }
+
 }

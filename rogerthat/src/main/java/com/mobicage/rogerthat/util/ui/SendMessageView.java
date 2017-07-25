@@ -332,9 +332,9 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
             case PICK_IMAGE:
                 if (resultCode == Activity.RESULT_OK) {
                     if (mUriSavedFile == null) {
-                        setupUploadFile("png", false);
+                        setupUploadFile("jpg", false);
                     }
-                    mUploadFileExtenstion = AttachmentViewerActivity.CONTENT_TYPE_PNG;
+                    mUploadFileExtenstion = AttachmentViewerActivity.CONTENT_TYPE_JPEG;
                     if (data != null && data.getData() != null) {
                         final Uri selectedImage = data.getData();
                         setFileExtemsionFromUri(selectedImage);
@@ -641,14 +641,14 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
             return;
         }
 
-        if (!setupUploadFile("png", true)) {
+        if (!setupUploadFile("jpg", true)) {
             return;
         }
 
         Intent galleryIntent = new Intent(Intent.ACTION_PICK,
                 android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         galleryIntent.putExtra(MediaStore.EXTRA_OUTPUT, mUriSavedFile);
-        galleryIntent.putExtra("outputFormat", Bitmap.CompressFormat.PNG.toString());
+        galleryIntent.putExtra("outputFormat", Bitmap.CompressFormat.JPEG.toString());
         galleryIntent.setType("image/*");
 
         final Intent chooserIntent = Intent.createChooser(galleryIntent, mActivity.getString(R.string.select_source));
@@ -773,8 +773,8 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
                 try {
                     String fileType = cr.getType(selectedImage);
                     L.d("fileType: " + fileType);
-                    if (fileType == null || AttachmentViewerActivity.CONTENT_TYPE_PNG.equalsIgnoreCase(fileType)) {
-                        mUploadFileExtenstion = AttachmentViewerActivity.CONTENT_TYPE_PNG;
+                    if (fileType == null || AttachmentViewerActivity.CONTENT_TYPE_JPEG.equalsIgnoreCase(fileType)) {
+                        mUploadFileExtenstion = AttachmentViewerActivity.CONTENT_TYPE_JPEG;
                     } else {
                         mUploadFileExtenstion = AttachmentViewerActivity.CONTENT_TYPE_JPEG;
                     }
@@ -832,15 +832,18 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
     }
 
     private void setPictureSelected() {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inSampleSize = 4;
         if (!new File(mUriSavedFile.getPath()).exists()) {
             UIUtils.showLongToast(mActivity, mActivity.getString(R.string.error_please_try_again));
             return;
         }
 
-        Bitmap bitmap = ImageHelper.getBitmapFromFile(mUriSavedFile.getPath(), options);
+        IOUtils.compressPicture(mUriSavedFile, 600000);
+        mUploadFileExtenstion = AttachmentViewerActivity.CONTENT_TYPE_JPEG;
 
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inSampleSize = 4;
+
+        Bitmap bitmap = ImageHelper.getBitmapFromFile(mUriSavedFile.getPath(), options);
         Drawable d = new BitmapDrawable(Resources.getSystem(), bitmap);
         mAttachmentPreview.setImageDrawable(d);
         mAttachmentContainer.setVisibility(View.VISIBLE);

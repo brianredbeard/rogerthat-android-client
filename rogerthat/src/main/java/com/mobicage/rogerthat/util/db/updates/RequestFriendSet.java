@@ -23,14 +23,11 @@ import android.database.sqlite.SQLiteDatabase;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 
-public class Update65 implements IDbUpdater {
-
-    @Override
-    public void preUpdate(MainService mainService, SQLiteDatabase db) {
-    }
+public class RequestFriendSet implements IDbUpdater {
 
     @Override
     public void postUpdate(MainService mainService, SQLiteDatabase db) {
-        mainService.registerPluginDBUpdate(FriendsPlugin.class, FriendsPlugin.FRIENDS_PLUGIN_MUST_UPDATE_EMAIL_HASHES);
+        mainService.registerPluginDBUpdate(FriendsPlugin.class,
+            FriendsPlugin.FRIENDS_PLUGIN_MUST_DO_FULL_REFRESH_INTENT);
     }
 }

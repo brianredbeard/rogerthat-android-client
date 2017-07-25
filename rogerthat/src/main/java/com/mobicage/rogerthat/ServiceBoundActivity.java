@@ -528,6 +528,9 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
 
     private void showNavigationToolbar() {
         LinearLayout navigationFooter = (LinearLayout) findViewById(R.id.nav_view_footer);
+        if (navigationFooter == null) {
+            return;
+        }
 
         GradientDrawable shape = new GradientDrawable(GradientDrawable.Orientation.BOTTOM_TOP,
                 new int[]{LookAndFeelConstants.getPrimaryColorDark(this), LookAndFeelConstants.getPrimaryColor(this)});
@@ -598,6 +601,9 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
 
         Bitmap background = SystemPlugin.getAppAsset(this, kind);
         ImageView headerImage = (ImageView) findViewById(R.id.nav_header);
+        if (headerImage == null) {
+            return;
+        }
         if (background == null) {
             headerImage.setImageResource(R.drawable.homescreen_header);
         } else {

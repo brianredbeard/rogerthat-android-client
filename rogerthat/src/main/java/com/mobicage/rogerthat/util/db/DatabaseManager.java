@@ -75,7 +75,6 @@ public class DatabaseManager implements Closeable {
     private class OpenHelper extends SQLiteOpenHelper {
 
         private final MainService mMainService;
-        private final int mVersion;
 
         OpenHelper(final MainService mainService, final String dbName, final int dbVersion) {
             super(mainService, dbName, new SQLiteDatabase.CursorFactory() {
@@ -88,16 +87,41 @@ public class DatabaseManager implements Closeable {
             }, dbVersion);
             T.UI();
             mMainService = mainService;
-            mVersion = dbVersion;
         }
 
         @Override
         public void onCreate(final SQLiteDatabase db) {
             T.UI();
-            for (int i = 1; i <= mVersion; i++) {
-                final int current = i - 1;
-                final int next = i;
-                updateDB(db, current, next);
+            initDB(db);
+        }
+
+        @Override
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            T.UI();
+            for (int i = oldVersion; i < newVersion; i++) {
+                updateDB(db, i, i + 1);
+            }
+        }
+
+        private List<String> getSql(final String filename) {
+            T.UI();
+            try {
+                return IOUtils.readAllLines(new InputStreamReader(mMainService.getAssets().open(filename)));
+            } catch (IOException e) {
+                L.d("Asset " + filename + " not found!");
+                throw new RuntimeException(e);
+            }
+        }
+
+        private void initDB(final SQLiteDatabase db) {
+            L.d("Initializing db");
+            final List<String> sqlLines = getSql("db/init.sql");
+            executeLines(db, sqlLines);
+
+            final Updates updates = new Updates();
+            for (int i = 0; i <= DB_VERSION; i++) {
+                IDbUpdater updater = updates.getUpdater(i);
+                updater.postUpdate(mMainService, db);
             }
         }
 
@@ -108,8 +132,11 @@ public class DatabaseManager implements Closeable {
 
             final Updates updates = new Updates();
             IDbUpdater updater = updates.getUpdater(next);
-            updater.preUpdate(mMainService, db);
+            executeLines(db, sqlLines);
+            updater.postUpdate(mMainService, db);
+        }
 
+        private void executeLines(final SQLiteDatabase db, List<String> sqlLines) {
             if (sqlLines != null) {
                 StringBuilder sb = new StringBuilder();
                 for (String sqlPart : sqlLines) {
@@ -125,25 +152,6 @@ public class DatabaseManager implements Closeable {
                         sb = new StringBuilder();
                     }
                 }
-            }
-            updater.postUpdate(mMainService, db);
-        }
-
-        private List<String> getSql(final String filename) {
-            T.UI();
-            try {
-                return IOUtils.readAllLines(new InputStreamReader(mMainService.getAssets().open(filename)));
-            } catch (IOException e) {
-                L.d("Asset " + filename + " not found!");
-                throw new RuntimeException(e);
-            }
-        }
-
-        @Override
-        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            T.UI();
-            for (int i = oldVersion; i < newVersion; i++) {
-                updateDB(db, i, i + 1);
             }
         }
     }

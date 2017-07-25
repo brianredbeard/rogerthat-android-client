@@ -894,12 +894,14 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 L.d("NOT Executing JS: " + jsCommand);
             }
         } else {
-            mService.postOnUIHandler(new SafeRunnable() {
-                @Override
-                protected void safeRun() throws Exception {
-                    executeJS(force, jsCommandFormat, args);
-                }
-            });
+            if (mService != null) {
+                mService.postOnUIHandler(new SafeRunnable() {
+                    @Override
+                    protected void safeRun() throws Exception {
+                        executeJS(force, jsCommandFormat, args);
+                    }
+                });
+            }
         }
     }
 
@@ -1334,11 +1336,19 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                         L.d("Changing to SCREEN_ORIENTATION_LANDSCAPE");
                         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
                     }
+                    if (mQRCodeScanner != null && mQRCodeScanner.cameraManager.isOpen()) {
+                        mQRCodeScanner.stopScanningForQRCodes();
+                        mQRCodeScanner.startScanningForQRCodes();
+                    }
                     break;
                 case PORTRAIT:
                     if (newConfig.orientation != Configuration.ORIENTATION_PORTRAIT) {
                         L.d("Changing to SCREEN_ORIENTATION_PORTRAIT");
                         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                    }
+                    if (mQRCodeScanner != null && mQRCodeScanner.cameraManager.isOpen()) {
+                        mQRCodeScanner.stopScanningForQRCodes();
+                        mQRCodeScanner.startScanningForQRCodes();
                     }
                     break;
                 case DYNAMIC:

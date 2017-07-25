@@ -18,6 +18,7 @@
 
 package com.mobicage.rpc.singlecall;
 
+import java.util.List;
 import java.util.Map;
 
 import org.json.simple.JSONValue;
@@ -33,20 +34,18 @@ public class ActivityLogLocations extends SingleCall {
 
     @Override
     public boolean isEqualToCallWithBody(String callBody) {
-        String thisCode = (String) request.get("code");
-        if (thisCode == null) {
-            L.e("code is not supposed to be empty in " + this.function);
+        List<Map<String, Object>> recipients = (List<Map<String, Object>>) request.get("recipients");
+        if (recipients == null) {
+            L.e("recipients is not supposed to be empty in " + this.function);
             return false;
         }
 
-        Map<String, Object> otherCall = (Map<String, Object>) JSONValue.parse(callBody);
-        Map<String, Object> otherArgs = (Map<String, Object>) otherCall.get("a");
-        Map<String, Object> otherRequest = (Map<String, Object>) otherArgs.get("request");
-        if (otherRequest == null)
-            return false;
-
-        String otherCode = (String) otherRequest.get("code");
-        return thisCode.equals(otherCode);
+        // Return TRUE if a target is not a TRACKING target (TRACKING targets are >1000)
+        for (Map<String, Object> recipient : recipients) {
+            final Long target = (Long) recipient.get("target");
+            return target == null || target < 1000;
+        }
+        return true;
     }
 
 }

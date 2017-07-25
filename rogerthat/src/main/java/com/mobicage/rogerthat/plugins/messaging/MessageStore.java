@@ -101,6 +101,7 @@ public class MessageStore implements Closeable {
     private final SQLiteStatement mUpdateFlagsBIZZ;
     private final SQLiteStatement mGetMessageFlagsUI;
     private final SQLiteStatement mGetMessageFlagsBIZZ;
+    private final SQLiteStatement mLastThreadMessageBySortidBIZZ;
     private final SQLiteStatement mUpdateSortidForThreadBySortidBIZZ;
     private final SQLiteStatement mGetHighestSortidBIZZ;
     private final SQLiteStatement mUpdateMessageLastThreadMessageBIZZ;
@@ -185,6 +186,8 @@ public class MessageStore implements Closeable {
         mUpdateFlagsBIZZ = mDb.compileStatement(mMainService.getString(R.string.sql_message_update_flags));
         mGetMessageFlagsUI = mDb.compileStatement(mMainService.getString(R.string.sql_message_get_flags));
         mGetMessageFlagsBIZZ = mDb.compileStatement(mMainService.getString(R.string.sql_message_get_flags));
+        mLastThreadMessageBySortidBIZZ = mDb.compileStatement(mMainService
+                .getString(R.string.sql_message_get_last_thread_message));
         mUpdateSortidForThreadBySortidBIZZ = mDb.compileStatement(mMainService
             .getString(R.string.sql_message_update_sortid_for_thread));
         mGetHighestSortidBIZZ = mDb.compileStatement(mMainService.getString(R.string.sql_message_get_highest_sortid));
@@ -649,10 +652,19 @@ public class MessageStore implements Closeable {
         return mGetParentSortIDBIZZ.simpleQueryForLong();
     }
 
+    private String lastThreadMessage(long sortId) {
+        mLastThreadMessageBySortidBIZZ.bindLong(1, sortId);
+        mLastThreadMessageBySortidBIZZ.bindLong(2, sortId);
+        return mLastThreadMessageBySortidBIZZ.simpleQueryForString();
+    }
+
     private void updateSortId(long oldSortId, long newSortId) {
+        String lastThreadMessage = lastThreadMessage(oldSortId);
+
         mUpdateSortidForThreadBySortidBIZZ.bindLong(1, newSortId);
-        mUpdateSortidForThreadBySortidBIZZ.bindLong(2, oldSortId);
+        mUpdateSortidForThreadBySortidBIZZ.bindString(2, lastThreadMessage);
         mUpdateSortidForThreadBySortidBIZZ.bindLong(3, oldSortId);
+        mUpdateSortidForThreadBySortidBIZZ.bindLong(4, oldSortId);
         mUpdateSortidForThreadBySortidBIZZ.execute();
     }
 
@@ -1150,6 +1162,7 @@ public class MessageStore implements Closeable {
         mUpdateFlagsBIZZ.close();
         mGetMessageFlagsUI.close();
         mGetMessageFlagsBIZZ.close();
+        mLastThreadMessageBySortidBIZZ.close();
         mUpdateSortidForThreadBySortidBIZZ.close();
         mGetHighestSortidBIZZ.close();
         mUpdateMessageLastThreadMessageBIZZ.close();

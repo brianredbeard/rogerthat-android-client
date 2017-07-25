@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.customtabs.CustomTabsIntent;
 
 import com.mobicage.api.services.Rpc;
 import com.mobicage.rogerth.at.R;
@@ -296,7 +297,7 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
             JsMfr.executeMfr(mfr, userInput, mService, true);
         } catch (EmptyStaticFlowException ex) {
             mActivity.completeTransmit(null);
-            UIUtils.showDialog(mService, null, ex.getMessage());
+            UIUtils.showDialog(mActivity, null, ex.getMessage());
             mService.getPlugin(FriendsPlugin.class).requestStaticFlow(request.service, item);
         }
     }
@@ -348,7 +349,16 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
             return;
         }
 
-        final Intent intent = new Intent(buttonAction, Uri.parse(actionInfo.get("androidUrl")));
+        Uri uri = Uri.parse(actionInfo.get("androidUrl"));
+        
+        if (Message.MC_HTTP_PREFIX.equals(buttonAction) || Message.MC_HTTPS_PREFIX.equals(buttonAction)) {
+            CustomTabsIntent.Builder customTabsBuilder = new CustomTabsIntent.Builder();
+            CustomTabsIntent customTabsIntent = customTabsBuilder.build();
+            customTabsIntent.launchUrl(mActivity, uri);
+            return;
+        }
+
+        final Intent intent = new Intent(buttonAction, uri);
         mActivity.startActivity(intent);
         mResultHandler.onSuccess();
         stop();

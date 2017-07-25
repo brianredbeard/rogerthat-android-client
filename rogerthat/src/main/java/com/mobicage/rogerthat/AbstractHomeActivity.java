@@ -348,7 +348,11 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity {
 
     private void goToMessageDetail(final String messageKey) {
         Message message = mMessagingPlugin.getStore().getPartialMessageByKey(messageKey);
-        mMessagingPlugin.showMessage(this, message, null);
+        if (message == null) {
+            UIUtils.showLongToast(this, getString(R.string.message_not_found));
+        } else {
+            mMessagingPlugin.showMessage(this, message, null);
+        }
     }
 
     private void processUrl(final String url) {

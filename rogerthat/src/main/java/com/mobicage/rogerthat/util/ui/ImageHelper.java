@@ -31,6 +31,7 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 
+import com.mobicage.rogerthat.util.logging.L;
 import com.soundcloud.android.crop.CropUtil;
 
 // Copied from http://stackoverflow.com/questions/2459916/how-to-make-an-imageview-to-have-rounded-corners
@@ -48,8 +49,13 @@ public class ImageHelper {
         int aw = UIUtils.getAbsoluteWidthInPixels(context);
 
         radius = (int) Math.ceil(((float) w / aw) * radius);
-
-        Bitmap output = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        Bitmap output;
+        try {
+            output = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        } catch (OutOfMemoryError e) {
+            L.d(e);
+            return null;
+        }
         Canvas canvas = new Canvas(output);
 
         final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -83,7 +89,15 @@ public class ImageHelper {
         if (bitmap == null)
             return null; // saw this once when phone complains about "not enough storage"
 
-        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Config.ARGB_8888);
+        int w = bitmap.getWidth();
+        int h = bitmap.getHeight();
+        Bitmap output;
+        try {
+            output = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        } catch (OutOfMemoryError e) {
+            L.d(e);
+            return null;
+        }
         Canvas canvas = new Canvas(output);
 
         final int color = 0xff424242;
@@ -122,5 +136,4 @@ public class ImageHelper {
             return bm;
         }
     }
-
 }

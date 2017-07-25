@@ -21,16 +21,12 @@ package com.mobicage.rogerthat.util.db.updates;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.mobicage.rogerthat.MainService;
-import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
+import com.mobicage.rogerthat.plugins.trackme.TrackmePlugin;
 
-public class Update69 implements IDbUpdater {
-
-    @Override
-    public void preUpdate(MainService mainService, SQLiteDatabase db) {
-    }
+public class RequestBeaconRegions implements IDbUpdater {
 
     @Override
     public void postUpdate(MainService mainService, SQLiteDatabase db) {
-        mainService.registerPluginDBUpdate(BrandingMgr.class, BrandingMgr.MUST_DELETE_ATTACHMENTS_INTENT);
+        mainService.registerPluginDBUpdate(TrackmePlugin.class, TrackmePlugin.TRACKME_PLUGIN_MUST_GET_BEACON_REGIONS);
     }
 }

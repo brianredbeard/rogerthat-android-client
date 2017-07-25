@@ -329,18 +329,10 @@ public class AlertManager extends BroadcastReceiver implements Closeable, OnShar
             mPendingRingIntent);
     }
 
-    private boolean isRogerthatTopActivity() {
-        T.UI();
-        final Activity topActivity = UIUtils.getTopActivity();
-        if (topActivity == null)
-            return false;
-        return mMainService.getPackageName().equals(topActivity.getPackageName());
-    }
-
     private void beep(boolean now) {
         T.UI();
 
-        final boolean shallMakeSound = !(mMainService.getScreenIsOn() && isRogerthatTopActivity())
+        final boolean shallMakeSound = !(mMainService.getScreenIsOn() && UIUtils.isRogerthatTopActivity())
             && (now || mIntervalTime != Integer.MAX_VALUE);
         final boolean shallVibrate = now || mIntervalTime != Integer.MAX_VALUE;
         mSoundAndVibrateHandler.post(new SafeRunnable() {

@@ -255,6 +255,7 @@
     <string name="message_delete_confirm">Confirm deletion</string>
     <string name="message_delete_question">Do you want to delete this conversation?</string>
     <string name="message_history">History</string>
+    <string name="message_not_found">Message not found.</string>
     <string name="message_not_on_server">Message not yet on server.</string>
     <string name="message_notification_n_new_messages">%1$d new messages.</string>
     <string name="message_notification_n_new_n_updated">%1$d new. %2$d updated.</string>
@@ -341,8 +342,8 @@
     <string name="profile">Profile</string>
     <string name="promo">Promo</string>
     <string name="provide_qr_code_name">Provide a name for the QR code</string>
-    <string name="qr_code">QR code</string>
     <string name="qr_call_tel">Do you wish to call %1$s?</string>
+    <string name="qr_code">QR code</string>
     <string name="qr_code_scanned">QR code scanned</string>
     <string name="qr_open_url">Do you wish to open the following web page:\n\n%1$s</string>
     <string name="reach">Reach:</string>

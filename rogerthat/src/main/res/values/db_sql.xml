@@ -112,6 +112,12 @@
 
     <string name="sql_friend_get_versions">SELECT versions FROM friend WHERE email=?</string>
 
+    <string name="sql_friend_brandings_in_use">
+        SELECT description_branding, menu_branding, screen_branding
+        FROM friend f INNER JOIN service_menu_item smi ON smi.friend = f.email
+        WHERE f.existence = 0
+    </string>
+
     <!-- friend_set -->
     <string name="sql_friendset_version_get">SELECT version FROM friend_set_version</string>
     <string name="sql_friendset_version_set">UPDATE friend_set_version SET version = ?</string>
@@ -145,19 +151,11 @@
     <string name="sql_message_set_thread_as_read">
 UPDATE message SET dirty = 0 WHERE \"key\" = ? or parent_key = ?
     </string>
+    <string name="sql_message_get_last_thread_message">SELECT m2.key FROM message m2 WHERE m2.sortid = ? AND m2.timestamp = (SELECT max(m3.timestamp) FROM message m3 WHERE m3.sortid = ? AND m3.existence = 1)</string>
     <string name="sql_message_update_sortid_for_thread">
 UPDATE message
 SET sortid = ?,
-    last_thread_message = (
-        SELECT m2.key
-        FROM message m2
-        WHERE m2.sortid = message.sortid
-        AND m2.timestamp = (
-            SELECT max(m3.timestamp)
-            FROM message m3
-            WHERE m3.sortid = message.sortid AND m3.existence = 1
-            )
-        ),
+    last_thread_message = ?,
     reply_count = (SELECT count(*) FROM message m1 WHERE m1.sortid = ? AND m1.existence = 1)
 WHERE sortid = ?
     </string>

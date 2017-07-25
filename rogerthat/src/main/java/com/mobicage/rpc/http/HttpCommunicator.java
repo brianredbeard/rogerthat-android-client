@@ -195,13 +195,8 @@ public class HttpCommunicator {
         mNetworkWorkerThread = new HandlerThread("rogerthat_net_worker");
         mNetworkWorkerThread.start();
         final Looper looper = mNetworkWorkerThread.getLooper();
+        T.setHTTPThread("HttpCommunicator", mNetworkWorkerThread);
         mNetworkHandler = new Handler(looper);
-        mNetworkHandler.post(new SafeRunnable() {
-            @Override
-            protected void safeRun() throws Exception {
-                debugLog("HTTP network thread id is " + android.os.Process.myTid());
-            }
-        });
 
         final CountDownLatch latch = new CountDownLatch(1);
         mMainService.postAtFrontOfBIZZHandler(new SafeRunnable() {
@@ -313,6 +308,7 @@ public class HttpCommunicator {
         }
         mNetworkHandler = null;
         mNetworkWorkerThread = null;
+        T.resetHTTPThreadId();
 
         final CountDownLatch latch = new CountDownLatch(1);
         mMainService.postAtFrontOfBIZZHandler(new SafeRunnable() {
@@ -514,7 +510,7 @@ public class HttpCommunicator {
             final boolean cachedNewCallsInBacklog = mNewCallsInBacklog;
             mNewCallsInBacklog = false; // we know that at least all work that is in the backlog *now*, will be
             // processed
-            doCommunication(protocol, (status == STATUS_COMMUNICATION_SERVER_HAS_MORE) || mustActOnKick, loopCount,
+            doCommunication(protocol, (status == STATUS_COMMUNICATION_SERVER_HAS_MORE) || mustActOnKick, false, loopCount,
                 wakeLockReleaseRunnable, new CommunicationResultHandler() {
                     @Override
                     public void handle(final int newStatus) {
@@ -608,7 +604,7 @@ public class HttpCommunicator {
 
     }
 
-    private void doCommunication(final HttpProtocol protocol, final boolean force, final int loopCount,
+    private void doCommunication(final HttpProtocol protocol, final boolean force, final boolean retry, final int loopCount,
         final WakeLockReleaseRunnable wakeLockReleaseRunnable, final CommunicationResultHandler resultHandler) {
         T.BIZZ();
 
@@ -625,7 +621,7 @@ public class HttpCommunicator {
         }
 
         synchronized (mStateMachineLock) {
-            if (mIsCommunicating && loopCount == 1) {
+            if (mIsCommunicating && loopCount == 1 && !retry) {
                 debugLog("Skipping duplicate first loop of doCommunication()");
                 mKickReceived = true;
                 wakeLockReleaseRunnable.run();
@@ -718,7 +714,7 @@ public class HttpCommunicator {
             mCurrentServerUrl = CloudConstants.JSON_RPC_URL;
 
             // loopCount + 1 otherwise failover won't work since doCommunication will see that mIsCommunicating == true
-            doCommunication(protocol, force, loopCount + 1, wakeLockReleaseRunnable, resultHandler);
+            doCommunication(protocol, force, true, loopCount, wakeLockReleaseRunnable, resultHandler);
         } else {
             resultHandler.handle(STATUS_COMMUNICATION_ERROR);
         }

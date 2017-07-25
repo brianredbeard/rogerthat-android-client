@@ -85,8 +85,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import in.uncod.android.bypass.Bypass;
-
 public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHolder> {
 
     public final static String NEWS_ITEM_ROGER_UPDATE_INTENT = "com.mobicage.rogerthat.NewsListAdapter.NEWS_ITEM_ROGER_UPDATE_INTENT";
@@ -641,9 +639,8 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                     }
                     sheetView.addView(optionItem);
 
-                    if (mActivity instanceof NewsPinnedActivity) {
+                    if (!(mActivity instanceof NewsPinnedActivity)) {
                         // You cannot hide news items from pinned item list
-                    } else if (existenceStatus == Friend.ACTIVE) {
                         final View actionHide = mLayoutInflater.inflate(R.layout.news_options_item, null);
                         ((ImageView) actionHide.findViewById(R.id.icon)).setImageDrawable(new IconicsDrawable(mActivity, FontAwesome.Icon.faw_times_circle).color(ContextCompat.getColor(mActivity, R.color.mc_default_text)).sizeDp(20).paddingDp(2));
                         ((TextView) actionHide.findViewById(R.id.title)).setText(R.string.unsubscribe);
@@ -1067,19 +1064,27 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 mFillCacheInFrontTask.cancel(true);
                 mFillCacheInFrontTask = null;
             }
-            List<NewsItemIndex> newsItems = mActivity.newsPlugin.getNewsBefore(mNewsItemsByPosition.get(mMinPosition).sortKey, BATCH_SIZE, mActivity.pinnedSearchQry);
-            addNewsItemsToFront(newsItems);
+
+            do {
+                List<NewsItemIndex> newsItems = mActivity.newsPlugin.getNewsBefore(mNewsItemsByPosition.get(mMinPosition).sortKey, BATCH_SIZE, mActivity.pinnedSearchQry);
+                addNewsItemsToFront(newsItems);
+            } while (position < mMinPosition);
+
         } else if (position > mMaxPosition) {
-            if (mMinPosition < 0)
-                mMinPosition = 0;
             if (mFillCacheInEndTask != null && mFillCacheInEndTask.getStatus() != AsyncTask.Status.FINISHED) {
                 mFillCacheInEndTask.cancel(true);
                 mFillCacheInEndTask = null;
             }
-            NewsItemIndex newsItemIndex = mNewsItemsByPosition.get(mMaxPosition);
-            long sortKey = newsItemIndex == null ? Long.MAX_VALUE : newsItemIndex.sortKey;
-            List<NewsItemIndex> newsItems = mActivity.newsPlugin.getNewsAfter(sortKey, BATCH_SIZE, mActivity.pinnedSearchQry);
-            addNewsItemsToEnd(newsItems);
+
+            if (mMinPosition < 0)
+                mMinPosition = 0;
+
+            do {
+                NewsItemIndex newsItemIndex = mNewsItemsByPosition.get(mMaxPosition);
+                long sortKey = newsItemIndex == null ? Long.MAX_VALUE : newsItemIndex.sortKey;
+                List<NewsItemIndex> newsItems = mActivity.newsPlugin.getNewsAfter(sortKey, BATCH_SIZE, mActivity.pinnedSearchQry);
+                addNewsItemsToEnd(newsItems);
+            } while (position > mMaxPosition);
         }
 
         if ((position - BACKGROUND_FETCH_THRESHOLD) <= mMinPosition && mMinPosition > 0
@@ -1106,12 +1111,10 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     }
 
     private void addNewsItemsToEnd(List<NewsItemIndex> newsItems) {
-        int pos = mMaxPosition;
         for (NewsItemIndex ni : newsItems) {
-            mNewsItemsByPosition.put(++pos, ni);
+            mNewsItemsByPosition.put(++mMaxPosition, ni);
             mNewsItemsById.put(ni.id, ni);
         }
-        mMaxPosition = pos;
         while (mNewsItemsByPosition.size() > CACHE_SIZE) {
             NewsItemIndex ni = mNewsItemsByPosition.get(mMinPosition);
             mNewsItemsByPosition.remove(mMinPosition++);
@@ -1120,12 +1123,10 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     }
 
     private void addNewsItemsToFront(List<NewsItemIndex> newsItems) {
-        int pos = mMinPosition;
         for (NewsItemIndex ni : newsItems) {
-            mNewsItemsByPosition.put(--pos, ni);
+            mNewsItemsByPosition.put(--mMinPosition, ni);
             mNewsItemsById.put(ni.id, ni);
         }
-        mMinPosition = pos;
         while (mNewsItemsByPosition.size() > CACHE_SIZE) {
             NewsItemIndex ni = mNewsItemsByPosition.get(mMaxPosition);
             mNewsItemsByPosition.remove(mMaxPosition--);

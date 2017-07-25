@@ -162,7 +162,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
         public String[] onSafeReceive(Context context, Intent intent) {
             T.UI();
             if (RegistrationWizard2.INTENT_GOT_BEACON_REGIONS.equals(intent.getAction())) {
-                if (mWiz.getBeaconRegions() != null && mBeaconManager == null) {
+                if (mWiz != null && mWiz.getBeaconRegions() != null && mBeaconManager == null) {
                     bindBeaconManager();
                 }
             } else if (MainService.INTENT_BEACON_SERVICE_CONNECTED.equals(intent.getAction())) {
@@ -328,7 +328,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
 
         mEnterEmailAutoCompleteTextView = (AutoCompleteTextView) findViewById(R.id.registration_enter_email);
 
-        Button agreeBtn = (Button) findViewById(R.id.registration_agree_tos);
+        final Button agreeBtn = (Button) findViewById(R.id.registration_agree_tos);
         TextView rogerthatWelcomeTextView = (TextView) findViewById(R.id.rogerthat_welcome);
         if (CloudConstants.isEnterpriseApp()) {
             rogerthatWelcomeTextView.setText(getString(R.string.rogerthat_welcome_enterprise,
@@ -349,6 +349,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
         agreeBtn.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
+                agreeBtn.setEnabled(false);
                 sendRegistrationStep(RegistrationWizard2.REGISTRATION_STEP_AGREED_TOS);
                 mWiz.proceedToNextPage();
             }
@@ -356,15 +357,16 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
 
         initLocationUsageStep();
 
+        final Button emailButton = (Button) findViewById(R.id.login_via_email);
         View.OnClickListener emailLoginListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                emailButton.setEnabled(false);
                 sendRegistrationStep(RegistrationWizard2.REGISTRATION_STEP_EMAIL_LOGIN);
                 mWiz.proceedToNextPage();
             }
         };
-
-        findViewById(R.id.login_via_email).setOnClickListener(emailLoginListener);
+        emailButton.setOnClickListener(emailLoginListener);
 
         Button facebookButton = (Button) findViewById(R.id.login_via_fb);
 
@@ -889,9 +891,9 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
         T.UI();
         final boolean getAccountsPermissionWasGranted = mService.isPermitted(Manifest.permission.GET_ACCOUNTS);
         if (getAccountsPermissionWasGranted) {
-            setAccounts(new AccountManager(this).getAccounts());
+            List<Account> accounts = new AccountManager(this).getAccounts();
             List<String> emails = new ArrayList<String>();
-            for (Account account : getAccounts()) {
+            for (Account account : accounts) {
                 if (RegexPatterns.EMAIL.matcher(account.name).matches() && !emails.contains(account.name))
                     emails.add(account.name);
             }

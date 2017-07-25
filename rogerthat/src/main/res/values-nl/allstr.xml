@@ -135,7 +135,7 @@
     <string name="error_please_try_again">Er is een fout opgetreden. Gelieve opnieuw te proberen.</string>
     <string name="error_recommend_on_fb">Er is een fout opgetreden tijdens het inlogging in je Facebook account. Probeer opnieuw.</string>
     <string name="error_search">Er is een fout opgetreden tijdens het zoeken. Probeer opnieuw.</string>
-    <string name="facebook_registration_email_missing">Er is geen e-mail adres geconfigureerd in je facebook account of u hebt geen rechten gegeven om uw e-mail te zien. Gelieve de  e-mail rechten toe te staan of maak gebruik van de e-mail gebaseerde login.</string>
+    <string name="facebook_registration_email_missing">Er is geen e-mail adres geconfigureerd in je Facebook account of u hebt geen rechten gegeven om uw e-mail te zien. Gelieve de e-mail rechten toe te staan of maak gebruik van de e-mail gebaseerde login.</string>
     <string name="failed_to_create_directory">Map \"%1$s\" kan niet aangemaakt worden.</string>
     <string name="failed_to_get_updated_location">Fout tijdens het ophalen van de nieuwe locatie.</string>
     <string name="failed_to_lookup_address">Fout tijdens het berekenen van de GPS coördinaten.</string>
@@ -167,7 +167,7 @@
     <string name="friend_selection_is_required">Gelieve minstens één vriend te selecteren.</string>
     <string name="friend_share_location">Kan mijn locatie zien</string>
     <string name="friend_sms_invitation">Beste %1$s,\n\nIk nodig u uit om met mij te communiceren via %4$s.\n\nStap 1. Installeer de smartphone app:\n%2$s\n\nStap 2. Connecteer mij:\n%3$s</string>
-    <string name="friend_sms_invitation_no_url">Beste %1$s\n\nIk nodig u uit om te communiceren met mij via %3$s. Dit is een cool communicatieplatform voor web en smartphone!\n\nInstalleer de %3$s app: %2$s</string>
+    <string name="friend_sms_invitation_no_url">Beste %1$s,\n\nIk nodig u uit om te communiceren met mij via %3$s. Dit is een cool communicatieplatform voor web en smartphone!\n\nInstalleer de %3$s app: %2$s</string>
     <string name="friends_getting_started_title">Aan de slag</string>
     <string name="friends_map">Vriendenkaart</string>
     <string name="gender">Geslacht</string>
@@ -255,6 +255,7 @@
     <string name="message_delete_confirm">Verwijdering bevestigen</string>
     <string name="message_delete_question">Wilt u deze conversatie verwijderen?</string>
     <string name="message_history">Historiek</string>
+    <string name="message_not_found">Bericht niet gevonden.</string>
     <string name="message_not_on_server">Bericht nog niet op de server.</string>
     <string name="message_notification_n_new_messages">%1$d nieuwe berichten.</string>
     <string name="message_notification_n_new_n_updated">%1$d nieuw. %2$d aangepast.</string>
@@ -342,6 +343,7 @@
     <string name="promo">Promo</string>
     <string name="provide_qr_code_name">Geef een naam aan de QR-code</string>
     <string name="qr_call_tel">Wenst u te bellen naar %1$s?</string>
+    <string name="qr_code">QR-code</string>
     <string name="qr_code_scanned">QR-code gescand</string>
     <string name="qr_open_url">Wenst u de volgende web pagina te openen:\n\n%1$s</string>
     <string name="reach">Bereik:</string>

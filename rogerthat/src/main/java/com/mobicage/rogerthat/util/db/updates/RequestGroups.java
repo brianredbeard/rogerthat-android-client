@@ -15,23 +15,19 @@
  *
  * @@license_version:1.3@@
  */
+
 package com.mobicage.rogerthat.util.db.updates;
 
 import android.database.sqlite.SQLiteDatabase;
 
 import com.mobicage.rogerthat.MainService;
-import com.mobicage.rogerthat.util.time.TimeUtils;
+import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 
-public class Update26 implements IDbUpdater {
-
-    @Override
-    public void preUpdate(MainService mainService, SQLiteDatabase db) {
-    }
+public class RequestGroups implements IDbUpdater {
 
     @Override
     public void postUpdate(MainService mainService, SQLiteDatabase db) {
-        final String tzdiff = String.valueOf(TimeUtils.getGMTOffsetMillis() / 1000L);
-        String sql = "UPDATE message SET day = (\"timestamp\" + " + tzdiff + ") / 86400;";
-        db.execSQL(sql);
+        mainService.registerPluginDBUpdate(FriendsPlugin.class, FriendsPlugin.FRIENDS_PLUGIN_MUST_GET_GROUPS);
+
     }
 }

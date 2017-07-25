@@ -181,8 +181,8 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         unregisterReceiver(getDefaultBroadcastReceiver());
         if (mMessagingPlugin != null) {
             mMessagingPlugin.cleanThreadDirtyFlags(mParentMessageKey);
-            if (!SystemUtils.isFlagEnabled(mFlags, MessagingPlugin.FLAG_DYNAMIC_CHAT) && !mParentMessage.threadDirty) {
-                List<String> dirties = new ArrayList<String>(mRenderedMessages.size());
+            if (!SystemUtils.isFlagEnabled(mFlags, MessagingPlugin.FLAG_DYNAMIC_CHAT) && mParentMessage.threadDirty) {
+                List<String> dirties = new ArrayList<>(mRenderedMessages.size());
                 for (String key : mRenderedMessages)
                     dirties.add(key);
                 mMessagingPlugin.markMessagesAsRead(mParentMessageKey, dirties.toArray(new String[dirties.size()]));

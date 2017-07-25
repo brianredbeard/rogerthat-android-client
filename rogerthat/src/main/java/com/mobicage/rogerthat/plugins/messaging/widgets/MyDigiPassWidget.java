@@ -592,6 +592,12 @@ public class MyDigiPassWidget extends Widget implements OnMDPAuthenticationListe
                 @SuppressWarnings("unchecked")
                 final Map<String, Object> result = (Map<String, Object>) JSONValue.parse(new InputStreamReader(
                     responseContent));
+
+                if (result == null) {
+                    L.bug("mdp result is null for " + responseContent);
+                    return false;
+                }
+
                 if (handleError(result)) {
                     return false;
                 } else {

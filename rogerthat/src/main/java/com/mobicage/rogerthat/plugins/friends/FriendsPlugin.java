@@ -115,6 +115,7 @@ import org.jivesoftware.smack.util.Base64;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONValue;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -1487,5 +1488,43 @@ public class FriendsPlugin implements MobicagePlugin {
         if (!isBroadcastTypeDisabled(serviceEmail, broadcastType)) {
             mDisabledBroadcastTypesCache.get(serviceEmail).add(broadcastType);
         }
+    }
+
+    public void cleanupOldBrandings() {
+        final long start = System.currentTimeMillis();
+
+        File dir;
+        try {
+            dir = mBrandingMgr.getBrandingRootDirectory();
+        } catch (Exception e) {
+            L.d(e);
+            return;
+        }
+
+        Set<String> brandings = mStore.listBrandingsInUse();
+
+        final long lastWeek = start - (7L * 86400L * 1000L);
+        long count = 0;
+        long totalCount = 0;
+        for (File file : dir.listFiles()) {
+            String fileName = file.getName();
+            if (!fileName.endsWith(".branding")) {
+                continue;
+            }
+            totalCount += 1;
+            if (file.lastModified() < lastWeek) {
+                String brandingKey = fileName.substring(0, fileName.lastIndexOf("."));
+                if (brandings.contains(brandingKey)) {
+                    continue;
+                }
+                count += 1;
+                if (!file.delete()) {
+                    L.e("Failed to delete old branding file with name '" + fileName + "'");
+                }
+            }
+        }
+
+        final long elapsed = System.currentTimeMillis() - start;
+        L.d("cleanupOldBrandings removed " + count + "/" + totalCount + " items in " + elapsed + " millis");
     }
 }

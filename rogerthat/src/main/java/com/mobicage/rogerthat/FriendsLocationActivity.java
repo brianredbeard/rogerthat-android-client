@@ -89,7 +89,7 @@ public class FriendsLocationActivity extends ServiceBoundMapActivity {
 
         // Show progress dialog until one or more locations are fetched.
         String title = getString(R.string.updating_location);
-        UIUtils.showProgressDialog(this, title, null, true, true, null, ProgressDialog.STYLE_HORIZONTAL, true);
+        mProgressDialog = UIUtils.showProgressDialog(this, title, null, true, true, null, ProgressDialog.STYLE_HORIZONTAL, true);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.friend_map);
         mapFragment.getMapAsync(this);
