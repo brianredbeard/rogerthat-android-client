@@ -191,14 +191,15 @@ def quoted_str_or_null(s):
 def rename_package():
     rogerthat_build_gradle = os.path.join(ANDROID_SRC_DIR, '..', 'build.gradle')
     facebook_app_id = doc["APP_CONSTANTS"].get("FACEBOOK_APP_ID")
-    package_sufix = APP_ID.replace('-', '.')
+    package_suffix = APP_ID.replace('-', '.')
+    package_suffix = re.sub('\\.(\d+)', lambda m: m.group(1), package_suffix)  # BAD_PACKAGE_NAME: demo.3 --> demo3
 
     with open(rogerthat_build_gradle, 'r+') as f:
         s = f.read()
         if APP_ID != 'rogerthat':
             s = s.replace('com.mobicage.rogerth.at', 'com.mobicage.rogerthat')
-        s = s.replace("applicationIdSuffix '.debug'", "applicationIdSuffix '.%s.debug'" % package_sufix)
-        s = s.replace("applicationIdSuffix ''", "applicationIdSuffix '.%s'" % package_sufix)
+        s = s.replace("applicationIdSuffix '.debug'", "applicationIdSuffix '.%s.debug'" % package_suffix)
+        s = s.replace("applicationIdSuffix ''", "applicationIdSuffix '.%s'" % package_suffix)
         s = s.replace('"app_id", "rogerthat"', '"app_id", "%s"' % APP_ID)
         if facebook_app_id:
             s = s.replace('188033791211994', str(facebook_app_id))
@@ -256,7 +257,7 @@ def rename_package():
                         s = f.read()
                         f.seek(0)
                         s = s.replace('com.mobicage.rogerth.at.test.R',
-                                      'com.mobicage.rogerthat.%s.test.R' % package_sufix)
+                                      'com.mobicage.rogerthat.%s.test.R' % package_suffix)
                         f.write(s)
                         f.truncate()
 
