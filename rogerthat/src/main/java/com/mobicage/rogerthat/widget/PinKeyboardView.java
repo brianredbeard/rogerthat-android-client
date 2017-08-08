@@ -25,6 +25,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.util.logging.L;
 
 public class PinKeyboardView extends LinearLayout {
 
@@ -166,7 +167,7 @@ public class PinKeyboardView extends LinearLayout {
                 pinEntryView.sendKey(which);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            L.bug(e);
         }
     }
 

@@ -54,17 +54,20 @@ import com.mobicage.rogerthat.plugins.history.HistoryPlugin;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.plugins.news.NewsPlugin;
+import com.mobicage.rogerthat.plugins.payment.PaymentPlugin;
+import com.mobicage.rogerthat.plugins.security.PinLockMgr;
+import com.mobicage.rogerthat.plugins.security.SecurityPlugin;
 import com.mobicage.rogerthat.plugins.system.SystemPlugin;
 import com.mobicage.rogerthat.plugins.trackme.TrackmePlugin;
 import com.mobicage.rogerthat.upgrade.Upgrader;
 import com.mobicage.rogerthat.util.CachedDownloader;
 import com.mobicage.rogerthat.util.GoogleServicesUtils;
-import com.mobicage.rogerthat.util.Security;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.db.DatabaseManager;
 import com.mobicage.rogerthat.util.geo.GeoLocationProvider;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.net.NetworkConnectivityManager;
+import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.system.SafeAsyncTask;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
@@ -103,8 +106,8 @@ import com.mobicage.to.system.SaveSettingsRequest;
 import com.mobicage.to.system.SettingsTO;
 import com.mobicage.to.system.UnregisterMobileRequestTO;
 import com.mobicage.to.system.UnregisterMobileResponseTO;
-import com.mobicage.to.system.UpdateAvailableRequestTO;
-import com.mobicage.to.system.UpdateAvailableResponseTO;
+import com.mobicage.to.system.UpdateEmbeddedAppTranslationsRequestTO;
+import com.mobicage.to.system.UpdateEmbeddedAppTranslationsResponseTO;
 import com.mobicage.to.system.UpdateSettingsRequestTO;
 import com.mobicage.to.system.UpdateSettingsResponseTO;
 
@@ -130,6 +133,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import static com.mobicage.rpc.config.LookAndFeelConstants.removeLookAndFeel;
+
 public class MainService extends Service implements TimeProvider, BeaconConsumer {
 
     public final static String PREFERENCES_UPDATE_INTENT = "com.mobicage.rogerthat.PREFERENCES_UPDATE";
@@ -146,6 +151,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
     public final static String PREFERENCE_ABOUT = "about";
     public final static String PREFERENCE_ALARM_SOUND = "alarm_sound";
     public final static String PREFERENCE_ALARM_TITLE = "alarm_title";
+    public final static String PREFERENCE_SECURITY = "security";
 
     private final static String CONFIGKEY = "com.mobicage.rogerthat";
 
@@ -245,12 +251,15 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
     private boolean mScreenIsOn = false;
 
     private final List<SecurityItem> mQueue = Collections.synchronizedList(new ArrayList<SecurityItem>());
-    private PrivateKey mPrivateKey;
-    private PublicKey mPublicKey;
+    private SecurityCallback mSetupPinCallback;
+    private String mPin;
+    private Map<String, PrivateKey> mPrivateKeys = new HashMap<>();
+    private Map<String, PublicKey> mPublicKeys = new HashMap<>();
     private boolean mEnterPinActivityActive = false;
-    private boolean mShouldClearPrivateKey = false;
+    private boolean mShouldClearPin = false;
 
     private Credentials mCredentials;
+    private PinLockMgr mPinLockMgr;
     // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static MainService getInstance() {
@@ -332,6 +341,10 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         mScreenIsOn = pow.isScreenOn();
 
         hideLogForwardNotification();
+
+        if (AppConstants.Security.PIN_LOCKED) {
+            mPinLockMgr = App.getContext().getPinLockMgr().setMainService(this);
+        }
 
         // This should remain the last line of this method.
         current = this;
@@ -786,6 +799,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
             L.d("Wiping database and SharedPreferences in MainService.onDestroy");
             mDatabaseManager.wipeAndClose();
             destroyPreferences();
+            removeLookAndFeel(this);
             showUnregisterNotification();
         } else {
             mDatabaseManager.close();
@@ -930,6 +944,12 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
             MobicagePlugin newsPlugin = new com.mobicage.rogerthat.plugins.news.NewsPlugin(this, mConfigProvider, mDatabaseManager);
             mPlugins.put(NewsPlugin.class.toString(), newsPlugin);
         }
+
+        MobicagePlugin securityPlugin = new com.mobicage.rogerthat.plugins.security.SecurityPlugin(this, mConfigProvider, mDatabaseManager);
+        mPlugins.put(SecurityPlugin.class.toString(), securityPlugin);
+
+        MobicagePlugin paymentPlugin = new com.mobicage.rogerthat.plugins.payment.PaymentPlugin(this, mConfigProvider, mDatabaseManager);
+        mPlugins.put(PaymentPlugin.class.toString(), paymentPlugin);
 
         for (MobicagePlugin plugin : mPlugins.values())
             plugin.initialize();
@@ -1110,6 +1130,10 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
             sendBroadcast(new Intent(CLOSE_ACTIVITY_INTENT));
             stopSelf();
         }
+
+        if (AppConstants.Security.PIN_LOCKED) {
+            mPinLockMgr.unregistered();
+        }
     }
 
     public Credentials getCredentials() {
@@ -1193,29 +1217,6 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
             }
 
             @Override
-            public UpdateAvailableResponseTO updateAvailable(final UpdateAvailableRequestTO request) throws Exception {
-                T.BIZZ();
-                postOnUIHandler(new SafeRunnable() {
-                    @Override
-                    protected void safeRun() throws Exception {
-                        T.UI();
-                        boolean mustUpgrade = mUpgrader.mustUpgrade(mMajorVersion, mMinorVersion, request.majorVersion,
-                            request.minorVersion);
-
-                        if (mustUpgrade) {
-                            mUpgrader.scheduleUpgradeToApk(request.downloadUrl, (int) request.majorVersion,
-                                (int) request.minorVersion);
-                        } else {
-                            L.d("Not upgrading from " + mMajorVersion + '.' + mMinorVersion + " to "
-                                + request.majorVersion + '.' + request.minorVersion);
-                        }
-                    }
-                });
-
-                return null;
-            }
-
-            @Override
             public UnregisterMobileResponseTO unregisterMobile(final UnregisterMobileRequestTO request)
                 throws Exception {
                 T.BIZZ();
@@ -1269,6 +1270,12 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
             public UpdateJSEmbeddingResponseTO updateJsEmbedding(UpdateJSEmbeddingRequestTO request) throws Exception {
                 getPlugin(SystemPlugin.class).updateJSEmbeddedPackets(request.items);
                 return new UpdateJSEmbeddingResponseTO();
+            }
+
+            @Override
+            public UpdateEmbeddedAppTranslationsResponseTO updateEmbeddedAppTranslations(UpdateEmbeddedAppTranslationsRequestTO request) throws java.lang.Exception {
+                getPlugin(SystemPlugin.class).updateEmbeddedAppTranslations(request.translations);
+                return new UpdateEmbeddedAppTranslationsResponseTO();
             }
         };
     }
@@ -1733,82 +1740,245 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         return granted;
     }
 
-    private static class SecurityItem {
-
-        public final String uid;
-        public final String message;
-        public final byte[] payload;
-        public final boolean forcePin;
-        public final SecurityCallback<byte[]> callback;
+    private abstract static class SecurityItem {
+        public String uid;
+        public String type;
         public boolean active;
+        public String keyAlgorithm;
+        public String keyName;
+        public String message;
+        public SecurityCallback callback;
 
-        public SecurityItem(String message, byte[] payload, boolean forcePin, boolean active, final SecurityCallback<byte[]> callback) {
+        public abstract boolean canExecuteFromQueue(String pin, Map<String, PrivateKey> privateKeys);
+    }
+
+    private static class KeyPairSecurityItem extends SecurityItem {
+
+        public String seed;
+
+        public KeyPairSecurityItem(String keyAlgorithm, String keyName, String message, String seed, SecurityCallback<CreateKeyPairResult> callback) {
             this.uid = UUID.randomUUID().toString();
+            this.type = "keypair";
+            this.keyAlgorithm = keyAlgorithm;
+            this.keyName = keyName;
+            this.message = message;
+            this.seed = seed;
+            this.active = false;
+            this.callback = callback;
+        }
+
+        public boolean canExecuteFromQueue(String pin, Map<String, PrivateKey> privateKeys) {
+            return pin != null;
+        }
+    }
+
+    private static class SeedSecurityItem extends SecurityItem {
+
+        public SeedSecurityItem(String keyAlgorithm, String keyName, String message, final SecurityCallback<String> callback) {
+            this.uid = UUID.randomUUID().toString();
+            this.type = "seed";
+            this.keyAlgorithm = keyAlgorithm;
+            this.keyName = keyName;
+            this.message = message;
+            this.active = false;
+            this.callback = callback;
+        }
+
+        public boolean canExecuteFromQueue(String pin, Map<String, PrivateKey> privateKeys) {
+            return pin != null;
+        }
+    }
+
+    private static class AddressSecurityItem extends SecurityItem {
+
+        public Long keyIndex;
+
+
+        public AddressSecurityItem(String keyAlgorithm, String keyName, long keyIndex, String message, final SecurityCallback<String> callback) {
+            this.uid = UUID.randomUUID().toString();
+            this.type = "address";
+            this.keyAlgorithm = keyAlgorithm;
+            this.keyName = keyName;
+            this.keyIndex = keyIndex;
+            this.message = message;
+            this.active = false;
+            this.callback = callback;
+        }
+
+        public boolean canExecuteFromQueue(String pin, Map<String, PrivateKey> privateKeys) {
+            return pin != null;
+        }
+    }
+
+    private static class SignSecurityItem extends SecurityItem {
+
+        public Long keyIndex;
+        public byte[] payload;
+        public boolean forcePin;
+
+        public SignSecurityItem(String keyAlgorithm, String keyName, Long keyIndex, String message, byte[] payload, boolean forcePin, final SecurityCallback<byte[]> callback) {
+            this.uid = UUID.randomUUID().toString();
+            this.type = "sign";
+            this.keyAlgorithm = keyAlgorithm;
+            this.keyName = keyName;
+            this.keyIndex = keyIndex;
             this.message = message;
             this.payload = payload;
             this.forcePin = forcePin;
-            this.active = active;
+            this.active = false;
             this.callback = callback;
         }
+
+        public boolean canExecuteFromQueue(String pin, Map<String, PrivateKey> privateKeys) {
+            final String key = SecurityUtils.getKeyString(this.keyAlgorithm, this.keyName, this.keyIndex);
+            if (!privateKeys.containsKey(key) || this.forcePin) {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    private static class AskPinSecurityItem extends SecurityItem {
+        public AskPinSecurityItem(String message, SecurityCallback<Object> callback) {
+            this.uid = UUID.randomUUID().toString();
+            this.type = "ask_pin";
+            this.message = message;
+            this.callback = callback;
+        }
+
+        @Override
+        public boolean canExecuteFromQueue(String pin, Map<String, PrivateKey> privateKeys) {
+            return true;
+        }
+    }
+
+    private void scheduleClearPin() {
+        postDelayedOnUIHandler(new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                if (mQueue.size() == 0) {
+                    mPin = null;
+                    mPrivateKeys = new HashMap<>();
+                    mPublicKeys = new HashMap<>();
+                    mShouldClearPin = false;
+                } else {
+                    mShouldClearPin = true;
+                }
+            }
+        }, 1000 * AppConstants.Security.PIN_INTERVAL);
+    }
+
+    public void onSetupPinCompleted(final String pin) {
+        T.UI();
+        if (pin == null) {
+            String errorMessage = getString(R.string.user_cancelled_pin_input);
+            mSetupPinCallback.onError("user_cancelled_pin_input", errorMessage);
+        } else {
+            mPin = pin;
+            scheduleClearPin();
+            mSetupPinCallback.onSuccess(null);
+        }
+        mSetupPinCallback = null;
     }
 
     public void onPinEntered(final String uid, final String pin) {
         T.UI();
-        try {
-            mPrivateKey = Security.getPrivateKey(this, pin);
-            mEnterPinActivityActive = false;
-
-            postDelayedOnIOHandler(new SafeRunnable() {
-                @Override
-                protected void safeRun() throws Exception {
-                    if (mQueue.size()  == 0) {
-                        mPrivateKey = null;
-                    } else {
-                        mShouldClearPrivateKey = true;
-                    }
-                }
-            }, 1000 * AppConstants.SECURE_PIN_INTERVAL);
-
-        } catch (Exception e) {
-            mEnterPinActivityActive = false;
-            SecurityItem si = dequeueSecurityItem(uid);
-            si.callback.onError(new Exception("An unknown error occurred while loading private key"));
-            return;
-        }
+        mPin = pin;
+        scheduleClearPin();
+        mEnterPinActivityActive = false;
 
         SecurityItem si = dequeueSecurityItem(uid);
-        executeSign(si, true);
+        executeSecurityItem(si, true);
     }
 
     public void onPinCancelled(final String uid) {
         T.UI();
         mEnterPinActivityActive = false;
         SecurityItem si = dequeueSecurityItem(uid);
-        si.callback.onError(new PinCancelledException("User cancelled pin input"));
+        String errorMessage = getString(R.string.user_cancelled_pin_input);
+        si.callback.onError("user_cancelled_pin_input", errorMessage);
         clearQueue();
-    }
-
-    public static class PinCancelledException extends Exception {
-        public PinCancelledException(String message) {
-            super(message);
-        }
     }
 
     public interface SecurityCallback<T> {
         void onSuccess(T result);
-
-        void onError(Exception e);
+        void onError(String code, String errorMessage);
     }
 
-    public void sign(final String message, final byte[] payload, final boolean forcePin, final SecurityCallback<byte[]> callback) {
-        T.UI();
-        queueSecurityItem(new SecurityItem(message, payload, forcePin, false, callback));
+    public class CreateKeyPairResult {
+        public String seed;
+        public String publicKey;
     }
 
-    public boolean validate(final byte[] payload, final byte[] payloadSignature) {
+    public void setupPin(final SecurityCallback<String> callback) {
+        if (mSetupPinCallback != null) {
+            L.d("Already setting up pin code.");
+            String errorMessage = getString(R.string.setup_pin_was_open);
+            callback.onError("setup_pin_was_open", errorMessage);
+            return;
+        }
+        mSetupPinCallback = callback;
+
+        Intent intent = new Intent(this, SetupPinActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(SetupPinActivity.RESULT_VIA_MAINSERVICE, true);
+        startActivity(intent);
+    }
+
+    public void askPin(final String message, final SecurityCallback<Object> callback) {
+        T.dontCare();
+        runOnUIHandlerNow(new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                queueSecurityItem(new AskPinSecurityItem(message, callback));
+            }
+        });
+    }
+
+    public void createKeyPair(final String keyAlgorithm, final String keyName, final String message, final String seed, final SecurityCallback<CreateKeyPairResult> callback) {
+        T.dontCare();
+        runOnUIHandlerNow(new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                queueSecurityItem(new KeyPairSecurityItem(keyAlgorithm, keyName, message, seed, callback));
+            }
+        });
+    }
+
+    public void getSeed(final String keyAlgorithm, final String keyName, final String message, final SecurityCallback<String> callback) {
+        T.dontCare();
+        runOnUIHandlerNow(new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                queueSecurityItem(new SeedSecurityItem(keyAlgorithm, keyName, message, callback));
+            }
+        });
+    }
+
+    public void getAddress(final String keyAlgorithm, final String keyName, final long keyIndex, final String message, final SecurityCallback<String> callback) {
+        T.dontCare();
+        runOnUIHandlerNow(new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                queueSecurityItem(new AddressSecurityItem(keyAlgorithm, keyName, keyIndex, message, callback));
+            }
+        });
+    }
+
+    public void sign(final String keyAlgorithm, final String keyName, final Long keyIndex, final String message, final byte[] payload, final boolean forcePin, final SecurityCallback<byte[]> callback) {
+        T.dontCare();
+        runOnUIHandlerNow(new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                queueSecurityItem(new SignSecurityItem(keyAlgorithm, keyName, keyIndex, message, payload, forcePin, callback));
+            }
+        });
+    }
+
+    public boolean validate(final String keyAlgorithm, final String keyName, final Long keyIndex, final byte[] payload, final byte[] payloadSignature) {
         T.UI();
         try {
-            return validateSignature(payload, payloadSignature);
+            return validateSignature(keyAlgorithm, keyName, keyIndex, payload, payloadSignature);
         } catch (Exception e) {
             L.d(e);
             return false;
@@ -1817,7 +1987,21 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
 
     private void queueSecurityItem(SecurityItem si) {
         T.UI();
-        if (mPrivateKey == null || si.forcePin) {
+        boolean shouldEnterPin = false;
+        if ("keypair".equals(si.type) || "seed".equals(si.type) || "address".equals(si.type)) {
+            if (mPin == null) {
+                shouldEnterPin = true;
+            }
+        } else if ("sign".equals(si.type)) {
+            SignSecurityItem ssi = (SignSecurityItem) si;
+            if (mPin == null || ssi.forcePin) {
+                shouldEnterPin = true;
+            }
+        } else if ("ask_pin".equals(si.type)) {
+            shouldEnterPin = true;
+        }
+
+        if (shouldEnterPin) {
             if (!mEnterPinActivityActive) {
                 mEnterPinActivityActive = true;
                 Intent intent = new Intent(this, EnterPinActivity.class);
@@ -1834,14 +2018,14 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
             }
             mQueue.add(si);
         } else {
-            executeSign(si, false);
+            executeSecurityItem(si, false);
         }
     }
 
     private SecurityItem getNextSecurityItemToSign() {
         T.UI();
         for (SecurityItem item : mQueue) {
-            if (item.active == false) {
+            if (!item.active) {
                 mQueue.remove(item);
                 return item;
             }
@@ -1849,40 +2033,107 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         return null;
     }
 
-    private void executeSign(SecurityItem si, boolean fromQueue) {
-        T.UI();
-        try {
-            si.callback.onSuccess(signValue(si.payload));
-        } catch (Exception e) {
-            si.callback.onError(e);
+    private void executeSecurityItem(SecurityItem si, boolean fromQueue) {
+        if ("keypair".equals(si.type)) {
+            executeCreateKeyPair((KeyPairSecurityItem) si);
+
+        } else if ("seed".equals(si.type)) {
+            executeGetSeed((SeedSecurityItem) si);
+
+        } else if ("address".equals(si.type)) {
+            executeGetAddress((AddressSecurityItem) si);
+
+        } else if ("sign".equals(si.type)) {
+            executeSign((SignSecurityItem) si);
         }
 
         if (fromQueue && !mEnterPinActivityActive) {
             SecurityItem nextSi = getNextSecurityItemToSign();
             if (nextSi != null) {
-                executeSign(nextSi, true);
-            } else if (mShouldClearPrivateKey){
-                mPrivateKey = null;
-                mShouldClearPrivateKey = false;
+                executeSecurityItem(nextSi, true);
+            } else if (mShouldClearPin) {
+                mPin = null;
+                mPrivateKeys = new HashMap<>();
+                mPublicKeys = new HashMap<>();
+                mShouldClearPin = false;
             }
+        }
+    }
+
+    private void executeCreateKeyPair(KeyPairSecurityItem si) {
+        try {
+            String publicKeyString = SecurityUtils.createKeyPair(this, mPin, si.keyAlgorithm, si.keyName, si.seed);
+            String seed;
+            if (si.seed == null) {
+                seed = SecurityUtils.getSeed(this, mPin, si.keyAlgorithm, si.keyName);
+            } else {
+                seed = si.seed;
+            }
+
+            final CreateKeyPairResult r = new CreateKeyPairResult();
+            r.publicKey = publicKeyString;
+            r.seed = seed;
+            si.callback.onSuccess(r);
+        } catch (Exception e) {
+            L.bug("Failed to executeCreateKeyPair", e);
+            String errorMessage = getString(R.string.unknown_error_occurred);
+            si.callback.onError("unknown_error_occurred", errorMessage);
+        }
+    }
+
+    private void executeGetSeed(SeedSecurityItem si) {
+        T.UI();
+        try {
+            String seed = SecurityUtils.getSeed(this, mPin, si.keyAlgorithm, si.keyName);
+            si.callback.onSuccess(seed);
+        } catch (Exception e) {
+            L.bug("Failed to executeGetSeed", e);
+            String errorMessage = getString(R.string.unknown_error_occurred);
+            si.callback.onError("unknown_error_occurred", errorMessage);
+        }
+    }
+
+    private void executeGetAddress(AddressSecurityItem si) {
+        T.UI();
+        try {
+            String address = SecurityUtils.getAddress(this, mPin, si.keyAlgorithm, si.keyName, si.keyIndex);
+            si.callback.onSuccess(address);
+        } catch (Exception e) {
+            L.bug("Failed to executeGetAddress", e);
+            String errorMessage = getString(R.string.unknown_error_occurred);
+            si.callback.onError("unknown_error_occurred", errorMessage);
+        }
+    }
+
+    private void executeSign(SignSecurityItem si) {
+        T.UI();
+        try {
+            byte[] payloadSignature = signValue(si.keyAlgorithm, si.keyName, si.keyIndex, si.payload);
+            si.callback.onSuccess(payloadSignature);
+        } catch (Exception e) {
+            L.bug("Failed to executeSign", e);
+            String errorMessage = getString(R.string.unknown_error_occurred);
+            si.callback.onError("unknown_error_occurred", errorMessage);
         }
     }
 
     private void clearQueue() {
         T.UI();
         for (int i= mQueue.size() - 1; i >= 0; i--) {
-            SecurityItem item = mQueue.get(i);
-            if (item.active == false) {
-                if (mPrivateKey == null || item.forcePin){
-                    item.callback.onError(new Exception("User cancelled pin input"));
-                    mQueue.remove(item);
+            SecurityItem si = mQueue.get(i);
+            if (!si.active) {
+                if (!si.canExecuteFromQueue(mPin, mPrivateKeys)) {
+                    String errorMessage = getString(R.string.user_cancelled_pin_input);
+                    si.callback.onError("user_cancelled_pin_input", errorMessage);
+                    mQueue.remove(si);
                 }
             }
         }
-        if (mPrivateKey != null && mQueue.size() != 0) {
-            for (SecurityItem item : mQueue) {
-                if (item.active == false) {
-                    executeSign(item, true);
+
+        if (mQueue.size() != 0) {
+            for (SecurityItem si : mQueue) {
+                if (!si.active) {
+                    executeSecurityItem(si, true);
                     break;
                 }
             }
@@ -1900,21 +2151,32 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         return null;
     }
 
-    private byte[] signValue(byte[] payload) throws Exception {
+    private byte[] signValue(final String keyAlgorithm, final String keyName, final Long keyIndex, byte[] payload) throws Exception {
         T.UI();
-        Signature s = Signature.getInstance("SHA256withECDSA");
-        s.initSign(mPrivateKey);
+        final String key = SecurityUtils.getKeyString(keyAlgorithm, keyName, keyIndex);
+        if (!mPrivateKeys.containsKey(key)) {
+            mPrivateKeys.put(key, SecurityUtils.getPrivateKey(this, mPin, key));
+        }
+        Signature s = SecurityUtils.getSignature(keyAlgorithm);
+        if (s == null) {
+            return null;
+        }
+        s.initSign(mPrivateKeys.get(key));
         s.update(payload);
         return s.sign();
     }
 
-    private boolean validateSignature( byte[] payload, byte[] payloadSignature) throws Exception {
+    private boolean validateSignature(final String keyAlgorithm, final String keyName, final Long keyIndex, byte[] payload, byte[] payloadSignature) throws Exception {
         T.UI();
-        if (mPublicKey == null) {
-            mPublicKey = Security.getPublicKey(this);
+        final String key = SecurityUtils.getKeyString(keyAlgorithm, keyName, keyIndex);
+        if (!mPublicKeys.containsKey(key)) {
+            mPublicKeys.put(key, SecurityUtils.getPublicKey(this, keyAlgorithm, keyName, keyIndex));
         }
-        Signature s = Signature.getInstance("SHA256withECDSA");
-        s.initVerify(mPublicKey);
+        Signature s = SecurityUtils.getSignature(keyAlgorithm);
+        if (s == null) {
+            return false;
+        }
+        s.initVerify(mPublicKeys.get(key));
         s.update(payload);
         return s.verify(payloadSignature);
     }
@@ -1927,4 +2189,5 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
             badges.put("news", newsPlugin.getBadgeCount());
         }
     }
+
 }

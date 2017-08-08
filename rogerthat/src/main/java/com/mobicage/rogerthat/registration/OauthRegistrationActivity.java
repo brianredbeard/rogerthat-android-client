@@ -30,7 +30,7 @@ import com.mobicage.rogerthat.Installation;
 import com.mobicage.rogerthat.OauthActivity;
 import com.mobicage.rogerthat.util.GoogleServicesUtils;
 import com.mobicage.rogerthat.util.GoogleServicesUtils.GCMRegistrationIdFoundCallback;
-import com.mobicage.rogerthat.util.Security;
+import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
@@ -162,6 +162,7 @@ public class OauthRegistrationActivity extends AbstractRegistrationActivity {
         Intent intent = new Intent(OauthRegistrationActivity.this, OauthActivity.class);
         intent.putExtra(OauthActivity.OAUTH_URL, AppConstants.REGISTRATION_TYPE_OAUTH_URL);
         intent.putExtra(OauthActivity.BUILD_URL, false);
+        intent.putExtra(OauthActivity.ALLOW_BACKPRESS, false);
         startActivityForResult(intent, START_OAUTH_REQUEST_CODE);
     }
 
@@ -214,7 +215,7 @@ public class OauthRegistrationActivity extends AbstractRegistrationActivity {
             protected void safeRun() throws Exception {
                 T.REGISTRATION();
                 String version = "1";
-                String signature = Security.sha256(version + " " + installId + " " + timestamp + " " + deviceId + " "
+                String signature = SecurityUtils.sha256(version + " " + installId + " " + timestamp + " " + deviceId + " "
                         + registrationId + " " + code + state + CloudConstants.REGISTRATION_MAIN_SIGNATURE);
 
                 HttpPost httppost = new HttpPost(CloudConstants.REGISTRATION_OAUTH_REGISTERED_URL);

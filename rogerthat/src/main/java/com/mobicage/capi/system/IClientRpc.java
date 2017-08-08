@@ -28,7 +28,7 @@ public interface IClientRpc {
 
     com.mobicage.to.app.UpdateAppAssetResponseTO updateAppAsset(com.mobicage.to.app.UpdateAppAssetRequestTO request) throws java.lang.Exception;
 
-    com.mobicage.to.system.UpdateAvailableResponseTO updateAvailable(com.mobicage.to.system.UpdateAvailableRequestTO request) throws java.lang.Exception;
+    com.mobicage.to.system.UpdateEmbeddedAppTranslationsResponseTO updateEmbeddedAppTranslations(com.mobicage.to.system.UpdateEmbeddedAppTranslationsRequestTO request) throws java.lang.Exception;
 
     com.mobicage.to.js_embedding.UpdateJSEmbeddingResponseTO updateJsEmbedding(com.mobicage.to.js_embedding.UpdateJSEmbeddingRequestTO request) throws java.lang.Exception;
 

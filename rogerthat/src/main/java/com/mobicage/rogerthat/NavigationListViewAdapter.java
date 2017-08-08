@@ -73,11 +73,7 @@ class NavigationListViewAdapter extends BaseAdapter {
         UIUtils.setBackgroundColor(iconView, navItem.iconColor);
         iconView.setImageDrawable(navItem.getIcon(mActivity));
 
-        if (navItem.labelText == null) {
-            titleView.setText(navItem.labelTextId);
-        } else {
-            titleView.setText(navItem.labelText);
-        }
+        titleView.setText(navItem.getLabel(mActivity));
         badgeView.setTextColor(LookAndFeelConstants.getPrimaryColor(mActivity));
         long badgeCount = mActivity.getBadgeCount(navItem.action);
         if (badgeCount > 0) {

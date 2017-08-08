@@ -75,7 +75,7 @@ import com.mobicage.rogerthat.util.FacebookUtils.PermissionType;
 import com.mobicage.rogerthat.util.GoogleServicesUtils;
 import com.mobicage.rogerthat.util.GoogleServicesUtils.GCMRegistrationIdFoundCallback;
 import com.mobicage.rogerthat.util.RegexPatterns;
-import com.mobicage.rogerthat.util.Security;
+import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeAsyncTask;
@@ -568,7 +568,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
             protected void safeRun() throws Exception {
                 T.REGISTRATION();
                 String version = "1";
-                String signature = Security.sha256(version + " " + installId + " " + timestamp + " " + deviceId + " "
+                String signature = SecurityUtils.sha256(version + " " + installId + " " + timestamp + " " + deviceId + " "
                         + registrationId + " " + accessToken + CloudConstants.REGISTRATION_MAIN_SIGNATURE);
 
                 HttpPost httppost = new HttpPost(CloudConstants.REGISTRATION_FACEBOOK_URL);
@@ -678,7 +678,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
             protected void safeRun() throws Exception {
                 T.REGISTRATION();
                 String version = "1";
-                String signature = Security.sha256(version + " " + installId + " " + timestamp + " " + deviceId + " "
+                String signature = SecurityUtils.sha256(version + " " + installId + " " + timestamp + " " + deviceId + " "
                         + registrationId + " " + "oauth" + CloudConstants.REGISTRATION_MAIN_SIGNATURE);
 
                 HttpPost httppost = new HttpPost(CloudConstants.REGISTRATION_OAUTH_INFO_URL);
@@ -746,7 +746,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                     intent.putExtra(OauthActivity.CLIENT_ID, client_id);
                     intent.putExtra(OauthActivity.OAUTH_URL, authorizeUrl);
                     intent.putExtra(OauthActivity.SCOPES, scopes);
-
+                    intent.putExtra(OauthActivity.ALLOW_BACKPRESS, true);
                     startActivityForResult(intent, START_OAUTH_REQUEST_CODE);
 
 
@@ -779,7 +779,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
             protected void safeRun() throws Exception {
                 T.REGISTRATION();
                 String version = "1";
-                String signature = Security.sha256(version + " " + installId + " " + timestamp + " " + deviceId + " "
+                String signature = SecurityUtils.sha256(version + " " + installId + " " + timestamp + " " + deviceId + " "
                         + registrationId + " " + code + state + CloudConstants.REGISTRATION_MAIN_SIGNATURE);
 
                 HttpPost httppost = new HttpPost(CloudConstants.REGISTRATION_OAUTH_REGISTERED_URL);
@@ -976,7 +976,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
             protected void safeRun() throws Exception {
                 T.REGISTRATION();
                 String version = "2";
-                String pinSignature = Security.sha256(version + " " + email + " " + timestamp + " " + deviceId + " "
+                String pinSignature = SecurityUtils.sha256(version + " " + email + " " + timestamp + " " + deviceId + " "
                         + registrationId + " " + pin + CloudConstants.REGISTRATION_PIN_SIGNATURE);
 
                 HttpPost httppost = new HttpPost(CloudConstants.REGISTRATION_PIN_URL);
@@ -1254,11 +1254,6 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                 }
 
                 ConfigurationProvider configProvider = mService.getConfigurationProvider();
-
-                if (AppConstants.SECURE_APP) {
-                    Security.setupKeyStore();
-                }
-
                 Configuration cfg = configProvider.getConfiguration(RegistrationWizard2.CONFIGKEY);
 
                 if (cfg != null && cfg.get(INVITOR_SECRET_CONFIGKEY, null) != null
@@ -1297,7 +1292,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
             protected void safeRun() throws Exception {
                 T.REGISTRATION();
                 String version = "2";
-                String requestSignature = Security.sha256(version + email + " " + timestamp + " " + deviceId + " "
+                String requestSignature = SecurityUtils.sha256(version + email + " " + timestamp + " " + deviceId + " "
                     + registrationId + " " + CloudConstants.REGISTRATION_EMAIL_SIGNATURE);
 
                 HttpPost httppost = new HttpPost(CloudConstants.REGISTRATION_REQUEST_URL);

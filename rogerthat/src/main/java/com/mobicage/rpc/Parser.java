@@ -83,6 +83,13 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
+    public static com.mobicage.models.properties.profiles.PublicKeyTO ComMobicageModelsPropertiesProfilesPublicKeyTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.models.properties.profiles.PublicKeyTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
     public static com.mobicage.to.activity.CallRecordTO ComMobicageToActivityCallRecordTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;
@@ -2239,6 +2246,307 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.AppPaymentProviderTO ComMobicageToPaymentAppPaymentProviderTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.AppPaymentProviderTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.CancelPaymentRequestTO ComMobicageToPaymentCancelPaymentRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.CancelPaymentRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.CancelPaymentResponseTO ComMobicageToPaymentCancelPaymentResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.CancelPaymentResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.ConfirmPaymentRequestTO ComMobicageToPaymentConfirmPaymentRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.ConfirmPaymentRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.ConfirmPaymentResponseTO ComMobicageToPaymentConfirmPaymentResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.ConfirmPaymentResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.CreateAssetRequestTO ComMobicageToPaymentCreateAssetRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.CreateAssetRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.CreateAssetResponseTO ComMobicageToPaymentCreateAssetResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.CreateAssetResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.CryptoTransactionDataTO ComMobicageToPaymentCryptoTransactionDataTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.CryptoTransactionDataTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.CryptoTransactionInputTO ComMobicageToPaymentCryptoTransactionInputTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.CryptoTransactionInputTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.CryptoTransactionOutputTO ComMobicageToPaymentCryptoTransactionOutputTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.CryptoTransactionOutputTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.CryptoTransactionTO ComMobicageToPaymentCryptoTransactionTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.CryptoTransactionTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.ErrorPaymentTO ComMobicageToPaymentErrorPaymentTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.ErrorPaymentTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.GetPaymentAssetsRequestTO ComMobicageToPaymentGetPaymentAssetsRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.GetPaymentAssetsRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.GetPaymentAssetsResponseTO ComMobicageToPaymentGetPaymentAssetsResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.GetPaymentAssetsResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.GetPaymentProfileRequestTO ComMobicageToPaymentGetPaymentProfileRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.GetPaymentProfileRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.GetPaymentProfileResponseTO ComMobicageToPaymentGetPaymentProfileResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.GetPaymentProfileResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.GetPaymentProvidersRequestTO ComMobicageToPaymentGetPaymentProvidersRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.GetPaymentProvidersRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.GetPaymentProvidersResponseTO ComMobicageToPaymentGetPaymentProvidersResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.GetPaymentProvidersResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.GetPaymentTransactionsRequestTO ComMobicageToPaymentGetPaymentTransactionsRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.GetPaymentTransactionsRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.GetPaymentTransactionsResponseTO ComMobicageToPaymentGetPaymentTransactionsResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.GetPaymentTransactionsResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.GetPendingPaymentDetailsRequestTO ComMobicageToPaymentGetPendingPaymentDetailsRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.GetPendingPaymentDetailsRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.GetPendingPaymentDetailsResponseTO ComMobicageToPaymentGetPendingPaymentDetailsResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.GetPendingPaymentDetailsResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.GetPendingPaymentSignatureDataRequestTO ComMobicageToPaymentGetPendingPaymentSignatureDataRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.GetPendingPaymentSignatureDataRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.GetPendingPaymentSignatureDataResponseTO ComMobicageToPaymentGetPendingPaymentSignatureDataResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.GetPendingPaymentSignatureDataResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.PaymentAssetRequiredActionTO ComMobicageToPaymentPaymentAssetRequiredActionTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.PaymentAssetRequiredActionTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.PaymentProviderAssetTO ComMobicageToPaymentPaymentProviderAssetTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.PaymentProviderAssetTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.PaymentProviderTransactionTO ComMobicageToPaymentPaymentProviderTransactionTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.PaymentProviderTransactionTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.PendingPaymentDetailsTO ComMobicageToPaymentPendingPaymentDetailsTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.PendingPaymentDetailsTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.PendingPaymentTO ComMobicageToPaymentPendingPaymentTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.PendingPaymentTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.ReceivePaymentRequestTO ComMobicageToPaymentReceivePaymentRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.ReceivePaymentRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.ReceivePaymentResponseTO ComMobicageToPaymentReceivePaymentResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.ReceivePaymentResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.UpdatePaymentAssetRequestTO ComMobicageToPaymentUpdatePaymentAssetRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.UpdatePaymentAssetRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.UpdatePaymentAssetResponseTO ComMobicageToPaymentUpdatePaymentAssetResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.UpdatePaymentAssetResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.UpdatePaymentAssetsRequestTO ComMobicageToPaymentUpdatePaymentAssetsRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.UpdatePaymentAssetsRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.UpdatePaymentAssetsResponseTO ComMobicageToPaymentUpdatePaymentAssetsResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.UpdatePaymentAssetsResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.UpdatePaymentProviderRequestTO ComMobicageToPaymentUpdatePaymentProviderRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.UpdatePaymentProviderRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.UpdatePaymentProviderResponseTO ComMobicageToPaymentUpdatePaymentProviderResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.UpdatePaymentProviderResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.UpdatePaymentProvidersRequestTO ComMobicageToPaymentUpdatePaymentProvidersRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.UpdatePaymentProvidersRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.UpdatePaymentProvidersResponseTO ComMobicageToPaymentUpdatePaymentProvidersResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.UpdatePaymentProvidersResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.UpdatePaymentStatusRequestTO ComMobicageToPaymentUpdatePaymentStatusRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.UpdatePaymentStatusRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.UpdatePaymentStatusResponseTO ComMobicageToPaymentUpdatePaymentStatusResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.UpdatePaymentStatusResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.VerifyPaymentAssetRequestTO ComMobicageToPaymentVerifyPaymentAssetRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.VerifyPaymentAssetRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.VerifyPaymentAssetResponseTO ComMobicageToPaymentVerifyPaymentAssetResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.VerifyPaymentAssetResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
     public static com.mobicage.to.service.FindServiceCategoryTO ComMobicageToServiceFindServiceCategoryTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;
@@ -2407,6 +2715,13 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
+    public static com.mobicage.to.service.UserDetailsTO ComMobicageToServiceUserDetailsTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.service.UserDetailsTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
     public static com.mobicage.to.system.EditProfileRequestTO ComMobicageToSystemEditProfileRequestTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;
@@ -2418,6 +2733,13 @@ public class Parser {
         if (value == null)
             return null;
         return new com.mobicage.to.system.EditProfileResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.system.EmbeddedAppTranslationsTO ComMobicageToSystemEmbeddedAppTranslationsTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.system.EmbeddedAppTranslationsTO((Map<String, Object>) value);
     }
 
     @SuppressWarnings("unchecked")
@@ -2589,17 +2911,17 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
-    public static com.mobicage.to.system.UpdateAvailableRequestTO ComMobicageToSystemUpdateAvailableRequestTO(Object value) throws IncompleteMessageException {
+    public static com.mobicage.to.system.UpdateEmbeddedAppTranslationsRequestTO ComMobicageToSystemUpdateEmbeddedAppTranslationsRequestTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;
-        return new com.mobicage.to.system.UpdateAvailableRequestTO((Map<String, Object>) value);
+        return new com.mobicage.to.system.UpdateEmbeddedAppTranslationsRequestTO((Map<String, Object>) value);
     }
 
     @SuppressWarnings("unchecked")
-    public static com.mobicage.to.system.UpdateAvailableResponseTO ComMobicageToSystemUpdateAvailableResponseTO(Object value) throws IncompleteMessageException {
+    public static com.mobicage.to.system.UpdateEmbeddedAppTranslationsResponseTO ComMobicageToSystemUpdateEmbeddedAppTranslationsResponseTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;
-        return new com.mobicage.to.system.UpdateAvailableResponseTO((Map<String, Object>) value);
+        return new com.mobicage.to.system.UpdateEmbeddedAppTranslationsResponseTO((Map<String, Object>) value);
     }
 
     @SuppressWarnings("unchecked")

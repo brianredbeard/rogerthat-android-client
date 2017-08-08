@@ -54,7 +54,7 @@ import com.mobicage.rogerthat.plugins.messaging.mfr.JsMfr;
 import com.mobicage.rogerthat.plugins.messaging.mfr.MessageFlowRun;
 import com.mobicage.rogerthat.plugins.messaging.widgets.Widget;
 import com.mobicage.rogerthat.util.IOUtils;
-import com.mobicage.rogerthat.util.Security;
+import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.db.DatabaseManager;
 import com.mobicage.rogerthat.util.logging.L;
@@ -100,7 +100,6 @@ import com.mobicage.to.messaging.forms.SubmitPhotoUploadFormResponseTO;
 import com.mobicage.to.messaging.forms.UnicodeListWidgetResultTO;
 import com.mobicage.to.messaging.forms.UnicodeWidgetResultTO;
 import com.mobicage.to.messaging.jsmfr.FlowStartedRequestTO;
-import com.mobicage.to.news.NewsActionButtonTO;
 import com.mobicage.to.system.SettingsTO;
 
 import org.jivesoftware.smack.util.Base64;
@@ -1771,8 +1770,7 @@ public class MessagingPlugin implements MobicagePlugin {
                                     transfer.put("submitToJSMFR", JSONValue.toJSONString(request.toJSONMap()));
                                     json.put(messageKey, transfer);
                                 } catch (JSONException e) {
-                                    // TODO Auto-generated catch block
-                                    e.printStackTrace();
+                                    L.bug(e);
                                 }
                                 // TODO save to db
                                 jsmfrTransferCompletedSave(json);
@@ -2075,7 +2073,7 @@ public class MessagingPlugin implements MobicagePlugin {
     }
 
     public String attachmentDownloadUrlHash(String downloadUrl) {
-        return Security.sha256(downloadUrl);
+        return SecurityUtils.sha256(downloadUrl);
     }
 
     public boolean attachmentExists(File dir, String downloadUrlHash) {

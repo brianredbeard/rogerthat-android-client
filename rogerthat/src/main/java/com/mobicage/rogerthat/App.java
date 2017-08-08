@@ -26,11 +26,13 @@ import com.facebook.appevents.AppEventsLogger;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.iconics.Iconics;
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.plugins.security.PinLockMgr;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeAsyncTask;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rpc.Credentials;
+import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
 
 import org.altbeacon.beacon.powersave.BackgroundPowerSaver;
@@ -54,10 +56,18 @@ import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
 public class App extends MultiDexApplication implements Thread.UncaughtExceptionHandler {
 
-    private static Context sContext;
+    private static App sContext;
 
-    @SuppressWarnings("unused")
-    private BackgroundPowerSaver mBackgroundPowerSaver;
+    protected BackgroundPowerSaver mBackgroundPowerSaver;
+    protected PinLockMgr mPinLockMgr;
+
+    public static App getContext() {
+        return sContext;
+    }
+
+    public PinLockMgr getPinLockMgr() {
+        return mPinLockMgr;
+    }
 
     @Override
     public void onCreate() {
@@ -81,11 +91,12 @@ public class App extends MultiDexApplication implements Thread.UncaughtException
         if (android.os.Build.VERSION.SDK_INT >= 18) {
             mBackgroundPowerSaver = new BackgroundPowerSaver(this);
         }
-        Iconics.registerFont(new FontAwesome());
-    }
 
-    public static Context getContext() {
-        return sContext;
+        Iconics.registerFont(new FontAwesome());
+
+        if (AppConstants.Security.PIN_LOCKED) {
+            mPinLockMgr = new PinLockMgr(this);
+        }
     }
 
     public static File getExceptionsDir(Context context) {

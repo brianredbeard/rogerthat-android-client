@@ -25,18 +25,39 @@ import java.util.Map;
 
 public class SignTO implements com.mobicage.rpc.IJSONable {
 
+    public String algorithm;
     public String caption;
+    public String index;
+    public String key_name;
     public String payload;
 
     public SignTO() {
     }
 
     public SignTO(Map<String, Object> json) throws IncompleteMessageException {
+        if (json.containsKey("algorithm")) {
+            Object val = json.get("algorithm");
+            this.algorithm = (String) val;
+        } else {
+            this.algorithm = null;
+        }
         if (json.containsKey("caption")) {
             Object val = json.get("caption");
             this.caption = (String) val;
         } else {
-            throw new IncompleteMessageException("com.mobicage.to.messaging.forms.SignTO object is missing field 'caption'");
+            this.caption = null;
+        }
+        if (json.containsKey("index")) {
+            Object val = json.get("index");
+            this.caption = (String) val;
+        } else {
+            this.caption = null;
+        }
+        if (json.containsKey("key_name")) {
+            Object val = json.get("key_name");
+            this.key_name = (String) val;
+        } else {
+            this.key_name = null;
         }
         if (json.containsKey("payload")) {
             Object val = json.get("payload");
@@ -49,7 +70,10 @@ public class SignTO implements com.mobicage.rpc.IJSONable {
     @Override
     public Map<String, Object> toJSONMap() {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
+        obj.put("algorithm", this.algorithm);
         obj.put("caption", this.caption);
+        obj.put("index", this.index);
+        obj.put("key_name", this.key_name);
         obj.put("payload", this.payload);
         return obj;
     }

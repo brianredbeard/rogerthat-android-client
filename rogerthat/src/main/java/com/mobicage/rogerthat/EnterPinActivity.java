@@ -30,18 +30,14 @@ import android.widget.TextView;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.config.Configuration;
-import com.mobicage.rogerthat.util.Security;
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.T;
-import com.mobicage.rogerthat.util.time.TimeUtils;
 import com.mobicage.rogerthat.widget.PinEntryListener;
 import com.mobicage.rogerthat.widget.PinEntryView;
 import com.mobicage.rogerthat.widget.PinKeyboardView;
 import com.mobicage.rpc.config.AppConstants;
-
-import java.util.Date;
-import java.util.UUID;
 
 public class EnterPinActivity extends ServiceBoundActivity implements PinEntryListener {
 
@@ -64,6 +60,7 @@ public class EnterPinActivity extends ServiceBoundActivity implements PinEntryLi
 
     private boolean mResultViaMainService = false;
     private String mUid;
+    private boolean sendUpdates = true;
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -88,9 +85,9 @@ public class EnterPinActivity extends ServiceBoundActivity implements PinEntryLi
 
     @Override
     protected void onServiceBound() {
-        Configuration cfg = Security.getConfiguration(mService);
-        mPinRetryCount = cfg.get(Security.CONFIG_PIN_RETRY_COUNT, 0);
-        mPinTimeout = cfg.get(Security.CONFIG_PIN_TIMEOUT, 0);
+        Configuration cfg = SecurityUtils.getConfiguration(mService);
+        mPinRetryCount = cfg.get(SecurityUtils.CONFIG_PIN_RETRY_COUNT, 0);
+        mPinTimeout = cfg.get(SecurityUtils.CONFIG_PIN_TIMEOUT, 0);
 
         long currentTime = System.currentTimeMillis();
         if (currentTime <= mPinTimeout) {
@@ -104,11 +101,15 @@ public class EnterPinActivity extends ServiceBoundActivity implements PinEntryLi
 
     public void onPinEntered(final String pin) {
         T.UI();
+        if (!sendUpdates) {
+            return;
+        }
         try{
-            boolean isValidPin = Security.isValidPin(mService, pin);
+            boolean isValidPin = SecurityUtils.isValidPin(mService, pin);
             if (isValidPin) {
+                sendUpdates = false;
                 if (mPinRetryCount != 0) {
-                    Security.setPinRetry(mService, 0, 0);
+                    SecurityUtils.setPinRetry(mService, 0, 0);
                 }
                 if (mResultViaMainService) {
                     mService.onPinEntered(mUid, pin);
@@ -124,8 +125,9 @@ public class EnterPinActivity extends ServiceBoundActivity implements PinEntryLi
                 if (mPinRetryCount >= 2) {
                     L.d("mPinRetryCount: " + mPinRetryCount);
                     long currentTime = System.currentTimeMillis();
-                    mPinTimeout = currentTime + ((mPinRetryCount - 1) * AppConstants.SECURE_PIN_RETRY_INTERVAL * SECOND);
-                    Security.setPinRetry(mService, mPinRetryCount - 1, mPinTimeout);
+                    mPinTimeout = currentTime + ((mPinRetryCount - 1) * AppConstants.Security.PIN_RETRY_INTERVAL *
+                            SECOND);
+                    SecurityUtils.setPinRetry(mService, mPinRetryCount - 1, mPinTimeout);
                     disablePinInput();
                 } else {
                     shakePinEntry();
@@ -134,13 +136,17 @@ public class EnterPinActivity extends ServiceBoundActivity implements PinEntryLi
                 }
             }
         } catch (Exception e) {
-            mService.processExceptionViaHTTP(e);
-            mService.wipe(0);
+            L.bug(e);
+            //mService.wipe(0); // todo ruben better solution
         }
         mPinEntryView.clearPinEntry();
     }
 
     public void onPinCancelled() {
+        if (!sendUpdates) {
+            return;
+        }
+        sendUpdates = false;
         if (mResultViaMainService) {
             mService.onPinCancelled(mUid);
         } else {

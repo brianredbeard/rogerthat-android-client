@@ -18,26 +18,6 @@
 
 package com.mobicage.rogerthat.util.logging;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.LinkedBlockingDeque;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HTTP;
-import org.json.simple.JSONObject;
-
 import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
@@ -53,6 +33,26 @@ import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.to.system.LogErrorRequestTO;
 import com.mobicage.to.system.LogErrorResponseTO;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
+import org.json.simple.JSONObject;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * Logging class to android.util.Log all messages with logtag "MC"
@@ -211,6 +211,26 @@ public class L {
         } catch (Exception e) {
             L.d("Error while posting error to server", e);
         }
+    }
+
+    public static void d(String format, Object... args) {
+        L.d(String.format(format, args));
+    }
+
+    public static void i(String format, Object... args) {
+        L.i(String.format(format, args));
+    }
+
+    public static void w(String format, Object... args) {
+        L.w(String.format(format, args));
+    }
+
+    public static void e(String format, Object... args) {
+        L.e(String.format(format, args));
+    }
+
+    public static void bug(String format, Object... args) {
+        L.bug(String.format(format, args));
     }
 
     public static void d(String s) {

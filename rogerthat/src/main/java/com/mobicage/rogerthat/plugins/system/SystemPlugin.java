@@ -30,6 +30,7 @@ import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.config.Configuration;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
+import com.mobicage.rogerthat.cordova.CordovaSettings;
 import com.mobicage.rogerthat.plugins.MobicagePlugin;
 import com.mobicage.rogerthat.plugins.messaging.BrandingFailureException;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
@@ -46,6 +47,7 @@ import com.mobicage.to.app.GetAppAssetRequestTO;
 import com.mobicage.to.app.UpdateAppAssetRequestTO;
 import com.mobicage.to.app.UpdateLookAndFeelRequestTO;
 import com.mobicage.to.js_embedding.JSEmbeddingItemTO;
+import com.mobicage.to.system.EmbeddedAppTranslationsTO;
 import com.mobicage.to.system.HeartBeatRequestTO;
 import com.mobicage.to.system.SettingsTO;
 
@@ -149,6 +151,8 @@ public class SystemPlugin implements MobicagePlugin {
         // device info
         request.deviceModelName = info.device.modelName;
         request.SDKVersion = info.device.osVersion;
+
+        request.embeddedApps = CordovaSettings.APPS.toArray(new String[CordovaSettings.APPS.size()]);
 
         try {
             L.d("Heartbeating to server");
@@ -414,5 +418,11 @@ public class SystemPlugin implements MobicagePlugin {
         }
 
         mMainService.sendBroadcast(new Intent(LOOK_AND_FEEL_UPDATED_INTENT));
+    }
+
+    public void updateEmbeddedAppTranslations(final EmbeddedAppTranslationsTO[] translations) {
+        for (final EmbeddedAppTranslationsTO t : translations) {
+            mStore.insertEmbeddedAppTranslations(t.embedded_app, t.translations);
+        }
     }
 }

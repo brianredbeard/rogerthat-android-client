@@ -96,4 +96,8 @@ public class NavigationItem {
             return this.actionType + "|" + this.action;
         }
     }
+
+    public String getLabel(Context ctx) {
+        return this.labelText == null ? ctx.getString(this.labelTextId) : this.labelText;
+    }
 }

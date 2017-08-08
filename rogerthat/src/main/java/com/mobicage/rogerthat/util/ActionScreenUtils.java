@@ -46,15 +46,20 @@ import com.mobicage.rogerthat.plugins.scan.ProcessScanActivity;
 import com.mobicage.rogerthat.plugins.trackme.DiscoveredBeaconProximity;
 import com.mobicage.rogerthat.plugins.trackme.TrackmePlugin;
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.ui.UIUtils;
+import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.rpc.newxmpp.XMPPKickChannel;
 import com.mobicage.to.friends.GetUserInfoRequestTO;
 
+import org.jivesoftware.smack.util.Base64;
 import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -62,7 +67,7 @@ import java.util.Map;
 
 public class ActionScreenUtils {
 
-    private ServiceBoundActivity mContext;
+    private ServiceBoundActivity mActivity;
     private MainService mMainService;
     private String mServiceEmail;
     private String mItemTagHash;
@@ -95,7 +100,7 @@ public class ActionScreenUtils {
             if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
                 L.d("[BroadcastReceiver] Screen OFF");
                 if (!mRunInBackground) {
-                    mContext.finish();
+                    mActivity.finish();
                 }
 
             } else if (FriendsPlugin.SERVICE_API_CALL_ANSWERED_INTENT.equals(intent.getAction())) {
@@ -168,7 +173,7 @@ public class ActionScreenUtils {
                                 com.mobicage.api.friends.Rpc.getUserInfo(handler, request);
                             } catch (Exception e) {
                                 // todo cordova finish(); ???
-                                mMainService.putInHistoryLog(mContext.getString(R.string.getuserinfo_failure), HistoryItem.ERROR);
+                                mMainService.putInHistoryLog(mActivity.getString(R.string.getuserinfo_failure), HistoryItem.ERROR);
                             }
                         }
                     } else {
@@ -238,9 +243,9 @@ public class ActionScreenUtils {
         }
     };
 
-    public ActionScreenUtils(ServiceBoundActivity context, String serviceEmail, String itemTagHash, boolean runInBackground) {
-        mContext = context;
-        mMainService = context.getMainService();
+    public ActionScreenUtils(ServiceBoundActivity activity, String serviceEmail, String itemTagHash, boolean runInBackground) {
+        mActivity = activity;
+        mMainService = activity.getMainService();
         mServiceEmail = serviceEmail;
         mItemTagHash = itemTagHash;
         mRunInBackground = runInBackground;
@@ -251,31 +256,34 @@ public class ActionScreenUtils {
         mCallback = callback;
 
         final IntentFilter intentFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
-        intentFilter.addAction(FriendsPlugin.SERVICE_API_CALL_ANSWERED_INTENT);
-        intentFilter.addAction(FriendsPlugin.SERVICE_DATA_UPDATED);
-        intentFilter.addAction(FriendsPlugin.BEACON_IN_REACH);
-        intentFilter.addAction(FriendsPlugin.BEACON_OUT_OF_REACH);
+        if (mServiceEmail != null) {
+            intentFilter.addAction(FriendsPlugin.SERVICE_API_CALL_ANSWERED_INTENT);
+            intentFilter.addAction(FriendsPlugin.SERVICE_DATA_UPDATED);
+            intentFilter.addAction(FriendsPlugin.BEACON_IN_REACH);
+            intentFilter.addAction(FriendsPlugin.BEACON_OUT_OF_REACH);
+        }
+        
         intentFilter.addAction(FriendsPlugin.FRIEND_INFO_RECEIVED_INTENT);
         intentFilter.addAction(ProcessScanActivity.URL_REDIRECTION_DONE);
 
-        mContext.registerReceiver(mBroadcastReceiver, intentFilter);
+        mActivity.registerReceiver(mBroadcastReceiver, intentFilter);
         mIsStartedListening = true;
     }
 
     public void stop() {
         if (mIsStartedListening) {
-            mContext.unregisterReceiver(mBroadcastReceiver);
+            mActivity.unregisterReceiver(mBroadcastReceiver);
         }
     }
 
     public void startBacklogListener() {
         final IntentFilter intentFilter = new IntentFilter(XMPPKickChannel.INTENT_BACKLOG_CONNECTED);
         intentFilter.addAction(XMPPKickChannel.INTENT_BACKLOG_DISCONNECTED);
-        mContext.registerReceiver(mBroadcastReceiverBacklog, intentFilter);
+        mActivity.registerReceiver(mBroadcastReceiverBacklog, intentFilter);
     }
 
     public void stopBacklogListener() {
-        mContext.unregisterReceiver(mBroadcastReceiverBacklog);
+        mActivity.unregisterReceiver(mBroadcastReceiverBacklog);
     }
 
     public void logError(String serviceEmail, String itemLabel, long[] itemCoords, String error) {
@@ -308,12 +316,12 @@ public class ActionScreenUtils {
     public String openActivity(final String actionType, final String action, final String title) {
         NavigationItem ni = new NavigationItem(FontAwesome.Icon.faw_question_circle_o, actionType, action, title, false);
 
-        String errorMessage = ActivityUtils.canOpenNavigationItem(mContext, ni);
+        String errorMessage = ActivityUtils.canOpenNavigationItem(mActivity, ni);
         if (errorMessage != null) {
             return errorMessage;
         }
         Bundle extras = new Bundle();
-        ActivityUtils.goToActivity(mContext, ni, false, extras);
+        ActivityUtils.goToActivity(mActivity, ni, false, extras);
         return null;
     }
 
@@ -347,5 +355,217 @@ public class ActionScreenUtils {
                 }
             }
         });
+    }
+
+    private void setupPin(final MainService.SecurityCallback sc) {
+        mMainService.setupPin(sc);
+    }
+
+    public void createKeyPair(final JSONObject params, final MainService.SecurityCallback callback) {
+        if (!AppConstants.Security.ENABLED) {
+            String errorMessage = mActivity.getString(R.string.security_not_enabled);
+            callback.onError("security_not_enabled", errorMessage);
+            return;
+        }
+
+        final String keyAlgorithm = TextUtils.optString(params, "key_algorithm", null);
+        final String keyName = TextUtils.optString(params, "key_name", null);
+        final String message = TextUtils.optString(params, "message", null);
+        final boolean forceCreate = params.optBoolean("force", false);
+        final String seed = TextUtils.optString(params, "seed", null);
+
+        if (!SecurityUtils.createKeyAlgorithmSupported(keyAlgorithm)) {
+            String errorMessage = mActivity.getString(R.string.algorithm_not_supported);
+            callback.onError("algorithm_not_supported", errorMessage);
+            return;
+        }
+
+        if (SecurityUtils.hasKey(mMainService, "public", keyAlgorithm, keyName, null) && !forceCreate) {
+            String errorMessage = mActivity.getString(R.string.key_already_exists);
+            callback.onError("key_already_exists", errorMessage);
+            return;
+        }
+
+        MainService.SecurityCallback sc = new MainService.SecurityCallback() {
+            @Override
+            public void onSuccess(Object result) {
+                mMainService.createKeyPair(keyAlgorithm, keyName, message, seed, callback);
+            }
+
+            @Override
+            public void onError(String code, String errorMessage) {
+                callback.onError(code, errorMessage);
+            }
+        };
+
+        if (!SecurityUtils.isPinSet(mMainService)) {
+            setupPin(sc);
+            return;
+        }
+
+        sc.onSuccess(null);
+    }
+
+    public void hasKeyPair(final JSONObject params, final MainService.SecurityCallback callback) throws JSONException {
+        if (!AppConstants.Security.ENABLED) {
+            String errorMessage = mActivity.getString(R.string.security_not_enabled);
+            callback.onError("security_not_enabled", errorMessage);
+            return;
+        }
+
+        final String keyAlgorithm = TextUtils.optString(params, "key_algorithm", null);
+        final String keyName = TextUtils.optString(params, "key_name", null);
+        final Long keyIndex = TextUtils.optLong(params, "key_index");
+        callback.onSuccess(SecurityUtils.hasKey(mMainService, "public", keyAlgorithm, keyName, keyIndex));
+    }
+
+    public void getPublicKey(final JSONObject params, final MainService.SecurityCallback callback) throws JSONException {
+        if (!AppConstants.Security.ENABLED) {
+            String errorMessage = mActivity.getString(R.string.security_not_enabled);
+            callback.onError("security_not_enabled", errorMessage);
+            return;
+        }
+
+        final String keyAlgorithm = TextUtils.optString(params, "key_algorithm", null);
+        final String keyName = TextUtils.optString(params, "key_name", null);
+        final Long keyIndex = TextUtils.optLong(params, "key_index");
+
+        if (!SecurityUtils.hasKey(mMainService, "public", keyAlgorithm, keyName, keyIndex)) {
+            callback.onSuccess(null);
+            return;
+        }
+        PublicKey publicKey = null;
+        try {
+            publicKey = SecurityUtils.getPublicKey(mMainService, keyAlgorithm, keyName, keyIndex);
+        } catch (Exception e) {
+            L.d("getPublicKey failed", e);
+        }
+        if (publicKey == null) {
+            callback.onSuccess(null);
+            return;
+        }
+        callback.onSuccess(Base64.encodeBytes(publicKey.getEncoded(), Base64.DONT_BREAK_LINES));
+    }
+
+    public void getSeed(final JSONObject params, final MainService.SecurityCallback callback) {
+        if (!AppConstants.Security.ENABLED) {
+            String errorMessage = mActivity.getString(R.string.security_not_enabled);
+            callback.onError("security_not_enabled", errorMessage);
+            return;
+        }
+
+        final String keyAlgorithm = TextUtils.optString(params, "key_algorithm", null);
+        final String keyName = TextUtils.optString(params, "key_name", null);
+        final String message = TextUtils.optString(params, "message", null);
+
+        if (!SecurityUtils.hasKey(mMainService, "seed", keyAlgorithm, keyName, null)) {
+            String errorMessage = mActivity.getString(R.string.key_not_found);
+            callback.onError("key_not_found", errorMessage);
+            return;
+        }
+
+        mMainService.getSeed(keyAlgorithm, keyName, message, callback);
+    }
+
+    public void getAddress(final JSONObject params, final MainService.SecurityCallback callback) {
+        if (!AppConstants.Security.ENABLED) {
+            String errorMessage = mActivity.getString(R.string.security_not_enabled);
+            callback.onError("security_not_enabled", errorMessage);
+            return;
+        }
+
+        final String keyAlgorithm = TextUtils.optString(params, "key_algorithm", null);
+        final String keyName = TextUtils.optString(params, "key_name", null);
+        final long keyIndex = params.optLong("key_index", 0);
+        final String message = TextUtils.optString(params, "message", null);
+
+        if (SecurityUtils.hasKey(mMainService, "address", keyAlgorithm, keyName, keyIndex)) {
+            try {
+                callback.onSuccess(SecurityUtils.getAddress(mMainService, keyAlgorithm, keyName, keyIndex));
+            } catch (Exception e) {
+                L.d("SecurityUtils.getAddress failed", e);
+                String errorMessage = mActivity.getString(R.string.unknown_error_occurred);
+                callback.onError("unknown_error_occurred", errorMessage);
+                return;
+            }
+            return;
+        }
+
+        if (!SecurityUtils.hasKey(mMainService, "seed", keyAlgorithm, keyName, null)) {
+            String errorMessage = mActivity.getString(R.string.key_not_found);
+            callback.onError("key_not_found", errorMessage);
+            return;
+        }
+
+        mMainService.getAddress(keyAlgorithm, keyName, keyIndex, message, callback);
+    }
+
+    public void signPayload(final JSONObject params, final String payload, final MainService.SecurityCallback callback) throws JSONException {
+        if (!AppConstants.Security.ENABLED) {
+            String errorMessage = mActivity.getString(R.string.security_not_enabled);
+            callback.onError("security_not_enabled", errorMessage);
+            return;
+        }
+
+        final String keyAlgorithm = TextUtils.optString(params, "key_algorithm", null);
+        final String keyName = TextUtils.optString(params, "key_name", null);
+        final Long keyIndex = TextUtils.optLong(params, "key_index");
+        final String message = TextUtils.optString(params, "message", null);
+        final boolean forcePin = params.optBoolean("force_pin", false);
+
+        if (!SecurityUtils.hasKey(mMainService, "public", keyAlgorithm, keyName, keyIndex)) {
+            String errorMessage = mActivity.getString(R.string.key_not_found);
+            callback.onError("key_not_found", errorMessage);
+            return;
+        }
+
+        byte[] payloadData = null;
+        try {
+            payloadData = SecurityUtils.getPayload(keyAlgorithm, Base64.decode(payload));
+        } catch (Exception e) {
+            L.d("SecurityUtils.getPayload failed", e);
+        }
+        if (payloadData == null) {
+            String errorMessage = mActivity.getString(R.string.unknown_error_occurred);
+            callback.onError("unknown_error_occurred", errorMessage);
+            return;
+        }
+        mMainService.sign(keyAlgorithm, keyName, keyIndex, message, payloadData, forcePin, callback);
+    }
+
+    public void verifySignedPayload(final JSONObject params, final MainService.SecurityCallback callback) throws JSONException {
+        if (!AppConstants.Security.ENABLED) {
+            String errorMessage = mActivity.getString(R.string.security_not_enabled);
+            callback.onError("security_not_enabled", errorMessage);
+            return;
+        }
+
+        final String keyAlgorithm = TextUtils.optString(params, "key_algorithm", null);
+        final String keyName = TextUtils.optString(params, "key_name", null);
+        final Long keyIndex = TextUtils.optLong(params, "key_index");
+        final String payload = TextUtils.optString(params, "payload", null);
+        final String payloadSignature = TextUtils.optString(params, "payload_signature", null);
+
+        if (!SecurityUtils.hasKey(mMainService, "public", keyAlgorithm, keyName, keyIndex)) {
+            String errorMessage = mActivity.getString(R.string.key_not_found);
+            callback.onError("key_not_found", errorMessage);
+            return;
+        }
+
+        byte[] payloadData = null;
+        try {
+            payloadData = SecurityUtils.getPayload(keyAlgorithm, Base64.decode(payload));
+        } catch (Exception e) {
+            L.d("SecurityUtils.getPayload failed", e);
+        }
+        if (payloadData == null) {
+            String errorMessage = mActivity.getString(R.string.unknown_error_occurred);
+            callback.onError("unknown_error_occurred", errorMessage);
+            return;
+        }
+
+        final byte[] payloadDataSignature = Base64.decode(payloadSignature);
+        boolean valid = mMainService.validate(keyAlgorithm, keyName, keyIndex, payloadData, payloadDataSignature);
+        callback.onSuccess(valid);
     }
 }

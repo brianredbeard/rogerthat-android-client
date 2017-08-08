@@ -201,7 +201,7 @@ var message = 'To confirm this payment please enter your pin code';
 var payload = JSON.stringify({amount: 500, fromUser: "jane@foo.com", toUser: "john@foo.com"});
 
 var onError = function(error) {
-    // error: {"exception": "<The error message>"}
+    // error: {"code": "error_code", "message": "Human readable translated message"}
     console.log(error);
 };
 

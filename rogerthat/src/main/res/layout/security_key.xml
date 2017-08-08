@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical">
+
+    <ProgressBar
+        android:id="@+id/spinner"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="42dp"
+        android:indeterminate="true"
+        android:visibility="gone"/>
+
+    <LinearLayout
+        android:id="@+id/security_settings_no_pin"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <include layout="@layout/security_settings_no_pin"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/security_settings_pin_result"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <include layout="@layout/security_settings_pin_result"/>
+    </LinearLayout>
+
+</LinearLayout>

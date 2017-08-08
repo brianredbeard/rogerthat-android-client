@@ -24,7 +24,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -44,14 +43,14 @@ import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.config.Configuration;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
 import com.mobicage.rogerthat.cordova.CordovaActionScreenActivity;
-import com.mobicage.rogerthat.cordova.CordovaPlugins;
+import com.mobicage.rogerthat.cordova.CordovaSettings;
 import com.mobicage.rogerthat.plugins.friends.ActionScreenActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.system.JSEmbedding;
 import com.mobicage.rogerthat.plugins.system.SystemPlugin;
 import com.mobicage.rogerthat.util.IOUtils;
 import com.mobicage.rogerthat.util.RegexPatterns;
-import com.mobicage.rogerthat.util.Security;
+import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.pickle.PickleException;
@@ -63,7 +62,6 @@ import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.time.TimeUtils;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
-import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.CallReceiver;
 import com.mobicage.rpc.Credentials;
 import com.mobicage.rpc.IJSONable;
@@ -197,7 +195,7 @@ public class BrandingMgr implements Pickleable, Closeable {
         public boolean usesDownloadManager() {
             // DownloadManager.COLUMN_LOCAL_FILENAME is added in API level 11
             return Build.VERSION.SDK_INT >= 11
-                && (this.type == BrandedItem.TYPE_ATTACHMENT || this.type == BrandedItem.TYPE_LOCAL_FLOW_ATTACHMENT);
+                    && (this.type == BrandedItem.TYPE_ATTACHMENT || this.type == BrandedItem.TYPE_LOCAL_FLOW_ATTACHMENT);
         }
 
         @Override
@@ -260,7 +258,7 @@ public class BrandingMgr implements Pickleable, Closeable {
                 for (int i = 0; i < val_arr.size(); i++) {
                     Map<String, Object> map = (Map<String, Object>) val_arr.get(i);
                     this.calls.add(BrandingMgr.createRpcCall((String) map.get("function"),
-                        (Map<String, Object>) map.get("arguments")));
+                            (Map<String, Object>) map.get("arguments")));
                 }
             }
 
@@ -316,7 +314,7 @@ public class BrandingMgr implements Pickleable, Closeable {
                         return false;
                     }
                 } else if (type == BrandedItem.TYPE_LOCAL_FLOW_ATTACHMENT
-                    || type == BrandedItem.TYPE_LOCAL_FLOW_BRANDING) {
+                        || type == BrandedItem.TYPE_LOCAL_FLOW_BRANDING) {
                     StartFlowRequest req = (StartFlowRequest) object;
                     StartFlowRequest otherReq = (StartFlowRequest) other.object;
                     if (!req.thread_key.equals(otherReq.thread_key)) {
@@ -423,8 +421,8 @@ public class BrandingMgr implements Pickleable, Closeable {
     }
 
     private static final String ENCRYPTION_KEY = "acec505e55e120f6"; // secret used in 1.0.1013.A for AES encryption
-    private static final byte[] ENCRYPTION_IV = new byte[] { -66, -70, 3, 86, -32, -49, -37, 46, -88, -126, -108, 26,
-        113, -37, 27, -111 }; // IV used in 1.0.1013.A for AES encryption
+    private static final byte[] ENCRYPTION_IV = new byte[]{-66, -70, 3, 86, -32, -49, -37, 46, -88, -126, -108, 26,
+            113, -37, 27, -111}; // IV used in 1.0.1013.A for AES encryption
 
     private static final String NUNTIUZ_MESSAGE = "<nuntiuz_message/>";
     private static final String NUNTIUZ_TIMESTAMP = "<nuntiuz_timestamp/>";
@@ -448,7 +446,7 @@ public class BrandingMgr implements Pickleable, Closeable {
     protected final List<BrandedItem> mQueue = Collections.synchronizedList(new ArrayList<BrandedItem>());
     @SuppressLint("UseSparseArrays")
     protected final Map<Long, BrandedItem> mDownloadMgrQueue = Collections
-        .synchronizedMap(new HashMap<Long, BrandedItem>());
+            .synchronizedMap(new HashMap<Long, BrandedItem>());
     protected HandlerThread mDownloaderThread;
     protected Handler mDownloaderHandler;
     protected Object mLock = new Object();
@@ -486,7 +484,7 @@ public class BrandingMgr implements Pickleable, Closeable {
     private byte[] getEncryptionKey() {
         T.dontCare();
         if (mEncryptionKeyBytes == null) {
-            mEncryptionKeyBytes = Security.md5(ENCRYPTION_KEY + mMainService.getPackageName());
+            mEncryptionKeyBytes = SecurityUtils.md5(ENCRYPTION_KEY + mMainService.getPackageName());
         }
         return mEncryptionKeyBytes;
     }
@@ -536,7 +534,7 @@ public class BrandingMgr implements Pickleable, Closeable {
                 if (item.type == BrandedItem.TYPE_ATTACHMENT) {
                     AttachmentDownload ad = (AttachmentDownload) item.object;
                     if (ad.threadKey.equals(threadKey) && ad.messageKey.equals(messageKey)
-                        && ad.download_url.equals(downloadUrl)) {
+                            && ad.download_url.equals(downloadUrl)) {
                         return item;
                     }
                 }
@@ -567,7 +565,7 @@ public class BrandingMgr implements Pickleable, Closeable {
                         toBeDeleted.add(item);
                     }
                 } else if (item.type == BrandedItem.TYPE_LOCAL_FLOW_ATTACHMENT
-                    || item.type == BrandedItem.TYPE_LOCAL_FLOW_BRANDING) {
+                        || item.type == BrandedItem.TYPE_LOCAL_FLOW_BRANDING) {
                     StartFlowRequest req = (StartFlowRequest) item.object;
                     if (threadKey.equals(req.thread_key)) {
                         toBeDeleted.add(item);
@@ -699,7 +697,7 @@ public class BrandingMgr implements Pickleable, Closeable {
 
     private boolean queue(BrandedItem item) {
         if (item.type != BrandedItem.TYPE_MESSAGE
-            && com.mobicage.rogerthat.util.TextUtils.isEmptyOrWhitespace(item.brandingKey))
+                && com.mobicage.rogerthat.util.TextUtils.isEmptyOrWhitespace(item.brandingKey))
             return false;
 
         if (item.type == BrandedItem.TYPE_FRIEND) {
@@ -825,7 +823,7 @@ public class BrandingMgr implements Pickleable, Closeable {
                                 extractJSEmbedding(packet);
                                 SystemPlugin systemPlugin = mMainService.getPlugin(SystemPlugin.class);
                                 systemPlugin.updateJSEmbeddedPacket(packet.name, packet.hash,
-                                    JSEmbedding.STATUS_AVAILABLE);
+                                        JSEmbedding.STATUS_AVAILABLE);
 
                                 Intent intent = new Intent(JS_EMBEDDING_AVAILABLE_INTENT);
                                 intent.putExtra(JS_EMBEDDING_NAME, attachmentDownloadUrlHash(packet.name));
@@ -841,7 +839,7 @@ public class BrandingMgr implements Pickleable, Closeable {
             });
 
         } else if (item.type == BrandedItem.TYPE_LOCAL_FLOW_ATTACHMENT
-            || item.type == BrandedItem.TYPE_LOCAL_FLOW_BRANDING) {
+                || item.type == BrandedItem.TYPE_LOCAL_FLOW_BRANDING) {
             mMainService.postOnBIZZHandler(new SafeRunnable() {
                 @Override
                 protected void safeRun() throws Exception {
@@ -973,7 +971,7 @@ public class BrandingMgr implements Pickleable, Closeable {
 
     public boolean isCordovaBranding(String brandingKey) {
         if (brandingKey.startsWith("cordova-")) {
-            if (CordovaPlugins.PLUGINS.length == 0) {
+            if (CordovaSettings.PLUGINS.size() == 0) {
                 L.e("App needs to be prepared when you want to use cordova");
             }
             return true;
@@ -994,7 +992,7 @@ public class BrandingMgr implements Pickleable, Closeable {
 
     /**
      * Prepares branding for description screen
-     * 
+     *
      * @param friend
      * @return
      * @throws BrandingFailureException
@@ -1005,7 +1003,7 @@ public class BrandingMgr implements Pickleable, Closeable {
     }
 
     public BrandingResult prepareBranding(String brandingKey, FriendTO friend, boolean jsEnabled)
-        throws BrandingFailureException {
+            throws BrandingFailureException {
         T.UI();
         BrandedItem item = new BrandedItem(BrandedItem.TYPE_GENERIC, null, brandingKey);
         item.object = friend;
@@ -1074,7 +1072,7 @@ public class BrandingMgr implements Pickleable, Closeable {
             final BufferedInputStream is = new BufferedInputStream(new FileInputStream(brandingCache));
             final FileOutputStream os = new FileOutputStream(tmpDecryptFile);
             if (aesEncrypted) {
-                Security.decryptAES(getEncryptionKey(), ENCRYPTION_IV, is, os);
+                SecurityUtils.decryptAES(getEncryptionKey(), ENCRYPTION_IV, is, os);
             }
         } catch (Exception e1) {
             brandingCache.delete();
@@ -1085,7 +1083,12 @@ public class BrandingMgr implements Pickleable, Closeable {
         BrandingResult br = extractBranding(item, brandingCache, tmpDecryptFile, tmpBrandingDir);
 
         if (isCordovaBranding(item.brandingKey)) {
-            copyAssetFolder(mMainService.getAssets(), "cordova", br.dir.getAbsolutePath());
+            try {
+                IOUtils.copyAssetFolder(mMainService.getAssets(), "cordova", br.dir.getAbsolutePath());
+            } catch (IOException e) {
+                L.bug(e);
+                throw new BrandingFailureException("Could not copy the cordova asset folder", e);
+            }
         }
 
         if (!aesEncrypted) {
@@ -1093,8 +1096,8 @@ public class BrandingMgr implements Pickleable, Closeable {
             final File dest = getBrandingFile(item.brandingKey);
             try {
                 if (!dest.exists())
-                    Security.encryptAES(getEncryptionKey(), ENCRYPTION_IV, new FileInputStream(tmpDecryptFile),
-                        new FileOutputStream(dest));
+                    SecurityUtils.encryptAES(getEncryptionKey(), ENCRYPTION_IV, new FileInputStream(tmpDecryptFile),
+                            new FileOutputStream(dest));
             } catch (Exception e) {
                 if (dest.exists() && !dest.delete())
                     L.d("Could not remove " + dest);
@@ -1107,50 +1110,8 @@ public class BrandingMgr implements Pickleable, Closeable {
         return br;
     }
 
-    private static void copyAssetFolder(AssetManager assetManager, String fromAssetPath, String toPath) {
-        try {
-            String[] files = assetManager.list(fromAssetPath);
-            if (files.length > 0) {
-                new File(toPath).mkdirs();
-                for (String file : files) {
-                    copyAssetFolder(assetManager, fromAssetPath + "/" + file, toPath + "/" + file);
-                }
-            } else {
-                copyAsset(assetManager, fromAssetPath, toPath);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static void copyAsset(AssetManager assetManager, String fromAssetPath, String toPath) {
-        InputStream in = null;
-        OutputStream out = null;
-        try {
-            in = assetManager.open(fromAssetPath);
-            new File(toPath).createNewFile();
-            out = new FileOutputStream(toPath);
-            copyFile(in, out);
-            in.close();
-            in = null;
-            out.flush();
-            out.close();
-            out = null;
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static void copyFile(InputStream in, OutputStream out) throws IOException {
-        byte[] buffer = new byte[1024];
-        int read;
-        while((read = in.read(buffer)) != -1){
-            out.write(buffer, 0, read);
-        }
-    }
-
     private BrandingResult extractBranding(final BrandedItem item, final File encryptedBrandingFile,
-        final File tmpDecryptedBrandingFile, final File tmpBrandingDir) throws BrandingFailureException {
+                                           final File tmpDecryptedBrandingFile, final File tmpBrandingDir) throws BrandingFailureException {
         try {
             L.i("Extracting " + tmpDecryptedBrandingFile + " (" + item.brandingKey + ")");
             File brandingFile = new File(tmpBrandingDir, "branding.html");
@@ -1173,7 +1134,7 @@ public class BrandingMgr implements Pickleable, Closeable {
             try {
                 MessageDigest digester = MessageDigest.getInstance("SHA256");
                 DigestInputStream dis = new DigestInputStream(new BufferedInputStream(new FileInputStream(
-                    tmpDecryptedBrandingFile)), digester);
+                        tmpDecryptedBrandingFile)), digester);
                 try {
                     ZipInputStream zis = new ZipInputStream(dis);
                     try {
@@ -1202,7 +1163,7 @@ public class BrandingMgr implements Pickleable, Closeable {
                                     watermarkFile = destination;
                                 }
                                 final OutputStream fos = new BufferedOutputStream(new FileOutputStream(destination),
-                                    BUFFER_SIZE);
+                                        BUFFER_SIZE);
                                 try {
                                     while ((count = zis.read(data, 0, BUFFER_SIZE)) != -1) {
                                         fos.write(data, 0, count);
@@ -1243,39 +1204,39 @@ public class BrandingMgr implements Pickleable, Closeable {
                 }
 
                 switch (item.type) {
-                case BrandedItem.TYPE_MESSAGE:
-                    MessageTO messageTO = (MessageTO) item.object;
-                    message = messageTO.message;
-                    if (showName) {
-                        FriendsPlugin friendsPlugin = mMainService.getPlugin(FriendsPlugin.class);
-                        senderName = friendsPlugin.getName(messageTO.sender);
-                    }
+                    case BrandedItem.TYPE_MESSAGE:
+                        MessageTO messageTO = (MessageTO) item.object;
+                        message = messageTO.message;
+                        if (showName) {
+                            FriendsPlugin friendsPlugin = mMainService.getPlugin(FriendsPlugin.class);
+                            senderName = friendsPlugin.getName(messageTO.sender);
+                        }
 
-                    brandingHtml = brandingHtml.replace(NUNTIUZ_MESSAGE,
-                            TextUtils.htmlEncode(message).replace("\r", "").replace("\n", "<br>"));
-                    brandingHtml = brandingHtml.replace(NUNTIUZ_TIMESTAMP,
-                            TimeUtils.getDayTimeStr(mContext, messageTO.timestamp * 1000));
-                    brandingHtml = brandingHtml.replace(NUNTIUZ_IDENTITY_NAME, TextUtils.htmlEncode(senderName));
-                    break;
+                        brandingHtml = brandingHtml.replace(NUNTIUZ_MESSAGE,
+                                TextUtils.htmlEncode(message).replace("\r", "").replace("\n", "<br>"));
+                        brandingHtml = brandingHtml.replace(NUNTIUZ_TIMESTAMP,
+                                TimeUtils.getDayTimeStr(mContext, messageTO.timestamp * 1000));
+                        brandingHtml = brandingHtml.replace(NUNTIUZ_IDENTITY_NAME, TextUtils.htmlEncode(senderName));
+                        break;
 
-                case BrandedItem.TYPE_FRIEND:
-                    FriendTO friend = (FriendTO) item.object;  // In this case Friend is fully populated
-                    message = friend.description;
-                    if (showName) {
-                        senderName = friend.name;
-                    }
+                    case BrandedItem.TYPE_FRIEND:
+                        FriendTO friend = (FriendTO) item.object;  // In this case Friend is fully populated
+                        message = friend.description;
+                        if (showName) {
+                            senderName = friend.name;
+                        }
 
-                    brandingHtml = brandingHtml.replace(NUNTIUZ_MESSAGE, TextUtils.htmlEncode(friend.description)
-                        .replace("\r", "").replace("\n", "<br>"));
-                    brandingHtml = brandingHtml.replace(NUNTIUZ_IDENTITY_NAME, TextUtils.htmlEncode(friend.name));
-                    break;
+                        brandingHtml = brandingHtml.replace(NUNTIUZ_MESSAGE, TextUtils.htmlEncode(friend.description)
+                                .replace("\r", "").replace("\n", "<br>"));
+                        brandingHtml = brandingHtml.replace(NUNTIUZ_IDENTITY_NAME, TextUtils.htmlEncode(friend.name));
+                        break;
 
-                case BrandedItem.TYPE_GENERIC:
-                    if (item.object instanceof FriendTO) {
-                        brandingHtml = brandingHtml.replace(NUNTIUZ_IDENTITY_NAME,
-                            TextUtils.htmlEncode(((FriendTO) item.object).name));
-                    }
-                    break;
+                    case BrandedItem.TYPE_GENERIC:
+                        if (item.object instanceof FriendTO) {
+                            brandingHtml = brandingHtml.replace(NUNTIUZ_IDENTITY_NAME,
+                                    TextUtils.htmlEncode(((FriendTO) item.object).name));
+                        }
+                        break;
                 }
 
                 matcher = RegexPatterns.BRANDING_BACKGROUND_COLOR.matcher(brandingHtml);
@@ -1411,7 +1372,7 @@ public class BrandingMgr implements Pickleable, Closeable {
     }
 
     private void extractJSEmbedding(final JSEmbeddingItemTO packet) throws BrandingFailureException,
-        NoSuchAlgorithmException, FileNotFoundException, IOException {
+            NoSuchAlgorithmException, FileNotFoundException, IOException {
         File brandingCache = getJSEmbeddingPacketFile(packet.name);
         if (!brandingCache.exists())
             throw new BrandingFailureException("Javascript package not found!");
@@ -1428,7 +1389,7 @@ public class BrandingMgr implements Pickleable, Closeable {
 
         MessageDigest digester = MessageDigest.getInstance("SHA256");
         DigestInputStream dis = new DigestInputStream(new BufferedInputStream(new FileInputStream(brandingCache)),
-            digester);
+                digester);
         try {
             ZipInputStream zis = new ZipInputStream(dis);
             try {
@@ -1612,7 +1573,7 @@ public class BrandingMgr implements Pickleable, Closeable {
             } else {
                 if (mInitialized)
                     initStorageSettings();
-                return new String[] { intent.getAction() };
+                return new String[]{intent.getAction()};
             }
         }
     };
@@ -1730,7 +1691,7 @@ public class BrandingMgr implements Pickleable, Closeable {
     private final SafeRunnable mQueueProcessor = new SafeRunnable() {
 
         private void copyAndVerify(BrandedItem item, InputStream input, FileOutputStream output) throws IOException,
-            BrandingFailureException {
+                BrandingFailureException {
             T.dontCare();
             String brandingKey = item.brandingKey;
 
@@ -1750,7 +1711,7 @@ public class BrandingMgr implements Pickleable, Closeable {
                     IOUtils.copy(dis, output, BUFFER_SIZE);
                 } else {
                     try {
-                        Security.encryptAES(getEncryptionKey(), ENCRYPTION_IV, dis, output);
+                        SecurityUtils.encryptAES(getEncryptionKey(), ENCRYPTION_IV, dis, output);
                     } catch (Exception e) {
                         throw new BrandingFailureException("Failed to encrypt branding " + brandingKey, e);
                     }
@@ -1765,8 +1726,8 @@ public class BrandingMgr implements Pickleable, Closeable {
                 String hexDigest = com.mobicage.rogerthat.util.TextUtils.toHex(digester.digest());
                 if (!getCleanBrandingKey(brandingKey).equals(hexDigest))
                     throw new BrandingFailureException(
-                        "SHA256 digest could not be validated against branding key\nExpected " + brandingKey + "\nGot "
-                            + hexDigest);
+                            "SHA256 digest could not be validated against branding key\nExpected " + brandingKey + "\nGot "
+                                    + hexDigest);
             }
         }
 
@@ -1796,9 +1757,9 @@ public class BrandingMgr implements Pickleable, Closeable {
                     Credentials credentials = mMainService.getCredentials();
                     if (credentials != null) {
                         httpGet.addHeader("X-MCTracker-User",
-                            Base64.encodeBytes(credentials.getUsername().getBytes(), Base64.DONT_BREAK_LINES));
+                                Base64.encodeBytes(credentials.getUsername().getBytes(), Base64.DONT_BREAK_LINES));
                         httpGet.addHeader("X-MCTracker-Pass",
-                            Base64.encodeBytes(credentials.getPassword().getBytes(), Base64.DONT_BREAK_LINES));
+                                Base64.encodeBytes(credentials.getPassword().getBytes(), Base64.DONT_BREAK_LINES));
                     } else {
                         L.bug("Failed to download JS Embedding packet, Credentials were NULL");
                         throw new Exception("Failed to download JS Embedding packet, Credentials were NULL");
@@ -1850,13 +1811,13 @@ public class BrandingMgr implements Pickleable, Closeable {
                     JSEmbeddingItemTO packet = (JSEmbeddingItemTO) item.object;
                     errorMessage += " for JSEmbedding: " + packet.name;
                 } else if (item.type == BrandedItem.TYPE_LOCAL_FLOW_ATTACHMENT
-                    || item.type == BrandedItem.TYPE_LOCAL_FLOW_BRANDING) {
+                        || item.type == BrandedItem.TYPE_LOCAL_FLOW_BRANDING) {
                     StartFlowRequest flow = (StartFlowRequest) item.object;
                     errorMessage += " for service '" + flow.service + "' and start flow hash: " + flow.static_flow_hash;
                 } else if (item.type == BrandedItem.TYPE_ATTACHMENT) {
                     AttachmentDownload attachment = (AttachmentDownload) item.object;
                     errorMessage += " for attachment " + attachment.download_url + " in message "
-                        + attachment.messageKey;
+                            + attachment.messageKey;
                 } else if (item.type == BrandedItem.TYPE_APP_ASSET) {
                     UpdateAppAssetRequestTO appAssetRequestTO = (UpdateAppAssetRequestTO) item.object;
                     errorMessage += " for app asset of kind " + appAssetRequestTO.kind + " in message ";
@@ -1891,7 +1852,7 @@ public class BrandingMgr implements Pickleable, Closeable {
         private boolean shouldDequeueItem(BrandedItem item) {
             try {
                 return item.brandingKey == null || isBrandingAvailable(item.brandingKey)
-                    || item.status != BrandedItem.STATUS_TODO;
+                        || item.status != BrandedItem.STATUS_TODO;
             } catch (BrandingFailureException e) {
                 L.e(e);
                 return true;
@@ -1996,17 +1957,17 @@ public class BrandingMgr implements Pickleable, Closeable {
     }
 
     private String attachmentDownloadUrlHash(String downloadUrl) {
-        return Security.sha256(downloadUrl);
+        return SecurityUtils.sha256(downloadUrl);
     }
 
     public File getAttachmentFile(AttachmentDownload attachment) throws BrandingFailureException {
         T.dontCare();
         return getAttachmentFile(attachment.threadKey, attachment.messageKey,
-            attachmentDownloadUrlHash(attachment.download_url));
+                attachmentDownloadUrlHash(attachment.download_url));
     }
 
     private File getAttachmentFile(String threadKey, String messageKey, String attachmentUrlHash)
-        throws BrandingFailureException {
+            throws BrandingFailureException {
         T.dontCare();
         File dir = getAttachmentsDirectory(threadKey, messageKey);
         return new File(dir, attachmentUrlHash);
@@ -2131,7 +2092,7 @@ public class BrandingMgr implements Pickleable, Closeable {
             int updatesCount = in.readInt();
             for (int j = 0; j < updatesCount; j++) {
                 item.calls.add(createRpcCall("com.mobicage.capi.messaging.updateMessageMemberStatus",
-                    (Map<String, Object>) JSONValue.parse(in.readUTF())));
+                        (Map<String, Object>) JSONValue.parse(in.readUTF())));
             }
         }
     }
@@ -2143,7 +2104,7 @@ public class BrandingMgr implements Pickleable, Closeable {
             String key = in.readUTF();
             BrandedItem item = getMessageFromQueue(key);
             item.calls.add(createRpcCall("com.mobicage.capi.messaging.messageLocked",
-                (Map<String, Object>) JSONValue.parse(in.readUTF())));
+                    (Map<String, Object>) JSONValue.parse(in.readUTF())));
         }
     }
 

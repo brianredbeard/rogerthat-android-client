@@ -86,7 +86,8 @@ public class PinEntryView extends LinearLayout {
                 break;
             case BUTTON_OK:
                 if (charIndex == 3) {
-                    processKeyEntryComplete();
+                    final String pin = getString(pinArray);
+                    mPinEntryListener.onPinEntered(pin);
                 } else {
                     mPinEntryListener.onPinIncomplete();
                 }
@@ -102,11 +103,6 @@ public class PinEntryView extends LinearLayout {
         imgViews[2] = (ImageView) view.findViewById(R.id.pe2);
         imgViews[3] = (ImageView) view.findViewById(R.id.pe3);
         addView(view, params);
-    }
-
-    private void processKeyEntryComplete() {
-        final String pin = getString(pinArray);
-        mPinEntryListener.onPinEntered(pin);
     }
 
     private String getString(int[] array) {

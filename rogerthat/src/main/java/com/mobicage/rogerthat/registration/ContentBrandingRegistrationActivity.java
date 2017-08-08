@@ -35,7 +35,7 @@ import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
 import com.mobicage.rogerthat.util.GoogleServicesUtils;
 import com.mobicage.rogerthat.util.GoogleServicesUtils.GCMRegistrationIdFoundCallback;
-import com.mobicage.rogerthat.util.Security;
+import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
@@ -251,7 +251,7 @@ public class ContentBrandingRegistrationActivity extends AbstractRegistrationAct
             protected void safeRun() throws Exception {
                 T.REGISTRATION();
                 String version = "1";
-                String signature = Security.sha256(version + " " + installId + " " + timestamp + " " + deviceId + " "
+                String signature = SecurityUtils.sha256(version + " " + installId + " " + timestamp + " " + deviceId + " "
                     + registrationId + " " + qr_url + CloudConstants.REGISTRATION_MAIN_SIGNATURE);
 
                 HttpPost httppost = new HttpPost(CloudConstants.REGISTRATION_QR_URL);

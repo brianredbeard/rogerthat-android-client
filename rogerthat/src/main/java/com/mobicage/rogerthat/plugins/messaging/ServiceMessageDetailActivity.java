@@ -252,7 +252,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
         String messageKey = intent.getStringExtra("message");
         String title = intent.getStringExtra(TITLE);
         mCurrentMessage = mStore.getFullMessageByKey(messageKey);
-        invalidateOptionsMenu();
+        supportInvalidateOptionsMenu();
 
         if (title == null) {
             setTitle(mFriendsPlugin.getName(mCurrentMessage.sender));
@@ -1151,7 +1151,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
 
         if (isUpdate) {
             mCurrentMessage = mStore.getFullMessageByKey(mCurrentMessage.key);
-            invalidateOptionsMenu();
+            supportInvalidateOptionsMenu();
         }
 
         boolean isLocked = (mCurrentMessage.flags & MessagingPlugin.FLAG_LOCKED) == MessagingPlugin.FLAG_LOCKED;
@@ -1375,7 +1375,6 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
                     transfers = plugin.jsmfrTransferCompletedGetNext();
                 } catch (Exception e) {
                     L.e(e);
-                    e.printStackTrace();
                 }
 
             }

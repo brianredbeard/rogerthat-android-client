@@ -29,6 +29,7 @@ public class HeartBeatRequestTO implements com.mobicage.rpc.IJSONable {
     public long appType;
     public String buildFingerPrint;
     public String deviceModelName;
+    public String[] embeddedApps;
     public boolean flushBackLog;
     public String localeCountry;
     public String localeLanguage;
@@ -79,6 +80,19 @@ public class HeartBeatRequestTO implements com.mobicage.rpc.IJSONable {
             this.deviceModelName = (String) val;
         } else {
             throw new IncompleteMessageException("com.mobicage.to.system.HeartBeatRequestTO object is missing field 'deviceModelName'");
+        }
+        if (json.containsKey("embeddedApps")) {
+            org.json.simple.JSONArray val_arr = (org.json.simple.JSONArray) json.get("embeddedApps");
+            if (val_arr == null) {
+                this.embeddedApps = null;
+            } else {
+                this.embeddedApps = new String[val_arr.size()];
+                for (int i=0; i < val_arr.size(); i++) {
+                    this.embeddedApps[i] = (String) val_arr.get(i);
+                }
+            }
+        } else {
+            throw new IncompleteMessageException("com.mobicage.to.system.HeartBeatRequestTO object is missing field 'embeddedApps'");
         }
         if (json.containsKey("flushBackLog")) {
             Object val = json.get("flushBackLog");
@@ -207,12 +221,22 @@ public class HeartBeatRequestTO implements com.mobicage.rpc.IJSONable {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Map<String, Object> toJSONMap() {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
         obj.put("SDKVersion", this.SDKVersion);
         obj.put("appType", this.appType);
         obj.put("buildFingerPrint", this.buildFingerPrint);
         obj.put("deviceModelName", this.deviceModelName);
+        if (this.embeddedApps == null) {
+            obj.put("embeddedApps", null);
+        } else {
+            org.json.simple.JSONArray arr = new org.json.simple.JSONArray();
+            for (int i=0; i < this.embeddedApps.length; i++) {
+                arr.add(this.embeddedApps[i]);
+            }
+            obj.put("embeddedApps", arr);
+        }
         obj.put("flushBackLog", this.flushBackLog);
         obj.put("localeCountry", this.localeCountry);
         obj.put("localeLanguage", this.localeLanguage);

@@ -75,7 +75,7 @@ import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
 import com.mobicage.rogerthat.util.ActionScreenUtils;
 import com.mobicage.rogerthat.util.FacebookUtils;
 import com.mobicage.rogerthat.util.FacebookUtils.PermissionType;
-import com.mobicage.rogerthat.util.Security;
+import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
@@ -83,7 +83,6 @@ import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.system.TaggedWakeLock;
 import com.mobicage.rogerthat.util.ui.UIUtils;
-import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
 
 import org.jivesoftware.smack.util.Base64;
@@ -111,6 +110,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
     public static final String ITEM_COORDS = "item_coords";
     public static final String CONTEXT_MATCH = "context";
     public static final String RUN_IN_BACKGROUND = "run_in_background";
+    public static final String CONTEXT = "context";
 
     private static final String POKE = "poke://";
 
@@ -257,7 +257,17 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 stopScanningQrCode(params);
             }
             // SECURITY
-            else if ("security/sign".equals(action)) {
+            else if ("security/createKeyPair".equals(action)) {
+                createKeyPair(params);
+            } else if ("security/hasKeyPair".equals(action)) {
+                hasKeyPair(params);
+            } else if ("security/getPublicKey".equals(action)) {
+                getPublicKey(params);
+            } else if ("security/getSeed".equals(action)) {
+                getSeed(params);
+            } else if ("security/getAddress".equals(action)) {
+                getAddress(params);
+            } else if ("security/sign".equals(action)) {
                 signPayload(params);
             } else if ("security/verify".equals(action)) {
                 verifySignedPayload(params);
@@ -360,9 +370,12 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             String cameraType = params.getString("camera_type");
 
             if (!QRCodeScanner.CAMERA_TYPES.contains(cameraType)) {
-                Map<String, Object> error = new HashMap<String, Object>();
-                error.put("exception", "Unsupported camera type");
-                deliverResult(requestId, null, error);
+                Map<String, Object> e = new HashMap<>();
+                e.put("code", "unsupported_camera_type");
+                String errorMessage = getString(R.string.unsupported_camera_type);
+                e.put("message", errorMessage);
+                e.put("exception", errorMessage); // deprecated
+                deliverResult(requestId, null, e);
                 return;
             }
 
@@ -377,9 +390,12 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 final SafeRunnable cancelRunnable = new SafeRunnable() {
                     @Override
                     protected void safeRun() throws Exception {
-                        Map<String, Object> error = new HashMap<String, Object>();
-                        error.put("exception", "Camera permission was not granted");
-                        deliverResult(requestId, null, error);
+                        Map<String, Object> e = new HashMap<>();
+                        e.put("code", "camera_permission_was_not_granted");
+                        String errorMessage = getString(R.string.camera_permission_was_not_granted);
+                        e.put("message", errorMessage);
+                        e.put("exception", errorMessage); // deprecated
+                        deliverResult(requestId, null, e);
                     }
                 };
                 if (askPermissionIfNeeded(Manifest.permission.CAMERA, PERMISSION_REQUEST_CAMERA,
@@ -389,9 +405,12 @@ public class ActionScreenActivity extends ServiceBoundActivity {
 
             if (mQRCodeScanner == null) {
                 if (mQRCodeScannerOpen) {
-                    Map<String, Object> error = new HashMap<String, Object>();
-                    error.put("exception", "Camera was already open");
-                    deliverResult(requestId, null, error);
+                    Map<String, Object> e = new HashMap<>();
+                    e.put("code", "camera_was_already_open");
+                    String errorMessage = getString(R.string.camera_was_already_open);
+                    e.put("message", errorMessage);
+                    e.put("exception", errorMessage); // deprecated
+                    deliverResult(requestId, null, e);
                     return;
                 }
                 mQRCodeScannerOpen = true;
@@ -403,9 +422,12 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             }
 
             if (mQRCodeScanner.cameraManager.isOpen()) {
-                Map<String, Object> error = new HashMap<String, Object>();
-                error.put("exception", "Camera was already open");
-                deliverResult(requestId, null, error);
+                Map<String, Object> e = new HashMap<>();
+                e.put("code", "camera_was_already_open");
+                String errorMessage = getString(R.string.camera_was_already_open);
+                e.put("message", errorMessage);
+                e.put("exception", errorMessage); // deprecated
+                deliverResult(requestId, null, e);
                 return;
             }
 
@@ -446,9 +468,12 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             String cameraType = params.getString("camera_type");
 
             if (!QRCodeScanner.CAMERA_TYPES.contains(cameraType)) {
-                Map<String, Object> error = new HashMap<String, Object>();
-                error.put("exception", "Unsupported camera type");
-                deliverResult(requestId, null, error);
+                Map<String, Object> e = new HashMap<>();
+                e.put("code", "unsupported_camera_type");
+                String errorMessage = getString(R.string.unsupported_camera_type);
+                e.put("message", errorMessage);
+                e.put("exception", errorMessage); // deprecated
+                deliverResult(requestId, null, e);
                 return;
             }
 
@@ -472,7 +497,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             final String url = params.getString("url");
             String fileOnDisk = "file://" + mBrandingResult.dir.getAbsolutePath() + "/" + url;
             mActionScreenUtils.playAudio(fileOnDisk);
-            Map<String, Object> result = new HashMap<String, Object>();
+            Map<String, Object> result = new HashMap<>();
             deliverResult(requestId, result, null);
         }
 
@@ -487,13 +512,15 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             final String title = params.has("title") ? params.getString("title") : null;
 
             String errorMessage = mActionScreenUtils.openActivity(actionType, action, title);
-            Map<String, Object> error = null;
+            Map<String, Object> e = null;
             if (errorMessage != null) {
-                error = new HashMap<>();
-                error.put("exception", errorMessage);
+                e = new HashMap<>();
+                e.put("code", "unknown_error_occurred");
+                e.put("message", errorMessage);
+                e.put("exception", errorMessage); // deprecated
                 return;
             }
-            deliverResult(requestId, null, error);
+            deliverResult(requestId, null, e);
         }
 
         private void openMessage(final JSONObject params) throws JSONException {
@@ -516,66 +543,197 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             deliverResult(requestId, null, error);
         }
 
+        private void createKeyPair(final JSONObject params) throws JSONException {
+            if (params == null) {
+                L.w("Expected params != null");
+                return;
+            }
+            final String requestId = params.getString("id");
+
+            MainService.SecurityCallback sc = new MainService.SecurityCallback() {
+                @Override
+                public void onSuccess(Object result) {
+                    Map<String, Object> r = (Map<String, Object>) result;
+                    deliverResult(requestId, r, null);
+                }
+
+                @Override
+                public void onError(String code, String errorMessage) {
+                    Map<String, Object> e = new HashMap<>();
+                    e.put("code", code);
+                    e.put("message", errorMessage);
+                    e.put("exception", errorMessage); // deprecated
+                    deliverResult(requestId, null, e);
+                }
+            };
+
+            mActionScreenUtils.createKeyPair(params, sc);
+        }
+
+        private void hasKeyPair(final JSONObject params) throws JSONException {
+            if (params == null) {
+                L.w("Expected params != null");
+                return;
+            }
+            final String requestId = params.getString("id");
+
+            MainService.SecurityCallback sc = new MainService.SecurityCallback() {
+                @Override
+                public void onSuccess(Object result) {
+                    boolean exists = (boolean) result;
+                    Map<String, Object> r = new HashMap<>();
+                    r.put("exists", exists);
+                    deliverResult(requestId, r, null);
+                }
+
+                @Override
+                public void onError(String code, String errorMessage) {
+                    Map<String, Object> e = new HashMap<>();
+                    e.put("code", code);
+                    e.put("message", errorMessage);
+                    e.put("exception", errorMessage); // deprecated
+                    deliverResult(requestId, null, e);
+                }
+            };
+
+            mActionScreenUtils.hasKeyPair(params, sc);
+        }
+
+        private void getPublicKey(final JSONObject params) throws JSONException {
+            if (params == null) {
+                L.w("Expected params != null");
+                return;
+            }
+            final String requestId = params.getString("id");
+
+            MainService.SecurityCallback sc = new MainService.SecurityCallback() {
+                @Override
+                public void onSuccess(Object result) {
+                    String publicKeyString = (String) result;
+                    if (publicKeyString == null) {
+                        Map<String, Object> e = new HashMap<>();
+                        e.put("code", "key_not_found");
+                        String errorMessage = getString(R.string.key_not_found);
+                        e.put("message", errorMessage);
+                        e.put("exception", errorMessage); // deprecated
+                        deliverResult(requestId, null, e);
+                    } else {
+                        Map<String, Object> r = new HashMap<>();
+                        r.put("public_key", publicKeyString);
+                        deliverResult(requestId, r, null);
+                    }
+                }
+
+                @Override
+                public void onError(String code, String errorMessage) {
+                    Map<String, Object> e = new HashMap<>();
+                    e.put("code", code);
+                    e.put("message", errorMessage);
+                    e.put("exception", errorMessage); // deprecated
+                    deliverResult(requestId, null, e);
+                }
+            };
+
+            mActionScreenUtils.getPublicKey(params, sc);
+        }
+
+        private void getSeed(final JSONObject params) throws JSONException {
+            if (params == null) {
+                L.w("Expected params != null");
+                return;
+            }
+            final String requestId = params.getString("id");
+
+            MainService.SecurityCallback sc = new MainService.SecurityCallback() {
+                @Override
+                public void onSuccess(Object result) {
+                    String seed = (String) result;
+                    Map<String, Object> r = new HashMap<>();
+                    r.put("seed", seed);
+                    deliverResult(requestId, r, null);
+                }
+
+                @Override
+                public void onError(String code, String errorMessage) {
+                    Map<String, Object> e = new HashMap<>();
+                    e.put("code", code);
+                    e.put("message", errorMessage);
+                    e.put("exception", errorMessage); // deprecated
+                    deliverResult(requestId, null, e);
+                }
+            };
+
+            mActionScreenUtils.getSeed(params, sc);
+        }
+
+        private void getAddress(final JSONObject params) throws JSONException {
+            if (params == null) {
+                L.w("Expected params != null");
+                return;
+            }
+            final String requestId = params.getString("id");
+
+            MainService.SecurityCallback sc = new MainService.SecurityCallback() {
+                @Override
+                public void onSuccess(Object result) {
+                    String address = (String) result;
+                    Map<String, Object> r = new HashMap<>();
+                    r.put("address", address);
+                    deliverResult(requestId, r, null);
+                }
+
+                @Override
+                public void onError(String code, String errorMessage) {
+                    Map<String, Object> e = new HashMap<>();
+                    e.put("code", code);
+                    e.put("message", errorMessage);
+                    e.put("exception", errorMessage); // deprecated
+                    deliverResult(requestId, null, e);
+                }
+            };
+
+            mActionScreenUtils.getAddress(params, sc);
+        }
+
         private void signPayload(final JSONObject params) throws JSONException {
             if (params == null) {
                 L.w("Expected params != null");
                 return;
             }
             final String requestId = params.getString("id");
-            if (!AppConstants.SECURE_APP) {
-                Map<String, Object> e = new HashMap<String, Object>();
-                e.put("exception", "Security is not enabled in your app.");
-                deliverResult(requestId, null, e);
-                return;
-            }
-            final String message = params.getString("message");
-            final String payload = params.getString("payload");
-            final boolean forcePin = params.getBoolean("force_pin");
+            final String payload = TextUtils.optString(params, "payload", null);
 
-            mService.postAtFrontOfUIHandler(new SafeRunnable() {
+            MainService.SecurityCallback sc = new MainService.SecurityCallback() {
                 @Override
-                protected void safeRun() throws Exception {
+                public void onSuccess(Object result) {
                     try {
-                        final byte[] payloadData = Security.sha256Digest(payload);
-                        if (payloadData == null) {
-                            throw new Exception("payloadData was null");
-                        }
-
-                        MainService.SecurityCallback sc = new MainService.SecurityCallback() {
-                            @Override
-                            public void onSuccess(Object result) {
-                                try {
-                                    byte[] payloadSignature = (byte[]) result;
-                                    Map<String, Object> r = new HashMap<String, Object>();
-                                    r.put("payload", payload);
-                                    r.put("payload_signature", Base64.encodeBytes(payloadSignature, Base64.DONT_BREAK_LINES));
-                                    deliverResult(requestId, r, null);
-                                } catch (Exception e) {
-                                    L.d("'security/sign' onSuccess exception", e);
-                                    Map<String, Object> error = new HashMap<String, Object>();
-                                    error.put("exception", "Payload signature not of correct format.");
-                                    deliverResult(requestId, null, error);
-                                }
-                            }
-
-                            @Override
-                            public void onError(Exception error) {
-                                L.d("'security/sign' onError", error);
-                                Map<String, Object> e = new HashMap<String, Object>();
-                                e.put("exception", error.getMessage());
-                                deliverResult(requestId, null, e);
-                            }
-                        };
-
-                        mService.sign(message, payloadData, forcePin, sc);
-
-                    }  catch (Exception e) {
-                        Map<String, Object> error = new HashMap<String, Object>();
-                        error.put("exception", "Payload not of correct format.");
-                        deliverResult(requestId, null, error);
+                        byte[] payloadSignature = (byte[]) result;
+                        Map<String, Object> r = new HashMap<>();
+                        r.put("payload", payload);
+                        r.put("payload_signature", Base64.encodeBytes(payloadSignature, Base64.DONT_BREAK_LINES));
+                        deliverResult(requestId, r, null);
+                    } catch (Exception exc) {
+                        L.bug("signPayload onSuccess exception", exc);
+                        Map<String, Object> e = new HashMap<>();
+                        e.put("code", "unknown_error_occurred");
+                        String errorMessage = getString(R.string.unknown_error_occurred);
+                        e.put("message", errorMessage);
+                        e.put("exception", errorMessage); // deprecated
+                        deliverResult(requestId, null, e);
                     }
                 }
-            });
+
+                @Override
+                public void onError(String code, String errorMessage) {
+                    Map<String, Object> e = new HashMap<>();
+                    e.put("code", code);
+                    e.put("message", errorMessage);
+                    e.put("exception", errorMessage); // deprecated
+                    deliverResult(requestId, null, e);
+                }
+            };
+
+            mActionScreenUtils.signPayload(params, payload, sc);
         }
 
         private void verifySignedPayload(final JSONObject params) throws JSONException {
@@ -584,38 +742,27 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 return;
             }
             final String requestId = params.getString("id");
-            if (!AppConstants.SECURE_APP) {
-                Map<String, Object> e = new HashMap<String, Object>();
-                e.put("exception", "Security is not enabled in your app.");
-                deliverResult(requestId, null, e);
-                return;
-            }
-            final String payload = params.getString("payload");
-            final String payloadSignature = params.getString("payload_signature");
 
-            mService.postAtFrontOfUIHandler(new SafeRunnable() {
+            MainService.SecurityCallback sc = new MainService.SecurityCallback() {
                 @Override
-                protected void safeRun() throws Exception {
-
-                    try {
-                        final byte[] payloadData = Security.sha256Digest(payload);
-                        if (payloadData == null) {
-                            throw new Exception("payloadData was null");
-                        }
-
-                        final byte[] payloadDataSignature = Base64.decode(payloadSignature);
-                        boolean valid = mService.validate(payloadData, payloadDataSignature);
-                        Map<String, Object> r = new HashMap<String, Object>();
-                        r.put("valid", valid);
-                        deliverResult(requestId, r, null);
-                    } catch (Exception e) {
-                        L.d("'security/verify' onSuccess exception", e);
-                        Map<String, Object> error = new HashMap<String, Object>();
-                        error.put("exception", "Payload not of correct format.");
-                        deliverResult(requestId, null, error);
-                    }
+                public void onSuccess(Object result) {
+                    boolean valid = (boolean) result;
+                    Map<String, Object> r = new HashMap<>();
+                    r.put("valid", valid);
+                    deliverResult(requestId, r, null);
                 }
-            });
+
+                @Override
+                public void onError(String code, String errorMessage) {
+                    Map<String, Object> e = new HashMap<>();
+                    e.put("code", code);
+                    e.put("message", errorMessage);
+                    e.put("exception", errorMessage); // deprecated
+                    deliverResult(requestId, null, e);
+                }
+            };
+
+            mActionScreenUtils.verifySignedPayload(params, sc);
         }
     }
 
@@ -907,10 +1054,11 @@ public class ActionScreenActivity extends ServiceBoundActivity {
 
     private void facebookLogin(final String requestId, final String permissionsStr) {
         if (!mService.getNetworkConnectivityManager().isConnected()) {
-            Map<String, Object> error = new HashMap<String, Object>();
-            error.put("type", FACEBOOK_TYPE_ERROR);
-            error.put("exception", getString(R.string.registration_screen_instructions_check_network_not_available));
-            deliverFacebookResult(requestId, null, error);
+            Map<String, Object> e = new HashMap<String, Object>();
+            e.put("type", FACEBOOK_TYPE_ERROR);
+            e.put("code", "no_network_connection");
+            e.put("exception", getString(R.string.registration_screen_instructions_check_network_not_available));
+            deliverFacebookResult(requestId, null, e);
             return;
         }
 
@@ -930,11 +1078,12 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                                     null);
                         } else {
                             L.e("Failed to execute fb request to /me\nResponse: " + response);
-                            Map<String, Object> error = new HashMap<>();
-                            error.put("type", FACEBOOK_TYPE_ERROR);
-                            error.put("exception", "Failed to execute fb request to /me\nResponse: " + response
+                            Map<String, Object> e = new HashMap<>();
+                            e.put("type", FACEBOOK_TYPE_ERROR);
+                            e.put("code", "unknown");
+                            e.put("exception", "Failed to execute fb request to /me\nResponse: " + response
                                     .toString());
-                            deliverFacebookResult(requestId, null, error);
+                            deliverFacebookResult(requestId, null, e);
                         }
                 }
                 }).executeAsync();
@@ -947,21 +1096,23 @@ public class ActionScreenActivity extends ServiceBoundActivity {
 
             @Override
             public void onError(FacebookException exception) {
-                Map<String, Object> error = new HashMap<>();
-                error.put("type", FACEBOOK_TYPE_ERROR);
-                error.put("exception", exception.toString());
+                Map<String, Object> e = new HashMap<>();
+                e.put("type", FACEBOOK_TYPE_ERROR);
+                e.put("code", "unknown");
+                e.put("exception", exception.toString());
                 L.d(exception.toString());
-                deliverFacebookResult(requestId, null, error);
+                deliverFacebookResult(requestId, null, e);
             }
         }, true);
     }
 
     private void facebookPost(final String requestId, final String postParamsStr) {
         if (!mService.getNetworkConnectivityManager().isConnected()) {
-            Map<String, Object> error = new HashMap<String, Object>();
-            error.put("type", FACEBOOK_TYPE_ERROR);
-            error.put("exception", getString(R.string.registration_screen_instructions_check_network_not_available));
-            deliverFacebookResult(requestId, null, error);
+            Map<String, Object> e = new HashMap<String, Object>();
+            e.put("type", FACEBOOK_TYPE_ERROR);
+            e.put("code", "no_network_connection");
+            e.put("exception", getString(R.string.registration_screen_instructions_check_network_not_available));
+            deliverFacebookResult(requestId, null, e);
             return;
         }
 
@@ -1008,21 +1159,23 @@ public class ActionScreenActivity extends ServiceBoundActivity {
 
             @Override
             public void onError(FacebookException exception) {
-                Map<String, Object> error = new HashMap<String, Object>();
-                error.put("type", FACEBOOK_TYPE_ERROR);
-                error.put("exception", exception.toString());
+                Map<String, Object> e = new HashMap<String, Object>();
+                e.put("type", FACEBOOK_TYPE_ERROR);
+                e.put("code", "unknown");
+                e.put("exception", exception.toString());
                 L.d(exception.toString());
-                deliverFacebookResult(requestId, null, error);
+                deliverFacebookResult(requestId, null, e);
             }
         });
     }
 
     private void facebookTicker(final String requestId, final String type, final String postParamsStr) {
         if (!mService.getNetworkConnectivityManager().isConnected()) {
-            Map<String, Object> error = new HashMap<>();
-            error.put("type", FACEBOOK_TYPE_ERROR);
-            error.put("exception", getString(R.string.registration_screen_instructions_check_network_not_available));
-            deliverFacebookResult(requestId, null, error);
+            Map<String, Object> e = new HashMap<>();
+            e.put("type", FACEBOOK_TYPE_ERROR);
+            e.put("code", "no_network_connection");
+            e.put("exception", getString(R.string.registration_screen_instructions_check_network_not_available));
+            deliverFacebookResult(requestId, null, e);
             return;
         }
 
@@ -1049,10 +1202,11 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                             public void onCompleted(GraphResponse response) {
                                 if (response == null || response.getJSONObject() == null) {
                                     L.w("Graph response is NULL");
-                                    Map<String, Object> error = new HashMap<>();
-                                    error.put("type", FACEBOOK_TYPE_ERROR);
-                                    error.put("exception", "Graph response is NULL");
-                                    deliverFacebookResult(requestId, null, error);
+                                    Map<String, Object> e = new HashMap<>();
+                                    e.put("type", FACEBOOK_TYPE_ERROR);
+                                    e.put("code", "unknown");
+                                    e.put("exception", "Graph response is NULL");
+                                    deliverFacebookResult(requestId, null, e);
                                     return;
                                 }
 
@@ -1062,12 +1216,13 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                                         final Map<String, Object> result = new HashMap<>();
                                         result.put("postId", jsonObject.getString("id"));
                                         deliverFacebookResult(requestId, result, null);
-                                    } catch (JSONException e) {
-                                        L.bug(e);
-                                        Map<String, Object> error = new HashMap<>();
-                                        error.put("type", FACEBOOK_TYPE_ERROR);
-                                        error.put("exception", "Unexpected JSONException occurred");
-                                        deliverFacebookResult(requestId, null, error);
+                                    } catch (JSONException exc) {
+                                        L.bug(exc);
+                                        Map<String, Object> e = new HashMap<>();
+                                        e.put("type", FACEBOOK_TYPE_ERROR);
+                                        e.put("code", "unknown");
+                                        e.put("exception", "Unexpected JSONException occurred");
+                                        deliverFacebookResult(requestId, null, e);
                                     }
                                 } else {
                                     deliverFacebookResult(requestId, null, FACEBOOK_MAP_CANCEL);
@@ -1083,11 +1238,12 @@ public class ActionScreenActivity extends ServiceBoundActivity {
 
                     @Override
                     public void onError(FacebookException exception) {
-                        Map<String, Object> error = new HashMap<>();
-                        error.put("type", FACEBOOK_TYPE_ERROR);
-                        error.put("exception", exception.toString());
+                        Map<String, Object> e = new HashMap<>();
+                        e.put("type", FACEBOOK_TYPE_ERROR);
+                        e.put("code", "unknown");
+                        e.put("exception", exception.toString());
                         L.d(exception.toString());
-                        deliverFacebookResult(requestId, null, error);
+                        deliverFacebookResult(requestId, null, e);
                     }
                 }, true);
     }
@@ -1126,12 +1282,12 @@ public class ActionScreenActivity extends ServiceBoundActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if (resultCode == RESULT_OK) {
-            if (requestCode == ScanTabActivity.MARKET_INSTALL_RESULT) {
-                mQRCodeScannerOpen = false;
-                // No need to do anything
-            } else if (requestCode == ScanTabActivity.ZXING_SCAN_RESULT) {
-                mQRCodeScannerOpen = false;
+        if (requestCode == ScanTabActivity.MARKET_INSTALL_RESULT) {
+            mQRCodeScannerOpen = false;
+            // No need to do anything
+        } else if (requestCode == ScanTabActivity.ZXING_SCAN_RESULT) {
+            mQRCodeScannerOpen = false;
+            if (resultCode == RESULT_OK) {
                 final String rawScanResult = intent.getStringExtra("SCAN_RESULT");
                 if (rawScanResult != null) {
                     L.i("Scanned QR code: " + rawScanResult);

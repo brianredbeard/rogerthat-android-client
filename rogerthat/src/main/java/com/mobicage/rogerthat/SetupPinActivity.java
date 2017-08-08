@@ -22,19 +22,22 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
 import com.mobicage.rogerth.at.R;
-import com.mobicage.rogerthat.util.Security;
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.widget.PinEntryListener;
 import com.mobicage.rogerthat.widget.PinEntryView;
 import com.mobicage.rogerthat.widget.PinKeyboardView;
 
 public class SetupPinActivity extends ServiceBoundActivity implements PinEntryListener {
+
+    public static String RESULT_VIA_MAINSERVICE = "result_via_mainservice";
 
     private TextView mMessage;
     private TextView mErrorMessage;
@@ -43,11 +46,17 @@ public class SetupPinActivity extends ServiceBoundActivity implements PinEntryLi
 
     private String mFirstPin = null;
 
+    private boolean mResultViaMainService = false;
+    private boolean mSendUpdates = true;
+
     @Override
-    public void onCreate(Bundle icicle) {
-        super.onCreate(icicle);
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
         setContentViewWithoutNavigationBar(R.layout.enter_pin);
+
+        Intent intent = getIntent();
+        mResultViaMainService = intent.getBooleanExtra(RESULT_VIA_MAINSERVICE, false);
 
         mMessage = (TextView) findViewById(R.id.message);
         mMessage.setText(R.string.pin_setup_4_digit);
@@ -67,6 +76,9 @@ public class SetupPinActivity extends ServiceBoundActivity implements PinEntryLi
     }
 
     public void onPinEntered(String pin) {
+        if (!mSendUpdates) {
+            return;
+        }
         if (mFirstPin == null) {
             mFirstPin = pin;
             mPinEntryView.clearPinEntry();
@@ -74,14 +86,19 @@ public class SetupPinActivity extends ServiceBoundActivity implements PinEntryLi
             mErrorMessage.setVisibility(View.GONE);
             return;
         } else if (mFirstPin.equals(pin)) {
+            mSendUpdates = false;
             try{
-                Security.setPin(mService, pin);
-                setResult(Activity.RESULT_OK);
+                SecurityUtils.setPin(mService, pin);
+                if (mResultViaMainService) {
+                    mService.onSetupPinCompleted(pin);
+                } else {
+                    setResult(Activity.RESULT_OK);
+                }
                 finish();
                 return;
             } catch (Exception e) {
-                mService.processExceptionViaHTTP(e);
-                mService.wipe(0);
+                L.bug(e);
+                //mService.wipe(0); // todo ruben better solution
             }
         } else {
             mErrorMessage.setText(R.string.pin_did_not_match);
@@ -94,8 +111,24 @@ public class SetupPinActivity extends ServiceBoundActivity implements PinEntryLi
     }
 
     public void onPinCancelled() {
-        setResult(Activity.RESULT_CANCELED);
+        if (!mSendUpdates) {
+            return;
+        }
+        mSendUpdates = false;
+        if (mResultViaMainService) {
+            mService.onSetupPinCompleted(null);
+        } else {
+            setResult(Activity.RESULT_CANCELED);
+        }
         finish();
+    }
+
+    @Override
+    public boolean onKeyDown(final int keyCode, final KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            onPinCancelled();
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     public void onPinIncomplete() {

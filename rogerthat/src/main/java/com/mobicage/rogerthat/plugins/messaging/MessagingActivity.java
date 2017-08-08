@@ -439,7 +439,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
             }
         }
 
-        invalidateOptionsMenu();
+        supportInvalidateOptionsMenu();
         mToBeDeleted = mEditing ? new HashSet<String>() : null;
 
         findViewById(R.id.delete_messages).setVisibility(mEditing ? View.VISIBLE : View.GONE);

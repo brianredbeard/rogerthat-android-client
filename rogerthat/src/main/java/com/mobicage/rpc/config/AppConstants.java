@@ -71,7 +71,14 @@ public class AppConstants {
     public static final String ABOUT_FACEBOOK_URL = "https://www.facebook.com/rogerthatplatform";
 
     public static final boolean SPEECH_TO_TEXT = false;
-    public static final boolean SECURE_APP = false;
-    public static final int SECURE_PIN_INTERVAL = 15 * 60;
-    public static final int SECURE_PIN_RETRY_INTERVAL = 5 * 60;
+
+    public static final class Security {
+        public static final boolean ENABLED = false;
+        public static final boolean PIN_LOCKED = false;
+        public static final int PIN_INTERVAL = 15 * 60;
+        public static final int PIN_RETRY_INTERVAL = 5 * 60;
+        public static final String APP_KEY_NAME = null;
+        public static final String APP_KEY_ALGORITHM = null;
+    }
+
 }

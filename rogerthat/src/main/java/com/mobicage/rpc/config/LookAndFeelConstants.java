@@ -97,7 +97,7 @@ public class LookAndFeelConstants {
     }
 
     private static void setup(Context context, boolean force) {
-        if (sNeedsSetup == false && !force) {
+        if (!sNeedsSetup && !force) {
             return;
         }
 
@@ -166,6 +166,18 @@ public class LookAndFeelConstants {
             L.bug("Failed to saveDynamicLookAndFeel", e);
             setup(context, null);
         }
+    }
+
+    public static boolean removeLookAndFeel(Context context) {
+        try {
+            File file = lookAndFeelSettingsFile(context);
+            if (file.exists()) {
+                return file.delete();
+            }
+        } catch (IOException exception) {
+            L.e(exception);
+        }
+        return true;
     }
 
     public static int getHomesActivityLayout(Context context) {

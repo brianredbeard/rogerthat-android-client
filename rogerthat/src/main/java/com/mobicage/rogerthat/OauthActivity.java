@@ -31,6 +31,7 @@ import android.webkit.WebView;
 import android.annotation.SuppressLint;
 
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.util.OauthUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rpc.config.CloudConstants;
 
@@ -42,6 +43,7 @@ public class OauthActivity extends Activity {
 
     public static final String FINISHED_OAUTH = "com.mobicage.rogerthat.FINISHED_OAUTH";
 
+    public static String ALLOW_BACKPRESS = "allow_backpress";
     public static String BUILD_URL = "build_url";
     public static String STATE = "state";
     public static String CLIENT_ID = "client_id";
@@ -53,6 +55,7 @@ public class OauthActivity extends Activity {
     public static String RESULT_ERROR_MESSAGE = "result_error_message";
     public static String RESULT_SUCCESS = "result_success";
 
+    private boolean mAllowBackpress;
     private boolean mBuildUrl;
     private String mState;
     private String mClientId;
@@ -71,6 +74,7 @@ public class OauthActivity extends Activity {
         mWebview = (WebView) findViewById(R.id.webview);
 
         Intent intent = getIntent();
+        mAllowBackpress = intent.getBooleanExtra(OauthActivity.ALLOW_BACKPRESS, false);
         mBuildUrl = intent.getBooleanExtra(OauthActivity.BUILD_URL, true);
         mState = intent.getStringExtra(OauthActivity.STATE);
         mClientId = intent.getStringExtra(OauthActivity.CLIENT_ID);
@@ -82,7 +86,7 @@ public class OauthActivity extends Activity {
             builder.appendQueryParameter("state", mState);
             builder.appendQueryParameter("client_id", mClientId);
             builder.appendQueryParameter("scope", mScopes);
-            builder.appendQueryParameter("redirect_uri", getCallbackUrl());
+            builder.appendQueryParameter("redirect_uri", OauthUtils.getCallbackUrl());
             builder.appendQueryParameter("response_type", "code");
         }
 
@@ -109,8 +113,8 @@ public class OauthActivity extends Activity {
             }
 
             private boolean interceptUrlCompat(WebView view, String url, boolean loadUrl) {
-                String redirectUri = getCallbackUrl();
-                if (isRedirectUriFound(url, redirectUri)) {
+                String redirectUri = OauthUtils.getCallbackUrl();
+                if (OauthUtils.isRedirectUriFound(url, redirectUri)) {
                     Uri uri = Uri.parse(url);
 
                     String code = uri.getQueryParameter("code");
@@ -157,7 +161,7 @@ public class OauthActivity extends Activity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK:
-                if (mBuildUrl) {
+                if (mAllowBackpress) {
                     setResult(Activity.RESULT_CANCELED);
                     finish();
                 } else if (mWebview.canGoBack()){
@@ -166,86 +170,5 @@ public class OauthActivity extends Activity {
                 return true;
         }
         return super.onKeyDown(keyCode, event);
-    }
-
-    static String getCallbackUrl() {
-        return "oauth-" + CloudConstants.APP_ID + "://x-callback-url";
-    }
-
-    static boolean isRedirectUriFound(String uri, String redirectUri) {
-        Uri u;
-        Uri r;
-        try {
-            u = Uri.parse(uri);
-            r = Uri.parse(redirectUri);
-        } catch (NullPointerException e) {
-            return false;
-        }
-        if (u == null || r == null) {
-            return false;
-        }
-        boolean rOpaque = r.isOpaque();
-        boolean uOpaque = u.isOpaque();
-        if (rOpaque != uOpaque) {
-            return false;
-        }
-        if (rOpaque) {
-            return TextUtils.equals(uri, redirectUri);
-        }
-        if (!TextUtils.equals(r.getScheme(), u.getScheme())) {
-            return false;
-        }
-        if (!TextUtils.equals(r.getAuthority(), u.getAuthority())) {
-            return false;
-        }
-        if (r.getPort() != u.getPort()) {
-            return false;
-        }
-        if (!TextUtils.isEmpty(r.getPath()) && !TextUtils.equals(r.getPath(), u.getPath())) {
-            return false;
-        }
-        Set<String> paramKeys = getQueryParameterNames(r);
-        for (String key : paramKeys) {
-            if (!TextUtils.equals(r.getQueryParameter(key), u.getQueryParameter(key))) {
-                return false;
-            }
-        }
-        String frag = r.getFragment();
-        if (!TextUtils.isEmpty(frag)
-                && !TextUtils.equals(frag, u.getFragment())) {
-            return false;
-        }
-        return true;
-    }
-
-    static Set<String> getQueryParameterNames(Uri uri) {
-        if (uri.isOpaque()) {
-            throw new UnsupportedOperationException("This isn't a hierarchical URI.");
-        }
-
-        String query = uri.getEncodedQuery();
-        if (query == null) {
-            return Collections.emptySet();
-        }
-
-        Set<String> names = new LinkedHashSet<String>();
-        int start = 0;
-        do {
-            int next = query.indexOf('&', start);
-            int end = (next == -1) ? query.length() : next;
-
-            int separator = query.indexOf('=', start);
-            if (separator > end || separator == -1) {
-                separator = end;
-            }
-
-            String name = query.substring(start, separator);
-            names.add(Uri.decode(name));
-
-            // Move start to end of name
-            start = end + 1;
-        } while (start < query.length());
-
-        return Collections.unmodifiableSet(names);
     }
 }

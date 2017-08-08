@@ -25,7 +25,7 @@ import com.mobicage.rogerthat.plugins.news.NewsItem;
 import com.mobicage.rogerthat.plugins.news.NewsPlugin;
 import com.mobicage.rogerthat.util.CachedDownloader;
 import com.mobicage.rogerthat.util.IOUtils;
-import com.mobicage.rogerthat.util.Security;
+import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.to.news.AppNewsItemTO;
@@ -82,7 +82,7 @@ public class FakeNewsActivity extends NewsActivity {
     }
 
     private File getCachedFile(String url) {
-        final String urlHash = Security.sha256(url);
+        final String urlHash = SecurityUtils.sha256(url);
         File file = mCachedDownloader.getCachedDownloadDir();
         return new File(file, urlHash);
     }

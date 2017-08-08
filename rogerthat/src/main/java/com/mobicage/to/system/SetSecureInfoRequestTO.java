@@ -25,23 +25,51 @@ import java.util.Map;
 
 public class SetSecureInfoRequestTO implements com.mobicage.rpc.IJSONable {
 
+    public com.mobicage.models.properties.profiles.PublicKeyTO[] public_keys;
     public String public_key;
 
     public SetSecureInfoRequestTO() {
     }
 
+    @SuppressWarnings("unchecked")
     public SetSecureInfoRequestTO(Map<String, Object> json) throws IncompleteMessageException {
+        if (json.containsKey("public_keys")) {
+            org.json.simple.JSONArray val_arr = (org.json.simple.JSONArray) json.get("public_keys");
+            if (val_arr == null) {
+                this.public_keys = null;
+            } else {
+                this.public_keys = new com.mobicage.models.properties.profiles.PublicKeyTO[val_arr.size()];
+                for (int i=0; i < val_arr.size(); i++) {
+                    Object item = val_arr.get(i);
+                    if (item != null) {
+                        this.public_keys[i] = new com.mobicage.models.properties.profiles.PublicKeyTO((Map<String, Object>) item);
+                    }
+                }
+            }
+        } else {
+            this.public_keys = new com.mobicage.models.properties.profiles.PublicKeyTO[0];
+        }
         if (json.containsKey("public_key")) {
             Object val = json.get("public_key");
             this.public_key = (String) val;
         } else {
-            throw new IncompleteMessageException("com.mobicage.to.system.SetSecureInfoRequestTO object is missing field 'public_key'");
+            this.public_key = null;
         }
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Map<String, Object> toJSONMap() {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
+        if (this.public_keys == null) {
+            obj.put("public_keys", null);
+        } else {
+            org.json.simple.JSONArray arr = new org.json.simple.JSONArray();
+            for (int i=0; i < this.public_keys.length; i++) {
+                arr.add(this.public_keys[i].toJSONMap());
+            }
+            obj.put("public_keys", arr);
+        }
         obj.put("public_key", this.public_key);
         return obj;
     }

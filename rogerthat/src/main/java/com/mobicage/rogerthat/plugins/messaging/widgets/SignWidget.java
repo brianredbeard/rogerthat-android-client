@@ -29,9 +29,9 @@ import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
-import com.mobicage.rogerthat.util.Security;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.ui.UIUtils;
@@ -59,6 +59,9 @@ public class SignWidget extends Widget {
     private Button mSignBtn;
     private View mSignResultView;
     private List<String> mResult;
+    private String mKeyAlgorithm;
+    private String mKeyName;
+    private Long mKeyIndex;
     private String mCaption;
 
     public SignWidget(Context context) {
@@ -71,8 +74,6 @@ public class SignWidget extends Widget {
 
     @Override
     public void initializeWidget() {
-
-
         mSignResultView = findViewById(R.id.sign_result);
         mSignBtn = (Button) findViewById(R.id.sign_btn);
         mSignBtn.setOnClickListener(new SafeViewOnClickListener() {
@@ -81,6 +82,11 @@ public class SignWidget extends Widget {
                 sign();
             }
         });
+
+        mKeyAlgorithm = (String) mWidgetMap.get("algorithm");
+        mKeyName = (String) mWidgetMap.get("key_name");
+        String index = (String) mWidgetMap.get("index");
+        mKeyIndex = index == null ? null : Long.getLong(index);
 
         mCaption = (String) mWidgetMap.get("caption");
         if (mCaption == null) {
@@ -150,16 +156,17 @@ public class SignWidget extends Widget {
         }
     }
 
-    private byte[] getPayloadHash() {
-        final String payloadStr = (String) mWidgetMap.get("payload");
-        return payloadStr == null ? null : Security.sha256Digest(Base64.decode(payloadStr));
+    private byte[] getPayloadHash() throws Exception {
+        final String payload = (String) mWidgetMap.get("payload");
+        if (payload == null) {
+            return null;
+        }
+        return SecurityUtils.getPayload(mKeyAlgorithm, Base64.decode(payload));
     }
 
     private void sign() {
-        try {
-            MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            UIUtils.showLongToast(mActivity, R.string.feature_not_supported);
+        if (!SecurityUtils.hasKey(mActivity.getMainService(), "public", mKeyAlgorithm, mKeyName, mKeyIndex)) {
+            UIUtils.showLongToast(mActivity, R.string.key_not_found);
             return;
         }
 
@@ -182,7 +189,14 @@ public class SignWidget extends Widget {
          * 1. sign(the hash of the message + the hash of the payload + the hash of all the attachments)
          */
         final String[] signatures = new String[2];
-        final byte[] payloadHash = getPayloadHash();
+        final byte[] payloadHash;
+        try {
+            payloadHash = getPayloadHash();
+        } catch (Exception e) {
+            L.d("Failed to get payload hash", e);
+            UIUtils.showErrorPleaseRetryDialog(mActivity);
+            return;
+        }
         final MainService.SecurityCallback<byte[]> signMessageCallback = new MainService.SecurityCallback<byte[]>() {
             @Override
             public void onSuccess(byte[] result) {
@@ -195,9 +209,8 @@ public class SignWidget extends Widget {
             }
 
             @Override
-            public void onError(Exception e) {
-                if (!(e instanceof MainService.PinCancelledException)) {
-                    L.bug(e);
+            public void onError(String code, String errorMessage) {
+                if (!"user_cancelled_pin_input".equals(code)) {
                     UIUtils.showErrorPleaseRetryDialog(mActivity);
                 }
             }
@@ -208,17 +221,30 @@ public class SignWidget extends Widget {
                 signatures[0] = (payloadHash == null || result == null) ? null : Base64.encodeBytes(result);
 
                 final List<byte[]> hashes = new ArrayList<>(mMessage.attachments.length + 2);
-                hashes.add(Security.sha256Digest(mMessage.message));
+                try {
+                    hashes.add(SecurityUtils.getPayload(mKeyAlgorithm, mMessage.message));
+                } catch (Exception e) {
+                    L.d("Failed to get message hash", e);
+                    UIUtils.showErrorPleaseRetryDialog(mActivity);
+                    return;
+                }
                 if (payloadHash != null) {
                     hashes.add(payloadHash);
                 }
 
                 if (mMessage.attachments.length != 0) {
                     for (AttachmentTO attachment : mMessage.attachments) {
+                        final File attachmentFile;
                         try {
-                            final File attachmentFile = messagingPlugin.attachmentFile(mMessage, attachment);
-                            hashes.add(Security.sha256Digest(attachmentFile));
+                            attachmentFile = messagingPlugin.attachmentFile(mMessage, attachment);
                         } catch (IOException e) {
+                            UIUtils.showErrorPleaseRetryDialog(mActivity);
+                            return;
+                        }
+                        try {
+                            hashes.add(SecurityUtils.getPayload(mKeyAlgorithm, attachmentFile));
+                        } catch (Exception e) {
+                            L.d("Failed to get attachment hash", e);
                             UIUtils.showErrorPleaseRetryDialog(mActivity);
                             return;
                         }
@@ -230,24 +256,29 @@ public class SignWidget extends Widget {
                         L.d("Partial hash " + i + ": " + TextUtils.toHex(hashes.get(i)));
                     }
                 }
-
-                final byte[] hash = Security.sha256Digest(hashes.toArray(new byte[hashes.size()][]));
+                final byte[] hash;
+                try {
+                    hash = SecurityUtils.getPayload(mKeyAlgorithm, hashes.toArray(new byte[hashes.size()][]));
+                } catch (Exception e) {
+                    L.d("Failed to get attachments hash", e);
+                    UIUtils.showErrorPleaseRetryDialog(mActivity);
+                    return;
+                }
                 L.i("Combined hash: " + TextUtils.toHex(hash));
-                mActivity.getMainService().sign(mCaption, hash, payloadHash == null, signMessageCallback);
+                mActivity.getMainService().sign(mKeyAlgorithm, mKeyName, mKeyIndex, mCaption, hash, payloadHash == null, signMessageCallback);
             }
 
             @Override
-            public void onError(Exception e) {
-                if (!(e instanceof MainService.PinCancelledException)) {
-                    L.bug(e);
+            public void onError(String code, String errorMessage) {
+                if (!"user_cancelled_pin_input".equals(code)) {
                     UIUtils.showErrorPleaseRetryDialog(mActivity);
                 }
-            }
+             }
         };
 
         if (payloadHash != null) {
             // Sign the payload
-            mActivity.getMainService().sign(mCaption, payloadHash, true, signPayloadCallback);
+            mActivity.getMainService().sign(mKeyAlgorithm, mKeyName, mKeyIndex, mCaption, payloadHash, true, signPayloadCallback);
         } else {
             signPayloadCallback.onSuccess(null);
         }

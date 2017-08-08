@@ -27,10 +27,10 @@ import com.mobicage.rogerthat.config.Configuration;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.system.SafeAsyncTask;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SystemUtils;
-import com.mobicage.rogerthat.util.system.T;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -194,7 +194,7 @@ public class CachedDownloader {
     }
 
     private String getHash(String url) {
-        return Security.sha256(url);
+        return SecurityUtils.sha256(url);
     }
 
     public boolean isStorageAvailable() {

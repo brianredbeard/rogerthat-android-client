@@ -36,7 +36,7 @@ import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.util.GoogleServicesUtils;
 import com.mobicage.rogerthat.util.GoogleServicesUtils.GCMRegistrationIdFoundCallback;
-import com.mobicage.rogerthat.util.Security;
+import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
@@ -224,7 +224,7 @@ public class YSAAARegistrationActivity extends AbstractRegistrationActivity {
             protected void safeRun() throws Exception {
                 T.REGISTRATION();
                 String version = "1";
-                String signature = Security.sha256(version + " " + installId + " " + timestamp + " " + deviceId + " "
+                String signature = SecurityUtils.sha256(version + " " + installId + " " + timestamp + " " + deviceId + " "
                     + registrationId + " " + CloudConstants.APP_SERVICE_GUID + CloudConstants.REGISTRATION_MAIN_SIGNATURE);
 
                 HttpPost httppost = new HttpPost(CloudConstants.REGISTRATION_YSAAA_URL);

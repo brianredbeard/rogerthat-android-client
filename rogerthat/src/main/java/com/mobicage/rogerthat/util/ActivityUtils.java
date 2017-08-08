@@ -20,6 +20,7 @@ package com.mobicage.rogerthat.util;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -42,11 +43,11 @@ import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.ServiceFriendsActivity;
 import com.mobicage.rogerthat.SettingsActivity;
 import com.mobicage.rogerthat.UserFriendsActivity;
+import com.mobicage.rogerthat.cordova.CordovaActionScreenActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendSearchActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendStore;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.friends.MenuItemPresser;
-import com.mobicage.rogerthat.plugins.friends.MenuItemPressingActivity;
 import com.mobicage.rogerthat.plugins.friends.ServiceActionMenuActivity;
 import com.mobicage.rogerthat.plugins.friends.ServiceMenuItemDetails;
 import com.mobicage.rogerthat.plugins.friends.ServiceSearchActivity;
@@ -59,7 +60,35 @@ import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rpc.config.AppConstants;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class ActivityUtils {
+
+    private static final Map<String, Integer> SERVICE_ACTIONS = new HashMap<>();
+    private static final Map<String, Class<?>> SIMPLE_ACTIONS = new HashMap<>();
+    private static final List<String> COMPLEX_ACTIONS = Arrays.asList("qrcode");
+
+    static {
+        SIMPLE_ACTIONS.put("news", NewsActivity.class);
+        SIMPLE_ACTIONS.put("messages", MessagingActivity.class);
+        SIMPLE_ACTIONS.put("scan", ScanTabActivity.class);
+        SIMPLE_ACTIONS.put("friends", UserFriendsActivity.class);
+        SIMPLE_ACTIONS.put("profile", ProfileActivity.class);
+        SIMPLE_ACTIONS.put("more", MoreActivity.class);
+        SIMPLE_ACTIONS.put("settings", SettingsActivity.class);
+        SIMPLE_ACTIONS.put("stream", HistoryListActivity.class);
+        SIMPLE_ACTIONS.put("directory", FriendSearchActivity.class);
+
+        SERVICE_ACTIONS.put("services", FriendStore.SERVICE_ORGANIZATION_TYPE_UNSPECIFIED);
+        SERVICE_ACTIONS.put("community_services", FriendStore.SERVICE_ORGANIZATION_TYPE_CITY);
+        SERVICE_ACTIONS.put("merchants", FriendStore.SERVICE_ORGANIZATION_TYPE_PROFIT);
+        SERVICE_ACTIONS.put("associations", FriendStore.SERVICE_ORGANIZATION_TYPE_NON_PROFIT);
+        SERVICE_ACTIONS.put("emergency_services", FriendStore.SERVICE_ORGANIZATION_TYPE_EMERGENCY);
+    }
 
     public static void goToActivity(Context context, Class clazz, boolean clearStack, Bundle extras) {
         Intent i = new Intent(context, clazz);
@@ -74,25 +103,22 @@ public class ActivityUtils {
 
     public static String canOpenNavigationItem(ServiceBoundActivity context, NavigationItem ni) {
         if (ni.actionType == null) {
-            if ("news".equals(ni.action)) {
-            } else if ("messages".equals(ni.action)) {
-            } else if ("scan".equals(ni.action)) {
-            } else if ("services".equals(ni.action)) {
-            } else if ("friends".equals(ni.action)) {
-            } else if ("directory".equals(ni.action)) {
-            } else if ("profile".equals(ni.action)) {
-            } else if ("more".equals(ni.action)) {
-            } else if ("settings".equals(ni.action)) {
-            } else if ("community_services".equals(ni.action)) {
-            } else if ("merchants".equals(ni.action)) {
-            } else if ("associations".equals(ni.action)) {
-            } else if ("emergency_services".equals(ni.action)) {
-            } else if ("stream".equals(ni.action)) {
-            } else if ("qrcode".equals(ni.action)) {
-            } else {
-                return "Unknown action";
+            if (!SIMPLE_ACTIONS.containsKey(ni.action)
+                    && !SERVICE_ACTIONS.containsKey(ni.action)
+                    && !COMPLEX_ACTIONS.contains(ni.action)) {
+                return "Unknown action: " + ni.action;
             }
         } else if ("action".equals(ni.actionType)) {
+        } else if ("cordova".equals(ni.actionType)) {
+            AssetManager assetManager = context.getAssets();
+            try {
+                List<String> cordovaApplications = Arrays.asList(assetManager.list("cordova-apps"));
+                if (!cordovaApplications.contains(ni.action)) {
+                    return "Unknown cordova-based app: " + ni.action;
+                }
+            } catch (IOException e) {
+                return "Failed to locate cordova-based app: " + e.getMessage();
+            }
         } else if ("click".equals(ni.actionType)) {
             if (TextUtils.isEmptyOrWhitespace(AppConstants.APP_EMAIL)) {
                 return "Unknown email";
@@ -103,7 +129,7 @@ public class ActivityUtils {
                 return "ServiceMenuItem not found";
             }
         } else {
-            return "Unknown action_type";
+            return "Unknown action_type: " + ni.actionType;
         }
         return null;
     }
@@ -121,18 +147,12 @@ public class ActivityUtils {
 
             final Intent i = new Intent(context, clazz);
             extras.putString(ServiceActionsOfflineActivity.ACTION, ni.action);
-            if (ni.labelTextId > 0) {
-                extras.putString(ServiceActionsOfflineActivity.TITLE, context.getString(ni.labelTextId));
-            } else {
-                extras.putString(ServiceActionsOfflineActivity.TITLE, ni.labelText);
-            }
-
+            extras.putString(ServiceActionsOfflineActivity.TITLE, ni.getLabel(context));
             i.putExtras(extras);
             i.addFlags(MainActivity.FLAG_CLEAR_STACK);
             context.startActivity(i);
 
         } else if ("click".equals(ni.actionType)) {
-
             final String serviceEmail;
             if (!TextUtils.isEmptyOrWhitespace(ni.serviceEmail)) {
                 serviceEmail = ni.serviceEmail;
@@ -150,6 +170,14 @@ public class ActivityUtils {
                 }
             });
 
+        } else if ("cordova".equals(ni.actionType)) {
+            final Intent i = new Intent(context, CordovaActionScreenActivity.class);
+            extras.putString(CordovaActionScreenActivity.EMBEDDED_APP, ni.action);
+            extras.putString(CordovaActionScreenActivity.TITLE, ni.getLabel(context));
+            i.putExtras(extras);
+            i.addFlags(MainActivity.FLAG_CLEAR_STACK);
+            context.startActivity(i);
+
         } else {
             L.bug("ignoring simulateNavigationItemClick: " + ni.actionType + "|" + ni.action);
             return false;
@@ -159,49 +187,22 @@ public class ActivityUtils {
 
     public static boolean goToActivity(ServiceBoundActivity context, String activityName, boolean clearStack,
                                        boolean collapse, Bundle extras) {
-        if ("news".equals(activityName)) {
-            goToActivity(context, NewsActivity.class, clearStack, extras);
-        } else if ("messages".equals(activityName)) {
-            goToActivity(context, MessagingActivity.class, clearStack, extras);
-        } else if ("scan".equals(activityName)) {
-            goToActivity(context, ScanTabActivity.class, clearStack, extras);
-        } else if ("services".equals(activityName)) {
-            goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_UNSPECIFIED, clearStack, collapse, extras);
-        } else if ("friends".equals(activityName)) {
-            goToUserFriendsActivity(context, clearStack, extras);
-        } else if ("directory".equals(activityName)) {
-            goToFriendSearchActivity(context, clearStack, extras);
-        } else if ("profile".equals(activityName)) {
-            goToActivity(context, ProfileActivity.class, clearStack, extras);
-        } else if ("more".equals(activityName)) {
-            goToActivity(context, MoreActivity.class, clearStack, extras);
-        } else if ("settings".equals(activityName)) {
-            goToActivity(context, SettingsActivity.class, clearStack, extras);
-        } else if ("community_services".equals(activityName)) {
-            goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_CITY, clearStack, collapse, extras);
-        } else if ("merchants".equals(activityName)) {
-            goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_PROFIT, clearStack, collapse, extras);
-        } else if ("associations".equals(activityName)) {
-            goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_NON_PROFIT, clearStack, collapse, extras);
-        } else if ("emergency_services".equals(activityName)) {
-            goToServicesActivity(context, FriendStore.SERVICE_ORGANIZATION_TYPE_EMERGENCY, clearStack, collapse, extras);
-        } else if ("stream".equals(activityName)) {
-            goToActivity(context, HistoryListActivity.class, clearStack, extras);
+        if (SIMPLE_ACTIONS.containsKey(activityName)) {
+            goToActivity(context, SIMPLE_ACTIONS.get(activityName), clearStack, extras);
+        } else if (SERVICE_ACTIONS.containsKey(activityName)) {
+            goToServicesActivity(context, SERVICE_ACTIONS.get(activityName), clearStack, collapse, extras);
         } else if ("qrcode".equals(activityName)) {
             goToQRActivity(context, clearStack, extras);
         } else {
             L.bug("unknown goToActivity: " + activityName);
             return false;
         }
+
         return true;
     }
 
     public static void goToMessagingActivity(Context context, boolean clearStack, Bundle extras) {
         goToActivity(context, MessagingActivity.class, clearStack, extras);
-    }
-
-    public static void goToUserFriendsActivity(Context context, boolean clearStack, Bundle extras) {
-        goToActivity(context, UserFriendsActivity.class, clearStack, extras);
     }
 
     public static void goToServicesActivity(final ServiceBoundActivity context, int organizationType, boolean clearStack, boolean collapse, Bundle extras) {
@@ -247,18 +248,6 @@ public class ActivityUtils {
         goToActivity(context, ScanTabActivity.class, clearStack, extras);
     }
 
-    public static void goToMoreActivity(Context context, boolean clearStack, Bundle extras) {
-        goToActivity(context, MoreActivity.class, clearStack, extras);
-    }
-
-    public static void goToProfileActivity(Context context, boolean clearStack, Bundle extras) {
-        goToActivity(context, ProfileActivity.class, clearStack, extras);
-    }
-
-    public static void goToFriendSearchActivity(Context context, boolean clearStack, Bundle extras) {
-        goToActivity(context, FriendSearchActivity.class, clearStack, extras);
-    }
-
     private static void goToQRActivity(ServiceBoundActivity context, boolean clearStack, Bundle extras) {
         Class<?> cls = QRCodeActivity.class;
         MainService mainService = context.getMainService();
@@ -276,29 +265,24 @@ public class ActivityUtils {
             context.menuItemPresser.stop();
             context.menuItemPresser = null;
         }
-        context.menuItemPresser = new MenuItemPresser(context, serviceEmail);
+        context.menuItemPresser = new MenuItemPresser<>(context, serviceEmail);
     }
 
     public static boolean goToActivityBehindTagWhenReady(final ServiceBoundActivity context, final String serviceEmail, final String tag) {
-        if (context instanceof MenuItemPressingActivity) {
-            setupMenuItemPresser(context, serviceEmail);
+        setupMenuItemPresser(context, serviceEmail);
 
-            if (!context.menuItemPresser.itemReady(tag)) {
-                return false;
-            }
-
-            context.menuItemPresser.itemPressed(tag, new MenuItemPresser.ResultHandler() {
-                @Override
-                public void onError() {
-                    L.e("SMI with tag " + tag + " not found!"); // XXX: log error to message.sender
-                    onTimeout();
-                }
-            });
-            return true;
-        } else {
-            L.bug("goToActivityBehindTag called from wrong context: " + context);
+        if (!context.menuItemPresser.itemReady(tag)) {
             return false;
         }
+
+        context.menuItemPresser.itemPressed(tag, new MenuItemPresser.ResultHandler() {
+            @Override
+            public void onError() {
+                L.e("SMI with tag " + tag + " not found!"); // XXX: log error to message.sender
+                onTimeout();
+            }
+        });
+        return true;
     }
 
     public static void goToActivityBehindTag(final ServiceBoundActivity context, final String serviceEmail, final String tag) {
@@ -306,19 +290,15 @@ public class ActivityUtils {
     }
 
     public static void goToActivityBehindTag(final ServiceBoundActivity context, final String serviceEmail, final String tag, Bundle extras) {
-        if (context instanceof MenuItemPressingActivity) {
-            setupMenuItemPresser(context, serviceEmail);
+        setupMenuItemPresser(context, serviceEmail);
 
-            context.menuItemPresser.itemPressed(tag, extras, null, new MenuItemPresser.ResultHandler() {
-                @Override
-                public void onError() {
-                    L.e("SMI with tag " + tag + " not found!"); // XXX: log error to message.sender
-                    onTimeout();
-                }
-            });
-        } else {
-            L.bug("goToActivityBehindTag called from wrong context: " + context);
-        }
+        context.menuItemPresser.itemPressed(tag, extras, null, new MenuItemPresser.ResultHandler() {
+            @Override
+            public void onError() {
+                L.e("SMI with tag " + tag + " not found!"); // XXX: log error to message.sender
+                onTimeout();
+            }
+        });
     }
 
     public static Intent buildTakePictureIntent(Context context, Uri saveTo, Facing facing) {

@@ -24,12 +24,18 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
+import android.os.Bundle;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MyIdentity;
+import com.mobicage.rogerthat.NavigationItem;
 import com.mobicage.rogerthat.ServiceBoundActivity;
+import com.mobicage.rogerthat.cordova.CordovaSettings;
+import com.mobicage.rogerthat.plugins.friends.ActionScreenActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.history.HistoryItem;
+import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.RegexPatterns;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
@@ -42,11 +48,15 @@ import com.mobicage.to.friends.GetUserInfoRequestTO;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 
 public class ProcessScanActivity extends ServiceBoundActivity {
@@ -297,6 +307,28 @@ public class ProcessScanActivity extends ServiceBoundActivity {
             scannedUnknownQR(getString(R.string.qr_call_tel, number), intent);
 
         } else {
+            try {
+                Map<String, Object> data = (Map<String, Object>) JSONValue.parse(url);
+                String applicationTag = (String) data.get("t");
+                JSONObject context = (JSONObject) data.get("c");
+
+                if (CordovaSettings.APPS.contains(applicationTag) && context != null) {
+                    NavigationItem ni = new NavigationItem(FontAwesome.Icon.faw_question_circle_o, "cordova", applicationTag, "", false);
+
+                    String errorMessage = ActivityUtils.canOpenNavigationItem(this, ni);
+                    if (errorMessage == null) {
+                        Bundle extras = new Bundle();
+                        extras.putString(ActionScreenActivity.CONTEXT, context.toJSONString());
+                        ActivityUtils.goToActivity(this, ni, false, extras);
+                        finish();
+                        return;
+                    }
+                    L.d(errorMessage);
+                }
+
+            } catch (Exception e) {
+                L.d("Failed to process url into an application", e);
+            }
             L.d("Cannot process url " + url);
             UIUtils.showLongToast(this, getResources().getString(R.string.unrecognized_scan_result));
             finish();

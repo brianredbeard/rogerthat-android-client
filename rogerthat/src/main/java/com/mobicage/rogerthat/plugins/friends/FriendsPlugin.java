@@ -26,6 +26,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 import com.mobicage.api.friends.Rpc;
+import com.mobicage.models.properties.profiles.PublicKeyTO;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.ContactListHelper;
 import com.mobicage.rogerthat.IdentityStore;
@@ -127,8 +128,6 @@ import java.util.regex.Matcher;
 
 public class FriendsPlugin implements MobicagePlugin {
 
-    private static final String CONFIGKEY = "com.mobicage.rogerthat.plugins.friends";
-
     public static final String FRIEND_MARKED_FOR_REMOVAL_INTENT = "com.mobicage.rogerthat.plugins.friends.FRIEND_MARKED_FOR_REMOVAL_INTENT";
     public static final String FRIEND_REMOVED_INTENT = "com.mobicage.rogerthat.plugins.friends.FRIEND_REMOVED";
     public static final String FRIEND_UPDATE_INTENT = "com.mobicage.rogerthat.plugins.friends.FRIEND_MODIFIED";
@@ -149,46 +148,32 @@ public class FriendsPlugin implements MobicagePlugin {
     public static final String SERVICE_DATA_UPDATED = "com.mobicage.rogerthat.plugins.friends.SERVICE_DATA_UPDATED";
     public static final String BEACON_IN_REACH = "com.mobicage.rogerthat.plugins.friends.BEACON_IN_REACH";
     public static final String BEACON_OUT_OF_REACH = "com.mobicage.rogerthat.plugins.friends.BEACON_OUT_OF_REACH";
-
     public final static String FRIEND_INFO_RECEIVED_INTENT = "com.mobicage.rogerthat.plugins.friends.FRIEND_INFO_RECEIVED";
     public static final String SERVICE_ACTION_INFO_RECEIVED_INTENT = "com.mobicage.rogerthat.plugins.friends.SERVICE_ACTION_INFO_RECEIVED";
-
     public static final String FRIENDS_PLUGIN_MUST_DO_FULL_REFRESH_INTENT = "com.mobicage.rogerthat.plugins.friends.FRIENDS_PLUGIN_MUST_DO_FULL_REFRESH_INTENT";
     public static final String FRIENDS_PLUGIN_MUST_GET_INVITATION_SECRETS = "com.mobicage.rogerthat.plugins.friends.FRIENDS_PLUGIN_MUST_GET_INVITATION_SECRETS";
     public static final String FRIENDS_PLUGIN_MUST_CHECK_IDENTITY_SHORTURL = "com.mobicage.rogerthat.plugins.friends.FRIENDS_PLUGIN_MUST_CHECK_IDENTITY_SHORTURL";
     public static final String FRIENDS_PLUGIN_MUST_REFRESH_IDENTITY = "com.mobicage.rogerthat.plugins.friends.FRIENDS_PLUGIN_MUST_REFRESH_IDENTITY";
     public static final String FRIENDS_PLUGIN_MUST_REFRESH_IDENTITY_QR_CODE = "com.mobicage.rogerthat.plugins.friends.FRIENDS_PLUGIN_MUST_REFRESH_IDENTITY_QR_CODE";
     public static final String FRIENDS_PLUGIN_MUST_UPDATE_EMAIL_HASHES = "com.mobicage.rogerthat.plugins.friends.FRIENDS_PLUGIN_MUST_UPDATE_EMAIL_HASHES";
-
     public static final String FRIENDS_PLUGIN_MUST_GET_GROUPS = "com.mobicage.rogerthat.plugins.friends.FRIENDS_PLUGIN_MUST_GET_GROUPS";
     public static final String GROUPS_UPDATED = "com.mobicage.rogerthat.plugins.friends.GROUPS_UPDATED";
     public static final String GROUP_ADDED = "com.mobicage.rogerthat.plugins.friends.GROUP_ADDED";
     public static final String GROUP_MODIFIED = "com.mobicage.rogerthat.plugins.friends.GROUP_MODIFIED";
     public static final String GROUP_REMOVED = "com.mobicage.rogerthat.plugins.friends.GROUP_REMOVED";
-
     public static final String STATIC_FLOW_AVAILABLE_INTENT = "com.mobicage.rogerthat.plugins.friends.STATIC_FLOW_AVAILABLE_INTENT";
-
     public static final String SYSTEM_FRIEND = "dashboard@rogerth.at";
-
     public static final String SEARCH_STRING = "SEARCH_STRING";
     public static final String SEARCH_RESULT = "SEARCH_RESULT";
-
-
     public static final int ME = 1;
     public static final int FRIEND = 4;
     public static final int NON_FRIEND = 8;
     public static final int SYSTEM = 16;
-
     public static final int FRIEND_TYPE_UNKNOWN = -1; // return this when type is asked of non-friend
     public static final int FRIEND_TYPE_USER = 1;
     public static final int FRIEND_TYPE_SERVICE = 2;
-
-    // XXX: these values should be generated in stubs
-    private static final long MODIFIED_FRIEND_STATUS = 2;
-
     public static final long SERVICE_API_CALL_STATUS_SENT = 0;
     public static final long SERVICE_API_CALL_STATUS_ANSWERED = 1;
-
     public static final long SERVICE_CALLBACK_FRIEND_INVITE_RESULT = 1;
     public static final long SERVICE_CALLBACK_FRIEND_INVITED = 2;
     public static final long SERVICE_CALLBACK_FRIEND_BROKE_UP = 4;
@@ -200,9 +185,10 @@ public class FriendsPlugin implements MobicagePlugin {
     public static final long SERVICE_CALLBACK_MESSAGING_FLOW_MEMBER_RESULT = 64;
     public static final long SERVICE_CALLBACK_MESSAGING_FORM_ACKNOWLEDGED = 32;
     public static final long SERVICE_CALLBACK_SYSTEM_API_CALL = 256;
-
     public static final long FRIEND_NOT_REMOVABLE = 1;
-
+    private static final String CONFIGKEY = "com.mobicage.rogerthat.plugins.friends";
+    // XXX: these values should be generated in stubs
+    private static final long MODIFIED_FRIEND_STATUS = 2;
     private final ConfigurationProvider mConfigProvider;
     private final FriendStore mStore;
     private final MainService mMainService;
@@ -215,14 +201,12 @@ public class FriendsPlugin implements MobicagePlugin {
     private final Bitmap mSystemFriendAvatar;
     private final GeoLocationProvider mGeoProvider;
     private final TrackmePlugin mTrackmePlugin;
+    private final Map<String, JSONArray> mDisabledBroadcastTypesCache = new HashMap<>();
     private FindServiceResponseTO mLastResponse;
 
-
-    private final Map<String, JSONArray> mDisabledBroadcastTypesCache = new HashMap<>();
-
     public FriendsPlugin(final DatabaseManager pDatabaseManager, final ConfigurationProvider pConfigProvider,
-        final MainService mainService, final NetworkConnectivityManager connectivityManager,
-        final BrandingMgr brandingMgr, final GeoLocationProvider pGeoProvider) {
+                         final MainService mainService, final NetworkConnectivityManager connectivityManager,
+                         final BrandingMgr brandingMgr, final GeoLocationProvider pGeoProvider) {
         T.UI();
         mStore = new FriendStore(pDatabaseManager, mainService);
         mConfigProvider = pConfigProvider;
@@ -249,13 +233,13 @@ public class FriendsPlugin implements MobicagePlugin {
         mNetworkConnectivityManager = connectivityManager;
         mHistory = new FriendHistory(this, mainService);
         mMissingGroupAvatarBitmap = ImageHelper.getRoundedCornerAvatar(BitmapFactory.decodeResource(
-            mMainService.getResources(), R.drawable.group_60));
+                mMainService.getResources(), R.drawable.group_60));
         mMissingFriendAvatarBitmap = ImageHelper.getRoundedCornerAvatar(BitmapFactory.decodeResource(
-            mMainService.getResources(), R.drawable.unknown_avatar));
+                mMainService.getResources(), R.drawable.unknown_avatar));
         mMissingNonFriendAvatarBitmap = ImageHelper.getRoundedCornerAvatar(BitmapFactory.decodeResource(
-            mMainService.getResources(), R.drawable.unknown_avatar_non_friend));
+                mMainService.getResources(), R.drawable.unknown_avatar_non_friend));
         mSystemFriendAvatar = ImageHelper.getRoundedCornerAvatar(BitmapFactory.decodeResource(
-            mMainService.getResources(), R.drawable.ic_dashboard));
+                mMainService.getResources(), R.drawable.ic_dashboard));
 
         mTrackmePlugin = mMainService.getPlugin(TrackmePlugin.class);
     }
@@ -296,10 +280,10 @@ public class FriendsPlugin implements MobicagePlugin {
         com.mobicage.rpc.CallReceiver.comMobicageCapiServicesIClientRpc = new com.mobicage.capi.services.IClientRpc() {
             @Override
             public ReceiveApiCallResultResponseTO receiveApiCallResult(ReceiveApiCallResultRequestTO request)
-                throws Exception {
+                    throws Exception {
                 T.BIZZ();
                 final ServiceApiCallbackResult r = mStore.setServiceApiCallResult(request.id, request.error,
-                    request.result, SERVICE_API_CALL_STATUS_ANSWERED);
+                        request.result, SERVICE_API_CALL_STATUS_ANSWERED);
 
                 if (r != null) {
                     Intent intent = new Intent(SERVICE_API_CALL_ANSWERED_INTENT);
@@ -356,7 +340,7 @@ public class FriendsPlugin implements MobicagePlugin {
             @Override
             public UpdateFriendSetResponseTO updateFriendSet(UpdateFriendSetRequestTO request) throws Exception {
                 return FriendsPlugin.this.updateFriendSet(Arrays.asList(request.friends), request.version, false,
-                    false, request.added_friend);
+                        false, request.added_friend);
             }
 
             @Override
@@ -393,14 +377,14 @@ public class FriendsPlugin implements MobicagePlugin {
                         T.BIZZ();
                         final Set<String> pluginDBUpdates = mMainService.getPluginDBUpdates(FriendsPlugin.class);
                         final boolean mustDoRefresh = pluginDBUpdates
-                            .contains(FRIENDS_PLUGIN_MUST_DO_FULL_REFRESH_INTENT);
+                                .contains(FRIENDS_PLUGIN_MUST_DO_FULL_REFRESH_INTENT);
                         boolean justRegistered = mStore.getFriendSetVersion() < 0;
                         if (justRegistered || mustDoRefresh) {
                             requestFriendSet(mustDoRefresh, justRegistered);
                         }
                         if (mustDoRefresh) {
                             mMainService.clearPluginDBUpdate(FriendsPlugin.class,
-                                FRIENDS_PLUGIN_MUST_DO_FULL_REFRESH_INTENT);
+                                    FRIENDS_PLUGIN_MUST_DO_FULL_REFRESH_INTENT);
                         }
 
                         if (pluginDBUpdates.contains(FRIENDS_PLUGIN_MUST_GET_INVITATION_SECRETS)) {
@@ -412,13 +396,13 @@ public class FriendsPlugin implements MobicagePlugin {
                             });
                             updateToNewStyleShortLink();
                             mMainService.clearPluginDBUpdate(FriendsPlugin.class,
-                                FRIENDS_PLUGIN_MUST_GET_INVITATION_SECRETS);
+                                    FRIENDS_PLUGIN_MUST_GET_INVITATION_SECRETS);
                         }
 
                         if (pluginDBUpdates.contains(FRIENDS_PLUGIN_MUST_CHECK_IDENTITY_SHORTURL)) {
                             checkIdentityShortURL();
                             mMainService.clearPluginDBUpdate(FriendsPlugin.class,
-                                FRIENDS_PLUGIN_MUST_CHECK_IDENTITY_SHORTURL);
+                                    FRIENDS_PLUGIN_MUST_CHECK_IDENTITY_SHORTURL);
                         }
 
                         if (pluginDBUpdates.contains(FRIENDS_PLUGIN_MUST_REFRESH_IDENTITY)) {
@@ -441,7 +425,7 @@ public class FriendsPlugin implements MobicagePlugin {
                         if (pluginDBUpdates.contains(FRIENDS_PLUGIN_MUST_UPDATE_EMAIL_HASHES)) {
                             mStore.updateEmailHashesForAllFriends();
                             mMainService.clearPluginDBUpdate(FriendsPlugin.class,
-                                FRIENDS_PLUGIN_MUST_UPDATE_EMAIL_HASHES);
+                                    FRIENDS_PLUGIN_MUST_UPDATE_EMAIL_HASHES);
                         }
                     }
                 });
@@ -455,9 +439,9 @@ public class FriendsPlugin implements MobicagePlugin {
         if (identity != null) {
             String oldLink = identity.getShortLink();
             if (oldLink != null
-                && oldLink.toLowerCase(Locale.US).startsWith(ProcessScanActivity.SHORT_HTTPS_URL_PREFIX)) {
+                    && oldLink.toLowerCase(Locale.US).startsWith(ProcessScanActivity.SHORT_HTTPS_URL_PREFIX)) {
                 String newLink = ProcessScanActivity.SHORT_HTTPS_URL_PREFIX.replace("s/", "M/")
-                    + oldLink.substring(ProcessScanActivity.SHORT_HTTPS_URL_PREFIX.length());
+                        + oldLink.substring(ProcessScanActivity.SHORT_HTTPS_URL_PREFIX.length());
                 mMainService.getIdentityStore().updateShortUrl(newLink);
             }
         }
@@ -507,7 +491,7 @@ public class FriendsPlugin implements MobicagePlugin {
     }
 
     public void requestFriend(final String email, final boolean force, final boolean isLast,
-        final boolean recalculateMessagesShowInList) {
+                              final boolean recalculateMessagesShowInList) {
         T.dontCare();
         mMainService.postOnUIHandler(new SafeRunnable() {
             @Override
@@ -542,7 +526,7 @@ public class FriendsPlugin implements MobicagePlugin {
     }
 
     public UpdateFriendSetResponseTO updateFriendSet(final List<String> newFriendSet, final long version,
-        final boolean force, final boolean recalculateMessagesShowInList, final FriendTO newFriend) {
+                                                     final boolean force, final boolean recalculateMessagesShowInList, final FriendTO newFriend) {
         T.BIZZ();
         final UpdateFriendSetResponseTO response = new UpdateFriendSetResponseTO();
         final List<String> addedFriends = new ArrayList<String>();
@@ -557,7 +541,7 @@ public class FriendsPlugin implements MobicagePlugin {
                 if (!force && (versionInDB = mStore.getFriendSetVersion()) >= version) {
                     response.updated = false;
                     response.reason = "Version in local DB (" + versionInDB + ") >= version on server (" + version
-                        + ")";
+                            + ")";
                     return;
                 }
 
@@ -615,7 +599,7 @@ public class FriendsPlugin implements MobicagePlugin {
 
         for (String friend : friendsToRequest) {
             requestFriend(friend, force, friendsToRequest.indexOf(friend) == friendsToRequest.size() - 1,
-                recalculateMessagesShowInList);
+                    recalculateMessagesShowInList);
         }
 
         for (String removedFriend : removedFriends) {
@@ -741,7 +725,7 @@ public class FriendsPlugin implements MobicagePlugin {
     }
 
     public boolean inviteFriend(final String emailOrHash, final String message, final String friendName,
-        final boolean showNotification) {
+                                final boolean showNotification) {
         T.UI();
         if (TextUtils.isEmptyOrWhitespace(emailOrHash)) {
             L.bug("Trying to invite friend with email '" + emailOrHash + "'");
@@ -762,8 +746,8 @@ public class FriendsPlugin implements MobicagePlugin {
         mStore.insertPendingInvitation(emailOrHash);
 
         mMainService.putInHistoryLog(
-            mMainService.getString(R.string.invited_activity_record, (friendName == null) ? emailOrHash : friendName),
-            HistoryItem.INFO);
+                mMainService.getString(R.string.invited_activity_record, (friendName == null) ? emailOrHash : friendName),
+                HistoryItem.INFO);
 
         return true;
     }
@@ -885,7 +869,7 @@ public class FriendsPlugin implements MobicagePlugin {
         request.friend = email;
         try {
             com.mobicage.api.location.Rpc
-                .getFriendLocation(new ResponseHandler<GetFriendLocationResponseTO>(), request);
+                    .getFriendLocation(new ResponseHandler<GetFriendLocationResponseTO>(), request);
         } catch (Exception e) {
             L.bug("Error while sending get friend location rpc request", e);
             return false;
@@ -938,7 +922,7 @@ public class FriendsPlugin implements MobicagePlugin {
                 } else {
                     final int contactType = getContactType(email);
                     if ((contactType & FriendsPlugin.FRIEND) == FriendsPlugin.FRIEND
-                        || (contactType & FriendsPlugin.ME) == FriendsPlugin.ME)
+                            || (contactType & FriendsPlugin.ME) == FriendsPlugin.ME)
                         return mMissingFriendAvatarBitmap;
                     else
                         return mMissingNonFriendAvatarBitmap;
@@ -1003,7 +987,7 @@ public class FriendsPlugin implements MobicagePlugin {
     public Bitmap getMissingFriendAvatarBitmap() {
         return mMissingFriendAvatarBitmap;
     }
-    
+
     public void updateFriendAvatar(final String friendEmail, final byte[] avatarBytes) {
         T.BIZZ();
         mStore.updateFriendAvatar(friendEmail, avatarBytes);
@@ -1025,8 +1009,8 @@ public class FriendsPlugin implements MobicagePlugin {
         final Friend friend = getStore().getExistingFriend(email);
         if (friend != null) {
             final Intent intent = new Intent(activity,
-                (friend.type == FriendsPlugin.FRIEND_TYPE_USER) ? UserDetailActivity.class
-                    : ServiceActionMenuActivity.class);
+                    (friend.type == FriendsPlugin.FRIEND_TYPE_USER) ? UserDetailActivity.class
+                            : ServiceActionMenuActivity.class);
             intent.putExtra("email", email);
             activity.startActivity(intent);
         }
@@ -1037,7 +1021,7 @@ public class FriendsPlugin implements MobicagePlugin {
         try {
             // This is a 'single call'
             Rpc.getFriendInvitationSecrets(new GetFriendInvitationSecretsResponseHandler(),
-                new GetFriendInvitationSecretsRequestTO());
+                    new GetFriendInvitationSecretsRequestTO());
         } catch (Exception e) {
             L.bug("Error while sending get friend invitation secrets rpc request", e);
             return false;
@@ -1062,7 +1046,7 @@ public class FriendsPlugin implements MobicagePlugin {
         request.secret = secret;
         try {
             Rpc.ackInvitationByInvitationSecret(new ResponseHandler<AckInvitationByInvitationSecretResponseTO>(),
-                request);
+                    request);
         } catch (Exception e) {
             L.bug("Error while sending ack invitation by invitation secret rpc request", e);
             return false;
@@ -1198,7 +1182,7 @@ public class FriendsPlugin implements MobicagePlugin {
     }
 
     public void updateProfile(final String newProfileName, final byte[] newAvatar, final String accessToken,
-        final long birthdate, final long gender, final boolean hasBirthdate, final boolean hasGender) {
+                              final long birthdate, final long gender, final boolean hasBirthdate, final boolean hasGender) {
         T.dontCare();
 
         SafeRunnable handler = new SafeRunnable() {
@@ -1263,14 +1247,14 @@ public class FriendsPlugin implements MobicagePlugin {
     }
 
     public void sendApiCall(final String serviceEmail, final String itemTagHash, final String method,
-        final String params, final String tag) {
+                            final String params, final String tag) {
 
         SafeRunnable handler = new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
                 T.BIZZ();
                 long id = mStore.insertServiceApiCall(serviceEmail, itemTagHash, method, tag,
-                    SERVICE_API_CALL_STATUS_SENT);
+                        SERVICE_API_CALL_STATUS_SENT);
 
                 SendApiCallRequestTO request = new SendApiCallRequestTO();
                 request.id = id;
@@ -1307,7 +1291,7 @@ public class FriendsPlugin implements MobicagePlugin {
                 request.service = serviceEmail;
                 try {
                     com.mobicage.api.services.Rpc.updateUserData(new ResponseHandler<UpdateUserDataResponseTO>(),
-                        request);
+                            request);
                 } catch (Exception e) {
                     L.bug("Failed to send " + request, e);
                 }
@@ -1382,10 +1366,11 @@ public class FriendsPlugin implements MobicagePlugin {
         return true;
     }
 
-    public void setSecureInfo(final String publicKey) {
+    public void setSecureInfo(final PublicKeyTO[] publicKeys) {
         T.dontCare();
         SetSecureInfoRequestTO request = new SetSecureInfoRequestTO();
-        request.public_key = publicKey;
+        request.public_key = null;
+        request.public_keys = publicKeys;
         try {
             com.mobicage.api.system.Rpc.setSecureInfo(new ResponseHandler<SetSecureInfoResponseTO>(), request);
         } catch (Exception e) {
@@ -1398,7 +1383,7 @@ public class FriendsPlugin implements MobicagePlugin {
             return getMissingFriendAvatarBitmap();
         }
         final Bitmap bitmap = ImageHelper.getRoundedCornerAvatar(BitmapFactory.decodeByteArray(bitmapBytes, 0,
-            bitmapBytes.length));
+                bitmapBytes.length));
         return bitmap;
     }
 
@@ -1407,15 +1392,15 @@ public class FriendsPlugin implements MobicagePlugin {
             return getMissingGroupAvatarBitmap();
         }
         final Bitmap bitmap = ImageHelper.getRoundedCornerAvatar(BitmapFactory.decodeByteArray(bitmapBytes, 0,
-            bitmapBytes.length));
+                bitmapBytes.length));
         return bitmap;
     }
 
     public Map<String, Object> getRogerthatUserAndServiceInfo(final String serviceEmail, final Friend serviceFriend) {
-        String[] data = mStore.getServiceData(serviceEmail);
+        String[] data = serviceEmail == null ? new String[]{null, null} : mStore.getServiceData(serviceEmail);
         MyIdentity myIdentity = mMainService.getIdentityStore().getIdentity();
 
-        Map<String, Object> userInfo = new HashMap<String, Object>();
+        Map<String, Object> userInfo = new HashMap<>();
         userInfo.put("name", myIdentity.getDisplayName());
 
         final Locale locale = Locale.getDefault();
@@ -1429,20 +1414,22 @@ public class FriendsPlugin implements MobicagePlugin {
         userInfo.put("account", myIdentity.getEmail());
         userInfo.put("data", data[0] == null ? new HashMap<String, Object>() : JSONValue.parse(data[0]));
 
-        Map<String, Object> serviceInfo = new HashMap<String, Object>();
-        serviceInfo.put("name", serviceFriend.getDisplayName());
-        serviceInfo.put("email", serviceFriend.getDisplayEmail());
-        serviceInfo.put("account", serviceFriend.email);
-        serviceInfo.put("data", data[1] == null ? new HashMap<String, Object>() : JSONValue.parse(data[1]));
+        Map<String, Object> serviceInfo = new HashMap<>();
+        if (serviceFriend != null) {
+            serviceInfo.put("name", serviceFriend.getDisplayName());
+            serviceInfo.put("email", serviceFriend.getDisplayEmail());
+            serviceInfo.put("account", serviceFriend.email);
+            serviceInfo.put("data", data[1] == null ? new HashMap<String, Object>() : JSONValue.parse(data[1]));
+        }
 
-        Map<String, Object> systemInfo = new HashMap<String, Object>();
+        Map<String, Object> systemInfo = new HashMap<>();
         systemInfo.put("os", "android");
         systemInfo.put("version", SystemUtils.getAndroidVersion() + "");
         systemInfo.put("appVersion", MainService.getVersion(mMainService));
         systemInfo.put("appName", SystemUtils.getApplicationName(mMainService));
         systemInfo.put("appId", CloudConstants.APP_ID);
 
-        Map<String, Object> info = new HashMap<String, Object>();
+        Map<String, Object> info = new HashMap<>();
         info.put("user", userInfo);
         info.put("service", serviceInfo);
         info.put("system", systemInfo);

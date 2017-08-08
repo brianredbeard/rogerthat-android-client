@@ -3,7 +3,7 @@
           package="com.mobicage.rogerth.at"
           android:configChanges="orientation|screenSize"
           android:versionCode="3223"
-          android:versionName="2.0.3223.A">
+          android:versionName="2.1.3223.A">
 
     <!-- BEGIN GCM -->
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
@@ -366,6 +366,18 @@
             android:screenOrientation="portrait">
         </activity>
         <activity
+            android:name="com.mobicage.rogerthat.SecuritySettingsActivity"
+            android:screenOrientation="portrait">
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.SecurityKeyActivity"
+            android:screenOrientation="portrait">
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.ImportSecurityKeyActivity"
+            android:screenOrientation="portrait">
+        </activity>
+        <activity
             android:name="com.mobicage.rogerthat.plugins.scan.ScanTabActivity"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize">
@@ -548,6 +560,7 @@
             android:launchMode="singleInstance"
             android:taskAffinity=""
             android:theme="@style/NoTitleDialogTheme"/>
+
         <!--todo: Needs to be restyled-->
         <!--<receiver-->
             <!--android:name="com.mobicage.rogerthat.widget.RogerthatWidgetProvider"-->

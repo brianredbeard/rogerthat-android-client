@@ -24,6 +24,7 @@ public class CallReceiver {
     public static volatile com.mobicage.capi.location.IClientRpc comMobicageCapiLocationIClientRpc = null;
     public static volatile com.mobicage.capi.messaging.IClientRpc comMobicageCapiMessagingIClientRpc = null;
     public static volatile com.mobicage.capi.news.IClientRpc comMobicageCapiNewsIClientRpc = null;
+    public static volatile com.mobicage.capi.payment.IClientRpc comMobicageCapiPaymentIClientRpc = null;
     public static volatile com.mobicage.capi.services.IClientRpc comMobicageCapiServicesIClientRpc = null;
     public static volatile com.mobicage.capi.system.IClientRpc comMobicageCapiSystemIClientRpc = null;
 
@@ -170,6 +171,21 @@ public class CallReceiver {
         if ("com.mobicage.capi.news.newNews".equals(function)) {
             return comMobicageCapiNewsIClientRpc.newNews(Parser.ComMobicageToNewsNewNewsRequestTO(call.arguments.get("request")));
         }
+        if ("com.mobicage.capi.payment.updatePaymentAsset".equals(function)) {
+            return comMobicageCapiPaymentIClientRpc.updatePaymentAsset(Parser.ComMobicageToPaymentUpdatePaymentAssetRequestTO(call.arguments.get("request")));
+        }
+        if ("com.mobicage.capi.payment.updatePaymentAssets".equals(function)) {
+            return comMobicageCapiPaymentIClientRpc.updatePaymentAssets(Parser.ComMobicageToPaymentUpdatePaymentAssetsRequestTO(call.arguments.get("request")));
+        }
+        if ("com.mobicage.capi.payment.updatePaymentProvider".equals(function)) {
+            return comMobicageCapiPaymentIClientRpc.updatePaymentProvider(Parser.ComMobicageToPaymentUpdatePaymentProviderRequestTO(call.arguments.get("request")));
+        }
+        if ("com.mobicage.capi.payment.updatePaymentProviders".equals(function)) {
+            return comMobicageCapiPaymentIClientRpc.updatePaymentProviders(Parser.ComMobicageToPaymentUpdatePaymentProvidersRequestTO(call.arguments.get("request")));
+        }
+        if ("com.mobicage.capi.payment.updatePaymentStatus".equals(function)) {
+            return comMobicageCapiPaymentIClientRpc.updatePaymentStatus(Parser.ComMobicageToPaymentUpdatePaymentStatusRequestTO(call.arguments.get("request")));
+        }
         if ("com.mobicage.capi.services.receiveApiCallResult".equals(function)) {
             return comMobicageCapiServicesIClientRpc.receiveApiCallResult(Parser.ComMobicageToServiceReceiveApiCallResultRequestTO(call.arguments.get("request")));
         }
@@ -188,8 +204,8 @@ public class CallReceiver {
         if ("com.mobicage.capi.system.updateAppAsset".equals(function)) {
             return comMobicageCapiSystemIClientRpc.updateAppAsset(Parser.ComMobicageToAppUpdateAppAssetRequestTO(call.arguments.get("request")));
         }
-        if ("com.mobicage.capi.system.updateAvailable".equals(function)) {
-            return comMobicageCapiSystemIClientRpc.updateAvailable(Parser.ComMobicageToSystemUpdateAvailableRequestTO(call.arguments.get("request")));
+        if ("com.mobicage.capi.system.updateEmbeddedAppTranslations".equals(function)) {
+            return comMobicageCapiSystemIClientRpc.updateEmbeddedAppTranslations(Parser.ComMobicageToSystemUpdateEmbeddedAppTranslationsRequestTO(call.arguments.get("request")));
         }
         if ("com.mobicage.capi.system.updateJsEmbedding".equals(function)) {
             return comMobicageCapiSystemIClientRpc.updateJsEmbedding(Parser.ComMobicageToJs_embeddingUpdateJSEmbeddingRequestTO(call.arguments.get("request")));

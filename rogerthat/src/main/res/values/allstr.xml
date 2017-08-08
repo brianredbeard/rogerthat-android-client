@@ -3,6 +3,18 @@
     <string name="__me_as_recipient">me</string>
     <string name="__me_as_sender">me</string>
     <string name="about">About</string>
+    <string name="security_not_enabled">Security is not enabled in your app.</string>
+    <string name="algorithm">Algorithm</string>
+    <string name="algorithm_not_supported">Algorithm not supported.</string>
+    <string name="key_already_exists">KeyPair already exists.</string>
+    <string name="key_not_found">Key not found.</string>
+    <string name="user_cancelled_pin_input">User cancelled pin input</string>
+    <string name="unknown_error_occurred">An unknown error has occurred</string>
+    <string name="setup_pin_was_open">Already setting up pin code.</string>
+    <string name="import_key">Import secure key</string>
+    <string name="unsupported_camera_type">Unsupported camera type</string>
+    <string name="camera_was_already_open">Camera was already open</string>
+    <string name="camera_permission_was_not_granted">Camera permission was not granted</string>
     <string name="about_more_info">For more information about %1$s and other Rogerthat based products, please visit:</string>
     <string name="about_more_info_enterprise">The %1$s app is built on the Rogerthat Enterprise platform. Do you want to know what Rogerthat Enterprise can do for your company? Visit:</string>
     <string name="about_provided_by">Rogerthat is proudly presented by</string>
@@ -332,7 +344,7 @@
     <string name="pin_did_not_match">Pin code did not match.</string>
     <string name="pin_invalid">Invalid pin code.</string>
     <string name="pin_required_continue">A pin is required to continue!</string>
-    <string name="pin_setup_4_digit">To secure your app you need to enter a 4 digit pin code.</string>
+    <string name="pin_setup_4_digit">To secure your app you need to choose a 4 digit pin code.</string>
     <string name="post">Post</string>
     <string name="previousButton">Back</string>
     <string name="previous_in_thread">Previous messages in this conversation</string>
@@ -340,6 +352,20 @@
     <string name="processing">Processing…</string>
     <string name="processing_scan">Processing scan…</string>
     <string name="profile">Profile</string>
+    <string name="security">Security</string>
+    <string name="setup_pin">Setup PIN code</string>
+    <string name="security_usage_explanation">Because this app uses security features, you have to secure it with a PIN code.</string>
+    <string name="enter_pin_to_unlock">Enter your secure PIN code to unlock the app.</string>
+    <string name="later">Later</string>
+    <string name="done">Done</string>
+    <string name="backup_security_key_later">You can always find these words back later when navigating to %1$s &gt; %2$s. Then select the secure key with name &quot;%3$s&quot;.</string>
+    <string name="view_security_settings">View security settings</string>
+    <string name="key_name">Key name</string>
+    <string name="backup_security_key_instructions">To be able to restore your secure %1$s key when you re-install the app, write down the algorithm, key name and 29 words below and store them in a secure location.\nNote: We will never ask you for these words. Never give them to someone else on a forum, via phone or via e-mail.</string>
+    <string name="import_security_key_instructions">To import a secure key select the key algorithm and enter the secure key name and the key\'s 29 words.</string>
+    <string name="seed_29_words">29 words</string>
+    <string name="import_key_failed">Your key could not be imported. Please make sure you selected the right algorithm and that all 29 words are written correctly.</string>
+    <string name="import_key_succeeded">Your key has been successfully imported.</string>
     <string name="promo">Promo</string>
     <string name="provide_qr_code_name">Provide a name for the QR code</string>
     <string name="qr_call_tel">Do you wish to call %1$s?</string>
@@ -421,8 +447,8 @@
     <string name="rogerthat_system">Rogerthat System</string>
     <string name="rogerthat_welcome_enterprise">Welcome to the %1$s app.\n\nBefore you can get started you need to register your user account.</string>
     <string name="sample_news_message_1">A free aperitif at a cozy dinner with tasty tapas!\n\nThis offer is valid until the end of January 2017.</string>
-    <string name="sample_news_message_2">We wish you a merry Christmas and offer you a Christmas present worth 5 euros.\nWhen purchasing a minumum amount of 25 euro you will immediately receive a one-time € 5 discount.\nIn grattitude for the many years of trust.\nOffer valid from 17/12/2016 till 31/01/2017.</string>
-    <string name="sample_news_title_1">Scan this coupon at La Tapa Canaria and receive...</string>
+    <string name="sample_news_message_2">We wish you a merry Christmas and offer you a Christmas present worth 5 euros.\nWhen purchasing a minimum amount of 25 euro you will immediately receive a one-time € 5 discount.\nIn grattitude for the many years of trust.\nOffer valid from 17/12/2016 till 31/01/2017.</string>
+    <string name="sample_news_title_1">Scan this coupon at La Tapa Canaria and receive…</string>
     <string name="sample_news_title_2">Christmas gift of € 5</string>
     <string name="save">Save</string>
     <string name="save_canned_message_dialog_title">Provide a name for the saved message</string>
@@ -530,6 +556,7 @@
     <string name="validate_discovered_location">Verify if the following location is correct</string>
     <string name="validation_failed">Invalid input</string>
     <string name="view_my_profile">View my profile</string>
+    <string name="wallet">Wallet</string>
     <string name="warning">Warning</string>
     <string name="website">Website</string>
     <string name="wont_store_data">Don\'t worry, we\'ll never store this data.</string>
@@ -537,5 +564,8 @@
     <string name="x_new_items_available">%1$d new items available</string>
     <string name="yes">Yes</string>
     <string name="you_are_here">You are here</string>
+    <string name="payment_providers">Payment providers</string>
+    <string name="payment_providers_add">Add payment provider</string>
+    <string name="no_payment_providers">You haven\'t any payment providers yet.</string>
     <string name="your_location_displayed_friend_have_contacted_for_their_location">Your location is displayed. Your friends (which share their location with you) have been contacted to send you their location.</string>
 </resources>

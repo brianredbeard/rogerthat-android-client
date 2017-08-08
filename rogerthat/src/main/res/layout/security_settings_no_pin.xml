@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+    <com.mobicage.rogerthat.util.ui.ScaleImageView
+        android:id="@+id/full_width_rogerthat_logo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:adjustViewBounds="true"
+        android:scaleType="fitStart"
+        android:src="@drawable/about_header"
+        android:visibility="gone"/>
+
+    <RelativeLayout
+        android:layout_below="@id/full_width_rogerthat_logo"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="20dp">
+
+        <ImageView
+            android:id="@+id/rogerthat_logo"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="20dp"
+            android:adjustViewBounds="true"
+            android:src="@drawable/about_header"
+            android:visibility="gone"/>
+
+        <ImageView
+            android:id="@+id/security_usage_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/rogerthat_logo"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="25dp"
+            android:layout_marginTop="25dp"
+            android:gravity="center_horizontal"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/security_usage_icon"
+            android:layout_centerHorizontal="true"
+            android:gravity="center_horizontal"
+            android:text="@string/security_usage_explanation"
+            android:textColor="@color/mc_default_text"
+            android:textSize="22sp"/>
+
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/setup_pin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="30dp"
+            android:minHeight="50dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:text="@string/setup_pin"
+            android:textSize="18sp"
+            android:theme="@style/PrimaryButtonTheme"/>
+    </RelativeLayout>
+
+</RelativeLayout>

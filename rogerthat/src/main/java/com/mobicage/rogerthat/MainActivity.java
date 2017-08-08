@@ -18,8 +18,6 @@
 
 package com.mobicage.rogerthat;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -45,15 +43,16 @@ import com.mobicage.rogerthat.plugins.messaging.ServiceMessageDetailActivity;
 import com.mobicage.rogerthat.plugins.scan.ProcessScanActivity;
 import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
 import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
+import com.mobicage.rogerthat.plugins.security.PinLockMgr;
 import com.mobicage.rogerthat.registration.ContentBrandingRegistrationActivity;
 import com.mobicage.rogerthat.registration.DetectedBeaconActivity;
 import com.mobicage.rogerthat.registration.OauthRegistrationActivity;
 import com.mobicage.rogerthat.registration.RegistrationActivity2;
 import com.mobicage.rogerthat.registration.RegistrationWizard2;
 import com.mobicage.rogerthat.registration.YSAAARegistrationActivity;
-import com.mobicage.rogerthat.util.Security;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SystemUtils;
@@ -69,7 +68,7 @@ import org.json.simple.JSONValue;
 import java.util.List;
 import java.util.Map;
 
-public class MainActivity extends ServiceBoundActivity {
+public class MainActivity extends ServiceBoundActivity implements PinLockMgr.NoPinUnlockActivity {
 
     public static final int FLAG_NEW_STACK = Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP
         | Intent.FLAG_ACTIVITY_CLEAR_TASK;
@@ -97,10 +96,9 @@ public class MainActivity extends ServiceBoundActivity {
     public static final String ACTION_SHOW_DETECTED_BEACONS = "ROGERTHAT_ACTION_SHOW_DETECTED_BEACONS";
 
     private ProgressDialog mDialog;
-    private AlertDialog mRegistrationCompleteDialog = null;
 
     private static final int START_SETUP_PIN_REQUEST_CODE = 100;
-    private Intent mBackupIntentAfterPin = null;
+    private Intent mIntentToBeProcessedOnActivityResult = null;
 
     private final SafeBroadcastReceiver mBroadcastReceiver = new SafeBroadcastReceiver() {
         @Override
@@ -148,120 +146,101 @@ public class MainActivity extends ServiceBoundActivity {
             processIntent(getIntent());
     }
 
-    private void processIntent(Intent intent) {
-        boolean hasRegistered = mService.getRegisteredFromConfig();
-
-        final String intentAction = intent.getAction();
-        L.d("MainActivity processIntent: " + intentAction);
-        L.d("Extras:");
-        Bundle bundle = intent.getExtras();
-        if (bundle != null) {
-            for (String key : bundle.keySet()) {
-                Object value = bundle.get(key);
-                L.d("- " + String.format("%s %s (%s)", key, value.toString(), value.getClass().getName()));
-            }
+    public static Friend getFriendForYSAAAWhenReady(MainService service) {
+        L.i("launchMainActivityAndFinishIfAppReady");
+        final FriendsPlugin friendsPlugin = service.getPlugin(FriendsPlugin.class);
+        final FriendStore friendStore = friendsPlugin.getStore();
+        List<String> friends = friendStore.getEmails();
+        if (friends.size() == 0) {
+            L.i("Service not available yet");
+            return null;
+        }
+        if (friends.size() != 1) {
+            L.bug("YSAAA user has more than 1 friend");
+            return null;
         }
 
-        //noinspection PointlessBooleanExpression
-        if (hasRegistered && AppConstants.SECURE_APP) {
+        Friend friend = friendStore.getFriend(friends.get(0));
+        friendStore.addMenuDetails(friend);
+
+        if (friend.descriptionBranding != null) {
+            boolean brandingAvailable = false;
             try {
-                if (!Security.isPinSet(mService)) {
-                    mBackupIntentAfterPin = intent;
-                    setupPin();
-                    return;
-                }
-            } catch (Exception e) {
-                mService.wipe(0);
+                brandingAvailable = friendsPlugin.getBrandingMgr().isBrandingAvailable(friend.descriptionBranding);
+            } catch (BrandingFailureException e) {
+                // ignore
+            }
+            if (!brandingAvailable) {
+                L.i("Description branding not available yet");
+                return null;
             }
         }
 
-        if (ACTION_WIDGET_SCAN.equals(intentAction) || ACTION_WIDGET_COMPOSE.equals(intentAction)) {
+        if (friend.actionMenu == null) {
+            L.i("Friend does not have an actionMenu yet");
+            return null;
+        }
 
-            // Started via one of the last 3 widget buttons
-            processWidgetIntent(intent, hasRegistered);
+        if (friend.actionMenu.branding != null) {
+            boolean brandingAvailable = false;
+            try {
+                brandingAvailable = friendsPlugin.getBrandingMgr().isBrandingAvailable(
+                        friend.actionMenu.branding);
+            } catch (BrandingFailureException e) {
+                // ignore
+            }
+            if (!brandingAvailable) {
+                L.i("Action menu branding not available yet");
+                return null;
+            }
+        }
 
-        } else if (ACTION_NOTIFICATION_ADDRESSBOOK_SCAN.equals(intentAction)
-            || ACTION_NOTIFICATION_FACEBOOK_SCAN.equals(intentAction)) {
-            processAddFriendsIntent(intent, hasRegistered);
+        boolean hasMenuIconsToDownload = false;
+        for (ServiceMenuItemTO item : friend.actionMenu.items) {
+            if (item.iconHash != null && !friendsPlugin.isMenuIconAvailable(item.iconHash) && !UIUtils
+                    .isSupportedFontawesomeIcon(item.iconName)) {
+                hasMenuIconsToDownload = true;
+                break;
+            }
+        }
+        if (hasMenuIconsToDownload) {
+            L.i("Still has icons to download");
+            return null;
+        }
 
-        } else if (ACTION_NOTIFICATION_PHOTO_UPLOAD_DONE.equals(intentAction)) {
-            processPhotoUploadDoneIntent(intent, hasRegistered);
-
-        } else if (ACTION_NOTIFICATION_ENTER_PIN.equals(intentAction)) {
-            launchRegistrationActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP);
-
-        } else if (ACTION_NOTIFICATION_MESSAGE_RECEIVED.equals(intentAction)) {
-            processMessageUpdatesIntent(intent, hasRegistered);
-
-        } else if (ACTION_NOTIFICATION_NEW_NEWS.equals(intentAction)) {
-            processNewNewsIntent(intent, hasRegistered);
-
-        } else if (ACTION_REGISTERED.equals(intentAction)) {
-            showRegistrationCompleteDialogAndGoToHomeActivity();
-
-        } else if (ACTION_COMPLETE_PROFILE.equals(intentAction)) {
-            launchProfileActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP, false);
-
-        } else if (ACTION_COMPLETE_PROFILE_FINISHED.equals(intentAction)) {
-            showRegistrationCompleteDialogAndGoToHomeActivity();
-
-        } else if (ACTION_SHOW_DETECTED_BEACONS.equals(intentAction)) {
-            launchDetectedBeaconsAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP,
-                intent.getStringExtra(DetectedBeaconActivity.EXTRA_DETECTED_BEACONS),
-                intent.getBooleanExtra(DetectedBeaconActivity.EXTRA_AGE_AND_GENDER_SET, true));
-        } else {
-            final Uri qrUri;
-            final int flags;
-
-            if (Intent.ACTION_VIEW.equals(intentAction) && intent.getData() != null) {
-                if (intent.getData().getScheme().equals("mdp-" + CloudConstants.APP_ID)) {
-                    // Redirected via MYDIGIPASS
-                    qrUri = null;
-                    flags = 0;
-                } else {
-                    // Started via rogerthat://
-                    qrUri = intent.getData();
-                    flags = FLAG_CLEAR_STACK_SINGLE_TOP;
+        boolean hasStaticFlowsToDownload = false;
+        for (ServiceMenuItemTO item : friend.actionMenu.items) {
+            if (!TextUtils.isEmptyOrWhitespace(item.staticFlowHash)) {
+                if (!friendsPlugin.isStaticFlowAvailable(item.staticFlowHash)) {
+                    hasStaticFlowsToDownload = true;
+                    break;
                 }
+            }
+        }
+        if (hasStaticFlowsToDownload) {
+            L.i("Still has static flows to download");
+            return null;
+        }
 
-            } else {
-                // Started via Launcher
-                // Started via Recents (long-press home button)
-                // Started via Eclipse
-                // Started via Google play
-                // Started via App widget
-
-                // We do not check action, it could be MAIN or WIDGET_MAIN
-                if (!isTaskRoot()) {
-                    if ((intent.getFlags() & Intent.FLAG_ACTIVITY_NEW_TASK) == 0) {
-                        // We are launched from another app, and it did not set the NEW_TASK flag
-                        L.d("MainActivity on existing stack - without FLAG_ACTIVITY_NEW_TASK");
-                        qrUri = null;
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED;
-                    } else {
-                        L.d("MainActivity on existing stack - finish right away");
-                        finish();
-                        return;
+        boolean hasBrandingsToDownload = false;
+        for (ServiceMenuItemTO item : friend.actionMenu.items) {
+            if (!TextUtils.isEmptyOrWhitespace(item.screenBranding)) {
+                try {
+                    if (!friendsPlugin.getBrandingMgr().isBrandingAvailable(friend.actionMenu.branding)) {
+                        hasBrandingsToDownload = true;
+                        break;
                     }
-                } else {
-                    L.d("MainActivity - creating new task stack");
-                    qrUri = null;
-                    flags = 0;
+                } catch (BrandingFailureException e) {
+                    // ignore
                 }
-            }
-
-            if (hasRegistered) {
-                if (CloudConstants.isContentBrandingApp()) {
-                    launchContentBrandingMainActivityAndFinish();
-                } else if (CloudConstants.isYSAAA()) {
-                    launchYSAAAActivityAndFinish();
-                } else {
-                    launchHomeActivityAndFinish(qrUri, flags);
-                }
-            } else {
-                launchRegistrationActivityAndFinish(qrUri, flags);
             }
         }
+        if (hasBrandingsToDownload) {
+            L.i("Still has brandings to download");
+            return null;
+        }
+
+        return friend;
     }
 
     private void processWidgetIntent(Intent intent, boolean hasRegistered) {
@@ -403,8 +382,115 @@ public class MainActivity extends ServiceBoundActivity {
             mDialog.dismiss();
     }
 
+    private void processIntent(final Intent intent) {
+        boolean hasRegistered = mService.getRegisteredFromConfig();
+
+        final String intentAction = intent.getAction();
+        L.d("MainActivity processIntent: " + intentAction);
+        L.d("Extras:");
+        Bundle bundle = intent.getExtras();
+        if (bundle != null) {
+            for (String key : bundle.keySet()) {
+                Object value = bundle.get(key);
+                L.d("- " + String.format("%s %s (%s)", key, value, value == null ? null : value.getClass().getName()));
+            }
+        }
+
+        if (hasRegistered && SecurityUtils.usesAppWidePinCode() && !SecurityUtils.isPinSet(mService)) {
+            mIntentToBeProcessedOnActivityResult = intent;
+            setupPin();
+
+        } else if (ACTION_WIDGET_SCAN.equals(intentAction) || ACTION_WIDGET_COMPOSE.equals(intentAction)) {
+            // Started via one of the last 3 widget buttons
+            processWidgetIntent(intent, hasRegistered);
+
+        } else if (ACTION_NOTIFICATION_ADDRESSBOOK_SCAN.equals(intentAction)
+            || ACTION_NOTIFICATION_FACEBOOK_SCAN.equals(intentAction)) {
+            processAddFriendsIntent(intent, hasRegistered);
+
+        } else if (ACTION_NOTIFICATION_PHOTO_UPLOAD_DONE.equals(intentAction)) {
+            processPhotoUploadDoneIntent(intent, hasRegistered);
+
+        } else if (ACTION_NOTIFICATION_ENTER_PIN.equals(intentAction)) {
+            launchRegistrationActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP);
+
+        } else if (ACTION_NOTIFICATION_MESSAGE_RECEIVED.equals(intentAction)) {
+            processMessageUpdatesIntent(intent, hasRegistered);
+
+        } else if (ACTION_NOTIFICATION_NEW_NEWS.equals(intentAction)) {
+            processNewNewsIntent(intent, hasRegistered);
+
+        } else if (ACTION_REGISTERED.equals(intentAction)) {
+            showRegistrationCompleteDialogAndGoToHomeActivity();
+
+        } else if (ACTION_COMPLETE_PROFILE.equals(intentAction)) {
+            launchProfileActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP, false);
+
+        } else if (ACTION_COMPLETE_PROFILE_FINISHED.equals(intentAction)) {
+            showRegistrationCompleteDialogAndGoToHomeActivity();
+
+        } else if (ACTION_SHOW_DETECTED_BEACONS.equals(intentAction)) {
+            launchDetectedBeaconsAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP,
+                intent.getStringExtra(DetectedBeaconActivity.EXTRA_DETECTED_BEACONS),
+                intent.getBooleanExtra(DetectedBeaconActivity.EXTRA_AGE_AND_GENDER_SET, true));
+        } else {
+            final Uri qrUri;
+            final int flags;
+
+            if (Intent.ACTION_VIEW.equals(intentAction) && intent.getData() != null) {
+                if (intent.getData().getScheme().equals("mdp-" + CloudConstants.APP_ID)) {
+                    // Redirected via MYDIGIPASS
+                    qrUri = null;
+                    flags = 0;
+                } else {
+                    // Started via rogerthat://
+                    qrUri = intent.getData();
+                    flags = FLAG_CLEAR_STACK_SINGLE_TOP;
+                }
+
+            } else {
+                // Started via Launcher
+                // Started via Recents (long-press home button)
+                // Started via Eclipse
+                // Started via Google play
+                // Started via App widget
+
+                // We do not check action, it could be MAIN or WIDGET_MAIN
+                if (!isTaskRoot()) {
+                    if ((intent.getFlags() & Intent.FLAG_ACTIVITY_NEW_TASK) == 0) {
+                        // We are launched from another app, and it did not set the NEW_TASK flag
+                        L.d("MainActivity on existing stack - without FLAG_ACTIVITY_NEW_TASK");
+                        qrUri = null;
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED;
+                    } else {
+                        L.d("MainActivity on existing stack - finish right away");
+                        finish();
+                        return;
+                    }
+                } else {
+                    L.d("MainActivity - creating new task stack");
+                    qrUri = null;
+                    flags = 0;
+                }
+            }
+
+            if (!hasRegistered) {
+                launchRegistrationActivityAndFinish(qrUri, flags);
+            } else if (CloudConstants.isContentBrandingApp()) {
+                launchContentBrandingMainActivityAndFinish();
+            } else if (CloudConstants.isYSAAA()) {
+                launchYSAAAActivityAndFinish();
+            } else {
+                launchHomeActivityAndFinish(qrUri, flags);
+            }
+        }
+    }
+
     private void setupPin() {
-        Intent setupPinIntent = new Intent(this, SetupPinActivity.class);
+        Intent setupPinIntent = new Intent(this, SecurityKeyActivity.class);
+        setupPinIntent.putExtra(SecurityKeyActivity.KEY_NAME, AppConstants.Security.APP_KEY_NAME);
+        setupPinIntent.putExtra(SecurityKeyActivity.KEY_ALGORITHM, AppConstants.Security.APP_KEY_ALGORITHM);
+        setupPinIntent.putExtra(SecurityKeyActivity.SHOW_FINISHED_BUTTON, true);
         startActivityForResult(setupPinIntent, START_SETUP_PIN_REQUEST_CODE);
     }
 
@@ -413,115 +499,19 @@ public class MainActivity extends ServiceBoundActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == START_SETUP_PIN_REQUEST_CODE) {
-            if (resultCode == Activity.RESULT_OK) {
-                Intent i = mBackupIntentAfterPin;
-                mBackupIntentAfterPin = null;
+            if (resultCode == RESULT_OK) {
+                final Intent i = mIntentToBeProcessedOnActivityResult;
+                mIntentToBeProcessedOnActivityResult = null;
                 processIntent(i);
             } else {
-                String message = getString(R.string.pin_required_continue);
-                SafeDialogClick onPositiveClick = new SafeDialogClick() {
+                final String message = getString(R.string.pin_required_continue);
+                UIUtils.showDialog(this, null, message, new SafeDialogClick() {
                     @Override
                     public void safeOnClick(DialogInterface dialog, int id) {
                         setupPin();
                     }
-                };
-                UIUtils.showDialog(this, null, message, onPositiveClick);
+                });
             }
-        }
-    }
-
-    public static Friend getFriendForYSAAAWhenReady(MainService service) {
-        L.i("launchMainActivityAndFinishIfAppReady");
-        final FriendsPlugin friendsPlugin = service.getPlugin(FriendsPlugin.class);
-        final FriendStore friendStore = friendsPlugin.getStore();
-        List<String> friends = friendStore.getEmails();
-        if (friends.size() == 0) {
-            L.i("Service not available yet");
-            return null;
-        }
-        if (friends.size() == 1) {
-            Friend friend = friendStore.getFriend(friends.get(0));
-            friendStore.addMenuDetails(friend);
-
-            if (friend.descriptionBranding != null) {
-                boolean brandingAvailable = false;
-                try {
-                    brandingAvailable = friendsPlugin.getBrandingMgr().isBrandingAvailable(friend.descriptionBranding);
-                } catch (BrandingFailureException e) {
-                    // ignore
-                }
-                if (!brandingAvailable) {
-                    L.i("Description branding not available yet");
-                    return null;
-                }
-            }
-
-            if (friend.actionMenu == null) {
-                L.i("Friend does not have an actionMenu yet");
-                return null;
-            } else {
-                if (friend.actionMenu.branding != null) {
-                    boolean brandingAvailable = false;
-                    try {
-                        brandingAvailable = friendsPlugin.getBrandingMgr().isBrandingAvailable(
-                            friend.actionMenu.branding);
-                    } catch (BrandingFailureException e) {
-                        // ignore
-                    }
-                    if (!brandingAvailable) {
-                        L.i("Action menu branding not available yet");
-                        return null;
-                    }
-                }
-
-                boolean hasMenuIconsToDownload = false;
-                for (ServiceMenuItemTO item : friend.actionMenu.items) {
-                    if (item.iconHash != null && !friendsPlugin.isMenuIconAvailable(item.iconHash) && !UIUtils.isSupportedFontawesomeIcon(item.iconName)) {
-                        hasMenuIconsToDownload = true;
-                        break;
-                    }
-                }
-                if (hasMenuIconsToDownload) {
-                    L.i("Still has icons to download");
-                    return null;
-                }
-
-                boolean hasStaticFlowsToDownload = false;
-                for (ServiceMenuItemTO item : friend.actionMenu.items) {
-                    if (!TextUtils.isEmptyOrWhitespace(item.staticFlowHash)) {
-                        if (!friendsPlugin.isStaticFlowAvailable(item.staticFlowHash)) {
-                            hasStaticFlowsToDownload = true;
-                            break;
-                        }
-                    }
-                }
-                if (hasStaticFlowsToDownload) {
-                    L.i("Still has static flows to download");
-                    return null;
-                }
-
-                boolean hasBrandingsToDownload = false;
-                for (ServiceMenuItemTO item : friend.actionMenu.items) {
-                    if (!TextUtils.isEmptyOrWhitespace(item.screenBranding)) {
-                        try {
-                            if (!friendsPlugin.getBrandingMgr().isBrandingAvailable(friend.actionMenu.branding)) {
-                                hasBrandingsToDownload = true;
-                                break;
-                            }
-                        } catch (BrandingFailureException e) {
-                            // ignore
-                        }
-                    }
-                }
-                if (hasBrandingsToDownload) {
-                    L.i("Still has brandings to download");
-                    return null;
-                }
-            }
-            return friend;
-        } else {
-            L.bug("YSAAA user has more than 1 friend");
-            return null;
         }
     }
 
@@ -676,7 +666,6 @@ public class MainActivity extends ServiceBoundActivity {
                 cfg.put(RegistrationActivity2.QRSCAN_CONFIGKEY, false);
                 cfgProvider.updateConfigurationNow(RegistrationWizard2.CONFIGKEY, cfg);
                 return;
-
             }
         }
         L.d("Starting HomeActivity");
@@ -727,4 +716,5 @@ public class MainActivity extends ServiceBoundActivity {
             startActivity(new Intent(this, SendMessageContactActivity.class));
         }
     }
+
 }

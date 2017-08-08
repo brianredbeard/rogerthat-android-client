@@ -84,6 +84,17 @@ public class PriorityMap {
         sPrioritySet.add("com.mobicage.api.news.getNews");
         sPrioritySet.add("com.mobicage.api.news.getNewsItems");
         sPrioritySet.add("com.mobicage.api.news.saveNewsStatistics");
+        sPrioritySet.add("com.mobicage.api.payment.cancelPayment");
+        sPrioritySet.add("com.mobicage.api.payment.confirmPayment");
+        sPrioritySet.add("com.mobicage.api.payment.createAsset");
+        sPrioritySet.add("com.mobicage.api.payment.getPaymentAssets");
+        sPrioritySet.add("com.mobicage.api.payment.getPaymentProfile");
+        sPrioritySet.add("com.mobicage.api.payment.getPaymentProviders");
+        sPrioritySet.add("com.mobicage.api.payment.getPaymentTransactions");
+        sPrioritySet.add("com.mobicage.api.payment.getPendingPaymentDetails");
+        sPrioritySet.add("com.mobicage.api.payment.getPendingPaymentSignatureData");
+        sPrioritySet.add("com.mobicage.api.payment.receivePayment");
+        sPrioritySet.add("com.mobicage.api.payment.verifyPaymentAsset");
         sPrioritySet.add("com.mobicage.api.services.findService");
         sPrioritySet.add("com.mobicage.api.services.getActionInfo");
         sPrioritySet.add("com.mobicage.api.services.getMenuIcon");

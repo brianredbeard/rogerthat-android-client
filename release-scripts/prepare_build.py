@@ -16,7 +16,9 @@
 #
 # @@license_version:1.3@@
 
+from contextlib import closing
 import hashlib
+import itertools
 import logging
 import os
 import pprint
@@ -25,7 +27,6 @@ import shutil
 import sys
 import tempfile
 from xml.dom import minidom
-from contextlib import closing
 
 from PIL import Image
 import yaml
@@ -306,6 +307,14 @@ def get_action(item):
     return action, action_type
 
 
+def get_cordova_apps():
+    cordova_apps = set()
+    for item in itertools.chain(get('HOMESCREEN.items', []), get('TOOLBAR.items', [])):
+        if item['action_type'] == 'cordova':
+            cordova_apps.add(item['action'])
+    return list(cordova_apps)
+
+
 def generate_navigation_menu(doc, strings_map):
     app_type = doc.get('APP_CONSTANTS')['APP_TYPE']
     homescreen_color = doc['HOMESCREEN'].get('color', None)
@@ -398,7 +407,7 @@ def convert_config():
     ##### HOMESCREEN #############################################
     if doc["HOMESCREEN"].get("style") == HOME_SCREEN_STYLE_MESSAGING or \
         doc["HOMESCREEN"].get("style") == HOME_SCREEN_STYLE_NEWS:
-        print "Not generating homescreen images"
+        logging.info('Not generating homescreen images')
         items = doc['HOMESCREEN'].get('items', [])
         toolbar = doc.get('TOOLBAR')
         if toolbar:
@@ -633,9 +642,7 @@ def convert_config():
     fb_registration = bool_str(doc["APP_CONSTANTS"]["FACEBOOK_REGISTRATION"])
     full_width_headers = bool_str(full_width_headers)
 
-    profile_settings = doc.get('PROFILE', dict())
-    profile_show_gender_and_birthdate = bool_str(profile_settings.get('SHOW_GENDER_AND_BIRTHDATE', "true"))
-
+    profile_show_gender_and_birthdate = bool_str(get('PROFILE.SHOW_GENDER_AND_BIRTHDATE', True))
 
     if doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_CITYPAPP:
         default_about_website = "www.onzestadapp.be"
@@ -654,25 +661,29 @@ def convert_config():
         default_about_facebook = "/rogerthatplatform"
         default_about_facebook_url = "https://www.facebook.com/rogerthatplatform"
 
-    about_website = doc.get("ABOUT_ACTIVITY", {}).get('website', default_about_website)
-    about_website_url = doc.get("ABOUT_ACTIVITY", {}).get('website_url', default_about_website_url)
-    about_email = doc.get("ABOUT_ACTIVITY", {}).get('email', default_about_email)
-    about_twitter = doc.get("ABOUT_ACTIVITY", {}).get('twitter', default_about_twitter)
-    about_twitter_url = doc.get("ABOUT_ACTIVITY", {}).get('twitter_url', default_about_twitter_url)
-    about_facebook = doc.get("ABOUT_ACTIVITY", {}).get('facebook', default_about_facebook)
-    about_facebook_url = doc.get("ABOUT_ACTIVITY", {}).get('facebook_url', default_about_facebook_url)
+    about_website = get('ABOUT_ACTIVITY.website', default_about_website)
+    about_website_url = get('ABOUT_ACTIVITY.website_url', default_about_website_url)
+    about_email = get('ABOUT_ACTIVITY.email', default_about_email)
+    about_twitter = get('ABOUT_ACTIVITY.twitter', default_about_twitter)
+    about_twitter_url = get('ABOUT_ACTIVITY.twitter_url', default_about_twitter_url)
+    about_facebook = get('ABOUT_ACTIVITY.facebook', default_about_facebook)
+    about_facebook_url = get('ABOUT_ACTIVITY.facebook_url', default_about_facebook_url)
 
-    speech_to_text = bool_str(doc["APP_CONSTANTS"].get("SPEECH_TO_TEXT", False))
-    secure_app = bool_str(doc["APP_CONSTANTS"].get("SECURE_APP", False))
-    secure_pin_interval = str(doc["APP_CONSTANTS"].get("SECURE_PIN_INTERVAL", 900))
-    secure_pin_retry_interval = str(doc["APP_CONSTANTS"].get("SECURE_PIN_RETRY_INTERVAL", 300))
+    speech_to_text = bool_str(get("APP_CONSTANTS.SPEECH_TO_TEXT", False))
+    secure_app = bool_str(get("APP_CONSTANTS.SECURITY.SECURE", False))
+    secure_pin_locked = bool_str(get("APP_CONSTANTS.SECURITY.PIN_LOCKED", False))
+    secure_pin_interval = get("APP_CONSTANTS.SECURITY.PIN_INTERVAL", 900)
+    secure_pin_retry_interval = get("APP_CONSTANTS.SECURITY.PIN_RETRY_INTERVAL", 300)
+    secure_app_key_name = quoted_str_or_null(get('APP_CONSTANTS.SECURITY.APP_KEY_NAME', None))
+    secure_app_key_algorithm = quoted_str_or_null(get('APP_CONSTANTS.SECURITY.APP_KEY_ALGORITHM', None))
+    if bool(secure_app_key_name) != bool(secure_app_key_algorithm):
+        raise ValueError('Both APP_KEY_NAME and APP_KEY_ALGORITHM are required under APP_CONSTANTS.SECURITY')
 
-    if doc["APP_CONSTANTS"].get("SECURE_APP", False):
+    if secure_app:
         rogerthat_build_gradle = os.path.join(ANDROID_SRC_DIR, '..', 'build.gradle')
         with closing(open(rogerthat_build_gradle, 'r+')) as f:
             s = f.read()
             s = re.sub('minSdkVersion \d+', 'minSdkVersion 23', s)
-
             f.seek(0)
             f.write(s)
             f.truncate()
@@ -693,7 +704,7 @@ def convert_config():
     else:
         raise Exception('Invalid registration type %d' % registration_type)
 
-    registration_asks_location_permission = bool_str(doc['APP_CONSTANTS'].get('REGISTRATION_ASKS_LOCATION_PERMISSION', True))
+    registration_asks_location_permission = bool_str(get('APP_CONSTANTS.REGISTRATION_ASKS_LOCATION_PERMISSION', True))
 
     output = u'''%(LICENSE)s
 
@@ -752,9 +763,16 @@ public class AppConstants {
     public static final String ABOUT_FACEBOOK_URL = "%(about_facebook_url)s";
 
     public static final boolean SPEECH_TO_TEXT = %(speech_to_text)s;
-    public static final boolean SECURE_APP = %(secure_app)s;
-    public static final int SECURE_PIN_INTERVAL = %(secure_pin_interval)s;
-    public static final int SECURE_PIN_RETRY_INTERVAL = %(secure_pin_retry_interval)s;
+
+    public static final class Security {
+        public static final boolean ENABLED = %(secure_app)s;
+        public static final boolean PIN_LOCKED = %(secure_pin_locked)s;
+        public static final int PIN_INTERVAL = %(secure_pin_interval)s;
+        public static final int PIN_RETRY_INTERVAL = %(secure_pin_retry_interval)s;
+        public static final String APP_KEY_NAME = %(secure_app_key_name)s;
+        public static final String APP_KEY_ALGORITHM = %(secure_app_key_algorithm)s;
+    }
+
 }
 ''' % dict(LICENSE=LICENSE,
            app_type=app_type,
@@ -782,8 +800,11 @@ public class AppConstants {
            about_facebook_url=about_facebook_url,
            speech_to_text=speech_to_text,
            secure_app=secure_app,
+           secure_pin_locked=secure_pin_locked,
            secure_pin_interval=secure_pin_interval,
            secure_pin_retry_interval=secure_pin_retry_interval,
+           secure_app_key_name=secure_app_key_name,
+           secure_app_key_algorithm=secure_app_key_algorithm,
            app_service_guid=app_service_guid,
            registration_type=registration_type,
            registration_type_oauth_domain=registration_type_oauth_domain,
@@ -964,52 +985,53 @@ if __name__ == "__main__":
         raise Exception("app_id not in valid app ids")
 
     #### IMAGES ###################################
+    # Always regenerate images except for the rogerthat app in debug mode
+    if APP_ID != 'rogerthat' or not debug:
+        src_dir_images_0 = os.path.join(APP_DIR, 'images', 'common')
+        to_dir_images_0 = os.path.join(SRC_RES_DIR, 'drawable')
+        if os.path.exists(src_dir_images_0):
+            app_utils.copytree(src_dir_images_0, to_dir_images_0, ignore=lambda p, f: ['localized'])
+            localized_path = os.path.join(src_dir_images_0, 'localized')
+            if os.path.exists(localized_path):
+                for dir_name in os.listdir(localized_path):
+                    d = os.path.join(localized_path, dir_name)
+                    for file_name in os.listdir(d):
+                        if dir_name == 'en':
+                            shutil.copyfile(os.path.join(d, file_name), os.path.join(to_dir_images_0, file_name))
+                        else:
+                            target_dir = os.path.realpath(os.path.join(SRC_RES_DIR, 'drawable-' + dir_name))
+                            if not os.path.exists(target_dir):
+                                os.mkdir(target_dir)
+                            shutil.copyfile(os.path.join(d, file_name), os.path.join(target_dir, file_name))
 
-    src_dir_images_0 = os.path.join(APP_DIR, 'images', 'common')
-    to_dir_images_0 = os.path.join(SRC_RES_DIR, 'drawable')
-    if os.path.exists(src_dir_images_0):
-        app_utils.copytree(src_dir_images_0, to_dir_images_0, ignore=lambda p, f: ['localized'])
-        localized_path = os.path.join(src_dir_images_0, 'localized')
-        if os.path.exists(localized_path):
-            for dir_name in os.listdir(localized_path):
-                d = os.path.join(localized_path, dir_name)
-                for file_name in os.listdir(d):
-                    if dir_name == 'en':
-                        shutil.copyfile(os.path.join(d, file_name), os.path.join(to_dir_images_0, file_name))
-                    else:
-                        target_dir = os.path.realpath(os.path.join(SRC_RES_DIR, 'drawable-' + dir_name))
-                        if not os.path.exists(target_dir):
-                            os.mkdir(target_dir)
-                        shutil.copyfile(os.path.join(d, file_name), os.path.join(target_dir, file_name))
+        src_dir_images_1 = os.path.join(APP_DIR, 'images', 'android')
+        to_dir_images_1 = os.path.join(SRC_RES_DIR, 'drawable')
+        if os.path.exists(src_dir_images_1):
+            app_utils.copytree(src_dir_images_1, to_dir_images_1)
 
-    src_dir_images_1 = os.path.join(APP_DIR, 'images', 'android')
-    to_dir_images_1 = os.path.join(SRC_RES_DIR, 'drawable')
-    if os.path.exists(src_dir_images_1):
-        app_utils.copytree(src_dir_images_1, to_dir_images_1)
+        itunes_artwork = os.path.join(APP_DIR, "images", "iTunesArtwork.png")
+        android_icon = os.path.join(APP_DIR, "images", "android_icon.png")
+        for drawable_folder, size in LAUNCHER_ICON_SIZES.iteritems():
+            app_utils.resize_image(android_icon,
+                                   os.path.join(SRC_RES_DIR, drawable_folder, 'ic_launcher.png'),
+                                   size, size)
+        for drawable_folder, size in ICON_SIZES.iteritems():
+            app_utils.resize_image(itunes_artwork,
+                                   os.path.join(SRC_RES_DIR, drawable_folder, 'ic_dashboard.png'),
+                                   size, size)
 
-    itunes_artwork = os.path.join(APP_DIR, "images", "iTunesArtwork.png")
-    android_icon = os.path.join(APP_DIR, "images", "android_icon.png")
-    for drawable_folder, size in LAUNCHER_ICON_SIZES.iteritems():
-        app_utils.resize_image(android_icon,
-                               os.path.join(SRC_RES_DIR, drawable_folder, 'ic_launcher.png'),
-                               size, size)
-    for drawable_folder, size in ICON_SIZES.iteritems():
-        app_utils.resize_image(itunes_artwork,
-                               os.path.join(SRC_RES_DIR, drawable_folder, 'ic_dashboard.png'),
-                               size, size)
+        ##### NOTIFICATION ICONS ################################
+        tmp_file = tempfile.NamedTemporaryFile(delete=False)
+        tmp_file_name = tmp_file.name
+        tmp_file.close()
 
-    ##### NOTIFICATION ICONS ################################
-    tmp_file = tempfile.NamedTemporaryFile(delete=False)
-    tmp_file_name = tmp_file.name
-    tmp_file.close()
+        create_notification_icon(android_icon, tmp_file_name)
+        for screen_type, icon_size in NOTIFICATION_ICON_SIZES.iteritems():
+            im = Image.open(tmp_file_name)
+            im.thumbnail((icon_size, icon_size), Image.ANTIALIAS)
+            im.save(os.path.join(SRC_RES_DIR, screen_type, 'notification_icon.png'), "PNG")
 
-    create_notification_icon(android_icon, tmp_file_name)
-    for screen_type, icon_size in NOTIFICATION_ICON_SIZES.iteritems():
-        im = Image.open(tmp_file_name)
-        im.thumbnail((icon_size, icon_size), Image.ANTIALIAS)
-        im.save(os.path.join(SRC_RES_DIR, screen_type, 'notification_icon.png'), "PNG")
-
-    os.remove(tmp_file_name)
+        os.remove(tmp_file_name)
 
     with open(os.path.join(APP_DIR, "build.yaml"), 'r') as f:
         doc = yaml.load(f)
@@ -1030,5 +1052,5 @@ if __name__ == "__main__":
         logging.info('app_id was rogerthat, only limited prepare is needed')
     generate_custom_cloud_constants(doc, debug)
 
-    cordova_plugins =  get('BUILD_CONSTANTS.CORDOVA.plugins', [])
-    cordova.install_cordova_plugins(APP_ID, cordova_plugins)
+    cordova_plugins = get('BUILD_CONSTANTS.CORDOVA.plugins', [])
+    cordova.install_cordova_plugins(APP_ID, cordova_plugins, get_cordova_apps(), doc['COLORS'])

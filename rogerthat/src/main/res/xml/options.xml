@@ -22,21 +22,22 @@
 
     <PreferenceCategory
         android:title="@string/sounds">
-
         <Preference
             android:key="alarm_sound"
             android:title="@string/alarm_sound" />
-
     </PreferenceCategory>
 
     <PreferenceCategory
         android:title="@string/settings_category_info">
         <Preference
             android:key="my_profile"
-            android:title="@string/profile"></Preference>
+            android:title="@string/profile" />
+        <Preference
+            android:key="security"
+            android:title="@string/security" />
         <Preference
             android:key="about"
-            android:title="@string/about"></Preference>
+            android:title="@string/about" />
     </PreferenceCategory>
 
 </PreferenceScreen> 

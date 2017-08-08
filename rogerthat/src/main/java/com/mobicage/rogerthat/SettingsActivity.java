@@ -61,11 +61,20 @@ public class SettingsActivity extends ServiceBoundPreferenceActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.options);
+
+        final PreferenceGroup preferenceGroup = (PreferenceGroup) findPreference(MainService.PREFERENCES_KEY);
         if (!AppConstants.FRIENDS_ENABLED) {
-            // Hide Invisable mode
+            // Hide "Invisible mode"
             Preference prefInvisibleMode = findPreference(MainService.PREFERENCE_TRACKING);
-            ((PreferenceGroup) findPreference(MainService.PREFERENCES_KEY)).removePreference(prefInvisibleMode);
+            preferenceGroup.removePreference(prefInvisibleMode);
         }
+
+        if (!AppConstants.Security.ENABLED) {
+            // Hide "Security settings"
+            Preference securityPref = findPreference(MainService.PREFERENCE_SECURITY);
+            preferenceGroup.removePreference(securityPref);
+        }
+
         setContentView(R.layout.settings);
 
         final SharedPreferences options = PreferenceManager.getDefaultSharedPreferences(SettingsActivity.this);
@@ -93,6 +102,19 @@ public class SettingsActivity extends ServiceBoundPreferenceActivity {
             }
         });
 
+        if (AppConstants.Security.ENABLED) {
+            final Preference securityPref = findPreference(MainService.PREFERENCE_SECURITY);
+            securityPref.setSummary(getString(R.string.view_security_settings));
+            securityPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Intent intent = new Intent(SettingsActivity.this, SecuritySettingsActivity.class);
+                    startActivity(intent);
+                    return true;
+                }
+            });
+        }
+
         Toolbar bar = (Toolbar) findViewById(R.id.toolbar);
         bar.setNavigationOnClickListener(new SafeViewOnClickListener() {
             @Override
@@ -100,7 +122,6 @@ public class SettingsActivity extends ServiceBoundPreferenceActivity {
                 onBackPressed();
             }
         });
-
 
         IntentFilter filter = new IntentFilter(MainService.PREFERENCES_UPDATE_INTENT);
         registerReceiver(mBroadcastReceiver, filter);

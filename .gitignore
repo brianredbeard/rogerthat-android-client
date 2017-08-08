@@ -3,6 +3,7 @@
 *.bak
 *.swp
 /rogerthat/rogerthat.iml
+/rogerthat/src/main/assets/cordova*
 *.tmp
 *.pyc
 *.class

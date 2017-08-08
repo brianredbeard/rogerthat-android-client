@@ -576,11 +576,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         }
         Bundle extras = new Bundle();
         extras.putBoolean("show_drawer_icon", true);
-        if (ni.labelText == null) {
-            extras.putString("title", getString(ni.labelTextId));
-        } else {
-            extras.putString("title", ni.labelText);
-        }
+        extras.putString("title", ni.getLabel(this));
         ActivityUtils.goToActivity(ServiceBoundActivity.this, ni, true, extras);
     }
 

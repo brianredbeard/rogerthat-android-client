@@ -501,6 +501,29 @@ ORDER BY ms.acked_timestamp DESC
     <string name="sql_qr_select">SELECT content, name FROM my_qr_codes ORDER BY name COLLATE NOCASE</string>
     <string name="sql_qr_delete">DELETE FROM my_qr_codes WHERE content=? AND name=?</string>
 
+    <!-- embedded app translations -->
+    <string name="sql_embedded_app_translations_insert">INSERT OR REPLACE INTO embedded_app_translations (id, content) VALUES (?, ?)</string>
+    <string name="sql_embedded_app_translations_select">SELECT content FROM embedded_app_translations WHERE id=?</string>
+
+    <!-- payments -->
+    <string name="sql_payment_provider_insert">INSERT OR REPLACE INTO payment_provider (id, name, logo_url, version, description, oauth_authorize_url, black_white_logo, background_color, text_color, button_color, currencies, asset_types) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)</string>
+    <string name="sql_payment_provider_select">SELECT id, name, logo_url, version, description, oauth_authorize_url, black_white_logo, background_color, text_color, button_color, currencies, asset_types FROM payment_provider ORDER BY name</string>
+    <string name="sql_payment_provider_select_by_id">SELECT id, name, logo_url, version, description, oauth_authorize_url, black_white_logo, background_color, text_color, button_color, currencies, asset_types FROM payment_provider WHERE id = ? ORDER BY name</string>
+    <string name="sql_payment_provider_delete">DELETE FROM payment_provider WHERE id=?</string>
+    <string name="sql_payment_provider_clear">DELETE FROM payment_provider</string>
+    <string name="sql_payment_asset_insert">INSERT OR REPLACE INTO payment_asset (provider_id, id, type, name, currency, balance, verified, enabled, has_balance, has_transactions, required_action) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)</string>
+    <string name="sql_payment_asset_select">SELECT provider_id, id, type, name, currency, balance, verified, enabled, has_balance, has_transactions, required_action FROM payment_asset ORDER BY name</string>
+    <string name="sql_payment_asset_select_by_provider_id">SELECT provider_id, id, type, name, currency, balance, verified, enabled, has_balance, has_transactions, required_action FROM payment_asset WHERE provider_id = ? ORDER BY name</string>
+    <string name="sql_payment_asset_select_by_provider_and_asset_id">SELECT provider_id, id, type, name, currency, balance, verified, enabled, has_balance, has_transactions, required_action FROM payment_asset WHERE provider_id = ? AND id = ? ORDER BY name</string>
+    <string name="sql_payment_asset_delete">DELETE FROM payment_asset WHERE provider_id=?</string>
+    <string name="sql_payment_asset_clear">DELETE FROM payment_asset</string>
+
+    <!-- security -->
+    <string name="sql_security_insert">INSERT INTO security_key (type, algorithm, name, indexx, data) VALUES (?, ?, ?, ?, ?)</string>
+    <string name="sql_security_delete_group">DELETE FROM security_key WHERE algorithm=? AND name=?</string>
+    <string name="sql_security_select_by_key">SELECT data FROM security_key WHERE type = ? AND algorithm = ? AND name = ? AND indexx = ?</string>
+    <string name="sql_security_list_public_keys">SELECT name, algorithm FROM security_key WHERE type = \"public\" ORDER BY name, algorithm COLLATE NOCASE</string>
+
     <!-- iOS-only queries -->
     <string name="sql_friend_count_by_type">SELECT COUNT(*) FROM friend WHERE (existence = 0 OR existence = 4) AND \"type\" = ?</string>
     <string name="sql_friend_update_email_hash">UPDATE friend SET email_hash = ? WHERE email = ?</string>

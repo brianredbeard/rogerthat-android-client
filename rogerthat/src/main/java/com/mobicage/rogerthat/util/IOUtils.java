@@ -19,6 +19,7 @@
 package com.mobicage.rogerthat.util;
 
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -131,6 +132,34 @@ public class IOUtils {
         int bytesRead;
         while ((bytesRead = in.read(buffer)) != -1) {
             out.write(buffer, 0, bytesRead);
+        }
+    }
+
+    public static void copyAssetFolder(AssetManager assetManager, String fromAssetPath, String toPath) throws IOException {
+        String[] files = assetManager.list(fromAssetPath);
+        if (files.length > 0) {
+            new File(toPath).mkdirs();
+            for (String file : files) {
+                copyAssetFolder(assetManager, fromAssetPath + "/" + file, toPath + "/" + file);
+            }
+        } else {
+            copyAsset(assetManager, fromAssetPath, toPath);
+        }
+    }
+
+    private static void copyAsset(AssetManager assetManager, String fromAssetPath, String toPath) throws IOException {
+        InputStream in = assetManager.open(fromAssetPath);
+        try {
+            new File(toPath).createNewFile();
+            OutputStream out = new FileOutputStream(toPath);
+            try {
+                copy(in, out, 1024);
+                out.flush();
+            } finally {
+                out.close();
+            }
+        } finally {
+            in.close();
         }
     }
 

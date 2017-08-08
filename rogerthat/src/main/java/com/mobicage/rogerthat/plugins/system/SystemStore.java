@@ -26,6 +26,7 @@ import java.util.Map;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteDoneException;
 import android.database.sqlite.SQLiteStatement;
 
 import com.mobicage.rogerth.at.R;
@@ -41,6 +42,9 @@ public class SystemStore implements Closeable {
     private final SQLiteStatement mQRInsert;
     private final SQLiteStatement mQRDelete;
 
+    private final SQLiteStatement mEmbeddedAppTranslationsInsert;
+    private final SQLiteStatement mEmbeddedAppTranslationsSelect;
+
     private final MainService mMainService;
     private final SQLiteDatabase mDb;
 
@@ -54,6 +58,9 @@ public class SystemStore implements Closeable {
 
         mQRInsert = mDb.compileStatement(mMainService.getString(R.string.sql_qr_insert));
         mQRDelete = mDb.compileStatement(mMainService.getString(R.string.sql_qr_delete));
+
+        mEmbeddedAppTranslationsInsert = mDb.compileStatement(mMainService.getString(R.string.sql_embedded_app_translations_insert));
+        mEmbeddedAppTranslationsSelect = mDb.compileStatement(mMainService.getString(R.string.sql_embedded_app_translations_select));
     }
 
     @Override
@@ -64,6 +71,9 @@ public class SystemStore implements Closeable {
 
         mQRInsert.close();
         mQRDelete.close();
+
+        mEmbeddedAppTranslationsInsert.close();
+        mEmbeddedAppTranslationsSelect.close();
     }
 
     public Map<String, JSEmbedding> getJSEmbeddedPackets() {
@@ -129,5 +139,22 @@ public class SystemStore implements Closeable {
             c.close();
         }
         return qrCodes;
+    }
+
+    public void insertEmbeddedAppTranslations(String id, String content) {
+        T.dontCare();
+        mEmbeddedAppTranslationsInsert.bindString(1, id);
+        mEmbeddedAppTranslationsInsert.bindString(2, content);
+        mEmbeddedAppTranslationsInsert.execute();
+    }
+
+    public String getEmbeddedAppTranslations(String id) {
+        mEmbeddedAppTranslationsSelect.bindString(1, id);
+        try {
+            return mEmbeddedAppTranslationsSelect.simpleQueryForString();
+        } catch (SQLiteDoneException e) {
+            return null;
+        }
+
     }
 }

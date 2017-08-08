@@ -138,7 +138,7 @@ public class TimeUtils {
             return new TimeStatus(false, wakeUpTimeMillis + 1001);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            L.bug(e);
             return null;
         }
 

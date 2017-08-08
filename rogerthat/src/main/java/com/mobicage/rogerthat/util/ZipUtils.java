@@ -18,6 +18,8 @@
 
 package com.mobicage.rogerthat.util;
 
+import com.mobicage.rogerthat.util.logging.L;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -37,7 +39,7 @@ public class ZipUtils {
         try {
             returnValue = new String(bytesDecompressed, 0, bytesDecompressed.length, "UTF-8");
         } catch (UnsupportedEncodingException uee) {
-            uee.printStackTrace();
+            L.bug(uee);
         }
 
         return returnValue;

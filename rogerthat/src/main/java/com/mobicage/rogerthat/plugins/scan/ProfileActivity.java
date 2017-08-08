@@ -572,7 +572,7 @@ public class ProfileActivity extends ServiceBoundActivity {
         switch (item.getItemId()) {
             case R.id.edit_profile:
                 updateProfileLayout(true, false);
-                invalidateOptionsMenu();
+                supportInvalidateOptionsMenu();
                 return true;
             case R.id.save_profile:
                 if (mEditing && AppConstants.PROFILE_SHOW_GENDER_AND_BIRTHDATE) {
@@ -592,11 +592,11 @@ public class ProfileActivity extends ServiceBoundActivity {
                     }
                 }
                 updateProfileLayout(false, true);
-                invalidateOptionsMenu();
+                supportInvalidateOptionsMenu();
                 return true;
             case R.id.cancel_edit_profile:
                 updateProfileLayout(false, false);
-                invalidateOptionsMenu();
+                supportInvalidateOptionsMenu();
                 return true;
         }
         return super.onOptionsItemSelected(item);

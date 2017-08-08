@@ -273,7 +273,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                         if (mNewsItem.id == newsId) {
                             updateView();
                         }
-                        mActivity.invalidateOptionsMenu();
+                        mActivity.supportInvalidateOptionsMenu();
                     }
                 } else if (NewsPlugin.DISABLE_NEWS_ITEM_INTENT.equals(action)) {
                     long newsId = intent.getLongExtra("id", -1);
