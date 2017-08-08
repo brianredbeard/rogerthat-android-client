@@ -1263,7 +1263,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
 
         @Override
         public void qrCodeScanned(Map<String, Object> result) {
-            executeJS(false, "if (typeof rogerthat !== 'undefined') rogerthat.rogerthat._qrCodeScanned(%s)", JSONValue.toJSONString(result));
+            executeJS(false, "if (typeof rogerthat !== 'undefined') rogerthat._qrCodeScanned(%s)", JSONValue.toJSONString(result));
         }
 
         @Override
