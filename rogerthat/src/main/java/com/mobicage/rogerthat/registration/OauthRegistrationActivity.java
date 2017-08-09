@@ -30,9 +30,9 @@ import com.mobicage.rogerthat.Installation;
 import com.mobicage.rogerthat.OauthActivity;
 import com.mobicage.rogerthat.util.GoogleServicesUtils;
 import com.mobicage.rogerthat.util.GoogleServicesUtils.GCMRegistrationIdFoundCallback;
-import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
@@ -59,7 +59,7 @@ import java.util.Map;
 public class OauthRegistrationActivity extends AbstractRegistrationActivity {
 
     private static final int HTTP_RETRY_COUNT = 3;
-    private static final int HTTP_TIMEOUT = 10000;
+    private static final int HTTP_TIMEOUT = 15000;
 
 
     private OauthRegistrationWizard mWiz;
@@ -240,6 +240,7 @@ public class OauthRegistrationActivity extends AbstractRegistrationActivity {
                     httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
                     // Execute HTTP Post Request
+                    L.i("Sending request to " + CloudConstants.REGISTRATION_OAUTH_REGISTERED_URL);
                     HttpResponse response = mHttpClient.execute(httppost);
 
                     int statusCode = response.getStatusLine().getStatusCode();
