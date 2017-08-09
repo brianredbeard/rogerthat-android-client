@@ -3,3 +3,5 @@ Pillow==2.6.1
 PyYAML==3.11
 colour==0.1.2
 wsgiref==0.1.2
+lxml==3.6.4
+
