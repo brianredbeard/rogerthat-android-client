@@ -37,7 +37,6 @@ import org.jivesoftware.smack.util.Base64;
 import org.json.simple.JSONValue;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -69,10 +68,6 @@ public class Ed25519 {
     }
 
     public static byte[] getPayload(byte[] data) throws Exception {
-        return SecurityUtils.blake2b256Digest(data);
-    }
-
-    public static byte[] getPayload(byte[]... data) throws Exception {
         return SecurityUtils.blake2b256Digest(data);
     }
 

@@ -156,17 +156,21 @@ public class SignWidget extends Widget {
         }
     }
 
-    private byte[] getPayloadHash() throws Exception {
-        final String payload = (String) mWidgetMap.get("payload");
-        if (payload == null) {
-            return null;
-        }
-        return SecurityUtils.getPayload(mKeyAlgorithm, Base64.decode(payload));
+    private byte[] getPayloadHash() {
+        final String payloadStr = (String) mWidgetMap.get("payload");
+        return payloadStr == null ? null : SecurityUtils.sha256Digest(Base64.decode(payloadStr));
     }
 
     private void sign() {
         if (!SecurityUtils.hasKey(mActivity.getMainService(), "public", mKeyAlgorithm, mKeyName, mKeyIndex)) {
             UIUtils.showLongToast(mActivity, R.string.key_not_found);
+            return;
+        }
+
+        try {
+            MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            UIUtils.showLongToast(mActivity, R.string.feature_not_supported);
             return;
         }
 
@@ -189,14 +193,7 @@ public class SignWidget extends Widget {
          * 1. sign(the hash of the message + the hash of the payload + the hash of all the attachments)
          */
         final String[] signatures = new String[2];
-        final byte[] payloadHash;
-        try {
-            payloadHash = getPayloadHash();
-        } catch (Exception e) {
-            L.d("Failed to get payload hash", e);
-            UIUtils.showErrorPleaseRetryDialog(mActivity);
-            return;
-        }
+        final byte[] payloadHash = getPayloadHash();
         final MainService.SecurityCallback<byte[]> signMessageCallback = new MainService.SecurityCallback<byte[]>() {
             @Override
             public void onSuccess(byte[] result) {
@@ -221,30 +218,17 @@ public class SignWidget extends Widget {
                 signatures[0] = (payloadHash == null || result == null) ? null : Base64.encodeBytes(result);
 
                 final List<byte[]> hashes = new ArrayList<>(mMessage.attachments.length + 2);
-                try {
-                    hashes.add(SecurityUtils.getPayload(mKeyAlgorithm, mMessage.message));
-                } catch (Exception e) {
-                    L.d("Failed to get message hash", e);
-                    UIUtils.showErrorPleaseRetryDialog(mActivity);
-                    return;
-                }
+                hashes.add(SecurityUtils.sha256Digest(mMessage.message));
                 if (payloadHash != null) {
                     hashes.add(payloadHash);
                 }
 
                 if (mMessage.attachments.length != 0) {
                     for (AttachmentTO attachment : mMessage.attachments) {
-                        final File attachmentFile;
                         try {
-                            attachmentFile = messagingPlugin.attachmentFile(mMessage, attachment);
+                            final File attachmentFile = messagingPlugin.attachmentFile(mMessage, attachment);
+                            hashes.add(SecurityUtils.sha256Digest(attachmentFile));
                         } catch (IOException e) {
-                            UIUtils.showErrorPleaseRetryDialog(mActivity);
-                            return;
-                        }
-                        try {
-                            hashes.add(SecurityUtils.getPayload(mKeyAlgorithm, attachmentFile));
-                        } catch (Exception e) {
-                            L.d("Failed to get attachment hash", e);
                             UIUtils.showErrorPleaseRetryDialog(mActivity);
                             return;
                         }
@@ -256,14 +240,8 @@ public class SignWidget extends Widget {
                         L.d("Partial hash " + i + ": " + TextUtils.toHex(hashes.get(i)));
                     }
                 }
-                final byte[] hash;
-                try {
-                    hash = SecurityUtils.getPayload(mKeyAlgorithm, hashes.toArray(new byte[hashes.size()][]));
-                } catch (Exception e) {
-                    L.d("Failed to get attachments hash", e);
-                    UIUtils.showErrorPleaseRetryDialog(mActivity);
-                    return;
-                }
+
+                final byte[] hash = SecurityUtils.sha256Digest(hashes.toArray(new byte[hashes.size()][]));
                 L.i("Combined hash: " + TextUtils.toHex(hash));
                 mActivity.getMainService().sign(mKeyAlgorithm, mKeyName, mKeyIndex, mCaption, hash, payloadHash == null, signMessageCallback);
             }
