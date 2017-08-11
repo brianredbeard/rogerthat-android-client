@@ -568,4 +568,10 @@
     <string name="payment_providers_add">Add payment provider</string>
     <string name="no_payment_providers">You haven\'t any payment providers yet.</string>
     <string name="your_location_displayed_friend_have_contacted_for_their_location">Your location is displayed. Your friends (which share their location with you) have been contacted to send you their location.</string>
+    <string name="install_import_secure_key">Do you want to import a %1$s key or generate a new one? If this is the first time you install the %1$s app, choose \'Generate new key\'.</string>
+    <string name="generate_new_key">Generate new key</string>
+    <string name="copy_to_clipboard">Copy to clipboard</string>
+    <string name="copied_to_clipboard">Copied to clipboard</string>
+    <string name="invalid_word">Unknown word: %1$s. Please validate that you\'ve entered all words correctly.</string>
+    <string name="import_existing_key">Import existing key</string>
 </resources>

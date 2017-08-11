@@ -19,8 +19,10 @@
 package com.mobicage.rogerthat;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.AppCompatButton;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -36,7 +38,12 @@ import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.LookAndFeelConstants;
 
-public class ImportSecurityKeyActivity extends ServiceBoundActivity implements AdapterView.OnItemSelectedListener {
+import java.util.Objects;
+
+import static com.mobicage.rogerthat.SecurityKeyActivity.KEY_ALGORITHM;
+import static com.mobicage.rogerthat.SecurityKeyActivity.KEY_NAME;
+
+public class ImportSecurityKeyActivity extends ServiceBoundActivity implements AdapterView.OnItemSelectedListener, View.OnCreateContextMenuListener {
 
     private String mSelectedAlgorithm;
 
@@ -53,12 +60,26 @@ public class ImportSecurityKeyActivity extends ServiceBoundActivity implements A
         algorithmSpinner.setAdapter(getArrayAdapter());
         algorithmSpinner.setOnItemSelectedListener(this);
 
-        findViewById(R.id.import_key).setOnClickListener(new SafeViewOnClickListener() {
+        final AppCompatButton importKeyButton = (AppCompatButton) findViewById(R.id.import_key);
+        importKeyButton.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
                 importKey();
             }
         });
+        Intent intent = getIntent();
+
+        String algorithm = intent.getStringExtra(KEY_ALGORITHM);
+        if (algorithm != null) {
+            mSelectedAlgorithm = algorithm;
+            findViewById(R.id.algorithm_container).setVisibility(View.GONE);
+        }
+        String keyName = intent.getStringExtra(KEY_NAME);
+        if (keyName != null) {
+            EditText keyNameView = (EditText) findViewById(R.id.key_name);
+            keyNameView.setText(keyName);
+            keyNameView.setEnabled(false);
+        }
     }
 
     @Override
@@ -83,14 +104,20 @@ public class ImportSecurityKeyActivity extends ServiceBoundActivity implements A
             @Override
             public void onSuccess(MainService.CreateKeyPairResult result) {
                 UIUtils.showLongToast(mService, R.string.import_key_succeeded);
+                setResult(RESULT_OK);
                 finish();
             }
 
             @Override
             public void onError(String code, String errorMessage) {
                 error(code, errorMessage);
-                UIUtils.showDialog(mService, getString(R.string.activity_error), getString(R.string
-                        .import_key_failed), new SafeDialogClick() {
+                String message;
+                if (Objects.equals(code, "unknown_error_occurred")) {
+                    message = getString(R.string.import_key_failed);
+                } else {
+                    message = errorMessage;
+                }
+                UIUtils.showDialog(ImportSecurityKeyActivity.this, getString(R.string.activity_error), message, new SafeDialogClick() {
                     @Override
                     public void safeOnClick(DialogInterface dialog, int id) {
                         dialog.dismiss();

@@ -17,9 +17,13 @@
  */
 package com.mobicage.rogerthat;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.ContextMenu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -35,22 +39,24 @@ import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.LookAndFeelConstants;
 
-public class SecurityKeyActivity extends ServiceBoundActivity {
+public class SecurityKeyActivity extends ServiceBoundActivity implements View.OnCreateContextMenuListener {
 
     public static final String KEY_ALGORITHM = "KEY_ALGORITHM";
     public static final String KEY_NAME = "KEY_NAME";
     public static final String SHOW_FINISHED_BUTTON = "SHOW_FINISHED_BUTTON ";
+    public static final String GO_TO_MAIN_ACTIVITY = "GO_TO_MAIN_ACTIVITY";
+    public static final int REQUEST_IMPORT_KEY = 1;
 
     private static final int[] RESOURCES = new int[]{R.id.security_settings_no_pin, R.id
             .security_settings_pin_result, R.id.spinner};
 
     private String mKeyAlgorithm;
     private String mKeyName;
+    private TextView mSeedView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setTitle(R.string.security);
 
         final Intent intent = getIntent();
@@ -59,6 +65,8 @@ public class SecurityKeyActivity extends ServiceBoundActivity {
         final boolean showFinishedBtn = intent.getBooleanExtra(SHOW_FINISHED_BUTTON, false);
 
         setContentView(R.layout.security_key);
+        mSeedView = (TextView) findViewById(R.id.seed);
+        registerForContextMenu(mSeedView);
 
         show(R.id.spinner);
 
@@ -101,8 +109,8 @@ public class SecurityKeyActivity extends ServiceBoundActivity {
             L.d("Private key already exists. Showing seed.");
             getSeed();
         } else {
-            L.d("Key doesn't exist yet. Creating key.");
-            createKey();
+            L.d("Key doesn't exist yet. Showing create or import dialog.");
+            showCreateKeyDialog();
         }
     }
 
@@ -120,7 +128,7 @@ public class SecurityKeyActivity extends ServiceBoundActivity {
         mService.setupPin(new MainService.SecurityCallback<String>() {
             @Override
             public void onSuccess(String result) {
-                createKey();
+                showCreateKeyDialog();
             }
 
             @Override
@@ -144,19 +152,39 @@ public class SecurityKeyActivity extends ServiceBoundActivity {
         });
     }
 
-    private void createKey() {
-        mService.createKeyPair(mKeyAlgorithm, mKeyName, null, null,
-                new MainService.SecurityCallback<MainService.CreateKeyPairResult>() {
-                    @Override
-                    public void onSuccess(MainService.CreateKeyPairResult r) {
-                        showSeed(r.seed);
-                    }
+    private void showCreateKeyDialog() {
+        String title = getString(R.string.import_key);
+        String message = getString(R.string.install_import_secure_key, getString(R.string.app_name));
+        String positiveCaption = getString(R.string.generate_new_key);
+        String negativeCaption = getString(R.string.import_existing_key);
+        SafeDialogClick onPositiveButtonClick = new SafeDialogClick() {
+            @Override
+            public void safeOnClick(DialogInterface dialog, int id) {
+                mService.createKeyPair(mKeyAlgorithm, mKeyName, null, null,
+                        new MainService.SecurityCallback<MainService.CreateKeyPairResult>() {
+                            @Override
+                            public void onSuccess(MainService.CreateKeyPairResult r) {
+                                showSeed(r.seed);
+                            }
 
-                    @Override
-                    public void onError(String code, String errorMessage) {
-                        error(code, errorMessage);
-                    }
-                });
+                            @Override
+                            public void onError(String code, String errorMessage) {
+                                error(code, errorMessage);
+                            }
+                        });
+            }
+        };
+        SafeDialogClick onNegativeButtonClick = new SafeDialogClick() {
+            @Override
+            public void safeOnClick(DialogInterface dialog, int id) {
+                Intent intent = new Intent(SecurityKeyActivity.this, ImportSecurityKeyActivity.class);
+                intent.putExtra(KEY_ALGORITHM, mKeyAlgorithm);
+                intent.putExtra(KEY_NAME, mKeyName);
+                startActivityForResult(intent, REQUEST_IMPORT_KEY);
+            }
+        };
+        UIUtils.showDialog(this, title, message, positiveCaption, onPositiveButtonClick, negativeCaption,
+                onNegativeButtonClick);
     }
 
     private void showSeed(final String seed) {
@@ -203,5 +231,32 @@ public class SecurityKeyActivity extends ServiceBoundActivity {
     @Override
     public void finish() {
         super.finish();
+    }
+
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        menu.add(0, v.getId(), 0, getString(R.string.copy_to_clipboard));
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        if (item.getTitle().equals(getString(R.string.copy_to_clipboard))) {
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+            ClipData clipData = ClipData.newPlainText(getString(R.string.seed_29_words), mSeedView.getText());
+            clipboard.setPrimaryClip(clipData);
+            UIUtils.showLongToast(this, R.string.copied_to_clipboard);
+        }
+        return true;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_IMPORT_KEY) {
+            setResult(RESULT_OK);
+            finish();
+        }
     }
 }

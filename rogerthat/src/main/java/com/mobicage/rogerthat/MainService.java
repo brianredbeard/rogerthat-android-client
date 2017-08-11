@@ -2075,9 +2075,17 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
             r.seed = seed;
             si.callback.onSuccess(r);
         } catch (Exception e) {
-            L.bug("Failed to executeCreateKeyPair", e);
-            String errorMessage = getString(R.string.unknown_error_occurred);
-            si.callback.onError("unknown_error_occurred", errorMessage);
+            String errorMessage;
+            String errorCode;
+            if (e.getMessage().contains("unknown word")) {
+                errorCode = "unknown_word";
+                errorMessage = getString(R.string.invalid_word, e.getMessage().split("unknown word: ")[1]);
+            } else {
+                L.bug("Failed to executeCreateKeyPair", e);
+                errorCode = "unknown_error_occurred";
+                errorMessage = getString(R.string.unknown_error_occurred);
+            }
+            si.callback.onError(errorCode, errorMessage);
         }
     }
 

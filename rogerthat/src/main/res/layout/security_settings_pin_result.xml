@@ -30,6 +30,7 @@
             android:textColor="@color/mc_default_text"
             android:textSize="18sp"
             android:textStyle="italic"
+            android:textIsSelectable="true"
             tools:text="jamming jamming arbitrary fatal dormant jolted nineteen befit adventure orbit syllabus italics listen heels algebra estate gasp towel mundane ajar estate habitat oxidant case gown joining vapidly both abyss"/>
 
         <TextView
