@@ -428,6 +428,15 @@ public class ResponseReceiverHandler {
                 resp.setResult(Parser.ComMobicageToMessagingFormsSubmitRangeSliderFormResponseTO(rpcr.result));
             ((IResponseHandler<com.mobicage.to.messaging.forms.SubmitRangeSliderFormResponseTO>) responseHandler).handle(resp);
         }
+        if ("com.mobicage.api.messaging.submitRatingForm".equals(function)) {
+            final Response<com.mobicage.to.messaging.forms.SubmitRatingFormResponseTO> resp = new Response<com.mobicage.to.messaging.forms.SubmitRatingFormResponseTO>();
+            resp.setError(rpcr.error);
+            resp.setSuccess(rpcr.success);
+            resp.setCallId(rpcr.callId);
+            if (rpcr.success)
+                resp.setResult(Parser.ComMobicageToMessagingFormsSubmitRatingFormResponseTO(rpcr.result));
+            ((IResponseHandler<com.mobicage.to.messaging.forms.SubmitRatingFormResponseTO>) responseHandler).handle(resp);
+        }
         if ("com.mobicage.api.messaging.submitSignForm".equals(function)) {
             final Response<com.mobicage.to.messaging.forms.SubmitSignFormResponseTO> resp = new Response<com.mobicage.to.messaging.forms.SubmitSignFormResponseTO>();
             resp.setError(rpcr.error);

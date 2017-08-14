@@ -70,6 +70,7 @@ public class PriorityMap {
         sPrioritySet.add("com.mobicage.api.messaging.submitMyDigiPassForm");
         sPrioritySet.add("com.mobicage.api.messaging.submitPhotoUploadForm");
         sPrioritySet.add("com.mobicage.api.messaging.submitRangeSliderForm");
+        sPrioritySet.add("com.mobicage.api.messaging.submitRatingForm");
         sPrioritySet.add("com.mobicage.api.messaging.submitSignForm");
         sPrioritySet.add("com.mobicage.api.messaging.submitSingleSelectForm");
         sPrioritySet.add("com.mobicage.api.messaging.submitSingleSliderForm");

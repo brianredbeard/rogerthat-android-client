@@ -49,9 +49,9 @@ public class SignTO implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("index")) {
             Object val = json.get("index");
-            this.caption = (String) val;
+            this.index = (String) val;
         } else {
-            this.caption = null;
+            this.index = null;
         }
         if (json.containsKey("key_name")) {
             Object val = json.get("key_name");

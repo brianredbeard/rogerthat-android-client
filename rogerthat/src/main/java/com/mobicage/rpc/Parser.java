@@ -76,6 +76,13 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
+    public static com.mobicage.models.properties.forms.RatingTopic ComMobicageModelsPropertiesFormsRatingTopic(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.models.properties.forms.RatingTopic((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
     public static com.mobicage.models.properties.forms.WidgetResult ComMobicageModelsPropertiesFormsWidgetResult(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;
@@ -1448,6 +1455,20 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.NewRatingFormRequestTO ComMobicageToMessagingFormsNewRatingFormRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.NewRatingFormRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.NewRatingFormResponseTO ComMobicageToMessagingFormsNewRatingFormResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.NewRatingFormResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
     public static com.mobicage.to.messaging.forms.NewSignFormRequestTO ComMobicageToMessagingFormsNewSignFormRequestTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;
@@ -1557,6 +1578,34 @@ public class Parser {
         if (value == null)
             return null;
         return new com.mobicage.to.messaging.forms.RangeSliderTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.RatingFormMessageTO ComMobicageToMessagingFormsRatingFormMessageTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.RatingFormMessageTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.RatingFormTO ComMobicageToMessagingFormsRatingFormTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.RatingFormTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.RatingTO ComMobicageToMessagingFormsRatingTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.RatingTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.RatingWidgetResultTO ComMobicageToMessagingFormsRatingWidgetResultTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.RatingWidgetResultTO((Map<String, Object>) value);
     }
 
     @SuppressWarnings("unchecked")
@@ -1746,6 +1795,20 @@ public class Parser {
         if (value == null)
             return null;
         return new com.mobicage.to.messaging.forms.SubmitRangeSliderFormResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.SubmitRatingFormRequestTO ComMobicageToMessagingFormsSubmitRatingFormRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.SubmitRatingFormRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.SubmitRatingFormResponseTO ComMobicageToMessagingFormsSubmitRatingFormResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.SubmitRatingFormResponseTO((Map<String, Object>) value);
     }
 
     @SuppressWarnings("unchecked")
@@ -1998,6 +2061,20 @@ public class Parser {
         if (value == null)
             return null;
         return new com.mobicage.to.messaging.forms.UpdateRangeSliderFormResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.UpdateRatingFormRequestTO ComMobicageToMessagingFormsUpdateRatingFormRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.UpdateRatingFormRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.UpdateRatingFormResponseTO ComMobicageToMessagingFormsUpdateRatingFormResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.UpdateRatingFormResponseTO((Map<String, Object>) value);
     }
 
     @SuppressWarnings("unchecked")
