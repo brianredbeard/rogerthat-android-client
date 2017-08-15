@@ -95,6 +95,7 @@ import com.mobicage.to.messaging.forms.FloatWidgetResultTO;
 import com.mobicage.to.messaging.forms.LocationWidgetResultTO;
 import com.mobicage.to.messaging.forms.LongWidgetResultTO;
 import com.mobicage.to.messaging.forms.MyDigiPassWidgetResultTO;
+import com.mobicage.to.messaging.forms.RatingWidgetResultTO;
 import com.mobicage.to.messaging.forms.SubmitPhotoUploadFormRequestTO;
 import com.mobicage.to.messaging.forms.SubmitPhotoUploadFormResponseTO;
 import com.mobicage.to.messaging.forms.UnicodeListWidgetResultTO;
@@ -1534,6 +1535,22 @@ public class MessagingPlugin implements MobicagePlugin {
     public void updateAdvancedOrderForm(final String parentMessageKey, final String messageKey,
         final AdvancedOrderWidgetResultTO formResult, final String buttonId, final long receivedTimestamp,
         final long ackedTimestamp) {
+
+        IFormResultProcessor resultProcessor = new IFormResultProcessor() {
+            @Override
+            public void processResult(final Message message) {
+                if (formResult != null) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> widget = (Map<String, Object>) message.form.get("widget");
+                    widget.put("value", formResult.toJSONMap());
+                }
+            }
+        };
+        saveFormUpdate(parentMessageKey, messageKey, buttonId, receivedTimestamp, ackedTimestamp, resultProcessor);
+    }
+
+    public void updateRatingForm(final String parentMessageKey, final String messageKey, final RatingWidgetResultTO formResult, final String buttonId, final long receivedTimestamp,
+                                 final long ackedTimestamp) {
 
         IFormResultProcessor resultProcessor = new IFormResultProcessor() {
             @Override

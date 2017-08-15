@@ -52,7 +52,8 @@ public abstract class Widget extends LinearLayout {
     public static final String TYPE_GPS_LOCATION = "gps_location";
     public static final String TYPE_MYDIGIPASS = "mydigipass";
     public static final String TYPE_ADVANCED_ORDER = "advanced_order";
-    public static final String TYPE_SIGN= "sign";
+    public static final String TYPE_SIGN = "sign";
+    public static final String TYPE_RATING = "rating";
     // Do not forget to update the valueString function when adding a form type
 
     public final static Map<String, Integer> RESOURCES;
@@ -73,6 +74,7 @@ public abstract class Widget extends LinearLayout {
         RESOURCES.put(TYPE_MYDIGIPASS, R.layout.widget_mydigipass);
         RESOURCES.put(TYPE_ADVANCED_ORDER, R.layout.widget_advanced_order);
         RESOURCES.put(TYPE_SIGN, R.layout.widget_sign);
+        RESOURCES.put(TYPE_RATING, R.layout.widget_rating);
     }
 
     protected Message mMessage;
@@ -168,6 +170,9 @@ public abstract class Widget extends LinearLayout {
 
         if (TYPE_ADVANCED_ORDER.equals(formType))
             return AdvancedOrderWidget.valueString(context, widget);
+
+        if (TYPE_RATING.equals(formType))
+            return RatingWidget.valueString(context, widget);
 
         L.bug("Unexpected form type: " + formType);
         return null;

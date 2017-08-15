@@ -53,6 +53,8 @@ import com.mobicage.to.messaging.forms.NewPhotoUploadFormRequestTO;
 import com.mobicage.to.messaging.forms.NewPhotoUploadFormResponseTO;
 import com.mobicage.to.messaging.forms.NewRangeSliderFormRequestTO;
 import com.mobicage.to.messaging.forms.NewRangeSliderFormResponseTO;
+import com.mobicage.to.messaging.forms.NewRatingFormRequestTO;
+import com.mobicage.to.messaging.forms.NewRatingFormResponseTO;
 import com.mobicage.to.messaging.forms.NewSignFormRequestTO;
 import com.mobicage.to.messaging.forms.NewSignFormResponseTO;
 import com.mobicage.to.messaging.forms.NewSingleSelectFormRequestTO;
@@ -81,6 +83,8 @@ import com.mobicage.to.messaging.forms.UpdatePhotoUploadFormRequestTO;
 import com.mobicage.to.messaging.forms.UpdatePhotoUploadFormResponseTO;
 import com.mobicage.to.messaging.forms.UpdateRangeSliderFormRequestTO;
 import com.mobicage.to.messaging.forms.UpdateRangeSliderFormResponseTO;
+import com.mobicage.to.messaging.forms.UpdateRatingFormRequestTO;
+import com.mobicage.to.messaging.forms.UpdateRatingFormResponseTO;
 import com.mobicage.to.messaging.forms.UpdateSignFormRequestTO;
 import com.mobicage.to.messaging.forms.UpdateSignFormResponseTO;
 import com.mobicage.to.messaging.forms.UpdateSingleSelectFormRequestTO;
@@ -255,6 +259,15 @@ public class MessagingCallReceiver implements com.mobicage.capi.messaging.IClien
     public NewSignFormResponseTO newSignForm(NewSignFormRequestTO request) throws Exception {
         mPlugin.newMessage(Message.fromFormMessage(request.form_message.toJSONMap()), false, false);
         NewSignFormResponseTO response = new NewSignFormResponseTO();
+        response.received_timestamp = mMainService.currentTimeMillis() / 1000;
+        return response;
+    }
+
+    @Override
+    public NewRatingFormResponseTO newRatingForm(NewRatingFormRequestTO request) throws Exception {
+        T.BIZZ();
+        mPlugin.newMessage(Message.fromFormMessage(request.form_message.toJSONMap()), false, false);
+        NewRatingFormResponseTO response = new NewRatingFormResponseTO();
         response.received_timestamp = mMainService.currentTimeMillis() / 1000;
         return response;
     }
@@ -439,6 +452,17 @@ public class MessagingCallReceiver implements com.mobicage.capi.messaging.IClien
                     request.received_timestamp, request.acked_timestamp);
         }
         return new UpdateSignFormResponseTO();
+    }
+
+    @Override
+    public UpdateRatingFormResponseTO updateRatingForm(UpdateRatingFormRequestTO request) throws Exception {
+        if (!mPlugin.getBrandingMgr().queueIfNeeded("com.mobicage.capi.messaging.updateRatingForm", request,
+                request.message_key)) {
+
+            mPlugin.updateRatingForm(request.parent_message_key, request.message_key, request.result, request.button_id,
+                    request.received_timestamp, request.acked_timestamp);
+        }
+        return new UpdateRatingFormResponseTO();
     }
 
     @Override
