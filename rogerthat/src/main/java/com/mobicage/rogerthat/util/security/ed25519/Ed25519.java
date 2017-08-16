@@ -86,7 +86,7 @@ public class Ed25519 {
 
         Map<String, Object> keys = createKeyPairForAddress(seedBytes, index);
         EdDSAPublicKey publicKey = (EdDSAPublicKey) keys.get("public_key");
-        EdDSAPrivateKey pKey = (EdDSAPrivateKey) keys.get("private_key");
+        EdDSAPrivateKey privateKey = (EdDSAPrivateKey) keys.get("private_key");
 
         byte[] timelock = SecurityUtils.longToBytes(0);
 
@@ -115,10 +115,10 @@ public class Ed25519 {
         final String address = SecurityUtils.lowercaseHash(mtRootFullchecksum);
 
         String publicKeyString =  Base64.encodeBytes(publicKey.getEncoded(), Base64.DONT_BREAK_LINES);
-        byte[] decodedPrivateKey = pKey.getEncoded();
+        String publicKeyAbyte = Base64.encodeBytes(publicKey.getAbyte(), Base64.DONT_BREAK_LINES);
 
-        SecurityUtils.savePublicKey(mainService, ALGORITHM, name, index, publicKeyString);
-        SecurityUtils.saveSecureInfo(mainService, pin, ALGORITHM, name, index, publicKeyString, decodedPrivateKey, null, address);
+        SecurityUtils.savePublicKey(mainService, ALGORITHM, name, index, publicKeyAbyte);
+        SecurityUtils.saveSecureInfo(mainService, pin, ALGORITHM, name, index, publicKeyString, privateKey.getEncoded(), null, address);
         return address;
     }
 
