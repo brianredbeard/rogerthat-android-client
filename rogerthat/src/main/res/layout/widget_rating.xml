@@ -11,15 +11,6 @@
         android:orientation="vertical">
 
 
-        <ListView
-            android:id="@+id/topic_list_view"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:background="@drawable/gray_border"
-            android:divider="@color/mc_divider_gray"
-            android:dividerHeight="1dip" />
-
     </LinearLayout>
 
 </com.mobicage.rogerthat.plugins.messaging.widgets.RatingWidget>

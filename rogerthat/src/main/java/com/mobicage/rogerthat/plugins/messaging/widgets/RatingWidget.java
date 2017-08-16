@@ -20,18 +20,18 @@ package com.mobicage.rogerthat.plugins.messaging.widgets;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.HashMap;
 import java.util.Map;
 
 
 import android.content.Context;
-import android.media.Rating;
+import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
+import android.widget.LinearLayout;
+import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.mobicage.api.messaging.Rpc;
@@ -69,7 +69,7 @@ public class RatingWidget extends Widget {
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(final int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
                 convertView = LayoutInflater.from(getContext()).inflate(R.layout.widget_rating_topic, parent, false);
             }
@@ -77,8 +77,18 @@ public class RatingWidget extends Widget {
             RatingTopic currentTopic = getItem(position);
             TextView titleText = (TextView) convertView.findViewById(R.id.title_text);
             TextView questionText = (TextView) convertView.findViewById(R.id.question_text);
+            titleText.setTypeface(Typeface.DEFAULT_BOLD);
             titleText.setText(currentTopic.title);
             questionText.setText(currentTopic.question);
+            RatingBar ratingBar = (RatingBar) convertView.findViewById(R.id.rating_bar);
+            ratingBar.setRating(currentTopic.score);
+            ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+                @Override
+                public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
+                    getItem(position).score = rating;
+                }
+            });
+
             return convertView;
         }
     }
@@ -90,12 +100,13 @@ public class RatingWidget extends Widget {
         try {
             rating = new RatingTO(mWidgetMap);
             topicsAdapter = new TopicsAdapter(mActivity, rating.topics);
-            ListView topicsList = (ListView) findViewById(R.id.topic_list_view);
-            topicsList.setAdapter(topicsAdapter);
+            LinearLayout layout = (LinearLayout) findViewById(R.id.rating_container);
+            for(int i=0; i<topicsAdapter.getCount(); i++) {
+                layout.addView(topicsAdapter.getView(i, null, null));
+            }
         } catch (IncompleteMessageException e) {
             L.bug(e);
         }
-
     }
 
     @Override
@@ -103,17 +114,6 @@ public class RatingWidget extends Widget {
         try {
             // result is the same as RatingTO
             // just update scores
-            Map<String, Long> topicScores = new HashMap<String, Long>();
-            for (int i=0; i<topicsAdapter.getCount(); i++) {
-                RatingTopic topic = topicsAdapter.getItem(i);
-                topicScores.put(topic.name, topic.score);
-            }
-            L.d(rating.toJSONMap().toString());
-
-            for(RatingTopic topic : rating.topics) {
-                topic.score = topicScores.get(topic.name);
-            }
-
             mResult = new RatingWidgetResultTO(rating.toJSONMap());
             mWidgetMap.put("value", rating.toJSONMap());
             L.d(rating.toJSONMap().toString());
@@ -170,7 +170,7 @@ public class RatingWidget extends Widget {
             if (i != 0) {
                 parts.add("");
             }
-            parts.add(String.format("%s, %s, %s, %d", topic.name, topic.title, topic.question, topic.score));
+            parts.add(String.format("%s: %d", topic.title, topic.score));
         }
         return android.text.TextUtils.join("\n", parts);
     }
