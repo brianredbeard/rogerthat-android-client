@@ -27,7 +27,7 @@ public class RatingTopic implements com.mobicage.rpc.IJSONable {
 
     public String name;
     public String question;
-    public long score;
+    public float score;
     public String title;
 
     public RatingTopic() {
@@ -48,10 +48,12 @@ public class RatingTopic implements com.mobicage.rpc.IJSONable {
         }
         if (json.containsKey("score")) {
             Object val = json.get("score");
-            if (val instanceof Integer) {
-                this.score = ((Integer) val).longValue();
+            if (val instanceof Float) {
+                this.score = ((Float) val).floatValue();
+            } else if (val instanceof Double) {
+                this.score = new Float((Double) val).floatValue();
             } else {
-                this.score = ((Long) val).longValue();
+                this.score = new Float((Long) val).floatValue();
             }
         } else {
             throw new IncompleteMessageException("com.mobicage.models.properties.forms.RatingTopic object is missing field 'score'");
