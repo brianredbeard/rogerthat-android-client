@@ -364,6 +364,28 @@ public class SecurityUtils {
         return null;
     }
 
+    public static byte[] getPayload(String algorithm, byte[]... payload) throws Exception {
+        if (Ed25519.ALGORITHM.equals(algorithm)) {
+            return Ed25519.getPayload(payload);
+        }
+        return null;
+    }
+
+    public static byte[] getPayload(String algorithm, String payload) throws Exception {
+        if (Ed25519.ALGORITHM.equals(algorithm)) {
+            return Ed25519.getPayload(payload.getBytes());
+        }
+        return null;
+    }
+
+    public static byte[] getPayload(String algorithm, File f) throws IOException {
+        if (Ed25519.ALGORITHM.equals(algorithm)) {
+            Blake2b.Blake2b256 digest = new Blake2b.Blake2b256();
+            return IOUtils.digest(digest, f);
+        }
+        return null;
+    }
+
     public static Configuration getConfiguration(MainService mainService) {
         T.UI();
         ConfigurationProvider configProvider = mainService.getConfigurationProvider();
