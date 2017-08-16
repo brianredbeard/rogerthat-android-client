@@ -37,7 +37,6 @@ import org.jivesoftware.smack.util.Base64;
 import org.json.simple.JSONValue;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -129,9 +128,14 @@ public class Ed25519 {
             new Random().nextBytes(b);
             seed = Mnemonics.seedToString(b);
         }
+
         final byte[] checksumSeedBytes = Mnemonics.stringToSeed(seed);
         final int entropySize = 32;
         final int seedChecksumSize = 6;
+
+        if (checksumSeedBytes.length != entropySize + seedChecksumSize) {
+            throw new Exception("checksum seed length is wrong");
+        }
 
         final byte[] seedBytes = new byte[entropySize];
         System.arraycopy(checksumSeedBytes, 0, seedBytes, 0, entropySize);
@@ -142,19 +146,20 @@ public class Ed25519 {
         final byte[] checksumBytes = new byte[seedChecksumSize];
         System.arraycopy(checksumSeedBytes, entropySize, checksumBytes, 0, seedChecksumSize);
 
-        if (checksumSeedBytes.length != entropySize + seedChecksumSize || !Arrays.equals(fullChecksum, checksumBytes)) {
-            throw new Exception("checksum seed length is wrong");
+        if (!Arrays.equals(fullChecksum, checksumBytes)) {
+            throw new Exception("checksum seed is wrong");
         }
 
         Map<String, Object> keys = createKeyPair(seedBytes);
         EdDSAPublicKey publicKey = (EdDSAPublicKey) keys.get("public_key");
-        EdDSAPrivateKey pKey = (EdDSAPrivateKey) keys.get("private_key");
+        EdDSAPrivateKey privateKey = (EdDSAPrivateKey) keys.get("private_key");
 
         String publicKeyString =  Base64.encodeBytes(publicKey.getEncoded(), Base64.DONT_BREAK_LINES);
-        byte[] decodedPrivateKey = pKey.getEncoded();
+        String publicKeyAbyte = Base64.encodeBytes(publicKey.getAbyte(), Base64.DONT_BREAK_LINES);
 
-        SecurityUtils.savePublicKey(mainService, ALGORITHM, name, null, publicKeyString);
-        SecurityUtils.saveSecureInfo(mainService, pin, ALGORITHM, name, null, publicKeyString, decodedPrivateKey, seedBytes, null);
+        SecurityUtils.savePublicKey(mainService, ALGORITHM, name, null, publicKeyAbyte);
+        SecurityUtils.saveSecureInfo(mainService, pin, ALGORITHM, name, null, publicKeyString, privateKey.getEncoded(),
+                seedBytes, null);
         return publicKeyString;
     }
 
