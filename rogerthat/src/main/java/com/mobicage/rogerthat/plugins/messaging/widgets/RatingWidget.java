@@ -98,11 +98,17 @@ public class RatingWidget extends Widget {
         T.UI();
 
         try {
-            rating = new RatingTO(mWidgetMap);
+            Map<String, Object> value = mWidgetMap;
+
+            if (!isEnabled()) {
+                value = (Map<String, Object>)mWidgetMap.get("value");
+            }
+
+            LinearLayout ratingContainer = (LinearLayout) findViewById(R.id.rating_container);
+            rating = new RatingTO(value);
             topicsAdapter = new TopicsAdapter(mActivity, rating.topics);
-            LinearLayout layout = (LinearLayout) findViewById(R.id.rating_container);
-            for(int i=0; i<topicsAdapter.getCount(); i++) {
-                layout.addView(topicsAdapter.getView(i, null, null));
+            for (int i = 0; i < topicsAdapter.getCount(); i++) {
+                ratingContainer.addView(topicsAdapter.getView(i, null, null));
             }
         } catch (IncompleteMessageException e) {
             L.bug(e);
@@ -116,7 +122,6 @@ public class RatingWidget extends Widget {
             // just update scores
             mResult = new RatingWidgetResultTO(rating.toJSONMap());
             mWidgetMap.put("value", rating.toJSONMap());
-            L.d(rating.toJSONMap().toString());
         } catch (IncompleteMessageException e) {
             L.bug(e);
         }
@@ -170,7 +175,7 @@ public class RatingWidget extends Widget {
             if (i != 0) {
                 parts.add("");
             }
-            parts.add(String.format("%s: %d", topic.title, topic.score));
+            parts.add(String.format("%s: %s", topic.title, topic.score));
         }
         return android.text.TextUtils.join("\n", parts);
     }

@@ -14,4 +14,12 @@
 
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/rating_locked"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:textSize="17dp"
+        android:visibility="gone" />
+
 </com.mobicage.rogerthat.plugins.messaging.widgets.RatingWidget>
