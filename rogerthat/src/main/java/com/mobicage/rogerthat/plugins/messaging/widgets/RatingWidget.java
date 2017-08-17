@@ -24,6 +24,7 @@ import java.util.Map;
 
 
 import android.content.Context;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -40,6 +41,7 @@ import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.rpc.ResponseHandler;
+import com.mobicage.rpc.config.LookAndFeelConstants;
 import com.mobicage.to.messaging.forms.RatingTO;
 import com.mobicage.models.properties.forms.RatingTopic;
 import com.mobicage.rogerthat.util.system.T;
@@ -82,6 +84,8 @@ public class RatingWidget extends Widget {
             questionText.setText(currentTopic.question);
             RatingBar ratingBar = (RatingBar) convertView.findViewById(R.id.rating_bar);
             ratingBar.setRating(currentTopic.score);
+            int color = LookAndFeelConstants.getPrimaryColor(mActivity);
+            ratingBar.getProgressDrawable().setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
             ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
                 @Override
                 public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
