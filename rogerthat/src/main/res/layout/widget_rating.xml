@@ -9,17 +9,6 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="20dp">
-
-
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/rating_locked"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="TextView"
-        android:textSize="17dp"
-        android:visibility="gone" />
+        android:padding="20dp"/>
 
 </com.mobicage.rogerthat.plugins.messaging.widgets.RatingWidget>

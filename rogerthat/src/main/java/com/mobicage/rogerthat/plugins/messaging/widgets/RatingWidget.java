@@ -98,14 +98,15 @@ public class RatingWidget extends Widget {
         T.UI();
 
         try {
-            Map<String, Object> value = mWidgetMap;
+            rating = new RatingTO(mWidgetMap);
 
             if (!isEnabled()) {
-                value = (Map<String, Object>)mWidgetMap.get("value");
+                Map<String, Object> value = (Map<String, Object>)mWidgetMap.get("value");
+                if (value != null)
+                    rating = new RatingTO(value);
             }
 
             LinearLayout ratingContainer = (LinearLayout) findViewById(R.id.rating_container);
-            rating = new RatingTO(value);
             topicsAdapter = new TopicsAdapter(mActivity, rating.topics);
             for (int i = 0; i < topicsAdapter.getCount(); i++) {
                 ratingContainer.addView(topicsAdapter.getView(i, null, null));
