@@ -191,8 +191,7 @@ public class SecurityKeyActivity extends ServiceBoundActivity implements View.On
         show(R.id.security_settings_pin_result);
 
         TextView explanationTextView = (TextView) findViewById(R.id.backup_security_key_instructions);
-        explanationTextView.setText(getString(R.string.backup_security_key_instructions, AppConstants
-                .Security.APP_KEY_NAME));
+        explanationTextView.setText(getString(R.string.backup_security_key_instructions, mKeyName));
 
         TextView algorithmTextView = (TextView) findViewById(R.id.algorithm);
         algorithmTextView.setText(getString(R.string.algorithm) + ": " + mKeyAlgorithm);
