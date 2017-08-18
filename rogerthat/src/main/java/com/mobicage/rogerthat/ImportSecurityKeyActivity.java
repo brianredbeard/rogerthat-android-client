@@ -38,8 +38,6 @@ import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.LookAndFeelConstants;
 
-import java.util.Objects;
-
 import static com.mobicage.rogerthat.SecurityKeyActivity.KEY_ALGORITHM;
 import static com.mobicage.rogerthat.SecurityKeyActivity.KEY_NAME;
 
@@ -112,7 +110,7 @@ public class ImportSecurityKeyActivity extends ServiceBoundActivity implements A
             public void onError(String code, String errorMessage) {
                 error(code, errorMessage);
                 String message;
-                if (Objects.equals(code, "unknown_error_occurred")) {
+                if ("unknown_error_occurred".equals(code)) {
                     message = getString(R.string.import_key_failed);
                 } else {
                     message = errorMessage;
