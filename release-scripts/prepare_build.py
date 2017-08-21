@@ -135,6 +135,10 @@ COLOURED_BUTTONS = {
 
 LICENSE = app_utils.get_license_header()
 
+SUPPORTED_LANGUAGES = map(lambda folder: folder.replace('values-', ''),
+                          filter(lambda folder: folder.startswith('values-'), os.listdir(
+                              os.path.join(os.path.dirname(__file__), '..', 'rogerthat', 'src', 'main', 'res'))))
+
 
 def get(k, default=MISSING):
     '''Get a dot-separated key from the build.yaml'''
@@ -867,6 +871,21 @@ def encode_translation(s):
         .replace(">", "&gt;").encode('utf-8')
 
 
+def get_language_code(code):
+    if code in SUPPORTED_LANGUAGES:
+        return code
+    split = code.split('-')
+    if split[0] in SUPPORTED_LANGUAGES:
+        return split[0]
+    for c in SUPPORTED_LANGUAGES:
+        if c.startswith(code):
+            return c
+    for c in SUPPORTED_LANGUAGES:
+        if c.startswith(split[0]):
+            return c
+    raise Exception('Unknown language %s' % code)
+
+
 def add_translations(doc):
     translations = doc.get('TRANSLATIONS')
     if not translations:
@@ -875,7 +894,7 @@ def add_translations(doc):
     for language, entries in translations.iteritems():
         values_dir = 'values'
         if language != 'en':
-            values_dir += '-' + language
+            values_dir += '-' + get_language_code(language)
         xml_path = os.path.join(SRC_RES_DIR, values_dir, 'allstr.xml')
         added_lines = list()
         for entry in entries:
