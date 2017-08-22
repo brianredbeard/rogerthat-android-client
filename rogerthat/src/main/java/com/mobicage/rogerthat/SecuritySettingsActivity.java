@@ -40,7 +40,10 @@ import java.util.List;
 
 public class SecuritySettingsActivity extends ServiceBoundActivity {
 
+    public static final int REQUEST_IMPORT_KEY = 1;
+
     private List<PublicKeyInfo> mPublicKeys;
+    private ListView mListView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,32 +54,10 @@ public class SecuritySettingsActivity extends ServiceBoundActivity {
 
     @Override
     protected void onServiceBound() {
-        mPublicKeys = mService.getPlugin(SecurityPlugin.class).getStore().listPublicKeys();
+        mListView = (ListView) findViewById(R.id.keys_list);
+        refreshList();
 
-        final ListView listView = (ListView) findViewById(R.id.keys_list);
-        listView.setAdapter(new ArrayAdapter<PublicKeyInfo>(this, R.layout.security_key_item, mPublicKeys) {
-            @NonNull
-            @Override
-            public View getView(int position, View convertView, @NonNull ViewGroup parent) {
-                final View view;
-                if (convertView == null) {
-                    final LayoutInflater inflater = LayoutInflater.from(SecuritySettingsActivity.this);
-                    view = inflater.inflate(R.layout.security_key_item, parent, false);
-                } else {
-                    view = convertView;
-                }
-
-                final PublicKeyInfo publicKey = getItem(position);
-                if (publicKey != null) {
-                    ((TextView) view.findViewById(R.id.title)).setText(publicKey.name);
-                    ((TextView) view.findViewById(R.id.subtitle)).setText(publicKey.algorithm);
-                }
-
-                return view;
-            }
-        });
-
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 final PublicKeyInfo publicKey = mPublicKeys.get(position);
@@ -106,9 +87,43 @@ public class SecuritySettingsActivity extends ServiceBoundActivity {
         switch (item.getItemId()) {
             case R.id.import_key:
                 Intent intent = new Intent(this, ImportSecurityKeyActivity.class);
-                startActivity(intent);
+                startActivityForResult(intent, REQUEST_IMPORT_KEY);
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_IMPORT_KEY) {
+            refreshList();
+        }
+    }
+
+    private void refreshList() {
+        mPublicKeys = mService.getPlugin(SecurityPlugin.class).getStore().listPublicKeys();
+        mListView.setAdapter(new ArrayAdapter<PublicKeyInfo>(this, R.layout.security_key_item, mPublicKeys) {
+            @NonNull
+            @Override
+            public View getView(int position, View convertView, @NonNull ViewGroup parent) {
+                final View view;
+                if (convertView == null) {
+                    final LayoutInflater inflater = LayoutInflater.from(SecuritySettingsActivity.this);
+                    view = inflater.inflate(R.layout.security_key_item, parent, false);
+                } else {
+                    view = convertView;
+                }
+
+                final PublicKeyInfo publicKey = getItem(position);
+                if (publicKey != null) {
+                    ((TextView) view.findViewById(R.id.title)).setText(publicKey.name);
+                    ((TextView) view.findViewById(R.id.subtitle)).setText(publicKey.algorithm);
+                }
+
+                return view;
+            }
+        });
     }
 }

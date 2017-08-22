@@ -25,7 +25,7 @@ import java.util.Map;
 
 public class SubmitSignFormRequestTO implements com.mobicage.rpc.IJSONable {
 
-    public com.mobicage.to.messaging.forms.UnicodeListWidgetResultTO result;
+    public com.mobicage.to.messaging.forms.SignWidgetResultTO result;
     public String button_id;
     public String message_key;
     public String parent_message_key;
@@ -38,7 +38,7 @@ public class SubmitSignFormRequestTO implements com.mobicage.rpc.IJSONable {
     public SubmitSignFormRequestTO(Map<String, Object> json) throws IncompleteMessageException {
         if (json.containsKey("result")) {
             Object val = json.get("result");
-            this.result = val == null ? null : new com.mobicage.to.messaging.forms.UnicodeListWidgetResultTO((Map<String, Object>) val);
+            this.result = val == null ? null : new com.mobicage.to.messaging.forms.SignWidgetResultTO((Map<String, Object>) val);
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.forms.SubmitSignFormRequestTO object is missing field 'result'");
         }

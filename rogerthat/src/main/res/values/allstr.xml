@@ -361,7 +361,7 @@
     <string name="backup_security_key_later">You can always find these words back later when navigating to %1$s &gt; %2$s. Then select the secure key with name &quot;%3$s&quot;.</string>
     <string name="view_security_settings">View security settings</string>
     <string name="key_name">Key name</string>
-    <string name="backup_security_key_instructions">To be able to restore your secure %1$s key when you re-install the app, write down the algorithm, key name and 29 words below and store them in a secure location.\nNote: We will never ask you for these words. Never give them to someone else on a forum, via phone or via e-mail.</string>
+    <string name="backup_security_key_instructions">To be able to restore your secure key when you re-install the app, write down the algorithm, key name and the 29 words below and store them in a secure location.\n\nNote: When you lose these words, you will lose access to your wallet/coins.\n\nNote: We will never ask you for these words. Never give them to someone else on a forum, via phone or via e-mail.</string>
     <string name="import_security_key_instructions">To import a secure key select the key algorithm and enter the secure key name and the key\'s 29 words.</string>
     <string name="seed_29_words">29 words</string>
     <string name="import_key_failed">Your key could not be imported. Please make sure you selected the right algorithm and that all 29 words are written correctly.</string>

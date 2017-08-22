@@ -18,6 +18,7 @@
 
 package com.mobicage.rogerthat;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -44,6 +45,7 @@ import com.mobicage.rogerthat.plugins.scan.ProcessScanActivity;
 import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
 import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
 import com.mobicage.rogerthat.plugins.security.PinLockMgr;
+import com.mobicage.rogerthat.plugins.security.SecurityPlugin;
 import com.mobicage.rogerthat.registration.ContentBrandingRegistrationActivity;
 import com.mobicage.rogerthat.registration.DetectedBeaconActivity;
 import com.mobicage.rogerthat.registration.OauthRegistrationActivity;
@@ -396,7 +398,19 @@ public class MainActivity extends ServiceBoundActivity implements PinLockMgr.NoP
             }
         }
 
-        if (hasRegistered && SecurityUtils.usesAppWidePinCode() && !SecurityUtils.isPinSet(mService)) {
+        boolean setupPinNeeded = false;
+        if (hasRegistered && SecurityUtils.usesAppWidePinCode()) {
+            if (SecurityUtils.isPinSet(mService)) {
+                final SecurityPlugin securityPlugin = mService.getPlugin(SecurityPlugin.class);
+                if (!securityPlugin.hasSecurityKey("public", AppConstants.Security.APP_KEY_ALGORITHM ,AppConstants.Security.APP_KEY_NAME, null)) {
+                    setupPinNeeded = true;
+                }
+            } else {
+                setupPinNeeded = true;
+            }
+        }
+
+        if (setupPinNeeded) {
             mIntentToBeProcessedOnActivityResult = intent;
             setupPin();
 
@@ -505,12 +519,13 @@ public class MainActivity extends ServiceBoundActivity implements PinLockMgr.NoP
                 processIntent(i);
             } else {
                 final String message = getString(R.string.pin_required_continue);
-                UIUtils.showDialog(this, null, message, new SafeDialogClick() {
+                AlertDialog dialog = UIUtils.showDialog(this, null, message, new SafeDialogClick() {
                     @Override
                     public void safeOnClick(DialogInterface dialog, int id) {
                         setupPin();
                     }
                 });
+                dialog.setCancelable(false);
             }
         }
     }

@@ -1581,6 +1581,13 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.SignWidgetResultTO ComMobicageToMessagingFormsSignWidgetResultTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.SignWidgetResultTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
     public static com.mobicage.to.messaging.forms.SingleSelectFormMessageTO ComMobicageToMessagingFormsSingleSelectFormMessageTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;

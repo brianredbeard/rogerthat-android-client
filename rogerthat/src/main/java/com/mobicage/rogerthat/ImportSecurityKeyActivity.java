@@ -44,6 +44,10 @@ import static com.mobicage.rogerthat.SecurityKeyActivity.KEY_NAME;
 public class ImportSecurityKeyActivity extends ServiceBoundActivity implements AdapterView.OnItemSelectedListener, View.OnCreateContextMenuListener {
 
     private String mSelectedAlgorithm;
+    private String mKeyName;
+
+    private static final int[] RESOURCES = new int[]{R.id.security_settings_no_pin, R.id
+            .security_settings_pin};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,24 +69,53 @@ public class ImportSecurityKeyActivity extends ServiceBoundActivity implements A
                 importKey();
             }
         });
+
+        findViewById(R.id.setup_pin).setOnClickListener(new SafeViewOnClickListener() {
+            @Override
+            public void safeOnClick(View v) {
+                setupPin();
+            }
+        });
+
         Intent intent = getIntent();
 
-        String algorithm = intent.getStringExtra(KEY_ALGORITHM);
-        if (algorithm != null) {
-            mSelectedAlgorithm = algorithm;
+        String keyAlgorithm = intent.getStringExtra(KEY_ALGORITHM);
+        if (keyAlgorithm != null) {
+            mSelectedAlgorithm = keyAlgorithm;
             findViewById(R.id.algorithm_container).setVisibility(View.GONE);
         }
-        String keyName = intent.getStringExtra(KEY_NAME);
-        if (keyName != null) {
+        mKeyName = intent.getStringExtra(KEY_NAME);
+        if (mKeyName != null) {
             EditText keyNameView = (EditText) findViewById(R.id.key_name);
-            keyNameView.setText(keyName);
+            keyNameView.setText(mKeyName);
             keyNameView.setEnabled(false);
+        }
+
+        if (mSelectedAlgorithm != null) {
+            if (mKeyName == null) {
+                findViewById(R.id.key_name).requestFocus();
+            } else {
+                findViewById(R.id.seed).requestFocus();
+            }
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mKeyName == null) {
+            UIUtils.hideKeyboard(this, findViewById(R.id.key_name));
+        } else {
+            UIUtils.hideKeyboard(this, findViewById(R.id.seed));
         }
     }
 
     @Override
     protected void onServiceBound() {
-
+        if (!SecurityUtils.isPinSet(mService)) {
+            L.d("No pin found. Setting up pin and creating key.");
+            show(R.id.security_settings_no_pin);
+        }
     }
 
     @Override
@@ -90,8 +123,32 @@ public class ImportSecurityKeyActivity extends ServiceBoundActivity implements A
 
     }
 
+    private void setupPin() {
+        mService.setupPin(new MainService.SecurityCallback<String>() {
+            @Override
+            public void onSuccess(String result) {
+                show(R.id.security_settings_pin);
+            }
+
+            @Override
+            public void onError(String code, String errorMessage) {
+                error(code, errorMessage);
+            }
+        });
+    }
+
+    private void show(int visibleId) {
+        for (int id : RESOURCES) {
+            findViewById(id).setVisibility(id == visibleId ? View.VISIBLE : View.GONE);
+        }
+    }
+
     private void error(String code, String errorMessage) {
-        L.bug("{code=\"" + code + "\", errorMessage=\"" + errorMessage + "\"}");
+        if ("user_cancelled_pin_input".equals(code)) {
+            L.e("{code=\"" + code + "\", errorMessage=\"" + errorMessage + "\"}");
+        } else {
+            L.bug("{code=\"" + code + "\", errorMessage=\"" + errorMessage + "\"}");
+        }
     }
 
     protected void importKey() {
@@ -109,18 +166,20 @@ public class ImportSecurityKeyActivity extends ServiceBoundActivity implements A
             @Override
             public void onError(String code, String errorMessage) {
                 error(code, errorMessage);
-                String message;
-                if ("unknown_error_occurred".equals(code)) {
-                    message = getString(R.string.import_key_failed);
-                } else {
-                    message = errorMessage;
-                }
-                UIUtils.showDialog(ImportSecurityKeyActivity.this, getString(R.string.activity_error), message, new SafeDialogClick() {
-                    @Override
-                    public void safeOnClick(DialogInterface dialog, int id) {
-                        dialog.dismiss();
+                if (!"user_cancelled_pin_input".equals(code)) {
+                    String message;
+                    if ("unknown_error_occurred".equals(code)) {
+                        message = getString(R.string.import_key_failed);
+                    } else {
+                        message = errorMessage;
                     }
-                });
+                    UIUtils.showDialog(ImportSecurityKeyActivity.this, getString(R.string.activity_error), message, new SafeDialogClick() {
+                        @Override
+                        public void safeOnClick(DialogInterface dialog, int id) {
+                            dialog.dismiss();
+                        }
+                    });
+                }
             }
         });
     }

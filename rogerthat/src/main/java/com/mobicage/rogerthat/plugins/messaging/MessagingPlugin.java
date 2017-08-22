@@ -54,10 +54,10 @@ import com.mobicage.rogerthat.plugins.messaging.mfr.JsMfr;
 import com.mobicage.rogerthat.plugins.messaging.mfr.MessageFlowRun;
 import com.mobicage.rogerthat.plugins.messaging.widgets.Widget;
 import com.mobicage.rogerthat.util.IOUtils;
-import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.db.DatabaseManager;
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
@@ -95,6 +95,7 @@ import com.mobicage.to.messaging.forms.FloatWidgetResultTO;
 import com.mobicage.to.messaging.forms.LocationWidgetResultTO;
 import com.mobicage.to.messaging.forms.LongWidgetResultTO;
 import com.mobicage.to.messaging.forms.MyDigiPassWidgetResultTO;
+import com.mobicage.to.messaging.forms.SignWidgetResultTO;
 import com.mobicage.to.messaging.forms.SubmitPhotoUploadFormRequestTO;
 import com.mobicage.to.messaging.forms.SubmitPhotoUploadFormResponseTO;
 import com.mobicage.to.messaging.forms.UnicodeListWidgetResultTO;
@@ -1534,6 +1535,23 @@ public class MessagingPlugin implements MobicagePlugin {
     public void updateAdvancedOrderForm(final String parentMessageKey, final String messageKey,
         final AdvancedOrderWidgetResultTO formResult, final String buttonId, final long receivedTimestamp,
         final long ackedTimestamp) {
+
+        IFormResultProcessor resultProcessor = new IFormResultProcessor() {
+            @Override
+            public void processResult(final Message message) {
+                if (formResult != null) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> widget = (Map<String, Object>) message.form.get("widget");
+                    widget.put("value", formResult.toJSONMap());
+                }
+            }
+        };
+        saveFormUpdate(parentMessageKey, messageKey, buttonId, receivedTimestamp, ackedTimestamp, resultProcessor);
+    }
+
+    public void updateSignForm(final String parentMessageKey, final String messageKey,
+                               final SignWidgetResultTO formResult, final String buttonId, final long receivedTimestamp,
+                               final long ackedTimestamp) {
 
         IFormResultProcessor resultProcessor = new IFormResultProcessor() {
             @Override

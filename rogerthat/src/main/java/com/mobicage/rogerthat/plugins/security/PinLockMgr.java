@@ -21,6 +21,7 @@ package com.mobicage.rogerthat.plugins.security;
 import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainService;
@@ -31,13 +32,15 @@ import com.mobicage.rogerthat.util.security.SecurityUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class PinLockMgr implements ServiceBound, Application.ActivityLifecycleCallbacks {
 
     protected volatile MainService mService;
     private List<Activity> mActivities = new ArrayList<>();
     private boolean mIsPinSet = false;
     private boolean mShouldAskPin = true;
+    private boolean mHasEnteredPin = false;
+    private long mShouldAskPinTime = 0;
+    private final static long PIN_DELAY = 3 * 60; // in seconds
 
     public PinLockMgr(Application app) {
         app.registerActivityLifecycleCallbacks(this);
@@ -50,6 +53,7 @@ public class PinLockMgr implements ServiceBound, Application.ActivityLifecycleCa
 
     public PinLockMgr setMainService(MainService mainService) {
         mService = mainService;
+        checkAskPin();
         return this;
     }
 
@@ -60,13 +64,7 @@ public class PinLockMgr implements ServiceBound, Application.ActivityLifecycleCa
     @Override
     public void onActivityStarted(Activity activity) {
         mActivities.add(activity);
-        if (mShouldAskPin || mActivities.size() == 1) {
-            if (activity instanceof NoPinUnlockActivity) {
-                mShouldAskPin = true;
-            } else {
-                askPin();
-            }
-        }
+        checkAskPin();
     }
 
     @Override
@@ -82,6 +80,10 @@ public class PinLockMgr implements ServiceBound, Application.ActivityLifecycleCa
         mActivities.remove(activity);
         if (mActivities.size() == 0) {
             mShouldAskPin = true;
+            if (mHasEnteredPin) {
+                mShouldAskPinTime = System.currentTimeMillis() / 1000;
+                mHasEnteredPin = false;
+            }
         }
     }
 
@@ -97,29 +99,48 @@ public class PinLockMgr implements ServiceBound, Application.ActivityLifecycleCa
         mIsPinSet = false;
     }
 
-    private boolean isPinSet() {
-        return mIsPinSet || SecurityUtils.isPinSet(mService);
+    private void checkAskPin() {
+        if (mService == null)
+            return;
+        if (!mShouldAskPin)
+            return;
+        long timestamp = System.currentTimeMillis() / 1000;
+        if (timestamp <= mShouldAskPinTime + PIN_DELAY) {
+            mShouldAskPin = false;
+            mHasEnteredPin = true;
+            return;
+        }
+
+        for (Activity a : mActivities) {
+            if (a instanceof NoPinUnlockActivity) {
+                continue;
+            } else {
+                askPin();
+                break;
+            }
+        }
     }
 
     private void askPin() {
         mShouldAskPin = false;
-
-        if (!isPinSet()) {
+        if (!(mIsPinSet || SecurityUtils.isPinSet(mService))) {
             return;
         }
+        mIsPinSet = true;
 
         L.i("Asking for the secure pin code");
         mService.askPin(mService.getString(R.string.enter_pin_to_unlock), new MainService.SecurityCallback<Object>() {
             @Override
             public void onSuccess(Object result) {
                 L.i("Pin code entered successfully");
+                mHasEnteredPin = true;
             }
 
             @Override
             public void onError(String code, String errorMessage) {
-                L.w("Finishing all activities! Pin code was not entered successfully: %s", errorMessage);
-                for (Activity activity : mActivities) {
-                    activity.finish();
+                L.w("Finishing all activities! Pin code was not entered successfully: %s", code);
+                if (mActivities.size() > 0) {
+                    ActivityCompat.finishAffinity(mActivities.get(0));
                 }
             }
         });

@@ -435,7 +435,7 @@ public class MessagingCallReceiver implements com.mobicage.capi.messaging.IClien
         if (!mPlugin.getBrandingMgr().queueIfNeeded("com.mobicage.capi.messaging.updateSignForm", request,
                 request.message_key)) {
 
-            mPlugin.updateForm(request.parent_message_key, request.message_key, request.result, request.button_id,
+            mPlugin.updateSignForm(request.parent_message_key, request.message_key, request.result, request.button_id,
                     request.received_timestamp, request.acked_timestamp);
         }
         return new UpdateSignFormResponseTO();

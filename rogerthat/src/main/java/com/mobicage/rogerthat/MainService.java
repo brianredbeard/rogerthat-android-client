@@ -2045,6 +2045,9 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
 
         } else if ("sign".equals(si.type)) {
             executeSign((SignSecurityItem) si);
+
+        } else if ("ask_pin".equals(si.type)) {
+            si.callback.onSuccess(null);
         }
 
         if (fromQueue && !mEnterPinActivityActive) {
@@ -2064,7 +2067,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         try {
             String publicKeyString = SecurityUtils.createKeyPair(this, mPin, si.keyAlgorithm, si.keyName, si.seed);
             String seed;
-            if (si.seed == null) {
+            if (TextUtils.isEmptyOrWhitespace(si.seed)) {
                 seed = SecurityUtils.getSeed(this, mPin, si.keyAlgorithm, si.keyName);
             } else {
                 seed = si.seed;

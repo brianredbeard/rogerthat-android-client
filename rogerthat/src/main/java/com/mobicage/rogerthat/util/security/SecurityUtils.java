@@ -36,6 +36,7 @@ import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.to.payment.CryptoTransactionTO;
 
+import net.i2p.crypto.eddsa.EdDSAPublicKey;
 import net.i2p.crypto.eddsa.EdDSASecurityProvider;
 
 import org.jivesoftware.smack.util.Base64;
@@ -350,6 +351,17 @@ public class SecurityUtils {
         return null;
     }
 
+    public static String getPublicKeyString(MainService mainService, String algorithm, String name, Long index) throws Exception {
+        PublicKey key = getPublicKey(mainService, algorithm, name, index);
+        if (key == null) {
+            return null;
+        }
+        if (Ed25519.ALGORITHM.equals(algorithm)) {
+            return Base64.encodeBytes(((EdDSAPublicKey) key).getAbyte(), Base64.DONT_BREAK_LINES);
+        }
+        return null;
+    }
+
     public static Signature getSignature(String algorithm) throws Exception {
         if (Ed25519.ALGORITHM.equals(algorithm)) {
             return Ed25519.getSignature();
@@ -463,10 +475,9 @@ public class SecurityUtils {
         }
 
         PrivateKey tmpDevicePrivateKey = getDevicePrivateKey();
-        if (tmpDevicePrivateKey != null) {
-            throw new Exception("Keystore was already set");
+        if (tmpDevicePrivateKey == null) {
+            setupKeyStore();
         }
-        setupKeyStore();
 
         ConfigurationProvider configProvider = mainService.getConfigurationProvider();
         Configuration cfg = configProvider.getConfiguration(CONFIGKEY);
@@ -498,7 +509,7 @@ public class SecurityUtils {
         SecurityPlugin securityPlugin = mainService.getPlugin(SecurityPlugin.class);
         return securityPlugin.hasSecurityKey(type, algorithm, name, index);
     }
-
+    
     public static String createTransactionData(MainService mainService, String algorithm, final String name,
                                                final Long index, final CryptoTransactionTO data) throws Exception {
 

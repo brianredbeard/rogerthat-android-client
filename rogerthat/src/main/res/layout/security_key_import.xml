@@ -1,79 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <LinearLayout
+        android:id="@+id/security_settings_no_pin"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical"
-        android:padding="?attr/listPreferredItemPaddingLeft">
+        android:visibility="gone">
 
-        <TextView
-            android:id="@+id/import_security_key_instructions"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:text="@string/import_security_key_instructions"
-            android:textColor="@color/mc_default_text"
-            android:textSize="20sp"/>
+        <include layout="@layout/security_settings_no_pin"/>
+    </LinearLayout>
+
+    <ScrollView
+        android:id="@+id/security_settings_pin"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:gravity="center_vertical"
-            android:id="@+id/algorithm_container"
-            android:orientation="horizontal">
+            android:orientation="vertical"
+            android:padding="?attr/listPreferredItemPaddingLeft">
 
             <TextView
-                android:id="@+id/algorithm_text_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:text="@string/algorithm"
-                android:textColor="@color/mc_default_text"
-                android:textSize="18sp"/>
-
-            <android.support.v7.widget.AppCompatSpinner
-                android:id="@+id/algorithm"
+                android:id="@+id/import_security_key_instructions"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:prompt="@string/algorithm"
-                android:spinnerMode="dropdown"/>
+                android:gravity="center_horizontal"
+                android:text="@string/import_security_key_instructions"
+                android:textColor="@color/mc_default_text"
+                android:textSize="20sp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="center_vertical"
+                android:id="@+id/algorithm_container"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/algorithm_text_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:text="@string/algorithm"
+                    android:textColor="@color/mc_default_text"
+                    android:textSize="18sp"/>
+
+                <android.support.v7.widget.AppCompatSpinner
+                    android:id="@+id/algorithm"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:prompt="@string/algorithm"
+                    android:spinnerMode="dropdown"/>
+
+            </LinearLayout>
+
+            <EditText
+                android:id="@+id/key_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:hint="@string/key_name"
+                android:inputType="text"/>
+
+            <EditText
+                android:id="@+id/seed"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="top"
+                android:hint="@string/seed_29_words"
+                android:inputType="textMultiLine"/>
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/import_key"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="30dp"
+                android:minHeight="50dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:text="@string/import_key"
+                android:textSize="18sp"
+                android:theme="@style/PrimaryButtonTheme"/>
 
         </LinearLayout>
+    </ScrollView>
 
-        <EditText
-            android:id="@+id/key_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:hint="@string/key_name"
-            android:inputType="text"/>
-
-        <EditText
-            android:id="@+id/seed"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:gravity="top"
-            android:hint="@string/seed_29_words"
-            android:inputType="textMultiLine"/>
-
-        <android.support.v7.widget.AppCompatButton
-            android:id="@+id/import_key"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="30dp"
-            android:minHeight="50dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:text="@string/import_key"
-            android:textSize="18sp"
-            android:theme="@style/PrimaryButtonTheme"/>
-
-    </LinearLayout>
-
-</ScrollView>
+</LinearLayout>

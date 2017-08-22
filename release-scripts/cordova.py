@@ -100,7 +100,7 @@ PLUGINS = {
 
 APPS = {
     'rogerthat-payment': {
-        'url': 'https://github.com/rogerthat-platform/rogerthat-payment#payments-alpha-3'
+        'url': 'https://github.com/rogerthat-platform/rogerthat-payment#master'
     }
 }
 
@@ -144,17 +144,23 @@ def _install_cordova_app(app_id, cordova_app_name, colors):
     url = APPS[cordova_app_name]['url']
     splitted_url = url.split('#')
     repo_dir = os.path.join(os.path.expanduser('~'), 'tmp', 'cordova', 'build', cordova_app_name)
+
+    def checkout(repo):
+        if len(splitted_url) > 1:
+            logging.info('  * Switching to branch: %s', splitted_url[1])
+            repo.git.checkout(splitted_url[1])
+
     if os.path.exists(os.path.join(repo_dir, '.git')):
         logging.info('  * Updating local repository: %s', repo_dir)
         repo = git.Repo(repo_dir)
+        repo.git.clean('-df')
+        repo.git.reset('--hard')
+        checkout(repo)
         repo.git.pull()
     else:
         logging.info('  * Cloning repository: %s', splitted_url[0])
         repo = git.Repo.clone_from(splitted_url[0], repo_dir)
-
-    if len(splitted_url) > 1:
-        logging.info('  * Switching to branch: %s', splitted_url[1])
-        repo.git.checkout(splitted_url[1])
+        checkout(repo)
 
     # get dependencies
     tree = etree.parse(os.path.join(repo_dir, "config.xml"))

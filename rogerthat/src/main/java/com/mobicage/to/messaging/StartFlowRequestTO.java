@@ -68,7 +68,7 @@ public class StartFlowRequestTO implements com.mobicage.rpc.IJSONable {
             Object val = json.get("flow_params");
             this.flow_params = (String) val;
         } else {
-            throw new IncompleteMessageException("com.mobicage.to.messaging.StartFlowRequestTO object is missing field 'flow_params'");
+            this.flow_params = null;
         }
         if (json.containsKey("message_flow_run_id")) {
             Object val = json.get("message_flow_run_id");

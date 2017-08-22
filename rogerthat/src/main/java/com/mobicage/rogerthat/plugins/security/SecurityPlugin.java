@@ -76,7 +76,7 @@ public class SecurityPlugin implements MobicagePlugin {
         mConfigProvider.registerListener(CONFIGKEY, this);
     }
 
-    public String getIndexString(final Long index) {
+    public static String getIndexString(final Long index) {
         if (index == null) {
             return "root";
         }
