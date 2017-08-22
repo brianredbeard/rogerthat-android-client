@@ -110,6 +110,7 @@
     <string name="disabled">Отключено</string>
     <string name="discover_services_short">Найти услуги</string>
     <string name="dismissed_at">Подтверждено %1$s.</string>
+    <string name="done">Готово</string>
     <string name="dont_like">Не нравится</string>
     <string name="downloading">Загрузка…</string>
     <string name="edit">Изменить</string>
@@ -489,6 +490,7 @@
     <string name="unable_to_create_images_directory">Не удалось создать папку изображений %1$s.</string>
     <string name="unable_to_read_write_sd_card">Произошла ошибка. Проверьте исправность вашей SD-карты.</string>
     <string name="unknown">Неизвестно</string>
+    <string name="unknown_error_occurred">Произошла неизвестная ошибка.</string>
     <string name="unrecognized_scan_result">Содержимое результата сканирования не распознано.</string>
     <string name="unsave">Отменить сохранение</string>
     <string name="unsubscribe">Отменить подписку</string>

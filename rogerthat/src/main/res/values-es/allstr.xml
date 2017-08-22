@@ -117,6 +117,7 @@
     <string name="discover_services_short">Añadir nuevo</string>
     <string name="dismissed_at">%1$s admitido.</string>
     <string name="do_you_want_to_follow_service">¿Quieres seguir a %1$s?</string>
+    <string name="done">OK</string>
     <string name="dont_like">No me gusta</string>
     <string name="downloading">Descargando…</string>
     <string name="edit">Editar</string>
@@ -512,6 +513,7 @@
     <string name="unable_to_read_write_sd_card">Ha ocurrido un error. Compruebe la disponibilidad de su tarjeta SD.</string>
     <string name="unfollow">Dejar de seguir</string>
     <string name="unknown">Desconocido</string>
+    <string name="unknown_error_occurred">Un error desconocido a ocurrido</string>
     <string name="unrecognized_scan_result">No se reconoce el contenido del resultado escaneado.</string>
     <string name="unsave">Deshacer</string>
     <string name="unsubscribe">Darse de baja</string>
