@@ -674,12 +674,13 @@ def convert_config():
     about_facebook_url = get('ABOUT_ACTIVITY.facebook_url', default_about_facebook_url)
 
     speech_to_text = bool_str(get("APP_CONSTANTS.SPEECH_TO_TEXT", False))
-    secure_app = bool_str(get("APP_CONSTANTS.SECURITY.SECURE", False))
-    secure_pin_locked = bool_str(get("APP_CONSTANTS.SECURITY.PIN_LOCKED", False))
+
+    secure_app = get("APP_CONSTANTS.SECURITY.SECURE", False)
+    secure_pin_locked = get("APP_CONSTANTS.SECURITY.PIN_LOCKED", False)
     secure_pin_interval = get("APP_CONSTANTS.SECURITY.PIN_INTERVAL", 900)
     secure_pin_retry_interval = get("APP_CONSTANTS.SECURITY.PIN_RETRY_INTERVAL", 300)
-    secure_app_key_name = quoted_str_or_null(get('APP_CONSTANTS.SECURITY.APP_KEY_NAME', None))
-    secure_app_key_algorithm = quoted_str_or_null(get('APP_CONSTANTS.SECURITY.APP_KEY_ALGORITHM', None))
+    secure_app_key_name = get('APP_CONSTANTS.SECURITY.APP_KEY_NAME', None)
+    secure_app_key_algorithm = get('APP_CONSTANTS.SECURITY.APP_KEY_ALGORITHM', None)
     if bool(secure_app_key_name) != bool(secure_app_key_algorithm):
         raise ValueError('Both APP_KEY_NAME and APP_KEY_ALGORITHM are required under APP_CONSTANTS.SECURITY')
 
@@ -803,12 +804,12 @@ public class AppConstants {
            about_facebook=about_facebook,
            about_facebook_url=about_facebook_url,
            speech_to_text=speech_to_text,
-           secure_app=secure_app,
-           secure_pin_locked=secure_pin_locked,
+           secure_app=bool_str(secure_app),
+           secure_pin_locked=bool_str(secure_pin_locked),
            secure_pin_interval=secure_pin_interval,
            secure_pin_retry_interval=secure_pin_retry_interval,
-           secure_app_key_name=secure_app_key_name,
-           secure_app_key_algorithm=secure_app_key_algorithm,
+           secure_app_key_name=quoted_str_or_null(secure_app_key_name),
+           secure_app_key_algorithm=quoted_str_or_null(secure_app_key_algorithm),
            app_service_guid=app_service_guid,
            registration_type=registration_type,
            registration_type_oauth_domain=registration_type_oauth_domain,
