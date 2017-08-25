@@ -26,6 +26,8 @@ import android.text.TextUtils;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.util.db.DatabaseManager;
+import com.mobicage.rogerthat.util.db.TransactionHelper;
+import com.mobicage.rogerthat.util.db.TransactionWithoutResult;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.IncompleteMessageException;
@@ -91,14 +93,19 @@ public class PaymentStore implements Closeable {
 
     public void deletePaymentProviders(final String[] providerIds) {
         T.dontCare();
-        if (providerIds.length == 0) {
-            mClearPaymentProviders.execute();
-        }
+        TransactionHelper.runInTransaction(getDatabase(), "deletePaymentProviders", new TransactionWithoutResult() {
+            @Override
+            protected void run() {
+                if (providerIds.length == 0) {
+                    mClearPaymentProviders.execute();
+                }
 
-        for (String providerId : providerIds) {
-            bindString(mDeletePaymentProvider, 1, providerId);
-            mDeletePaymentProvider.execute();
-        }
+                for (String providerId : providerIds) {
+                    bindString(mDeletePaymentProvider, 1, providerId);
+                    mDeletePaymentProvider.execute();
+                }
+            }
+        });
     }
 
     public void savePaymentProvider(final AppPaymentProviderTO paymentProvider) {
@@ -186,14 +193,19 @@ public class PaymentStore implements Closeable {
 
     public void deletePaymentAssets(final String[] providerIds) {
         T.dontCare();
-        if (providerIds.length == 0) {
-            mClearPaymentAssets.execute();
-        }
+        TransactionHelper.runInTransaction(getDatabase(), "deletePaymentAssets", new TransactionWithoutResult() {
+            @Override
+            protected void run() {
+                if (providerIds.length == 0) {
+                    mClearPaymentAssets.execute();
+                }
 
-        for (String providerId : providerIds) {
-            bindString(mDeletePaymentAsset, 1, providerId);
-            mDeletePaymentAsset.execute();
-        }
+                for (String providerId : providerIds) {
+                    bindString(mDeletePaymentAsset, 1, providerId);
+                    mDeletePaymentAsset.execute();
+                }
+            }
+        });
     }
 
     public void savePaymentAsset(final PaymentProviderAssetTO asset) {

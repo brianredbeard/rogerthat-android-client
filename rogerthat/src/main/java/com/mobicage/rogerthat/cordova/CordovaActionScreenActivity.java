@@ -139,7 +139,7 @@ public class CordovaActionScreenActivity extends ServiceBoundActivity {
                 InputStream ims = getAssets().open("cordova-apps/" + mEmbeddedApp + "/resources/splash.png");
                 return Drawable.createFromStream(ims, null);
             } catch (IOException ioe) {
-                L.bug(ioe);
+                L.e(ioe);
                 return null;
             }
         } else {

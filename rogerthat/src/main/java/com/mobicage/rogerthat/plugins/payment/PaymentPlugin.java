@@ -58,6 +58,7 @@ import com.mobicage.to.system.SettingsTO;
 
 import org.json.simple.JSONValue;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -339,6 +340,7 @@ public class PaymentPlugin implements MobicagePlugin {
         } else {
             paymentProviderIds = Arrays.asList(request.provider_ids);
         }
+        final List<String> deletedProviderIds = new ArrayList<>(paymentProviderIds);
 
         TransactionHelper.runInTransaction(mStore.getDatabase(), "updatePaymentProviders", new TransactionWithoutResult() {
             @Override
@@ -346,6 +348,7 @@ public class PaymentPlugin implements MobicagePlugin {
                 mStore.deletePaymentProviders(request.provider_ids);
 
                 for (AppPaymentProviderTO paymentProvider : request.payment_providers) {
+                    deletedProviderIds.remove(paymentProvider.id);
                     if (!paymentProviderIds.contains(paymentProvider.id)) {
                         paymentProviderIds.add(paymentProvider.id);
                     }
@@ -355,12 +358,12 @@ public class PaymentPlugin implements MobicagePlugin {
         });
 
         for (String providerId : paymentProviderIds) {
-            if (paymentProviderIds.contains(providerId)) {
-                Intent intent = new Intent(PAYMENT_PROVIDER_UPDATED_INTENT);
+            if (deletedProviderIds.contains(providerId)) {
+                Intent intent = new Intent(PAYMENT_PROVIDER_REMOVED_INTENT);
                 intent.putExtra("provider_id", providerId);
                 mMainService.sendBroadcast(intent);
             } else {
-                Intent intent = new Intent(PAYMENT_PROVIDER_REMOVED_INTENT);
+                Intent intent = new Intent(PAYMENT_PROVIDER_UPDATED_INTENT);
                 intent.putExtra("provider_id", providerId);
                 mMainService.sendBroadcast(intent);
             }
