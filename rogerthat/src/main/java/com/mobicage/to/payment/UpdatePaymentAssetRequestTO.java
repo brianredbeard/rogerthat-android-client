@@ -25,8 +25,9 @@ import java.util.Map;
 
 public class UpdatePaymentAssetRequestTO implements com.mobicage.rpc.IJSONable {
 
+    public com.mobicage.to.payment.PaymentAssetBalanceTO available_balance;
     public com.mobicage.to.payment.PaymentAssetRequiredActionTO required_action;
-    public long balance;
+    public com.mobicage.to.payment.PaymentAssetBalanceTO total_balance;
     public String currency;
     public boolean enabled;
     public boolean has_balance;
@@ -42,21 +43,23 @@ public class UpdatePaymentAssetRequestTO implements com.mobicage.rpc.IJSONable {
 
     @SuppressWarnings("unchecked")
     public UpdatePaymentAssetRequestTO(Map<String, Object> json) throws IncompleteMessageException {
+        if (json.containsKey("available_balance")) {
+            Object val = json.get("available_balance");
+            this.available_balance = val == null ? null : new com.mobicage.to.payment.PaymentAssetBalanceTO((Map<String, Object>) val);
+        } else {
+            throw new IncompleteMessageException("com.mobicage.to.payment.UpdatePaymentAssetRequestTO object is missing field 'available_balance'");
+        }
         if (json.containsKey("required_action")) {
             Object val = json.get("required_action");
             this.required_action = val == null ? null : new com.mobicage.to.payment.PaymentAssetRequiredActionTO((Map<String, Object>) val);
         } else {
             throw new IncompleteMessageException("com.mobicage.to.payment.UpdatePaymentAssetRequestTO object is missing field 'required_action'");
         }
-        if (json.containsKey("balance")) {
-            Object val = json.get("balance");
-            if (val instanceof Integer) {
-                this.balance = ((Integer) val).longValue();
-            } else {
-                this.balance = ((Long) val).longValue();
-            }
+        if (json.containsKey("total_balance")) {
+            Object val = json.get("total_balance");
+            this.total_balance = val == null ? null : new com.mobicage.to.payment.PaymentAssetBalanceTO((Map<String, Object>) val);
         } else {
-            throw new IncompleteMessageException("com.mobicage.to.payment.UpdatePaymentAssetRequestTO object is missing field 'balance'");
+            throw new IncompleteMessageException("com.mobicage.to.payment.UpdatePaymentAssetRequestTO object is missing field 'total_balance'");
         }
         if (json.containsKey("currency")) {
             Object val = json.get("currency");
@@ -117,8 +120,9 @@ public class UpdatePaymentAssetRequestTO implements com.mobicage.rpc.IJSONable {
     @Override
     public Map<String, Object> toJSONMap() {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
+        obj.put("available_balance", this.available_balance == null ? null : this.available_balance.toJSONMap());
         obj.put("required_action", this.required_action == null ? null : this.required_action.toJSONMap());
-        obj.put("balance", this.balance);
+        obj.put("total_balance", this.total_balance == null ? null : this.total_balance.toJSONMap());
         obj.put("currency", this.currency);
         obj.put("enabled", this.enabled);
         obj.put("has_balance", this.has_balance);

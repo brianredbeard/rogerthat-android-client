@@ -511,10 +511,10 @@ ORDER BY ms.acked_timestamp DESC
     <string name="sql_payment_provider_select_by_id">SELECT id, name, logo_url, version, description, oauth_authorize_url, black_white_logo, background_color, text_color, button_color, currencies, asset_types FROM payment_provider WHERE id = ? ORDER BY name</string>
     <string name="sql_payment_provider_delete">DELETE FROM payment_provider WHERE id=?</string>
     <string name="sql_payment_provider_clear">DELETE FROM payment_provider</string>
-    <string name="sql_payment_asset_insert">INSERT OR REPLACE INTO payment_asset (provider_id, id, type, name, currency, balance, verified, enabled, has_balance, has_transactions, required_action) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)</string>
-    <string name="sql_payment_asset_select">SELECT provider_id, id, type, name, currency, balance, verified, enabled, has_balance, has_transactions, required_action FROM payment_asset ORDER BY name</string>
-    <string name="sql_payment_asset_select_by_provider_id">SELECT provider_id, id, type, name, currency, balance, verified, enabled, has_balance, has_transactions, required_action FROM payment_asset WHERE provider_id = ? ORDER BY name</string>
-    <string name="sql_payment_asset_select_by_provider_and_asset_id">SELECT provider_id, id, type, name, currency, balance, verified, enabled, has_balance, has_transactions, required_action FROM payment_asset WHERE provider_id = ? AND id = ? ORDER BY name</string>
+    <string name="sql_payment_asset_insert">INSERT OR REPLACE INTO payment_asset (provider_id, id, type, name, currency, available_balance, total_balance, verified, enabled, has_balance, has_transactions, required_action) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)</string>
+    <string name="sql_payment_asset_select">SELECT provider_id, id, type, name, currency, available_balance, total_balance, verified, enabled, has_balance, has_transactions, required_action FROM payment_asset ORDER BY name</string>
+    <string name="sql_payment_asset_select_by_provider_id">SELECT provider_id, id, type, name, currency, available_balance, total_balance, verified, enabled, has_balance, has_transactions, required_action FROM payment_asset WHERE provider_id = ? ORDER BY name</string>
+    <string name="sql_payment_asset_select_by_provider_and_asset_id">SELECT provider_id, id, type, name, currency, available_balance, total_balance, verified, enabled, has_balance, has_transactions, required_action FROM payment_asset WHERE provider_id = ? AND id = ? ORDER BY name</string>
     <string name="sql_payment_asset_delete">DELETE FROM payment_asset WHERE provider_id=?</string>
     <string name="sql_payment_asset_clear">DELETE FROM payment_asset</string>
 

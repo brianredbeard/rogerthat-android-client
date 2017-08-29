@@ -20,7 +20,6 @@ package com.mobicage.rogerthat.util;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;

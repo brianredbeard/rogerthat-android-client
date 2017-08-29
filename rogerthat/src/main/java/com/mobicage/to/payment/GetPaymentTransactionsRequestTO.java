@@ -28,6 +28,7 @@ public class GetPaymentTransactionsRequestTO implements com.mobicage.rpc.IJSONab
     public String asset_id;
     public String cursor;
     public String provider_id;
+    public String type;
 
     public GetPaymentTransactionsRequestTO() {
     }
@@ -51,6 +52,12 @@ public class GetPaymentTransactionsRequestTO implements com.mobicage.rpc.IJSONab
         } else {
             throw new IncompleteMessageException("com.mobicage.to.payment.GetPaymentTransactionsRequestTO object is missing field 'provider_id'");
         }
+        if (json.containsKey("type")) {
+            Object val = json.get("type");
+            this.type = (String) val;
+        } else {
+            throw new IncompleteMessageException("com.mobicage.to.payment.GetPaymentTransactionsRequestTO object is missing field 'type'");
+        }
     }
 
     @Override
@@ -59,6 +66,7 @@ public class GetPaymentTransactionsRequestTO implements com.mobicage.rpc.IJSONab
         obj.put("asset_id", this.asset_id);
         obj.put("cursor", this.cursor);
         obj.put("provider_id", this.provider_id);
+        obj.put("type", this.type);
         return obj;
     }
 

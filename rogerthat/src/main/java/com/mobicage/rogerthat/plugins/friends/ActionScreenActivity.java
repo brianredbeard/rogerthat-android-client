@@ -108,7 +108,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
     public static final String ITEM_TAG_HASH = "item_tag_hash";
     public static final String ITEM_LABEL = "item_label";
     public static final String ITEM_COORDS = "item_coords";
-    public static final String CONTEXT_MATCH = "context";
+    public static final String CONTEXT_MATCH = "context_match";
     public static final String RUN_IN_BACKGROUND = "run_in_background";
     public static final String CONTEXT = "context";
 

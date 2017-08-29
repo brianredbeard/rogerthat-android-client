@@ -208,11 +208,12 @@ public class PaymentPlugin implements MobicagePlugin {
         return true;
     }
 
-    public boolean getPaymentTransactions(String callbackKey, String providerId, String assetId, String cursor) {
+    public boolean getPaymentTransactions(String callbackKey, String providerId, String assetId, String cursor, String type) {
         GetPaymentTransactionsRequestTO request = new GetPaymentTransactionsRequestTO();
         request.provider_id = providerId;
         request.asset_id = assetId;
         request.cursor = cursor;
+        request.type = type;
         try {
             GetPaymentTransactionsResponseHandler rh = new GetPaymentTransactionsResponseHandler();
             rh.setCallbackKey(callbackKey);

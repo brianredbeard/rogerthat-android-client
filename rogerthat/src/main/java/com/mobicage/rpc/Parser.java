@@ -2421,6 +2421,13 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.PaymentAssetBalanceTO ComMobicageToPaymentPaymentAssetBalanceTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.PaymentAssetBalanceTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
     public static com.mobicage.to.payment.PaymentAssetRequiredActionTO ComMobicageToPaymentPaymentAssetRequiredActionTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;
