@@ -45,10 +45,10 @@ PLUGINS = {
         "url": "https://github.com/rogerthat-platform/cordova-plugin-whitelist#1.3.2"
     },
     "rogerthat-plugin": {
-        "url": "https://github.com/rogerthat-platform/cordova-rogerthat-plugin#public_keys"
+        "url": "https://github.com/rogerthat-platform/cordova-rogerthat-plugin#master"
     },
     "rogerthat-payments-plugin": {
-        "url": "https://github.com/rogerthat-platform/cordova-rogerthat-payments-plugin#test"
+        "url": "https://github.com/rogerthat-platform/cordova-rogerthat-payments-plugin#master"
     },
     "cordova-plugin-file": {
         "url": "https://github.com/rogerthat-platform/cordova-plugin-file#rt/4.3.3"
