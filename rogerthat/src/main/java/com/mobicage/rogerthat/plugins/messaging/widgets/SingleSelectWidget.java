@@ -22,6 +22,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Checkable;
+import android.widget.ScrollView;
 
 import com.mobicage.api.messaging.Rpc;
 import com.mobicage.rogerth.at.R;
@@ -48,6 +49,16 @@ public class SingleSelectWidget extends AbstractSelectWidget {
         super(context, attrs);
     }
 
+    private void scrollToBottom() {
+        final ScrollView scrollView = (ScrollView) mActivity.findViewById(R.id.message_scroll_view);
+        scrollView.post(new Runnable() {
+            @Override
+            public void run() {
+                scrollView.smoothScrollTo(0, scrollView.getBottom());
+            }
+        });
+    }
+
     @Override
     protected SafeViewOnClickListener getItemOnClickListener(final Checkable tv) {
         return new SafeViewOnClickListener() {
@@ -56,6 +67,7 @@ public class SingleSelectWidget extends AbstractSelectWidget {
                 for (int i = 0; i < getChildCount(); i++) {
                     Checkable ctv = (Checkable) getChildAt(i);
                     ctv.setChecked((ctv == tv));
+                    scrollToBottom();
                 }
             }
         };
