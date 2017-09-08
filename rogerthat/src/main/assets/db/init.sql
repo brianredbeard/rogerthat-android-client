@@ -35,7 +35,7 @@ CREATE TABLE button (
 	id TEXT NOT NULL,
 	caption TEXT NOT NULL,
 	"action" TEXT,
-	"index" INTEGER, ui_flags INTEGER NOT NULL DEFAULT 0,
+	"index" INTEGER, ui_flags INTEGER NOT NULL DEFAULT 0, color TEXT,
 	PRIMARY KEY (message, id),
 	FOREIGN KEY (message) REFERENCES message ("key")
 );

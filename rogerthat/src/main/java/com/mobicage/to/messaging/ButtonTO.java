@@ -27,6 +27,7 @@ public class ButtonTO implements com.mobicage.rpc.IJSONable {
 
     public String action;
     public String caption;
+    public String color;
     public String id;
     public long ui_flags;
 
@@ -45,6 +46,12 @@ public class ButtonTO implements com.mobicage.rpc.IJSONable {
             this.caption = (String) val;
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.ButtonTO object is missing field 'caption'");
+        }
+        if (json.containsKey("color")) {
+            Object val = json.get("color");
+            this.color = (String) val;
+        } else {
+            this.color = null;
         }
         if (json.containsKey("id")) {
             Object val = json.get("id");
@@ -69,6 +76,7 @@ public class ButtonTO implements com.mobicage.rpc.IJSONable {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
         obj.put("action", this.action);
         obj.put("caption", this.caption);
+        obj.put("color", this.color);
         obj.put("id", this.id);
         obj.put("ui_flags", this.ui_flags);
         return obj;
