@@ -95,7 +95,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import in.uncod.android.bypass.Bypass;
 import thirdparty.nishantnair.FlowLayout;
 import thirdparty.nishantnair.FlowLayoutRTL;
 
@@ -927,16 +926,8 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
     private void displayMembers(MessageTO parentMessage) {
         final boolean isChat = SystemUtils.isFlagEnabled(mFlags, MessagingPlugin.FLAG_DYNAMIC_CHAT);
         if (isChat) {
-            setTitle(R.string.group_chat);
             final JSONObject json = (JSONObject) JSONValue.parse(parentMessage.message);
-
-            getToolbar().post(new SafeRunnable() {
-                @Override
-                protected void safeRun() throws Exception {
-                    getSupportActionBar().setSubtitle((String) json.get("t"));
-                }
-            });
-
+            setTitle((String) json.get("t"));
             return;
         }
         List<String> members = new ArrayList<>();
