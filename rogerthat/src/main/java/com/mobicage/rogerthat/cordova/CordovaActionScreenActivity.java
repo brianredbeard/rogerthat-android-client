@@ -29,6 +29,7 @@ import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.plugins.friends.ActionScreenActivity;
 import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
+import com.mobicage.rogerthat.plugins.friends.ServiceMenuItemInfo;
 import com.mobicage.rogerthat.plugins.messaging.BrandingFailureException;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
@@ -103,6 +104,10 @@ public class CordovaActionScreenActivity extends ServiceBoundActivity {
 
     public String getContext() {
         return mContext;
+    }
+
+    public ServiceMenuItemInfo getServiceMenuItem() {
+        return new ServiceMenuItemInfo(mItemLabel, mItemTagHash);
     }
 
     public MessagingPlugin getMessagingPlugin() {

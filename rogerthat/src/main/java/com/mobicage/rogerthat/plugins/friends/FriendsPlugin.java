@@ -1397,6 +1397,11 @@ public class FriendsPlugin implements MobicagePlugin {
     }
 
     public Map<String, Object> getRogerthatUserAndServiceInfo(final String serviceEmail, final Friend serviceFriend) {
+        return getRogerthatUserAndServiceInfo(serviceEmail, serviceFriend, null);
+    }
+
+    public Map<String, Object> getRogerthatUserAndServiceInfo(final String serviceEmail, final Friend serviceFriend,
+                                                              final ServiceMenuItemInfo menuItem) {
         String[] data = serviceEmail == null ? new String[]{null, null} : mStore.getServiceData(serviceEmail);
         MyIdentity myIdentity = mMainService.getIdentityStore().getIdentity();
 
@@ -1433,6 +1438,7 @@ public class FriendsPlugin implements MobicagePlugin {
         info.put("user", userInfo);
         info.put("service", serviceInfo);
         info.put("system", systemInfo);
+        info.put("menuItem", menuItem == null ? null : menuItem.toJSONMap());
         return info;
     }
 

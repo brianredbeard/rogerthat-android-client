@@ -129,7 +129,6 @@ public class ActionScreenActivity extends ServiceBoundActivity {
 
     private WebView mBranding;
     private String mBrandingKey;
-    private String mContextMatch = "";
     private String mServiceEmail;
     private String mItemTagHash;
     private String mItemLabel;
@@ -903,7 +902,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 L.i("onPageFinished " + url);
                 if (!mInfoSet && mService != null && mIsHtmlContent) {
                     Map<String, Object> info = mFriendsPlugin.getRogerthatUserAndServiceInfo(mServiceEmail,
-                        mServiceFriend);
+                            mServiceFriend, new ServiceMenuItemInfo(mItemLabel, mItemTagHash));
 
                     executeJS(true, "if (typeof rogerthat !== 'undefined') rogerthat._setInfo(%s)",
                         JSONValue.toJSONString(info));
@@ -988,6 +987,10 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         if (CloudConstants.isContentBrandingApp()) {
             initFullScreenForContentBranding();
         }
+    }
+
+    public ServiceMenuItemInfo getServiceMenuItemInfo() {
+        return new ServiceMenuItemInfo(mItemLabel, mItemTagHash);
     }
 
     @SuppressLint("NewApi")
@@ -1259,8 +1262,6 @@ public class ActionScreenActivity extends ServiceBoundActivity {
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onServiceBound() {
-
-
         if (CloudConstants.isContentBrandingApp()) {
             final IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction(BrandingMgr.SERVICE_BRANDING_AVAILABLE_INTENT);

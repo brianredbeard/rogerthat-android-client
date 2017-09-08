@@ -2080,7 +2080,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         } catch (Exception e) {
             String errorMessage;
             String errorCode;
-            if (e.getMessage().contains("unknown word")) {
+            if (e.getMessage() != null && e.getMessage().contains("unknown word")) {
                 errorCode = "unknown_word";
                 errorMessage = getString(R.string.invalid_word, e.getMessage().split("unknown word: ")[1]);
             } else {
