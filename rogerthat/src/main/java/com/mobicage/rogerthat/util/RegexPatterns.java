@@ -17,6 +17,8 @@
  */
 package com.mobicage.rogerthat.util;
 
+import com.mobicage.rpc.config.AppConstants;
+
 import java.util.regex.Pattern;
 
 public class RegexPatterns {
@@ -28,13 +30,13 @@ public class RegexPatterns {
 
     public static final Pattern PIN = Pattern.compile("^\\d\\d\\d\\d$");
 
-    public static final Pattern FRIEND_INVITE_URL = Pattern.compile("^rogerthat://q/i.*$");
+    public static final Pattern FRIEND_INVITE_URL = Pattern.compile("^" + AppConstants.APP_ID + "://q/i.*$");
 
-    public static final Pattern FRIEND_INVITE_WITH_SECRET_URL = Pattern.compile("^rogerthat://q/i.*\\?.*s=.+$");
+    public static final Pattern FRIEND_INVITE_WITH_SECRET_URL = Pattern.compile("^" + AppConstants.APP_ID + "://q/i.*\\?.*s=.+$");
 
-    public static final Pattern SERVICE_INTERACT_URL = Pattern.compile("^rogerthat://q/s/(.*)/(\\d+)(\\?.+)?$");
+    public static final Pattern SERVICE_INTERACT_URL = Pattern.compile("^" + AppConstants.APP_ID + "://q/s/(.*)/(\\d+)(\\?.+)?$");
 
-    public static final Pattern OPEN_HOME_URL = Pattern.compile("^rogerthat://$");
+    public static final Pattern OPEN_HOME_URL = Pattern.compile("^" + AppConstants.APP_ID + "://$");
 
     public static final Pattern IDENTITY_SHORT_URL = Pattern
         .compile("^https://rogerth.at/M/([0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ$*-./:]+)(\\?.*)?$");

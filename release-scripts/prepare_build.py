@@ -205,7 +205,7 @@ def rename_package():
             s = s.replace('com.mobicage.rogerth.at', 'com.mobicage.rogerthat')
         s = s.replace("applicationIdSuffix '.debug'", "applicationIdSuffix '.%s.debug'" % package_suffix)
         s = s.replace("applicationIdSuffix ''", "applicationIdSuffix '.%s'" % package_suffix)
-        s = s.replace('"app_id", "rogerthat"', '"app_id", "%s"' % APP_ID)
+        s = s.replace('"rogerthat"', '"%s"' % APP_ID)
         if facebook_app_id:
             s = s.replace('188033791211994', str(facebook_app_id))
         f.seek(0)

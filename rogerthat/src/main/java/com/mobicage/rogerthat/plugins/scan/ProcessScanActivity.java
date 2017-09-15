@@ -43,6 +43,7 @@ import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
+import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.to.friends.GetUserInfoRequestTO;
 
@@ -61,8 +62,8 @@ import java.util.regex.Matcher;
 
 public class ProcessScanActivity extends ServiceBoundActivity {
 
-    public final static String URL_ROGERTHAT_PREFIX = "rogerthat://q/i";
-    public final static String URL_ROGERTHAT_SID_PREFIX = "rogerthat://q/s/";
+    public final static String URL_ROGERTHAT_PREFIX = AppConstants.APP_ID + "://q/i";
+    public final static String URL_ROGERTHAT_SID_PREFIX = AppConstants.APP_ID + "://q/s/";
 
     // /s/ (lowercase s) is probably no longer used. Certainly server doesnt serve this path
     public final static String SHORT_HTTPS_URL_PREFIX = CloudConstants.HTTPS_BASE_URL + "/s/";
