@@ -28,6 +28,7 @@ public class ServiceMenuItemTO implements com.mobicage.rpc.IJSONable {
     public com.mobicage.to.friends.ServiceMenuItemLinkTO link;
     public long action;
     public long[] coords;
+    public boolean fallThrough;
     public String hashedTag;
     public String iconColor;
     public String iconHash;
@@ -72,6 +73,12 @@ public class ServiceMenuItemTO implements com.mobicage.rpc.IJSONable {
             }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.friends.ServiceMenuItemTO object is missing field 'coords'");
+        }
+        if (json.containsKey("fallThrough")) {
+            Object val = json.get("fallThrough");
+            this.fallThrough = ((Boolean) val).booleanValue();
+        } else {
+            this.fallThrough = false;
         }
         if (json.containsKey("hashedTag")) {
             Object val = json.get("hashedTag");
@@ -157,6 +164,7 @@ public class ServiceMenuItemTO implements com.mobicage.rpc.IJSONable {
             }
             obj.put("coords", arr);
         }
+        obj.put("fallThrough", this.fallThrough);
         obj.put("hashedTag", this.hashedTag);
         obj.put("iconColor", this.iconColor);
         obj.put("iconHash", this.iconHash);

@@ -245,7 +245,7 @@ CREATE TABLE service_menu_item (
     z INTEGER NOT NULL,
     label TEXT NOT NULL,
     icon_hash TEXT NOT NULL,
-    screen_branding TEXT, static_flow_hash TEXT, hashed_tag TEXT, requires_wifi INTEGER NOT NULL DEFAULT 0, run_in_background INTEGER NOT NULL DEFAULT 1, "action" INTEGER NOT NULL DEFAULT 0, "icon_name" TEXT, "icon_color" TEXT, url TEXT, external INT,
+    screen_branding TEXT, static_flow_hash TEXT, hashed_tag TEXT, requires_wifi INTEGER NOT NULL DEFAULT 0, run_in_background INTEGER NOT NULL DEFAULT 1, "action" INTEGER NOT NULL DEFAULT 0, "icon_name" TEXT, "icon_color" TEXT, url TEXT, external INT, fall_through INTEGER DEFAULT 0,
     PRIMARY KEY (friend, x, y, z),
     FOREIGN KEY (friend) REFERENCES friend(email) 
 );
