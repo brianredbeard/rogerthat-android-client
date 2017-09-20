@@ -147,10 +147,12 @@ public class CordovaActionScreenActivity extends ServiceBoundActivity {
                 L.e(ioe);
                 return null;
             }
-        } else {
+        } else if (mBrandingResult != null) {
             String file = new File(mBrandingResult.dir, "resources/splash.png").getAbsolutePath();
             return Drawable.createFromPath(file);
         }
+        L.i("mBrandingResult not set yet, not showing splash screen.");
+        return null;
     }
 
     @Override

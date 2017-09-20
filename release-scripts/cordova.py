@@ -104,6 +104,10 @@ APPS = {
     }
 }
 
+# The order of these is important
+DEFAULT_PLUGINS = ['cordova-plugin-compat', 'cordova-plugin-whitelist', 'rogerthat-plugin',
+                   'cordova-plugin-splashscreen', 'cordova-plugin-statusbar', 'cordova-plugin-inappbrowser',
+                   'cordova-plugin-browsertab']
 
 def install_cordova_plugins(app_id, cordova_plugins, cordova_apps, colors):
     _check_cordova_command()
@@ -233,7 +237,7 @@ def _check_cordova_command():
 
 
 def _get_plugins(cordova_plugins):
-    plugins = ['cordova-plugin-compat', 'cordova-plugin-whitelist', 'rogerthat-plugin']
+    plugins = list(DEFAULT_PLUGINS)
 
     for cordova_plugin in cordova_plugins:
         if cordova_plugin in plugins:
