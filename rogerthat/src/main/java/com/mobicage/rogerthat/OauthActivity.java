@@ -50,10 +50,10 @@ public class OauthActivity extends Activity {
     public static String OAUTH_URL = "oauth_url";
     public static String SCOPES = "scopes";
 
+    public static String RESULT_QUERY = "result_query";
     public static String RESULT_STATE = "result_stae";
     public static String RESULT_CODE = "result_code";
     public static String RESULT_ERROR_MESSAGE = "result_error_message";
-    public static String RESULT_SUCCESS = "result_success";
 
     private boolean mAllowBackpress;
     private boolean mBuildUrl;
@@ -116,32 +116,20 @@ public class OauthActivity extends Activity {
                 String redirectUri = OauthUtils.getCallbackUrl();
                 if (OauthUtils.isRedirectUriFound(url, redirectUri)) {
                     Uri uri = Uri.parse(url);
-
+                    String query = uri.getQuery();
+                    L.d("Oauth authorize result: " + query);
                     String code = uri.getQueryParameter("code");
                     String state = uri.getQueryParameter("state");
-                    if (!TextUtils.isEmpty(code)) {
-                        L.d("Code: " + code);
-                        L.d("State: " + state);
+                    String errorDescription = uri.getQueryParameter("error_description");
 
-                        Intent resultIntent = new Intent(OauthActivity.FINISHED_OAUTH);
-                        resultIntent.putExtra(OauthActivity.RESULT_CODE, code);
-                        resultIntent.putExtra(OauthActivity.RESULT_STATE, state);
-                        resultIntent.putExtra(OauthActivity.RESULT_SUCCESS, true);
-                        setResult(Activity.RESULT_OK, resultIntent);
-                        finish();
-
-                    } else {
-                        String error = uri.getQueryParameter("error");
-                        String errorDescription = uri.getQueryParameter("error_description");
-                        L.d("error: " + error);
-                        L.d("errorMsg: " + errorDescription);
-
-                        Intent resultIntent = new Intent(OauthActivity.FINISHED_OAUTH);
-                        resultIntent.putExtra(OauthActivity.RESULT_ERROR_MESSAGE, errorDescription);
-                        resultIntent.putExtra(OauthActivity.RESULT_SUCCESS, false);
-                        setResult(Activity.RESULT_OK, resultIntent);
-                        finish();
-                    }
+                    Intent resultIntent = new Intent(OauthActivity.FINISHED_OAUTH);
+                    resultIntent.putExtra(OauthActivity.RESULT_QUERY, query);
+                    resultIntent.putExtra(OauthActivity.RESULT_CODE, code);
+                    resultIntent.putExtra(OauthActivity.RESULT_STATE, state);
+                    resultIntent.putExtra(OauthActivity.RESULT_STATE, state);
+                    resultIntent.putExtra(OauthActivity.RESULT_ERROR_MESSAGE, errorDescription);
+                    setResult(Activity.RESULT_OK, resultIntent);
+                    finish();
 
                     return true;
                 }

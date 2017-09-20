@@ -42,6 +42,8 @@ public interface IClientRpc {
 
     com.mobicage.to.messaging.forms.NewMyDigiPassFormResponseTO newMyDigiPassForm(com.mobicage.to.messaging.forms.NewMyDigiPassFormRequestTO request) throws java.lang.Exception;
 
+    com.mobicage.to.messaging.forms.NewOauthFormResponseTO newOauthForm(com.mobicage.to.messaging.forms.NewOauthFormRequestTO request) throws java.lang.Exception;
+
     com.mobicage.to.messaging.forms.NewPhotoUploadFormResponseTO newPhotoUploadForm(com.mobicage.to.messaging.forms.NewPhotoUploadFormRequestTO request) throws java.lang.Exception;
 
     com.mobicage.to.messaging.forms.NewRangeSliderFormResponseTO newRangeSliderForm(com.mobicage.to.messaging.forms.NewRangeSliderFormRequestTO request) throws java.lang.Exception;
@@ -77,6 +79,8 @@ public interface IClientRpc {
     com.mobicage.to.messaging.forms.UpdateMultiSelectFormResponseTO updateMultiSelectForm(com.mobicage.to.messaging.forms.UpdateMultiSelectFormRequestTO request) throws java.lang.Exception;
 
     com.mobicage.to.messaging.forms.UpdateMyDigiPassFormResponseTO updateMyDigiPassForm(com.mobicage.to.messaging.forms.UpdateMyDigiPassFormRequestTO request) throws java.lang.Exception;
+
+    com.mobicage.to.messaging.forms.UpdateOauthFormResponseTO updateOauthForm(com.mobicage.to.messaging.forms.UpdateOauthFormRequestTO request) throws java.lang.Exception;
 
     com.mobicage.to.messaging.forms.UpdatePhotoUploadFormResponseTO updatePhotoUploadForm(com.mobicage.to.messaging.forms.UpdatePhotoUploadFormRequestTO request) throws java.lang.Exception;
 

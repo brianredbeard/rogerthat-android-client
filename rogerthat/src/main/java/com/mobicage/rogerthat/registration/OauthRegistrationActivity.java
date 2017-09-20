@@ -30,6 +30,7 @@ import com.mobicage.rogerthat.Installation;
 import com.mobicage.rogerthat.OauthActivity;
 import com.mobicage.rogerthat.util.GoogleServicesUtils;
 import com.mobicage.rogerthat.util.GoogleServicesUtils.GCMRegistrationIdFoundCallback;
+import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
@@ -171,7 +172,7 @@ public class OauthRegistrationActivity extends AbstractRegistrationActivity {
         T.UI();
         if (requestCode == START_OAUTH_REQUEST_CODE) {
             if (resultCode == Activity.RESULT_OK) {
-                if (data.getBooleanExtra(OauthActivity.RESULT_SUCCESS, false)) {
+                if (!TextUtils.isEmptyOrWhitespace(data.getStringExtra(OauthActivity.RESULT_CODE))) {
                     registerWithOauthCode(data.getStringExtra(OauthActivity.RESULT_CODE), data.getStringExtra(OauthActivity.RESULT_STATE));
                 } else {
                     String errorMessage = data.getStringExtra(OauthActivity.RESULT_ERROR_MESSAGE);

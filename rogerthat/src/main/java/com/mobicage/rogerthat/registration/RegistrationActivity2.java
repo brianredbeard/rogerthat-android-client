@@ -75,6 +75,7 @@ import com.mobicage.rogerthat.util.FacebookUtils.PermissionType;
 import com.mobicage.rogerthat.util.GoogleServicesUtils;
 import com.mobicage.rogerthat.util.GoogleServicesUtils.GCMRegistrationIdFoundCallback;
 import com.mobicage.rogerthat.util.RegexPatterns;
+import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
@@ -83,6 +84,7 @@ import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
+import com.mobicage.rogerthat.util.ui.TestUtils;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rogerthat.util.ui.Wizard;
 import com.mobicage.rpc.Credentials;
@@ -936,12 +938,11 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
 
         if (requestCode == START_OAUTH_REQUEST_CODE) {
             if (resultCode == Activity.RESULT_OK) {
-                if (data.getBooleanExtra(OauthActivity.RESULT_SUCCESS, false)) {
+                if (!TextUtils.isEmptyOrWhitespace(data.getStringExtra(OauthActivity.RESULT_CODE))) {
                     registerWithOauthCode(data.getStringExtra(OauthActivity.RESULT_CODE), data.getStringExtra(OauthActivity.RESULT_STATE));
                 } else {
                     String message = data.getStringExtra(OauthActivity.RESULT_ERROR_MESSAGE);
                     UIUtils.showDialog(this, null, message);
-
                 }
             }
         }

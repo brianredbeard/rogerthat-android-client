@@ -90,6 +90,9 @@ public class CallReceiver {
         if ("com.mobicage.capi.messaging.newMyDigiPassForm".equals(function)) {
             return comMobicageCapiMessagingIClientRpc.newMyDigiPassForm(Parser.ComMobicageToMessagingFormsNewMyDigiPassFormRequestTO(call.arguments.get("request")));
         }
+        if ("com.mobicage.capi.messaging.newOauthForm".equals(function)) {
+            return comMobicageCapiMessagingIClientRpc.newOauthForm(Parser.ComMobicageToMessagingFormsNewOauthFormRequestTO(call.arguments.get("request")));
+        }
         if ("com.mobicage.capi.messaging.newPhotoUploadForm".equals(function)) {
             return comMobicageCapiMessagingIClientRpc.newPhotoUploadForm(Parser.ComMobicageToMessagingFormsNewPhotoUploadFormRequestTO(call.arguments.get("request")));
         }
@@ -143,6 +146,9 @@ public class CallReceiver {
         }
         if ("com.mobicage.capi.messaging.updateMyDigiPassForm".equals(function)) {
             return comMobicageCapiMessagingIClientRpc.updateMyDigiPassForm(Parser.ComMobicageToMessagingFormsUpdateMyDigiPassFormRequestTO(call.arguments.get("request")));
+        }
+        if ("com.mobicage.capi.messaging.updateOauthForm".equals(function)) {
+            return comMobicageCapiMessagingIClientRpc.updateOauthForm(Parser.ComMobicageToMessagingFormsUpdateOauthFormRequestTO(call.arguments.get("request")));
         }
         if ("com.mobicage.capi.messaging.updatePhotoUploadForm".equals(function)) {
             return comMobicageCapiMessagingIClientRpc.updatePhotoUploadForm(Parser.ComMobicageToMessagingFormsUpdatePhotoUploadFormRequestTO(call.arguments.get("request")));

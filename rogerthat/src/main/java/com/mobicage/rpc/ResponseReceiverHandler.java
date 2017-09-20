@@ -410,6 +410,15 @@ public class ResponseReceiverHandler {
                 resp.setResult(Parser.ComMobicageToMessagingFormsSubmitMyDigiPassFormResponseTO(rpcr.result));
             ((IResponseHandler<com.mobicage.to.messaging.forms.SubmitMyDigiPassFormResponseTO>) responseHandler).handle(resp);
         }
+        if ("com.mobicage.api.messaging.submitOauthForm".equals(function)) {
+            final Response<com.mobicage.to.messaging.forms.SubmitOauthFormResponseTO> resp = new Response<com.mobicage.to.messaging.forms.SubmitOauthFormResponseTO>();
+            resp.setError(rpcr.error);
+            resp.setSuccess(rpcr.success);
+            resp.setCallId(rpcr.callId);
+            if (rpcr.success)
+                resp.setResult(Parser.ComMobicageToMessagingFormsSubmitOauthFormResponseTO(rpcr.result));
+            ((IResponseHandler<com.mobicage.to.messaging.forms.SubmitOauthFormResponseTO>) responseHandler).handle(resp);
+        }
         if ("com.mobicage.api.messaging.submitPhotoUploadForm".equals(function)) {
             final Response<com.mobicage.to.messaging.forms.SubmitPhotoUploadFormResponseTO> resp = new Response<com.mobicage.to.messaging.forms.SubmitPhotoUploadFormResponseTO>();
             resp.setError(rpcr.error);

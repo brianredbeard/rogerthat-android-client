@@ -1420,6 +1420,20 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.NewOauthFormRequestTO ComMobicageToMessagingFormsNewOauthFormRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.NewOauthFormRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.NewOauthFormResponseTO ComMobicageToMessagingFormsNewOauthFormResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.NewOauthFormResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
     public static com.mobicage.to.messaging.forms.NewPhotoUploadFormRequestTO ComMobicageToMessagingFormsNewPhotoUploadFormRequestTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;
@@ -1515,6 +1529,27 @@ public class Parser {
         if (value == null)
             return null;
         return new com.mobicage.to.messaging.forms.NewTextLineFormResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.OauthFormMessageTO ComMobicageToMessagingFormsOauthFormMessageTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.OauthFormMessageTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.OauthFormTO ComMobicageToMessagingFormsOauthFormTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.OauthFormTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.OauthTO ComMobicageToMessagingFormsOauthTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.OauthTO((Map<String, Object>) value);
     }
 
     @SuppressWarnings("unchecked")
@@ -1725,6 +1760,20 @@ public class Parser {
         if (value == null)
             return null;
         return new com.mobicage.to.messaging.forms.SubmitMyDigiPassFormResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.SubmitOauthFormRequestTO ComMobicageToMessagingFormsSubmitOauthFormRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.SubmitOauthFormRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.SubmitOauthFormResponseTO ComMobicageToMessagingFormsSubmitOauthFormResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.SubmitOauthFormResponseTO((Map<String, Object>) value);
     }
 
     @SuppressWarnings("unchecked")
@@ -1977,6 +2026,20 @@ public class Parser {
         if (value == null)
             return null;
         return new com.mobicage.to.messaging.forms.UpdateMyDigiPassFormResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.UpdateOauthFormRequestTO ComMobicageToMessagingFormsUpdateOauthFormRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.UpdateOauthFormRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.UpdateOauthFormResponseTO ComMobicageToMessagingFormsUpdateOauthFormResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.UpdateOauthFormResponseTO((Map<String, Object>) value);
     }
 
     @SuppressWarnings("unchecked")
