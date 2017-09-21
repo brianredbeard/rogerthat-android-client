@@ -19,6 +19,7 @@
 package com.mobicage.rogerthat.util;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.view.View;
@@ -26,19 +27,44 @@ import android.widget.ImageView;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.system.SafeAsyncTask;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
 
 import java.io.File;
 import java.io.InputStream;
 
+public class DownloadImageTask extends SafeAsyncTask<String, Void, DownloadImageTask.Result> {
 
-public class DownloadImageTask extends SafeAsyncTask<String, Void, Bitmap> {
+    public class Result {
+
+        public String url ;
+        public Bitmap image ;
+
+        public Result(String url, Bitmap image) {
+            this.url = url;
+            this.image = image;
+        }
+
+        public String getUrlHash() {
+            return SecurityUtils.sha256(this.url);
+        }
+    }
+
     private boolean rounded;
     private int topRadius;
     private ImageView bmImage;
     private Context context;
     private CachedDownloader cachedDownloader;
+    private boolean resultViaIntent;
+
+    public DownloadImageTask(CachedDownloader cachedDownloader, Context context) {
+        this.cachedDownloader = cachedDownloader;
+        this.bmImage = null;
+        this.rounded = false;
+        this.context = context;
+        this.topRadius = 0;
+    }
 
     public DownloadImageTask(CachedDownloader cachedDownloader, ImageView bmImage, boolean rounded, Context context, int topRadius) {
         this.cachedDownloader = cachedDownloader;
@@ -49,7 +75,7 @@ public class DownloadImageTask extends SafeAsyncTask<String, Void, Bitmap> {
     }
 
     @Override
-    protected Bitmap safeDoInBackground(String... urls) {
+    protected Result safeDoInBackground(String... urls) {
         String urldisplay = urls[0];
         try {
             final Bitmap bitmap;
@@ -66,11 +92,11 @@ public class DownloadImageTask extends SafeAsyncTask<String, Void, Bitmap> {
             }
             if (bitmap != null) {
                 if (rounded && topRadius > 0)
-                    return ImageHelper.getRoundTopCornerBitmap(this.context, bitmap, topRadius);
+                    return  new Result(urldisplay, ImageHelper.getRoundTopCornerBitmap(this.context, bitmap, topRadius));
                 else if (rounded)
-                    return ImageHelper.getRoundedCornerAvatar(bitmap);
+                    return  new Result(urldisplay, ImageHelper.getRoundedCornerAvatar(bitmap));
             }
-            return bitmap;
+            return new Result(urldisplay, bitmap);
         } catch (Exception e) {
             L.d("DownloadImageTask error", e);
             return null;
@@ -78,19 +104,26 @@ public class DownloadImageTask extends SafeAsyncTask<String, Void, Bitmap> {
     }
 
     @Override
-    protected void onPostExecute(Bitmap result) {
-        if (result != null) {
-            bmImage.setImageBitmap(result);
-            bmImage.setVisibility(View.VISIBLE);
+    protected void onPostExecute(Result result) {
+        if (bmImage == null && result != null) {
+            Intent intent = new Intent(CachedDownloader.CACHED_DOWNLOAD_AVAILABLE_INTENT);
+            intent.putExtra("hash", result.getUrlHash());
+            intent.putExtra("url", result.url);
+            context.sendBroadcast(intent);
         } else {
-            if (rounded) {
-                if (topRadius > 0) {
-                    bmImage.setImageResource(R.drawable.news_image_placeholder_rounded);
-                } else {
-                    bmImage.setImageResource(R.drawable.news_avatar_placeholder);
-                }
+            if (result != null) {
+                bmImage.setImageBitmap(result.image);
+                bmImage.setVisibility(View.VISIBLE);
             } else {
-                bmImage.setImageResource(R.drawable.news_image_placeholder);
+                if (rounded) {
+                    if (topRadius > 0) {
+                        bmImage.setImageResource(R.drawable.news_image_placeholder_rounded);
+                    } else {
+                        bmImage.setImageResource(R.drawable.news_avatar_placeholder);
+                    }
+                } else {
+                    bmImage.setImageResource(R.drawable.news_image_placeholder);
+                }
             }
         }
     }

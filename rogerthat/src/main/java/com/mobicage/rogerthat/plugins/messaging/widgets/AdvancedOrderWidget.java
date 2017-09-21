@@ -905,7 +905,7 @@ public class AdvancedOrderWidget extends Widget {
         });
 
         if (!TextUtils.isEmptyOrWhitespace(row.imageUrl)) {
-            new DownloadImageTask(mCachedDownloader, imageView, false, mActivity, 0).execute(row.imageUrl);
+            new DownloadImageTask(mCachedDownloader, mActivity).execute(row.imageUrl);
         }
 
         mActivity.getMainService().postOnUIHandler(new SafeRunnable() {
