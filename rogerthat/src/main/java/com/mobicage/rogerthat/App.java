@@ -94,9 +94,7 @@ public class App extends MultiDexApplication implements Thread.UncaughtException
 
         Iconics.registerFont(new FontAwesome());
 
-        if (AppConstants.Security.PIN_LOCKED) {
-            mPinLockMgr = new PinLockMgr(this);
-        }
+        mPinLockMgr = new PinLockMgr(this);
     }
 
     public static File getExceptionsDir(Context context) {

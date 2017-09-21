@@ -259,7 +259,6 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
     private boolean mShouldClearPin = false;
 
     private Credentials mCredentials;
-    private PinLockMgr mPinLockMgr;
     // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static MainService getInstance() {
@@ -342,9 +341,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
 
         hideLogForwardNotification();
 
-        if (AppConstants.Security.PIN_LOCKED) {
-            mPinLockMgr = App.getContext().getPinLockMgr().setMainService(this);
-        }
+        App.getContext().getPinLockMgr().setMainService(this);
 
         // This should remain the last line of this method.
         current = this;
@@ -1131,9 +1128,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
             stopSelf();
         }
 
-        if (AppConstants.Security.PIN_LOCKED) {
-            mPinLockMgr.unregistered();
-        }
+        App.getContext().getPinLockMgr().unregistered();
     }
 
     public Credentials getCredentials() {
