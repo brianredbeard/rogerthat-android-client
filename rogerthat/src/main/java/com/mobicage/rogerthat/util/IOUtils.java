@@ -227,7 +227,20 @@ public class IOUtils {
                 maxSize = size;
             }
             int sampleSize = Math.round((size / maxSize));
-            L.d("compressPicture size: " + size);
+            L.d("compressPicture 100% size: " + size);
+
+            if (size > maxSize) {
+                imgBitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+                FileOutputStream compressfOut = new FileOutputStream(file);
+                try {
+                    imgBitmap.compress(Bitmap.CompressFormat.JPEG, 80, compressfOut);
+                } finally {
+                    compressfOut.close();
+                }
+                size = file.length();
+                L.d("compressPicture 80% size: " + size);
+            }
+
             if (size > maxSize && sampleSize > 1) {
                 double cs;
                 do {
@@ -245,12 +258,15 @@ public class IOUtils {
             final int exifRotation = CropUtil.getExifRotation(file);
             imgBitmap = ImageHelper.rotateBitmap(imgBitmap, exifRotation);
 
-            FileOutputStream fOut = new FileOutputStream(file);
+            FileOutputStream savefOut = new FileOutputStream(file);
             try {
-                imgBitmap.compress(Bitmap.CompressFormat.JPEG, 80, fOut);
+                imgBitmap.compress(Bitmap.CompressFormat.JPEG, 100, savefOut);
             } finally {
-                fOut.close();
+                savefOut.close();
             }
+
+            L.d("compressPicture final size: " + file.length());
+
         } catch (Exception e) {
             L.e("compressPicture exception", e);
         }

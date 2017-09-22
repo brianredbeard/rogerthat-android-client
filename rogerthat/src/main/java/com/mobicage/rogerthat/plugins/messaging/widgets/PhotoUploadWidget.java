@@ -414,21 +414,25 @@ public class PhotoUploadWidget extends Widget {
 
     @Override
     public boolean proceedWithSubmit(final String buttonId) {
-        final File image;
+        File image = null;
         try {
             image = getTmpUploadPhotoLocation();
         } catch (IOException e) {
-            L.d(e.getMessage());
-            UIUtils.showLongToast(getContext(), e.getMessage());
-            return false;
+            if (Message.POSITIVE.equals(buttonId)) {
+                L.d(e.getMessage());
+                UIUtils.showLongToast(getContext(), e.getMessage());
+                return false;
+            }
         }
 
         if (Message.POSITIVE.equals(buttonId)) {
-            boolean imageExists = image.exists();
+            boolean imageExists = image != null && image.exists();
             if (!mPhotoSelected || !imageExists) {
                 UIUtils.showDialog(mActivity, R.string.no_photo_selected_tilte, R.string.no_photo_selected_summary);
                 return false;
             }
+        } else if (image != null) {
+            image.delete();
         }
         return true;
     }
@@ -442,8 +446,9 @@ public class PhotoUploadWidget extends Widget {
         request.parent_message_key = mMessage.parent_key;
         request.timestamp = timestamp;
         final boolean isSentByJSMFR = (mMessage.flags & MessagingPlugin.FLAG_SENT_BY_JSMFR) == MessagingPlugin.FLAG_SENT_BY_JSMFR;
-        final File image = getTmpUploadPhotoLocation();
+
         if (Message.POSITIVE.equals(buttonId)) {
+            final File image = getTmpUploadPhotoLocation();
             boolean showTransferring = mActivity.getMainService().getPlugin(MessagingPlugin.class)
                 .startUploadingFile(image, mMessage, AttachmentViewerActivity.CONTENT_TYPE_JPEG);
 
@@ -457,10 +462,8 @@ public class PhotoUploadWidget extends Widget {
         } else if (isSentByJSMFR) {
             mPlugin.answerJsMfrMessage(mMessage, request.toJSONMap(),
                 "com.mobicage.api.messaging.submitPhotoUploadForm", mActivity, mParentView);
-            image.delete();
         } else {
             Rpc.submitPhotoUploadForm(new ResponseHandler<SubmitPhotoUploadFormResponseTO>(), request);
-            image.delete();
         }
     }
 
