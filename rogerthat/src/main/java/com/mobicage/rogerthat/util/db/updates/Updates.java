@@ -57,6 +57,7 @@ public class Updates {
         mUpdates.put(69, new DeleteAttachments());
         mUpdates.put(71, new RequestIdentityQRCode());
         mUpdates.put(72, new RequestFriendsAndAssets());
+        mUpdates.put(79, new AddPaymentAssetColumnsIfNeeded());
     }
 
     public IDbUpdater getUpdater(int version) {

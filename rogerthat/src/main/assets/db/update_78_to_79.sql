@@ -1,0 +1,1 @@
+-- Adding columns `available_balance` and `total_balance` to table `payment_asset` if they don't exist yet in post-update script.
