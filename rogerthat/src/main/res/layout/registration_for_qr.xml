@@ -53,7 +53,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:text="@string/scan_qr_code"
-            android:theme="@style/ButtonTheme"
+            android:theme="@style/PrimaryButtonTheme"
             android:textSize="18sp"/>
 
     </LinearLayout>

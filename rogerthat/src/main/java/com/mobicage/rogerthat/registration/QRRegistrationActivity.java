@@ -194,16 +194,16 @@ public class QRRegistrationActivity extends AbstractRegistrationActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         T.UI();
+        if (mProgressDialog != null) {
+            mProgressDialog.dismiss();
+            mProgressDialog = null;
+        }
         if (resultCode == RESULT_OK) {
             if (requestCode == ZXING_SCAN_QR_CODE_RESULT) {
                 final String rawScanResult = intent.getStringExtra("SCAN_RESULT");
                 L.d("scanned: " + rawScanResult);
                 registerWithQR(rawScanResult);
             }
-        }
-        if (mProgressDialog != null) {
-            mProgressDialog.dismiss();
-            mProgressDialog = null;
         }
     }
 
