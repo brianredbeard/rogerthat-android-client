@@ -706,6 +706,10 @@ def convert_config():
         registration_type = 'REGISTRATION_TYPE_FULL_OAUTH'
         registration_type_oauth_domain = 'dummy'
         registration_type_oauth_url = doc['APP_CONSTANTS']['REGISTRATION_TYPE_OAUTH_URL']
+    elif registration_type == 4:
+        registration_type = 'REGISTRATION_TYPE_QR'
+        registration_type_oauth_domain = 'dummy'
+        registration_type_oauth_url = 'dummy'
     else:
         raise Exception('Invalid registration type %d' % registration_type)
 
@@ -732,6 +736,8 @@ public class AppConstants {
     public static final int REGISTRATION_TYPE_FULL_OAUTH = 3;
     public static final String REGISTRATION_TYPE_OAUTH_DOMAIN = "%(registration_type_oauth_domain)s";
     public static final String REGISTRATION_TYPE_OAUTH_URL = "%(registration_type_oauth_url)s";
+    public static final int REGISTRATION_TYPE_QR = 4;
+    public static final String REGISTRATION_TYPE_QR_TYPE = "jwt";
     public static int getRegistrationType() {
         return %(registration_type)s;
     };

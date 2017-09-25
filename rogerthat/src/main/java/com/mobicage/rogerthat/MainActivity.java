@@ -49,6 +49,7 @@ import com.mobicage.rogerthat.plugins.security.SecurityPlugin;
 import com.mobicage.rogerthat.registration.ContentBrandingRegistrationActivity;
 import com.mobicage.rogerthat.registration.DetectedBeaconActivity;
 import com.mobicage.rogerthat.registration.OauthRegistrationActivity;
+import com.mobicage.rogerthat.registration.QRRegistrationActivity;
 import com.mobicage.rogerthat.registration.RegistrationActivity2;
 import com.mobicage.rogerthat.registration.RegistrationWizard2;
 import com.mobicage.rogerthat.registration.YSAAARegistrationActivity;
@@ -586,6 +587,13 @@ public class MainActivity extends ServiceBoundActivity implements PinLockMgr.NoP
             intent.setData(qrUri);
             intent.setFlags(flags);
             L.d("Starting OauthRegistrationActivity");
+            startActivity(intent);
+            finish();
+        } else if (AppConstants.getRegistrationType() == AppConstants.REGISTRATION_TYPE_QR) {
+            final Intent intent = new Intent(this, QRRegistrationActivity.class);
+            intent.setData(qrUri);
+            intent.setFlags(flags);
+            L.d("Starting QRRegistrationActivity");
             startActivity(intent);
             finish();
         } else {
