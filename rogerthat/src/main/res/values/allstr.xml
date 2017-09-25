@@ -577,4 +577,5 @@
 
     <string name="authorize">Authorize</string>
     <string name="authorize_success">Successfully authorized</string>
+    <string name="register_qr_text">Welcome to the %1$s App. In order for this app to offer you personalised services, you\'ll need to make an account on %2$s\n\nAfter logging in on the website, we\'ll present you with a QR code to link your app to your account.</string>
 </resources>

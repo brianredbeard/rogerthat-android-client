@@ -37,6 +37,7 @@ public class AppConstants {
     public static final String REGISTRATION_TYPE_OAUTH_URL = "dummy";
     public static final int REGISTRATION_TYPE_QR = 4;
     public static final String REGISTRATION_TYPE_QR_TYPE = "jwt";
+    public static final String REGISTRATION_TYPE_QR_URL = "dummy";
 
     public static int getRegistrationType() {
         return REGISTRATION_TYPE_DEFAULT;

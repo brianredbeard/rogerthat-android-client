@@ -27,6 +27,7 @@ import android.support.v4.app.ActivityCompat;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.Installation;
@@ -45,6 +46,7 @@ import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.Pausable;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.Credentials;
+import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.rpc.newxmpp.XMPPConfigurationFactory;
 
@@ -144,6 +146,10 @@ public class QRRegistrationActivity extends AbstractRegistrationActivity {
     protected void onServiceBound() {
         T.UI();
         setContentViewWithoutNavigationBar(R.layout.registration_for_qr);
+
+        TextView tv = (TextView) findViewById(R.id.registration_text);
+        tv.setText(getString(R.string.register_qr_text, getString(R.string.app_name), AppConstants.REGISTRATION_TYPE_QR_URL));
+
         mScanQrCodeBtn = (Button) findViewById(R.id.registration_scan_qr_code);
         mScanQrCodeBtn.setOnClickListener(new SafeViewOnClickListener() {
             @Override
