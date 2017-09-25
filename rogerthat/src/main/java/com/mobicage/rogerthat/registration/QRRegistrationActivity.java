@@ -223,7 +223,7 @@ public class QRRegistrationActivity extends AbstractRegistrationActivity {
         }
     }
 
-    private void registerWithQR(final String qr_content) {
+    private void registerWithQR(final String qrContent) {
         if (!mService.getNetworkConnectivityManager().isConnected()) {
             UIUtils.showNoNetworkDialog(this);
             return;
@@ -261,7 +261,7 @@ public class QRRegistrationActivity extends AbstractRegistrationActivity {
                 T.REGISTRATION();
                 String version = "1";
                 String signature = SecurityUtils.sha256(version + " " + installId + " " + timestamp + " " + deviceId + " "
-                    + registrationId + " " + REGISTRATION_TYPE_QR_TYPE + "-" + qr_content +  CloudConstants.REGISTRATION_MAIN_SIGNATURE);
+                    + registrationId + " " + REGISTRATION_TYPE_QR_TYPE + "-" + qrContent +  CloudConstants.REGISTRATION_MAIN_SIGNATURE);
 
                 HttpPost httppost = new HttpPost(CloudConstants.REGISTRATION_QR_URL);
                 try {
@@ -274,7 +274,7 @@ public class QRRegistrationActivity extends AbstractRegistrationActivity {
                     nameValuePairs.add(new BasicNameValuePair("signature", signature));
                     nameValuePairs.add(new BasicNameValuePair("install_id", installId));
                     nameValuePairs.add(new BasicNameValuePair("qr_type", REGISTRATION_TYPE_QR_TYPE));
-                    nameValuePairs.add(new BasicNameValuePair("qr_content", qr_content));
+                    nameValuePairs.add(new BasicNameValuePair("qr_content", qrContent));
                     nameValuePairs.add(new BasicNameValuePair("language", Locale.getDefault().getLanguage()));
                     nameValuePairs.add(new BasicNameValuePair("country", Locale.getDefault().getCountry()));
                     nameValuePairs.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
