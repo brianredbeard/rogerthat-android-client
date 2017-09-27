@@ -66,6 +66,8 @@ public class AppConstants {
     public static final String[] PROFILE_DATA_FIELDS = new String[] {};
     public static final boolean PROFILE_SHOW_GENDER_AND_BIRTHDATE = true;
 
+    public static final String TERMS_OF_SERVICE_URL = "https://rogerth.at/static/terms_and_conditions.html";
+
     public static final String ABOUT_WEBSITE = "www.rogerthat.net";
     public static final String ABOUT_WEBSITE_URL = "http://www.rogerthat.net";
     public static final String ABOUT_EMAIL = "info@mobicage.com";

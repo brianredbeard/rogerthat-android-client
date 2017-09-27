@@ -174,7 +174,7 @@ public class QRRegistrationActivity extends AbstractRegistrationActivity {
             rogerthatWelcomeTextView.setText(getString(R.string.registration_welcome_text,
                     getString(R.string.app_name)));
 
-            tosTextView.setText(Html.fromHtml("<a href=\"" + CloudConstants.TERMS_OF_SERVICE_URL + "\">"
+            tosTextView.setText(Html.fromHtml("<a href=\"" + AppConstants.TERMS_OF_SERVICE_URL + "\">"
                     + tosTextView.getText() + "</a>"));
             tosTextView.setMovementMethod(LinkMovementMethod.getInstance());
 

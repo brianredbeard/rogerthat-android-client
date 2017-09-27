@@ -67,7 +67,6 @@ public class CloudConstants {
         + "/login_google?continue=%2Fregister%3Fua%3Dandroid";
     public final static String REGISTRATION_LOG_STEP_URL = HTTPS_BASE_URL
         + "/unauthenticated/mobi/registration/log_registration_step";
-    public final static String TERMS_OF_SERVICE_URL = HTTPS_BASE_URL + "/static/terms_and_conditions.html";
     public final static String LOG_ERROR_URL = HTTPS_BASE_URL + "/unauthenticated/mobi/logging/exception";
     public final static String JS_EMBEDDING_URL_PREFIX = HTTPS_BASE_URL + "/mobi/js_embedding/";
     public final static String INSTALL_URL = "/install";
