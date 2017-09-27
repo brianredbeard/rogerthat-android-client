@@ -22,12 +22,19 @@ import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.text.Html;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.method.LinkMovementMethod;
+import android.text.style.StyleSpan;
 import android.view.View;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.ViewFlipper;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.Installation;
@@ -39,12 +46,14 @@ import com.mobicage.rogerthat.util.GoogleServicesUtils.GCMRegistrationIdFoundCal
 import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.security.SecurityUtils;
+import com.mobicage.rogerthat.util.system.SafeAsyncTask;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.Pausable;
 import com.mobicage.rogerthat.util.ui.UIUtils;
+import com.mobicage.rogerthat.util.ui.Wizard;
 import com.mobicage.rpc.Credentials;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
@@ -68,10 +77,13 @@ import org.json.simple.JSONValue;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import javax.net.ssl.SSLException;
 
 import static com.mobicage.rpc.config.AppConstants.REGISTRATION_TYPE_QR_TYPE;
 
@@ -147,8 +159,45 @@ public class QRRegistrationActivity extends AbstractRegistrationActivity {
         T.UI();
         setContentViewWithoutNavigationBar(R.layout.registration_for_qr);
 
+        TextView tosTextView = (TextView) findViewById(R.id.registration_tos);
+        tosTextView.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/lato_light_italic.ttf"));
+        tosTextView.setTextColor(ContextCompat.getColor(QRRegistrationActivity.this, R.color.mc_default_text));
+
+        final Button agreeBtn = (Button) findViewById(R.id.registration_agree_tos);
+        TextView rogerthatWelcomeTextView = (TextView) findViewById(R.id.rogerthat_welcome);
+        if (CloudConstants.isEnterpriseApp()) {
+            rogerthatWelcomeTextView.setText(getString(R.string.rogerthat_welcome_enterprise,
+                    getString(R.string.app_name)));
+            tosTextView.setVisibility(View.GONE);
+            agreeBtn.setText(R.string.start_registration);
+        } else {
+            rogerthatWelcomeTextView.setText(getString(R.string.registration_welcome_text,
+                    getString(R.string.app_name)));
+
+            tosTextView.setText(Html.fromHtml("<a href=\"" + CloudConstants.TERMS_OF_SERVICE_URL + "\">"
+                    + tosTextView.getText() + "</a>"));
+            tosTextView.setMovementMethod(LinkMovementMethod.getInstance());
+
+            agreeBtn.setText(R.string.registration_btn_agree_tos);
+        }
+
+        agreeBtn.setOnClickListener(new SafeViewOnClickListener() {
+            @Override
+            public void safeOnClick(View v) {
+                agreeBtn.setEnabled(false);
+                sendRegistrationStep(RegistrationWizard2.REGISTRATION_STEP_AGREED_TOS);
+                mWiz.proceedToNextPage();
+            }
+        });
+
         TextView tv = (TextView) findViewById(R.id.registration_text);
-        tv.setText(getString(R.string.register_qr_text, getString(R.string.app_name), AppConstants.REGISTRATION_TYPE_QR_URL));
+        String text = getString(R.string.register_qr_text, getString(R.string.app_name), AppConstants.REGISTRATION_TYPE_QR_URL);
+        int startOffset = text.indexOf(AppConstants.REGISTRATION_TYPE_QR_URL);
+        final SpannableString spanText = new SpannableString(text);
+
+        spanText.setSpan(new StyleSpan(Typeface.BOLD), startOffset, startOffset + AppConstants.REGISTRATION_TYPE_QR_URL.length(),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        tv.setText(spanText);
 
         mScanQrCodeBtn = (Button) findViewById(R.id.registration_scan_qr_code);
         mScanQrCodeBtn.setOnClickListener(new SafeViewOnClickListener() {
@@ -159,7 +208,11 @@ public class QRRegistrationActivity extends AbstractRegistrationActivity {
         });
 
         mWiz = QRRegistrationWizard.getWizard(mService, Installation.id(this));
+        mWiz.setFlipper((ViewFlipper) findViewById(R.id.registration_viewFlipper));
         setWizard(mWiz);
+        addAgreeTOSHandler();
+        addScanQRHandler();
+        mWiz.run();
         if (CloudConstants.USE_GCM_KICK_CHANNEL && GoogleServicesUtils.checkPlayServices(this, true)) {
             GoogleServicesUtils.registerGCMRegistrationId(mService, new GCMRegistrationIdFoundCallback() {
                 @Override
@@ -168,6 +221,54 @@ public class QRRegistrationActivity extends AbstractRegistrationActivity {
                 }
             });
         }
+    }
+
+    private void addAgreeTOSHandler() {
+        mWiz.addPageHandler(new Wizard.PageHandler() {
+
+            @Override
+            public void pageDisplayed(Button back, Button next, ViewFlipper switcher) {
+            }
+
+            @Override
+            public String getTitle() {
+                return null;
+            }
+
+            @Override
+            public boolean beforeNextClicked(Button back, Button next, ViewFlipper switcher) {
+                return false;
+            }
+
+            @Override
+            public boolean beforeBackClicked(Button back, Button next, ViewFlipper switcher) {
+                return false;
+            }
+        });
+    }
+
+    private void addScanQRHandler() {
+        mWiz.addPageHandler(new Wizard.PageHandler() {
+
+            @Override
+            public void pageDisplayed(Button back, Button next, ViewFlipper switcher) {
+            }
+
+            @Override
+            public String getTitle() {
+                return null;
+            }
+
+            @Override
+            public boolean beforeNextClicked(Button back, Button next, ViewFlipper switcher) {
+                return false;
+            }
+
+            @Override
+            public boolean beforeBackClicked(Button back, Button next, ViewFlipper switcher) {
+                return false;
+            }
+        });
     }
 
     private void startQRScan() {
@@ -501,5 +602,78 @@ public class QRRegistrationActivity extends AbstractRegistrationActivity {
 
     @Override
     protected void onServiceUnbound() {
+    }
+
+    public void sendRegistrationStep(final String step) {
+        new SafeAsyncTask<Object, Object, Object>() {
+
+            @Override
+            protected Object safeDoInBackground(Object... params) {
+                final HttpPost httpPost = new HttpPost(CloudConstants.REGISTRATION_LOG_STEP_URL);
+                httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
+                httpPost.setHeader("User-Agent", MainService.getUserAgent(QRRegistrationActivity.this));
+                List<NameValuePair> formParams = new ArrayList<NameValuePair>();
+                formParams.add(new BasicNameValuePair("step", step));
+                formParams.add(new BasicNameValuePair("install_id", mWiz.getInstallationId()));
+
+                UrlEncodedFormEntity entity;
+                try {
+                    entity = new UrlEncodedFormEntity(formParams, HTTP.UTF_8);
+                } catch (UnsupportedEncodingException e) {
+                    L.bug(e);
+                    return false;
+                }
+                httpPost.setEntity(entity);
+                L.d("Sending registration step: " + step);
+                HttpResponse response;
+                try {
+                    response = HTTPUtil.getHttpClient(HTTP_TIMEOUT, HTTP_RETRY_COUNT).execute(httpPost);
+                } catch (ClientProtocolException e) {
+                    L.bug(e);
+                    return false;
+                } catch (SSLException e) {
+                    L.bug(e);
+                    return false;
+                } catch (IOException e) {
+                    L.e(e);
+                    return false;
+                }
+
+                if (response.getEntity() != null) {
+                    try {
+                        response.getEntity().consumeContent();
+                    } catch (IOException e) {
+                        L.bug(e);
+                        return false;
+                    }
+                }
+
+                L.d("Registration step " + step + " sent");
+                final int responseCode = response.getStatusLine().getStatusCode();
+                if (responseCode != HttpStatus.SC_OK) {
+                    L.bug("HTTP request resulted in status code " + responseCode);
+                    return false;
+                }
+
+                return true;
+            }
+
+            @Override
+            protected void safeOnPostExecute(Object result) {
+            }
+
+            @Override
+            protected void safeOnCancelled(Object result) {
+            }
+
+            @Override
+            protected void safeOnProgressUpdate(Object... values) {
+            }
+
+            @Override
+            protected void safeOnPreExecute() {
+            }
+
+        }.execute();
     }
 }
