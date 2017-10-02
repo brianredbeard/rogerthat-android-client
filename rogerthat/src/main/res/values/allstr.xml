@@ -578,4 +578,8 @@
     <string name="authorize">Authorize</string>
     <string name="authorize_success">Successfully authorized</string>
     <string name="register_qr_text">Welcome to the %1$s App.\n\nTo get started, visit\n %2$s \nfrom your PC, laptop or tablet and scan your personal QR code.</string>
+    <string name="pay">Pay</string>
+    <string name="transaction_id">Transaction ID</string>
+    <string name="provider_id">Provider ID</string>
+    <string name="status">Status</string>
 </resources>

@@ -18,44 +18,36 @@
 
 package com.mobicage.rogerthat.plugins.messaging.widgets;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.net.Uri;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.api.messaging.Rpc;
 import com.mobicage.rogerth.at.R;
-import com.mobicage.rogerthat.OauthActivity;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
-import com.mobicage.rogerthat.util.OauthUtils;
-import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
-import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
-import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.rpc.config.LookAndFeelConstants;
-import com.mobicage.to.messaging.forms.SubmitOauthFormRequestTO;
-import com.mobicage.to.messaging.forms.SubmitOauthFormResponseTO;
+import com.mobicage.to.messaging.forms.PayWidgetResultTO;
 import com.mobicage.to.messaging.forms.SubmitPayFormRequestTO;
 import com.mobicage.to.messaging.forms.SubmitPayFormResponseTO;
-import com.mobicage.to.messaging.forms.UnicodeWidgetResultTO;
 
 import java.util.Map;
 
 @SuppressWarnings("unchecked")
 public class PayWidget extends Widget {
 
-    private UnicodeWidgetResultTO mResult;
+    private Button mPayBtn;
+    private PayWidgetResultTO mResult;
+    private LinearLayout mResultData;
 
     public PayWidget(Context context) {
         super(context);
@@ -67,6 +59,29 @@ public class PayWidget extends Widget {
 
     @Override
     public void initializeWidget() {
+        mPayBtn = (Button) findViewById(R.id.pay_btn);
+        mPayBtn.setOnClickListener(new SafeViewOnClickListener() {
+            @Override
+            public void safeOnClick(View v) {
+                pay();
+            }
+        });
+
+        IconicsDrawable d = new IconicsDrawable(mActivity, FontAwesome.Icon.faw_credit_card).color(LookAndFeelConstants.getPrimaryIconColor(mActivity)).sizeDp(24);
+        mPayBtn.setCompoundDrawablesWithIntrinsicBounds(d, null, null, null);
+
+        mResultData = (LinearLayout) findViewById(R.id.result_data);
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> result = (Map<String, Object>) mWidgetMap.get("value");
+        if (result != null) {
+            try {
+                mResult = new PayWidgetResultTO(result);
+                showResult();
+            } catch (IncompleteMessageException e) {
+                L.bug(e); // Should never happen
+            }
+        }
     }
 
     public static String valueString(Context context, Map<String, Object> widget) {
@@ -79,7 +94,7 @@ public class PayWidget extends Widget {
     }
 
     @Override
-    public UnicodeWidgetResultTO getWidgetResult() {
+    public PayWidgetResultTO getWidgetResult() {
         return mResult;
     }
 
@@ -109,5 +124,34 @@ public class PayWidget extends Widget {
         } else {
             Rpc.submitPayForm(new ResponseHandler<SubmitPayFormResponseTO>(), request);
         }
+    }
+
+    private void pay() {
+        showResult();
+    }
+
+    private void showResult() {
+        mPayBtn.setVisibility(View.GONE);
+        mResultData.removeAllViews();
+        mResultData.setVisibility(View.VISIBLE);
+
+        addRow(mActivity.getString(R.string.transaction_id), "trans id");
+        addRow(mActivity.getString(R.string.provider_id), "prov id");
+        addRow(mActivity.getString(R.string.status), "pending");
+    }
+
+    private void addRow(String key, String value) {
+        final LinearLayout ll = (LinearLayout) View.inflate(mActivity, R.layout.profile_data_detail, null);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        layoutParams.setMargins(0, 10, 0, 0);
+
+        final TextView tvKey = (TextView) ll.findViewById(R.id.profile_data_detail_key);
+        final TextView tvVal = (TextView) ll.findViewById(R.id.profile_data_detail_value);
+
+        tvKey.setText(key);
+        tvKey.setTextColor(LookAndFeelConstants.getPrimaryColor(mActivity));
+        tvVal.setText(value);
+        mResultData.addView(ll, layoutParams);
     }
 }

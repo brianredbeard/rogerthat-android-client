@@ -95,6 +95,7 @@ import com.mobicage.to.messaging.forms.FloatWidgetResultTO;
 import com.mobicage.to.messaging.forms.LocationWidgetResultTO;
 import com.mobicage.to.messaging.forms.LongWidgetResultTO;
 import com.mobicage.to.messaging.forms.MyDigiPassWidgetResultTO;
+import com.mobicage.to.messaging.forms.PayWidgetResultTO;
 import com.mobicage.to.messaging.forms.SignWidgetResultTO;
 import com.mobicage.to.messaging.forms.SubmitPhotoUploadFormRequestTO;
 import com.mobicage.to.messaging.forms.SubmitPhotoUploadFormResponseTO;
@@ -1584,8 +1585,8 @@ public class MessagingPlugin implements MobicagePlugin {
     }
 
     public void updatePayForm(final String parentMessageKey, final String messageKey,
-                                final UnicodeWidgetResultTO formResult, final String buttonId, final long receivedTimestamp,
-                                final long ackedTimestamp) {
+                              final PayWidgetResultTO formResult, final String buttonId, final long receivedTimestamp,
+                              final long ackedTimestamp) {
 
         IFormResultProcessor resultProcessor = new IFormResultProcessor() {
             @Override

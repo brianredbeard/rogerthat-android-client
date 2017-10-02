@@ -24,4 +24,21 @@
     android:layout_margin="5dp"
     android:orientation="vertical">
 
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/pay_btn"
+        android:layout_width="match_parent"
+        android:layout_height="88dp"
+        android:drawableLeft="@drawable/sign"
+        android:theme="@style/ButtonTheme"
+        android:text="@string/pay"/>
+
+    <LinearLayout
+        android:id="@+id/result_data"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:orientation="vertical"
+        android:visibility="gone" >
+    </LinearLayout>
+
 </com.mobicage.rogerthat.plugins.messaging.widgets.PayWidget>

@@ -250,7 +250,7 @@ public class MyDigiPassWidget extends Widget implements OnMDPAuthenticationListe
         mScopes = Collections.unmodifiableList(Arrays.asList(mScope.split(" ")));
 
         @SuppressWarnings("unchecked")
-        Map<String, Object> result = (Map<String, Object>) mWidgetMap.get("result");
+        Map<String, Object> result = (Map<String, Object>) mWidgetMap.get("value");
         if (result != null) {
             try {
                 mResult = new MyDigiPassWidgetResult(result);

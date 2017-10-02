@@ -25,7 +25,7 @@ import java.util.Map;
 
 public class UpdatePayFormRequestTO implements com.mobicage.rpc.IJSONable {
 
-    public com.mobicage.to.messaging.forms.UnicodeWidgetResultTO result;
+    public com.mobicage.to.messaging.forms.PayWidgetResultTO result;
     public long acked_timestamp;
     public String button_id;
     public String message_key;
@@ -40,7 +40,7 @@ public class UpdatePayFormRequestTO implements com.mobicage.rpc.IJSONable {
     public UpdatePayFormRequestTO(Map<String, Object> json) throws IncompleteMessageException {
         if (json.containsKey("result")) {
             Object val = json.get("result");
-            this.result = val == null ? null : new com.mobicage.to.messaging.forms.UnicodeWidgetResultTO((Map<String, Object>) val);
+            this.result = val == null ? null : new com.mobicage.to.messaging.forms.PayWidgetResultTO((Map<String, Object>) val);
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.forms.UpdatePayFormRequestTO object is missing field 'result'");
         }
