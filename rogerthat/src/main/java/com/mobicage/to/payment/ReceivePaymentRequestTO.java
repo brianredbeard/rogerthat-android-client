@@ -28,6 +28,7 @@ public class ReceivePaymentRequestTO implements com.mobicage.rpc.IJSONable {
     public long amount;
     public String asset_id;
     public String memo;
+    public long precision;
     public String provider_id;
 
     public ReceivePaymentRequestTO() {
@@ -56,6 +57,16 @@ public class ReceivePaymentRequestTO implements com.mobicage.rpc.IJSONable {
         } else {
             throw new IncompleteMessageException("com.mobicage.to.payment.ReceivePaymentRequestTO object is missing field 'memo'");
         }
+        if (json.containsKey("precision")) {
+            Object val = json.get("precision");
+            if (val instanceof Integer) {
+                this.precision = ((Integer) val).longValue();
+            } else {
+                this.precision = ((Long) val).longValue();
+            }
+        } else {
+            throw new IncompleteMessageException("com.mobicage.to.payment.ReceivePaymentRequestTO object is missing field 'precision'");
+        }
         if (json.containsKey("provider_id")) {
             Object val = json.get("provider_id");
             this.provider_id = (String) val;
@@ -70,6 +81,7 @@ public class ReceivePaymentRequestTO implements com.mobicage.rpc.IJSONable {
         obj.put("amount", this.amount);
         obj.put("asset_id", this.asset_id);
         obj.put("memo", this.memo);
+        obj.put("precision", this.precision);
         obj.put("provider_id", this.provider_id);
         return obj;
     }

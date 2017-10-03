@@ -31,6 +31,7 @@ public class PaymentProviderTransactionTO implements com.mobicage.rpc.IJSONable 
     public String id;
     public String memo;
     public String name;
+    public long precision;
     public long timestamp;
     public String to_asset_id;
     public String type;
@@ -79,6 +80,16 @@ public class PaymentProviderTransactionTO implements com.mobicage.rpc.IJSONable 
         } else {
             throw new IncompleteMessageException("com.mobicage.to.payment.PaymentProviderTransactionTO object is missing field 'name'");
         }
+        if (json.containsKey("precision")) {
+            Object val = json.get("precision");
+            if (val instanceof Integer) {
+                this.precision = ((Integer) val).longValue();
+            } else {
+                this.precision = ((Long) val).longValue();
+            }
+        } else {
+            this.precision = 2;
+        }
         if (json.containsKey("timestamp")) {
             Object val = json.get("timestamp");
             if (val instanceof Integer) {
@@ -112,6 +123,7 @@ public class PaymentProviderTransactionTO implements com.mobicage.rpc.IJSONable 
         obj.put("id", this.id);
         obj.put("memo", this.memo);
         obj.put("name", this.name);
+        obj.put("precision", this.precision);
         obj.put("timestamp", this.timestamp);
         obj.put("to_asset_id", this.to_asset_id);
         obj.put("type", this.type);
