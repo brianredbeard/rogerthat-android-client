@@ -19,6 +19,7 @@
 package com.mobicage.rogerthat.plugins.messaging.widgets;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
@@ -29,10 +30,15 @@ import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.api.messaging.Rpc;
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.NavigationItem;
+import com.mobicage.rogerthat.cordova.CordovaSettings;
+import com.mobicage.rogerthat.plugins.friends.ActionScreenActivity;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
+import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
+import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.rpc.config.LookAndFeelConstants;
@@ -40,10 +46,15 @@ import com.mobicage.to.messaging.forms.PayWidgetResultTO;
 import com.mobicage.to.messaging.forms.SubmitPayFormRequestTO;
 import com.mobicage.to.messaging.forms.SubmitPayFormResponseTO;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.simple.JSONValue;
+
 import java.util.Map;
 
-@SuppressWarnings("unchecked")
 public class PayWidget extends Widget {
+
+    private final String APPLICATION_TAG = "rogerthat-payment";
 
     private Button mPayBtn;
     private PayWidgetResultTO mResult;
@@ -127,7 +138,37 @@ public class PayWidget extends Widget {
     }
 
     private void pay() {
-        showResult();
+
+        JSONObject context = new JSONObject();
+        try {
+            // t should match a PaymentQRCodeType in rogerthat-payment branding
+            // see https://github.com/rogerthat-platform/rogerthat-payment/blob/master/src/interfaces/actions.interfaces.ts
+            context.put("t", 2);
+            context.put("methods", mWidgetMap.get("methods"));
+            context.put("memo", mWidgetMap.get("memo"));
+            context.put("target", mWidgetMap.get("target"));
+        } catch (JSONException e) {
+            L.bug("Failed to start payment branding with context", e);
+            UIUtils.showErrorPleaseRetryDialog(mActivity);
+            return;
+        }
+
+        //showResult();
+
+        if (CordovaSettings.APPS.contains(APPLICATION_TAG)) {
+            NavigationItem ni = new NavigationItem(FontAwesome.Icon.faw_question_circle_o, "cordova", APPLICATION_TAG, "", false);
+
+            String errorMessage = ActivityUtils.canOpenNavigationItem(mActivity, ni);
+            if (errorMessage == null) {
+                Bundle extras = new Bundle();
+                extras.putString(ActionScreenActivity.CONTEXT, JSONValue.toJSONString(context));
+                ActivityUtils.goToActivity(mActivity, ni, false, extras);
+                return;
+            }
+            L.d(errorMessage);
+        } else {
+            UIUtils.showLongToast(mActivity, mActivity.getString(R.string.payment_not_enabled));
+        }
     }
 
     private void showResult() {
