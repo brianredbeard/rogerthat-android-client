@@ -18,7 +18,9 @@
 
 package com.mobicage.rogerthat.plugins.messaging.widgets;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.View;
@@ -30,12 +32,15 @@ import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.api.messaging.Rpc;
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.NavigationItem;
+import com.mobicage.rogerthat.cordova.CordovaActionScreenActivity;
 import com.mobicage.rogerthat.cordova.CordovaSettings;
 import com.mobicage.rogerthat.plugins.friends.ActionScreenActivity;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.util.ActivityUtils;
+import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.ui.UIUtils;
@@ -55,6 +60,7 @@ import java.util.Map;
 public class PayWidget extends Widget {
 
     private final String APPLICATION_TAG = "rogerthat-payment";
+    private static final int START_CORDOVA_APP_REQUEST_CODE = 1;
 
     private Button mPayBtn;
     private PayWidgetResultTO mResult;
@@ -144,30 +150,61 @@ public class PayWidget extends Widget {
             // t should match a PaymentQRCodeType in rogerthat-payment branding
             // see https://github.com/rogerthat-platform/rogerthat-payment/blob/master/src/interfaces/actions.interfaces.ts
             context.put("t", 2);
+            // result_type is the way we return our data
+            // plugin needs to be used when using startActivityForResult
+            context.put("result_type", "plugin");
+
             context.put("methods", mWidgetMap.get("methods"));
             context.put("memo", mWidgetMap.get("memo"));
             context.put("target", mWidgetMap.get("target"));
+
         } catch (JSONException e) {
             L.bug("Failed to start payment branding with context", e);
             UIUtils.showErrorPleaseRetryDialog(mActivity);
             return;
         }
 
-        //showResult();
-
         if (CordovaSettings.APPS.contains(APPLICATION_TAG)) {
-            NavigationItem ni = new NavigationItem(FontAwesome.Icon.faw_question_circle_o, "cordova", APPLICATION_TAG, "", false);
+            Bundle extras = new Bundle();
+            extras.putString(ActionScreenActivity.CONTEXT, JSONValue.toJSONString(context));
+            extras.putString(CordovaActionScreenActivity.EMBEDDED_APP, APPLICATION_TAG);
+            extras.putString(CordovaActionScreenActivity.TITLE, "");
 
-            String errorMessage = ActivityUtils.canOpenNavigationItem(mActivity, ni);
-            if (errorMessage == null) {
-                Bundle extras = new Bundle();
-                extras.putString(ActionScreenActivity.CONTEXT, JSONValue.toJSONString(context));
-                ActivityUtils.goToActivity(mActivity, ni, false, extras);
-                return;
-            }
-            L.d(errorMessage);
+            final Intent i = new Intent(mActivity, CordovaActionScreenActivity.class);
+            i.putExtras(extras);
+            i.addFlags(MainActivity.FLAG_CLEAR_STACK);
+            mActivity.startActivityForResult(i, START_CORDOVA_APP_REQUEST_CODE);
+
         } else {
             UIUtils.showLongToast(mActivity, mActivity.getString(R.string.payment_not_enabled));
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == START_CORDOVA_APP_REQUEST_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                if (data.getBooleanExtra("success", false)) {
+                    mResult = new PayWidgetResultTO();
+                    mResult.transaction_id = data.getStringExtra("transaction_id");
+                    mResult.provider_id = data.getStringExtra("provider_id");
+                    mResult.status = data.getStringExtra("status");
+                    showResult();
+
+                    mActivity.excecutePositiveButtonClick();
+
+                } else {
+                    String code = data.getStringExtra("code");
+                    String message = data.getStringExtra("message");
+                    if (TextUtils.isEmptyOrWhitespace(code) || TextUtils.isEmptyOrWhitespace(message)) {
+                        L.e("Failed to make payment: unknown reason!");
+                        UIUtils.showLongToast(mActivity, mActivity.getString(R.string.error_please_try_again));
+                    } else {
+                        L.i("Failed to make payment: " + code);
+                        UIUtils.showLongToast(mActivity, message);
+                    }
+                }
+            }
         }
     }
 
@@ -176,9 +213,9 @@ public class PayWidget extends Widget {
         mResultData.removeAllViews();
         mResultData.setVisibility(View.VISIBLE);
 
-        addRow(mActivity.getString(R.string.transaction_id), "trans id");
-        addRow(mActivity.getString(R.string.provider_id), "prov id");
-        addRow(mActivity.getString(R.string.status), "pending");
+        addRow(mActivity.getString(R.string.transaction_id), mResult.transaction_id);
+        addRow(mActivity.getString(R.string.provider_id), mResult.provider_id);
+        addRow(mActivity.getString(R.string.status), mResult.status);
     }
 
     private void addRow(String key, String value) {
