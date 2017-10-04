@@ -33,13 +33,11 @@ import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.api.messaging.Rpc;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainActivity;
-import com.mobicage.rogerthat.NavigationItem;
 import com.mobicage.rogerthat.cordova.CordovaActionScreenActivity;
 import com.mobicage.rogerthat.cordova.CordovaSettings;
 import com.mobicage.rogerthat.plugins.friends.ActionScreenActivity;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
-import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
@@ -59,8 +57,11 @@ import java.util.Map;
 
 public class PayWidget extends Widget {
 
+    public static final String FINISHED_PAYMENT = "com.mobicage.rogerthat.plugins.messaging.widgets.FINISHED_PAYMENT";
+    public static String RESULT = "result";
+
     private final String APPLICATION_TAG = "rogerthat-payment";
-    private static final int START_CORDOVA_APP_REQUEST_CODE = 1;
+    private static final int START_CORDOVA_APP_REQUEST_CODE = 123;
 
     private Button mPayBtn;
     private PayWidgetResultTO mResult;
@@ -172,7 +173,6 @@ public class PayWidget extends Widget {
 
             final Intent i = new Intent(mActivity, CordovaActionScreenActivity.class);
             i.putExtras(extras);
-            i.addFlags(MainActivity.FLAG_CLEAR_STACK);
             mActivity.startActivityForResult(i, START_CORDOVA_APP_REQUEST_CODE);
 
         } else {
@@ -184,25 +184,32 @@ public class PayWidget extends Widget {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == START_CORDOVA_APP_REQUEST_CODE) {
             if (resultCode == Activity.RESULT_OK) {
-                if (data.getBooleanExtra("success", false)) {
-                    mResult = new PayWidgetResultTO();
-                    mResult.transaction_id = data.getStringExtra("transaction_id");
-                    mResult.provider_id = data.getStringExtra("provider_id");
-                    mResult.status = data.getStringExtra("status");
-                    showResult();
+                final String result =  data.getStringExtra(RESULT);
+                try {
+                    JSONObject args = new JSONObject(result);
+                    if (args.optBoolean("success")) {
+                        mResult = new PayWidgetResultTO();
+                        mResult.transaction_id = TextUtils.optString(args, "transaction_id", null);
+                        mResult.provider_id = TextUtils.optString(args, "provider_id", null);
+                        mResult.status = TextUtils.optString(args, "status", null);
+                        showResult();
 
-                    mActivity.excecutePositiveButtonClick();
+                        mActivity.excecutePositiveButtonClick();
 
-                } else {
-                    String code = data.getStringExtra("code");
-                    String message = data.getStringExtra("message");
-                    if (TextUtils.isEmptyOrWhitespace(code) || TextUtils.isEmptyOrWhitespace(message)) {
-                        L.e("Failed to make payment: unknown reason!");
-                        UIUtils.showLongToast(mActivity, mActivity.getString(R.string.error_please_try_again));
                     } else {
-                        L.i("Failed to make payment: " + code);
-                        UIUtils.showLongToast(mActivity, message);
+                        String code = TextUtils.optString(args, "code", null);
+                        String message = TextUtils.optString(args, "message", null);
+                        if (TextUtils.isEmptyOrWhitespace(code) || TextUtils.isEmptyOrWhitespace(message)) {
+                            L.e("Failed to make payment: unknown reason!");
+                            UIUtils.showLongToast(mActivity, mActivity.getString(R.string.error_please_try_again));
+                        } else {
+                            L.i("Failed to make payment: " + code);
+                            UIUtils.showLongToast(mActivity, message);
+                        }
                     }
+                } catch (JSONException e) {
+                    L.e("Failed to make payment", e);
+                    UIUtils.showLongToast(mActivity, mActivity.getString(R.string.error_please_try_again));
                 }
             }
         }
