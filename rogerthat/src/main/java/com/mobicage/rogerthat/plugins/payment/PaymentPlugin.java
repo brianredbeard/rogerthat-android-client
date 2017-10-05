@@ -242,12 +242,14 @@ public class PaymentPlugin implements MobicagePlugin {
         return true;
     }
 
-    public boolean receivePayment(String callbackKey, String providerId, String assetId, long amount, String memo) {
+    public boolean receivePayment(String callbackKey, String providerId, String assetId,
+                                  long amount, String memo, long precision) {
         ReceivePaymentRequestTO request = new ReceivePaymentRequestTO();
         request.provider_id = providerId;
         request.asset_id = assetId;
         request.amount = amount;
         request.memo = memo;
+        request.precision = precision;
 
         try {
             ReceivePaymentResponseHandler rh = new ReceivePaymentResponseHandler();
