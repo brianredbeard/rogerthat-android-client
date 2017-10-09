@@ -31,6 +31,7 @@ import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.CallReceiver;
 import com.mobicage.rpc.IncompleteMessageException;
+import com.mobicage.to.payment.ApiCallToPaymentProviderRequestTO;
 import com.mobicage.to.payment.AppPaymentProviderTO;
 import com.mobicage.to.payment.CancelPaymentRequestTO;
 import com.mobicage.to.payment.ConfirmPaymentRequestTO;
@@ -41,6 +42,7 @@ import com.mobicage.to.payment.GetPaymentProvidersRequestTO;
 import com.mobicage.to.payment.GetPaymentTransactionsRequestTO;
 import com.mobicage.to.payment.GetPendingPaymentDetailsRequestTO;
 import com.mobicage.to.payment.GetPendingPaymentSignatureDataRequestTO;
+import com.mobicage.to.payment.GetTargetInfoRequestTO;
 import com.mobicage.to.payment.PaymentProviderAssetTO;
 import com.mobicage.to.payment.ReceivePaymentRequestTO;
 import com.mobicage.to.payment.UpdatePaymentAssetRequestTO;
@@ -98,6 +100,12 @@ public class PaymentPlugin implements MobicagePlugin {
 
     public static final String CREATE_PAYMENT_ASSET_RESULT_INTENT = "com.mobicage.rogerthat.plugins.payment.CREATE_PAYMENT_ASSET_RESULT_INTENT";
     public static final String CREATE_PAYMENT_ASSET_FAILED_INTENT = "com.mobicage.rogerthat.plugins.payment.CREATE_PAYMENT_ASSET_FAILED_INTENT";
+
+    public static final String GET_TARGET_INFO_RESULT_INTENT = "com.mobicage.rogerthat.plugins.payment.GET_TARGET_INFO_RESULT_INTENT";
+    public static final String GET_TARGET_INFO_FAILED_INTENT = "com.mobicage.rogerthat.plugins.payment.GET_TARGET_INFO_FAILED_INTENT";
+
+    public static final String API_CALL_TO_PAYMENT_PROVIDER_RESULT_INTENT = "com.mobicage.rogerthat.plugins.payment.API_CALL_TO_PAYMENT_PROVIDER_RESULT_INTENT";
+    public static final String API_CALL_TO_PAYMENT_PROVIDER_FAILED_INTENT = "com.mobicage.rogerthat.plugins.payment.API_CALL_TO_PAYMENT_PROVIDER_FAILED_INTENT";
 
     public static final String PAYMENT_PROVIDER_UPDATED_INTENT = "com.mobicage.rogerthat.plugins.payment.PAYMENT_PROVIDER_UPDATED_INTENT";
     public static final String PAYMENT_PROVIDER_REMOVED_INTENT = "com.mobicage.rogerthat.plugins.payment.PAYMENT_PROVIDER_REMOVED_INTENT";
@@ -427,5 +435,29 @@ public class PaymentPlugin implements MobicagePlugin {
 
         intent.putExtra("result", JSONValue.toJSONString(request.toJSONMap()));
         mMainService.sendBroadcast(intent);
+    }
+
+    public boolean apiCallToPaymentProvider(String callbackKey, ApiCallToPaymentProviderRequestTO request) {
+        try {
+            ApiCallToPaymentProviderResponseHandler handler = new ApiCallToPaymentProviderResponseHandler();
+            handler.setCallbackKey(callbackKey);
+            Rpc.apiCallToPaymentProvider(handler, request);
+        } catch (Exception e) {
+            L.bug("Error while executing apiCallToPaymentProvider rpc", e);
+            return false;
+        }
+        return true;
+    }
+
+    public boolean getTargetInfo(String callbackKey, GetTargetInfoRequestTO request) {
+        try {
+            GetTargetInfoResponseHandler handler = new GetTargetInfoResponseHandler();
+            handler.setCallbackKey(callbackKey);
+            Rpc.getTargetInfo(handler, request);
+        } catch (Exception e) {
+            L.bug("Error while executing getTargetInfo rpc", e);
+            return false;
+        }
+        return true;
     }
 }
