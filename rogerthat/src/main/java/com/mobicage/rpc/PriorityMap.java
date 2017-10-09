@@ -86,6 +86,7 @@ public class PriorityMap {
         sPrioritySet.add("com.mobicage.api.news.getNews");
         sPrioritySet.add("com.mobicage.api.news.getNewsItems");
         sPrioritySet.add("com.mobicage.api.news.saveNewsStatistics");
+        sPrioritySet.add("com.mobicage.api.payment.apiCallToPaymentProvider");
         sPrioritySet.add("com.mobicage.api.payment.cancelPayment");
         sPrioritySet.add("com.mobicage.api.payment.confirmPayment");
         sPrioritySet.add("com.mobicage.api.payment.createAsset");
@@ -95,6 +96,7 @@ public class PriorityMap {
         sPrioritySet.add("com.mobicage.api.payment.getPaymentTransactions");
         sPrioritySet.add("com.mobicage.api.payment.getPendingPaymentDetails");
         sPrioritySet.add("com.mobicage.api.payment.getPendingPaymentSignatureData");
+        sPrioritySet.add("com.mobicage.api.payment.getTargetInfo");
         sPrioritySet.add("com.mobicage.api.payment.receivePayment");
         sPrioritySet.add("com.mobicage.api.payment.verifyPaymentAsset");
         sPrioritySet.add("com.mobicage.api.services.findService");

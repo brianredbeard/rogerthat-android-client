@@ -20,6 +20,17 @@ package com.mobicage.api.payment;
 
 public class Rpc {
 
+    public static void apiCallToPaymentProvider(com.mobicage.rpc.IResponseHandler<com.mobicage.to.payment.ApiCallToPaymentProviderResponseTO> responseHandler,
+            com.mobicage.to.payment.ApiCallToPaymentProviderRequestTO request) throws Exception {
+        java.util.Map<java.lang.String, java.lang.Object> arguments = new java.util.LinkedHashMap<java.lang.String, java.lang.Object>();
+        if (request == null) {
+            arguments.put("request", null);
+        } else {
+            arguments.put("request", request.toJSONMap());
+        }
+        com.mobicage.rpc.Rpc.call("com.mobicage.api.payment.apiCallToPaymentProvider", arguments, responseHandler);
+    }
+
     public static void cancelPayment(com.mobicage.rpc.IResponseHandler<com.mobicage.to.payment.CancelPaymentResponseTO> responseHandler,
             com.mobicage.to.payment.CancelPaymentRequestTO request) throws Exception {
         java.util.Map<java.lang.String, java.lang.Object> arguments = new java.util.LinkedHashMap<java.lang.String, java.lang.Object>();
@@ -117,6 +128,17 @@ public class Rpc {
             arguments.put("request", request.toJSONMap());
         }
         com.mobicage.rpc.Rpc.call("com.mobicage.api.payment.getPendingPaymentSignatureData", arguments, responseHandler);
+    }
+
+    public static void getTargetInfo(com.mobicage.rpc.IResponseHandler<com.mobicage.to.payment.GetTargetInfoResponseTO> responseHandler,
+            com.mobicage.to.payment.GetTargetInfoRequestTO request) throws Exception {
+        java.util.Map<java.lang.String, java.lang.Object> arguments = new java.util.LinkedHashMap<java.lang.String, java.lang.Object>();
+        if (request == null) {
+            arguments.put("request", null);
+        } else {
+            arguments.put("request", request.toJSONMap());
+        }
+        com.mobicage.rpc.Rpc.call("com.mobicage.api.payment.getTargetInfo", arguments, responseHandler);
     }
 
     public static void receivePayment(com.mobicage.rpc.IResponseHandler<com.mobicage.to.payment.ReceivePaymentResponseTO> responseHandler,

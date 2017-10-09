@@ -572,6 +572,15 @@ public class ResponseReceiverHandler {
                 resp.setResult(Parser.ComMobicageToNewsSaveNewsStatisticsResponseTO(rpcr.result));
             ((IResponseHandler<com.mobicage.to.news.SaveNewsStatisticsResponseTO>) responseHandler).handle(resp);
         }
+        if ("com.mobicage.api.payment.apiCallToPaymentProvider".equals(function)) {
+            final Response<com.mobicage.to.payment.ApiCallToPaymentProviderResponseTO> resp = new Response<com.mobicage.to.payment.ApiCallToPaymentProviderResponseTO>();
+            resp.setError(rpcr.error);
+            resp.setSuccess(rpcr.success);
+            resp.setCallId(rpcr.callId);
+            if (rpcr.success)
+                resp.setResult(Parser.ComMobicageToPaymentApiCallToPaymentProviderResponseTO(rpcr.result));
+            ((IResponseHandler<com.mobicage.to.payment.ApiCallToPaymentProviderResponseTO>) responseHandler).handle(resp);
+        }
         if ("com.mobicage.api.payment.cancelPayment".equals(function)) {
             final Response<com.mobicage.to.payment.CancelPaymentResponseTO> resp = new Response<com.mobicage.to.payment.CancelPaymentResponseTO>();
             resp.setError(rpcr.error);
@@ -652,6 +661,15 @@ public class ResponseReceiverHandler {
             if (rpcr.success)
                 resp.setResult(Parser.ComMobicageToPaymentGetPendingPaymentSignatureDataResponseTO(rpcr.result));
             ((IResponseHandler<com.mobicage.to.payment.GetPendingPaymentSignatureDataResponseTO>) responseHandler).handle(resp);
+        }
+        if ("com.mobicage.api.payment.getTargetInfo".equals(function)) {
+            final Response<com.mobicage.to.payment.GetTargetInfoResponseTO> resp = new Response<com.mobicage.to.payment.GetTargetInfoResponseTO>();
+            resp.setError(rpcr.error);
+            resp.setSuccess(rpcr.success);
+            resp.setCallId(rpcr.callId);
+            if (rpcr.success)
+                resp.setResult(Parser.ComMobicageToPaymentGetTargetInfoResponseTO(rpcr.result));
+            ((IResponseHandler<com.mobicage.to.payment.GetTargetInfoResponseTO>) responseHandler).handle(resp);
         }
         if ("com.mobicage.api.payment.receivePayment".equals(function)) {
             final Response<com.mobicage.to.payment.ReceivePaymentResponseTO> resp = new Response<com.mobicage.to.payment.ReceivePaymentResponseTO>();

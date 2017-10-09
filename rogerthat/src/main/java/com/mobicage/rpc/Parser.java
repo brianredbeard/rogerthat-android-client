@@ -2393,6 +2393,20 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.ApiCallToPaymentProviderRequestTO ComMobicageToPaymentApiCallToPaymentProviderRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.ApiCallToPaymentProviderRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.ApiCallToPaymentProviderResponseTO ComMobicageToPaymentApiCallToPaymentProviderResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.ApiCallToPaymentProviderResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
     public static com.mobicage.to.payment.AppPaymentProviderTO ComMobicageToPaymentAppPaymentProviderTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;
@@ -2561,6 +2575,20 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.GetTargetInfoRequestTO ComMobicageToPaymentGetTargetInfoRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.GetTargetInfoRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.GetTargetInfoResponseTO ComMobicageToPaymentGetTargetInfoResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.GetTargetInfoResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
     public static com.mobicage.to.payment.PaymentAssetBalanceTO ComMobicageToPaymentPaymentAssetBalanceTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;
@@ -2614,6 +2642,20 @@ public class Parser {
         if (value == null)
             return null;
         return new com.mobicage.to.payment.ReceivePaymentResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.TargetInfoAssetTO ComMobicageToPaymentTargetInfoAssetTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.TargetInfoAssetTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.TargetInfoTO ComMobicageToPaymentTargetInfoTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.TargetInfoTO((Map<String, Object>) value);
     }
 
     @SuppressWarnings("unchecked")
