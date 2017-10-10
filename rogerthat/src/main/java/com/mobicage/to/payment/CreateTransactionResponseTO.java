@@ -23,34 +23,34 @@ import com.mobicage.rpc.IncompleteMessageException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class ApiCallToPaymentProviderResponseTO implements com.mobicage.rpc.IJSONable {
+public class CreateTransactionResponseTO implements com.mobicage.rpc.IJSONable {
 
     public com.mobicage.to.payment.ErrorPaymentTO error;
-    public String result;
+    public com.mobicage.to.payment.CreateTransactionResultTO result;
     public boolean success;
 
-    public ApiCallToPaymentProviderResponseTO() {
+    public CreateTransactionResponseTO() {
     }
 
     @SuppressWarnings("unchecked")
-    public ApiCallToPaymentProviderResponseTO(Map<String, Object> json) throws IncompleteMessageException {
+    public CreateTransactionResponseTO(Map<String, Object> json) throws IncompleteMessageException {
         if (json.containsKey("error")) {
             Object val = json.get("error");
             this.error = val == null ? null : new com.mobicage.to.payment.ErrorPaymentTO((Map<String, Object>) val);
         } else {
-            throw new IncompleteMessageException("com.mobicage.to.payment.ApiCallToPaymentProviderResponseTO object is missing field 'error'");
+            throw new IncompleteMessageException("com.mobicage.to.payment.CreateTransactionResponseTO object is missing field 'error'");
         }
         if (json.containsKey("result")) {
             Object val = json.get("result");
-            this.result = (String) val;
+            this.result = val == null ? null : new com.mobicage.to.payment.CreateTransactionResultTO((Map<String, Object>) val);
         } else {
-            throw new IncompleteMessageException("com.mobicage.to.payment.ApiCallToPaymentProviderResponseTO object is missing field 'result'");
+            throw new IncompleteMessageException("com.mobicage.to.payment.CreateTransactionResponseTO object is missing field 'result'");
         }
         if (json.containsKey("success")) {
             Object val = json.get("success");
             this.success = ((Boolean) val).booleanValue();
         } else {
-            throw new IncompleteMessageException("com.mobicage.to.payment.ApiCallToPaymentProviderResponseTO object is missing field 'success'");
+            throw new IncompleteMessageException("com.mobicage.to.payment.CreateTransactionResponseTO object is missing field 'success'");
         }
     }
 
@@ -58,7 +58,7 @@ public class ApiCallToPaymentProviderResponseTO implements com.mobicage.rpc.IJSO
     public Map<String, Object> toJSONMap() {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
         obj.put("error", this.error == null ? null : this.error.toJSONMap());
-        obj.put("result", this.result);
+        obj.put("result", this.result == null ? null : this.result.toJSONMap());
         obj.put("success", this.success);
         return obj;
     }

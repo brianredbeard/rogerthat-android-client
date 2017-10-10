@@ -23,40 +23,32 @@ import com.mobicage.rpc.IncompleteMessageException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class ApiCallToPaymentProviderRequestTO implements com.mobicage.rpc.IJSONable {
+public class CreateTransactionRequestTO implements com.mobicage.rpc.IJSONable {
 
-    public String method;
     public String params;
     public String provider_id;
 
-    public ApiCallToPaymentProviderRequestTO() {
+    public CreateTransactionRequestTO() {
     }
 
-    public ApiCallToPaymentProviderRequestTO(Map<String, Object> json) throws IncompleteMessageException {
-        if (json.containsKey("method")) {
-            Object val = json.get("method");
-            this.method = (String) val;
-        } else {
-            throw new IncompleteMessageException("com.mobicage.to.payment.ApiCallToPaymentProviderRequestTO object is missing field 'method'");
-        }
+    public CreateTransactionRequestTO(Map<String, Object> json) throws IncompleteMessageException {
         if (json.containsKey("params")) {
             Object val = json.get("params");
             this.params = (String) val;
         } else {
-            throw new IncompleteMessageException("com.mobicage.to.payment.ApiCallToPaymentProviderRequestTO object is missing field 'params'");
+            throw new IncompleteMessageException("com.mobicage.to.payment.CreateTransactionRequestTO object is missing field 'params'");
         }
         if (json.containsKey("provider_id")) {
             Object val = json.get("provider_id");
             this.provider_id = (String) val;
         } else {
-            throw new IncompleteMessageException("com.mobicage.to.payment.ApiCallToPaymentProviderRequestTO object is missing field 'provider_id'");
+            throw new IncompleteMessageException("com.mobicage.to.payment.CreateTransactionRequestTO object is missing field 'provider_id'");
         }
     }
 
     @Override
     public Map<String, Object> toJSONMap() {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
-        obj.put("method", this.method);
         obj.put("params", this.params);
         obj.put("provider_id", this.provider_id);
         return obj;

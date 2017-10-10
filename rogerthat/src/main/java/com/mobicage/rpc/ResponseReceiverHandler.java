@@ -572,15 +572,6 @@ public class ResponseReceiverHandler {
                 resp.setResult(Parser.ComMobicageToNewsSaveNewsStatisticsResponseTO(rpcr.result));
             ((IResponseHandler<com.mobicage.to.news.SaveNewsStatisticsResponseTO>) responseHandler).handle(resp);
         }
-        if ("com.mobicage.api.payment.apiCallToPaymentProvider".equals(function)) {
-            final Response<com.mobicage.to.payment.ApiCallToPaymentProviderResponseTO> resp = new Response<com.mobicage.to.payment.ApiCallToPaymentProviderResponseTO>();
-            resp.setError(rpcr.error);
-            resp.setSuccess(rpcr.success);
-            resp.setCallId(rpcr.callId);
-            if (rpcr.success)
-                resp.setResult(Parser.ComMobicageToPaymentApiCallToPaymentProviderResponseTO(rpcr.result));
-            ((IResponseHandler<com.mobicage.to.payment.ApiCallToPaymentProviderResponseTO>) responseHandler).handle(resp);
-        }
         if ("com.mobicage.api.payment.cancelPayment".equals(function)) {
             final Response<com.mobicage.to.payment.CancelPaymentResponseTO> resp = new Response<com.mobicage.to.payment.CancelPaymentResponseTO>();
             resp.setError(rpcr.error);
@@ -607,6 +598,15 @@ public class ResponseReceiverHandler {
             if (rpcr.success)
                 resp.setResult(Parser.ComMobicageToPaymentCreateAssetResponseTO(rpcr.result));
             ((IResponseHandler<com.mobicage.to.payment.CreateAssetResponseTO>) responseHandler).handle(resp);
+        }
+        if ("com.mobicage.api.payment.createTransaction".equals(function)) {
+            final Response<com.mobicage.to.payment.CreateTransactionResponseTO> resp = new Response<com.mobicage.to.payment.CreateTransactionResponseTO>();
+            resp.setError(rpcr.error);
+            resp.setSuccess(rpcr.success);
+            resp.setCallId(rpcr.callId);
+            if (rpcr.success)
+                resp.setResult(Parser.ComMobicageToPaymentCreateTransactionResponseTO(rpcr.result));
+            ((IResponseHandler<com.mobicage.to.payment.CreateTransactionResponseTO>) responseHandler).handle(resp);
         }
         if ("com.mobicage.api.payment.getPaymentAssets".equals(function)) {
             final Response<com.mobicage.to.payment.GetPaymentAssetsResponseTO> resp = new Response<com.mobicage.to.payment.GetPaymentAssetsResponseTO>();

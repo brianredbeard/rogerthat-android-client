@@ -31,11 +31,11 @@ import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.CallReceiver;
 import com.mobicage.rpc.IncompleteMessageException;
-import com.mobicage.to.payment.ApiCallToPaymentProviderRequestTO;
 import com.mobicage.to.payment.AppPaymentProviderTO;
 import com.mobicage.to.payment.CancelPaymentRequestTO;
 import com.mobicage.to.payment.ConfirmPaymentRequestTO;
 import com.mobicage.to.payment.CreateAssetRequestTO;
+import com.mobicage.to.payment.CreateTransactionRequestTO;
 import com.mobicage.to.payment.CryptoTransactionTO;
 import com.mobicage.to.payment.GetPaymentProfileRequestTO;
 import com.mobicage.to.payment.GetPaymentProvidersRequestTO;
@@ -104,8 +104,8 @@ public class PaymentPlugin implements MobicagePlugin {
     public static final String GET_TARGET_INFO_RESULT_INTENT = "com.mobicage.rogerthat.plugins.payment.GET_TARGET_INFO_RESULT_INTENT";
     public static final String GET_TARGET_INFO_FAILED_INTENT = "com.mobicage.rogerthat.plugins.payment.GET_TARGET_INFO_FAILED_INTENT";
 
-    public static final String API_CALL_TO_PAYMENT_PROVIDER_RESULT_INTENT = "com.mobicage.rogerthat.plugins.payment.API_CALL_TO_PAYMENT_PROVIDER_RESULT_INTENT";
-    public static final String API_CALL_TO_PAYMENT_PROVIDER_FAILED_INTENT = "com.mobicage.rogerthat.plugins.payment.API_CALL_TO_PAYMENT_PROVIDER_FAILED_INTENT";
+    public static final String CREATE_TRANSACTION_RESULT_INTENT = "com.mobicage.rogerthat.plugins.payment.CREATE_TRANSACTION_RESULT_INTENT";
+    public static final String CREATE_TRANSACTION_FAILED_INTENT = "com.mobicage.rogerthat.plugins.payment.CREATE_TRANSACTION_FAILED_INTENT";
 
     public static final String PAYMENT_PROVIDER_UPDATED_INTENT = "com.mobicage.rogerthat.plugins.payment.PAYMENT_PROVIDER_UPDATED_INTENT";
     public static final String PAYMENT_PROVIDER_REMOVED_INTENT = "com.mobicage.rogerthat.plugins.payment.PAYMENT_PROVIDER_REMOVED_INTENT";
@@ -437,13 +437,13 @@ public class PaymentPlugin implements MobicagePlugin {
         mMainService.sendBroadcast(intent);
     }
 
-    public boolean apiCallToPaymentProvider(String callbackKey, ApiCallToPaymentProviderRequestTO request) {
+    public boolean createTransaction(String callbackKey, CreateTransactionRequestTO request) {
         try {
-            ApiCallToPaymentProviderResponseHandler handler = new ApiCallToPaymentProviderResponseHandler();
+            CreateTransactionResponseHandler handler = new CreateTransactionResponseHandler();
             handler.setCallbackKey(callbackKey);
-            Rpc.apiCallToPaymentProvider(handler, request);
+            Rpc.createTransaction(handler, request);
         } catch (Exception e) {
-            L.bug("Error while executing apiCallToPaymentProvider rpc", e);
+            L.bug("Error while executing createTransaction rpc", e);
             return false;
         }
         return true;

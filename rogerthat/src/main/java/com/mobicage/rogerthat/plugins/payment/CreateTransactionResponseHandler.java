@@ -25,7 +25,7 @@ import com.mobicage.rogerthat.util.pickle.PickleException;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.IResponse;
 import com.mobicage.rpc.ResponseHandler;
-import com.mobicage.to.payment.ApiCallToPaymentProviderResponseTO;
+import com.mobicage.to.payment.CreateTransactionResponseTO;
 
 import org.json.simple.JSONValue;
 
@@ -34,7 +34,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 
-public class ApiCallToPaymentProviderResponseHandler extends ResponseHandler<ApiCallToPaymentProviderResponseTO> {
+public class CreateTransactionResponseHandler extends ResponseHandler<CreateTransactionResponseTO> {
 
     private String mCallbackKey;
 
@@ -58,20 +58,20 @@ public class ApiCallToPaymentProviderResponseHandler extends ResponseHandler<Api
     }
 
     @Override
-    public void handle(final IResponse<ApiCallToPaymentProviderResponseTO> result) {
+    public void handle(final IResponse<CreateTransactionResponseTO> result) {
         T.BIZZ();
-        ApiCallToPaymentProviderResponseTO response;
+        CreateTransactionResponseTO response;
         try {
             response = result.getResponse();
         } catch (Exception e) {
-            L.d("api call to payment provider api call failed", e);
-            Intent intent = new Intent(PaymentPlugin.API_CALL_TO_PAYMENT_PROVIDER_FAILED_INTENT);
+            L.d("createTransaction api call failed", e);
+            Intent intent = new Intent(PaymentPlugin.CREATE_TRANSACTION_FAILED_INTENT);
             intent.putExtra("callback_key", mCallbackKey);
             mMainService.sendBroadcast(intent);
             return;
         }
 
-        Intent intent = new Intent(PaymentPlugin.API_CALL_TO_PAYMENT_PROVIDER_RESULT_INTENT);
+        Intent intent = new Intent(PaymentPlugin.CREATE_TRANSACTION_RESULT_INTENT);
         intent.putExtra("json", JSONValue.toJSONString(response.toJSONMap()));
         intent.putExtra("callback_key", mCallbackKey);
         mMainService.sendBroadcast(intent);

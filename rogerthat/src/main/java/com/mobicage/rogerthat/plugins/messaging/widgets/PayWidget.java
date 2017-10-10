@@ -220,8 +220,8 @@ public class PayWidget extends Widget {
         mResultData.removeAllViews();
         mResultData.setVisibility(View.VISIBLE);
 
-        addRow(mActivity.getString(R.string.transaction_id), mResult.transaction_id);
         addRow(mActivity.getString(R.string.provider_id), mResult.provider_id);
+        addRow(mActivity.getString(R.string.transaction_id), mResult.transaction_id);
         addRow(mActivity.getString(R.string.status), mResult.status);
     }
 
