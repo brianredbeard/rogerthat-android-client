@@ -194,7 +194,10 @@ public class PayWidget extends Widget {
                         mResult.status = TextUtils.optString(args, "status", null);
                         showResult();
 
-                        mActivity.excecutePositiveButtonClick();
+                        String message = TextUtils.optString(args, "message", null);
+                        if (!TextUtils.isEmptyOrWhitespace(message)) {
+                            UIUtils.showLongToast(mActivity, message);
+                        }
 
                     } else {
                         String code = TextUtils.optString(args, "code", null);
