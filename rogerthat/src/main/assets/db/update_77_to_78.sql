@@ -1,0 +1,1 @@
+ALTER TABLE service_menu_item ADD COLUMN fall_through INTEGER DEFAULT 0;

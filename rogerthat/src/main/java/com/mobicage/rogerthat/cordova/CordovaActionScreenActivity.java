@@ -29,6 +29,7 @@ import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.plugins.friends.ActionScreenActivity;
 import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
+import com.mobicage.rogerthat.plugins.friends.ServiceMenuItemInfo;
 import com.mobicage.rogerthat.plugins.messaging.BrandingFailureException;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
@@ -105,6 +106,10 @@ public class CordovaActionScreenActivity extends ServiceBoundActivity {
         return mContext;
     }
 
+    public ServiceMenuItemInfo getServiceMenuItem() {
+        return new ServiceMenuItemInfo(mItemLabel, mItemTagHash);
+    }
+
     public MessagingPlugin getMessagingPlugin() {
         return mMessagingPlugin;
     }
@@ -139,13 +144,15 @@ public class CordovaActionScreenActivity extends ServiceBoundActivity {
                 InputStream ims = getAssets().open("cordova-apps/" + mEmbeddedApp + "/resources/splash.png");
                 return Drawable.createFromStream(ims, null);
             } catch (IOException ioe) {
-                L.bug(ioe);
+                L.e(ioe);
                 return null;
             }
-        } else {
+        } else if (mBrandingResult != null) {
             String file = new File(mBrandingResult.dir, "resources/splash.png").getAbsolutePath();
             return Drawable.createFromPath(file);
         }
+        L.i("mBrandingResult not set yet, not showing splash screen.");
+        return null;
     }
 
     @Override

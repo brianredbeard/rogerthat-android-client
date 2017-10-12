@@ -54,15 +54,15 @@
     <string name="sql_friend_delete_service_menu">DELETE FROM service_menu_item WHERE friend = ?</string>
     <string name="sql_friend_insert_service_menu">
         INSERT INTO service_menu_item (friend, x, y, z, label, icon_hash, screen_branding, static_flow_hash,
-        hashed_tag, requires_wifi, run_in_background, \"action\", icon_name, icon_color, url, external)
-        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        hashed_tag, requires_wifi, run_in_background, \"action\", icon_name, icon_color, url, external, fall_through)
+        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     </string>
     <string name="sql_friend_check_menu_icon_available">SELECT count(*) FROM service_menu_icon WHERE icon_hash = ?</string>
     <string name="sql_friend_insert_menu_icon">INSERT OR REPLACE INTO service_menu_icon (icon_hash, icon) values (?, ?)</string>
     <string name="sql_friend_menu_icon_usage">SELECT smi.icon_hash, count(smii.icon_hash) FROM service_menu_icon smi LEFT OUTER JOIN service_menu_item smii ON smi.icon_hash = smii.icon_hash GROUP BY smi.icon_hash </string>
     <string name="sql_friend_get_menu">
         SELECT x, y, label, icon, screen_branding, static_flow_hash, hashed_tag, requires_wifi, run_in_background,
-        \"action\", icon_name, icon_color, url, external
+        \"action\", icon_name, icon_color, url, external, fall_through
         FROM service_menu_item smii LEFT OUTER JOIN service_menu_icon smi ON smi.icon_hash = smii.icon_hash
         WHERE friend = ? AND z = ?
     </string>
@@ -104,7 +104,7 @@
     </string>
     <string name="sql_friend_get_smi_by_tag">
         SELECT smi.x, smi.y, smi.z, smi.label, NULL, smi.screen_branding, smi.static_flow_hash, smi.hashed_tag,
-        smi.requires_wifi, smi.run_in_background, smi.action, smi.icon_name, smi.icon_color, smi.url, smi.external,
+        smi.requires_wifi, smi.run_in_background, smi.action, smi.icon_name, smi.icon_color, smi.url, smi.external, smi.fall_through,
         f.generation
         FROM service_menu_item smi INNER JOIN friend f ON smi.friend = f.email
         WHERE f.email = ? and smi.hashed_tag = ?
@@ -159,7 +159,7 @@ SET sortid = ?,
     reply_count = (SELECT count(*) FROM message m1 WHERE m1.sortid = ? AND m1.existence = 1)
 WHERE sortid = ?
     </string>
-    <string name="sql_message_insert_button">INSERT INTO button (message, id, caption, \"action\", \"index\", ui_flags) VALUES (?,?,?,?,?,?)</string>
+    <string name="sql_message_insert_button">INSERT INTO button (message, id, caption, \"action\", \"index\", ui_flags, color) VALUES (?,?,?,?,?,?,?)</string>
     <string name="sql_message_insert_member_status">INSERT INTO member_status (message, member, received_timestamp, acked_timestamp, button, status) VALUES (?,?,?,?,?,?)</string>
     <string name="sql_message_update_member_status">
 UPDATE member_status
@@ -184,7 +184,7 @@ WHERE
     <string name="sql_message_get_unprocessed_message_after_timestamp_keys">SELECT key FROM message WHERE show_in_message_list = 1 AND existence = 1 AND thread_dirty = 1 AND \"timestamp\" > ?</string>
     <string name="sql_message_get_unprocessed_message_count_for_sender">SELECT count(*) FROM message WHERE show_in_message_list > 0  AND existence = 1 AND thread_dirty = 1 AND sender = ?</string>
     <string name="sql_message_get_message_by_key">SELECT \"key\", parent_key, sender, message, \"timestamp\", flags, branding, alert_flags, needs_my_answer, reply_count, dirty, recipients_status, recipients, form, thread_dirty, thread_needs_my_answer, dismiss_button_ui_flags, last_thread_message, thread_show_in_list, broadcast_type, thread_avatar_hash, thread_background_color, thread_text_color, priority, default_priority, default_sticky FROM message WHERE \"key\" = ?</string>
-    <string name="sql_message_get_message_buttons">SELECT id, caption, action, ui_flags FROM button WHERE message = ? ORDER BY \"index\"</string>
+    <string name="sql_message_get_message_buttons">SELECT id, caption, action, ui_flags, color FROM button WHERE message = ? ORDER BY \"index\"</string>
     <string name="sql_message_get_message_members_statusses">SELECT member, received_timestamp, acked_timestamp, button, custom_reply, status FROM member_status WHERE message = ? </string>
     <string name="sql_message_get_message_members">SELECT member FROM member_status WHERE message = ? </string>
     <string name="sql_message_get_message_sender">SELECT sender FROM message WHERE \"key\" = ? </string>
@@ -511,10 +511,10 @@ ORDER BY ms.acked_timestamp DESC
     <string name="sql_payment_provider_select_by_id">SELECT id, name, logo_url, version, description, oauth_authorize_url, black_white_logo, background_color, text_color, button_color, currencies, asset_types FROM payment_provider WHERE id = ? ORDER BY name</string>
     <string name="sql_payment_provider_delete">DELETE FROM payment_provider WHERE id=?</string>
     <string name="sql_payment_provider_clear">DELETE FROM payment_provider</string>
-    <string name="sql_payment_asset_insert">INSERT OR REPLACE INTO payment_asset (provider_id, id, type, name, currency, balance, verified, enabled, has_balance, has_transactions, required_action) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)</string>
-    <string name="sql_payment_asset_select">SELECT provider_id, id, type, name, currency, balance, verified, enabled, has_balance, has_transactions, required_action FROM payment_asset ORDER BY name</string>
-    <string name="sql_payment_asset_select_by_provider_id">SELECT provider_id, id, type, name, currency, balance, verified, enabled, has_balance, has_transactions, required_action FROM payment_asset WHERE provider_id = ? ORDER BY name</string>
-    <string name="sql_payment_asset_select_by_provider_and_asset_id">SELECT provider_id, id, type, name, currency, balance, verified, enabled, has_balance, has_transactions, required_action FROM payment_asset WHERE provider_id = ? AND id = ? ORDER BY name</string>
+    <string name="sql_payment_asset_insert">INSERT OR REPLACE INTO payment_asset (provider_id, id, type, name, currency, available_balance, total_balance, verified, enabled, has_balance, has_transactions, required_action) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)</string>
+    <string name="sql_payment_asset_select">SELECT provider_id, id, type, name, currency, available_balance, total_balance, verified, enabled, has_balance, has_transactions, required_action FROM payment_asset ORDER BY name</string>
+    <string name="sql_payment_asset_select_by_provider_id">SELECT provider_id, id, type, name, currency, available_balance, total_balance, verified, enabled, has_balance, has_transactions, required_action FROM payment_asset WHERE provider_id = ? ORDER BY name</string>
+    <string name="sql_payment_asset_select_by_provider_and_asset_id">SELECT provider_id, id, type, name, currency, available_balance, total_balance, verified, enabled, has_balance, has_transactions, required_action FROM payment_asset WHERE provider_id = ? AND id = ? ORDER BY name</string>
     <string name="sql_payment_asset_delete">DELETE FROM payment_asset WHERE provider_id=?</string>
     <string name="sql_payment_asset_clear">DELETE FROM payment_asset</string>
 
@@ -543,7 +543,7 @@ ORDER BY ms.acked_timestamp DESC
 
     <string name="sql_friend_get_full_menu">
         SELECT x, y, z, label, icon, screen_branding, static_flow_hash, hashed_tag, requires_wifi, run_in_background,
-        \"action\", icon_name, icon_color, url, external
+        \"action\", icon_name, icon_color, url, external, fall_through
         FROM service_menu_item smii LEFT OUTER JOIN service_menu_icon smi ON smi.icon_hash = smii.icon_hash
         WHERE friend = ?
     </string>

@@ -26,10 +26,13 @@ import android.text.TextUtils;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.util.db.DatabaseManager;
+import com.mobicage.rogerthat.util.db.TransactionHelper;
+import com.mobicage.rogerthat.util.db.TransactionWithoutResult;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.to.payment.AppPaymentProviderTO;
+import com.mobicage.to.payment.PaymentAssetBalanceTO;
 import com.mobicage.to.payment.PaymentAssetRequiredActionTO;
 import com.mobicage.to.payment.PaymentProviderAssetTO;
 
@@ -91,14 +94,19 @@ public class PaymentStore implements Closeable {
 
     public void deletePaymentProviders(final String[] providerIds) {
         T.dontCare();
-        if (providerIds.length == 0) {
-            mClearPaymentProviders.execute();
-        }
+        TransactionHelper.runInTransaction(getDatabase(), "deletePaymentProviders", new TransactionWithoutResult() {
+            @Override
+            protected void run() {
+                if (providerIds.length == 0) {
+                    mClearPaymentProviders.execute();
+                }
 
-        for (String providerId : providerIds) {
-            bindString(mDeletePaymentProvider, 1, providerId);
-            mDeletePaymentProvider.execute();
-        }
+                for (String providerId : providerIds) {
+                    bindString(mDeletePaymentProvider, 1, providerId);
+                    mDeletePaymentProvider.execute();
+                }
+            }
+        });
     }
 
     public void savePaymentProvider(final AppPaymentProviderTO paymentProvider) {
@@ -186,30 +194,38 @@ public class PaymentStore implements Closeable {
 
     public void deletePaymentAssets(final String[] providerIds) {
         T.dontCare();
-        if (providerIds.length == 0) {
-            mClearPaymentAssets.execute();
-        }
+        TransactionHelper.runInTransaction(getDatabase(), "deletePaymentAssets", new TransactionWithoutResult() {
+            @Override
+            protected void run() {
+                if (providerIds.length == 0) {
+                    mClearPaymentAssets.execute();
+                }
 
-        for (String providerId : providerIds) {
-            bindString(mDeletePaymentAsset, 1, providerId);
-            mDeletePaymentAsset.execute();
-        }
+                for (String providerId : providerIds) {
+                    bindString(mDeletePaymentAsset, 1, providerId);
+                    mDeletePaymentAsset.execute();
+                }
+            }
+        });
     }
 
     public void savePaymentAsset(final PaymentProviderAssetTO asset) {
         T.dontCare();
         String requiredAction = asset.required_action == null ? null : JSONValue.toJSONString(asset.required_action.toJSONMap());
+        String availableBalance = asset.available_balance == null ? null : JSONValue.toJSONString(asset.available_balance.toJSONMap());
+        String totalBalance = asset.total_balance == null ? null : JSONValue.toJSONString(asset.total_balance.toJSONMap());
         bindString(mInsertPaymentAsset, 1, asset.provider_id);
         bindString(mInsertPaymentAsset, 2, asset.id);
         bindString(mInsertPaymentAsset, 3, asset.type);
         bindString(mInsertPaymentAsset, 4, asset.name);
         bindString(mInsertPaymentAsset, 5, asset.currency);
-        mInsertPaymentAsset.bindLong(6, asset.balance);
-        mInsertPaymentAsset.bindLong(7, asset.verified ? 1 : 0);
-        mInsertPaymentAsset.bindLong(8, asset.enabled ? 1 : 0);
-        mInsertPaymentAsset.bindLong(9, asset.has_balance ? 1 : 0);
-        mInsertPaymentAsset.bindLong(10, asset.has_transactions ? 1 : 0);
-        bindString(mInsertPaymentAsset, 11, requiredAction);
+        bindString(mInsertPaymentAsset, 6, availableBalance);
+        bindString(mInsertPaymentAsset, 7, totalBalance);
+        mInsertPaymentAsset.bindLong(8, asset.verified ? 1 : 0);
+        mInsertPaymentAsset.bindLong(9, asset.enabled ? 1 : 0);
+        mInsertPaymentAsset.bindLong(10, asset.has_balance ? 1 : 0);
+        mInsertPaymentAsset.bindLong(11, asset.has_transactions ? 1 : 0);
+        bindString(mInsertPaymentAsset, 12, requiredAction);
         mInsertPaymentAsset.execute();
     }
 
@@ -221,13 +237,35 @@ public class PaymentStore implements Closeable {
         to.type = c.getString(2);
         to.name = c.getString(3);
         to.currency = c.getString(4);
-        to.balance = c.getLong(5);
-        to.verified = c.getLong(6) > 0;
-        to.enabled = c.getLong(7) > 0;
-        to.has_balance = c.getLong(8) > 0;
-        to.has_transactions = c.getLong(9) > 0;
-        String actionString = c.getString(10);
-        L.w(actionString);
+        String availableBalance = c.getString(5);
+        if (availableBalance == null || "".equals(availableBalance)) {
+            to.available_balance = null;
+        } else {
+            try {
+                Map<String, Object> json = (Map<String, Object>) JSONValue.parse(availableBalance);
+                to.available_balance = new PaymentAssetBalanceTO(json);
+            } catch (IncompleteMessageException e) {
+                L.bug(e);
+                to.available_balance = null;
+            }
+        }
+        String totalBalance = c.getString(6);
+        if (totalBalance == null || "".equals(totalBalance)) {
+            to.total_balance = null;
+        } else {
+            try {
+                Map<String, Object> json = (Map<String, Object>) JSONValue.parse(totalBalance);
+                to.total_balance = new PaymentAssetBalanceTO(json);
+            } catch (IncompleteMessageException e) {
+                L.bug(e);
+                to.total_balance = null;
+            }
+        }
+        to.verified = c.getLong(7) > 0;
+        to.enabled = c.getLong(8) > 0;
+        to.has_balance = c.getLong(9) > 0;
+        to.has_transactions = c.getLong(10) > 0;
+        String actionString = c.getString(11);
         if (actionString == null || "".equals(actionString)) {
             to.required_action = null;
         } else {

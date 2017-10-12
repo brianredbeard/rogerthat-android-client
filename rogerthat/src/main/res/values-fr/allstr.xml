@@ -115,6 +115,7 @@
     <string name="disabled">Désactivé</string>
     <string name="discover_services_short">Découvrir les services</string>
     <string name="dismissed_at">Accusé réception %1$s.</string>
+    <string name="done">OK</string>
     <string name="dont_like">Je n\'aime pas</string>
     <string name="downloading">Téléchargement…</string>
     <string name="edit">Modifier</string>
@@ -505,6 +506,7 @@
     <string name="unable_to_read_write_sd_card">Une erreur s\'est produite. Vérifiez la disponibilité de votre carte SD.</string>
     <string name="unfollow">Désabonner</string>
     <string name="unknown">Inconnu</string>
+    <string name="unknown_error_occurred">Une erreur inconnue s\'est produite</string>
     <string name="unrecognized_scan_result">Le contenu du résultat scanné n\'est pas reconnu.</string>
     <string name="unsave">Effacer</string>
     <string name="unsubscribe">Désinscrire</string>

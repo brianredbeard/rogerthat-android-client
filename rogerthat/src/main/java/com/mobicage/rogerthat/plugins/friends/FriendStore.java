@@ -975,6 +975,7 @@ public class FriendStore implements Closeable {
             smi.link.url = url;
             smi.link.external = external;
         }
+        smi.fallThrough = curs.getLong(i++) == 1;
         if (!UIUtils.isSupportedFontawesomeIcon(smi.iconName)) {
             smi.icon = curs.getBlob(blobIndex);
         }
@@ -1166,6 +1167,7 @@ public class FriendStore implements Closeable {
                 mInsertServiceMenuHTTP.bindString(15, item.link.url);
                 mInsertServiceMenuHTTP.bindLong(16, item.link.external ? 1 : 0);
             }
+            mInsertServiceMenuHTTP.bindLong(17, item.fallThrough ? 1 : 0);
             mInsertServiceMenuHTTP.execute();
 
             if (!UIUtils.isSupportedFontawesomeIcon(item.iconName) && !isMenuIconAvailable(item.iconHash)) {

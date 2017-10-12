@@ -259,7 +259,6 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
     private boolean mShouldClearPin = false;
 
     private Credentials mCredentials;
-    private PinLockMgr mPinLockMgr;
     // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static MainService getInstance() {
@@ -342,9 +341,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
 
         hideLogForwardNotification();
 
-        if (AppConstants.Security.PIN_LOCKED) {
-            mPinLockMgr = App.getContext().getPinLockMgr().setMainService(this);
-        }
+        App.getContext().getPinLockMgr().setMainService(this);
 
         // This should remain the last line of this method.
         current = this;
@@ -1131,9 +1128,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
             stopSelf();
         }
 
-        if (AppConstants.Security.PIN_LOCKED) {
-            mPinLockMgr.unregistered();
-        }
+        App.getContext().getPinLockMgr().unregistered();
     }
 
     public Credentials getCredentials() {
@@ -2045,6 +2040,9 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
 
         } else if ("sign".equals(si.type)) {
             executeSign((SignSecurityItem) si);
+
+        } else if ("ask_pin".equals(si.type)) {
+            si.callback.onSuccess(null);
         }
 
         if (fromQueue && !mEnterPinActivityActive) {
@@ -2064,7 +2062,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         try {
             String publicKeyString = SecurityUtils.createKeyPair(this, mPin, si.keyAlgorithm, si.keyName, si.seed);
             String seed;
-            if (si.seed == null) {
+            if (TextUtils.isEmptyOrWhitespace(si.seed)) {
                 seed = SecurityUtils.getSeed(this, mPin, si.keyAlgorithm, si.keyName);
             } else {
                 seed = si.seed;
@@ -2077,7 +2075,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         } catch (Exception e) {
             String errorMessage;
             String errorCode;
-            if (e.getMessage().contains("unknown word")) {
+            if (e.getMessage() != null && e.getMessage().contains("unknown word")) {
                 errorCode = "unknown_word";
                 errorMessage = getString(R.string.invalid_word, e.getMessage().split("unknown word: ")[1]);
             } else {

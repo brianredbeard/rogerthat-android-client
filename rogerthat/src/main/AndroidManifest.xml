@@ -2,8 +2,8 @@
           xmlns:tools="http://schemas.android.com/tools"
           package="com.mobicage.rogerth.at"
           android:configChanges="orientation|screenSize"
-          android:versionCode="3223"
-          android:versionName="2.1.3223.A">
+          android:versionCode="3416"
+          android:versionName="2.1.3416.A">
 
     <!-- BEGIN GCM -->
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
@@ -116,7 +116,7 @@
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data
-                    android:scheme="rogerthat" />
+                    android:scheme="${app_id}" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -188,6 +188,12 @@
         </activity>
         <activity
             android:name="com.mobicage.rogerthat.registration.OauthRegistrationActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" >
+        </activity>
+        <activity
+            android:name="com.mobicage.rogerthat.registration.QRRegistrationActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" >

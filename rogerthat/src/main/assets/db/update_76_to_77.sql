@@ -1,0 +1,1 @@
+ALTER TABLE button ADD COLUMN color TEXT;

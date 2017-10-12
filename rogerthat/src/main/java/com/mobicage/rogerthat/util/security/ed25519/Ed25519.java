@@ -71,6 +71,10 @@ public class Ed25519 {
         return SecurityUtils.blake2b256Digest(data);
     }
 
+    public static byte[] getPayload(byte[]... data) throws Exception {
+        return SecurityUtils.blake2b256Digest(data);
+    }
+
     public static String getSeed(byte[] seedBytes) throws Exception {
         return Mnemonics.seedToString(seedBytes);
     }
@@ -82,7 +86,7 @@ public class Ed25519 {
 
         Map<String, Object> keys = createKeyPairForAddress(seedBytes, index);
         EdDSAPublicKey publicKey = (EdDSAPublicKey) keys.get("public_key");
-        EdDSAPrivateKey pKey = (EdDSAPrivateKey) keys.get("private_key");
+        EdDSAPrivateKey privateKey = (EdDSAPrivateKey) keys.get("private_key");
 
         byte[] timelock = SecurityUtils.longToBytes(0);
 
@@ -111,10 +115,10 @@ public class Ed25519 {
         final String address = SecurityUtils.lowercaseHash(mtRootFullchecksum);
 
         String publicKeyString =  Base64.encodeBytes(publicKey.getEncoded(), Base64.DONT_BREAK_LINES);
-        byte[] decodedPrivateKey = pKey.getEncoded();
+        String publicKeyAbyte = Base64.encodeBytes(publicKey.getAbyte(), Base64.DONT_BREAK_LINES);
 
-        SecurityUtils.savePublicKey(mainService, ALGORITHM, name, index, publicKeyString);
-        SecurityUtils.saveSecureInfo(mainService, pin, ALGORITHM, name, index, publicKeyString, decodedPrivateKey, null, address);
+        SecurityUtils.savePublicKey(mainService, ALGORITHM, name, index, publicKeyAbyte);
+        SecurityUtils.saveSecureInfo(mainService, pin, ALGORITHM, name, index, publicKeyString, privateKey.getEncoded(), null, address);
         return address;
     }
 
@@ -124,9 +128,14 @@ public class Ed25519 {
             new Random().nextBytes(b);
             seed = Mnemonics.seedToString(b);
         }
+
         final byte[] checksumSeedBytes = Mnemonics.stringToSeed(seed);
         final int entropySize = 32;
         final int seedChecksumSize = 6;
+
+        if (checksumSeedBytes.length != entropySize + seedChecksumSize) {
+            throw new Exception("checksum seed length is wrong");
+        }
 
         final byte[] seedBytes = new byte[entropySize];
         System.arraycopy(checksumSeedBytes, 0, seedBytes, 0, entropySize);
@@ -137,19 +146,20 @@ public class Ed25519 {
         final byte[] checksumBytes = new byte[seedChecksumSize];
         System.arraycopy(checksumSeedBytes, entropySize, checksumBytes, 0, seedChecksumSize);
 
-        if (checksumSeedBytes.length != entropySize + seedChecksumSize || !Arrays.equals(fullChecksum, checksumBytes)) {
-            throw new Exception("checksum seed length is wrong");
+        if (!Arrays.equals(fullChecksum, checksumBytes)) {
+            throw new Exception("checksum seed is wrong");
         }
 
         Map<String, Object> keys = createKeyPair(seedBytes);
         EdDSAPublicKey publicKey = (EdDSAPublicKey) keys.get("public_key");
-        EdDSAPrivateKey pKey = (EdDSAPrivateKey) keys.get("private_key");
+        EdDSAPrivateKey privateKey = (EdDSAPrivateKey) keys.get("private_key");
 
         String publicKeyString =  Base64.encodeBytes(publicKey.getEncoded(), Base64.DONT_BREAK_LINES);
-        byte[] decodedPrivateKey = pKey.getEncoded();
+        String publicKeyAbyte = Base64.encodeBytes(publicKey.getAbyte(), Base64.DONT_BREAK_LINES);
 
-        SecurityUtils.savePublicKey(mainService, ALGORITHM, name, null, publicKeyString);
-        SecurityUtils.saveSecureInfo(mainService, pin, ALGORITHM, name, null, publicKeyString, decodedPrivateKey, seedBytes, null);
+        SecurityUtils.savePublicKey(mainService, ALGORITHM, name, null, publicKeyAbyte);
+        SecurityUtils.saveSecureInfo(mainService, pin, ALGORITHM, name, null, publicKeyString, privateKey.getEncoded(),
+                seedBytes, null);
         return publicKeyString;
     }
 

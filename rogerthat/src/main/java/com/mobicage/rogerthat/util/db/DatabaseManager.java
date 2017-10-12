@@ -18,11 +18,6 @@
 
 package com.mobicage.rogerthat.util.db;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.List;
-
 import android.database.Cursor;
 import android.database.sqlite.SQLiteCursor;
 import android.database.sqlite.SQLiteCursorDriver;
@@ -37,10 +32,15 @@ import com.mobicage.rogerthat.util.db.updates.Updates;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.T;
 
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.List;
+
 public class DatabaseManager implements Closeable {
 
     private final static String DB_NAME = "mc.db";
-    private final static int DB_VERSION = 76;
+    private final static int DB_VERSION = 79;
 
     private final MainService mMainService;
     private final SQLiteDatabase mDb;

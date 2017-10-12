@@ -48,6 +48,8 @@
     <string name="alarm_sound">Alarm geluid</string>
     <string name="alarm_sound_custom">Eigen geluid</string>
     <string name="alarm_sound_default">Standaard geluid</string>
+    <string name="algorithm">Algoritme</string>
+    <string name="algorithm_not_supported">Algoritme wordt niet ondersteund</string>
     <string name="all_friends">Alle vrienden</string>
     <string name="all_items">Alle items</string>
     <string name="allow">Toestaan</string>
@@ -61,6 +63,8 @@
     <string name="authenticate_first">Gelieve te authenticeren vooraleer verder te gaan.</string>
     <string name="authenticate_via_your_oauth_account">Authenticeren met behulp van uw \'%1$s\' account</string>
     <string name="back">Terug</string>
+    <string name="backup_security_key_instructions">Om de beveiligingscode te importeren wanneer u de app opnieuw installeert, moet u onderstaande algoritme,  sleutelnaam en 29 woorden opschrijven en op een veilige locatie opslaan.\n\nOpmerking: als u deze woorden verliest, verliest u de toegang tot uw portemonnee/munten.\n\nOpmerking: Wij zullen nooit achter deze woorden vragen. Geef ze nooit aan iemand anders op een forum, via telefoon of via e-mail.</string>
+    <string name="backup_security_key_later">Deze woorden kunnen later nog bekeken worden onder %1$s &gt; %2$s. Selecteer daarna de sleutel met naam \"%3$s\".</string>
     <string name="birthdate">Geboortedatum</string>
     <string name="broadcast_subscribed_to">Je ontvangt dit bericht omdat je bent ingeschreven op: %1$s.</string>
     <string name="button_action">(Optioneel) Actie URL</string>
@@ -69,6 +73,8 @@
     <string name="calculate_location">Opvragen</string>
     <string name="call_service">Bellen</string>
     <string name="camera">Camera</string>
+    <string name="camera_permission_was_not_granted">Camerapermissie was niet toegestaan</string>
+    <string name="camera_was_already_open">De camera was al open</string>
     <string name="cancel">Annuleren</string>
     <string name="caption_call">Bel nu naar %1$s</string>
     <string name="caption_required">Tekst op knop is vereist.</string>
@@ -94,6 +100,8 @@
     <string name="contacts_found_none">Geen contacten gevonden die %1$s gebruiken.</string>
     <string name="continue_">Verder</string>
     <string name="continue_shopping">Verder winkelen</string>
+    <string name="copied_to_clipboard">Gekopieerd naar klembord</string>
+    <string name="copy_to_clipboard">Kopiëren naar klembord</string>
     <string name="corr">Corr</string>
     <string name="create_button_title">Maak nieuwe antwoordknop</string>
     <string name="create_group">Groep aanmaken</string>
@@ -117,6 +125,7 @@
     <string name="discover_services_short">Diensten ontdekken</string>
     <string name="dismissed_at">Bevestigd: %1$s.</string>
     <string name="do_you_want_to_follow_service">Wens je %1$s te volgen?</string>
+    <string name="done">Gereed</string>
     <string name="dont_like">Vind ik niet leuk</string>
     <string name="downloading">Downloaden…</string>
     <string name="edit">Wijzigen</string>
@@ -128,6 +137,7 @@
     <string name="enabled_summary">Achtergrond modus</string>
     <string name="enabled_title">Achtergrond</string>
     <string name="enter_pin_to_sign">Gelieve uw pincode in te geven om de bijgevoegde document(en) te ondertekenen.</string>
+    <string name="enter_pin_to_unlock">Geef uw PIN code in om de app te ontgrendelen.</string>
     <string name="enter_search_query">Geef een zoekopdracht in</string>
     <string name="error_find_from_addressbook">Adresboek kon niet gescand worden. Probeer het later opnieuw.</string>
     <string name="error_find_from_facebook">Facebook vrienden voor %1$s konden niet gevonden worden. Probeer het later opnieuw.</string>
@@ -171,6 +181,7 @@
     <string name="friends_getting_started_title">Aan de slag</string>
     <string name="friends_map">Vriendenkaart</string>
     <string name="gender">Geslacht</string>
+    <string name="generate_new_key">Nieuwe sleutel genereren</string>
     <string name="generic_no_services_found">Je volgt nog geen %1$s in %2$s. Klik op het vergrootglas om %1$s in je buurt te zoeken.</string>
     <string name="get_current_coordinates">Vraag GPS coördinaten op van je huidige locatie</string>
     <string name="get_friends_location_failed">Kan locatie niet verkrijgen.</string>
@@ -200,9 +211,16 @@
     <string name="ibeacon_usage_track_location_without_concent">Uw locatie opvragen zonder uw voorafgaande toestemming.</string>
     <string name="ibeacon_usage_used_for">De %1$s app gebruikt uw locatie voor:</string>
     <string name="identify">Identificeren</string>
+    <string name="import_existing_key">Bestaande sleutel importeren</string>
+    <string name="import_key">Beveiligingssleutel importeren</string>
+    <string name="import_key_failed">De sleutel kon niet geïmporteerd worden. Controleer of het juiste algoritme geselecteerd is en dat de 29 woorden correct geschreven zijn.</string>
+    <string name="import_key_succeeded">De sleutel is succesvol geïmporteerd.</string>
+    <string name="import_security_key_instructions">Om een sleutel te importeren dien je het algoritme te selecteren en de sleutelnaam en de 29 woorden in te geven.</string>
     <string name="initializing">Initialiseren…</string>
     <string name="install">Installeren</string>
+    <string name="install_import_secure_key">Wil je een %1$s sleutel importeren of een nieuwe genereren? Als dit de eerste keer is dat je de %1$s app installeert, kies dan \'Nieuwe sleutel genereren\'.</string>
     <string name="install_mdp">Gelieve MYDIGIPASS Authenticator for Mobile te installeren vooraleer verder te gaan.</string>
+    <string name="invalid_word">Onbekend woord: %1$s. Controleer dat alle woorden correct zijn ingegeven.</string>
     <string name="invitation_acception_failure">Fout tijdens het verzenden.</string>
     <string name="invitation_sent_successfully">Uitnodiging verzonden.</string>
     <string name="invitation_successfully_accepted">Vriendschapsverzoek aanvaard van %1$s.</string>
@@ -223,9 +241,13 @@
     <string name="invite_via_sms">Vrienden uitnodigen via SMS</string>
     <string name="invited">Uitgenodigd</string>
     <string name="invited_activity_record">%1$s is uitgenodigd</string>
+    <string name="key_already_exists">De sleutel bestaat al</string>
+    <string name="key_name">Sleutelnaam</string>
+    <string name="key_not_found">Sleutel niet gevonden.</string>
     <string name="label_home">(thuis)</string>
     <string name="label_mobile">(mobiel)</string>
     <string name="label_work">(werk)</string>
+    <string name="later">Later</string>
     <string name="like">Vind ik leuk</string>
     <string name="load_canned_message">Laden</string>
     <string name="load_canned_message_dialog_title">Kies standaard bericht</string>
@@ -306,6 +328,7 @@
     <string name="no_network_available_when_online_transfer_continues">Er is geen netwerk beschikbaar, de verzending zal verder gaan wanneer u met een netwerk verbonden bent.</string>
     <string name="no_network_available_when_online_transfer_continues_tilte">Geen netwerk beschikbaar</string>
     <string name="no_network_available_when_wifi_online_transfer_continues">Er is geen netwerk beschikbaar, de verzending zal verder gaan wanneer u verbonden bent met WIFI</string>
+    <string name="no_payment_providers">Je hebt nog geen betalingsaanbieders.</string>
     <string name="no_photo_selected_summary">U dient een foto te selecteren voor u kan verder gaan.</string>
     <string name="no_photo_selected_tilte">Geen foto geseleceerd</string>
     <string name="no_rogerthat_qr">De gescande QR code is geen %2$s QR code.\n\n%1$s</string>
@@ -326,6 +349,8 @@
     <string name="order">Bestellen</string>
     <string name="osa_loyalty_welcome_message">Welkom op de Onze Stad App terminal. Deze app is de perfecte aanvulling bij uw aanwezigheid in de stad app om zo uw klanten nog meer te bieden. Wij helpen u het getrouwheidssysteem klaar te zetten voor gebruik. Begin met uw QR-code te scannen om zo uw terminal te activeren.</string>
     <string name="passport">%1$s id</string>
+    <string name="payment_providers">Betalingsaanbieders</string>
+    <string name="payment_providers_add">Betalingsaanbieder toevoegen</string>
     <string name="phone">Telefoon</string>
     <string name="photo">Foto</string>
     <string name="pin_confirm">Bevestig uw pincode.</string>
@@ -440,6 +465,10 @@
     <string name="scanner_failure">Er is een fout opgetreden.</string>
     <string name="search_services_if_none_connected_message">Wil je zoeken naar %1$s in je buurt?</string>
     <string name="searching">Aan het zoeken…</string>
+    <string name="security">Beveiliging</string>
+    <string name="security_not_enabled">Beveiliging is niet ingeschakeld voor deze app.</string>
+    <string name="security_usage_explanation">Omdat deze app beveiligingsfuncties gebruikt, moet u deze beveiligen met een pincode.</string>
+    <string name="seed_29_words">29 woorden</string>
     <string name="select_all">Alles selecteren</string>
     <string name="select_colleague">Collega selecteren</string>
     <string name="select_contact">Contact selecteren</string>
@@ -457,6 +486,8 @@
     <string name="settings">Instellingen</string>
     <string name="settings_category_info">Algemene informatie</string>
     <string name="settings_title">Rogerthat Instellingen</string>
+    <string name="setup_pin">PIN code instellen</string>
+    <string name="setup_pin_was_open">PIN code wordt al opgezet</string>
     <string name="shopping_basket">Winkelmandje</string>
     <string name="show_details">Toon detail</string>
     <string name="show_location">Locatie tonen</string>
@@ -514,9 +545,11 @@
     <string name="unable_to_read_write_sd_card">Er is een fout opgetreden. Zorg dat er vrije ruimte is op uw SD card.</string>
     <string name="unfollow">Ontvolgen</string>
     <string name="unknown">Onbekend</string>
+    <string name="unknown_error_occurred">Er is een onbekende fout opgetreden</string>
     <string name="unrecognized_scan_result">Er is een fout gebeurd tijdens de verwerking.</string>
     <string name="unsave">Opslaan ongedaan maken</string>
     <string name="unsubscribe">Uitschrijven</string>
+    <string name="unsupported_camera_type">Ongeldig cameratype</string>
     <string name="update">Updaten</string>
     <string name="update_settings_failure">Fout tijdens het veranderen van de instellingen.</string>
     <string name="updating_location">Locatie vernieuwen…</string>
@@ -525,11 +558,14 @@
     <string name="urgent">Dringend</string>
     <string name="urgent_with_alarm">Dringend met alarm</string>
     <string name="use_gps_provider">Gebruik GPS</string>
+    <string name="user_cancelled_pin_input">Gebruiker heeft de PIN ingave geannuleerd</string>
     <string name="userfriends_getting_started_msg">Nodig vrienden uit met deze mobiele app:\n- via e-mail\n- via SMS bericht\n- scan hun %1$s id\n\nSurf met je PC naar https://rogerth.at om vrienden uit te nodigen:\n- Facebook vrienden\n- LinkedIn kennissen\n- Vrienden van vrienden</string>
     <string name="valid_from_to">Geldig van %1$s tot %2$s</string>
     <string name="validate_discovered_location">Controleer of deze locatie de juiste is</string>
     <string name="validation_failed">Ongeldige input</string>
     <string name="view_my_profile">Mijn profiel bekijken</string>
+    <string name="view_security_settings">Beveiligingsinstellingen bekijken</string>
+    <string name="wallet">Portemonnee</string>
     <string name="warning">Waarschuwing</string>
     <string name="website">Website</string>
     <string name="wont_store_data">We gebruiken deze gegevens enkel om uw contacten te vinden. We houden ze niet bij.</string>

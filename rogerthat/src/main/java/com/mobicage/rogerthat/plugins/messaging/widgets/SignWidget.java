@@ -25,31 +25,31 @@ import android.view.View;
 import android.widget.Button;
 
 import com.mobicage.api.messaging.Rpc;
+import com.mobicage.models.properties.profiles.PublicKeyTO;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
+import com.mobicage.rogerthat.plugins.security.SecurityPlugin;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.ui.UIUtils;
+import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.to.messaging.AttachmentTO;
+import com.mobicage.to.messaging.forms.SignWidgetResultTO;
 import com.mobicage.to.messaging.forms.SubmitSignFormRequestTO;
 import com.mobicage.to.messaging.forms.SubmitSignFormResponseTO;
-import com.mobicage.to.messaging.forms.UnicodeListWidgetResultTO;
 
 import org.jivesoftware.smack.util.Base64;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -58,11 +58,12 @@ public class SignWidget extends Widget {
 
     private Button mSignBtn;
     private View mSignResultView;
-    private List<String> mResult;
+    private SignWidgetResultTO mResult;
     private String mKeyAlgorithm;
     private String mKeyName;
     private Long mKeyIndex;
     private String mCaption;
+    private String mPublicKey;
 
     public SignWidget(Context context) {
         super(context);
@@ -93,7 +94,14 @@ public class SignWidget extends Widget {
             mCaption = mActivity.getString(R.string.enter_pin_to_sign);
         }
 
-        mResult = (List<String>) mWidgetMap.get("values");
+        Map<String, Object> result = (Map<String, Object>) mWidgetMap.get("value");
+        if (result != null) {
+            try {
+                mResult = new SignWidgetResultTO(result);
+            } catch (IncompleteMessageException e) {
+                L.bug(e);
+            }
+        }
         if (mResult != null) {
             mSignBtn.setVisibility(View.GONE);
             mSignResultView.setVisibility(View.VISIBLE);
@@ -101,20 +109,17 @@ public class SignWidget extends Widget {
     }
 
     public static String valueString(Context context, Map<String, Object> widget) {
-        return widget.get("values") != null ? context.getString(R.string.signed) : null;
+        return widget.get("value") != null ? context.getString(R.string.signed) : null;
     }
 
     @Override
     public void putValue() {
-        mWidgetMap.put("values", mResult == null ? null : mResult);
+        mWidgetMap.put("value", mResult == null ? null : mResult.toJSONMap());
     }
 
     @Override
-    public UnicodeListWidgetResultTO getWidgetResult() {
-        UnicodeListWidgetResultTO result = new UnicodeListWidgetResultTO();
-        final List<String> values = (List<String>) mWidgetMap.get("values");
-        result.values = values.toArray(new String[values.size()]);
-        return result;
+    public SignWidgetResultTO getWidgetResult() {
+        return mResult;
     }
 
     @Override
@@ -156,21 +161,24 @@ public class SignWidget extends Widget {
         }
     }
 
-    private byte[] getPayloadHash() {
-        final String payloadStr = (String) mWidgetMap.get("payload");
-        return payloadStr == null ? null : SecurityUtils.sha256Digest(Base64.decode(payloadStr));
+    private byte[] getPayloadHash() throws Exception {
+        final String payload = (String) mWidgetMap.get("payload");
+        if (payload == null) {
+            return null;
+        }
+        return SecurityUtils.getPayload(mKeyAlgorithm, Base64.decode(payload));
     }
 
     private void sign() {
-        if (!SecurityUtils.hasKey(mActivity.getMainService(), "public", mKeyAlgorithm, mKeyName, mKeyIndex)) {
-            UIUtils.showLongToast(mActivity, R.string.key_not_found);
+        try {
+            mPublicKey = SecurityUtils.getPublicKeyString(mActivity.getMainService(), mKeyAlgorithm, mKeyName, mKeyIndex);
+        } catch (Exception e) {
+            L.bug("Error while getting public key", e);
+            UIUtils.showErrorPleaseRetryDialog(mActivity);
             return;
         }
-
-        try {
-            MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            UIUtils.showLongToast(mActivity, R.string.feature_not_supported);
+        if (mPublicKey == null) {
+            UIUtils.showLongToast(mActivity, R.string.key_not_found);
             return;
         }
 
@@ -188,18 +196,33 @@ public class SignWidget extends Widget {
             }
         }
 
-        /** Signatures array contains 2 Strings:
-         * 0. payload == null ? null : sign(the hash of the payload)
-         * 1. sign(the hash of the message + the hash of the payload + the hash of all the attachments)
+        /* Signatures array contains 2 Strings:
+          0. payload == null ? null : sign(the hash of the payload)
+          1. sign(the hash of the message + the hash of the payload + the hash of all the attachments)
          */
         final String[] signatures = new String[2];
-        final byte[] payloadHash = getPayloadHash();
+        final byte[] payloadHash;
+        try {
+            payloadHash = getPayloadHash();
+        } catch (Exception e) {
+            L.d("Failed to get payload hash", e);
+            UIUtils.showErrorPleaseRetryDialog(mActivity);
+            return;
+        }
         final MainService.SecurityCallback<byte[]> signMessageCallback = new MainService.SecurityCallback<byte[]>() {
             @Override
             public void onSuccess(byte[] result) {
                 signatures[1] = result == null ? null : Base64.encodeBytes(result);
 
-                mResult = Arrays.asList(signatures);
+                mResult = new SignWidgetResultTO();
+                mResult.payload_signature = signatures[0];
+                mResult.total_signature = signatures[1];
+                mResult.public_key = new PublicKeyTO();
+                mResult.public_key.algorithm = mKeyAlgorithm;
+                mResult.public_key.index = SecurityPlugin.getIndexString(mKeyIndex);
+                mResult.public_key.name = mKeyName;
+                mResult.public_key.public_key = mPublicKey;
+
                 mSignBtn.setVisibility(View.GONE);
                 mSignResultView.setVisibility(View.VISIBLE);
                 mActivity.excecutePositiveButtonClick();
@@ -218,17 +241,30 @@ public class SignWidget extends Widget {
                 signatures[0] = (payloadHash == null || result == null) ? null : Base64.encodeBytes(result);
 
                 final List<byte[]> hashes = new ArrayList<>(mMessage.attachments.length + 2);
-                hashes.add(SecurityUtils.sha256Digest(mMessage.message));
+                try {
+                    hashes.add(SecurityUtils.getPayload(mKeyAlgorithm, mMessage.message));
+                } catch (Exception e) {
+                    L.d("Failed to get message hash", e);
+                    UIUtils.showErrorPleaseRetryDialog(mActivity);
+                    return;
+                }
                 if (payloadHash != null) {
                     hashes.add(payloadHash);
                 }
 
                 if (mMessage.attachments.length != 0) {
                     for (AttachmentTO attachment : mMessage.attachments) {
+                        final File attachmentFile;
                         try {
-                            final File attachmentFile = messagingPlugin.attachmentFile(mMessage, attachment);
-                            hashes.add(SecurityUtils.sha256Digest(attachmentFile));
+                            attachmentFile = messagingPlugin.attachmentFile(mMessage, attachment);
                         } catch (IOException e) {
+                            UIUtils.showErrorPleaseRetryDialog(mActivity);
+                            return;
+                        }
+                        try {
+                            hashes.add(SecurityUtils.getPayload(mKeyAlgorithm, attachmentFile));
+                        } catch (Exception e) {
+                            L.d("Failed to get attachment hash", e);
                             UIUtils.showErrorPleaseRetryDialog(mActivity);
                             return;
                         }
@@ -240,8 +276,14 @@ public class SignWidget extends Widget {
                         L.d("Partial hash " + i + ": " + TextUtils.toHex(hashes.get(i)));
                     }
                 }
-
-                final byte[] hash = SecurityUtils.sha256Digest(hashes.toArray(new byte[hashes.size()][]));
+                final byte[] hash;
+                try {
+                    hash = SecurityUtils.getPayload(mKeyAlgorithm, hashes.toArray(new byte[hashes.size()][]));
+                } catch (Exception e) {
+                    L.d("Failed to get attachments hash", e);
+                    UIUtils.showErrorPleaseRetryDialog(mActivity);
+                    return;
+                }
                 L.i("Combined hash: " + TextUtils.toHex(hash));
                 mActivity.getMainService().sign(mKeyAlgorithm, mKeyName, mKeyIndex, mCaption, hash, payloadHash == null, signMessageCallback);
             }

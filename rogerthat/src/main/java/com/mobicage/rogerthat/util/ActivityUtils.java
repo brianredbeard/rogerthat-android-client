@@ -20,7 +20,6 @@ package com.mobicage.rogerthat.util;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -44,6 +43,7 @@ import com.mobicage.rogerthat.ServiceFriendsActivity;
 import com.mobicage.rogerthat.SettingsActivity;
 import com.mobicage.rogerthat.UserFriendsActivity;
 import com.mobicage.rogerthat.cordova.CordovaActionScreenActivity;
+import com.mobicage.rogerthat.cordova.CordovaSettings;
 import com.mobicage.rogerthat.plugins.friends.FriendSearchActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendStore;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
@@ -110,21 +110,20 @@ public class ActivityUtils {
             }
         } else if ("action".equals(ni.actionType)) {
         } else if ("cordova".equals(ni.actionType)) {
-            AssetManager assetManager = context.getAssets();
-            try {
-                List<String> cordovaApplications = Arrays.asList(assetManager.list("cordova-apps"));
-                if (!cordovaApplications.contains(ni.action)) {
-                    return "Unknown cordova-based app: " + ni.action;
-                }
-            } catch (IOException e) {
-                return "Failed to locate cordova-based app: " + e.getMessage();
+            if (!CordovaSettings.APPS.contains(ni.action)) {
+                return "Unknown cordova-based app: " + ni.action;
             }
         } else if ("click".equals(ni.actionType)) {
-            if (TextUtils.isEmptyOrWhitespace(AppConstants.APP_EMAIL)) {
+            final String serviceEmail;
+            if (!TextUtils.isEmptyOrWhitespace(ni.serviceEmail)) {
+                serviceEmail = ni.serviceEmail;
+            } else if (!TextUtils.isEmptyOrWhitespace(AppConstants.APP_EMAIL)) {
+                serviceEmail = AppConstants.APP_EMAIL;
+            } else {
                 return "Unknown email";
             }
             final FriendStore friendStore = context.getMainService().getPlugin(FriendsPlugin.class).getStore();
-            final ServiceMenuItemDetails smi = friendStore.getMenuItem(AppConstants.APP_EMAIL, ni.action);
+            final ServiceMenuItemDetails smi = friendStore.getMenuItem(serviceEmail, ni.action);
             if (smi == null) {
                 return "ServiceMenuItem not found";
             }

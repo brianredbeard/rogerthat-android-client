@@ -76,6 +76,8 @@ import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.to.friends.ServiceMenuItemTO;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class ServiceActionMenuActivity extends ServiceBoundActivity {
@@ -280,16 +282,6 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
         final FriendStore store = friendsPlugin.getStore();
 
         List<Cell> usedCells = new ArrayList<Cell>();
-        if (page == 0) {
-            addAboutHandler(usedCells, menu.aboutLabel);
-            addHistoryHandler(usedCells, store, menu.messagesLabel);
-            addCallHandler(menu, usedCells, menu.callLabel);
-            if (CloudConstants.isYSAAA()) {
-                addScanHandler(menu, usedCells, null);
-            } else {
-                addShareHandler(menu, usedCells, menu.shareLabel);
-            }
-        }
         boolean[] rows = new boolean[] { false, false, false };
         if (page == 0)
             rows[0] = true;
@@ -316,10 +308,6 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
                         activity.setBackgroundColor(brandingBackgroundColor);
                     }
                     if (br.scheme == ColorScheme.DARK) {
-                        for (Cell cell : usedCells) {
-                            cell.label.setTextColor(darkSchemeTextColor);
-                            cell.label.setShadowLayer(2, 1, 1, Color.BLACK);
-                        }
                         useDarkScheme = true;
                     }
 
@@ -351,43 +339,46 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
         if (brandingBackgroundColor == null) {
             brandingBackgroundColor = ContextCompat.getColor(this, R.color.mc_page_light);
         }
-        for (final ServiceMenuItem item : menu.itemList) {
-            rows[(int) item.coords[1]] = true;
-            final Cell cell = cells[(int) item.coords[0]][(int) item.coords[1]];
-            View p = (View) cell.icon.getParent();
 
-            View.OnClickListener onClickListener = new SafeViewOnClickListener() {
-                @Override
-                public void safeOnClick(View v) {
-                    if (mMenuItemPresser == null) {
-                        mMenuItemPresser = new MenuItemPresser(ServiceActionMenuActivity.this, email);
-                    }
-                    mMenuItemPresser.itemPressed(item, menu.generation, null);
-                }
-            };
-            p.setOnClickListener(onClickListener);
-            int menuItemColor = defaultMenuItemColor;
-            if (item.iconColor != null) {
-                menuItemColor = Color.parseColor("#" + item.iconColor);
-            }
-            if (UIUtils.isSupportedFontawesomeIcon(item.iconName)) {
-                Drawable icon = UIUtils.getIconFromString(this, item.iconName).color(brandingBackgroundColor).sizeDp(24).paddingDp(5);
-                cell.icon.setImageDrawable(icon);
-                UIUtils.setBackgroundColor(cell.icon, menuItemColor);
-            } else if (item.icon == null) {
-                L.d(String.format("Font awesome icon not set and icon content not found." +
-                        "\nService: %s, iconName: %s", email, item.iconName));
+        if (page == 0) {
+            addAboutHandler(usedCells, menu.aboutLabel, brandingBackgroundColor, defaultMenuItemColor, useDarkScheme);
+            addHistoryHandler(usedCells, store, menu.messagesLabel, brandingBackgroundColor, defaultMenuItemColor, useDarkScheme);
+            addCallHandler(menu, usedCells, menu.callLabel, brandingBackgroundColor, defaultMenuItemColor, useDarkScheme);
+            if (CloudConstants.isYSAAA()) {
+                addScanHandler(menu, usedCells, null, brandingBackgroundColor, defaultMenuItemColor, useDarkScheme);
             } else {
-                cell.icon.setImageBitmap(BitmapFactory.decodeByteArray(item.icon, 0, item.icon.length));
-                UIUtils.setBackgroundColor(cell.icon, brandingBackgroundColor);
+                addShareHandler(menu, usedCells, menu.shareLabel, brandingBackgroundColor, defaultMenuItemColor, useDarkScheme);
             }
-            p.setVisibility(View.VISIBLE);
-            cell.label.setText(item.label);
-            if (useDarkScheme) {
-                cell.label.setTextColor(darkSchemeTextColor);
-                cell.label.setShadowLayer(2, 1, 1, Color.BLACK);
+        }
+
+        for (final ServiceMenuItem item : menu.itemList) {
+            if (item.fallThrough) {
+                continue;
             }
-            usedCells.add(cell);
+            addMenuItemToCell(usedCells, rows, defaultMenuItemColor, brandingBackgroundColor,
+                    useDarkScheme, menu.generation, item, (int) item.coords[0], (int) item.coords[1]);
+
+        }
+        Collections.sort(menu.itemList, comparator);
+        for (final ServiceMenuItem item : menu.itemList) {
+            if (!item.fallThrough) {
+                continue;
+            }
+            boolean added = false;
+            for (int y = 0; y < 3; y++) {
+                for (int x = 0; x < 4; x++) {
+                    if (added) {
+                        continue;
+                    }
+                    final Cell cell = cells[x][y];
+                    if (usedCells.contains(cell)) {
+                        continue;
+                    }
+                    added = true;
+                    addMenuItemToCell(usedCells, rows, defaultMenuItemColor, brandingBackgroundColor,
+                            useDarkScheme, menu.generation, item, x, y);
+                }
+            }
         }
 
         for (int i = 2; i >= 0; i--) {
@@ -404,21 +395,6 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
                 final Drawable d = getResources().getDrawable(R.drawable.mc_smi_background_light);
                 p.setBackground(d);
             }
-        }
-
-        if (page == 0) {
-            cells[0][0].icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_info).color(brandingBackgroundColor).sizeDp(24).paddingDp(5));
-            UIUtils.setBackgroundColor(cells[0][0].icon, defaultMenuItemColor);
-            cells[1][0].icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_envelope).color(brandingBackgroundColor).sizeDp(24).paddingDp(5));
-            UIUtils.setBackgroundColor(cells[1][0].icon, defaultMenuItemColor);
-            cells[2][0].icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_phone).color(brandingBackgroundColor).sizeDp(24).paddingDp(5));
-            UIUtils.setBackgroundColor(cells[2][0].icon, defaultMenuItemColor);
-            if (CloudConstants.isYSAAA()) {
-                cells[3][0].icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_qrcode).color(brandingBackgroundColor).sizeDp(24).paddingDp(5));
-            } else {
-                cells[3][0].icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_thumbs_up).color(brandingBackgroundColor).sizeDp(24).paddingDp(5));
-            }
-            UIUtils.setBackgroundColor(cells[3][0].icon, defaultMenuItemColor);
         }
 
         if (menu.maxPage > 0) {
@@ -458,6 +434,59 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
             }
         });
         mGestureScanner = new GestureDetector(this, instance);
+    }
+
+    private final Comparator<ServiceMenuItem> comparator = new Comparator<ServiceMenuItem>() {
+        @Override
+        public int compare(ServiceMenuItem item1, ServiceMenuItem item2) {
+            if (item1.coords[1] != item2.coords[1]) {
+                return item1.coords[1] > item2.coords[1] ? 1 : -1;
+            } else if (item1.coords[0] != item2.coords[0]) {
+                return item1.coords[0] > item2.coords[0] ? 1 : -1;
+            }
+            return 0;
+        }
+    };
+
+    private void addMenuItemToCell(final List<Cell> usedCells, final boolean[] rows, final int defaultMenuItemColor,
+                                   final int brandingBackgroundColor, final boolean useDarkScheme, final long generation,
+                                   final ServiceMenuItem item, final int x, final int y) {
+        rows[y] = true;
+        final Cell cell = cells[x][y];
+        View p = (View) cell.icon.getParent();
+
+        View.OnClickListener onClickListener = new SafeViewOnClickListener() {
+            @Override
+            public void safeOnClick(View v) {
+                if (mMenuItemPresser == null) {
+                    mMenuItemPresser = new MenuItemPresser(ServiceActionMenuActivity.this, email);
+                }
+                mMenuItemPresser.itemPressed(item, generation, null);
+            }
+        };
+        p.setOnClickListener(onClickListener);
+        int menuItemColor = defaultMenuItemColor;
+        if (item.iconColor != null) {
+            menuItemColor = Color.parseColor("#" + item.iconColor);
+        }
+        if (UIUtils.isSupportedFontawesomeIcon(item.iconName)) {
+            Drawable icon = UIUtils.getIconFromString(this, item.iconName).color(brandingBackgroundColor).sizeDp(24).paddingDp(5);
+            cell.icon.setImageDrawable(icon);
+            UIUtils.setBackgroundColor(cell.icon, menuItemColor);
+        } else if (item.icon == null) {
+            L.d(String.format("Font awesome icon not set and icon content not found." +
+                    "\nService: %s, iconName: %s", email, item.iconName));
+        } else {
+            cell.icon.setImageBitmap(BitmapFactory.decodeByteArray(item.icon, 0, item.icon.length));
+            UIUtils.setBackgroundColor(cell.icon, brandingBackgroundColor);
+        }
+        p.setVisibility(View.VISIBLE);
+        cell.label.setText(item.label);
+        if (useDarkScheme) {
+            cell.label.setTextColor(darkSchemeTextColor);
+            cell.label.setShadowLayer(2, 1, 1, Color.BLACK);
+        }
+        usedCells.add(cell);
     }
 
     private void setupWebView(BrandingResult brandingResult, int displayWidth) {
@@ -548,10 +577,17 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
 
     };
 
-    private void addAboutHandler(final List<Cell> usedCells, final String aboutLabel) {
+    private void addAboutHandler(final List<Cell> usedCells, final String aboutLabel, int brandingBackgroundColor, int defaultMenuItemColor, boolean useDarkScheme) {
         final Cell cell = cells[0][0];
         View p = (View) cell.icon.getParent();
         cell.label.setText(TextUtils.isEmptyOrWhitespace(aboutLabel) ? getString(R.string.about) : aboutLabel);
+        if (useDarkScheme) {
+            cell.label.setTextColor(darkSchemeTextColor);
+            cell.label.setShadowLayer(2, 1, 1, Color.BLACK);
+        }
+
+        cell.icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_info).color(brandingBackgroundColor).sizeDp(24).paddingDp(5));
+        UIUtils.setBackgroundColor(cell.icon, defaultMenuItemColor);
 
         final View.OnClickListener onClickListener = new SafeViewOnClickListener() {
             @Override
@@ -574,11 +610,19 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
         usedCells.add(cell);
     }
 
-    private void addHistoryHandler(final List<Cell> usedCells, final FriendStore friendStore, final String messagesLabel) {
+    private void addHistoryHandler(final List<Cell> usedCells, final FriendStore friendStore, final String messagesLabel, int brandingBackgroundColor, int defaultMenuItemColor, boolean useDarkScheme) {
         final Cell cell = cells[1][0];
         View p = (View) cell.icon.getParent();
         cell.label.setText(TextUtils.isEmptyOrWhitespace(messagesLabel) ? getString(R.string.message_history)
             : messagesLabel);
+        if (useDarkScheme) {
+            cell.label.setTextColor(darkSchemeTextColor);
+            cell.label.setShadowLayer(2, 1, 1, Color.BLACK);
+        }
+
+        cell.icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_envelope).color(brandingBackgroundColor).sizeDp(24).paddingDp(5));
+        UIUtils.setBackgroundColor(cell.icon, defaultMenuItemColor);
+
         final View.OnClickListener onClickListener = new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
@@ -617,11 +661,19 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
         }
     }
 
-    private void addCallHandler(final ServiceMenu menu, final List<Cell> usedCells, final String callLabel) {
+    private void addCallHandler(final ServiceMenu menu, final List<Cell> usedCells, final String callLabel, int brandingBackgroundColor, int defaultMenuItemColor, boolean useDarkScheme) {
         if (menu.phoneNumber != null) {
             final Cell cell = cells[2][0];
             View p = (View) cell.icon.getParent();
             cell.label.setText(TextUtils.isEmptyOrWhitespace(callLabel) ? getString(R.string.call_service) : callLabel);
+            if (useDarkScheme) {
+                cell.label.setTextColor(darkSchemeTextColor);
+                cell.label.setShadowLayer(2, 1, 1, Color.BLACK);
+            }
+
+            cell.icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_phone).color(brandingBackgroundColor).sizeDp(24).paddingDp(5));
+            UIUtils.setBackgroundColor(cell.icon, defaultMenuItemColor);
+
             final View.OnClickListener onClickListener = new SafeViewOnClickListener() {
                 @Override
                 public void safeOnClick(View v) {
@@ -651,12 +703,25 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
         }
     }
 
-    private void addShareHandler(final ServiceMenu menu, final List<Cell> usedCells, final String shareLabel) {
+    private void addShareHandler(final ServiceMenu menu, final List<Cell> usedCells, final String shareLabel, int brandingBackgroundColor, int defaultMenuItemColor, boolean useDarkScheme) {
         if (menu.share) {
-            final Cell cell = cells[3][0];
+            final Cell cell;
+            if (usedCells.contains(cells[2][0])) {
+                cell = cells[3][0];
+            } else {
+                cell = cells[2][0];
+            }
+
             View p = (View) cell.icon.getParent();
-            cell.label.setText(TextUtils.isEmptyOrWhitespace(shareLabel) ? getString(R.string.recommend_service)
-                : shareLabel);
+            cell.label.setText(TextUtils.isEmptyOrWhitespace(shareLabel) ? getString(R.string.recommend_service) : shareLabel);
+            if (useDarkScheme) {
+                cell.label.setTextColor(darkSchemeTextColor);
+                cell.label.setShadowLayer(2, 1, 1, Color.BLACK);
+            }
+
+            cell.icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_thumbs_up).color(brandingBackgroundColor).sizeDp(24).paddingDp(5));
+            UIUtils.setBackgroundColor(cell.icon, defaultMenuItemColor);
+
             final View.OnClickListener onClickListener = new SafeViewOnClickListener() {
                 @Override
                 public void safeOnClick(View v) {
@@ -682,10 +747,22 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
         }
     }
 
-    private void addScanHandler(final ServiceMenu menu, final List<Cell> usedCells, final String scanLabel) {
-        final Cell cell = cells[3][0];
+    private void addScanHandler(final ServiceMenu menu, final List<Cell> usedCells, final String scanLabel, int brandingBackgroundColor, int defaultMenuItemColor, boolean useDarkScheme) {
+        final Cell cell;
+        if (usedCells.contains(cells[2][0])) {
+            cell = cells[3][0];
+        } else {
+            cell = cells[2][0];
+        }
         View p = (View) cell.icon.getParent();
         cell.label.setText(TextUtils.isEmptyOrWhitespace(scanLabel) ? getString(R.string.scan) : scanLabel);
+        if (useDarkScheme) {
+            cell.label.setTextColor(darkSchemeTextColor);
+            cell.label.setShadowLayer(2, 1, 1, Color.BLACK);
+        }
+
+        cell.icon.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_qrcode).color(brandingBackgroundColor).sizeDp(24).paddingDp(5));
+        UIUtils.setBackgroundColor(cell.icon, defaultMenuItemColor);
 
         int cameraPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
         if (cameraPermission != PackageManager.PERMISSION_GRANTED) {

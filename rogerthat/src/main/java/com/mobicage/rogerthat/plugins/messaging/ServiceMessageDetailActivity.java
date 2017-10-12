@@ -985,15 +985,28 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
         final boolean buttonIsEnabled = canEdit && (mCurrentMessage.form != null || !buttonSelectedByMe || hasAction);
         buttonView.setEnabled(buttonIsEnabled);
 
-        int color;
+        ColorStateList colorListState;
         if (button.id == null || mCurrentMessage.form != null && Message.POSITIVE.equals(button.id)) {
-            color = buttonIsEnabled ? R.color.mc_positive_button : R.color.mc_positive_button_disabled;
+            int color = buttonIsEnabled ? R.color.mc_positive_button : R.color.mc_positive_button_disabled;
+            colorListState = ContextCompat.getColorStateList(mService, color);
         } else if (mCurrentMessage.form != null && Message.NEGATIVE.equals(button.id)) {
-            color = buttonIsEnabled ? R.color.mc_negative_button : R.color.mc_negative_button_disabled;
+            int color = buttonIsEnabled ? R.color.mc_negative_button : R.color.mc_negative_button_disabled;
+            colorListState = ContextCompat.getColorStateList(mService, color);
+        } else if (buttonIsEnabled && !TextUtils.isEmptyOrWhitespace(button.color)) {
+            int color = Color.parseColor("#" + button.color);
+            colorListState = new ColorStateList(new int[][]{{0}}, new int[]{color});
+            // https://en.wikipedia.org/wiki/Luma_%28video%29
+            int r = Color.red(color);
+            int g = Color.green(color);
+            int b = Color.blue(color);
+            if ((0.299 * r + 0.587 * g + 0.114 * b)/255 > 0.5) {
+                buttonView.setTextColor(ContextCompat.getColor(this, android.R.color.primary_text_light));
+            }
         } else {
-            color = buttonIsEnabled ? R.color.mc_default_button : R.color.mc_default_button_disabled;
+            int color = buttonIsEnabled ? R.color.mc_default_button : R.color.mc_default_button_disabled;
+            colorListState = ContextCompat.getColorStateList(mService, color);
         }
-        ColorStateList colorListState = ContextCompat.getColorStateList(mService, color);
+
         ViewCompat.setBackgroundTintList(buttonView, colorListState);
 
         buttonView.setOnClickListener(new SafeViewOnClickListener() {

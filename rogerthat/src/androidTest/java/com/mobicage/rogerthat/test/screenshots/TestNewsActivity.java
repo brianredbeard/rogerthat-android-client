@@ -62,6 +62,8 @@ public class TestNewsActivity {
             Intent intent = new Intent(targetContext, FakeNewsActivity.class);
             intent.putExtra("show_drawer_icon", true);
             activityTestRule.launchActivity(intent);
+            // Ensure the drawer is closed because for some reason it is opened sometimes
+            activityTestRule.getActivity().closeNavigationView();
             Screengrab.screenshot("news");
         }
     }

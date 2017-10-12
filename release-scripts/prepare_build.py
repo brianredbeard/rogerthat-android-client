@@ -135,6 +135,10 @@ COLOURED_BUTTONS = {
 
 LICENSE = app_utils.get_license_header()
 
+SUPPORTED_LANGUAGES = map(lambda folder: folder.replace('values-', ''),
+                          filter(lambda folder: folder.startswith('values-'), os.listdir(
+                              os.path.join(os.path.dirname(__file__), '..', 'rogerthat', 'src', 'main', 'res'))))
+
 
 def get(k, default=MISSING):
     '''Get a dot-separated key from the build.yaml'''
@@ -201,7 +205,7 @@ def rename_package():
             s = s.replace('com.mobicage.rogerth.at', 'com.mobicage.rogerthat')
         s = s.replace("applicationIdSuffix '.debug'", "applicationIdSuffix '.%s.debug'" % package_suffix)
         s = s.replace("applicationIdSuffix ''", "applicationIdSuffix '.%s'" % package_suffix)
-        s = s.replace('"app_id", "rogerthat"', '"app_id", "%s"' % APP_ID)
+        s = s.replace('"rogerthat"', '"%s"' % APP_ID)
         if facebook_app_id:
             s = s.replace('188033791211994', str(facebook_app_id))
         f.seek(0)
@@ -644,6 +648,8 @@ def convert_config():
 
     profile_show_gender_and_birthdate = bool_str(get('PROFILE.SHOW_GENDER_AND_BIRTHDATE', True))
 
+    tos_url = doc["APP_CONSTANTS"].get("TERMS_OF_SERVICE_URL", "https://rogerth.at/static/terms_and_conditions.html")
+
     if doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_CITYPAPP:
         default_about_website = "www.onzestadapp.be"
         default_about_website_url = "http://www.onzestadapp.be"
@@ -670,12 +676,13 @@ def convert_config():
     about_facebook_url = get('ABOUT_ACTIVITY.facebook_url', default_about_facebook_url)
 
     speech_to_text = bool_str(get("APP_CONSTANTS.SPEECH_TO_TEXT", False))
-    secure_app = bool_str(get("APP_CONSTANTS.SECURITY.SECURE", False))
-    secure_pin_locked = bool_str(get("APP_CONSTANTS.SECURITY.PIN_LOCKED", False))
+
+    secure_app = get("APP_CONSTANTS.SECURITY.SECURE", False)
+    secure_pin_locked = get("APP_CONSTANTS.SECURITY.PIN_LOCKED", False)
     secure_pin_interval = get("APP_CONSTANTS.SECURITY.PIN_INTERVAL", 900)
     secure_pin_retry_interval = get("APP_CONSTANTS.SECURITY.PIN_RETRY_INTERVAL", 300)
-    secure_app_key_name = quoted_str_or_null(get('APP_CONSTANTS.SECURITY.APP_KEY_NAME', None))
-    secure_app_key_algorithm = quoted_str_or_null(get('APP_CONSTANTS.SECURITY.APP_KEY_ALGORITHM', None))
+    secure_app_key_name = get('APP_CONSTANTS.SECURITY.APP_KEY_NAME', None)
+    secure_app_key_algorithm = get('APP_CONSTANTS.SECURITY.APP_KEY_ALGORITHM', None)
     if bool(secure_app_key_name) != bool(secure_app_key_algorithm):
         raise ValueError('Both APP_KEY_NAME and APP_KEY_ALGORITHM are required under APP_CONSTANTS.SECURITY')
 
@@ -689,18 +696,20 @@ def convert_config():
             f.truncate()
 
     registration_type = long(doc['APP_CONSTANTS'].get('REGISTRATION_TYPE', 1))
+    registration_type_oauth_domain = 'dummy'
+    registration_type_oauth_url = 'dummy'
+    registration_type_qr_url = 'dummy'
     if registration_type == 1:
         registration_type = 'REGISTRATION_TYPE_DEFAULT'
-        registration_type_oauth_domain = 'dummy'
-        registration_type_oauth_url = 'dummy'
     elif registration_type == 2:
         registration_type = 'REGISTRATION_TYPE_OAUTH'
         registration_type_oauth_domain = doc['APP_CONSTANTS']['REGISTRATION_TYPE_OAUTH_DOMAIN']
-        registration_type_oauth_url = 'dummy'
     elif registration_type == 3:
         registration_type = 'REGISTRATION_TYPE_FULL_OAUTH'
-        registration_type_oauth_domain = 'dummy'
         registration_type_oauth_url = doc['APP_CONSTANTS']['REGISTRATION_TYPE_OAUTH_URL']
+    elif registration_type == 4:
+        registration_type = 'REGISTRATION_TYPE_QR'
+        registration_type_qr_url = doc['APP_CONSTANTS']['REGISTRATION_TYPE_QR_URL']
     else:
         raise Exception('Invalid registration type %d' % registration_type)
 
@@ -727,6 +736,10 @@ public class AppConstants {
     public static final int REGISTRATION_TYPE_FULL_OAUTH = 3;
     public static final String REGISTRATION_TYPE_OAUTH_DOMAIN = "%(registration_type_oauth_domain)s";
     public static final String REGISTRATION_TYPE_OAUTH_URL = "%(registration_type_oauth_url)s";
+    public static final int REGISTRATION_TYPE_QR = 4;
+    public static final String REGISTRATION_TYPE_QR_TYPE = "jwt";
+    public static final String REGISTRATION_TYPE_QR_URL =  "%(registration_type_qr_url)s";
+
     public static int getRegistrationType() {
         return %(registration_type)s;
     };
@@ -753,6 +766,8 @@ public class AppConstants {
 
     public static final String[] PROFILE_DATA_FIELDS = new String[] { };
     public static final boolean PROFILE_SHOW_GENDER_AND_BIRTHDATE = %(profile_show_gender_and_birthdate)s;
+
+    public static final String TERMS_OF_SERVICE_URL = "%(tos_url)s";
 
     public static final String ABOUT_WEBSITE = "%(about_website)s";
     public static final String ABOUT_WEBSITE_URL = "%(about_website_url)s";
@@ -791,6 +806,7 @@ public class AppConstants {
            show_scan_in_more=show_scan_in_more,
            full_width_headers=full_width_headers,
            profile_show_gender_and_birthdate=profile_show_gender_and_birthdate,
+           tos_url=tos_url,
            about_website=about_website,
            about_website_url=about_website_url,
            about_email=about_email,
@@ -799,16 +815,17 @@ public class AppConstants {
            about_facebook=about_facebook,
            about_facebook_url=about_facebook_url,
            speech_to_text=speech_to_text,
-           secure_app=secure_app,
-           secure_pin_locked=secure_pin_locked,
+           secure_app=bool_str(secure_app),
+           secure_pin_locked=bool_str(secure_pin_locked),
            secure_pin_interval=secure_pin_interval,
            secure_pin_retry_interval=secure_pin_retry_interval,
-           secure_app_key_name=secure_app_key_name,
-           secure_app_key_algorithm=secure_app_key_algorithm,
+           secure_app_key_name=quoted_str_or_null(secure_app_key_name),
+           secure_app_key_algorithm=quoted_str_or_null(secure_app_key_algorithm),
            app_service_guid=app_service_guid,
            registration_type=registration_type,
            registration_type_oauth_domain=registration_type_oauth_domain,
            registration_type_oauth_url=registration_type_oauth_url,
+           registration_type_qr_url=registration_type_qr_url,
            registration_asks_location_permission=registration_asks_location_permission)
 
     path = os.path.join(SRC_JAVA_DIR, "com", "mobicage", "rpc", "config")
@@ -867,6 +884,21 @@ def encode_translation(s):
         .replace(">", "&gt;").encode('utf-8')
 
 
+def get_language_code(code):
+    if code in SUPPORTED_LANGUAGES:
+        return code
+    split = code.split('-')
+    if split[0] in SUPPORTED_LANGUAGES:
+        return split[0]
+    for c in SUPPORTED_LANGUAGES:
+        if c.startswith(code):
+            return c
+    for c in SUPPORTED_LANGUAGES:
+        if c.startswith(split[0]):
+            return c
+    raise Exception('Unknown language %s' % code)
+
+
 def add_translations(doc):
     translations = doc.get('TRANSLATIONS')
     if not translations:
@@ -875,7 +907,7 @@ def add_translations(doc):
     for language, entries in translations.iteritems():
         values_dir = 'values'
         if language != 'en':
-            values_dir += '-' + language
+            values_dir += '-' + get_language_code(language)
         xml_path = os.path.join(SRC_RES_DIR, values_dir, 'allstr.xml')
         added_lines = list()
         for entry in entries:

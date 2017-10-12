@@ -17,12 +17,14 @@
  */
 package com.mobicage.rogerthat;
 
+import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.ContextMenu;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -50,6 +52,7 @@ public class SecurityKeyActivity extends ServiceBoundActivity implements View.On
     private static final int[] RESOURCES = new int[]{R.id.security_settings_no_pin, R.id
             .security_settings_pin_result, R.id.spinner};
 
+    private boolean mShowFinishedBtn;
     private String mKeyAlgorithm;
     private String mKeyName;
     private TextView mSeedView;
@@ -62,7 +65,7 @@ public class SecurityKeyActivity extends ServiceBoundActivity implements View.On
         final Intent intent = getIntent();
         mKeyAlgorithm = intent.getStringExtra(KEY_ALGORITHM);
         mKeyName = intent.getStringExtra(KEY_NAME);
-        final boolean showFinishedBtn = intent.getBooleanExtra(SHOW_FINISHED_BUTTON, false);
+        mShowFinishedBtn = intent.getBooleanExtra(SHOW_FINISHED_BUTTON, false);
 
         setContentView(R.layout.security_key);
         mSeedView = (TextView) findViewById(R.id.seed);
@@ -87,7 +90,10 @@ public class SecurityKeyActivity extends ServiceBoundActivity implements View.On
             }
         });
 
-        if (showFinishedBtn) {
+        if (mShowFinishedBtn) {
+            setNavigationBarBurgerVisible(false);
+            setNavigationBarIcon(null);
+
             findViewById(R.id.backup_key_finished).setOnClickListener(new SafeViewOnClickListener() {
                 @Override
                 public void safeOnClick(View v) {
@@ -183,16 +189,17 @@ public class SecurityKeyActivity extends ServiceBoundActivity implements View.On
                 startActivityForResult(intent, REQUEST_IMPORT_KEY);
             }
         };
-        UIUtils.showDialog(this, title, message, positiveCaption, onPositiveButtonClick, negativeCaption,
+
+        AlertDialog dialog = UIUtils.showDialog(this, title, message, positiveCaption, onPositiveButtonClick, negativeCaption,
                 onNegativeButtonClick);
+        dialog.setCancelable(false);
     }
 
     private void showSeed(final String seed) {
         show(R.id.security_settings_pin_result);
 
         TextView explanationTextView = (TextView) findViewById(R.id.backup_security_key_instructions);
-        explanationTextView.setText(getString(R.string.backup_security_key_instructions, AppConstants
-                .Security.APP_KEY_NAME));
+        explanationTextView.setText(getString(R.string.backup_security_key_instructions));
 
         TextView algorithmTextView = (TextView) findViewById(R.id.algorithm);
         algorithmTextView.setText(getString(R.string.algorithm) + ": " + mKeyAlgorithm);
@@ -218,8 +225,23 @@ public class SecurityKeyActivity extends ServiceBoundActivity implements View.On
         });
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && mShowFinishedBtn && findViewById(R.id.security_settings_pin_result).getVisibility() == View.VISIBLE) {
+            keyBackupFinished();
+            return true;
+        }
+
+        return super.onKeyDown(keyCode, event);
+    }
+
     private void error(String code, String errorMessage) {
-        L.bug("{code=\"" + code + "\", errorMessage=\"" + errorMessage + "\"}");
+        if ("user_cancelled_pin_input".equals(code)) {
+            L.e("{code=\"" + code + "\", errorMessage=\"" + errorMessage + "\"}");
+        } else {
+            L.bug("{code=\"" + code + "\", errorMessage=\"" + errorMessage + "\"}");
+        }
+
 
         final Intent i = new Intent();
         i.putExtra("code", code);
@@ -255,7 +277,7 @@ public class SecurityKeyActivity extends ServiceBoundActivity implements View.On
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_IMPORT_KEY) {
-            setResult(RESULT_OK);
+            setResult(resultCode);
             finish();
         }
     }

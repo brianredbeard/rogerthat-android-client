@@ -68,6 +68,7 @@ public class PriorityMap {
         sPrioritySet.add("com.mobicage.api.messaging.submitGPSLocationForm");
         sPrioritySet.add("com.mobicage.api.messaging.submitMultiSelectForm");
         sPrioritySet.add("com.mobicage.api.messaging.submitMyDigiPassForm");
+        sPrioritySet.add("com.mobicage.api.messaging.submitOauthForm");
         sPrioritySet.add("com.mobicage.api.messaging.submitPhotoUploadForm");
         sPrioritySet.add("com.mobicage.api.messaging.submitRangeSliderForm");
         sPrioritySet.add("com.mobicage.api.messaging.submitRatingForm");

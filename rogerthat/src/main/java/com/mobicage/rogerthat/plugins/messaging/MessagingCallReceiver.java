@@ -49,6 +49,8 @@ import com.mobicage.to.messaging.forms.NewMultiSelectFormRequestTO;
 import com.mobicage.to.messaging.forms.NewMultiSelectFormResponseTO;
 import com.mobicage.to.messaging.forms.NewMyDigiPassFormRequestTO;
 import com.mobicage.to.messaging.forms.NewMyDigiPassFormResponseTO;
+import com.mobicage.to.messaging.forms.NewOauthFormRequestTO;
+import com.mobicage.to.messaging.forms.NewOauthFormResponseTO;
 import com.mobicage.to.messaging.forms.NewPhotoUploadFormRequestTO;
 import com.mobicage.to.messaging.forms.NewPhotoUploadFormResponseTO;
 import com.mobicage.to.messaging.forms.NewRangeSliderFormRequestTO;
@@ -79,6 +81,8 @@ import com.mobicage.to.messaging.forms.UpdateMultiSelectFormRequestTO;
 import com.mobicage.to.messaging.forms.UpdateMultiSelectFormResponseTO;
 import com.mobicage.to.messaging.forms.UpdateMyDigiPassFormRequestTO;
 import com.mobicage.to.messaging.forms.UpdateMyDigiPassFormResponseTO;
+import com.mobicage.to.messaging.forms.UpdateOauthFormRequestTO;
+import com.mobicage.to.messaging.forms.UpdateOauthFormResponseTO;
 import com.mobicage.to.messaging.forms.UpdatePhotoUploadFormRequestTO;
 import com.mobicage.to.messaging.forms.UpdatePhotoUploadFormResponseTO;
 import com.mobicage.to.messaging.forms.UpdateRangeSliderFormRequestTO;
@@ -175,7 +179,7 @@ public class MessagingCallReceiver implements com.mobicage.capi.messaging.IClien
     }
 
     @Override
-    public NewFriendSelectFormResponseTO newFriendSelectForm(NewFriendSelectFormRequestTO request) throws Exception { 
+    public NewFriendSelectFormResponseTO newFriendSelectForm(NewFriendSelectFormRequestTO request) throws Exception {
         T.BIZZ();
         mPlugin.newMessage(Message.fromFormMessage(request.form_message.toJSONMap()), false, false);
         NewFriendSelectFormResponseTO response = new NewFriendSelectFormResponseTO();
@@ -268,6 +272,14 @@ public class MessagingCallReceiver implements com.mobicage.capi.messaging.IClien
         T.BIZZ();
         mPlugin.newMessage(Message.fromFormMessage(request.form_message.toJSONMap()), false, false);
         NewRatingFormResponseTO response = new NewRatingFormResponseTO();
+        response.received_timestamp = mMainService.currentTimeMillis() / 1000;
+        return response;
+    }
+
+    @Override
+    public NewOauthFormResponseTO newOauthForm(NewOauthFormRequestTO request) throws Exception {
+        mPlugin.newMessage(Message.fromFormMessage(request.form_message.toJSONMap()), false, false);
+        NewOauthFormResponseTO response = new NewOauthFormResponseTO();
         response.received_timestamp = mMainService.currentTimeMillis() / 1000;
         return response;
     }
@@ -448,7 +460,7 @@ public class MessagingCallReceiver implements com.mobicage.capi.messaging.IClien
         if (!mPlugin.getBrandingMgr().queueIfNeeded("com.mobicage.capi.messaging.updateSignForm", request,
                 request.message_key)) {
 
-            mPlugin.updateForm(request.parent_message_key, request.message_key, request.result, request.button_id,
+            mPlugin.updateSignForm(request.parent_message_key, request.message_key, request.result, request.button_id,
                     request.received_timestamp, request.acked_timestamp);
         }
         return new UpdateSignFormResponseTO();
@@ -463,6 +475,17 @@ public class MessagingCallReceiver implements com.mobicage.capi.messaging.IClien
                     request.received_timestamp, request.acked_timestamp);
         }
         return new UpdateRatingFormResponseTO();
+    }
+
+    @Override
+    public UpdateOauthFormResponseTO updateOauthForm(UpdateOauthFormRequestTO request) throws Exception {
+        if (!mPlugin.getBrandingMgr().queueIfNeeded("com.mobicage.capi.messaging.updateOauthForm", request,
+                request.message_key)) {
+
+            mPlugin.updateOauthForm(request.parent_message_key, request.message_key, request.result, request.button_id,
+                    request.received_timestamp, request.acked_timestamp);
+        }
+        return new UpdateOauthFormResponseTO();
     }
 
     @Override

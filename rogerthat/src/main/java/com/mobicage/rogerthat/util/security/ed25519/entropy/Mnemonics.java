@@ -58,7 +58,7 @@ public class Mnemonics {
 
     public static BigInteger phraseToInt(String[] phrase) throws Exception {
         BigInteger base = BigInteger.valueOf(English.WORDS.size());
-        BigInteger exp = BigInteger.valueOf(1);
+        BigInteger exp = BigInteger.ONE;
         BigInteger result = BigInteger.valueOf(-1);
         boolean found = false;
 
@@ -78,7 +78,7 @@ public class Mnemonics {
                 throw new Exception("Error unknown word: " + word);
             }
 
-            index = index.add(BigInteger.valueOf(1));
+            index = index.add(BigInteger.ONE);
             index = index.multiply(exp);
             exp = exp.multiply(base);
             result = result.add(index);
@@ -101,11 +101,11 @@ public class Mnemonics {
 
     public static BigInteger bytesToInt(byte[] entropy) {
         BigInteger base = BigInteger.valueOf(256);
-        BigInteger exp = BigInteger.valueOf(1);
+        BigInteger exp = BigInteger.ONE;
         BigInteger result = BigInteger.valueOf(-1);
         for (int i = 0; i < entropy.length; i++) {
             BigInteger index = BigInteger.valueOf(entropy[i] & 0xFF);
-            index = index.add(BigInteger.valueOf(1));
+            index = index.add(BigInteger.ONE);
             index = index.multiply(exp);
             exp = exp.multiply(base);
             result = result.add(index);

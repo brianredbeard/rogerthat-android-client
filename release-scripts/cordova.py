@@ -45,10 +45,10 @@ PLUGINS = {
         "url": "https://github.com/rogerthat-platform/cordova-plugin-whitelist#1.3.2"
     },
     "rogerthat-plugin": {
-        "url": "https://github.com/rogerthat-platform/cordova-rogerthat-plugin#public_keys"
+        "url": "https://github.com/rogerthat-platform/cordova-rogerthat-plugin#master"
     },
     "rogerthat-payments-plugin": {
-        "url": "https://github.com/rogerthat-platform/cordova-rogerthat-payments-plugin#test"
+        "url": "https://github.com/rogerthat-platform/cordova-rogerthat-payments-plugin#master"
     },
     "cordova-plugin-file": {
         "url": "https://github.com/rogerthat-platform/cordova-plugin-file#rt/4.3.3"
@@ -100,10 +100,14 @@ PLUGINS = {
 
 APPS = {
     'rogerthat-payment': {
-        'url': 'https://github.com/rogerthat-platform/rogerthat-payment#payments-alpha-3'
+        'url': 'https://github.com/rogerthat-platform/rogerthat-payment#master'
     }
 }
 
+# The order of these is important
+DEFAULT_PLUGINS = ['cordova-plugin-compat', 'cordova-plugin-whitelist', 'rogerthat-plugin',
+                   'cordova-plugin-splashscreen', 'cordova-plugin-statusbar', 'cordova-plugin-inappbrowser',
+                   'cordova-plugin-browsertab']
 
 def install_cordova_plugins(app_id, cordova_plugins, cordova_apps, colors):
     _check_cordova_command()
@@ -144,17 +148,23 @@ def _install_cordova_app(app_id, cordova_app_name, colors):
     url = APPS[cordova_app_name]['url']
     splitted_url = url.split('#')
     repo_dir = os.path.join(os.path.expanduser('~'), 'tmp', 'cordova', 'build', cordova_app_name)
+
+    def checkout(repo):
+        if len(splitted_url) > 1:
+            logging.info('  * Switching to branch: %s', splitted_url[1])
+            repo.git.checkout(splitted_url[1])
+
     if os.path.exists(os.path.join(repo_dir, '.git')):
         logging.info('  * Updating local repository: %s', repo_dir)
         repo = git.Repo(repo_dir)
+        repo.git.clean('-df')
+        repo.git.reset('--hard')
+        checkout(repo)
         repo.git.pull()
     else:
         logging.info('  * Cloning repository: %s', splitted_url[0])
         repo = git.Repo.clone_from(splitted_url[0], repo_dir)
-
-    if len(splitted_url) > 1:
-        logging.info('  * Switching to branch: %s', splitted_url[1])
-        repo.git.checkout(splitted_url[1])
+        checkout(repo)
 
     # get dependencies
     tree = etree.parse(os.path.join(repo_dir, "config.xml"))
@@ -227,7 +237,7 @@ def _check_cordova_command():
 
 
 def _get_plugins(cordova_plugins):
-    plugins = ['cordova-plugin-compat', 'cordova-plugin-whitelist', 'rogerthat-plugin']
+    plugins = list(DEFAULT_PLUGINS)
 
     for cordova_plugin in cordova_plugins:
         if cordova_plugin in plugins:

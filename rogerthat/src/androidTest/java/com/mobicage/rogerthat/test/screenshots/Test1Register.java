@@ -105,7 +105,7 @@ public class Test1Register {
                 onView(withId(R.id.registration_enter_pin))
                         .check(matches(isDisplayed()))
                         .perform(typeText("0666"));
-                return;
+                break;
             } catch (NoMatchingViewException ignored) {
                 if (tries > 100) {
                     throw ignored;
@@ -113,6 +113,10 @@ public class Test1Register {
                     Thread.sleep(100);
                 }
             }
+        }
+        // Keep activity open until we are properly registered.
+        while (!activityTestRule.getActivity().getMainService().getRegisteredFromConfig()) {
+            Thread.sleep(100);
         }
     }
 }

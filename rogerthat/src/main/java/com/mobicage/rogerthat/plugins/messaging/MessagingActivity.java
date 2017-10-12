@@ -17,6 +17,7 @@
  */
 package com.mobicage.rogerthat.plugins.messaging;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -46,6 +47,7 @@ import android.widget.TextView;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.App;
 import com.mobicage.rogerthat.HomeActivity;
 import com.mobicage.rogerthat.IdentityStore;
 import com.mobicage.rogerthat.MainActivity;
@@ -55,10 +57,12 @@ import com.mobicage.rogerthat.ServiceBoundCursorListActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.messaging.MessageStore.CursorSet;
 import com.mobicage.rogerthat.plugins.scan.ProcessScanActivity;
+import com.mobicage.rogerthat.plugins.security.PinLockMgr;
 import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.RegexPatterns;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
@@ -82,6 +86,8 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
     private static final long sGMTOffsetMillis = TimeUtils.getGMTOffsetMillis();
 
     // Owned by UI thread
+    private BroadcastReceiver mBroadcastReceiver;
+
     private FloatingActionButton mFloatingActionButton;
     private MessagingPlugin mMessagingPlugin;
     private FriendsPlugin mFriendsPlugin;
@@ -93,6 +99,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
     private CursorSet mCursorSet = null;
     private Map<View, SafeRunnable> mCellsToUpdate = new HashMap<View, SafeRunnable>();
 
+    private Intent mPendingIntent;
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
@@ -195,6 +202,20 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
         T.UI();
         super.onCreate(savedInstanceState);
         mResources = getResources();
+
+        mBroadcastReceiver = new SafeBroadcastReceiver() {
+            @Override
+            public String[] onSafeReceive(Context context, Intent intent) {
+                if (PinLockMgr.PIN_ENTERED_INTENT.equals(intent.getAction())) {
+                    if (mPendingIntent != null) {
+                        processMessageUpdatesIntent(mPendingIntent);
+                        mPendingIntent= null;
+                    }
+                    return new String[] { intent.getAction() };
+                }
+                return null;
+            };
+        };
     }
 
     private void processMessageUpdatesIntent(final Intent intent) {
@@ -215,6 +236,11 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
             } else if (HomeActivity.INTENT_VALUE_SHOW_NEW_MESSAGES.equals(value)
                     || HomeActivity.INTENT_VALUE_SHOW_UPDATED_MESSAGES.equals(value)) {
                 if (intent.hasExtra(HomeActivity.INTENT_KEY_MESSAGE)) {
+                    if (!App.getContext().getPinLockMgr().canContinueToActivity()) {
+                        mPendingIntent = intent;
+                        return;
+                    }
+
                     String messageKey = intent.getStringExtra(HomeActivity.INTENT_KEY_MESSAGE);
                     goToMessageDetail(messageKey);
                 } else {
@@ -363,7 +389,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
             filter.addAction(action);
         registerReceiver(getDefaultBroadcastReceiver(), filter);
 
-
+        registerReceiver(mBroadcastReceiver, new IntentFilter(PinLockMgr.PIN_ENTERED_INTENT));
     }
 
     @Override

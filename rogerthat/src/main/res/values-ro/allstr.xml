@@ -105,6 +105,7 @@
     <string name="disabled">Dezactivat</string>
     <string name="discover_services_short">Descopera serviciile</string>
     <string name="dismissed_at">Recunoscut %1$s.</string>
+    <string name="done">Terminat</string>
     <string name="dont_like">Nu imi face placere</string>
     <string name="downloading">Se descarca…</string>
     <string name="edit">Editare</string>
@@ -434,6 +435,7 @@
     <string name="unable_to_create_images_directory">Nu am putut crea folderul de imagini %1$s.</string>
     <string name="unable_to_read_write_sd_card">A aparut o eroare. Verificati disponibilitatea cardului SD.</string>
     <string name="unknown">Necunoscut</string>
+    <string name="unknown_error_occurred">A aparut o eroare necunoscuta</string>
     <string name="unrecognized_scan_result">Continutul rezultatului scanat nu este recunoscut.</string>
     <string name="unsubscribe">dezabonare de</string>
     <string name="update">Actualizare</string>

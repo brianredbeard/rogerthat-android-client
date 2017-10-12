@@ -32,7 +32,6 @@ import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.AbstractHomeActivity;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.ServiceBoundActivity;
-import com.mobicage.rogerthat.cordova.CordovaActionScreenActivity;
 import com.mobicage.rogerthat.plugins.messaging.BrandingFailureException;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.FriendsThreadActivity;

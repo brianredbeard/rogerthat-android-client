@@ -476,12 +476,10 @@ public class MessageStore implements Closeable {
                     mAddButtonBIZZ.bindString(1, message.key);
                     mAddButtonBIZZ.bindString(2, button.id);
                     mAddButtonBIZZ.bindString(3, button.caption);
-                    if (button.action == null)
-                        mAddButtonBIZZ.bindNull(4);
-                    else
-                        mAddButtonBIZZ.bindString(4, button.action);
+                    bindString(mAddButtonBIZZ, 4, button.action);
                     mAddButtonBIZZ.bindLong(5, i);
                     mAddButtonBIZZ.bindLong(6, button.ui_flags);
+                    bindString(mAddButtonBIZZ, 7, button.color);
                     mAddButtonBIZZ.execute();
                 }
                 // Add member statuses
@@ -1278,6 +1276,7 @@ public class MessageStore implements Closeable {
         button.caption = bcurs.getString(1);
         button.action = bcurs.getString(2);
         button.ui_flags = bcurs.getLong(3);
+        button.color = bcurs.getString(4);
         return button;
     }
 
