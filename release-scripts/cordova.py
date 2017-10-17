@@ -45,10 +45,10 @@ PLUGINS = {
         "url": "https://github.com/rogerthat-platform/cordova-plugin-whitelist#1.3.2"
     },
     "rogerthat-plugin": {
-        "url": "https://github.com/rogerthat-platform/cordova-rogerthat-plugin#master"
+        "url": "https://github.com/rogerthat-platform/cordova-rogerthat-plugin#pay_widget"
     },
     "rogerthat-payments-plugin": {
-        "url": "https://github.com/rogerthat-platform/cordova-rogerthat-payments-plugin#master"
+        "url": "https://github.com/rogerthat-platform/cordova-rogerthat-payments-plugin#pay_widget"
     },
     "cordova-plugin-file": {
         "url": "https://github.com/rogerthat-platform/cordova-plugin-file#rt/4.3.3"
@@ -100,7 +100,7 @@ PLUGINS = {
 
 APPS = {
     'rogerthat-payment': {
-        'url': 'https://github.com/rogerthat-platform/rogerthat-payment#master'
+        'url': 'https://github.com/rogerthat-platform/rogerthat-payment#pay_widget'
     }
 }
 
@@ -159,6 +159,7 @@ def _install_cordova_app(app_id, cordova_app_name, colors):
         repo = git.Repo(repo_dir)
         repo.git.clean('-df')
         repo.git.reset('--hard')
+        repo.git.pull()
         checkout(repo)
         repo.git.pull()
     else:
