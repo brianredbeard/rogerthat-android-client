@@ -294,7 +294,7 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity {
         if (mMenuItemPresser == null) {
             mMenuItemPresser = new MenuItemPresser(this, serviceEmail);
         }
-        mMenuItemPresser.itemPressed(smi, service.generation, null);
+        mMenuItemPresser.itemPressed(smi, ((ServiceMenu) service.actionMenu).generation, null);
     }
 
     protected void goToActivity(NavigationItem ni) {
