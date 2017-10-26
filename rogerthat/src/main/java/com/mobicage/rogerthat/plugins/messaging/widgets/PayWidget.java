@@ -51,14 +51,11 @@ import com.mobicage.to.messaging.forms.SubmitPayFormResponseTO;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.simple.JSONValue;
+import org.json.simple.JSONArray;
 
 import java.util.Map;
 
 public class PayWidget extends Widget {
-
-    public static final String FINISHED_PAYMENT = "com.mobicage.rogerthat.plugins.messaging.widgets.FINISHED_PAYMENT";
-    public static String RESULT = "result";
 
     private final String APPLICATION_TAG = "rogerthat-payment";
     private static final int START_CORDOVA_APP_REQUEST_CODE = 123;
@@ -146,28 +143,22 @@ public class PayWidget extends Widget {
 
     private void pay() {
 
-        JSONObject context = new JSONObject();
-        try {
-            // t should match a PaymentQRCodeType in rogerthat-payment branding
-            // see https://github.com/rogerthat-platform/rogerthat-payment/blob/master/src/interfaces/actions.interfaces.ts
-            context.put("t", 2);
-            // result_type is the way we return our data
-            // plugin needs to be used when using startActivityForResult
-            context.put("result_type", "plugin");
+        org.json.simple.JSONObject context = new org.json.simple.JSONObject();
+        // t should match a PaymentQRCodeType in rogerthat-payment branding
+        // see https://github.com/rogerthat-platform/rogerthat-payment/blob/master/src/interfaces/actions.interfaces.ts
+        context.put("t", 2);
+        // result_type is the way we return our data
+        // plugin needs to be used when using startActivityForResult
+        context.put("result_type", "plugin");
+        JSONArray methods = (JSONArray) mWidgetMap.get("methods");
+        context.put("methods", methods);
+        context.put("memo", mWidgetMap.get("memo"));
+        context.put("target", mWidgetMap.get("target"));
 
-            context.put("methods", mWidgetMap.get("methods"));
-            context.put("memo", mWidgetMap.get("memo"));
-            context.put("target", mWidgetMap.get("target"));
-
-        } catch (JSONException e) {
-            L.bug("Failed to start payment branding with context", e);
-            UIUtils.showErrorPleaseRetryDialog(mActivity);
-            return;
-        }
 
         if (CordovaSettings.APPS.contains(APPLICATION_TAG)) {
             Bundle extras = new Bundle();
-            extras.putString(ActionScreenActivity.CONTEXT, JSONValue.toJSONString(context));
+            extras.putString(ActionScreenActivity.CONTEXT, context.toString());
             extras.putString(CordovaActionScreenActivity.EMBEDDED_APP, APPLICATION_TAG);
             extras.putString(CordovaActionScreenActivity.TITLE, "");
 
@@ -184,7 +175,7 @@ public class PayWidget extends Widget {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == START_CORDOVA_APP_REQUEST_CODE) {
             if (resultCode == Activity.RESULT_OK) {
-                final String result =  data.getStringExtra(RESULT);
+                final String result =  data.getStringExtra(ActionScreenActivity.EXIT_APP_RESULT);
                 try {
                     JSONObject args = new JSONObject(result);
                     if (args.optBoolean("success")) {

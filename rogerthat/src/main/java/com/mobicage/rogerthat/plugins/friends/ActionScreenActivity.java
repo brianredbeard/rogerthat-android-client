@@ -112,6 +112,10 @@ public class ActionScreenActivity extends ServiceBoundActivity {
     public static final String RUN_IN_BACKGROUND = "run_in_background";
     public static final String CONTEXT = "context";
 
+    public static final String EXIT_APP = "exit_app";
+    public static final String EXIT_APP_RESULT = "exit_app_result";
+
+
     private static final String POKE = "poke://";
 
     private static final String FACEBOOK_TYPE_CANCEL = "CANCEL";
