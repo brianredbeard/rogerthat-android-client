@@ -229,13 +229,13 @@ public class PayWidget extends Widget {
     }
 
     private void addRow(String key, String value) {
-        final LinearLayout ll = (LinearLayout) View.inflate(mActivity, R.layout.profile_data_detail, null);
+        final LinearLayout ll = (LinearLayout) View.inflate(mActivity, R.layout.pay_data_detail, null);
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         layoutParams.setMargins(0, 10, 0, 0);
 
-        final TextView tvKey = (TextView) ll.findViewById(R.id.profile_data_detail_key);
-        final TextView tvVal = (TextView) ll.findViewById(R.id.profile_data_detail_value);
+        final TextView tvKey = (TextView) ll.findViewById(R.id.pay_data_detail_key);
+        final TextView tvVal = (TextView) ll.findViewById(R.id.pay_data_detail_value);
 
         tvKey.setText(key);
         tvKey.setTextColor(LookAndFeelConstants.getPrimaryColor(mActivity));
