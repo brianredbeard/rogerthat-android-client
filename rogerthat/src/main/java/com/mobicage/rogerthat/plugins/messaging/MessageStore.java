@@ -653,17 +653,22 @@ public class MessageStore implements Closeable {
     private String lastThreadMessage(long sortId) {
         mLastThreadMessageBySortidBIZZ.bindLong(1, sortId);
         mLastThreadMessageBySortidBIZZ.bindLong(2, sortId);
-        return mLastThreadMessageBySortidBIZZ.simpleQueryForString();
+        try {
+            return mLastThreadMessageBySortidBIZZ.simpleQueryForString();
+        } catch (SQLiteDoneException e) {
+            return null;
+        }
     }
 
     private void updateSortId(long oldSortId, long newSortId) {
         String lastThreadMessage = lastThreadMessage(oldSortId);
-
-        mUpdateSortidForThreadBySortidBIZZ.bindLong(1, newSortId);
-        mUpdateSortidForThreadBySortidBIZZ.bindString(2, lastThreadMessage);
-        mUpdateSortidForThreadBySortidBIZZ.bindLong(3, oldSortId);
-        mUpdateSortidForThreadBySortidBIZZ.bindLong(4, oldSortId);
-        mUpdateSortidForThreadBySortidBIZZ.execute();
+        if (lastThreadMessage != null) {
+            mUpdateSortidForThreadBySortidBIZZ.bindLong(1, newSortId);
+            mUpdateSortidForThreadBySortidBIZZ.bindString(2, lastThreadMessage);
+            mUpdateSortidForThreadBySortidBIZZ.bindLong(3, oldSortId);
+            mUpdateSortidForThreadBySortidBIZZ.bindLong(4, oldSortId);
+            mUpdateSortidForThreadBySortidBIZZ.execute();
+        }
     }
 
     public boolean updateMessage(final String messageKey, final String parentMessageKey, final Long flags,
