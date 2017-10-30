@@ -51,7 +51,7 @@ public class OauthActivity extends Activity {
     public static String SCOPES = "scopes";
 
     public static String RESULT_QUERY = "result_query";
-    public static String RESULT_STATE = "result_stae";
+    public static String RESULT_STATE = "result_state";
     public static String RESULT_CODE = "result_code";
     public static String RESULT_ERROR_MESSAGE = "result_error_message";
 

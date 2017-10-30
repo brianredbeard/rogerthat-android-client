@@ -26,46 +26,28 @@ import android.net.Uri;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.api.messaging.Rpc;
-import com.mobicage.models.properties.profiles.PublicKeyTO;
 import com.mobicage.rogerth.at.R;
-import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.OauthActivity;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
-import com.mobicage.rogerthat.plugins.security.SecurityPlugin;
-import com.mobicage.rogerthat.registration.OauthRegistrationActivity;
-import com.mobicage.rogerthat.registration.RegistrationActivity2;
 import com.mobicage.rogerthat.util.OauthUtils;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
-import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.rpc.ResponseHandler;
-import com.mobicage.rpc.config.AppConstants;
-import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.rpc.config.LookAndFeelConstants;
-import com.mobicage.to.messaging.AttachmentTO;
-import com.mobicage.to.messaging.forms.SignWidgetResultTO;
 import com.mobicage.to.messaging.forms.SubmitOauthFormRequestTO;
 import com.mobicage.to.messaging.forms.SubmitOauthFormResponseTO;
-import com.mobicage.to.messaging.forms.SubmitSignFormRequestTO;
-import com.mobicage.to.messaging.forms.SubmitSignFormResponseTO;
 import com.mobicage.to.messaging.forms.UnicodeWidgetResultTO;
 
-import org.jivesoftware.smack.util.Base64;
-import org.w3c.dom.Text;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("unchecked")
@@ -74,10 +56,9 @@ public class OauthWidget extends Widget {
     private static final int START_OAUTH_REQUEST_CODE = 1;
 
     private Button mOauthBtn;
-    private View mOatuhResultView;
+    private TextView mOauthResultView;
     private UnicodeWidgetResultTO mResult;
     private String mUrl;
-    private String mCaption;
     private String mSuccessMessage;
 
     public OauthWidget(Context context) {
@@ -90,7 +71,7 @@ public class OauthWidget extends Widget {
 
     @Override
     public void initializeWidget() {
-        mOatuhResultView = findViewById(R.id.oauth_result);
+        mOauthResultView = (TextView) findViewById(R.id.oauth_result);
         mOauthBtn = (Button) findViewById(R.id.oauth_btn);
         mOauthBtn.setOnClickListener(new SafeViewOnClickListener() {
             @Override
@@ -100,9 +81,9 @@ public class OauthWidget extends Widget {
         });
 
         mUrl = (String) mWidgetMap.get("url");
-        mCaption = (String) mWidgetMap.get("caption");
-        if (TextUtils.isEmptyOrWhitespace(mCaption)) {
-            mCaption = mActivity.getString(R.string.authorize);
+        String caption = (String) mWidgetMap.get("caption");
+        if (TextUtils.isEmptyOrWhitespace(caption)) {
+            caption = mActivity.getString(R.string.authorize);
         }
         mSuccessMessage = (String) mWidgetMap.get("success_message");
         if (TextUtils.isEmptyOrWhitespace(mSuccessMessage)) {
@@ -110,7 +91,7 @@ public class OauthWidget extends Widget {
         }
         IconicsDrawable d = new IconicsDrawable(mActivity, FontAwesome.Icon.faw_lock).color(LookAndFeelConstants.getPrimaryIconColor(mActivity)).sizeDp(24);
         mOauthBtn.setCompoundDrawablesWithIntrinsicBounds(d, null, null, null);
-        mOauthBtn.setText(mCaption);
+        mOauthBtn.setText(caption);
 
         Map<String, Object> result = (Map<String, Object>) mWidgetMap.get("value");
         if (result != null) {
@@ -122,7 +103,8 @@ public class OauthWidget extends Widget {
         }
         if (mResult != null) {
             mOauthBtn.setVisibility(View.GONE);
-            mOatuhResultView.setVisibility(View.VISIBLE);
+            mOauthResultView.setVisibility(View.VISIBLE);
+            mOauthResultView.setText(mSuccessMessage);
         }
     }
 
@@ -205,9 +187,9 @@ public class OauthWidget extends Widget {
                     mResult.value = data.getStringExtra(OauthActivity.RESULT_QUERY);
 
                     mOauthBtn.setVisibility(View.GONE);
-                    mOatuhResultView.setVisibility(View.VISIBLE);
+                    mOauthResultView.setVisibility(View.VISIBLE);
+                    mOauthResultView.setText(mSuccessMessage);
                     mActivity.excecutePositiveButtonClick();
-
                 } else {
                     String message = data.getStringExtra(OauthActivity.RESULT_ERROR_MESSAGE);
                     UIUtils.showDialog(mActivity, null, message);

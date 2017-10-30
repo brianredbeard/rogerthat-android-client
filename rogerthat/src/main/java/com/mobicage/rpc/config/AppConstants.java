@@ -35,6 +35,10 @@ public class AppConstants {
     public static final int REGISTRATION_TYPE_FULL_OAUTH = 3;
     public static final String REGISTRATION_TYPE_OAUTH_DOMAIN = "dummy";
     public static final String REGISTRATION_TYPE_OAUTH_URL = "dummy";
+    public static final int REGISTRATION_TYPE_QR = 4;
+    public static final String REGISTRATION_TYPE_QR_TYPE = "jwt";
+    public static final String REGISTRATION_TYPE_QR_URL = "dummy";
+
     public static int getRegistrationType() {
         return REGISTRATION_TYPE_DEFAULT;
     };
@@ -61,6 +65,8 @@ public class AppConstants {
 
     public static final String[] PROFILE_DATA_FIELDS = new String[] {};
     public static final boolean PROFILE_SHOW_GENDER_AND_BIRTHDATE = true;
+
+    public static final String TERMS_OF_SERVICE_URL = "https://rogerth.at/static/terms_and_conditions.html";
 
     public static final String ABOUT_WEBSITE = "www.rogerthat.net";
     public static final String ABOUT_WEBSITE_URL = "http://www.rogerthat.net";

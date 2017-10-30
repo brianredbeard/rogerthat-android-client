@@ -648,6 +648,8 @@ def convert_config():
 
     profile_show_gender_and_birthdate = bool_str(get('PROFILE.SHOW_GENDER_AND_BIRTHDATE', True))
 
+    tos_url = doc["APP_CONSTANTS"].get("TERMS_OF_SERVICE_URL", "https://rogerth.at/static/terms_and_conditions.html")
+
     if doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_CITYPAPP:
         default_about_website = "www.onzestadapp.be"
         default_about_website_url = "http://www.onzestadapp.be"
@@ -694,18 +696,20 @@ def convert_config():
             f.truncate()
 
     registration_type = long(doc['APP_CONSTANTS'].get('REGISTRATION_TYPE', 1))
+    registration_type_oauth_domain = 'dummy'
+    registration_type_oauth_url = 'dummy'
+    registration_type_qr_url = 'dummy'
     if registration_type == 1:
         registration_type = 'REGISTRATION_TYPE_DEFAULT'
-        registration_type_oauth_domain = 'dummy'
-        registration_type_oauth_url = 'dummy'
     elif registration_type == 2:
         registration_type = 'REGISTRATION_TYPE_OAUTH'
         registration_type_oauth_domain = doc['APP_CONSTANTS']['REGISTRATION_TYPE_OAUTH_DOMAIN']
-        registration_type_oauth_url = 'dummy'
     elif registration_type == 3:
         registration_type = 'REGISTRATION_TYPE_FULL_OAUTH'
-        registration_type_oauth_domain = 'dummy'
         registration_type_oauth_url = doc['APP_CONSTANTS']['REGISTRATION_TYPE_OAUTH_URL']
+    elif registration_type == 4:
+        registration_type = 'REGISTRATION_TYPE_QR'
+        registration_type_qr_url = doc['APP_CONSTANTS']['REGISTRATION_TYPE_QR_URL']
     else:
         raise Exception('Invalid registration type %d' % registration_type)
 
@@ -732,6 +736,10 @@ public class AppConstants {
     public static final int REGISTRATION_TYPE_FULL_OAUTH = 3;
     public static final String REGISTRATION_TYPE_OAUTH_DOMAIN = "%(registration_type_oauth_domain)s";
     public static final String REGISTRATION_TYPE_OAUTH_URL = "%(registration_type_oauth_url)s";
+    public static final int REGISTRATION_TYPE_QR = 4;
+    public static final String REGISTRATION_TYPE_QR_TYPE = "jwt";
+    public static final String REGISTRATION_TYPE_QR_URL =  "%(registration_type_qr_url)s";
+
     public static int getRegistrationType() {
         return %(registration_type)s;
     };
@@ -758,6 +766,8 @@ public class AppConstants {
 
     public static final String[] PROFILE_DATA_FIELDS = new String[] { };
     public static final boolean PROFILE_SHOW_GENDER_AND_BIRTHDATE = %(profile_show_gender_and_birthdate)s;
+
+    public static final String TERMS_OF_SERVICE_URL = "%(tos_url)s";
 
     public static final String ABOUT_WEBSITE = "%(about_website)s";
     public static final String ABOUT_WEBSITE_URL = "%(about_website_url)s";
@@ -796,6 +806,7 @@ public class AppConstants {
            show_scan_in_more=show_scan_in_more,
            full_width_headers=full_width_headers,
            profile_show_gender_and_birthdate=profile_show_gender_and_birthdate,
+           tos_url=tos_url,
            about_website=about_website,
            about_website_url=about_website_url,
            about_email=about_email,
@@ -814,6 +825,7 @@ public class AppConstants {
            registration_type=registration_type,
            registration_type_oauth_domain=registration_type_oauth_domain,
            registration_type_oauth_url=registration_type_oauth_url,
+           registration_type_qr_url=registration_type_qr_url,
            registration_asks_location_permission=registration_asks_location_permission)
 
     path = os.path.join(SRC_JAVA_DIR, "com", "mobicage", "rpc", "config")
