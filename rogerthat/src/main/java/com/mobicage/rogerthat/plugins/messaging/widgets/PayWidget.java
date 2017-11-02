@@ -20,6 +20,7 @@ package com.mobicage.rogerthat.plugins.messaging.widgets;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.AttributeSet;
@@ -40,6 +41,7 @@ import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.IncompleteMessageException;
@@ -53,6 +55,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.simple.JSONArray;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class PayWidget extends Widget {
@@ -100,7 +104,25 @@ public class PayWidget extends Widget {
     }
 
     public static String valueString(Context context, Map<String, Object> widget) {
-        return (String) widget.get("value");
+        final Map<String, Object> jsonResult = (Map<String, Object>) widget.get("value");
+        if (jsonResult == null) {
+            return "";
+        }
+
+        final PayWidgetResultTO result;
+        try {
+            result = new PayWidgetResultTO(jsonResult);
+        } catch (IncompleteMessageException e) {
+            L.bug(e);
+            return "";
+        }
+
+        final List<String> parts = new ArrayList<>();
+        parts.add(String.format("%s: %s", context.getString(R.string.provider_id), result.provider_id));
+        parts.add(String.format("%s: %s", context.getString(R.string.transaction_id), result.transaction_id));
+        parts.add(String.format("%s: %s", context.getString(R.string.status), result.status));
+
+        return android.text.TextUtils.join("\n", parts);
     }
 
     @Override
@@ -117,6 +139,18 @@ public class PayWidget extends Widget {
     public boolean proceedWithSubmit(final String buttonId) {
         if (Message.POSITIVE.equals(buttonId)) {
             if (mResult == null) {
+                String title = mActivity.getString(R.string.not_payed);
+                String message = mActivity.getString(R.string.pay_first);
+                String positiveCaption = mActivity.getString(R.string.pay);
+                String negativeCaption = mActivity.getString(R.string.cancel);
+                SafeDialogClick onPositiveClick = new SafeDialogClick() {
+                    @Override
+                    public void safeOnClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                        pay();
+                    }
+                };
+                UIUtils.showDialog(mActivity, title, message, positiveCaption, onPositiveClick, negativeCaption, null);
                 return false;
             }
         }
@@ -142,7 +176,10 @@ public class PayWidget extends Widget {
     }
 
     private void pay() {
-
+        if (!CordovaSettings.APPS.contains(APPLICATION_TAG)) {
+            UIUtils.showLongToast(mActivity, mActivity.getString(R.string.payment_not_enabled));
+            return;
+        }
         org.json.simple.JSONObject context = new org.json.simple.JSONObject();
         // t should match a PaymentQRCodeType in rogerthat-payment branding
         // see https://github.com/rogerthat-platform/rogerthat-payment/blob/master/src/interfaces/actions.interfaces.ts
@@ -155,20 +192,14 @@ public class PayWidget extends Widget {
         context.put("memo", mWidgetMap.get("memo"));
         context.put("target", mWidgetMap.get("target"));
 
+        Bundle extras = new Bundle();
+        extras.putString(ActionScreenActivity.CONTEXT, context.toString());
+        extras.putString(CordovaActionScreenActivity.EMBEDDED_APP, APPLICATION_TAG);
+        extras.putString(CordovaActionScreenActivity.TITLE, "");
 
-        if (CordovaSettings.APPS.contains(APPLICATION_TAG)) {
-            Bundle extras = new Bundle();
-            extras.putString(ActionScreenActivity.CONTEXT, context.toString());
-            extras.putString(CordovaActionScreenActivity.EMBEDDED_APP, APPLICATION_TAG);
-            extras.putString(CordovaActionScreenActivity.TITLE, "");
-
-            final Intent i = new Intent(mActivity, CordovaActionScreenActivity.class);
-            i.putExtras(extras);
-            mActivity.startActivityForResult(i, START_CORDOVA_APP_REQUEST_CODE);
-
-        } else {
-            UIUtils.showLongToast(mActivity, mActivity.getString(R.string.payment_not_enabled));
-        }
+        final Intent i = new Intent(mActivity, CordovaActionScreenActivity.class);
+        i.putExtras(extras);
+        mActivity.startActivityForResult(i, START_CORDOVA_APP_REQUEST_CODE);
     }
 
     @Override
