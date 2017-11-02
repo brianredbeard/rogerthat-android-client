@@ -211,8 +211,8 @@ public class PayWidget extends Widget {
                     JSONObject args = new JSONObject(result);
                     if (args.optBoolean("success")) {
                         mResult = new PayWidgetResultTO();
-                        mResult.transaction_id = TextUtils.optString(args, "transaction_id", null);
                         mResult.provider_id = TextUtils.optString(args, "provider_id", null);
+                        mResult.transaction_id = TextUtils.optString(args, "transaction_id", null);
                         mResult.status = TextUtils.optString(args, "status", null);
                         showResult();
 
