@@ -81,9 +81,16 @@ public class RatingWidget extends Widget {
             TextView questionText = (TextView) convertView.findViewById(R.id.question_text);
             titleText.setTypeface(Typeface.DEFAULT_BOLD);
             titleText.setText(currentTopic.title);
-            questionText.setText(currentTopic.question);
             RatingBar ratingBar = (RatingBar) convertView.findViewById(R.id.rating_bar);
             ratingBar.setRating(currentTopic.score);
+
+            if (currentTopic.question == null) {
+                questionText.setVisibility(View.GONE);
+                ratingBar.setEnabled(false);
+            } else if (!currentTopic.question.trim().equals("")){
+                questionText.setText(currentTopic.question);
+            }
+
             int color = LookAndFeelConstants.getPrimaryColor(mActivity);
             ratingBar.getProgressDrawable().setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
             ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
