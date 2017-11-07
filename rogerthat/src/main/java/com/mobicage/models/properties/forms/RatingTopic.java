@@ -29,6 +29,7 @@ public class RatingTopic implements com.mobicage.rpc.IJSONable {
     public String question;
     public float score;
     public String title;
+    public long total_count;
 
     public RatingTopic() {
     }
@@ -64,6 +65,16 @@ public class RatingTopic implements com.mobicage.rpc.IJSONable {
         } else {
             throw new IncompleteMessageException("com.mobicage.models.properties.forms.RatingTopic object is missing field 'title'");
         }
+        if (json.containsKey("total_count")) {
+            Object val = json.get("total_count");
+            if (val instanceof Integer) {
+                this.total_count = ((Integer) val).longValue();
+            } else {
+                this.total_count = ((Long) val).longValue();
+            }
+        } else {
+            throw new IncompleteMessageException("com.mobicage.models.properties.forms.RatingTopic object is missing field 'total_count'");
+        }
     }
 
     @Override
@@ -73,6 +84,7 @@ public class RatingTopic implements com.mobicage.rpc.IJSONable {
         obj.put("question", this.question);
         obj.put("score", this.score);
         obj.put("title", this.title);
+        obj.put("total_count", this.total_count);
         return obj;
     }
 
