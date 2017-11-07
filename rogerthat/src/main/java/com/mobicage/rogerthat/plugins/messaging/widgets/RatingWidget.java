@@ -83,11 +83,15 @@ public class RatingWidget extends Widget {
             titleText.setText(currentTopic.title);
             RatingBar ratingBar = (RatingBar) convertView.findViewById(R.id.rating_bar);
             ratingBar.setRating(currentTopic.score);
+            TextView totalCount = (TextView) convertView.findViewById(R.id.total_count);
 
-            if (currentTopic.question == null) {
+            // if total count is set, then show the rating only as an indicator
+            if (currentTopic.question == null || currentTopic.total_count > 0) {
                 questionText.setVisibility(View.GONE);
-                ratingBar.setEnabled(false);
+                totalCount.setText(String.valueOf(currentTopic.total_count));
+                ratingBar.setIsIndicator(true);
             } else if (!currentTopic.question.trim().equals("")){
+                totalCount.setVisibility(View.GONE);
                 questionText.setText(currentTopic.question);
             }
 
