@@ -457,7 +457,7 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
 
     private void setEditing(boolean editing) {
         mEditing = editing;
-        if (AppConstants.FRIENDS_ENABLED) {
+        if (AppConstants.FRIENDS_ENABLED && mMemberFilter == null) {
             if (editing) {
                 mFloatingActionButton.hide();
             } else {
