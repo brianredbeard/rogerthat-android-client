@@ -1883,6 +1883,9 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         mEnterPinActivityActive = false;
 
         SecurityItem si = dequeueSecurityItem(uid);
+        if (si == null) {
+            return;
+        }
         executeSecurityItem(si, true);
     }
 
@@ -1890,8 +1893,10 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         T.UI();
         mEnterPinActivityActive = false;
         SecurityItem si = dequeueSecurityItem(uid);
-        String errorMessage = getString(R.string.user_cancelled_pin_input);
-        si.callback.onError("user_cancelled_pin_input", errorMessage);
+        if (si != null) {
+            String errorMessage = getString(R.string.user_cancelled_pin_input);
+            si.callback.onError("user_cancelled_pin_input", errorMessage);
+        }
         clearQueue();
     }
 
