@@ -1925,6 +1925,10 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         startActivity(intent);
     }
 
+    public boolean pinInMemory() {
+        return mPin != null;
+    }
+
     public void askPin(final String message, final SecurityCallback<Object> callback) {
         T.dontCare();
         runOnUIHandlerNow(new SafeRunnable() {

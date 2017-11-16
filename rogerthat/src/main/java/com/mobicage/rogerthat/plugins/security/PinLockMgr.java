@@ -152,6 +152,11 @@ public class PinLockMgr implements ServiceBound, Application.ActivityLifecycleCa
         if (mService == null) {
             return true;
         }
+        if (mService.pinInMemory()) {
+            mShouldAskPin = false;
+            mHasEnteredPin = true;
+            return true;
+        }
         long timestamp = System.currentTimeMillis() / 1000;
         if (timestamp <= mShouldAskPinTime + PIN_DELAY) {
             mShouldAskPin = false;
