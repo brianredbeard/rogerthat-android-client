@@ -218,7 +218,7 @@ public class PayWidget extends Widget {
 
                         String message = TextUtils.optString(args, "message", null);
                         if (!TextUtils.isEmptyOrWhitespace(message)) {
-                            UIUtils.showLongToast(mActivity, message);
+                            UIUtils.showDialog(mActivity, null, message);
                         }
 
                     } else {
@@ -226,15 +226,15 @@ public class PayWidget extends Widget {
                         String message = TextUtils.optString(args, "message", null);
                         if (TextUtils.isEmptyOrWhitespace(code) || TextUtils.isEmptyOrWhitespace(message)) {
                             L.e("Failed to make payment: unknown reason!");
-                            UIUtils.showLongToast(mActivity, mActivity.getString(R.string.error_please_try_again));
+                            UIUtils.showDialog(mActivity, null, R.string.error_please_try_again);
                         } else {
                             L.i("Failed to make payment: " + code);
-                            UIUtils.showLongToast(mActivity, message);
+                            UIUtils.showDialog(mActivity, null, message);
                         }
                     }
                 } catch (JSONException e) {
                     L.e("Failed to make payment", e);
-                    UIUtils.showLongToast(mActivity, mActivity.getString(R.string.error_please_try_again));
+                    UIUtils.showDialog(mActivity, null, R.string.error_please_try_again);
                 }
             }
         }
