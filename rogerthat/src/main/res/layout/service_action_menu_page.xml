@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/menu_table"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:stretchColumns="*">
+
+    <TableRow
+        android:id="@+id/row0"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="invisible" >
+
+        <LinearLayout
+            android:id="@+id/menu_0x0"
+            android:layout_height="95dp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:visibility="invisible" >
+
+            <include layout="@layout/service_action_menu_item" />
+        </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/menu_1x0"
+            android:layout_height="95dp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:visibility="invisible">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:gravity="center_horizontal"
+                android:orientation="vertical" >
+
+                <include layout="@layout/service_action_menu_item" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/badge"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginRight="8dp"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/badge_red"
+                android:gravity="center"
+                android:padding="2dp"
+                android:text="9+"
+                android:textColor="#FFFFFF"
+                android:textSize="12dp"
+                fontPath="fonts/lato_bold.ttf"
+                tools:ignore="HardcodedText"
+                android:visibility="gone">
+            </TextView>
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/menu_2x0"
+            android:layout_height="95dp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:visibility="invisible" >
+
+            <include layout="@layout/service_action_menu_item" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/menu_3x0"
+            android:layout_height="95dp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:visibility="invisible" >
+
+            <include layout="@layout/service_action_menu_item" />
+        </LinearLayout>
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/row1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:visibility="invisible" >
+
+        <LinearLayout
+            android:id="@+id/menu_0x1"
+            android:layout_height="95dp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:visibility="invisible" >
+
+            <include layout="@layout/service_action_menu_item" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/menu_1x1"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:visibility="invisible" >
+
+            <include layout="@layout/service_action_menu_item" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/menu_2x1"
+            android:layout_height="95dp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:visibility="invisible" >
+
+            <include layout="@layout/service_action_menu_item" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/menu_3x1"
+            android:layout_height="95dp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:visibility="invisible" >
+
+            <include layout="@layout/service_action_menu_item" />
+        </LinearLayout>
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/row2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:visibility="invisible" >
+
+        <LinearLayout
+            android:id="@+id/menu_0x2"
+            android:layout_height="95dp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:visibility="invisible" >
+
+            <include layout="@layout/service_action_menu_item" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/menu_1x2"
+            android:layout_height="95dp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:visibility="invisible" >
+
+            <include layout="@layout/service_action_menu_item" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/menu_2x2"
+            android:layout_height="95dp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:visibility="invisible" >
+
+            <include layout="@layout/service_action_menu_item" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/menu_3x2"
+            android:layout_height="95dp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:visibility="invisible" >
+
+            <include layout="@layout/service_action_menu_item" />
+        </LinearLayout>
+    </TableRow>
+</TableLayout>

@@ -55,7 +55,6 @@ import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.plugins.news.NewsPlugin;
 import com.mobicage.rogerthat.plugins.payment.PaymentPlugin;
-import com.mobicage.rogerthat.plugins.security.PinLockMgr;
 import com.mobicage.rogerthat.plugins.security.SecurityPlugin;
 import com.mobicage.rogerthat.plugins.system.SystemPlugin;
 import com.mobicage.rogerthat.plugins.trackme.TrackmePlugin;
