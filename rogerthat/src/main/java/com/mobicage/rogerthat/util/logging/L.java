@@ -22,6 +22,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
 
+import com.crashlytics.android.Crashlytics;
 import com.mobicage.api.system.Rpc;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.registration.RegistrationWizard2;
@@ -141,6 +142,12 @@ public class L {
 
     private static void logToServer(final String s, final Throwable t) {
         try {
+            if (t == null) {
+                Crashlytics.log(5, "logToServer", s);
+            } else {
+                Crashlytics.logException(t);
+            }
+
             if (sMainService == null)
                 return;
             final long currentTimeMillis = sMainService.currentTimeMillis();
