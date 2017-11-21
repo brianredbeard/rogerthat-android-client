@@ -28,7 +28,7 @@ android {
                 "app_id"                      : "rogerthat",
                 "facebook_content_provider_id": "188033791211994",
                 "google_maps_api_key"         : google_maps_api_key,
-                "fabic_api_token"             : fabic_api_token
+                "fabric_api_token"            : fabric_api_token
         ]
     }
 
