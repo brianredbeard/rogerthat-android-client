@@ -43,51 +43,52 @@ public class RegexPatterns {
 
     public static final Pattern BRANDING_BACKGROUND_COLOR = Pattern
         .compile(
-            "<\\s*meta\\s+property\\s*=\\s*\"rt:style:background-color\"\\s+content\\s*=\\s*\"(#[a-f0-9]{3}([a-f0-9]{3})?)\"\\s*/>",
+                "<\\s*meta\\s+property\\s*=\\s*\"rt:style:background-color\"\\s+content\\s*=\\s*\"(#[a-f0-9]{3}" +
+                        "([a-f0-9]{3})?)\"\\s*/?>",
             Pattern.CASE_INSENSITIVE);
 
     public static final Pattern BRANDING_MENU_ITEM_COLOR = Pattern
         .compile(
-            "<\\s*meta\\s+property\\s*=\\s*\"rt:style:menu-item-color\"\\s+content\\s*=\\s*\"(#[a-f0-9]{3}([a-f0-9]{3})?)\"\\s*/>",
+                "<\\s*meta\\s+property\\s*=\\s*\"rt:style:menu-item-color\"\\s+content\\s*=\\s*\"(#[a-f0-9]{3}([a-f0-9]{3})?)\"\\s*/?>",
             Pattern.CASE_INSENSITIVE);
 
     public static final Pattern BRANDING_DIMENSIONS = Pattern.compile(
-        "<\\s*meta\\s+property\\s*=\\s*\"rt:dimensions\"\\s+content\\s*=\\s*\"\\[((\\d+,){3}\\d+)\\]\"\\s*/>",
+            "<\\s*meta\\s+property\\s*=\\s*\"rt:dimensions\"\\s+content\\s*=\\s*\"\\[((\\d+,){3}\\d+)\\]\"\\s*/?>",
         Pattern.CASE_INSENSITIVE);
 
     public static final Pattern BRANDING_COLOR_SCHEME = Pattern.compile(
-            "<\\s*meta\\s+property\\s*=\\s*\"rt:style:color-scheme\"\\s+content\\s*=\\s*\"(dark|light)\"\\s*/>",
+            "<\\s*meta\\s+property\\s*=\\s*\"rt:style:color-scheme\"\\s+content\\s*=\\s*\"(dark|light)\"\\s*/?>",
             Pattern.CASE_INSENSITIVE);
 
     public static final Pattern BRANDING_ORIENTATION = Pattern.compile
             ("<\\s*meta\\s+property\\s*=\\s*\"rt:style:orientation\"\\s+content\\s*=\\s*\"" +
-                    "(portrait|landscape|dynamic)\"\\s*/>", Pattern.CASE_INSENSITIVE);
+                    "(portrait|landscape|dynamic)\"\\s*/?>", Pattern.CASE_INSENSITIVE);
 
     public static final Pattern BRANDING_SHOW_HEADER = Pattern.compile(
-            "<\\s*meta\\s+property\\s*=\\s*\"rt:style:show-header\"\\s+content\\s*=\\s*\"(true|false)\"\\s*/>",
+            "<\\s*meta\\s+property\\s*=\\s*\"rt:style:show-header\"\\s+content\\s*=\\s*\"(true|false)\"\\s*/?>",
             Pattern.CASE_INSENSITIVE);
 
     public static final Pattern BRANDING_SHOW_NAME = Pattern.compile(
-            "<\\s*meta\\s+property\\s*=\\s*\"rt:style:show-name\"\\s+content\\s*=\\s*\"(true|false)\"\\s*/>",
+            "<\\s*meta\\s+property\\s*=\\s*\"rt:style:show-name\"\\s+content\\s*=\\s*\"(true|false)\"\\s*/?>",
             Pattern.CASE_INSENSITIVE);
 
     public static final Pattern BRANDING_CONTENT_TYPE = Pattern.compile(
-        "<\\s*meta\\s+property\\s*=\\s*\"rt:style:content-type\"\\s+content\\s*=\\s*\"([a-zA-Z0-9_/-]*)\"\\s*/>",
+            "<\\s*meta\\s+property\\s*=\\s*\"rt:style:content-type\"\\s+content\\s*=\\s*\"([a-zA-Z0-9_/-]*)\"\\s*/?>",
         Pattern.CASE_INSENSITIVE);
 
     public static final Pattern BRANDING_WAKELOCK_ENABLED = Pattern.compile(
-        "<\\s*meta\\s+property\\s*=\\s*\"rt:wakelock\"\\s+content\\s*=\\s*\"(true|false)\"\\s*/>",
+            "<\\s*meta\\s+property\\s*=\\s*\"rt:wakelock\"\\s+content\\s*=\\s*\"(true|false)\"\\s*/?>",
         Pattern.CASE_INSENSITIVE);
 
     public static final Pattern BRANDING_EXTERNAL_URLS = Pattern
-        .compile("<\\s*meta\\s+property\\s*=\\s*\"rt:external-url\"\\s+content\\s*=\\s*\"(.*)\"\\s*/>",
+            .compile("<\\s*meta\\s+property\\s*=\\s*\"rt:external-url\"\\s+content\\s*=\\s*\"(.*)\"\\s*/?>",
             Pattern.CASE_INSENSITIVE);
 
     public static final Pattern IS_DASHBOARD_ACCOUNT = Pattern.compile("^dashboard.*@rogerth\\.at$",
         Pattern.CASE_INSENSITIVE);
 
     public static final Pattern BRANDING_DISPLAY_TYPE = Pattern.compile(
-            "<\\s*meta\\s+property\\s*=\\s*\"rt:style:display-type\"\\s+content\\s*=\\s*\"(native|webview)\"\\s*/>",
+            "<\\s*meta\\s+property\\s*=\\s*\"rt:style:display-type\"\\s+content\\s*=\\s*\"(native|webview)\"\\s*/?>",
             Pattern.CASE_INSENSITIVE);
 
 }

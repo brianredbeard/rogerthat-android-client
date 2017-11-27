@@ -17,27 +17,29 @@
  */
 package com.mobicage.rogerthat;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
-import android.webkit.WebViewClient;
+import android.webkit.ValueCallback;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.annotation.SuppressLint;
+import android.webkit.WebViewClient;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.util.OauthUtils;
+import com.mobicage.rogerthat.util.RegexPatterns;
 import com.mobicage.rogerthat.util.logging.L;
-import com.mobicage.rpc.config.CloudConstants;
 
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
 
 public class OauthActivity extends Activity {
 
@@ -105,11 +107,13 @@ public class OauthActivity extends Activity {
 
         mWebview.setWebViewClient(new WebViewClient() {
 
+            private Map<String, List<String>> externalUrlPatternsCache = new HashMap<>();
+            private String currentURL = null;
+
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 L.d("shouldOverrideUrlLoading: " + url);
-                interceptUrlCompat(view, url, true);
-                return true;
+                return interceptUrlCompat(view, url, true);
             }
 
             private boolean interceptUrlCompat(WebView view, String url, boolean loadUrl) {
@@ -126,15 +130,53 @@ public class OauthActivity extends Activity {
                     resultIntent.putExtra(OauthActivity.RESULT_QUERY, query);
                     resultIntent.putExtra(OauthActivity.RESULT_CODE, code);
                     resultIntent.putExtra(OauthActivity.RESULT_STATE, state);
-                    resultIntent.putExtra(OauthActivity.RESULT_STATE, state);
                     resultIntent.putExtra(OauthActivity.RESULT_ERROR_MESSAGE, errorDescription);
                     setResult(Activity.RESULT_OK, resultIntent);
                     finish();
 
                     return true;
                 }
+
+                if (isExternalUrl(url)) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    startActivity(intent);
+                    return true;
+                }
+
                 if (loadUrl) {
                     view.loadUrl(url);
+                }
+
+                return false;
+            }
+
+            @Override
+            public void onPageFinished(final WebView view, final String url) {
+                this.currentURL = url;
+                L.d("Current URL = " + url);
+                mWebview.evaluateJavascript("(function(){return document.head.innerHTML;})();",
+                        new ValueCallback<String>() {
+                            @Override
+                            public void onReceiveValue(String head) {
+                                final List<String> externalUrlPatterns = new ArrayList<String>();
+                                final Matcher matcher = RegexPatterns.BRANDING_EXTERNAL_URLS.matcher(head);
+                                while (matcher.find()) {
+                                    externalUrlPatterns.add(matcher.group(1));
+                                }
+
+                                externalUrlPatternsCache.put(url, externalUrlPatterns);
+                            }
+                        });
+            }
+
+            private boolean isExternalUrl(String url) {
+                List<String> externalUrlPatterns = externalUrlPatternsCache.get(this.currentURL);
+                if (externalUrlPatterns != null) {
+                    for (String regularExpression : externalUrlPatterns) {
+                        if (url.matches(regularExpression)) {
+                            return true;
+                        }
+                    }
                 }
                 return false;
             }
