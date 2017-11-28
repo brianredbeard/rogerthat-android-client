@@ -19,15 +19,11 @@
 package com.mobicage.rogerthat.plugins.messaging.widgets;
 
 import android.content.Context;
-import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.widget.Checkable;
 import android.widget.CheckedTextView;
-import android.widget.TextView;
 
-import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.ui.UIUtils;
@@ -53,10 +49,10 @@ public abstract class AbstractSelectWidget extends Widget {
         List<String> defaults = getDefaultValues();
 
         int primaryColor = LookAndFeelConstants.getPrimaryColor(mActivity);
-
+        LayoutInflater layoutInflater = LayoutInflater.from(getContext());
+        int textViewResourceId = getTextViewResourceId();
         for (Map<String, String> choice : (List<Map<String, String>>) mWidgetMap.get("choices")) {
-            View v = LayoutInflater.from(getContext()).inflate(getTextViewResourceId(), null);
-            final CheckedTextView ctv = (CheckedTextView) v;
+            CheckedTextView ctv = (CheckedTextView) layoutInflater.inflate(textViewResourceId, null);
 
             if (mColorScheme != BrandingMgr.ColorScheme.DARK) {
                 UIUtils.setColors(primaryColor, ctv);
