@@ -93,11 +93,13 @@
     <string name="sql_friend_get_emails">SELECT email from friend WHERE existence = 0</string>
     <string name="sql_friend_get_emails_by_type">SELECT email FROM friend WHERE type = ?</string>
 
-    <string name="sql_friend_data_get">SELECT user_data, app_data FROM friend WHERE email = ?</string>
-    <string name="sql_friend_user_data_get">SELECT user_data FROM friend WHERE email = ?</string>
-    <string name="sql_friend_set_user_data">UPDATE friend SET user_data=? WHERE email=?</string>
-    <string name="sql_friend_set_app_data">UPDATE friend SET app_data=? WHERE email=?</string>
-    <string name="sql_friend_set_data">UPDATE friend SET user_data=?, app_data=? WHERE email=?</string>
+    <string name="sql_friend_set_user_data_old">UPDATE friend SET user_data=?, app_data=? WHERE email=?</string>
+
+    <string name="sql_friend_migrate_user_data">SELECT email, user_data, app_data FROM friend</string>
+    <string name="sql_friend_get_user_data">SELECT d_key, d_value FROM user_data WHERE email = ? AND d_type = ?</string>
+    <string name="sql_friend_update_user_data">INSERT OR REPLACE INTO user_data (email, d_type, d_key, d_value) VALUES (?,?,?,?)</string>
+    <string name="sql_friend_delete_user_data">DELETE FROM user_data WHERE email = ? AND d_type = ? AND d_key = ?</string>
+    <string name="sql_friend_delete_all_user_data">DELETE FROM user_data WHERE email = ? AND d_type = ?</string>
 
     <string name="sql_friend_get_broadcast_flow_for_mfr">
         SELECT smi.x, smi.y, smi.z, smi.static_flow_hash, smi.hashed_tag, f.generation, smi.label FROM service_menu_item smi INNER JOIN friend f ON f.email=smi.friend WHERE smi.static_flow_hash=f.broadcast_flow_hash AND f.email=?

@@ -56,6 +56,7 @@ import com.mobicage.to.friends.UpdateFriendResponseTO;
 import com.mobicage.to.service.GetMenuIconRequestTO;
 
 import org.jivesoftware.smack.util.Base64;
+import org.json.simple.JSONObject;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONValue;
 
@@ -83,7 +84,9 @@ public class FriendStore implements Closeable {
     public final static int SERVICE_ORGANIZATION_TYPE_CITY = 3;
     public final static int SERVICE_ORGANIZATION_TYPE_EMERGENCY = 4;
 
-    private static final String DISABLED_BROADCAST_TYPES_USER_DATA_KEY = "__rt__disabledBroadcastTypes";
+    public final static String FRIEND_DATA_TYPE_USER = "user";
+    public final static String FRIEND_DATA_TYPE_APP = "app";
+    private final String DISABLED_BROADCAST_TYPES_USER_DATA_KEY = "__rt__disabledBroadcastTypes";
 
     public final static BitmapHolder FRIEND_WITHOUT_AVATAR = new BitmapHolder(null);
 
@@ -149,9 +152,10 @@ public class FriendStore implements Closeable {
     private final SQLiteStatement mServiceApiCallSetResultHTTP;
     private final SQLiteStatement mServiceApiCallRemoveUI;
 
+    private final SQLiteStatement mServiceUserDataUpdateOldBIZZ;
     private final SQLiteStatement mServiceUserDataUpdateBIZZ;
-    private final SQLiteStatement mServiceAppDataUpdateBIZZ;
-    private final SQLiteStatement mServiceDataUpdateBIZZ;
+    private final SQLiteStatement mServiceUserDataDeleteBIZZ;
+    private final SQLiteStatement mServiceUserDataDeleteAllBIZZ;
 
     private final SQLiteStatement mGetFriendVersionsBizz;
     private final SQLiteStatement mFriendSetVersionGetBizz;
@@ -251,9 +255,10 @@ public class FriendStore implements Closeable {
                 .getString(R.string.sql_service_api_call_set_result));
         mServiceApiCallRemoveUI = mDb.compileStatement(mMainService.getString(R.string.sql_service_api_call_remove));
 
-        mServiceUserDataUpdateBIZZ = mDb.compileStatement(mMainService.getString(R.string.sql_friend_set_user_data));
-        mServiceAppDataUpdateBIZZ = mDb.compileStatement(mMainService.getString(R.string.sql_friend_set_app_data));
-        mServiceDataUpdateBIZZ = mDb.compileStatement(mMainService.getString(R.string.sql_friend_set_data));
+        mServiceUserDataUpdateOldBIZZ = mDb.compileStatement(mMainService.getString(R.string.sql_friend_set_user_data_old));
+        mServiceUserDataUpdateBIZZ = mDb.compileStatement(mMainService.getString(R.string.sql_friend_update_user_data));
+        mServiceUserDataDeleteBIZZ = mDb.compileStatement(mMainService.getString(R.string.sql_friend_delete_user_data));
+        mServiceUserDataDeleteAllBIZZ = mDb.compileStatement(mMainService.getString(R.string.sql_friend_delete_all_user_data));
 
         mGetFriendVersionsBizz = mDb.compileStatement(mMainService.getString(R.string.sql_friend_get_versions));
         mFriendSetVersionGetBizz = mDb.compileStatement(mMainService.getString(R.string.sql_friendset_version_get));
@@ -334,9 +339,10 @@ public class FriendStore implements Closeable {
         mServiceApiCallSetResultHTTP.close();
         mServiceApiCallRemoveUI.close();
 
+        mServiceUserDataUpdateOldBIZZ.close();
         mServiceUserDataUpdateBIZZ.close();
-        mServiceAppDataUpdateBIZZ.close();
-        mServiceDataUpdateBIZZ.close();
+        mServiceUserDataDeleteBIZZ.close();
+        mServiceUserDataDeleteAllBIZZ.close();
 
         mGetFriendName.close();
 
@@ -645,24 +651,6 @@ public class FriendStore implements Closeable {
 
                         requestFriendCategoryIfNeeded(friend);
 
-                        final boolean userDataUpdated;
-                        final boolean serviceDataUpdated;
-
-                        // Check if service data has changed
-                        if (friend.type == FriendsPlugin.FRIEND_TYPE_SERVICE) {
-                            String[] data = getServiceData(friend.email);
-                            if (data != null) {
-                                userDataUpdated = !android.text.TextUtils.equals(data[0], friend.userData);
-                                serviceDataUpdated = !android.text.TextUtils.equals(data[1], friend.appData);
-                            } else {
-                                userDataUpdated = false;
-                                serviceDataUpdated = false;
-                            }
-                        } else {
-                            userDataUpdated = false;
-                            serviceDataUpdated = false;
-                        }
-
                         final String friendDisplayName;
                         if (!TextUtils.isEmptyOrWhitespace(friend.name)) {
                             friendDisplayName = friend.name;
@@ -806,10 +794,6 @@ public class FriendStore implements Closeable {
 
                             @Override
                             protected void safeRun() throws Exception {
-                                if (userDataUpdated || serviceDataUpdated) {
-                                    broadcastServiceDataUpdated(friend.email, userDataUpdated, serviceDataUpdated);
-                                }
-
                                 downloadAvatar(friend);
                             }
                         });
@@ -1100,35 +1084,117 @@ public class FriendStore implements Closeable {
         }
     }
 
-    public String[] getServiceData(final String email) {
-        T.dontCare();
-        final Cursor curs = mDb.rawQuery(mMainService.getString(R.string.sql_friend_data_get), new String[]{email});
-
+    public void migrateFriendData() {
+        T.BIZZ();
+        final Cursor curs = mDb.rawQuery(mMainService.getString(R.string.sql_friend_migrate_user_data), new String[]{});
         try {
-            if (!curs.moveToFirst())
-                return null;
+            if (!curs.moveToFirst()) {
+                return;
+            }
+            do {
+                String serviceEmail = curs.getString(0);
+                String userDataString = curs.getString(1);
+                String appDataString = curs.getString(2);
 
-            String userDataString = curs.getString(0);
-            String appDataString = curs.getString(1);
+                saveUserData(serviceEmail, FRIEND_DATA_TYPE_USER, userDataString);
+                saveUserData(serviceEmail, FRIEND_DATA_TYPE_APP, appDataString);
+                wipeOldUserData(serviceEmail);
 
-            return new String[]{userDataString, appDataString};
+            } while (curs.moveToNext());
         } finally {
             curs.close();
         }
     }
 
-    public String getUserData(final String email) {
+    private void wipeOldUserData(String serviceEmail) {
+        T.BIZZ(); // only used by migration
+        mServiceUserDataUpdateOldBIZZ.bindNull(1);
+        mServiceUserDataUpdateOldBIZZ.bindNull(2);
+        mServiceUserDataUpdateOldBIZZ.bindString(3, serviceEmail);
+        mServiceUserDataUpdateOldBIZZ.execute();
+    }
+
+    public void saveUserData(final String serviceEmail, final String type, final String dataString) {
+        T.BIZZ();
+        TransactionHelper.runInTransaction(mDb, "saveUserData", new TransactionWithoutResult() {
+            @Override
+            protected void run() {
+                Map<String, Object> data = dataString == null ? new HashMap<String, Object>() : (Map<String, Object>) JSONValue.parse(dataString);
+                deleteUserData(serviceEmail, type);
+                for (Map.Entry<String, Object> dataEntry : data.entrySet()) {
+                    Object value = dataEntry.getValue();
+                    if (value != null) {
+                        JSONObject v = new JSONObject();
+                        v.put("v", value);
+                        updateUserData(serviceEmail, type, dataEntry.getKey(), JSONValue.toJSONString(v));
+                    }
+                }
+            }
+        });
+    }
+
+    public void updateUserData(final String serviceEmail, final String type, final List<String> keys, final List<String> values) {
+        T.BIZZ();
+        TransactionHelper.runInTransaction(mDb, "updateUserData", new TransactionWithoutResult() {
+            @Override
+            protected void run() {
+                for(int i = 0; i < keys.size(); i++) {
+                    String key = keys.get(i);
+                    String value = values.get(i);
+                    if (value == null) {
+                        deleteUserData(serviceEmail, type, key);
+                    } else {
+                        updateUserData(serviceEmail, type, key, value);
+                    }
+                }
+            }
+        });
+    }
+
+    private void updateUserData(String serviceEmail, String type, String key, String value) {
+        T.BIZZ();
+        mServiceUserDataUpdateBIZZ.bindString(1, serviceEmail);
+        mServiceUserDataUpdateBIZZ.bindString(2, type);
+        mServiceUserDataUpdateBIZZ.bindString(3, key);
+        mServiceUserDataUpdateBIZZ.bindString(4, value);
+        mServiceUserDataUpdateBIZZ.execute();
+    }
+
+    private void deleteUserData(String serviceEmail, String type) {
+        T.BIZZ();
+        mServiceUserDataDeleteAllBIZZ.bindString(1, serviceEmail);
+        mServiceUserDataDeleteAllBIZZ.bindString(2, type);
+        mServiceUserDataDeleteAllBIZZ.execute();
+    }
+
+    private void deleteUserData(String serviceEmail, String type, String key) {
+        T.BIZZ();
+        mServiceUserDataDeleteBIZZ.bindString(1, serviceEmail);
+        mServiceUserDataDeleteBIZZ.bindString(2, type);
+        mServiceUserDataDeleteBIZZ.bindString(3, key);
+        mServiceUserDataDeleteBIZZ.execute();
+    }
+
+    public Map<String, Object> getUserData(final String email, final String type) {
         T.dontCare();
-        final Cursor curs = mDb.rawQuery(mMainService.getString(R.string.sql_friend_user_data_get), new String[]{email});
+        final Cursor curs = mDb.rawQuery(mMainService.getString(R.string.sql_friend_get_user_data), new String[]{email, type});
 
+        Map<String, Object> data = new HashMap<>();
         try {
-            if (!curs.moveToFirst())
-                return null;
+            if (!curs.moveToFirst()) {
+                return data;
+            }
+            do {
+                String key = curs.getString(0);
+                String value = curs.getString(1);
+                JSONObject v = (JSONObject) JSONValue.parse(value);
+                data.put(key, v.get("v"));
 
-            return curs.getString(0);
+            } while (curs.moveToNext());
         } finally {
             curs.close();
         }
+        return data;
     }
 
     private void deleteServiceMenuForFriend(final String email) {
@@ -1757,61 +1823,6 @@ public class FriendStore implements Closeable {
         mServiceApiCallRemoveUI.execute();
     }
 
-    private void updateUserData(String serviceEmail, String userDataJsonString) {
-        T.BIZZ();
-        if (userDataJsonString == null) {
-            mServiceUserDataUpdateBIZZ.bindNull(1);
-        } else {
-            mServiceUserDataUpdateBIZZ.bindString(1, userDataJsonString);
-        }
-        mServiceUserDataUpdateBIZZ.bindString(2, serviceEmail);
-        mServiceUserDataUpdateBIZZ.execute();
-    }
-
-    private void updateAppData(String serviceEmail, String appDataJsonString) {
-        T.BIZZ();
-        if (appDataJsonString == null) {
-            mServiceAppDataUpdateBIZZ.bindNull(1);
-        } else {
-            mServiceAppDataUpdateBIZZ.bindString(1, appDataJsonString);
-        }
-        mServiceAppDataUpdateBIZZ.bindString(2, serviceEmail);
-        mServiceAppDataUpdateBIZZ.execute();
-    }
-
-    public void updateServiceData(String serviceEmail, String userDataJsonString, String appDataJsonString,
-                                  boolean mustBroadcastIntent) {
-        T.BIZZ();
-        final boolean userDataUpdated = userDataJsonString != null;
-        final boolean appDataUpdated = appDataJsonString != null;
-
-        if (userDataUpdated && appDataUpdated) {
-            mServiceDataUpdateBIZZ.bindString(1, userDataJsonString);
-            mServiceDataUpdateBIZZ.bindString(1, appDataJsonString);
-            mServiceDataUpdateBIZZ.bindString(3, serviceEmail);
-            mServiceDataUpdateBIZZ.execute();
-        } else if (userDataUpdated) {
-            updateUserData(serviceEmail, userDataJsonString);
-        } else if (appDataUpdated) {
-            updateAppData(serviceEmail, appDataJsonString);
-        } else {
-            return;
-        }
-
-        if (mustBroadcastIntent) {
-            broadcastServiceDataUpdated(serviceEmail, userDataUpdated, appDataUpdated);
-        }
-    }
-
-    private void broadcastServiceDataUpdated(final String email, final boolean userDataUpdated,
-                                             final boolean serviceDataUpdated) {
-        Intent intent = new Intent(FriendsPlugin.SERVICE_DATA_UPDATED);
-        intent.putExtra("email", email);
-        intent.putExtra("user_data", userDataUpdated);
-        intent.putExtra("service_data", serviceDataUpdated);
-        mMainService.sendBroadcast(intent);
-    }
-
     public ServiceMenuItemDetails getBroadcastServiceMenuItem(String email) {
         final Cursor cursor = mDb.rawQuery(mMainService.getString(R.string.sql_friend_get_broadcast_flow_for_mfr),
                 new String[]{email});
@@ -2120,29 +2131,35 @@ public class FriendStore implements Closeable {
 
     public String disableBroadcastType(final String serviceEmail, final String broadcastType) {
         T.BIZZ();
-        String userDataString = getUserData(serviceEmail);
-        Map<String, Object> userData = userDataString == null ? new HashMap<String, Object>() : (Map<String, Object>) JSONValue.parse(userDataString);
+        Map<String, Object> userData = getUserData(serviceEmail, FRIEND_DATA_TYPE_USER);
 
-        JSONArray disabledBroadcastTypes = (JSONArray) userData.get(DISABLED_BROADCAST_TYPES_USER_DATA_KEY);
+        JSONArray disabledBroadcastTypes = null;
+        if (userData.containsKey(DISABLED_BROADCAST_TYPES_USER_DATA_KEY)) {
+            disabledBroadcastTypes = (JSONArray) userData.get(DISABLED_BROADCAST_TYPES_USER_DATA_KEY);
+        }
         if (disabledBroadcastTypes == null) {
             disabledBroadcastTypes = new JSONArray();
-            userData.put(DISABLED_BROADCAST_TYPES_USER_DATA_KEY, disabledBroadcastTypes);
-        } else if (disabledBroadcastTypes.contains(broadcastType)) {
+        }
+        if (disabledBroadcastTypes.contains(broadcastType)) {
             return null;
         }
-
         disabledBroadcastTypes.add(broadcastType);
+        JSONObject v = new JSONObject();
+        v.put("v", disabledBroadcastTypes);
+        updateUserData(serviceEmail, FRIEND_DATA_TYPE_USER, DISABLED_BROADCAST_TYPES_USER_DATA_KEY, JSONValue.toJSONString(v));
+        FriendsPlugin.broadcastServiceDataUpdated(mMainService, serviceEmail, true, false);
 
-        String userDataJsonString = JSONValue.toJSONString(userData);
-        updateServiceData(serviceEmail, userDataJsonString, null, false);
-        return userDataJsonString;
+        userData.put(DISABLED_BROADCAST_TYPES_USER_DATA_KEY, disabledBroadcastTypes);
+        return JSONValue.toJSONString(userData);
     }
 
     public JSONArray getDisabledBroadcastTypes(final String serviceEmail) {
         T.dontCare(); // T.UI or T.BIZZ
-        String userDataString = getUserData(serviceEmail);
-        Map<String, Object> userData = userDataString == null ? new HashMap<String, Object>() : (Map<String, Object>) JSONValue.parse(userDataString);
-        JSONArray disabledBroadcastTypes = (JSONArray) userData.get(DISABLED_BROADCAST_TYPES_USER_DATA_KEY);
+        Map<String, Object> userData = getUserData(serviceEmail, FRIEND_DATA_TYPE_USER);
+        JSONArray disabledBroadcastTypes = null;
+        if (userData.containsKey(DISABLED_BROADCAST_TYPES_USER_DATA_KEY)) {
+            disabledBroadcastTypes = (JSONArray) userData.get(DISABLED_BROADCAST_TYPES_USER_DATA_KEY);
+        }
         return disabledBroadcastTypes == null ? new JSONArray() : disabledBroadcastTypes;
     }
 
