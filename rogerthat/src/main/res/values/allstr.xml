@@ -583,6 +583,6 @@
     <string name="provider_id">Provider ID</string>
     <string name="status">Status</string>
     <string name="payment_not_enabled">Payment is not enabled in your app.</string>
-    <string name="not_payed">Not Payed</string>
+    <string name="not_payed">Not Paid</string>
     <string name="pay_first">You need to pay before you can continue.</string>
 </resources>
