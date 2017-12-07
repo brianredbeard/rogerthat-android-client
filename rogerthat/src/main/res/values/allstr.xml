@@ -579,10 +579,11 @@
     <string name="authorize_success">Successfully authorized</string>
     <string name="register_qr_text">Welcome to the %1$s App.\n\nTo get started, visit\n %2$s \nfrom your PC, laptop or tablet and scan your personal QR code.</string>
     <string name="pay">Pay</string>
+    <string name="paid">Paid</string>
     <string name="transaction_id">Transaction ID</string>
-    <string name="provider_id">Provider ID</string>
+    <string name="payment_provider">Provider</string>
     <string name="status">Status</string>
     <string name="payment_not_enabled">Payment is not enabled in your app.</string>
-    <string name="not_payed">Not Paid</string>
+    <string name="not_paid">Not Paid</string>
     <string name="pay_first">You need to pay before you can continue.</string>
 </resources>

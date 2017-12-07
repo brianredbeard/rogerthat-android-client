@@ -33,7 +33,6 @@ import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.api.messaging.Rpc;
 import com.mobicage.rogerth.at.R;
-import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.cordova.CordovaActionScreenActivity;
 import com.mobicage.rogerthat.cordova.CordovaSettings;
 import com.mobicage.rogerthat.plugins.friends.ActionScreenActivity;
@@ -66,6 +65,7 @@ public class PayWidget extends Widget {
 
     private Button mPayBtn;
     private PayWidgetResultTO mResult;
+    private TextView mResultTextView;
     private LinearLayout mResultData;
 
     public PayWidget(Context context) {
@@ -78,6 +78,8 @@ public class PayWidget extends Widget {
 
     @Override
     public void initializeWidget() {
+        mResultData = (LinearLayout) findViewById(R.id.result_data);
+        mResultTextView = (TextView) findViewById(R.id.result_textview);
         mPayBtn = (Button) findViewById(R.id.pay_btn);
         mPayBtn.setOnClickListener(new SafeViewOnClickListener() {
             @Override
@@ -88,8 +90,6 @@ public class PayWidget extends Widget {
 
         IconicsDrawable d = new IconicsDrawable(mActivity, FontAwesome.Icon.faw_credit_card).color(LookAndFeelConstants.getPrimaryIconColor(mActivity)).sizeDp(24);
         mPayBtn.setCompoundDrawablesWithIntrinsicBounds(d, null, null, null);
-
-        mResultData = (LinearLayout) findViewById(R.id.result_data);
 
         @SuppressWarnings("unchecked")
         Map<String, Object> result = (Map<String, Object>) mWidgetMap.get("value");
@@ -118,7 +118,7 @@ public class PayWidget extends Widget {
         }
 
         final List<String> parts = new ArrayList<>();
-        parts.add(String.format("%s: %s", context.getString(R.string.provider_id), result.provider_id));
+        parts.add(String.format("%s: %s", context.getString(R.string.payment_provider), result.provider_id));
         parts.add(String.format("%s: %s", context.getString(R.string.transaction_id), result.transaction_id));
         parts.add(String.format("%s: %s", context.getString(R.string.status), result.status));
 
@@ -139,7 +139,7 @@ public class PayWidget extends Widget {
     public boolean proceedWithSubmit(final String buttonId) {
         if (Message.POSITIVE.equals(buttonId)) {
             if (mResult == null) {
-                String title = mActivity.getString(R.string.not_payed);
+                String title = mActivity.getString(R.string.not_paid);
                 String message = mActivity.getString(R.string.pay_first);
                 String positiveCaption = mActivity.getString(R.string.pay);
                 String negativeCaption = mActivity.getString(R.string.cancel);
@@ -242,12 +242,14 @@ public class PayWidget extends Widget {
 
     private void showResult() {
         mPayBtn.setVisibility(View.GONE);
+        if ("succeeded".equals(mResult.status)) {
+            mResultTextView.setVisibility(View.VISIBLE);
+        }
         mResultData.removeAllViews();
         mResultData.setVisibility(View.VISIBLE);
 
-        addRow(mActivity.getString(R.string.provider_id), mResult.provider_id);
+        addRow(mActivity.getString(R.string.payment_provider), mResult.provider_id);
         addRow(mActivity.getString(R.string.transaction_id), mResult.transaction_id);
-        addRow(mActivity.getString(R.string.status), mResult.status);
     }
 
     private void addRow(String key, String value) {

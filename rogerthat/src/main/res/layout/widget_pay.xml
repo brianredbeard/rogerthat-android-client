@@ -32,6 +32,17 @@
         android:theme="@style/ButtonTheme"
         android:text="@string/pay"/>
 
+    <TextView
+        android:id="@+id/result_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/gray_border"
+        android:drawableLeft="@drawable/checkmark"
+        android:gravity="center"
+        android:text="@string/paid"
+        android:minHeight="44dp"
+        android:visibility="gone"/>
+
     <LinearLayout
         android:id="@+id/result_data"
         android:layout_width="match_parent"
