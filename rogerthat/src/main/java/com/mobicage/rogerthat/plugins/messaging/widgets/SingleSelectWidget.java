@@ -54,7 +54,7 @@ public class SingleSelectWidget extends AbstractSelectWidget {
         scrollView.post(new Runnable() {
             @Override
             public void run() {
-                scrollView.smoothScrollTo(0, scrollView.getBottom());
+                scrollView.fullScroll(ScrollView.FOCUS_DOWN);
             }
         });
     }
@@ -67,8 +67,8 @@ public class SingleSelectWidget extends AbstractSelectWidget {
                 for (int i = 0; i < getChildCount(); i++) {
                     Checkable ctv = (Checkable) getChildAt(i);
                     ctv.setChecked((ctv == tv));
-                    scrollToBottom();
                 }
+                scrollToBottom();
             }
         };
     }
