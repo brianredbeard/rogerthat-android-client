@@ -56,8 +56,8 @@ import com.mobicage.to.friends.UpdateFriendResponseTO;
 import com.mobicage.to.service.GetMenuIconRequestTO;
 
 import org.jivesoftware.smack.util.Base64;
-import org.json.simple.JSONObject;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import java.io.Closeable;
@@ -74,6 +74,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.mobicage.rogerthat.util.db.DBUtils.bindBoolean;
 import static com.mobicage.rogerthat.util.db.DBUtils.bindString;
 
 public class FriendStore implements Closeable {
@@ -303,7 +304,6 @@ public class FriendStore implements Closeable {
 
     private void closeSQLStatements() {
         T.UI();
-
         mGetLocationSharingFriendCountUI.close();
         mGetIsFriendUI.close();
         mGetEmailByEmailHashUI.close();
@@ -651,6 +651,11 @@ public class FriendStore implements Closeable {
 
                         requestFriendCategoryIfNeeded(friend);
 
+                        // Backwards compatibility. We could still receive some old requests with service data.
+                        // TODO: remove at 01/01/2018
+                        mMainService.getPlugin(FriendsPlugin.class).updateUserData(friend.email, friend.userData,
+                                friend.appData);
+
                         final String friendDisplayName;
                         if (!TextUtils.isEmptyOrWhitespace(friend.name)) {
                             friendDisplayName = friend.name;
@@ -659,131 +664,51 @@ public class FriendStore implements Closeable {
                         } else {
                             friendDisplayName = friend.email;
                         }
-                        mUpdateFriendHTTP.bindString(1, friendDisplayName);
+                        bindString(mUpdateFriendHTTP, 1, friendDisplayName);
                         mUpdateFriendHTTP.bindLong(2, friend.avatarId);
-                        mUpdateFriendHTTP.bindLong(3, friend.shareLocation ? 1 : 0);
-                        mUpdateFriendHTTP.bindLong(4, friend.sharesLocation ? 1 : 0);
+                        bindBoolean(mUpdateFriendHTTP, 3, friend.shareLocation);
+                        bindBoolean(mUpdateFriendHTTP, 4, friend.sharesLocation);
                         mUpdateFriendHTTP.bindLong(5, friend.type);
-                        if (friend.description == null)
-                            mUpdateFriendHTTP.bindNull(6);
-                        else
-                            mUpdateFriendHTTP.bindString(6, friend.description);
+                        bindString(mUpdateFriendHTTP, 6, friend.description);
+                        bindString(mUpdateFriendHTTP, 7, friend.descriptionBranding, true);
+                        bindString(mUpdateFriendHTTP, 8, friend.pokeDescription);
 
-                        if (TextUtils.isEmptyOrWhitespace(friend.descriptionBranding))
-                            mUpdateFriendHTTP.bindNull(7);
-                        else
-                            mUpdateFriendHTTP.bindString(7, friend.descriptionBranding);
-
-                        if (friend.pokeDescription == null)
-                            mUpdateFriendHTTP.bindNull(8);
-                        else
-                            mUpdateFriendHTTP.bindString(8, friend.pokeDescription);
-
-                        if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.branding))
-                            mUpdateFriendHTTP.bindNull(9);
-                        else
-                            mUpdateFriendHTTP.bindString(9, friend.actionMenu.branding);
-
-                        if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.phoneNumber))
-                            mUpdateFriendHTTP.bindNull(10);
-                        else
-                            mUpdateFriendHTTP.bindString(10, friend.actionMenu.phoneNumber);
-
-                        boolean hasNoShareImageUrl = friend.actionMenu == null
-                                || TextUtils.isEmptyOrWhitespace(friend.actionMenu.shareImageUrl);
-                        mUpdateFriendHTTP.bindLong(11, hasNoShareImageUrl ? 0 : 1);
+                        if (friend.actionMenu == null) {
+                            bindBoolean(mUpdateFriendHTTP, 11, false);
+                            for (int index : new int[]{9, 10, 13, 14, 15, 16, 18, 19, 20, 21, 22}) {
+                                mUpdateFriendHTTP.bindNull(index);
+                            }
+                        } else {
+                            bindString(mUpdateFriendHTTP, 9, friend.actionMenu.branding, true);
+                            bindString(mUpdateFriendHTTP, 10, friend.actionMenu.phoneNumber, true);
+                            bindBoolean(mUpdateFriendHTTP, 11, !TextUtils.isEmptyOrWhitespace(friend.actionMenu
+                                    .shareImageUrl));
+                            bindString(mUpdateFriendHTTP, 13, friend.actionMenu.shareImageUrl, true);
+                            bindString(mUpdateFriendHTTP, 14, friend.actionMenu.shareDescription, true);
+                            bindString(mUpdateFriendHTTP, 15, friend.actionMenu.shareCaption, true);
+                            bindString(mUpdateFriendHTTP, 16, friend.actionMenu.shareLinkUrl, true);
+                            bindString(mUpdateFriendHTTP, 18, friend.actionMenu.aboutLabel, true);
+                            bindString(mUpdateFriendHTTP, 19, friend.actionMenu.messagesLabel, true);
+                            bindString(mUpdateFriendHTTP, 20, friend.actionMenu.callLabel, true);
+                            bindString(mUpdateFriendHTTP, 21, friend.actionMenu.shareLabel, true);
+                            bindString(mUpdateFriendHTTP, 22, friend.actionMenu.callConfirmation, true);
+                        }
 
                         mUpdateFriendHTTP.bindLong(12, friend.generation);
+                        bindString(mUpdateFriendHTTP, 17, friend.qualifiedIdentifier, true);
 
-                        if (hasNoShareImageUrl)
-                            mUpdateFriendHTTP.bindNull(13);
-                        else
-                            mUpdateFriendHTTP.bindString(13, friend.actionMenu.shareImageUrl);
-
-                        if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.shareDescription))
-                            mUpdateFriendHTTP.bindNull(14);
-                        else
-                            mUpdateFriendHTTP.bindString(14, friend.actionMenu.shareDescription);
-
-                        if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.shareCaption))
-                            mUpdateFriendHTTP.bindNull(15);
-                        else
-                            mUpdateFriendHTTP.bindString(15, friend.actionMenu.shareCaption);
-
-                        if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.shareLinkUrl))
-                            mUpdateFriendHTTP.bindNull(16);
-                        else
-                            mUpdateFriendHTTP.bindString(16, friend.actionMenu.shareLinkUrl);
-
-                        if (TextUtils.isEmptyOrWhitespace(friend.qualifiedIdentifier))
-                            mUpdateFriendHTTP.bindNull(17);
-                        else
-                            mUpdateFriendHTTP.bindString(17, friend.qualifiedIdentifier);
-
-                        if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.aboutLabel))
-                            mUpdateFriendHTTP.bindNull(18);
-                        else
-                            mUpdateFriendHTTP.bindString(18, friend.actionMenu.aboutLabel);
-
-                        if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.messagesLabel))
-                            mUpdateFriendHTTP.bindNull(19);
-                        else
-                            mUpdateFriendHTTP.bindString(19, friend.actionMenu.messagesLabel);
-
-                        if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.callLabel))
-                            mUpdateFriendHTTP.bindNull(20);
-                        else
-                            mUpdateFriendHTTP.bindString(20, friend.actionMenu.callLabel);
-
-                        if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.shareLabel))
-                            mUpdateFriendHTTP.bindNull(21);
-                        else
-                            mUpdateFriendHTTP.bindString(21, friend.actionMenu.shareLabel);
-
-                        if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.callConfirmation))
-                            mUpdateFriendHTTP.bindNull(22);
-                        else
-                            mUpdateFriendHTTP.bindString(22, friend.actionMenu.callConfirmation);
-
-                        if (TextUtils.isEmptyOrWhitespace(friend.userData))
-                            mUpdateFriendHTTP.bindNull(23);
-                        else
-                            mUpdateFriendHTTP.bindString(23, friend.userData);
-
-                        if (TextUtils.isEmptyOrWhitespace(friend.appData))
-                            mUpdateFriendHTTP.bindNull(24);
-                        else
-                            mUpdateFriendHTTP.bindString(24, friend.appData);
-
-                        if (TextUtils.isEmptyOrWhitespace(friend.category_id))
-                            mUpdateFriendHTTP.bindNull(25);
-                        else
-                            mUpdateFriendHTTP.bindString(25, friend.category_id);
-
-                        if (TextUtils.isEmptyOrWhitespace(friend.broadcastFlowHash))
-                            mUpdateFriendHTTP.bindNull(26);
-                        else
-                            mUpdateFriendHTTP.bindString(26, friend.broadcastFlowHash);
-
-                        mUpdateFriendHTTP.bindLong(27, friend.organizationType);
-                        mUpdateFriendHTTP.bindLong(28, friend.callbacks);
-                        mUpdateFriendHTTP.bindLong(29, friend.flags);
-                        mUpdateFriendHTTP.bindString(30, getStringFromVersions(friend.versions));
-
-                        if (TextUtils.isEmptyOrWhitespace(friend.profileData))
-                            mUpdateFriendHTTP.bindNull(31);
-                        else
-                            mUpdateFriendHTTP.bindString(31, friend.profileData);
-
-                        if (TextUtils.isEmptyOrWhitespace(friend.contentBrandingHash))
-                            mUpdateFriendHTTP.bindNull(32);
-                        else
-                            mUpdateFriendHTTP.bindString(32, friend.contentBrandingHash);
-
-                        bindString(mUpdateFriendHTTP, 33, getActions(friend));
+                        bindString(mUpdateFriendHTTP, 23, friend.category_id, true);
+                        bindString(mUpdateFriendHTTP, 24, friend.broadcastFlowHash, true);
+                        mUpdateFriendHTTP.bindLong(25, friend.organizationType);
+                        mUpdateFriendHTTP.bindLong(26, friend.callbacks);
+                        mUpdateFriendHTTP.bindLong(27, friend.flags);
+                        bindString(mUpdateFriendHTTP, 28, getStringFromVersions(friend.versions));
+                        bindString(mUpdateFriendHTTP, 29, friend.profileData, true);
+                        bindString(mUpdateFriendHTTP, 30, friend.contentBrandingHash, true);
+                        bindString(mUpdateFriendHTTP, 31, getActions(friend));
 
                         // Where clause
-                        mUpdateFriendHTTP.bindString(34, friend.email);
+                        bindString(mUpdateFriendHTTP, 32, friend.email);
                         mUpdateFriendHTTP.execute();
 
                         mFriendNameCache.put(friend.email, friendDisplayName);
@@ -791,7 +716,6 @@ public class FriendStore implements Closeable {
                         rebuildServiceMenu(friend, true);
 
                         TransactionHelper.onTransactionCommitted(new SafeRunnable() {
-
                             @Override
                             protected void safeRun() throws Exception {
                                 downloadAvatar(friend);
@@ -1471,138 +1395,57 @@ public class FriendStore implements Closeable {
 
         requestFriendCategoryIfNeeded(friend);
 
-        final byte[] hashBytes = EmailHashCalculator.calculateEmailHash(friend.email, friend.type);
+        // Backwards compatibility. We could still receive some old requests with service data.
+        // TODO: remove after 01/01/2018
+        mMainService.getPlugin(FriendsPlugin.class).updateUserData(friend.email, friend.userData, friend.appData);
 
-        mInsertFriendHTTP.bindString(1, friend.email);
-        if (TextUtils.isEmptyOrWhitespace(friend.name)) {
-            mInsertFriendHTTP.bindString(2, friend.email);
-        } else {
-            mInsertFriendHTTP.bindString(2, friend.name);
-        }
+        final byte[] hashBytes = EmailHashCalculator.calculateEmailHash(friend.email, friend.type);
+        final String displayName = TextUtils.isEmptyOrWhitespace(friend.name) ? friend.email : friend.name;
+
+        bindString(mInsertFriendHTTP, 1, friend.email);
+        bindString(mInsertFriendHTTP, 2, displayName);
         mInsertFriendHTTP.bindLong(3, friend.avatarId);
-        mInsertFriendHTTP.bindLong(4, friend.shareLocation ? 1 : 0);
-        mInsertFriendHTTP.bindLong(5, friend.sharesLocation ? 1 : 0);
+        bindBoolean(mInsertFriendHTTP, 4, friend.shareLocation);
+        bindBoolean(mInsertFriendHTTP, 5, friend.sharesLocation);
         mInsertFriendHTTP.bindLong(6, existence);
         mInsertFriendHTTP.bindLong(7, friend.type);
         mInsertFriendHTTP.bindBlob(8, hashBytes);
-        if (TextUtils.isEmptyOrWhitespace(friend.description))
-            mInsertFriendHTTP.bindNull(9);
-        else
-            mInsertFriendHTTP.bindString(9, friend.description);
+        bindString(mInsertFriendHTTP, 9, friend.description, true);
+        bindString(mInsertFriendHTTP, 10, friend.descriptionBranding, true);
+        bindString(mInsertFriendHTTP, 11, friend.pokeDescription, true);
 
-        if (TextUtils.isEmptyOrWhitespace(friend.descriptionBranding))
-            mInsertFriendHTTP.bindNull(10);
-        else
-            mInsertFriendHTTP.bindString(10, friend.descriptionBranding);
-
-        if (TextUtils.isEmptyOrWhitespace(friend.pokeDescription))
-            mInsertFriendHTTP.bindNull(11);
-        else
-            mInsertFriendHTTP.bindString(11, friend.pokeDescription);
-
-        if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.branding))
-            mInsertFriendHTTP.bindNull(12);
-        else
-            mInsertFriendHTTP.bindString(12, friend.actionMenu.branding);
-
-        if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.phoneNumber))
-            mInsertFriendHTTP.bindNull(13);
-        else
-            mInsertFriendHTTP.bindString(13, friend.actionMenu.phoneNumber);
-
-        boolean hasNoShareImageUrl = friend.actionMenu == null
-                || TextUtils.isEmptyOrWhitespace(friend.actionMenu.shareImageUrl);
-        mInsertFriendHTTP.bindLong(14, hasNoShareImageUrl ? 0 : 1);
+        if (friend.actionMenu == null) {
+            bindBoolean(mInsertFriendHTTP, 14, false);
+            for (int index : new int[]{12, 13, 16, 17, 18, 19, 21, 22, 23, 24, 25}) {
+                mInsertFriendHTTP.bindNull(index);
+            }
+        } else {
+            bindString(mInsertFriendHTTP, 12, friend.actionMenu.branding, true);
+            bindString(mInsertFriendHTTP, 13, friend.actionMenu.phoneNumber, true);
+            bindBoolean(mInsertFriendHTTP, 14, !TextUtils.isEmptyOrWhitespace(friend.actionMenu.shareImageUrl));
+            bindString(mInsertFriendHTTP, 16, friend.actionMenu.shareImageUrl, true);
+            bindString(mInsertFriendHTTP, 17, friend.actionMenu.shareDescription, true);
+            bindString(mInsertFriendHTTP, 18, friend.actionMenu.shareCaption, true);
+            bindString(mInsertFriendHTTP, 19, friend.actionMenu.shareLinkUrl, true);
+            bindString(mInsertFriendHTTP, 21, friend.actionMenu.aboutLabel, true);
+            bindString(mInsertFriendHTTP, 22, friend.actionMenu.messagesLabel, true);
+            bindString(mInsertFriendHTTP, 23, friend.actionMenu.callLabel, true);
+            bindString(mInsertFriendHTTP, 24, friend.actionMenu.shareLabel, true);
+            bindString(mInsertFriendHTTP, 25, friend.actionMenu.callConfirmation, true);
+        }
 
         mInsertFriendHTTP.bindLong(15, friend.generation);
+        bindString(mInsertFriendHTTP, 20, friend.qualifiedIdentifier, true);
 
-        if (hasNoShareImageUrl)
-            mInsertFriendHTTP.bindNull(16);
-        else
-            mInsertFriendHTTP.bindString(16, friend.actionMenu.shareImageUrl);
-
-        if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.shareDescription))
-            mInsertFriendHTTP.bindNull(17);
-        else
-            mInsertFriendHTTP.bindString(17, friend.actionMenu.shareDescription);
-
-        if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.shareCaption))
-            mInsertFriendHTTP.bindNull(18);
-        else
-            mInsertFriendHTTP.bindString(18, friend.actionMenu.shareCaption);
-
-        if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.shareLinkUrl))
-            mInsertFriendHTTP.bindNull(19);
-        else
-            mInsertFriendHTTP.bindString(19, friend.actionMenu.shareLinkUrl);
-
-        if (TextUtils.isEmptyOrWhitespace(friend.qualifiedIdentifier))
-            mInsertFriendHTTP.bindNull(20);
-        else
-            mInsertFriendHTTP.bindString(20, friend.qualifiedIdentifier);
-
-        if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.aboutLabel))
-            mInsertFriendHTTP.bindNull(21);
-        else
-            mInsertFriendHTTP.bindString(21, friend.actionMenu.aboutLabel);
-
-        if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.messagesLabel))
-            mInsertFriendHTTP.bindNull(22);
-        else
-            mInsertFriendHTTP.bindString(22, friend.actionMenu.messagesLabel);
-
-        if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.callLabel))
-            mInsertFriendHTTP.bindNull(23);
-        else
-            mInsertFriendHTTP.bindString(23, friend.actionMenu.callLabel);
-
-        if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.shareLabel))
-            mInsertFriendHTTP.bindNull(24);
-        else
-            mInsertFriendHTTP.bindString(24, friend.actionMenu.shareLabel);
-
-        if (friend.actionMenu == null || TextUtils.isEmptyOrWhitespace(friend.actionMenu.callConfirmation))
-            mInsertFriendHTTP.bindNull(25);
-        else
-            mInsertFriendHTTP.bindString(25, friend.actionMenu.callConfirmation);
-
-        if (TextUtils.isEmptyOrWhitespace(friend.userData))
-            mInsertFriendHTTP.bindNull(26);
-        else
-            mInsertFriendHTTP.bindString(26, friend.userData);
-
-        if (TextUtils.isEmptyOrWhitespace(friend.appData))
-            mInsertFriendHTTP.bindNull(27);
-        else
-            mInsertFriendHTTP.bindString(27, friend.appData);
-
-        if (TextUtils.isEmptyOrWhitespace(friend.category_id))
-            mInsertFriendHTTP.bindNull(28);
-        else
-            mInsertFriendHTTP.bindString(28, friend.category_id);
-
-        if (TextUtils.isEmptyOrWhitespace(friend.broadcastFlowHash))
-            mInsertFriendHTTP.bindNull(29);
-        else
-            mInsertFriendHTTP.bindString(29, friend.broadcastFlowHash);
-
-        mInsertFriendHTTP.bindLong(30, friend.organizationType);
-        mInsertFriendHTTP.bindLong(31, friend.callbacks);
-        mInsertFriendHTTP.bindLong(32, friend.flags);
-        mInsertFriendHTTP.bindString(33, getStringFromVersions(friend.versions));
-
-        if (TextUtils.isEmptyOrWhitespace(friend.profileData))
-            mInsertFriendHTTP.bindNull(34);
-        else
-            mInsertFriendHTTP.bindString(34, friend.profileData);
-
-        if (TextUtils.isEmptyOrWhitespace(friend.contentBrandingHash))
-            mInsertFriendHTTP.bindNull(35);
-        else
-            mInsertFriendHTTP.bindString(35, friend.contentBrandingHash);
-
-        bindString(mInsertFriendHTTP, 36, getActions(friend));
-
+        bindString(mInsertFriendHTTP, 26, friend.category_id, true);
+        bindString(mInsertFriendHTTP, 27, friend.broadcastFlowHash, true);
+        mInsertFriendHTTP.bindLong(28, friend.organizationType);
+        mInsertFriendHTTP.bindLong(29, friend.callbacks);
+        mInsertFriendHTTP.bindLong(30, friend.flags);
+        bindString(mInsertFriendHTTP, 31, getStringFromVersions(friend.versions));
+        bindString(mInsertFriendHTTP, 32, friend.profileData, true);
+        bindString(mInsertFriendHTTP, 33, friend.contentBrandingHash, true);
+        bindString(mInsertFriendHTTP, 34, getActions(friend));
         mInsertFriendHTTP.execute();
     }
 

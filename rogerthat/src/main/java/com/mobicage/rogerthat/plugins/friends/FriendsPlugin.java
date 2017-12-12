@@ -631,7 +631,7 @@ public class FriendsPlugin implements MobicagePlugin {
             mStore.saveUserData(serviceEmail, FriendStore.FRIEND_DATA_TYPE_USER, userData);
         }
         if (appDataUpdated)  {
-            mStore.saveUserData(serviceEmail, FriendStore.FRIEND_DATA_TYPE_APP, userData);
+            mStore.saveUserData(serviceEmail, FriendStore.FRIEND_DATA_TYPE_APP, appData);
         }
         if (userDataUpdated || appDataUpdated) {
             broadcastServiceDataUpdated(mMainService, serviceEmail, userDataUpdated, appDataUpdated);

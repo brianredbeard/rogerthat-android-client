@@ -19,6 +19,7 @@ package com.mobicage.rogerthat.util.db;
 
 import android.database.sqlite.SQLiteStatement;
 
+import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.system.T;
 
 public class DBUtils {
@@ -29,18 +30,27 @@ public class DBUtils {
             statement.close();
     }
 
-    public static void close(SQLiteStatement[] statements) {
+    public static void close(SQLiteStatement... statements) {
         T.IO();
         for (SQLiteStatement statement : statements) {
             close(statement);
         }
     }
 
+    public static void bindBoolean(SQLiteStatement statement, int position, boolean value) {
+        statement.bindLong(position, value ? 1 : 0);
+    }
+
     public static void bindString(SQLiteStatement statement, int position, String value) {
-        if (value == null)
+        bindString(statement, position, value, false);
+    }
+
+    public static void bindString(SQLiteStatement statement, int position, String value, boolean treatEmptyAsNull) {
+        if ((treatEmptyAsNull && TextUtils.isEmptyOrWhitespace(value)) || value == null) {
             statement.bindNull(position);
-        else
+        } else {
             statement.bindString(position, value);
+        }
     }
 
 }

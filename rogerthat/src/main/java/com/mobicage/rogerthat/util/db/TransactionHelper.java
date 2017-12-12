@@ -26,7 +26,6 @@ import android.database.sqlite.SQLiteDatabase;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.ui.UIUtils;
-import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
 
 @SuppressWarnings("serial")
@@ -50,7 +49,7 @@ public class TransactionHelper {
         }
     };
 
-    private static ThreadLocal<List<SafeRunnable>> onRollbackedRunnables = new ThreadLocal<List<SafeRunnable>>() {
+    private static ThreadLocal<List<SafeRunnable>> onRolledBackRunnables = new ThreadLocal<List<SafeRunnable>>() {
         @Override
         protected java.util.List<SafeRunnable> initialValue() {
             return null;
@@ -73,7 +72,7 @@ public class TransactionHelper {
         final boolean isNestedTransaction = onCommittedRunnables.get() != null;
         if (!isNestedTransaction) {
             onCommittedRunnables.set(new ArrayList<SafeRunnable>());
-            onRollbackedRunnables.set(new ArrayList<SafeRunnable>());
+            onRolledBackRunnables.set(new ArrayList<SafeRunnable>());
         }
 
         boolean success = false;
@@ -92,12 +91,12 @@ public class TransactionHelper {
         } finally {
             if (!isNestedTransaction) {
                 db.endTransaction();
-                final List<SafeRunnable> runnables = (success ? onCommittedRunnables : onRollbackedRunnables).get();
+                final List<SafeRunnable> runnables = (success ? onCommittedRunnables : onRolledBackRunnables).get();
                 for (SafeRunnable safeRunnable : runnables) {
                     safeRunnable.run();
                 }
                 onCommittedRunnables.set(null);
-                onRollbackedRunnables.set(null);
+                onRolledBackRunnables.set(null);
 
                 final long duration = System.currentTimeMillis() - start;
                 if (duration > 5000 && UIUtils.isRogerthatTopActivity()) {
@@ -121,8 +120,8 @@ public class TransactionHelper {
         }
     }
 
-    public static void onTransactionRollbacked(SafeRunnable safeRunnable) {
-        final List<SafeRunnable> runnables = onRollbackedRunnables.get();
+    public static void onTransactionRolledBack(SafeRunnable safeRunnable) {
+        final List<SafeRunnable> runnables = onRolledBackRunnables.get();
         if (runnables == null) {
             throw new NotInTransactionException();
         }
