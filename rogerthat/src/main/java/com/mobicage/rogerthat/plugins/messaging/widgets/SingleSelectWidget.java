@@ -51,12 +51,12 @@ public class SingleSelectWidget extends AbstractSelectWidget {
 
     private void scrollToBottom() {
         final ScrollView scrollView = (ScrollView) mActivity.findViewById(R.id.message_scroll_view);
-        scrollView.post(new Runnable() {
+        scrollView.postDelayed(new Runnable() {
             @Override
             public void run() {
                 scrollView.fullScroll(ScrollView.FOCUS_DOWN);
             }
-        });
+        }, 400);
     }
 
     @Override
