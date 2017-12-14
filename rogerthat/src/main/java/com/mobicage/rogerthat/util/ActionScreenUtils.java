@@ -58,6 +58,7 @@ import com.mobicage.to.friends.GetUserInfoRequestTO;
 import org.jivesoftware.smack.util.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.simple.JSONValue;
 
 import java.security.PublicKey;
 import java.util.Arrays;
@@ -112,12 +113,13 @@ public class ActionScreenUtils {
 
             } else if (FriendsPlugin.SERVICE_DATA_UPDATED.equals(intent.getAction())) {
                 if (mServiceEmail.equals(intent.getStringExtra("email"))) {
-                    final String[] data = mFriendsPlugin.getStore().getServiceData(mServiceEmail);
                     if (intent.getBooleanExtra("user_data", false)) {
-                        mCallback.userDataUpdated(data[0]);
+                        final Map<String, Object> userData = mFriendsPlugin.getStore().getUserData(mServiceEmail, FriendStore.FRIEND_DATA_TYPE_USER);
+                        mCallback.userDataUpdated(JSONValue.toJSONString(userData));
                     }
                     if (intent.getBooleanExtra("service_data", false)) {
-                        mCallback.serviceDataUpdated(data[1]);
+                        final Map<String, Object> appData = mFriendsPlugin.getStore().getUserData(mServiceEmail, FriendStore.FRIEND_DATA_TYPE_APP);
+                        mCallback.serviceDataUpdated(JSONValue.toJSONString(appData));
                     }
                     return new String[] { FriendsPlugin.SERVICE_DATA_UPDATED };
                 }

@@ -284,7 +284,9 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 L.w("Expected params != null");
                 return;
             }
-            mFriendsPlugin.putUserData(mServiceEmail, params.getString("u"));
+            String data = params.getString("u");
+            boolean smart = params.optBoolean("smart", false);
+            mFriendsPlugin.putUserData(mServiceEmail, data, smart);
         }
 
         private void getBeaconsInReach(final JSONObject params) throws JSONException {

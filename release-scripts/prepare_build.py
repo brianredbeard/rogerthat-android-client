@@ -648,7 +648,7 @@ def convert_config():
 
     profile_show_gender_and_birthdate = bool_str(get('PROFILE.SHOW_GENDER_AND_BIRTHDATE', True))
 
-    tos_url = doc["APP_CONSTANTS"].get("TERMS_OF_SERVICE_URL", "https://rogerth.at/static/terms_and_conditions.html")
+    tos_url = doc["APP_CONSTANTS"].get("TERMS_OF_SERVICE_URL", "https://rogerth.at/legal?doc=terms-and-conditions")
 
     if doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_CITYPAPP:
         default_about_website = "www.onzestadapp.be"

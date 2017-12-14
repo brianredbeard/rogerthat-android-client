@@ -1,4 +1,14 @@
+buildscript {
+    repositories {
+        maven { url 'https://maven.fabric.io/public' }
+    }
+
+    dependencies {
+        classpath 'io.fabric.tools:gradle:1.+'
+    }
+}
 apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
 
 android {
     compileSdkVersion 25
@@ -17,7 +27,8 @@ android {
         manifestPlaceholders = [
                 "app_id"                      : "rogerthat",
                 "facebook_content_provider_id": "188033791211994",
-                "google_maps_api_key"         : google_maps_api_key
+                "google_maps_api_key"         : google_maps_api_key,
+                "fabric_api_token"            : fabric_api_token
         ]
     }
 
@@ -71,6 +82,7 @@ repositories {
     maven {
         url "https://jitpack.io"
     }
+    maven { url 'https://maven.fabric.io/public' }
 }
 
 dependencies {
@@ -109,4 +121,7 @@ dependencies {
     androidTestCompile 'tools.fastlane:screengrab:1.1.0'
     androidTestCompile 'com.android.support:support-annotations:25.3.1'
     androidTestCompile 'junit:junit:4.12'
+    compile('com.crashlytics.sdk.android:crashlytics:2.7.1@aar') {
+        transitive = true;
+    }
 }

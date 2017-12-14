@@ -262,6 +262,13 @@ CREATE TABLE unprocessed_messages(
 	id TEXT PRIMARY KEY, 
 	timestamp INTEGER, 
 	message BLOB);
+CREATE TABLE user_data (
+    email TEXT,
+    d_type TEXT,
+    d_key TEXT,
+    d_value TEXT,
+    PRIMARY KEY (email, d_type, d_key)
+);
 CREATE INDEX ix_Backlog_timestamp ON Backlog(timestamp);
 CREATE INDEX ix_ConfigurationProvider_key ON ConfigurationProvider(key);
 CREATE INDEX ix_unprocessed_messages_timestamp ON unprocessed_messages(timestamp);

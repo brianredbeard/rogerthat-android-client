@@ -40,7 +40,7 @@ import java.util.List;
 public class DatabaseManager implements Closeable {
 
     private final static String DB_NAME = "mc.db";
-    private final static int DB_VERSION = 79;
+    private final static int DB_VERSION = 80;
 
     private final MainService mMainService;
     private final SQLiteDatabase mDb;

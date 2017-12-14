@@ -26,8 +26,11 @@ import java.util.Map;
 public class UpdateUserDataRequestTO implements com.mobicage.rpc.IJSONable {
 
     public String app_data;
+    public String[] keys;
     public String service;
+    public String type;
     public String user_data;
+    public String[] values;
 
     public UpdateUserDataRequestTO() {
     }
@@ -39,11 +42,30 @@ public class UpdateUserDataRequestTO implements com.mobicage.rpc.IJSONable {
         } else {
             this.app_data = null;
         }
+        if (json.containsKey("keys")) {
+            org.json.simple.JSONArray val_arr = (org.json.simple.JSONArray) json.get("keys");
+            if (val_arr == null) {
+                this.keys = null;
+            } else {
+                this.keys = new String[val_arr.size()];
+                for (int i=0; i < val_arr.size(); i++) {
+                    this.keys[i] = (String) val_arr.get(i);
+                }
+            }
+        } else {
+            this.keys = new String[0];
+        }
         if (json.containsKey("service")) {
             Object val = json.get("service");
             this.service = (String) val;
         } else {
             throw new IncompleteMessageException("com.mobicage.to.service.UpdateUserDataRequestTO object is missing field 'service'");
+        }
+        if (json.containsKey("type")) {
+            Object val = json.get("type");
+            this.type = (String) val;
+        } else {
+            this.type = null;
         }
         if (json.containsKey("user_data")) {
             Object val = json.get("user_data");
@@ -51,14 +73,47 @@ public class UpdateUserDataRequestTO implements com.mobicage.rpc.IJSONable {
         } else {
             this.user_data = null;
         }
+        if (json.containsKey("values")) {
+            org.json.simple.JSONArray val_arr = (org.json.simple.JSONArray) json.get("values");
+            if (val_arr == null) {
+                this.values = null;
+            } else {
+                this.values = new String[val_arr.size()];
+                for (int i=0; i < val_arr.size(); i++) {
+                    this.values[i] = (String) val_arr.get(i);
+                }
+            }
+        } else {
+            this.values = new String[0];
+        }
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Map<String, Object> toJSONMap() {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
         obj.put("app_data", this.app_data);
+        if (this.keys == null) {
+            obj.put("keys", null);
+        } else {
+            org.json.simple.JSONArray arr = new org.json.simple.JSONArray();
+            for (int i=0; i < this.keys.length; i++) {
+                arr.add(this.keys[i]);
+            }
+            obj.put("keys", arr);
+        }
         obj.put("service", this.service);
+        obj.put("type", this.type);
         obj.put("user_data", this.user_data);
+        if (this.values == null) {
+            obj.put("values", null);
+        } else {
+            org.json.simple.JSONArray arr = new org.json.simple.JSONArray();
+            for (int i=0; i < this.values.length; i++) {
+                arr.add(this.values[i]);
+            }
+            obj.put("values", arr);
+        }
         return obj;
     }
 

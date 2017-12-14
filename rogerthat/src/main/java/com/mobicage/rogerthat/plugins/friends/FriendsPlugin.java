@@ -114,6 +114,7 @@ import com.mobicage.to.system.SettingsTO;
 
 import org.jivesoftware.smack.util.Base64;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import java.io.File;
@@ -156,6 +157,8 @@ public class FriendsPlugin implements MobicagePlugin {
     public static final String FRIENDS_PLUGIN_MUST_REFRESH_IDENTITY = "com.mobicage.rogerthat.plugins.friends.FRIENDS_PLUGIN_MUST_REFRESH_IDENTITY";
     public static final String FRIENDS_PLUGIN_MUST_REFRESH_IDENTITY_QR_CODE = "com.mobicage.rogerthat.plugins.friends.FRIENDS_PLUGIN_MUST_REFRESH_IDENTITY_QR_CODE";
     public static final String FRIENDS_PLUGIN_MUST_UPDATE_EMAIL_HASHES = "com.mobicage.rogerthat.plugins.friends.FRIENDS_PLUGIN_MUST_UPDATE_EMAIL_HASHES";
+    public static final String FRIENDS_PLUGIN_MUST_MIGRATE_FRIEND_DATA = "com.mobicage.rogerthat.plugins.friends.FRIENDS_PLUGIN_MUST_MIGRATE_FRIEND_DATA";
+
     public static final String FRIENDS_PLUGIN_MUST_GET_GROUPS = "com.mobicage.rogerthat.plugins.friends.FRIENDS_PLUGIN_MUST_GET_GROUPS";
     public static final String GROUPS_UPDATED = "com.mobicage.rogerthat.plugins.friends.GROUPS_UPDATED";
     public static final String GROUP_ADDED = "com.mobicage.rogerthat.plugins.friends.GROUP_ADDED";
@@ -300,8 +303,11 @@ public class FriendsPlugin implements MobicagePlugin {
 
             @Override
             public UpdateUserDataResponseTO updateUserData(UpdateUserDataRequestTO request) throws Exception {
-                T.BIZZ();
-                mStore.updateServiceData(request.service, request.user_data, request.app_data, true);
+                if (request.keys == null || request.keys.length == 0) {
+                    FriendsPlugin.this.updateUserData(request.service, request.user_data, request.app_data);
+                } else {
+                    FriendsPlugin.this.updateUserData(request.service, request.type, Arrays.asList(request.keys), Arrays.asList(request.values));
+                }
                 mDisabledBroadcastTypesCache.remove(request.service);
                 return new UpdateUserDataResponseTO();
             }
@@ -354,7 +360,6 @@ public class FriendsPlugin implements MobicagePlugin {
                 requestGroups();
                 return new UpdateGroupsResponseTO();
             }
-
         };
     }
 
@@ -426,6 +431,12 @@ public class FriendsPlugin implements MobicagePlugin {
                             mStore.updateEmailHashesForAllFriends();
                             mMainService.clearPluginDBUpdate(FriendsPlugin.class,
                                     FRIENDS_PLUGIN_MUST_UPDATE_EMAIL_HASHES);
+                        }
+
+                        if (pluginDBUpdates.contains(FRIENDS_PLUGIN_MUST_MIGRATE_FRIEND_DATA)) {
+                            mStore.migrateFriendData();
+                            mMainService.clearPluginDBUpdate(FriendsPlugin.class,
+                                    FRIENDS_PLUGIN_MUST_MIGRATE_FRIEND_DATA);
                         }
                     }
                 });
@@ -613,10 +624,44 @@ public class FriendsPlugin implements MobicagePlugin {
         return response;
     }
 
+    public void updateUserData(final String serviceEmail, final String userData, final String appData) {
+        final boolean userDataUpdated = userData != null;
+        final boolean appDataUpdated = appData != null;
+        if (userDataUpdated)  {
+            mStore.saveUserData(serviceEmail, FriendStore.FRIEND_DATA_TYPE_USER, userData);
+        }
+        if (appDataUpdated)  {
+            mStore.saveUserData(serviceEmail, FriendStore.FRIEND_DATA_TYPE_APP, appData);
+        }
+        if (userDataUpdated || appDataUpdated) {
+            broadcastServiceDataUpdated(mMainService, serviceEmail, userDataUpdated, appDataUpdated);
+        }
+    }
+
+    public void updateUserData(final String serviceEmail, final String type, final List<String> keys, final List<String> values) {
+        mStore.updateUserData(serviceEmail, type, keys, values);
+
+        if (FriendStore.FRIEND_DATA_TYPE_USER.equals(type)) {
+            broadcastServiceDataUpdated(mMainService, serviceEmail, true, false);
+        } else if (FriendStore.FRIEND_DATA_TYPE_APP.equals(type)) {
+            broadcastServiceDataUpdated(mMainService, serviceEmail, false, true);
+        }
+    }
+
+    public static void broadcastServiceDataUpdated(final MainService mainservice, final String email, final boolean userDataUpdated,
+                                                   final boolean serviceDataUpdated) {
+        Intent intent = new Intent(SERVICE_DATA_UPDATED);
+        intent.putExtra("email", email);
+        intent.putExtra("user_data", userDataUpdated);
+        intent.putExtra("service_data", serviceDataUpdated);
+        mainservice.sendBroadcast(intent);
+    }
+
     @Override
     public void destroy() {
         T.UI();
         mConfigProvider.unregisterListener(CONFIGKEY, this);
+        com.mobicage.rpc.CallReceiver.comMobicageCapiServicesIClientRpc = null;
         com.mobicage.rpc.CallReceiver.comMobicageCapiFriendsIClientRpc = null;
         mBrandingMgr.close();
         mStore.close();
@@ -1278,17 +1323,42 @@ public class FriendsPlugin implements MobicagePlugin {
         }
     }
 
-    public void putUserData(final String serviceEmail, final String userDataJsonString) {
+    public void putUserData(final String serviceEmail, final String userDataJsonString, final boolean smart) {
         SafeRunnable handler = new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
                 T.BIZZ();
-                mStore.updateServiceData(serviceEmail, userDataJsonString, null, false);
-                mDisabledBroadcastTypesCache.remove(serviceEmail);
-
                 UpdateUserDataRequestTO request = new UpdateUserDataRequestTO();
-                request.user_data = userDataJsonString;
                 request.service = serviceEmail;
+                request.user_data = null;
+                request.type = null;
+                request.keys = new String[0];
+                request.values = new String[0];
+                if (smart) {
+                    request.type = FriendStore.FRIEND_DATA_TYPE_USER;
+                    List<String> keys = new ArrayList<>();
+                    List<String> values = new ArrayList<>();
+
+                    Map<String, Object> data = (Map<String, Object>) JSONValue.parse(userDataJsonString);
+                    for (Map.Entry<String, Object> dataEntry : data.entrySet()) {
+                        Object value = dataEntry.getValue();
+                        JSONObject v = new JSONObject();
+                        v.put("v", value);
+                        keys.add(dataEntry.getKey());
+                        values.add(v.toJSONString());
+                    }
+                    request.keys = keys.toArray(new String[keys.size()]);
+                    request.values =  values.toArray(new String[values.size()]);
+                    mStore.updateUserData(serviceEmail, FriendStore.FRIEND_DATA_TYPE_USER, keys, values);
+
+                } else {
+                    request.user_data = userDataJsonString;
+                    if (userDataJsonString != null) {
+                        mStore.saveUserData(serviceEmail, FriendStore.FRIEND_DATA_TYPE_USER, userDataJsonString);
+                    }
+                }
+
+                mDisabledBroadcastTypesCache.remove(serviceEmail);
                 try {
                     com.mobicage.api.services.Rpc.updateUserData(new ResponseHandler<UpdateUserDataResponseTO>(),
                             request);
@@ -1402,7 +1472,8 @@ public class FriendsPlugin implements MobicagePlugin {
 
     public Map<String, Object> getRogerthatUserAndServiceInfo(final String serviceEmail, final Friend serviceFriend,
                                                               final ServiceMenuItemInfo menuItem) {
-        String[] data = serviceEmail == null ? new String[]{null, null} : mStore.getServiceData(serviceEmail);
+        Map<String, Object> userData = mStore.getUserData(serviceEmail, FriendStore.FRIEND_DATA_TYPE_USER);
+        Map<String, Object> appData = mStore.getUserData(serviceEmail, FriendStore.FRIEND_DATA_TYPE_APP);
         MyIdentity myIdentity = mMainService.getIdentityStore().getIdentity();
 
         Map<String, Object> userInfo = new HashMap<>();
@@ -1417,14 +1488,14 @@ public class FriendsPlugin implements MobicagePlugin {
         userInfo.put("language", language);
         userInfo.put("avatarUrl", CloudConstants.CACHED_AVATAR_URL_PREFIX + myIdentity.getAvatarId());
         userInfo.put("account", myIdentity.getEmail());
-        userInfo.put("data", data[0] == null ? new HashMap<String, Object>() : JSONValue.parse(data[0]));
+        userInfo.put("data", userData);
 
         Map<String, Object> serviceInfo = new HashMap<>();
         if (serviceFriend != null) {
             serviceInfo.put("name", serviceFriend.getDisplayName());
             serviceInfo.put("email", serviceFriend.getDisplayEmail());
             serviceInfo.put("account", serviceFriend.email);
-            serviceInfo.put("data", data[1] == null ? new HashMap<String, Object>() : JSONValue.parse(data[1]));
+            serviceInfo.put("data", appData);
         }
 
         Map<String, Object> systemInfo = new HashMap<>();
@@ -1451,8 +1522,11 @@ public class FriendsPlugin implements MobicagePlugin {
                 String userDataJsonString = mStore.disableBroadcastType(serviceEmail, broadcastType);
                 if (userDataJsonString != null) {
                     UpdateUserDataRequestTO request = new UpdateUserDataRequestTO();
-                    request.user_data = userDataJsonString;
                     request.service = serviceEmail;
+                    request.user_data = userDataJsonString;
+                    request.type = null;
+                    request.keys = new String[0];
+                    request.values = new String[0];
                     try {
                         com.mobicage.api.services.Rpc.updateUserData(new ResponseHandler<UpdateUserDataResponseTO>(),
                                 request);

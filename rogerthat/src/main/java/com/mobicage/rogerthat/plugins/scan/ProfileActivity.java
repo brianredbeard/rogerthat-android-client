@@ -496,13 +496,9 @@ public class ProfileActivity extends ServiceBoundActivity {
 
     private void updateQRBitMap() {
         ImageView imageView = ((ImageView) findViewById(R.id.qrcode));
-        if (AppConstants.FRIENDS_ENABLED) {
-            final Bitmap qrBitmap = mIdentity.getQRBitmap();
-            if (qrBitmap != null) {
-                imageView.setImageBitmap(qrBitmap);
-            }
-        } else {
-            imageView.setVisibility(View.GONE);
+        final Bitmap qrBitmap = mIdentity.getQRBitmap();
+        if (qrBitmap != null) {
+            imageView.setImageBitmap(qrBitmap);
         }
     }
 

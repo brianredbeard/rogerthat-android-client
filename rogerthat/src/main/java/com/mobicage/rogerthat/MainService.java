@@ -55,7 +55,6 @@ import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.plugins.news.NewsPlugin;
 import com.mobicage.rogerthat.plugins.payment.PaymentPlugin;
-import com.mobicage.rogerthat.plugins.security.PinLockMgr;
 import com.mobicage.rogerthat.plugins.security.SecurityPlugin;
 import com.mobicage.rogerthat.plugins.system.SystemPlugin;
 import com.mobicage.rogerthat.plugins.trackme.TrackmePlugin;
@@ -1883,6 +1882,9 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         mEnterPinActivityActive = false;
 
         SecurityItem si = dequeueSecurityItem(uid);
+        if (si == null) {
+            return;
+        }
         executeSecurityItem(si, true);
     }
 
@@ -1890,8 +1892,10 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         T.UI();
         mEnterPinActivityActive = false;
         SecurityItem si = dequeueSecurityItem(uid);
-        String errorMessage = getString(R.string.user_cancelled_pin_input);
-        si.callback.onError("user_cancelled_pin_input", errorMessage);
+        if (si != null) {
+            String errorMessage = getString(R.string.user_cancelled_pin_input);
+            si.callback.onError("user_cancelled_pin_input", errorMessage);
+        }
         clearQueue();
     }
 
@@ -1918,6 +1922,10 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(SetupPinActivity.RESULT_VIA_MAINSERVICE, true);
         startActivity(intent);
+    }
+
+    public boolean pinInMemory() {
+        return mPin != null;
     }
 
     public void askPin(final String message, final SecurityCallback<Object> callback) {

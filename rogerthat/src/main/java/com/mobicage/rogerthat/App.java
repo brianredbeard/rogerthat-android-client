@@ -21,6 +21,7 @@ package com.mobicage.rogerthat;
 import android.content.Context;
 import android.support.multidex.MultiDexApplication;
 
+import com.crashlytics.android.Crashlytics;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
@@ -52,6 +53,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
+import io.fabric.sdk.android.Fabric;
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
 public class App extends MultiDexApplication implements Thread.UncaughtExceptionHandler {
@@ -85,6 +87,8 @@ public class App extends MultiDexApplication implements Thread.UncaughtException
         // Initialize the SDK before executing any other operations,
         FacebookSdk.sdkInitialize(getApplicationContext());
         AppEventsLogger.activateApp(this);
+
+        Fabric.with(this, new Crashlytics());
 
         // Simply constructing this class and holding a reference to it in your custom Application class enables auto
         // battery saving of about 60%

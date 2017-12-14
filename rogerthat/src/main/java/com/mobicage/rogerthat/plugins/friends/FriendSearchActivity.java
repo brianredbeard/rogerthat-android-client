@@ -327,9 +327,11 @@ public class FriendSearchActivity extends ServiceBoundActivity {
 
             final FindFriendItemTO item = mItems.get(position);
 
-            View v = convertView;
-            if (v == null || v.getTag() == null) {
+            final View v;
+            if (convertView == null || convertView.getTag() == null) {
                 v = getLayoutInflater().inflate(R.layout.search_friend, null);
+            } else {
+                v = convertView;
             }
 
             Map<String, Object> tag = new HashMap<String, Object>();
@@ -338,14 +340,19 @@ public class FriendSearchActivity extends ServiceBoundActivity {
 
             // Set avatar
             final ImageView avatarView = (ImageView) v.findViewById(R.id.friend_avatar);
+            avatarView.setImageBitmap(null);
             LayoutParams lp = avatarView.getLayoutParams();
             lp.width = lp.height = UIUtils.convertDipToPixels(FriendSearchActivity.this, 40);
 
             new SafeAsyncTask<Object, Object, Object>() {
+
+                private String avatarUrl;
+
                 @Override
                 protected Object safeDoInBackground(Object... params) {
                     try {
-                        return BitmapFactory.decodeStream((InputStream) new URL((String) params[0]).getContent());
+                        avatarUrl = (String) params[0];
+                        return BitmapFactory.decodeStream((InputStream) new URL(avatarUrl).getContent());
                     } catch (MalformedURLException e) {
                         L.bug("Could not download friend avatar: " + item.avatar_url, e);
                     } catch (IOException e) {
@@ -358,8 +365,13 @@ public class FriendSearchActivity extends ServiceBoundActivity {
 
                 @Override
                 protected void safeOnPostExecute(Object result) {
+                    if (result == null) {
+                        return;
+                    }
                     Bitmap bitmap = (Bitmap) result;
-                    if (bitmap != null) {
+                    Map<String, Object> tag = (Map<String, Object> ) v.getTag();
+                    FindFriendItemTO item = (FindFriendItemTO) tag.get("item");
+                    if (item.avatar_url.equals(this.avatarUrl)) {
                         Bitmap avatar = ImageHelper.getRoundedCornerAvatar(bitmap);
                         avatarView.setImageBitmap(avatar);
                     }

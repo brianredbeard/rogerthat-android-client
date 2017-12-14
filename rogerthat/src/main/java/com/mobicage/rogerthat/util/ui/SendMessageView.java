@@ -610,7 +610,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
         return true;
     }
 
-    private void askCameraPermission(final SafeRunnable continueRunnable) {
+    private void askCameraPermission(final boolean recordAudio, final SafeRunnable continueRunnable) {
         final SafeRunnable runnableCheckStorage = new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
@@ -620,10 +620,25 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
                 continueRunnable.run();
             }
         };
-        if (mActivity.askPermissionIfNeeded(Manifest.permission.CAMERA, PERMISSION_REQUEST_CAMERA,
-                runnableCheckStorage, null))
-            return;
-        runnableCheckStorage.run();
+        final SafeRunnable runnableCheckRecordAudio = new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                if (recordAudio && mActivity.askPermissionIfNeeded(Manifest.permission.RECORD_AUDIO,
+                        PERMISSION_REQUEST_CAMERA, runnableCheckStorage, null))
+                    return;
+                runnableCheckStorage.run();
+            }
+        };
+        final SafeRunnable runnableCheckCamera = new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                if (mActivity.askPermissionIfNeeded(Manifest.permission.CAMERA,
+                        PERMISSION_REQUEST_CAMERA, runnableCheckRecordAudio, null))
+                    return;
+                runnableCheckRecordAudio.run();
+            }
+        };
+        runnableCheckCamera.run();
     }
 
     private void getNewPicture() {
@@ -632,7 +647,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
 
     private void getNewPicture(boolean checkPermission) {
         if (checkPermission) {
-            askCameraPermission(new SafeRunnable() {
+            askCameraPermission(false, new SafeRunnable() {
                 @Override
                 protected void safeRun() throws Exception {
                     getNewPicture(false);
@@ -668,7 +683,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
 
     private void getNewVideo(boolean checkPermission) {
         if (checkPermission) {
-            askCameraPermission(new SafeRunnable() {
+            askCameraPermission(true, new SafeRunnable() {
                 @Override
                 protected void safeRun() throws Exception {
                     getNewVideo(false);

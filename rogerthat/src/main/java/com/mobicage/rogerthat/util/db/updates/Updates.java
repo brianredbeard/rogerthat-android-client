@@ -58,6 +58,7 @@ public class Updates {
         mUpdates.put(71, new RequestIdentityQRCode());
         mUpdates.put(72, new RequestFriendsAndAssets());
         mUpdates.put(79, new AddPaymentAssetColumnsIfNeeded());
+        mUpdates.put(80, new MigrateFriendData());
     }
 
     public IDbUpdater getUpdater(int version) {
