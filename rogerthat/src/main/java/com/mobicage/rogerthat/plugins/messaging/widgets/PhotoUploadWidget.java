@@ -426,7 +426,7 @@ public class PhotoUploadWidget extends Widget {
         }
 
         if (Message.POSITIVE.equals(buttonId)) {
-            boolean imageExists = image != null && image.exists();
+            boolean imageExists = image != null && image.exists() && image.length() != 0;
             if (!mPhotoSelected || !imageExists) {
                 UIUtils.showDialog(mActivity, R.string.no_photo_selected_tilte, R.string.no_photo_selected_summary);
                 return false;
