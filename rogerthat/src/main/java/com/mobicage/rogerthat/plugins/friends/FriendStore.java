@@ -1111,8 +1111,14 @@ public class FriendStore implements Closeable {
             do {
                 String key = curs.getString(0);
                 String value = curs.getString(1);
-                JSONObject v = (JSONObject) JSONValue.parse(value);
-                data.put(key, v.get("v"));
+                L.w("getUserData: " + key + " = " + value);
+                try {
+                    JSONObject v = (JSONObject) JSONValue.parse(value);
+                    data.put(key, v.get("v"));
+                } catch (Exception e) {
+                    L.bug("Got unexpected value for userData key '" + key + "': " + value);
+                    data.put(key, value);
+                }
 
             } while (curs.moveToNext());
         } finally {
