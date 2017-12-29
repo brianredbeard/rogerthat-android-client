@@ -26,6 +26,7 @@ import java.util.Map;
 public class UpdateUserDataRequestTO implements com.mobicage.rpc.IJSONable {
 
     public String app_data;
+    public String data;
     public String[] keys;
     public String service;
     public String type;
@@ -41,6 +42,12 @@ public class UpdateUserDataRequestTO implements com.mobicage.rpc.IJSONable {
             this.app_data = (String) val;
         } else {
             this.app_data = null;
+        }
+        if (json.containsKey("data")) {
+            Object val = json.get("data");
+            this.data = (String) val;
+        } else {
+            this.data = null;
         }
         if (json.containsKey("keys")) {
             org.json.simple.JSONArray val_arr = (org.json.simple.JSONArray) json.get("keys");
@@ -93,6 +100,7 @@ public class UpdateUserDataRequestTO implements com.mobicage.rpc.IJSONable {
     public Map<String, Object> toJSONMap() {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
         obj.put("app_data", this.app_data);
+        obj.put("data", this.data);
         if (this.keys == null) {
             obj.put("keys", null);
         } else {

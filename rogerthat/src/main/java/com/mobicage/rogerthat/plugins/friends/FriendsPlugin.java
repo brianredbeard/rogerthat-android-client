@@ -114,7 +114,6 @@ import com.mobicage.to.system.SettingsTO;
 
 import org.jivesoftware.smack.util.Base64;
 import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import java.io.File;
@@ -279,88 +278,16 @@ public class FriendsPlugin implements MobicagePlugin {
         }
     }
 
-    private void initCallReceiver() {
-        com.mobicage.rpc.CallReceiver.comMobicageCapiServicesIClientRpc = new com.mobicage.capi.services.IClientRpc() {
-            @Override
-            public ReceiveApiCallResultResponseTO receiveApiCallResult(ReceiveApiCallResultRequestTO request)
-                    throws Exception {
-                T.BIZZ();
-                final ServiceApiCallbackResult r = mStore.setServiceApiCallResult(request.id, request.error,
-                        request.result, SERVICE_API_CALL_STATUS_ANSWERED);
-
-                if (r != null) {
-                    Intent intent = new Intent(SERVICE_API_CALL_ANSWERED_INTENT);
-                    intent.putExtra("service", r.service);
-                    intent.putExtra("item", r.item);
-                    mMainService.sendBroadcast(intent);
-                } else {
-                    // Double execution?
-                    L.bug("Could not find service_api_call with id " + request.id);
-                }
-
-                return new ReceiveApiCallResultResponseTO();
-            }
-
-            @Override
-            public UpdateUserDataResponseTO updateUserData(UpdateUserDataRequestTO request) throws Exception {
-                if (request.keys == null || request.keys.length == 0) {
-                    FriendsPlugin.this.updateUserData(request.service, request.user_data, request.app_data);
-                } else {
-                    FriendsPlugin.this.updateUserData(request.service, request.type, Arrays.asList(request.keys), Arrays.asList(request.values));
-                }
-                mDisabledBroadcastTypesCache.remove(request.service);
-                return new UpdateUserDataResponseTO();
-            }
-        };
-
-        com.mobicage.rpc.CallReceiver.comMobicageCapiFriendsIClientRpc = new com.mobicage.capi.friends.IClientRpc() {
-            @Override
-            public UpdateFriendResponseTO updateFriend(final UpdateFriendRequestTO request) throws Exception {
-                T.BIZZ();
-                UpdateFriendResponseTO response;
-                if (request.status != MODIFIED_FRIEND_STATUS) {
-                    response = new UpdateFriendResponseTO();
-                    response.updated = false;
-                    response.reason = "Ignoring updateFriend request because it's status is not STATUS_MODIFIED";
-                } else if (request.friend == null) {
-                    response = new UpdateFriendResponseTO();
-                    response.updated = false;
-                    response.reason = "friend was null";
-                } else {
-                    response = mStore.updateFriend(request.friend);
-                    if (response.updated) {
-                        mBrandingMgr.queue(request.friend);
-                        Intent intent = new Intent(FRIEND_UPDATE_INTENT);
-                        intent.putExtra("email", request.friend.email);
-                        mMainService.sendBroadcast(intent);
-                        mHistory.putUpdateFriendInHistory(request.friend.email);
-                    }
-                }
-
-                if (!response.updated) {
-                    L.d(response.reason);
-                }
-                return response;
-            }
-
-            @Override
-            public UpdateFriendSetResponseTO updateFriendSet(UpdateFriendSetRequestTO request) throws Exception {
-                return FriendsPlugin.this.updateFriendSet(Arrays.asList(request.friends), request.version, false,
-                        false, request.added_friend);
-            }
-
-            @Override
-            public BecameFriendsResponseTO becameFriends(BecameFriendsRequestTO request) throws Exception {
-                mHistory.putFriendBecameFriendWithInHistory(request.user, request.friend.name, request.friend.email);
-                return null;
-            }
-
-            @Override
-            public UpdateGroupsResponseTO updateGroups(UpdateGroupsRequestTO request) throws Exception {
-                requestGroups();
-                return new UpdateGroupsResponseTO();
-            }
-        };
+    public static void broadcastServiceDataUpdated(final MainService mainservice, final String email, final boolean
+            userDataUpdated,
+                                                   final boolean serviceDataUpdated) {
+        if (userDataUpdated || serviceDataUpdated) {
+            Intent intent = new Intent(SERVICE_DATA_UPDATED);
+            intent.putExtra("email", email);
+            intent.putExtra("user_data", userDataUpdated);
+            intent.putExtra("service_data", serviceDataUpdated);
+            mainservice.sendBroadcast(intent);
+        }
     }
 
     @Override
@@ -624,37 +551,116 @@ public class FriendsPlugin implements MobicagePlugin {
         return response;
     }
 
-    public void updateUserData(final String serviceEmail, final String userData, final String appData) {
+    private void initCallReceiver() {
+        com.mobicage.rpc.CallReceiver.comMobicageCapiServicesIClientRpc = new com.mobicage.capi.services.IClientRpc() {
+            @Override
+            public ReceiveApiCallResultResponseTO receiveApiCallResult(ReceiveApiCallResultRequestTO request)
+                    throws Exception {
+                T.BIZZ();
+                final ServiceApiCallbackResult r = mStore.setServiceApiCallResult(request.id, request.error,
+                        request.result, SERVICE_API_CALL_STATUS_ANSWERED);
+
+                if (r != null) {
+                    Intent intent = new Intent(SERVICE_API_CALL_ANSWERED_INTENT);
+                    intent.putExtra("service", r.service);
+                    intent.putExtra("item", r.item);
+                    mMainService.sendBroadcast(intent);
+                } else {
+                    // Double execution?
+                    L.bug("Could not find service_api_call with id " + request.id);
+                }
+
+                return new ReceiveApiCallResultResponseTO();
+            }
+
+            @Override
+            public UpdateUserDataResponseTO updateUserData(UpdateUserDataRequestTO request) throws Exception {
+                if (request.data != null) {
+                    FriendsPlugin.this.updateUserData(request.service, request.type,
+                            (Map<String, Object>) JSONValue.parse(request.data));
+                } else if (request.user_data != null) {
+                    replaceUserData(request.service, request.user_data, null);
+                } else if (request.app_data != null) {
+                    replaceUserData(request.service, null, request.app_data);
+                }
+
+                return new UpdateUserDataResponseTO();
+            }
+        };
+
+        com.mobicage.rpc.CallReceiver.comMobicageCapiFriendsIClientRpc = new com.mobicage.capi.friends.IClientRpc() {
+            @Override
+            public UpdateFriendResponseTO updateFriend(final UpdateFriendRequestTO request) throws Exception {
+                T.BIZZ();
+                UpdateFriendResponseTO response;
+                if (request.status != MODIFIED_FRIEND_STATUS) {
+                    response = new UpdateFriendResponseTO();
+                    response.updated = false;
+                    response.reason = "Ignoring updateFriend request because it's status is not STATUS_MODIFIED";
+                } else if (request.friend == null) {
+                    response = new UpdateFriendResponseTO();
+                    response.updated = false;
+                    response.reason = "friend was null";
+                } else {
+                    response = mStore.updateFriend(request.friend);
+                    if (response.updated) {
+                        mBrandingMgr.queue(request.friend);
+                        Intent intent = new Intent(FRIEND_UPDATE_INTENT);
+                        intent.putExtra("email", request.friend.email);
+                        mMainService.sendBroadcast(intent);
+                        mHistory.putUpdateFriendInHistory(request.friend.email);
+                    }
+                }
+
+                if (!response.updated) {
+                    L.d(response.reason);
+                }
+                return response;
+            }
+
+            @Override
+            public UpdateFriendSetResponseTO updateFriendSet(UpdateFriendSetRequestTO request) throws Exception {
+                return FriendsPlugin.this.updateFriendSet(Arrays.asList(request.friends), request.version, false,
+                        false, request.added_friend);
+            }
+
+            @Override
+            public BecameFriendsResponseTO becameFriends(BecameFriendsRequestTO request) throws Exception {
+                mHistory.putFriendBecameFriendWithInHistory(request.user, request.friend.name, request.friend.email);
+                return null;
+            }
+
+            @Override
+            public UpdateGroupsResponseTO updateGroups(UpdateGroupsRequestTO request) throws Exception {
+                requestGroups();
+                return new UpdateGroupsResponseTO();
+            }
+        };
+    }
+
+    public void replaceUserData(final String serviceEmail, final String userData, final String appData) {
+        replaceUserData(serviceEmail, userData == null ? null : (Map<String, Object>) JSONValue.parse(userData),
+                appData == null ? null : (Map<String, Object>) JSONValue.parse(appData));
+    }
+
+    public void replaceUserData(final String serviceEmail, final Map<String, Object> userData, final Map<String,
+            Object> appData) {
         final boolean userDataUpdated = userData != null;
         final boolean appDataUpdated = appData != null;
         if (userDataUpdated)  {
-            mStore.saveUserData(serviceEmail, FriendStore.FRIEND_DATA_TYPE_USER, userData);
+            mStore.replaceUserData(serviceEmail, FriendStore.FRIEND_DATA_TYPE_USER, userData);
         }
         if (appDataUpdated)  {
-            mStore.saveUserData(serviceEmail, FriendStore.FRIEND_DATA_TYPE_APP, appData);
+            mStore.replaceUserData(serviceEmail, FriendStore.FRIEND_DATA_TYPE_APP, appData);
         }
-        if (userDataUpdated || appDataUpdated) {
-            broadcastServiceDataUpdated(mMainService, serviceEmail, userDataUpdated, appDataUpdated);
-        }
+        broadcastServiceDataUpdated(mMainService, serviceEmail, userDataUpdated, appDataUpdated);
     }
 
-    public void updateUserData(final String serviceEmail, final String type, final List<String> keys, final List<String> values) {
-        mStore.updateUserData(serviceEmail, type, keys, values);
+    public void updateUserData(final String serviceEmail, final String type, final Map<String, Object> data) {
+        mStore.updateUserData(serviceEmail, type, data);
 
-        if (FriendStore.FRIEND_DATA_TYPE_USER.equals(type)) {
-            broadcastServiceDataUpdated(mMainService, serviceEmail, true, false);
-        } else if (FriendStore.FRIEND_DATA_TYPE_APP.equals(type)) {
-            broadcastServiceDataUpdated(mMainService, serviceEmail, false, true);
-        }
-    }
-
-    public static void broadcastServiceDataUpdated(final MainService mainservice, final String email, final boolean userDataUpdated,
-                                                   final boolean serviceDataUpdated) {
-        Intent intent = new Intent(SERVICE_DATA_UPDATED);
-        intent.putExtra("email", email);
-        intent.putExtra("user_data", userDataUpdated);
-        intent.putExtra("service_data", serviceDataUpdated);
-        mainservice.sendBroadcast(intent);
+        broadcastServiceDataUpdated(mMainService, serviceEmail, FriendStore.FRIEND_DATA_TYPE_USER.equals(type),
+                FriendStore.FRIEND_DATA_TYPE_APP.equals(type));
     }
 
     @Override
@@ -1328,33 +1334,22 @@ public class FriendsPlugin implements MobicagePlugin {
             @Override
             protected void safeRun() throws Exception {
                 T.BIZZ();
-                UpdateUserDataRequestTO request = new UpdateUserDataRequestTO();
+                final Map<String, Object> userData = userDataJsonString == null ? null :
+                        (Map<String, Object>) JSONValue.parse(userDataJsonString);
+
+                final UpdateUserDataRequestTO request = new UpdateUserDataRequestTO();
                 request.service = serviceEmail;
                 request.user_data = null;
-                request.type = null;
                 request.keys = new String[0];
                 request.values = new String[0];
                 if (smart) {
+                    request.data = userDataJsonString;
                     request.type = FriendStore.FRIEND_DATA_TYPE_USER;
-                    List<String> keys = new ArrayList<>();
-                    List<String> values = new ArrayList<>();
-
-                    Map<String, Object> data = (Map<String, Object>) JSONValue.parse(userDataJsonString);
-                    for (Map.Entry<String, Object> dataEntry : data.entrySet()) {
-                        Object value = dataEntry.getValue();
-                        JSONObject v = new JSONObject();
-                        v.put("v", value);
-                        keys.add(dataEntry.getKey());
-                        values.add(v.toJSONString());
-                    }
-                    request.keys = keys.toArray(new String[keys.size()]);
-                    request.values =  values.toArray(new String[values.size()]);
-                    mStore.updateUserData(serviceEmail, FriendStore.FRIEND_DATA_TYPE_USER, keys, values);
-
+                    mStore.updateUserData(serviceEmail, FriendStore.FRIEND_DATA_TYPE_USER, userData);
                 } else {
                     request.user_data = userDataJsonString;
-                    if (userDataJsonString != null) {
-                        mStore.saveUserData(serviceEmail, FriendStore.FRIEND_DATA_TYPE_USER, userDataJsonString);
+                    if (userData != null) {
+                        mStore.replaceUserData(serviceEmail, FriendStore.FRIEND_DATA_TYPE_USER, userData);
                     }
                 }
 
