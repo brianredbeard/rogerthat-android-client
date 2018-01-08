@@ -1020,10 +1020,14 @@ public class FriendStore implements Closeable {
                 String userDataString = curs.getString(1);
                 String appDataString = curs.getString(2);
 
-                replaceUserData(serviceEmail, FRIEND_DATA_TYPE_USER,
-                        (Map<String, Object>) JSONValue.parse(userDataString));
-                replaceUserData(serviceEmail, FRIEND_DATA_TYPE_APP,
-                        (Map<String, Object>) JSONValue.parse(appDataString));
+                if (userDataString != null) {
+                    replaceUserData(serviceEmail, FRIEND_DATA_TYPE_USER,
+                            (Map<String, Object>) JSONValue.parse(userDataString));
+                }
+                if (appDataString != null) {
+                    replaceUserData(serviceEmail, FRIEND_DATA_TYPE_APP,
+                            (Map<String, Object>) JSONValue.parse(appDataString));
+                }
                 wipeOldUserData(serviceEmail);
 
             } while (curs.moveToNext());
