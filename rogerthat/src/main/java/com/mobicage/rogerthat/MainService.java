@@ -601,6 +601,10 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         }
     }
 
+    public long getAdjustedTimeDiff() {
+        return this.mAdjustedTimeDiff;
+    }
+
     @Override
     public long currentTimeMillis() {
         T.dontCare();
