@@ -137,7 +137,7 @@ public class EnterPinActivity extends ServiceBoundActivity implements PinEntryLi
             }
         } catch (Exception e) {
             L.bug(e);
-            //mService.wipe(0); // todo ruben better solution
+            //mService.wipe(0); // todo better solution
         }
         mPinEntryView.clearPinEntry();
     }

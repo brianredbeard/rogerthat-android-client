@@ -60,6 +60,8 @@ public class CloudConstants {
             + "/unauthenticated/mobi/registration/oauth/registered";
 
     public final static String REGISTRATION_QR_URL = HTTPS_BASE_URL + "/unauthenticated/mobi/registration/register_qr";
+    public final static String REGISTRATION_REGISTER_DEVICE_URL = HTTPS_BASE_URL
+            + "/unauthenticated/mobi/registration/register_device";
     public final static String REGISTRATION_FINISH_URL = HTTPS_BASE_URL + "/unauthenticated/mobi/registration/finish";
     public final static String REGISTRATION_PAGE_URL_FACEBOOK = HTTPS_BASE_URL
         + "/login_facebook?display=wap&continue=%2Fregister%3Fua%3Dandroid";

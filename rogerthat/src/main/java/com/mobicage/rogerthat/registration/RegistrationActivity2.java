@@ -23,6 +23,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -31,8 +32,10 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.telephony.TelephonyManager;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
@@ -81,9 +84,12 @@ import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeAsyncTask;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
+import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
+import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
+import com.mobicage.rogerthat.util.ui.FSListView;
 import com.mobicage.rogerthat.util.ui.TestUtils;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rogerthat.util.ui.Wizard;
@@ -112,6 +118,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
@@ -145,10 +152,10 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
     private static final int START_OAUTH_REQUEST_CODE = 1;
 
     private static final int[] NORMAL_WIDTH_ROGERTHAT_LOGOS = new int[] { R.id.rogerthat_logo, R.id.rogerthat_logo1,
-            R.id.rogerthat_logo2, R.id.rogerthat_logo3, R.id.rogerthat_logo4};
+            R.id.rogerthat_logo2, R.id.rogerthat_logo3, R.id.rogerthat_logo4, R.id.rogerthat_logo5};
     private static final int[] FULL_WIDTH_ROGERTHAT_LOGOS = new int[] { R.id.full_width_rogerthat_logo,
             R.id.full_width_rogerthat_logo1, R.id.full_width_rogerthat_logo2, R.id.full_width_rogerthat_logo3, R.id
-            .full_width_rogerthat_logo4};
+            .full_width_rogerthat_logo4, R.id.full_width_rogerthat_logo5};
 
     private Intent mNotYetProcessedIntent = null;
 
@@ -462,15 +469,46 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
             }
         });
 
+        final Button registerBtn = (Button) findViewById(R.id.registration_devices_register);
+        final Button cancelBtn = (Button) findViewById(R.id.registration_devices_cancel);
+
+        registerBtn.setEnabled(true);
+        cancelBtn.setEnabled(true);
+
+        registerBtn.setOnClickListener(new SafeViewOnClickListener() {
+            @Override
+            public void safeOnClick(View v) {
+                registerBtn.setEnabled(false);
+                cancelBtn.setEnabled(false);
+                hideNotification();
+                registerDevice();
+            }
+        });
+
+        cancelBtn.setOnClickListener(new SafeViewOnClickListener() {
+            @Override
+            public void safeOnClick(View v) {
+                registerBtn.setEnabled(false);
+                cancelBtn.setEnabled(false);
+
+                if (AppConstants.getRegistrationType() == AppConstants.REGISTRATION_TYPE_OAUTH) {
+                    mWiz.proceedToPosition(2);
+                } else {
+                    mWiz.proceedToPosition(3);
+                }
+            }
+        });
+
         mWiz = RegistrationWizard2.getWizard(mService);
         mWiz.setFlipper((ViewFlipper) findViewById(R.id.registration_viewFlipper));
         setWizard(mWiz);
         setFinishHandler();
-        addAgreeTOSHandler();
-        addIBeaconUsageHandler();
-        addOauthMethodHandler();
-        addChooseLoginMethodHandler();
-        addEnterPinHandler();
+        addAgreeTOSHandler(); // 0
+        addIBeaconUsageHandler(); // 1
+        addOauthMethodHandler(); // 2
+        addChooseLoginMethodHandler(); // 3
+        addEnterPinHandler(); // 4
+        addRegisterDeviceHandler(); // 5
         mWiz.run();
         mWiz.setDeviceId(Installation.id(this));
 
@@ -489,10 +527,24 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
             });
         }
 
-        // Colours
+        // Colors
         int primaryIconColor = LookAndFeelConstants.getPrimaryColor(this);
         ((ImageView) findViewById(R.id.ibeacon_usage_icon)).setImageDrawable(new IconicsDrawable(mService,
                 FontAwesome.Icon.faw_compass).color(primaryIconColor).sizeDp(75));
+
+        // unregister reason
+        String reason = mService.getUnregisterReason();
+        if (!TextUtils.isEmptyOrWhitespace(reason)) {
+            SafeDialogClick onPositiveClick = new SafeDialogClick() {
+                @Override
+                public void safeOnClick(DialogInterface dialog, int id) {
+                    dialog.dismiss();
+                    mService.deleteUnregisterFile();
+                }
+            };
+            UIUtils.showDialog(this, null, reason, getString(R.string.rogerthat), onPositiveClick,
+                    null, null);
+        }
     }
 
     private void initLocationUsageStep() {
@@ -569,13 +621,13 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
             @Override
             protected void safeRun() throws Exception {
                 T.REGISTRATION();
-                String version = "1";
+                String version = "3";
                 String signature = SecurityUtils.sha256(version + " " + installId + " " + timestamp + " " + deviceId + " "
                         + registrationId + " " + accessToken + CloudConstants.REGISTRATION_MAIN_SIGNATURE);
 
                 HttpPost httppost = new HttpPost(CloudConstants.REGISTRATION_FACEBOOK_URL);
                 try {
-                    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(8);
+                    List<NameValuePair> nameValuePairs = new ArrayList<>();
                     nameValuePairs.add(new BasicNameValuePair("version", version));
                     nameValuePairs.add(new BasicNameValuePair("registration_time", timestamp));
                     nameValuePairs.add(new BasicNameValuePair("device_id", deviceId));
@@ -590,6 +642,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                     nameValuePairs.add(new BasicNameValuePair("use_xmpp_kick", CloudConstants.USE_XMPP_KICK_CHANNEL
                             + ""));
                     nameValuePairs.add(new BasicNameValuePair("GCM_registration_id", getGCMRegistrationId()));
+                    nameValuePairs.add(new BasicNameValuePair("unique_device_id",  Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID)));
 
                     httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
@@ -626,27 +679,41 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                         runOnUI(showErrorDialog);
                         return;
                     }
-                    JSONObject account = (JSONObject) responseMap.get("account");
+                    Boolean hasDevices = (Boolean) responseMap.get("has_devices");
                     final String email = (String) responseMap.get("email");
-                    setAgeAndGenderSet((Boolean) responseMap.get("age_and_gender_set"));
+                    if (hasDevices) {
+                        final JSONArray deviceNames = (JSONArray) responseMap.get("device_names");
+                        runOnUI(new SafeRunnable() {
+                            @Override
+                            protected void safeRun() throws Exception {
+                                T.UI();
+                                progressDialog.dismiss();
+                                hideNotification();
+                                mWiz.setDeviceNames(deviceNames);
+                                mWiz.proceedToPosition(5);
+                            }
+                        });
+                    } else {
+                        JSONObject account = (JSONObject) responseMap.get("account");
+                        setAgeAndGenderSet((Boolean) responseMap.get("age_and_gender_set"));
 
-                    final RegistrationInfo info = new RegistrationInfo(email, new Credentials((String) account
-                            .get("account"), (String) account.get("password")));
-                    runOnUI(new SafeRunnable() {
-                        @Override
-                        protected void safeRun() throws Exception {
-                            T.UI();
-                            mWiz.setEmail(email);
-                            mWiz.save();
-                            hideNotification();
-                            tryConnect(
-                                    progressDialog,
-                                    1,
-                                    getString(R.string.registration_establish_connection, email,
-                                            getString(R.string.app_name)) + " ", info);
-                        }
-                    });
-
+                        final RegistrationInfo info = new RegistrationInfo(email, new Credentials((String) account
+                                .get("account"), (String) account.get("password")));
+                        runOnUI(new SafeRunnable() {
+                            @Override
+                            protected void safeRun() throws Exception {
+                                T.UI();
+                                mWiz.setEmail(email);
+                                mWiz.save();
+                                hideNotification();
+                                tryConnect(
+                                        progressDialog,
+                                        1,
+                                        getString(R.string.registration_establish_connection, email,
+                                                getString(R.string.app_name)) + " ", info);
+                            }
+                        });
+                    }
                 } catch (Exception e) {
                     L.d(e);
                     runOnUI(showErrorDialog);
@@ -685,7 +752,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
 
                 HttpPost httppost = new HttpPost(CloudConstants.REGISTRATION_OAUTH_INFO_URL);
                 try {
-                    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(8);
+                    List<NameValuePair> nameValuePairs = new ArrayList<>();
                     nameValuePairs.add(new BasicNameValuePair("version", version));
                     nameValuePairs.add(new BasicNameValuePair("registration_time", timestamp));
                     nameValuePairs.add(new BasicNameValuePair("device_id", deviceId));
@@ -780,13 +847,13 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
             @Override
             protected void safeRun() throws Exception {
                 T.REGISTRATION();
-                String version = "1";
+                String version = "3";
                 String signature = SecurityUtils.sha256(version + " " + installId + " " + timestamp + " " + deviceId + " "
                         + registrationId + " " + code + state + CloudConstants.REGISTRATION_MAIN_SIGNATURE);
 
                 HttpPost httppost = new HttpPost(CloudConstants.REGISTRATION_OAUTH_REGISTERED_URL);
                 try {
-                    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(8);
+                    List<NameValuePair> nameValuePairs = new ArrayList<>();
                     nameValuePairs.add(new BasicNameValuePair("version", version));
                     nameValuePairs.add(new BasicNameValuePair("registration_time", timestamp));
                     nameValuePairs.add(new BasicNameValuePair("device_id", deviceId));
@@ -802,6 +869,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                     nameValuePairs.add(new BasicNameValuePair("use_xmpp_kick", CloudConstants.USE_XMPP_KICK_CHANNEL
                             + ""));
                     nameValuePairs.add(new BasicNameValuePair("GCM_registration_id", getGCMRegistrationId()));
+                    nameValuePairs.add(new BasicNameValuePair("unique_device_id",  Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID)));
 
                     httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
@@ -839,27 +907,43 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                         return;
                     }
 
-                    progressDialog.dismiss();
-
-                    JSONObject account = (JSONObject) responseMap.get("account");
+                    Boolean hasDevices = (Boolean) responseMap.get("has_devices");
                     final String email = (String) responseMap.get("email");
-                    setAgeAndGenderSet((Boolean) responseMap.get("age_and_gender_set"));
-                    final RegistrationInfo info = new RegistrationInfo(email, new Credentials((String) account
-                            .get("account"), (String) account.get("password")));
-                    runOnUI(new SafeRunnable() {
-                        @Override
-                        protected void safeRun() throws Exception {
-                            T.UI();
-                            mWiz.setEmail(email);
-                            mWiz.save();
-                            hideNotification();
-                            tryConnect(
-                                    progressDialog,
-                                    1,
-                                    getString(R.string.registration_establish_connection, email,
-                                            getString(R.string.app_name)) + " ", info);
-                        }
-                    });
+                    if (hasDevices) {
+                        final JSONArray deviceNames = (JSONArray) responseMap.get("device_names");
+                        runOnUI(new SafeRunnable() {
+                            @Override
+                            protected void safeRun() throws Exception {
+                                T.UI();
+                                progressDialog.dismiss();
+                                hideNotification();
+                                mWiz.setEmail(email);
+                                mWiz.setDeviceNames(deviceNames);
+                                mWiz.proceedToPosition(5);
+                            }
+                        });
+                    } else {
+                        JSONObject account = (JSONObject) responseMap.get("account");
+                        setAgeAndGenderSet((Boolean) responseMap.get("age_and_gender_set"));
+
+                        final RegistrationInfo info = new RegistrationInfo(email, new Credentials((String) account
+                                .get("account"), (String) account.get("password")));
+                        runOnUI(new SafeRunnable() {
+                            @Override
+                            protected void safeRun() throws Exception {
+                                T.UI();
+                                progressDialog.dismiss();
+                                mWiz.setEmail(email);
+                                mWiz.save();
+                                hideNotification();
+                                tryConnect(
+                                        progressDialog,
+                                        1,
+                                        getString(R.string.registration_establish_connection, email,
+                                                getString(R.string.app_name)) + " ", info);
+                            }
+                        });
+                    }
 
                 } catch (Exception e) {
                     L.d(e);
@@ -976,13 +1060,13 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
             @Override
             protected void safeRun() throws Exception {
                 T.REGISTRATION();
-                String version = "2";
+                String version = "3";
                 String pinSignature = SecurityUtils.sha256(version + " " + email + " " + timestamp + " " + deviceId + " "
                         + registrationId + " " + pin + CloudConstants.REGISTRATION_PIN_SIGNATURE);
 
                 HttpPost httppost = new HttpPost(CloudConstants.REGISTRATION_PIN_URL);
                 try {
-                    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(6);
+                    List<NameValuePair> nameValuePairs = new ArrayList<>();
                     nameValuePairs.add(new BasicNameValuePair("version", version));
                     nameValuePairs.add(new BasicNameValuePair("email", email));
                     nameValuePairs.add(new BasicNameValuePair("registration_time", timestamp));
@@ -991,11 +1075,14 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                     nameValuePairs.add(new BasicNameValuePair("pin_code", pin));
                     nameValuePairs.add(new BasicNameValuePair("pin_signature", pinSignature));
                     nameValuePairs.add(new BasicNameValuePair("request_id", UUID.randomUUID().toString()));
-                    nameValuePairs.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
                     nameValuePairs.add(new BasicNameValuePair("platform", "android"));
+                    nameValuePairs.add(new BasicNameValuePair("language", Locale.getDefault().getLanguage()));
+                    nameValuePairs.add(new BasicNameValuePair("country", Locale.getDefault().getCountry()));
+                    nameValuePairs.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
                     nameValuePairs.add(new BasicNameValuePair("use_xmpp_kick", CloudConstants.USE_XMPP_KICK_CHANNEL
                             + ""));
                     nameValuePairs.add(new BasicNameValuePair("GCM_registration_id", getGCMRegistrationId()));
+                    nameValuePairs.add(new BasicNameValuePair("unique_device_id",  Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID)));
 
                     httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
@@ -1011,24 +1098,38 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                     final Map<String, Object> responseMap = (Map<String, Object>) org.json.simple.JSONValue
                             .parse(new InputStreamReader(entity.getContent()));
                     if ("success".equals(responseMap.get("result"))) {
+                        Boolean hasDevices = (Boolean) responseMap.get("has_devices");
+                        if (hasDevices) {
+                            final JSONArray deviceNames = (JSONArray) responseMap.get("device_names");
+                            runOnUI(new SafeRunnable() {
+                                @Override
+                                protected void safeRun() throws Exception {
+                                    T.UI();
+                                    progressDialog.dismiss();
+                                    hideNotification();
+                                    mWiz.setDeviceNames(deviceNames);
+                                    mWiz.proceedToPosition(5);
+                                }
+                            });
+                        } else {
+                                JSONObject account = (JSONObject) responseMap.get("account");
+                                final RegistrationInfo info = new RegistrationInfo(email, new Credentials((String) account
+                                        .get("account"), (String) account.get("password")));
 
-                        JSONObject account = (JSONObject) responseMap.get("account");
-                        final RegistrationInfo info = new RegistrationInfo(email, new Credentials((String) account
-                                .get("account"), (String) account.get("password")));
-
-                        setAgeAndGenderSet((Boolean) responseMap.get("age_and_gender_set"));
-                        runOnUI(new SafeRunnable() {
-                            @Override
-                            protected void safeRun() throws Exception {
-                                T.UI();
-                                hideNotification();
-                                tryConnect(
-                                        progressDialog,
-                                        1,
-                                        getString(R.string.registration_establish_connection, email,
-                                                getString(R.string.app_name)) + " ", info);
-                            }
-                        });
+                                setAgeAndGenderSet((Boolean) responseMap.get("age_and_gender_set"));
+                                runOnUI(new SafeRunnable() {
+                                    @Override
+                                    protected void safeRun() throws Exception {
+                                        T.UI();
+                                        hideNotification();
+                                        tryConnect(
+                                                progressDialog,
+                                                1,
+                                                getString(R.string.registration_establish_connection, email,
+                                                        getString(R.string.app_name)) + " ", info);
+                                    }
+                                });
+                        }
                     } else {
 
                         final long attempts_left = (Long) responseMap.get("attempts_left");
@@ -1151,17 +1252,13 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
 
             @Override
             public void pageDisplayed(Button back, Button next, ViewFlipper switcher) {
-                if (AppConstants.getRegistrationType() == AppConstants.REGISTRATION_TYPE_OAUTH) {
-                    mWiz.proceedToNextPage(); // todo ruben validate
-                } else {
-                    mEnterEmailAutoCompleteTextView.setThreshold(1000); // Prevent popping up automatically
+                mEnterEmailAutoCompleteTextView.setThreshold(1000); // Prevent popping up automatically
 
-                    if (AppConstants.FACEBOOK_APP_ID == null || !AppConstants.FACEBOOK_REGISTRATION) {
-                        LinearLayout orLaylout = (LinearLayout) findViewById(R.id.or);
-                        orLaylout.setVisibility(View.INVISIBLE);
-                        Button facebookButton = (Button) findViewById(R.id.login_via_fb);
-                        facebookButton.setVisibility(View.INVISIBLE);
-                    }
+                if (AppConstants.FACEBOOK_APP_ID == null || !AppConstants.FACEBOOK_REGISTRATION) {
+                    LinearLayout orLaylout = (LinearLayout) findViewById(R.id.or);
+                    orLaylout.setVisibility(View.INVISIBLE);
+                    Button facebookButton = (Button) findViewById(R.id.login_via_fb);
+                    facebookButton.setVisibility(View.INVISIBLE);
                 }
             }
 
@@ -1239,6 +1336,41 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
         });
     }
 
+    private void addRegisterDeviceHandler() {
+        mWiz.addPageHandler(new Wizard.PageHandler() {
+            @Override
+            public void pageDisplayed(Button back, Button next, ViewFlipper switcher) {
+                mEnterEmailAutoCompleteTextView.setThreshold(1000); // Prevent popping up automatically
+                final FSListView deviceList = (FSListView) findViewById(R.id.devices_list);
+                final Button registerBtn = (Button) findViewById(R.id.registration_devices_register);
+                final Button cancelBtn = (Button) findViewById(R.id.registration_devices_cancel);
+
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(RegistrationActivity2.this, R.layout.list_item, mWiz.getDeviceNames());
+                deviceList.setAdapter(adapter);
+
+                registerBtn.setEnabled(true);
+                cancelBtn.setEnabled(true);
+
+                ((TextView) findViewById(R.id.registration_devices_text)).setText(getString(R.string.device_unregister_others));
+            }
+
+            @Override
+            public String getTitle() {
+                return null;
+            }
+
+            @Override
+            public boolean beforeNextClicked(Button back, Button next, ViewFlipper switcher) {
+                return false;
+            }
+
+            @Override
+            public boolean beforeBackClicked(Button back, Button next, ViewFlipper switcher) {
+                return false;
+            }
+        });
+    }
+
     private void setFinishHandler() {
         mWiz.setOnFinish(new SafeRunnable() {
 
@@ -1298,7 +1430,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
 
                 HttpPost httppost = new HttpPost(CloudConstants.REGISTRATION_REQUEST_URL);
                 try {
-                    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(6);
+                    List<NameValuePair> nameValuePairs = new ArrayList<>();
                     nameValuePairs.add(new BasicNameValuePair("version", version));
                     nameValuePairs.add(new BasicNameValuePair("email", email));
                     nameValuePairs.add(new BasicNameValuePair("registration_time", timestamp));

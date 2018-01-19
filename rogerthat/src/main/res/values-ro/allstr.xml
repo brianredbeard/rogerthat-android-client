@@ -55,6 +55,7 @@
     <string name="authenticate">Autentifica</string>
     <string name="authenticate_first">Este nevoie sa va autentificați înainte pentru a putea continua.</string>
     <string name="authenticate_via_your_oauth_account">Autentifice utilizând contul dvs. \"%1$s\".</string>
+    <string name="authorize">Autoriza</string>
     <string name="back">Inapoi</string>
     <string name="birthdate">Ziua nasterii</string>
     <string name="broadcast_subscribed_to">Ati primit acest mesaj pentru ca sunteti abonat la: %1$s.</string>

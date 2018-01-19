@@ -60,6 +60,7 @@
     <string name="authenticate">Authentifier</string>
     <string name="authenticate_first">Avant de commencer, merci de vous authentifier.</string>
     <string name="authenticate_via_your_oauth_account">Authentifier en utilisant votre compte \'%1$s\'</string>
+    <string name="authorize">Autoriser</string>
     <string name="back">Arrière</string>
     <string name="birthdate">Date de naissance</string>
     <string name="broadcast_subscribed_to">Vous avez reçu ce message parce que vous êtes abonné à: %1$s.</string>

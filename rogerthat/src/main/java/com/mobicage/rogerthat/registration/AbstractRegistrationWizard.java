@@ -18,11 +18,37 @@
 package com.mobicage.rogerthat.registration;
 
 import com.mobicage.rogerthat.MainService;
+import com.mobicage.rogerthat.util.http.HTTPUtil;
+import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.system.SafeAsyncTask;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.Wizard;
 import com.mobicage.rpc.Credentials;
+import com.mobicage.rpc.config.CloudConstants;
+import com.mobicage.to.beacon.GetBeaconRegionsResponseTO;
 import com.mobicage.to.location.BeaconDiscoveredRequestTO;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 public abstract class AbstractRegistrationWizard extends Wizard {
@@ -31,9 +57,10 @@ public abstract class AbstractRegistrationWizard extends Wizard {
     private String mEmail = null;
     private long mTimestamp = 0;
     private String mRegistrationId = null;
-    private boolean mInGoogleAuthenticationProcess = false;
     private String mInstallationId = null;
+    private boolean mInGoogleAuthenticationProcess = false;
     private String mDeviceId = null;
+    private JSONArray mDeviceNames = null;
 
     public Credentials getCredentials() {
         T.UI();
@@ -98,7 +125,102 @@ public abstract class AbstractRegistrationWizard extends Wizard {
 
     public abstract Set<BeaconDiscoveredRequestTO> getDetectedBeacons();
 
+    public JSONArray getDeviceNames() {
+        T.UI();
+        return mDeviceNames;
+    }
+
+    public void setDeviceNames(JSONArray deviceNames) {
+        T.UI();
+        mDeviceNames = deviceNames;
+    }
+
     public abstract void init(final MainService mainService);
 
-    public abstract  void reInit();
+    public abstract void reInit();
+
+    protected void sendInstallationId(final MainService mainService) {
+        if (mInstallationId == null) {
+            throw new IllegalStateException("Installation id should be set!");
+        }
+
+        new SafeAsyncTask<Object, Object, Boolean>() {
+
+            @SuppressWarnings("unchecked")
+            @Override
+            protected Boolean safeDoInBackground(Object... params) {
+                try {
+                    HttpClient httpClient = HTTPUtil.getHttpClient(10000, 3);
+                    final HttpPost httpPost = new HttpPost(CloudConstants.REGISTRATION_REGISTER_INSTALL_URL);
+                    httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
+                    httpPost.setHeader("User-Agent", MainService.getUserAgent(mainService));
+                    List<NameValuePair> formParams = new ArrayList<NameValuePair>();
+                    formParams.add(new BasicNameValuePair("version", MainService.getVersion(mainService)));
+                    formParams.add(new BasicNameValuePair("install_id", getInstallationId()));
+                    formParams.add(new BasicNameValuePair("platform", "android"));
+                    formParams.add(new BasicNameValuePair("language", Locale.getDefault().getLanguage()));
+                    formParams.add(new BasicNameValuePair("country", Locale.getDefault().getCountry()));
+                    formParams.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
+
+                    UrlEncodedFormEntity entity;
+                    try {
+                        entity = new UrlEncodedFormEntity(formParams, HTTP.UTF_8);
+                    } catch (UnsupportedEncodingException e) {
+                        L.bug(e);
+                        return true;
+                    }
+
+                    httpPost.setEntity(entity);
+                    L.d("Sending installation id: " + getInstallationId());
+                    try {
+                        HttpResponse response = httpClient.execute(httpPost);
+                        L.d("Installation id sent");
+                        int statusCode = response.getStatusLine().getStatusCode();
+                        if (statusCode != HttpStatus.SC_OK) {
+                            L.e("HTTP request resulted in status code " + statusCode);
+                            return false;
+                        }
+                        HttpEntity httpEntity = response.getEntity();
+                        if (httpEntity == null) {
+                            L.e("Response of '" + CloudConstants.REGISTRATION_REGISTER_INSTALL_URL + "' was null");
+                            return false;
+                        }
+
+                        final Map<String, Object> responseMap = (Map<String, Object>) JSONValue
+                                .parse(new InputStreamReader(httpEntity.getContent()));
+                        if (responseMap == null) {
+                            L.e("HTTP request responseMap was null");
+                            return false;
+                        }
+
+                        if (!"success".equals(responseMap.get("result"))) {
+                            L.e("HTTP request result was not 'success' but: " + responseMap.get("result"));
+                            return false;
+                        }
+
+                        JSONObject beaconRegions = (JSONObject) responseMap.get("beacon_regions");
+                        processBeaconRegions(new GetBeaconRegionsResponseTO(beaconRegions), mainService);
+                        return true;
+
+                    } catch (ClientProtocolException e) {
+                        L.bug(e);
+                        return false;
+                    } catch (IOException e) {
+                        L.bug(e);
+                        return false;
+                    }
+                } catch (Exception e) {
+                    L.bug(e);
+                    return false;
+                }
+            }
+
+        }.execute();
+    }
+
+    protected void processBeaconRegions(GetBeaconRegionsResponseTO response, MainService mainService) {
+        // Can be overridden by registration wizards that are interested in this
+    }
+
+
 }

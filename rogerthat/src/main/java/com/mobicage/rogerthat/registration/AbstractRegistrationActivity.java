@@ -20,10 +20,13 @@ package com.mobicage.rogerthat.registration;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.telephony.TelephonyManager;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainActivity;
@@ -33,14 +36,16 @@ import com.mobicage.rogerthat.config.Configuration;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
 import com.mobicage.rogerthat.plugins.system.MobileInfo;
 import com.mobicage.rogerthat.plugins.system.SystemPlugin;
-import com.mobicage.rogerthat.registration.AccountManager.Account;
 import com.mobicage.rogerthat.util.GoogleServicesUtils;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
+import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.Pausable;
 import com.mobicage.rogerthat.util.ui.UIUtils;
+import com.mobicage.rpc.Credentials;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.rpc.newxmpp.XMPPConfigurationFactory;
@@ -60,13 +65,14 @@ import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.Logger;
 import org.jivesoftware.smack.XMPPConnection;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 
@@ -369,5 +375,118 @@ public abstract class AbstractRegistrationActivity extends ServiceBoundActivity 
 
     public void setAgeAndGenderSet(boolean ageAndGenderSet) {
         mAgeAndGenderSet = ageAndGenderSet;
+    }
+
+
+    public void registerDevice() {
+        T.UI();
+        final HttpClient httpClient = HTTPUtil.getHttpClient();
+        final String email = mWizard.getEmail();
+        final String timestamp = "" + mWizard.getTimestamp();
+        final String deviceId = mWizard.getDeviceId();
+        final String registrationId = mWizard.getRegistrationId();
+        // Make call to Rogerthat
+        String message = getString(R.string.activating);
+        final ProgressDialog progressDialog = UIUtils.showProgressDialog(mActivity, null, message, true, false);
+        final SafeRunnable showErrorDialog = new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                T.UI();
+                progressDialog.dismiss();
+                UIUtils.showErrorPleaseRetryDialog(mActivity);
+            }
+        };
+
+        runOnWorker(new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                T.REGISTRATION();
+                String version = "3";
+                String signature = SecurityUtils.sha256(version + " " + email + " " + timestamp + " " + deviceId + " "
+                        + registrationId + " " + CloudConstants.REGISTRATION_MAIN_SIGNATURE);
+
+                HttpPost httppost = new HttpPost(CloudConstants.REGISTRATION_REGISTER_DEVICE_URL);
+                try {
+                    List<NameValuePair> nameValuePairs = new ArrayList<>();
+                    nameValuePairs.add(new BasicNameValuePair("version", version));
+                    nameValuePairs.add(new BasicNameValuePair("registration_time", timestamp));
+                    nameValuePairs.add(new BasicNameValuePair("device_id", deviceId));
+                    nameValuePairs.add(new BasicNameValuePair("registration_id", registrationId));
+                    nameValuePairs.add(new BasicNameValuePair("signature", signature));
+                    nameValuePairs.add(new BasicNameValuePair("email", email));
+                    nameValuePairs.add(new BasicNameValuePair("platform", "android"));
+                    nameValuePairs.add(new BasicNameValuePair("language", Locale.getDefault().getLanguage()));
+                    nameValuePairs.add(new BasicNameValuePair("country", Locale.getDefault().getCountry()));
+                    nameValuePairs.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
+                    nameValuePairs.add(new BasicNameValuePair("use_xmpp_kick", CloudConstants.USE_XMPP_KICK_CHANNEL
+                            + ""));
+                    nameValuePairs.add(new BasicNameValuePair("GCM_registration_id", getGCMRegistrationId()));
+                    nameValuePairs.add(new BasicNameValuePair("hardware_model", SystemUtils.isRunningInEmulator(mService) ? "Android emulator" : Build.MODEL));
+                    TelephonyManager telephonyManager = (TelephonyManager) mService.getSystemService(Context.TELEPHONY_SERVICE);
+                    if (telephonyManager != null) {
+                        nameValuePairs.add(new BasicNameValuePair("sim_carrier_name", telephonyManager.getSimOperatorName()));
+                    }
+
+
+                    httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+
+                    // Execute HTTP Post Request
+                    HttpResponse response = httpClient.execute(httppost);
+
+                    int statusCode = response.getStatusLine().getStatusCode();
+                    HttpEntity entity = response.getEntity();
+
+                    if (entity == null) {
+                        runOnUI(showErrorDialog);
+                        return;
+                    }
+
+                    @SuppressWarnings("unchecked")
+                    final Map<String, Object> responseMap = (Map<String, Object>) JSONValue
+                            .parse(new InputStreamReader(entity.getContent()));
+
+                    if (statusCode != 200 || responseMap == null) {
+                        if (statusCode == 500 && responseMap != null) {
+                            final String errorMessage = (String) responseMap.get("error");
+                            if (errorMessage != null) {
+                                runOnUI(new SafeRunnable() {
+                                    @Override
+                                    protected void safeRun() throws Exception {
+                                        T.UI();
+                                        progressDialog.dismiss();
+                                        UIUtils.showDialog(mActivity, null, errorMessage);
+                                    }
+                                });
+                                return;
+                            }
+                        }
+                        runOnUI(showErrorDialog);
+                        return;
+                    }
+                    JSONObject account = (JSONObject) responseMap.get("account");
+                    setAgeAndGenderSet((Boolean) responseMap.get("age_and_gender_set"));
+
+                    final RegistrationInfo info = new RegistrationInfo(email, new Credentials((String) account
+                            .get("account"), (String) account.get("password")));
+                    runOnUI(new SafeRunnable() {
+                        @Override
+                        protected void safeRun() throws Exception {
+                            T.UI();
+                            mWizard.setEmail(email);
+                            mWizard.save();
+                            tryConnect(
+                                    progressDialog,
+                                    1,
+                                    getString(R.string.registration_establish_connection, email,
+                                            getString(R.string.app_name)) + " ", info);
+                        }
+                    });
+
+                } catch (Exception e) {
+                    L.d(e);
+                    runOnUI(showErrorDialog);
+                }
+            }
+        });
     }
 }
