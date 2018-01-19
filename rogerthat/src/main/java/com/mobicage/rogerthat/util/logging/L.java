@@ -25,6 +25,7 @@ import android.util.Log;
 import com.crashlytics.android.Crashlytics;
 import com.mobicage.api.system.Rpc;
 import com.mobicage.rogerthat.MainService;
+import com.mobicage.rogerthat.plugins.system.SystemPlugin;
 import com.mobicage.rogerthat.registration.RegistrationWizard2;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
@@ -170,7 +171,7 @@ public class L {
                             request.mobicageVersion = (sMainService.isDebug() ? "-" : "")
                                     + sMainService.getMajorVersion() + "." + sMainService.getMinorVersion();
                             request.platformVersion = Build.FINGERPRINT + " (-) " + SystemUtils.getAndroidVersion()
-                                    + " (-) " + Build.MODEL;
+                                    + " (-) " + SystemPlugin.getDeviceModelName();
                             setErrorMessageOnLogErrorRequest(t == null ? e : t, request);
                             Rpc.logError(new ResponseHandler<LogErrorResponseTO>(), request);
                         } else {

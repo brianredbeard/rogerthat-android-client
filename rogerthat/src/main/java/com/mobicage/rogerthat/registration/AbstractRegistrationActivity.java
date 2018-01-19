@@ -22,7 +22,6 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -41,7 +40,6 @@ import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
-import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.Pausable;
 import com.mobicage.rogerthat.util.ui.UIUtils;
@@ -421,7 +419,7 @@ public abstract class AbstractRegistrationActivity extends ServiceBoundActivity 
                     nameValuePairs.add(new BasicNameValuePair("use_xmpp_kick", CloudConstants.USE_XMPP_KICK_CHANNEL
                             + ""));
                     nameValuePairs.add(new BasicNameValuePair("GCM_registration_id", getGCMRegistrationId()));
-                    nameValuePairs.add(new BasicNameValuePair("hardware_model", SystemUtils.isRunningInEmulator(mService) ? "Android emulator" : Build.MODEL));
+                    nameValuePairs.add(new BasicNameValuePair("hardware_model", SystemPlugin.getDeviceModelName()));
                     TelephonyManager telephonyManager = (TelephonyManager) mService.getSystemService(Context.TELEPHONY_SERVICE);
                     if (telephonyManager != null) {
                         nameValuePairs.add(new BasicNameValuePair("sim_carrier_name", telephonyManager.getSimOperatorName()));

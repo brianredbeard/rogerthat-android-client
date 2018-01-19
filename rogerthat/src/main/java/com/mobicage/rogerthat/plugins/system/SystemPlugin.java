@@ -308,11 +308,7 @@ public class SystemPlugin implements MobicagePlugin {
         }
 
         // Device info
-        String modelName = DeviceName.getDeviceName();
-        if (!Build.MODEL.equalsIgnoreCase(modelName)) {
-            modelName = String.format("%s (%s)", modelName, Build.MODEL);
-        }
-        info.device.modelName = modelName;
+        info.device.modelName = getDeviceModelName();
         info.device.osVersion = SystemUtils.getAndroidVersion() + "";
 
         // Locale info
@@ -326,6 +322,14 @@ public class SystemPlugin implements MobicagePlugin {
         info.timeZone.secondsFromGMT = timeZone.getRawOffset() / 1000;
 
         return info;
+    }
+
+    public static String getDeviceModelName() {
+        String modelName = DeviceName.getDeviceName();
+        if (!Build.MODEL.equalsIgnoreCase(modelName)) {
+            modelName = String.format("%s (%s)", modelName, Build.MODEL);
+        }
+        return modelName;
     }
 
     public void updateAppAsset(String kind, String url, float scaleX) {
