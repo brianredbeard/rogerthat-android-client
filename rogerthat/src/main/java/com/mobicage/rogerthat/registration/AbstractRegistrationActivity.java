@@ -39,6 +39,7 @@ import com.mobicage.rogerthat.util.GoogleServicesUtils;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.security.SecurityUtils;
+import com.mobicage.rogerthat.util.system.SafeAsyncTask;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.Pausable;
@@ -68,16 +69,24 @@ import org.json.simple.JSONValue;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.net.ssl.SSLException;
+
 
 public abstract class AbstractRegistrationActivity extends ServiceBoundActivity {
 
-    private static final int XMPP_CHECK_DELAY_MILLIS = 5000;
-    private static final int XMPP_MAX_NUM_ATTEMPTS = 8;
+    public final static String INTENT_LOG_URL = "com.mobicage.rogerthat.registration.log_url";
+
+    public static final int HTTP_RETRY_COUNT = 3;
+    public static final int HTTP_TIMEOUT = 10000;
+
+    public static final int XMPP_CHECK_DELAY_MILLIS = 5000;
+    public static final int XMPP_MAX_NUM_ATTEMPTS = 8;
 
     public static final String INVITOR_CODE_CONFIGKEY = "invitor_code";
     public static final String INVITOR_SECRET_CONFIGKEY = "invitor_secret";
@@ -294,6 +303,92 @@ public abstract class AbstractRegistrationActivity extends ServiceBoundActivity 
         } else {
             runDelayedOnWorker(runnable, XMPP_CHECK_DELAY_MILLIS);
         }
+    }
+
+    public void sendRegistrationStep(final String step) {
+        List<NameValuePair> extraParams = new ArrayList<>();
+        sendRegistrationStep(step, extraParams);
+    }
+
+    public void sendRegistrationUrl(final String url, final int count) {
+        List<NameValuePair> extraParams = new ArrayList<>();
+        extraParams.add(new BasicNameValuePair("url", url));
+        extraParams.add(new BasicNameValuePair("count", count + ""));
+        sendRegistrationStep("log_url", extraParams);
+    }
+
+    public void sendRegistrationStep(final String step, final List<NameValuePair> extraParams) {
+        new SafeAsyncTask<Object, Object, Object>() {
+
+            @Override
+            protected Object safeDoInBackground(Object... params) {
+                final HttpPost httpPost = new HttpPost(CloudConstants.REGISTRATION_LOG_STEP_URL);
+                httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
+                httpPost.setHeader("User-Agent", MainService.getUserAgent(mActivity));
+                List<NameValuePair> formParams = new ArrayList<NameValuePair>();
+                formParams.add(new BasicNameValuePair("step", step));
+                formParams.add(new BasicNameValuePair("install_id", mWizard.getInstallationId()));
+                formParams.addAll(extraParams);
+
+                UrlEncodedFormEntity entity;
+                try {
+                    entity = new UrlEncodedFormEntity(formParams, HTTP.UTF_8);
+                } catch (UnsupportedEncodingException e) {
+                    L.bug(e);
+                    return false;
+                }
+                httpPost.setEntity(entity);
+                L.d("Sending registration step: " + step);
+                HttpResponse response;
+                try {
+                    response = HTTPUtil.getHttpClient(HTTP_TIMEOUT, HTTP_RETRY_COUNT).execute(httpPost);
+                } catch (ClientProtocolException e) {
+                    L.bug(e);
+                    return false;
+                } catch (SSLException e) {
+                    L.bug(e);
+                    return false;
+                } catch (IOException e) {
+                    L.e(e);
+                    return false;
+                }
+
+                if (response.getEntity() != null) {
+                    try {
+                        response.getEntity().consumeContent();
+                    } catch (IOException e) {
+                        L.bug(e);
+                        return false;
+                    }
+                }
+
+                L.d("Registration step " + step + " sent");
+                final int responseCode = response.getStatusLine().getStatusCode();
+                if (responseCode != HttpStatus.SC_OK) {
+                    L.bug("HTTP request resulted in status code " + responseCode);
+                    return false;
+                }
+
+                return true;
+            }
+
+            @Override
+            protected void safeOnPostExecute(Object result) {
+            }
+
+            @Override
+            protected void safeOnCancelled(Object result) {
+            }
+
+            @Override
+            protected void safeOnProgressUpdate(Object... values) {
+            }
+
+            @Override
+            protected void safeOnPreExecute() {
+            }
+
+        }.execute();
     }
 
     @SuppressWarnings("unchecked")

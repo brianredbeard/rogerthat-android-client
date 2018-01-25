@@ -93,11 +93,6 @@ public class QRRegistrationActivity extends AbstractRegistrationActivity {
     private static final int MARKET_INSTALL_RESULT = 60000;
     private final static int ZXING_SCAN_QR_CODE_RESULT = 60001;
 
-    private static final int XMPP_CHECK_DELAY_MILLIS = 5000;
-    private static final int XMPP_MAX_NUM_ATTEMPTS = 8;
-    private static final int HTTP_RETRY_COUNT = 3;
-    private static final int HTTP_TIMEOUT = 10000;
-
     private QRRegistrationWizard mWiz;
     private HttpClient mHttpClient;
     private ProgressDialog mProgressDialog = null;
@@ -602,78 +597,5 @@ public class QRRegistrationActivity extends AbstractRegistrationActivity {
 
     @Override
     protected void onServiceUnbound() {
-    }
-
-    public void sendRegistrationStep(final String step) {
-        new SafeAsyncTask<Object, Object, Object>() {
-
-            @Override
-            protected Object safeDoInBackground(Object... params) {
-                final HttpPost httpPost = new HttpPost(CloudConstants.REGISTRATION_LOG_STEP_URL);
-                httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
-                httpPost.setHeader("User-Agent", MainService.getUserAgent(QRRegistrationActivity.this));
-                List<NameValuePair> formParams = new ArrayList<NameValuePair>();
-                formParams.add(new BasicNameValuePair("step", step));
-                formParams.add(new BasicNameValuePair("install_id", mWiz.getInstallationId()));
-
-                UrlEncodedFormEntity entity;
-                try {
-                    entity = new UrlEncodedFormEntity(formParams, HTTP.UTF_8);
-                } catch (UnsupportedEncodingException e) {
-                    L.bug(e);
-                    return false;
-                }
-                httpPost.setEntity(entity);
-                L.d("Sending registration step: " + step);
-                HttpResponse response;
-                try {
-                    response = HTTPUtil.getHttpClient(HTTP_TIMEOUT, HTTP_RETRY_COUNT).execute(httpPost);
-                } catch (ClientProtocolException e) {
-                    L.bug(e);
-                    return false;
-                } catch (SSLException e) {
-                    L.bug(e);
-                    return false;
-                } catch (IOException e) {
-                    L.e(e);
-                    return false;
-                }
-
-                if (response.getEntity() != null) {
-                    try {
-                        response.getEntity().consumeContent();
-                    } catch (IOException e) {
-                        L.bug(e);
-                        return false;
-                    }
-                }
-
-                L.d("Registration step " + step + " sent");
-                final int responseCode = response.getStatusLine().getStatusCode();
-                if (responseCode != HttpStatus.SC_OK) {
-                    L.bug("HTTP request resulted in status code " + responseCode);
-                    return false;
-                }
-
-                return true;
-            }
-
-            @Override
-            protected void safeOnPostExecute(Object result) {
-            }
-
-            @Override
-            protected void safeOnCancelled(Object result) {
-            }
-
-            @Override
-            protected void safeOnProgressUpdate(Object... values) {
-            }
-
-            @Override
-            protected void safeOnPreExecute() {
-            }
-
-        }.execute();
     }
 }
