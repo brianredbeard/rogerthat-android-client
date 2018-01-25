@@ -31,15 +31,17 @@ import android.webkit.WebView;
 import android.annotation.SuppressLint;
 
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.registration.AbstractRegistrationActivity;
 import com.mobicage.rogerthat.util.OauthUtils;
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.config.CloudConstants;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-public class OauthActivity extends Activity {
+public class OauthActivity extends ServiceBoundActivity {
 
     public static final String FINISHED_OAUTH = "com.mobicage.rogerthat.FINISHED_OAUTH";
 
@@ -63,6 +65,7 @@ public class OauthActivity extends Activity {
     private String mScopes; // Comma separated
 
     private WebView mWebview;
+    private int mCount = 0;
 
     @SuppressLint({ "SetJavaScriptEnabled", "NewApi" })
     @Override
@@ -80,18 +83,6 @@ public class OauthActivity extends Activity {
         mClientId = intent.getStringExtra(OauthActivity.CLIENT_ID);
         mOauthUrl = intent.getStringExtra(OauthActivity.OAUTH_URL);
         mScopes = intent.getStringExtra(OauthActivity.SCOPES);
-
-        Uri.Builder builder = Uri.parse(mOauthUrl).buildUpon();
-        if (mBuildUrl) {
-            builder.appendQueryParameter("state", mState);
-            builder.appendQueryParameter("client_id", mClientId);
-            builder.appendQueryParameter("scope", mScopes);
-            builder.appendQueryParameter("redirect_uri", OauthUtils.getCallbackUrl());
-            builder.appendQueryParameter("response_type", "code");
-        }
-
-        final String url = builder.build().toString();
-
 
         WebSettings webviewSettings = mWebview.getSettings();
         webviewSettings.setJavaScriptEnabled(true);
@@ -132,6 +123,8 @@ public class OauthActivity extends Activity {
                     finish();
 
                     return true;
+                } else {
+                    sendUrl(url);
                 }
                 if (loadUrl) {
                     view.loadUrl(url);
@@ -140,9 +133,40 @@ public class OauthActivity extends Activity {
             }
 
         });
+    }
+
+    private void sendUrl(final String url) {
+        mCount += 1;
+        Intent logUrl = new Intent(AbstractRegistrationActivity.INTENT_LOG_URL);
+        logUrl.putExtra("count", mCount);
+        logUrl.putExtra("url", url);
+        mService.sendBroadcast(logUrl);
+    }
+
+    @Override
+    protected void onServiceBound() {
+        T.UI();
+
+        Uri.Builder builder = Uri.parse(mOauthUrl).buildUpon();
+        if (mBuildUrl) {
+            builder.appendQueryParameter("state", mState);
+            builder.appendQueryParameter("client_id", mClientId);
+            builder.appendQueryParameter("scope", mScopes);
+            builder.appendQueryParameter("redirect_uri", OauthUtils.getCallbackUrl());
+            builder.appendQueryParameter("response_type", "code");
+        }
+
+        final String url = builder.build().toString();
+
+        sendUrl(url);
 
         mWebview.loadUrl(url);
         mWebview.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+    }
+
+    @Override
+    protected void onServiceUnbound() {
+        T.UI();
     }
 
     @Override

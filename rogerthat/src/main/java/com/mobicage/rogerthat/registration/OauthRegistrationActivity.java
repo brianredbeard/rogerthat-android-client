@@ -20,7 +20,10 @@ package com.mobicage.rogerthat.registration;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.View;
@@ -31,6 +34,7 @@ import android.widget.ViewFlipper;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.Installation;
+import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.OauthActivity;
 import com.mobicage.rogerthat.util.GoogleServicesUtils;
 import com.mobicage.rogerthat.util.GoogleServicesUtils.GCMRegistrationIdFoundCallback;
@@ -38,6 +42,7 @@ import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
@@ -78,12 +83,29 @@ public class OauthRegistrationActivity extends AbstractRegistrationActivity {
     private TextView mErrorTextView;
     private static final int START_OAUTH_REQUEST_CODE = 1;
 
+    private BroadcastReceiver mBroadcastReceiver = new SafeBroadcastReceiver() {
+        @Override
+        public String[] onSafeReceive(Context context, Intent intent) {
+            T.UI();
+            if (INTENT_LOG_URL.equals(intent.getAction())) {
+                String url = intent.getStringExtra("url");
+                int count = intent.getIntExtra("count", 0);
+                sendRegistrationUrl(url, count);
+            }
+
+            return null;
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         T.UI();
         init(this);
         mHttpClient = HTTPUtil.getHttpClient(HTTP_TIMEOUT, HTTP_RETRY_COUNT);
+
+        final IntentFilter filter = new IntentFilter(INTENT_LOG_URL);
+        registerReceiver(mBroadcastReceiver, filter);
 
         // TODO: This has to be improved.
         // If the app relies on GCM the user should not be able to register.
@@ -125,6 +147,7 @@ public class OauthRegistrationActivity extends AbstractRegistrationActivity {
     @Override
     protected void onDestroy() {
         closeWorkerThread();
+        unregisterReceiver(mBroadcastReceiver);
         super.onDestroy();
     }
 

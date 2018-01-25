@@ -35,7 +35,6 @@ import android.os.RemoteException;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.telephony.TelephonyManager;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
@@ -82,15 +81,12 @@ import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
-import com.mobicage.rogerthat.util.system.SafeAsyncTask;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
-import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.FSListView;
-import com.mobicage.rogerthat.util.ui.TestUtils;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rogerthat.util.ui.Wizard;
 import com.mobicage.rpc.Credentials;
@@ -110,21 +106,18 @@ import org.altbeacon.beacon.logging.LogManager;
 import org.altbeacon.beacon.logging.Loggers;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HTTP;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -133,15 +126,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.net.ssl.SSLException;
-
 // TODO: this class still has lots of duplicated code
 
 public class RegistrationActivity2 extends AbstractRegistrationActivity {
 
     private static final int PIN_LENGTH = 4;
-    private static final int HTTP_RETRY_COUNT = 3;
-    private static final int HTTP_TIMEOUT = 10000;
 
     public static final String QRSCAN_CONFIGKEY = "QR_SCAN";
     public static final String OPENED_URL_CONFIGKEY = "opened_url";
@@ -185,6 +174,10 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                 if (mBeaconManager != null) {
                     mBeaconManager.setBackgroundMode(false);
                 }
+            } else if (INTENT_LOG_URL.equals(intent.getAction())) {
+                String url = intent.getStringExtra("url");
+                int count = intent.getIntExtra("count", 0);
+                sendRegistrationUrl(url, count);
             }
 
             return null;
@@ -205,6 +198,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
         filter.addAction(RegistrationWizard2.INTENT_GOT_BEACON_REGIONS);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
+        filter.addAction(INTENT_LOG_URL);
         registerReceiver(mBroadcastReceiver, filter);
 
         // TODO: This has to be improved.
@@ -1516,79 +1510,6 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
             }
         }
         return super.onKeyDown(keyCode, event);
-    }
-
-    public void sendRegistrationStep(final String step) {
-        new SafeAsyncTask<Object, Object, Object>() {
-
-            @Override
-            protected Object safeDoInBackground(Object... params) {
-                final HttpPost httpPost = new HttpPost(CloudConstants.REGISTRATION_LOG_STEP_URL);
-                httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
-                httpPost.setHeader("User-Agent", MainService.getUserAgent(RegistrationActivity2.this));
-                List<NameValuePair> formParams = new ArrayList<NameValuePair>();
-                formParams.add(new BasicNameValuePair("step", step));
-                formParams.add(new BasicNameValuePair("install_id", mWiz.getInstallationId()));
-
-                UrlEncodedFormEntity entity;
-                try {
-                    entity = new UrlEncodedFormEntity(formParams, HTTP.UTF_8);
-                } catch (UnsupportedEncodingException e) {
-                    L.bug(e);
-                    return false;
-                }
-                httpPost.setEntity(entity);
-                L.d("Sending registration step: " + step);
-                HttpResponse response;
-                try {
-                    response = HTTPUtil.getHttpClient(HTTP_TIMEOUT, HTTP_RETRY_COUNT).execute(httpPost);
-                } catch (ClientProtocolException e) {
-                    L.bug(e);
-                    return false;
-                } catch (SSLException e) {
-                    L.bug(e);
-                    return false;
-                } catch (IOException e) {
-                    L.e(e);
-                    return false;
-                }
-
-                if (response.getEntity() != null) {
-                    try {
-                        response.getEntity().consumeContent();
-                    } catch (IOException e) {
-                        L.bug(e);
-                        return false;
-                    }
-                }
-
-                L.d("Registration step " + step + " sent");
-                final int responseCode = response.getStatusLine().getStatusCode();
-                if (responseCode != HttpStatus.SC_OK) {
-                    L.bug("HTTP request resulted in status code " + responseCode);
-                    return false;
-                }
-
-                return true;
-            }
-
-            @Override
-            protected void safeOnPostExecute(Object result) {
-            }
-
-            @Override
-            protected void safeOnCancelled(Object result) {
-            }
-
-            @Override
-            protected void safeOnProgressUpdate(Object... values) {
-            }
-
-            @Override
-            protected void safeOnPreExecute() {
-            }
-
-        }.execute();
     }
 
     @TargetApi(18)
