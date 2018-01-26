@@ -114,8 +114,15 @@ public class Test1Register {
                 }
             }
         }
+        try {
+            onView(withId(R.id.registration_devices_register))
+                    .perform(click());
+        } catch (PerformException ex) {
+            L.i("Not clicking 'Unregister other devices'");
+        }
         // Keep activity open until we are properly registered.
         while (!activityTestRule.getActivity().getMainService().getRegisteredFromConfig()) {
+
             Thread.sleep(100);
         }
     }
