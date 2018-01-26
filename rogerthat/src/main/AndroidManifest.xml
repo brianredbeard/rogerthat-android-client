@@ -2,8 +2,8 @@
           xmlns:tools="http://schemas.android.com/tools"
           package="com.mobicage.rogerth.at"
           android:configChanges="orientation|screenSize"
-          android:versionCode="3564"
-          android:versionName="2.1.3564.A">
+          android:versionCode="3640"
+          android:versionName="2.1.3640.A">
 
     <!-- BEGIN GCM -->
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />

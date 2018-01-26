@@ -449,16 +449,12 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             if (mQRCodeScanner.hasSurface == true
                     && (mQRCodeScanner.surfaceHolder != null || mQRCodeScanner.surfaceTexture != null)) {
                 if (mBranding.getVisibility() == View.VISIBLE) {
-                    if (T.getThreadType() == T.UI) {
-                        mQRCodeScanner.startScanningForQRCodes();
-                    } else {
-                        mService.postAtFrontOfUIHandler(new SafeRunnable() {
-                            @Override
-                            protected void safeRun() throws Exception {
-                                mQRCodeScanner.startScanningForQRCodes();
-                            }
-                        });
-                    }
+                    mService.runOnUIHandler(new SafeRunnable() {
+                        @Override
+                        protected void safeRun() throws Exception {
+                            mQRCodeScanner.startScanningForQRCodes();
+                        }
+                    });
                 }
             }
             deliverResult(requestId, null, null);
@@ -487,7 +483,12 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 Intent intent = new Intent(CaptureActivity.FINISH_INTENT);
                 sendBroadcast(intent);
             } else {
-                mQRCodeScanner.stopScanningForQRCodes();
+                mService.runOnUIHandler(new SafeRunnable() {
+                    @Override
+                    protected void safeRun() throws Exception {
+                        mQRCodeScanner.stopScanningForQRCodes();
+                    }
+                });
             }
 
             deliverResult(requestId, null, null);
@@ -813,27 +814,6 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             });
         }
 
-        final View brandingFooter = findViewById(R.id.branding_footer_container);
-
-        if (CloudConstants.isContentBrandingApp()) {
-            final ImageView brandingFooterClose = (ImageView) findViewById(R.id.branding_footer_close);
-            final TextView brandingFooterText = (TextView) findViewById(R.id.branding_footer_text);
-            brandingFooterText.setText(getString(R.string.back));
-            brandingFooterClose.setColorFilter(UIUtils.imageColorFilter(ContextCompat.getColor(this,
-                R.color.mc_homescreen_text)));
-
-            brandingFooter.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (mQRCodeScanner != null) {
-                        mQRCodeScanner.onResume();
-                    }
-                    brandingFooter.setVisibility(View.GONE);
-                    mBranding.setVisibility(View.VISIBLE);
-                }
-            });
-        }
-
         final RelativeLayout openPreview = (RelativeLayout) findViewById(R.id.preview_holder);
 
         openPreview.setOnClickListener(new OnClickListener() {
@@ -892,9 +872,6 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                     poke(tag);
                     return true;
                 } else if (lowerCaseUrl.startsWith("http://") || lowerCaseUrl.startsWith("https://")) {
-                    if (mQRCodeScanner != null) {
-                        mQRCodeScanner.onPause();
-                    }
                     CustomTabsIntent.Builder customTabsBuilder = new CustomTabsIntent.Builder();
                     CustomTabsIntent customTabsIntent = customTabsBuilder.build();
                     customTabsIntent.launchUrl(ActionScreenActivity.this, uri);
@@ -985,8 +962,6 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         if (mQRCodeScanner != null) {
             if (mQRCodeScanner.cameraManager == null) {
                 mQRCodeScanner.startCamera();
-            } else if (mBranding.getVisibility() == View.VISIBLE) {
-                    mQRCodeScanner.onResume();
             }
         }
 

@@ -28,6 +28,7 @@ public class HeartBeatRequestTO implements com.mobicage.rpc.IJSONable {
     public String SDKVersion;
     public long appType;
     public String buildFingerPrint;
+    public String deviceId;
     public String deviceModelName;
     public String[] embeddedApps;
     public boolean flushBackLog;
@@ -74,6 +75,12 @@ public class HeartBeatRequestTO implements com.mobicage.rpc.IJSONable {
             this.buildFingerPrint = (String) val;
         } else {
             throw new IncompleteMessageException("com.mobicage.to.system.HeartBeatRequestTO object is missing field 'buildFingerPrint'");
+        }
+        if (json.containsKey("deviceId")) {
+            Object val = json.get("deviceId");
+            this.deviceId = (String) val;
+        } else {
+            throw new IncompleteMessageException("com.mobicage.to.system.HeartBeatRequestTO object is missing field 'deviceId'");
         }
         if (json.containsKey("deviceModelName")) {
             Object val = json.get("deviceModelName");
@@ -227,6 +234,7 @@ public class HeartBeatRequestTO implements com.mobicage.rpc.IJSONable {
         obj.put("SDKVersion", this.SDKVersion);
         obj.put("appType", this.appType);
         obj.put("buildFingerPrint", this.buildFingerPrint);
+        obj.put("deviceId", this.deviceId);
         obj.put("deviceModelName", this.deviceModelName);
         if (this.embeddedApps == null) {
             obj.put("embeddedApps", null);

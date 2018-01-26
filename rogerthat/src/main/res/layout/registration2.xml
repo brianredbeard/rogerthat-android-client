@@ -27,6 +27,8 @@
 
             <include layout="@layout/registration_activation"/>
 
+            <include layout="@layout/registration_devices"/>
+
 
         </com.mobicage.rogerthat.util.ui.SafeViewFlipper>
     </ScrollView>

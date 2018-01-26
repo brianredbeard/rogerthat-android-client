@@ -50,12 +50,12 @@ import com.mobicage.rogerthat.plugins.system.JSEmbedding;
 import com.mobicage.rogerthat.plugins.system.SystemPlugin;
 import com.mobicage.rogerthat.util.IOUtils;
 import com.mobicage.rogerthat.util.RegexPatterns;
-import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.pickle.PickleException;
 import com.mobicage.rogerthat.util.pickle.Pickleable;
 import com.mobicage.rogerthat.util.pickle.Pickler;
+import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SystemUtils;
@@ -86,6 +86,7 @@ import org.json.simple.JSONValue;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.DataInput;
@@ -96,6 +97,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
@@ -109,6 +112,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -2029,16 +2033,114 @@ public class BrandingMgr implements Pickleable, Closeable {
         }
     }
 
+    private static Object safeDeserialize(String s) {
+        byte[] b = Base64.decode(s);
+        try {
+            ByteArrayInputStream bais = new ByteArrayInputStream(b);
+            ObjectInputStream ois = new ObjectInputStream(bais);
+            try {
+                return ois.readObject();
+            } finally {
+                ois.close();
+            }
+        } catch (Exception e) {
+            L.bug(e);
+        }
+        return null;
+    }
+
+    private static String safeSerialize(Map<String, Object> jsonMap) {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try {
+                new ObjectOutputStream(baos).writeObject(jsonMap);
+                return Base64.encodeBytes(baos.toByteArray());
+            } finally {
+                baos.close();
+            }
+        } catch (IOException e) {
+            return L.getStackTraceString(e);
+        }
+    }
+
+    private String serialize(BrandedItem item) {
+        Map<String, Object> jsonMap = item.toJSONMap();
+        try {
+            return JSONValue.toJSONString(jsonMap);
+        } catch (StackOverflowError e) { // Hunting down issue #55
+            List<Object> memLocations = new ArrayList<>();
+            Stack<Object> breadcrumb = new Stack<>();
+            if (checkObjectForCircularReferences(memLocations, breadcrumb, jsonMap)) {
+                throw new Error("Found circular reference while serializing BrandedItem!\n\nbreadcrumb = "
+                        + breadcrumb + "\n\njsonMap b64 = " + safeSerialize(jsonMap));
+            }
+            throw new Error("Expected to find circular reference in " + safeSerialize(jsonMap));
+        }
+    }
+
+    private boolean checkObjectForCircularReferences(List<Object> memLocations, Stack<Object> breadcrumb, Object
+            value) {
+        if (memLocations.contains(value)) {
+            return true;
+        }
+
+        if (value instanceof Map) {
+            memLocations.add(value);
+            if (checkMapForCircularReferences(memLocations, breadcrumb, (Map) value)) {
+                return true;
+            }
+            memLocations.remove(value);
+        } else if (value instanceof List) {
+            memLocations.add(value);
+            if (checkListForCircularReferences(memLocations, breadcrumb, (List<Object>) value)) {
+                return true;
+            }
+            memLocations.remove(value);
+        }
+
+        return false;
+    }
+
+    private boolean checkListForCircularReferences(List<Object> memLocations, Stack<Object> breadcrumb, List<Object>
+            jsonArray) {
+
+        for (int i = 0; i < jsonArray.size(); i++) {
+            breadcrumb.push(i);
+
+            if (checkObjectForCircularReferences(memLocations, breadcrumb, jsonArray.get(i))) {
+                return true;
+            }
+
+            breadcrumb.pop();
+        }
+        return false;
+    }
+
+    private boolean checkMapForCircularReferences(List<Object> memLocations, Stack<Object> breadcrumb, Map<String,
+            Object> jsonMap) {
+
+        for (Map.Entry<String, Object> entry : jsonMap.entrySet()) {
+            breadcrumb.push(entry.getKey());
+
+            if (checkObjectForCircularReferences(memLocations, breadcrumb, entry.getValue())) {
+                return true;
+            }
+
+            breadcrumb.pop();
+        }
+        return false;
+    }
+
     @Override
     public void writePickle(DataOutput out) throws IOException {
         T.dontCare();
         out.writeInt(mQueue.size());
         for (BrandedItem item : mQueue) {
-            out.writeUTF(JSONValue.toJSONString(item.toJSONMap()));
+            out.writeUTF(serialize(item));
         }
         out.writeInt(mDownloadMgrQueue.size());
         for (BrandedItem item : mDownloadMgrQueue.values()) {
-            out.writeUTF(JSONValue.toJSONString(item.toJSONMap()));
+            out.writeUTF(serialize(item));
         }
     }
 

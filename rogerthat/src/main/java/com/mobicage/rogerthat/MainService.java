@@ -61,6 +61,7 @@ import com.mobicage.rogerthat.plugins.trackme.TrackmePlugin;
 import com.mobicage.rogerthat.upgrade.Upgrader;
 import com.mobicage.rogerthat.util.CachedDownloader;
 import com.mobicage.rogerthat.util.GoogleServicesUtils;
+import com.mobicage.rogerthat.util.IOUtils;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.db.DatabaseManager;
 import com.mobicage.rogerthat.util.geo.GeoLocationProvider;
@@ -115,6 +116,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -246,6 +248,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
 
     private volatile long mAdjustedTimeDiff = 0; // written and modified on UI thread; read on all threads
     private boolean mMustWipePersistenceInOnDestroy = false; // UI thread
+    private String mWipeReason = null; // UI thread
 
     private boolean mScreenIsOn = false;
 
@@ -601,6 +604,10 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         }
     }
 
+    public long getAdjustedTimeDiff() {
+        return this.mAdjustedTimeDiff;
+    }
+
     @Override
     public long currentTimeMillis() {
         T.dontCare();
@@ -796,7 +803,12 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
             mDatabaseManager.wipeAndClose();
             destroyPreferences();
             removeLookAndFeel(this);
-            showUnregisterNotification();
+            String reason = mWipeReason;
+            if (TextUtils.isEmptyOrWhitespace(reason)) {
+                reason = getString(R.string.device_was_unregistered);
+            }
+            createUnregisterFile(reason);
+            showUnregisterNotification(reason);
         } else {
             mDatabaseManager.close();
         }
@@ -1118,10 +1130,10 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         closeIdentity();
     }
 
-    public void wipe(long delay) {
+    public void wipe(long delay, String reason) {
         T.UI();
         mMustWipePersistenceInOnDestroy = true;
-
+        mWipeReason = reason;
         if (!mIsBacklogRunning) {
             sendBroadcast(new Intent(CLOSE_ACTIVITY_INTENT));
             stopSelf();
@@ -1189,9 +1201,49 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         }
     }
 
-    private void showUnregisterNotification() {
+    private File getUnregisterReasonFile() {
+        File file = IOUtils.getFilesDirectory(this);
+        return new File(file, "unregister_reason.txt");
+    }
+
+    public String getUnregisterReason() {
+        try {
+            File f = getUnregisterReasonFile();
+            if (!f.exists()) {
+                return null;
+            }
+            FileInputStream fis = new FileInputStream(f);
+            try {
+                return SystemUtils.convertStreamToString(fis);
+            } finally {
+                fis.close();
+            }
+        } catch (Exception e) {
+            L.e("Failed to getUnregisterReason", e);
+            return null;
+        }
+    }
+
+    public boolean deleteUnregisterFile() {
+        File file = getUnregisterReasonFile();
+        if (file.exists()) {
+            return file.delete();
+        }
+        return true;
+    }
+
+    private void createUnregisterFile(String reason) {
         T.UI();
-        UIUtils.showLongToast(this, getString(R.string.device_was_unregistered));
+        try {
+            SystemUtils.writeStringToFile(getUnregisterReasonFile(), reason);
+        } catch (Exception e) {
+            L.e("Failed to createUnregisterFile", e);
+        }
+    }
+
+    private void showUnregisterNotification(String reason) {
+        T.UI();
+        UIUtils.showLongToast(this, reason);
     }
 
     private void setupSystemRPC() {
@@ -1218,7 +1270,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
                     @Override
                     protected void safeRun() throws Exception {
                         L.d("Server called unregisterMobile()");
-                        wipe(WIPE_DELAY_MILLIS);
+                        wipe(WIPE_DELAY_MILLIS, request.reason);
                     }
                 });
 

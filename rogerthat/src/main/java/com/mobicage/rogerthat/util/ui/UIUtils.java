@@ -137,6 +137,7 @@ public class UIUtils {
         sActivities.add(activity);
         L.d(activity.getClass().getSimpleName() + " starting. Visible activities: " + sActivities);
         connectToNewsChannel(mainService);
+        checkAppDidEnterForeGround(mainService);
     }
 
     public static void onActivityBound(final MainService mainService) {
@@ -144,6 +145,7 @@ public class UIUtils {
             throw new RuntimeException("This method must be called from T.UI, got " + T.getThreadName());
         }
         connectToNewsChannel(mainService);
+        checkAppDidEnterForeGround(mainService);
     }
 
     private static void connectToNewsChannel(final MainService mainService) {
@@ -152,6 +154,12 @@ public class UIUtils {
             if (newsPlugin != null) {
                 newsPlugin.connectToChannel();
             }
+        }
+    }
+
+    private static void checkAppDidEnterForeGround(MainService mainService) {
+        if (mainService != null && sActivities.size() == 1) {
+            mainService.kickHttpCommunication(true, "App did enter foreground");
         }
     }
 

@@ -18,33 +18,6 @@
 
 package com.mobicage.rogerthat.plugins.messaging.mfr;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-import org.mozilla.javascript.Callable;
-import org.mozilla.javascript.ConsString;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.NativeArray;
-import org.mozilla.javascript.NativeObject;
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
-import org.mozilla.javascript.UniqueTag;
-
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.support.annotation.NonNull;
@@ -65,6 +38,29 @@ import com.mobicage.rpc.Rpc;
 import com.mobicage.rpc.RpcCall;
 import com.mobicage.to.messaging.jsmfr.MessageFlowErrorRequestTO;
 import com.mobicage.to.messaging.jsmfr.MessageFlowErrorResponseTO;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+import org.mozilla.javascript.Callable;
+import org.mozilla.javascript.ConsString;
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.Function;
+import org.mozilla.javascript.NativeArray;
+import org.mozilla.javascript.NativeObject;
+import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
+import org.mozilla.javascript.UniqueTag;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @SuppressWarnings("unchecked")
 public class JsMfr {
@@ -199,7 +195,7 @@ public class JsMfr {
         final JsMfr jsMfr = new JsMfr();
         jsMfr.mService = mainService;
 
-        FriendsPlugin friendsPlugin = jsMfr.mService.getPlugin(FriendsPlugin.class);
+        final FriendsPlugin friendsPlugin = jsMfr.mService.getPlugin(FriendsPlugin.class);
         final String htmlString;
         try {
             htmlString = friendsPlugin.getStore().getStaticFlow(mfr.staticFlowHash);
@@ -214,61 +210,57 @@ public class JsMfr {
             return;
         }
 
-        Map<String, Object> request = (Map<String, Object>) userInput.get("request");
-
-        String serviceEmail = (String) request.get("service");
-        if (TextUtils.isEmptyOrWhitespace(serviceEmail)) {
-            serviceEmail = (String) request.get("email");
-        }
-        String context = (String) request.get("context");
-
-        final JSONObject state;
-        if (mfr.state == null) {
-            state = new JSONObject();
-        } else {
-            state = (JSONObject) JSONValue.parse(mfr.state);
-        }
-
-        MyIdentity myIdentity = mainService.getIdentityStore().getIdentity();
-        if (!state.containsKey("member")) {
-            state.put("member", myIdentity.getEmail());
-        }
-
-        Friend serviceFriend = null;
-        if (serviceEmail != null && !state.containsKey("user")) {
-            serviceFriend = friendsPlugin.getStore().getExistingFriend(serviceEmail);
-        }
-
-        if (serviceFriend != null) {
-            Map<String, Object> info = friendsPlugin.getRogerthatUserAndServiceInfo(serviceEmail, serviceFriend);
-            state.put("user", info.get("user"));
-            state.put("service", info.get("service"));
-            state.put("system", info.get("system"));
-        } else if (!state.containsKey("user")) {
-            Map<String, Object> empty = new HashMap<String, Object>();
-            state.put("user", empty);
-            state.put("service", empty);
-            state.put("system", empty);
-        }
-
-        Map<String, Object> system = (Map<String, Object>) state.get("system");
-        if (system != null) {
-            system.put("internet", getInternetInfoMap(mainService));
-        }
-
-        final JSONObject ui = (JSONObject) JSONValue.parse(JSONValue.toJSONString(userInput));
-
-        final String appVersion = MainService.getVersion(mainService);
-        final String jsCommand = String.format("mc_run_ext(transition, \"%s\", %s, %s)", appVersion,
-            state.toJSONString(), JSONValue.toJSONString(userInput));
-
-        L.d("Executing JSMFR command");
-
-        final JsMfrWebviewTag tag = new JsMfrWebviewTag(mfr.parentKey, context, jsCommand);
-
         mainService.postOnBIZZHandler(new SafeRunnable() {
             @Override
             protected void safeRun() {
+                Map<String, Object> request = (Map<String, Object>) userInput.get("request");
+
+                String serviceEmail = (String) request.get("service");
+                if (TextUtils.isEmptyOrWhitespace(serviceEmail)) {
+                    serviceEmail = (String) request.get("email");
+                }
+                String context = (String) request.get("context");
+
+                final JSONObject state;
+                if (mfr.state == null) {
+                    state = new JSONObject();
+                } else {
+                    state = (JSONObject) JSONValue.parse(mfr.state);
+                }
+
+                MyIdentity myIdentity = mainService.getIdentityStore().getIdentity();
+                if (!state.containsKey("member")) {
+                    state.put("member", myIdentity.getEmail());
+                }
+
+                Friend serviceFriend = null;
+                if (serviceEmail != null && !state.containsKey("user")) {
+                    serviceFriend = friendsPlugin.getStore().getExistingFriend(serviceEmail);
+                }
+
+                if (serviceFriend != null) {
+                    Map<String, Object> info = friendsPlugin.getRogerthatUserAndServiceInfo(serviceEmail, serviceFriend);
+                    state.put("user", info.get("user"));
+                    state.put("service", info.get("service"));
+                    state.put("system", info.get("system"));
+                } else if (!state.containsKey("user")) {
+                    Map<String, Object> empty = new HashMap<String, Object>();
+                    state.put("user", empty);
+                    state.put("service", empty);
+                    state.put("system", empty);
+                }
+
+                Map<String, Object> system = (Map<String, Object>) state.get("system");
+                if (system != null) {
+                    system.put("internet", getInternetInfoMap(mainService));
+                }
+
+                final JSONObject ui = (JSONObject) JSONValue.parse(JSONValue.toJSONString(userInput));
+
+                final String appVersion = MainService.getVersion(mainService);
+
+                L.d("Executing JSMFR command");
+
                 SandboxContextFactory contextFactory = new SandboxContextFactory();
                 Context cx = contextFactory.makeContext();
                 contextFactory.enterContext(cx);
@@ -316,7 +308,7 @@ public class JsMfr {
                         L.d("calling doTopCall");
                         ScriptableObject.putProperty(scope, "returnScriptable", true);
                         rs = contextFactory.doTopCall(runFct, cx, scope, scope, new Object[] { transitionFct,
-                            appVersion, scriptableState, scriptableUI});
+                                appVersion, scriptableState, scriptableUI, mainService.getAdjustedTimeDiff()});
 
                         L.d("FlowCodeResult");
                     } else {
@@ -325,6 +317,9 @@ public class JsMfr {
                     }
 
                     if (rs != null) {
+                        final String jsCommand = String.format("mc_run_ext(transition, \"%s\", %s, %s, %s)", appVersion,
+                                state.toJSONString(), JSONValue.toJSONString(userInput), mainService.getAdjustedTimeDiff());
+                        final JsMfrWebviewTag tag = new JsMfrWebviewTag(mfr.parentKey, context, jsCommand);
                         if (rs instanceof String) {
                             try {
                                 jsMfr.processResult((JSONObject) JSONValue.parse((String)rs), tag);
@@ -429,7 +424,6 @@ public class JsMfr {
         L.d("Executing JS Validation command");
 
         final JsMfrWebviewTag tag = new JsMfrWebviewTag(parentKey, null, jsCommand);
-
         SandboxContextFactory contextFactory = new SandboxContextFactory();
         Context cx = contextFactory.makeContext();
         contextFactory.enterContext(cx);

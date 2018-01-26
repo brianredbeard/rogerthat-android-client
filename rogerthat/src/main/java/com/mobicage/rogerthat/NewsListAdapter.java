@@ -912,7 +912,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                     mQRCodeContainer.setPadding(0, UIUtils.convertDipToPixels(mActivity, 30), 0, 0);
                 }
 
-                mQRCode.setImageResource(R.drawable.qr_gray_preview); // todo ruben not working
+                mQRCode.setImageResource(R.drawable.qr_gray_preview); // todo not working
 
                 mMainService.postOnBIZZHandler(new SafeRunnable() {
                     @Override

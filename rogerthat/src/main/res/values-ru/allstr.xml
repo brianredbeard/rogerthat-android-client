@@ -57,6 +57,7 @@
     <string name="authenticate">Подтвердить личность</string>
     <string name="authenticate_first">Чтобы продолжить, вам необходимо подтвердить вашу личность.</string>
     <string name="authenticate_via_your_oauth_account">Подтвердите личность, используя ваш аккаунт %1$s.</string>
+    <string name="authorize">Авторизовать</string>
     <string name="back">Назад</string>
     <string name="birthdate">День рождения</string>
     <string name="broadcast_subscribed_to">Вы получили это сообщение, потому что вы подписаны на: %1$s.</string>

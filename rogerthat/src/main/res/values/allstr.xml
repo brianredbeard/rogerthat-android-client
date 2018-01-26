@@ -62,6 +62,8 @@
     <string name="authenticate">Authenticate</string>
     <string name="authenticate_first">You need to authenticate before you can continue.</string>
     <string name="authenticate_via_your_oauth_account">Authenticate using your \'%1$s\' account.</string>
+    <string name="authorize">Authorize</string>
+    <string name="authorize_success">Successfully authorized</string>
     <string name="back">Back</string>
     <string name="backup_security_key_instructions">To be able to restore your secure key when you re-install the app, write down the algorithm, key name and the 29 words below and store them in a secure location.\n\nNote: When you lose these words, you will lose access to your wallet/coins.\n\nNote: We will never ask you for these words. Never give them to someone else on a forum, via phone or via e-mail.</string>
     <string name="backup_security_key_later">You can always find these words back later when navigating to %1$s &gt; %2$s. Then select the secure key with name \"%3$s\".</string>
@@ -119,6 +121,7 @@
     <string name="description">Description</string>
     <string name="deselect_all">Deselect all</string>
     <string name="detected_services_title">%1$s detected the following services at this location. Select the services you want to add in your %1$s app.</string>
+    <string name="device_unregister_others">You already use this account on another device. By pressing continue, the following devices will be unregistered.</string>
     <string name="device_was_unregistered">Device was unregistered.</string>
     <string name="dialog_request_location_sharing">%1$s did not enable location sharing with you.\n\nDo you want to send a request to enable location sharing?</string>
     <string name="disabled">Disabled</string>
@@ -384,6 +387,7 @@
     <string name="recommend_to_friends">Recommend to %1$s contacts</string>
     <string name="recommended_service">Recommended</string>
     <string name="register_first">Complete the registration now</string>
+    <string name="register_qr_text">Welcome to the %1$s App.\n\nTo get started, visit\n %2$s \nfrom your PC, laptop or tablet and scan your personal QR code.</string>
     <string name="registration_activating_account">Activating your %1$s account…</string>
     <string name="registration_activation_code_was_mailed">To verify your e-mail we sent an activation code to %1$s\n\nYou might need to check your spam or junk mail folders.</string>
     <string name="registration_agree_tos">Agree and continue</string>
@@ -574,10 +578,6 @@
     <string name="yes">Yes</string>
     <string name="you_are_here">You are here</string>
     <string name="your_location_displayed_friend_have_contacted_for_their_location">Your location is displayed. Your friends (which share their location with you) have been contacted to send you their location.</string>
-
-    <string name="authorize">Authorize</string>
-    <string name="authorize_success">Successfully authorized</string>
-    <string name="register_qr_text">Welcome to the %1$s App.\n\nTo get started, visit\n %2$s \nfrom your PC, laptop or tablet and scan your personal QR code.</string>
     <string name="pay">Pay</string>
     <string name="paid">Paid</string>
     <string name="transaction_id">Transaction ID</string>

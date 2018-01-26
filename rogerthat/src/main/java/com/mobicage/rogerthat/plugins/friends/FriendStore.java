@@ -652,8 +652,8 @@ public class FriendStore implements Closeable {
                         requestFriendCategoryIfNeeded(friend);
 
                         // Backwards compatibility. We could still receive some old requests with service data.
-                        // TODO: remove at 01/01/2018
-                        mMainService.getPlugin(FriendsPlugin.class).updateUserData(friend.email, friend.userData,
+                        // TODO: remove after 02/02/2018
+                        mMainService.getPlugin(FriendsPlugin.class).replaceUserData(friend.email, friend.userData,
                                 friend.appData);
 
                         final String friendDisplayName;
@@ -1020,8 +1020,14 @@ public class FriendStore implements Closeable {
                 String userDataString = curs.getString(1);
                 String appDataString = curs.getString(2);
 
-                saveUserData(serviceEmail, FRIEND_DATA_TYPE_USER, userDataString);
-                saveUserData(serviceEmail, FRIEND_DATA_TYPE_APP, appDataString);
+                if (userDataString != null) {
+                    replaceUserData(serviceEmail, FRIEND_DATA_TYPE_USER,
+                            (Map<String, Object>) JSONValue.parse(userDataString));
+                }
+                if (appDataString != null) {
+                    replaceUserData(serviceEmail, FRIEND_DATA_TYPE_APP,
+                            (Map<String, Object>) JSONValue.parse(appDataString));
+                }
                 wipeOldUserData(serviceEmail);
 
             } while (curs.moveToNext());
@@ -1038,49 +1044,45 @@ public class FriendStore implements Closeable {
         mServiceUserDataUpdateOldBIZZ.execute();
     }
 
-    public void saveUserData(final String serviceEmail, final String type, final String dataString) {
+    public void replaceUserData(final String serviceEmail, final String type, final Map<String, Object> data) {
         T.BIZZ();
-        TransactionHelper.runInTransaction(mDb, "saveUserData", new TransactionWithoutResult() {
+        TransactionHelper.runInTransaction(mDb, "replaceUserData", new TransactionWithoutResult() {
             @Override
             protected void run() {
-                Map<String, Object> data = dataString == null ? new HashMap<String, Object>() : (Map<String, Object>) JSONValue.parse(dataString);
                 deleteUserData(serviceEmail, type);
-                for (Map.Entry<String, Object> dataEntry : data.entrySet()) {
-                    Object value = dataEntry.getValue();
-                    if (value != null) {
-                        JSONObject v = new JSONObject();
-                        v.put("v", value);
-                        updateUserData(serviceEmail, type, dataEntry.getKey(), JSONValue.toJSONString(v));
-                    }
-                }
+                updateUserData(serviceEmail, type, data);
             }
         });
     }
 
-    public void updateUserData(final String serviceEmail, final String type, final List<String> keys, final List<String> values) {
+    public void updateUserData(final String serviceEmail, final String type, final Map<String, Object> data) {
         T.BIZZ();
+        if (data == null) {
+            return;
+        }
+
         TransactionHelper.runInTransaction(mDb, "updateUserData", new TransactionWithoutResult() {
             @Override
             protected void run() {
-                for(int i = 0; i < keys.size(); i++) {
-                    String key = keys.get(i);
-                    String value = values.get(i);
-                    if (value == null) {
-                        deleteUserData(serviceEmail, type, key);
+                for (Map.Entry<String, Object> entry : data.entrySet()) {
+                    if (entry.getValue() == null) {
+                        deleteUserData(serviceEmail, type, entry.getKey());
                     } else {
-                        updateUserData(serviceEmail, type, key, value);
+                        updateUserData(serviceEmail, type, entry.getKey(), entry.getValue());
                     }
                 }
             }
         });
     }
 
-    private void updateUserData(String serviceEmail, String type, String key, String value) {
+    private void updateUserData(String serviceEmail, String type, String key, Object value) {
         T.BIZZ();
+        final JSONObject v = new JSONObject();
+        v.put("v", value);
         mServiceUserDataUpdateBIZZ.bindString(1, serviceEmail);
         mServiceUserDataUpdateBIZZ.bindString(2, type);
         mServiceUserDataUpdateBIZZ.bindString(3, key);
-        mServiceUserDataUpdateBIZZ.bindString(4, value);
+        mServiceUserDataUpdateBIZZ.bindString(4, JSONValue.toJSONString(v));
         mServiceUserDataUpdateBIZZ.execute();
     }
 
@@ -1113,7 +1115,6 @@ public class FriendStore implements Closeable {
                 String value = curs.getString(1);
                 JSONObject v = (JSONObject) JSONValue.parse(value);
                 data.put(key, v.get("v"));
-
             } while (curs.moveToNext());
         } finally {
             curs.close();
@@ -1396,8 +1397,8 @@ public class FriendStore implements Closeable {
         requestFriendCategoryIfNeeded(friend);
 
         // Backwards compatibility. We could still receive some old requests with service data.
-        // TODO: remove after 01/01/2018
-        mMainService.getPlugin(FriendsPlugin.class).updateUserData(friend.email, friend.userData, friend.appData);
+        // TODO: remove after 02/02/2018
+        mMainService.getPlugin(FriendsPlugin.class).replaceUserData(friend.email, friend.userData, friend.appData);
 
         final byte[] hashBytes = EmailHashCalculator.calculateEmailHash(friend.email, friend.type);
         final String displayName = TextUtils.isEmptyOrWhitespace(friend.name) ? friend.email : friend.name;

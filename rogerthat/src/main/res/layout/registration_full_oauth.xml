@@ -1,47 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:background="@color/mc_background_color"
+android:orientation="vertical">
+
+<ScrollView
+    android:id="@+id/registration_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:padding="10dp">
+    android:fillViewport="true"
+    android:scrollbars="none">
 
-    <ImageView
-        android:id="@+id/rogerthat_logo"
+    <com.mobicage.rogerthat.util.ui.SafeViewFlipper
+        android:id="@+id/registration_viewFlipper"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_marginBottom="30dp"
-        android:adjustViewBounds="true"
-        android:padding="50dp"
-        android:layout_marginTop="20dp"
-        android:src="@drawable/registration_logo"/>
+        android:layout_height="wrap_content">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@+id/retry"
-        android:layout_below="@id/rogerthat_logo"
-        android:layout_gravity="center"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/error_text"
+        <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:gravity="center_horizontal"
-            android:text="@string/loading"
-            android:textColor="@color/mc_homescreen_text"
-            android:textSize="18sp"/>
-    </LinearLayout>
+            android:layout_height="match_parent"
+            android:padding="10dp">
 
-    <android.support.v7.widget.AppCompatButton
-        android:id="@+id/retry"
-        android:layout_width="match_parent"
-        android:layout_alignParentBottom="true"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:text="@string/retry"
-        android:theme="@style/PrimaryButtonTheme"
-        android:textSize="18sp"/>
-</RelativeLayout>
+            <ImageView
+                android:id="@+id/rogerthat_logo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_marginBottom="30dp"
+                android:adjustViewBounds="true"
+                android:padding="50dp"
+                android:layout_marginTop="20dp"
+                android:src="@drawable/registration_logo"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_above="@+id/retry"
+                android:layout_below="@id/rogerthat_logo"
+                android:layout_gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/error_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:gravity="center_horizontal"
+                    android:text="@string/loading"
+                    android:textColor="@color/mc_homescreen_text"
+                    android:textSize="18sp"/>
+            </LinearLayout>
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/retry"
+                android:layout_width="match_parent"
+                android:layout_alignParentBottom="true"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:text="@string/retry"
+                android:theme="@style/PrimaryButtonTheme"
+                android:textSize="18sp"/>
+        </RelativeLayout>
+
+        <include layout="@layout/registration_devices"/>
+
+
+    </com.mobicage.rogerthat.util.ui.SafeViewFlipper>
+</ScrollView>
+</LinearLayout>

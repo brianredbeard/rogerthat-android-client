@@ -161,6 +161,7 @@ public class Wizard implements Pickleable {
                 mPosition = position;
                 mFlipper.setDisplayedChild(mPosition);
                 handleDisplay();
+                save();
             }
         }
 
@@ -230,6 +231,7 @@ public class Wizard implements Pickleable {
 
     private void handleDisplay() {
         T.UI();
+        L.d("handleDisplay of position: " + mPosition);
         updateButtons();
         PageHandler pageHandler = mHandlers.get(mPosition);
         pageHandler.pageDisplayed(mBackButton, mNextButton, mFlipper);

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.mobicage.rogerthat.util.ui.ScaleImageView
+        android:id="@+id/full_width_rogerthat_logo5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:adjustViewBounds="true"
+        android:scaleType="fitStart"
+        android:src="@drawable/registration_logo"
+        android:visibility="gone" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="20dp">
+
+        <ImageView
+            android:id="@+id/rogerthat_logo5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:padding="50dp"
+            android:src="@drawable/registration_logo" />
+
+        <TextView
+            android:id="@+id/registration_devices_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/rogerthat_logo5"
+            android:gravity="center_horizontal"
+            android:textColor="@color/mc_homescreen_text"
+            android:textSize="18sp" />
+
+        <LinearLayout
+            android:id="@+id/registration_devices_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal">
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/registration_devices_register"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_marginRight="5dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:minHeight="50dp"
+                android:text="@string/continue_"
+                android:textSize="18sp"
+                android:theme="@style/PrimaryButtonTheme" />
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/registration_devices_cancel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_marginLeft="5dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:minHeight="50dp"
+                android:text="@string/cancel"
+                android:textSize="18sp"
+                android:theme="@style/ButtonTheme" />
+
+        </LinearLayout>
+
+        <com.mobicage.rogerthat.util.ui.FSListView
+            android:id="@+id/devices_list"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_marginTop="20dp"
+            android:layout_above="@id/registration_devices_buttons"
+            android:layout_below="@id/registration_devices_text"
+            android:cacheColorHint="#00000000"
+            android:divider="@drawable/divider_gray"
+            android:dividerHeight="1px"
+            android:fastScrollEnabled="true"></com.mobicage.rogerthat.util.ui.FSListView>
+
+    </RelativeLayout>
+</LinearLayout>

@@ -35,9 +35,9 @@ import cordova
 
 
 logging.basicConfig(
-        level=logging.INFO,
-        format="%(levelname)s [%(asctime)s] [%(funcName)s:%(lineno)d] %(message)s",
-        datefmt="%H:%M:%S", stream=sys.stdout)
+    level=logging.INFO,
+    format="%(levelname)s [%(asctime)s] [%(funcName)s:%(lineno)d] %(message)s",
+    datefmt="%H:%M:%S", stream=sys.stdout)
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 APPS_REPO_DIR = os.path.join(CURRENT_DIR, "..", "..", "apps", 'res')
@@ -174,8 +174,8 @@ def generate_resource_images(source_file_name, size, height_width_ratio):
     height_width_ratio_str = "%.2f" % height_width_ratio
     if im1_heigth_width_ratio < (height_width_ratio - 0.1) or im1_heigth_width_ratio > (height_width_ratio + 0.1):
         raise Exception(
-                "Cannot generate resource images for %s ratio does not match (IMG:%s, GIVEN:%s)" % (
-                    source_file_name, im1_heigth_width_ratio_str, height_width_ratio_str))
+            "Cannot generate resource images for %s ratio does not match (IMG:%s, GIVEN:%s)" % (
+                source_file_name, im1_heigth_width_ratio_str, height_width_ratio_str))
 
     for drawable_folder_name, screen_width in SCREEN_SIZES.iteritems():
         width = int(screen_width * size)
@@ -357,7 +357,7 @@ public class NavigationConstants {
             action_type=action_type,
             action=action,
             string_id=strings_map[item['text']],
-            collapse=bool_str(item.get('collapse', False)))
+            collapse=bool_str(item.get('params', {}).get('collapse', False)))
 
     output += '''
         };
@@ -372,11 +372,11 @@ public class NavigationConstants {
             action, action_type = get_action(item)
             output += '''
                 new NavigationItem(FontAwesome.Icon.%(icon_name)s, %(action_type)s, %(action)s, R.string.%(string_id)s, %(collapse)s),''' % dict(
-                    icon_name=icon_name,
-                    action_type=action_type,
-                    action=action,
-                    string_id=strings_map[item['text']] if item.get('text') else u"app_name",
-                    collapse=bool_str(item.get('collapse', False)))
+                icon_name=icon_name,
+                action_type=action_type,
+                action=action,
+                string_id=strings_map[item['text']] if item.get('text') else u"app_name",
+                collapse=bool_str(item.get('collapse', False)))
 
     output += '''
         };
@@ -410,7 +410,7 @@ def convert_config():
 
     ##### HOMESCREEN #############################################
     if doc["HOMESCREEN"].get("style") == HOME_SCREEN_STYLE_MESSAGING or \
-        doc["HOMESCREEN"].get("style") == HOME_SCREEN_STYLE_NEWS:
+            doc["HOMESCREEN"].get("style") == HOME_SCREEN_STYLE_NEWS:
         logging.info('Not generating homescreen images')
         items = doc['HOMESCREEN'].get('items', [])
         toolbar = doc.get('TOOLBAR')
@@ -457,12 +457,13 @@ def convert_config():
                     @Override
                     public void safeOnClick(View v) {
 ''' % dict(x=item["position"][0],
-           y=item["position"][1],
-           string_id=strings_map.get(item["text"]))
+                y=item["position"][1],
+                string_id=strings_map.get(item["text"]))
 
             output += '                        '
             if 'coords' in item:
-                output += 'simulateMenuItemPress(AppConstants.APP_EMAIL, new long[] { %s });' % (', '.join(map(str, item["coords"])))
+                output += 'simulateMenuItemPress(AppConstants.APP_EMAIL, new long[] { %s });' % (
+                    ', '.join(map(str, item["coords"])))
             else:
                 action, action_type = get_action(item)
                 output += 'goToActivity(new NavigationItem(FontAwesome.Icon.faw_question, %(action_type)s, %(action)s, R.string.%(string_id)s, %(collapse)s));' % dict(
@@ -627,7 +628,6 @@ def convert_config():
         home_activity = "R.layout.homescreen_2x3"
     elif home_screen_style == HOME_SCREEN_STYLE_3X3:
         home_activity = "R.layout.homescreen_3x3"
-
 
     friends_enabled = bool_str(doc["APP_CONSTANTS"].get("FRIENDS_ENABLED", True))
     friends_caption = doc["APP_CONSTANTS"].get("FRIENDS_CAPTION", None)
@@ -866,7 +866,6 @@ public class AppConstants {
     if doc["CLOUD_CONSTANTS"]["USE_TRUSTSTORE"]:
         app_utils.create_trusstore(APP_ID, os.path.join(ANDROID_SRC_DIR, "main", "assets", "truststore.bks"))
 
-
     ##### HOMESCREEN QR AREA BACKGROUND ####################
 
     if show_homescreen_footer:
@@ -994,7 +993,7 @@ def validate_android_manifest():
                 missing_activities.append(file_path)
 
     if missing_activities:
-        raise Exception("There are activities defined in AndroidManifest.xml which don't exist on disk:\n- %s" % \
+        raise Exception("There are activities defined in AndroidManifest.xml which don't exist on disk:\n- %s" %
                         "\n- ".join(missing_activities))
 
 

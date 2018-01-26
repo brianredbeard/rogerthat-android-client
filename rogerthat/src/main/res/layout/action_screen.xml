@@ -5,60 +5,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
-    <RelativeLayout
+    <WebView
+        android:id="@+id/branding"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical" >
-
-        <LinearLayout
-            android:id="@+id/branding_footer_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:orientation="vertical"
-            android:visibility="gone" >
-
-            <View
-                android:id="@+id/branding_footer_divider"
-                style="@style/RogerThatNavigationBarDivider" >
-            </View>
-
-            <LinearLayout
-                android:id="@+id/branding_footer"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="@color/mc_homescreen_background"
-                android:orientation="horizontal" >
-
-                <ImageView
-                    android:id="@+id/branding_footer_close"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginRight="5dp"
-                    android:layout_marginTop="5dp"
-                    app:ico_color="@color/mc_primary_icon"
-                    app:ico_icon="@string/faw_times_circle"
-                    app:ico_size="40dp" />
-
-                <TextView
-                    android:id="@+id/branding_footer_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:gravity="center_vertical"
-                    android:lines="1"
-                    android:textColor="@color/mc_homescreen_text"
-                    android:textSize="18sp" >
-                </TextView>
-            </LinearLayout>
-        </LinearLayout>
-
-        <WebView
-            android:id="@+id/branding"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_above="@id/branding_footer_container" />
-
-    </RelativeLayout>
+        android:layout_height="match_parent"/>
 
     <RelativeLayout
         android:id="@+id/preview_holder"

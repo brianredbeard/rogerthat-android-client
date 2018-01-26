@@ -23,8 +23,10 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
+import android.provider.Settings;
 import android.telephony.TelephonyManager;
 
+import com.jaredrummler.android.device.DeviceName;
 import com.mobicage.api.system.Rpc;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainService;
@@ -151,6 +153,7 @@ public class SystemPlugin implements MobicagePlugin {
         // device info
         request.deviceModelName = info.device.modelName;
         request.SDKVersion = info.device.osVersion;
+        request.deviceId = Settings.Secure.getString(mMainService.getContentResolver(), Settings.Secure.ANDROID_ID);
 
         request.embeddedApps = CordovaSettings.APPS.toArray(new String[CordovaSettings.APPS.size()]);
 
@@ -305,7 +308,7 @@ public class SystemPlugin implements MobicagePlugin {
         }
 
         // Device info
-        info.device.modelName = SystemUtils.isRunningInEmulator(mainService) ? "Android emulator" : Build.MODEL;
+        info.device.modelName = getDeviceModelName();
         info.device.osVersion = SystemUtils.getAndroidVersion() + "";
 
         // Locale info
@@ -319,6 +322,14 @@ public class SystemPlugin implements MobicagePlugin {
         info.timeZone.secondsFromGMT = timeZone.getRawOffset() / 1000;
 
         return info;
+    }
+
+    public static String getDeviceModelName() {
+        String modelName = DeviceName.getDeviceName();
+        if (!Build.MODEL.equalsIgnoreCase(modelName)) {
+            modelName = String.format("%s (%s)", modelName, Build.MODEL);
+        }
+        return modelName;
     }
 
     public void updateAppAsset(String kind, String url, float scaleX) {

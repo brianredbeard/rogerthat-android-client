@@ -17,17 +17,6 @@
  */
 package com.mobicage.rogerthat.registration;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.EOFException;
-import java.io.IOException;
-
-import java.util.Set;
-import java.util.UUID;
-
-import org.jivesoftware.smack.util.Base64;
-
-
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.config.Configuration;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
@@ -40,12 +29,23 @@ import com.mobicage.rogerthat.util.ui.Wizard;
 import com.mobicage.rpc.Credentials;
 import com.mobicage.to.location.BeaconDiscoveredRequestTO;
 
+import org.jivesoftware.smack.util.Base64;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONValue;
+
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.EOFException;
+import java.io.IOException;
+import java.util.Set;
+import java.util.UUID;
+
 public class OauthRegistrationWizard extends AbstractRegistrationWizard {
 
     public final static String CONFIGKEY = "Registration";
     private final static String CONFIG_PICKLED_WIZARD_KEY = "OauthRegistrationWizard";
 
-    private final static Integer PICKLE_CLASS_VERSION = 1;
+    private final static Integer PICKLE_CLASS_VERSION = 2;
 
     public static OauthRegistrationWizard getWizard(final MainService mainService, final String deviceId) {
         T.UI();
@@ -118,6 +118,11 @@ public class OauthRegistrationWizard extends AbstractRegistrationWizard {
         out.writeBoolean(getInGoogleAuthenticationProcess());
         out.writeUTF(getInstallationId());
         out.writeUTF(getDeviceId());
+        set = getDeviceNames() != null;
+        out.writeBoolean(set);
+        if (set) {
+            out.writeUTF(JSONValue.toJSONString(getDeviceNames()));
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -140,11 +145,22 @@ public class OauthRegistrationWizard extends AbstractRegistrationWizard {
         } catch (EOFException e) {
             setDeviceId(null);
         }
+        if (version >= 2) {
+            set = in.readBoolean();
+            if (set) {
+                String deviceNames = in.readUTF();
+                JSONArray db1 = (JSONArray) JSONValue.parse(deviceNames);
+                if (db1 != null) {
+                    setDeviceNames(db1);
+                }
+            }
+        }
     }
 
     public void init(final MainService mainService) {
         T.UI();
         setInstallationId(UUID.randomUUID().toString());
+        sendInstallationId(mainService);
         reInit();
     }
     public void reInit() {

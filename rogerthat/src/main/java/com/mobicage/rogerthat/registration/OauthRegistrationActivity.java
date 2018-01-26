@@ -20,13 +20,21 @@ package com.mobicage.rogerthat.registration;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.ViewFlipper;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.Installation;
+import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.OauthActivity;
 import com.mobicage.rogerthat.util.GoogleServicesUtils;
 import com.mobicage.rogerthat.util.GoogleServicesUtils.GCMRegistrationIdFoundCallback;
@@ -34,9 +42,13 @@ import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
+import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.T;
+import com.mobicage.rogerthat.util.ui.FSListView;
 import com.mobicage.rogerthat.util.ui.UIUtils;
+import com.mobicage.rogerthat.util.ui.Wizard;
 import com.mobicage.rpc.Credentials;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
@@ -48,6 +60,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
@@ -70,12 +83,29 @@ public class OauthRegistrationActivity extends AbstractRegistrationActivity {
     private TextView mErrorTextView;
     private static final int START_OAUTH_REQUEST_CODE = 1;
 
+    private BroadcastReceiver mBroadcastReceiver = new SafeBroadcastReceiver() {
+        @Override
+        public String[] onSafeReceive(Context context, Intent intent) {
+            T.UI();
+            if (INTENT_LOG_URL.equals(intent.getAction())) {
+                String url = intent.getStringExtra("url");
+                int count = intent.getIntExtra("count", 0);
+                sendRegistrationUrl(url, count);
+            }
+
+            return null;
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         T.UI();
         init(this);
         mHttpClient = HTTPUtil.getHttpClient(HTTP_TIMEOUT, HTTP_RETRY_COUNT);
+
+        final IntentFilter filter = new IntentFilter(INTENT_LOG_URL);
+        registerReceiver(mBroadcastReceiver, filter);
 
         // TODO: This has to be improved.
         // If the app relies on GCM the user should not be able to register.
@@ -117,6 +147,7 @@ public class OauthRegistrationActivity extends AbstractRegistrationActivity {
     @Override
     protected void onDestroy() {
         closeWorkerThread();
+        unregisterReceiver(mBroadcastReceiver);
         super.onDestroy();
     }
 
@@ -124,9 +155,6 @@ public class OauthRegistrationActivity extends AbstractRegistrationActivity {
     protected void onServiceBound() {
         T.UI();
         setContentViewWithoutNavigationBar(R.layout.registration_full_oauth);
-
-        mWiz = OauthRegistrationWizard.getWizard(mService, Installation.id(this));
-        setWizard(mWiz);
 
         if (CloudConstants.USE_GCM_KICK_CHANNEL && GoogleServicesUtils.checkPlayServices(this, true)) {
             GoogleServicesUtils.registerGCMRegistrationId(mService, new GCMRegistrationIdFoundCallback() {
@@ -144,13 +172,104 @@ public class OauthRegistrationActivity extends AbstractRegistrationActivity {
                 openOauthActivity();
             }
         });
-        setFinishHandler();
 
-        openOauthActivity();
+        final Button registerBtn = (Button) findViewById(R.id.registration_devices_register);
+        final Button cancelBtn = (Button) findViewById(R.id.registration_devices_cancel);
+
+        registerBtn.setEnabled(true);
+        cancelBtn.setEnabled(true);
+
+        registerBtn.setOnClickListener(new SafeViewOnClickListener() {
+            @Override
+            public void safeOnClick(View v) {
+                registerBtn.setEnabled(false);
+                cancelBtn.setEnabled(false);
+                registerDevice();
+            }
+        });
+
+        cancelBtn.setOnClickListener(new SafeViewOnClickListener() {
+            @Override
+            public void safeOnClick(View v) {
+                registerBtn.setEnabled(false);
+                cancelBtn.setEnabled(false);
+                mWiz.goBackToPrevious();
+            }
+        });
+
+        mWiz = OauthRegistrationWizard.getWizard(mService, Installation.id(this));
+        mWiz.setFlipper((ViewFlipper) findViewById(R.id.registration_viewFlipper));
+        setWizard(mWiz);
+        setFinishHandler();
+        addOauthMethodHandler(); // 0
+        addRegisterDeviceHandler(); // 1
+        mWiz.run();
+
+        if (mWiz.getPosition() == 0) {
+            openOauthActivity();
+        }
     }
 
     @Override
     protected void onServiceUnbound() {
+    }
+
+    private void addOauthMethodHandler() {
+        mWiz.addPageHandler(new Wizard.PageHandler() {
+
+            @Override
+            public void pageDisplayed(Button back, Button next, ViewFlipper switcher) {
+            }
+
+            @Override
+            public String getTitle() {
+                return null;
+            }
+
+            @Override
+            public boolean beforeNextClicked(Button back, Button next, ViewFlipper switcher) {
+                return false;
+            }
+
+            @Override
+            public boolean beforeBackClicked(Button back, Button next, ViewFlipper switcher) {
+                return false;
+            }
+        });
+    }
+
+    private void addRegisterDeviceHandler() {
+        mWiz.addPageHandler(new Wizard.PageHandler() {
+            @Override
+            public void pageDisplayed(Button back, Button next, ViewFlipper switcher) {
+                final FSListView deviceList = (FSListView) findViewById(R.id.devices_list);
+                final Button registerBtn = (Button) findViewById(R.id.registration_devices_register);
+                final Button cancelBtn = (Button) findViewById(R.id.registration_devices_cancel);
+
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(OauthRegistrationActivity.this, R.layout.list_item, mWiz.getDeviceNames());
+                deviceList.setAdapter(adapter);
+
+                registerBtn.setEnabled(true);
+                cancelBtn.setEnabled(true);
+
+                ((TextView) findViewById(R.id.registration_devices_text)).setText(getString(R.string.device_unregister_others));
+            }
+
+            @Override
+            public String getTitle() {
+                return null;
+            }
+
+            @Override
+            public boolean beforeNextClicked(Button back, Button next, ViewFlipper switcher) {
+                return false;
+            }
+
+            @Override
+            public boolean beforeBackClicked(Button back, Button next, ViewFlipper switcher) {
+                return false;
+            }
+        });
     }
 
     private void openOauthActivity() {
@@ -215,13 +334,13 @@ public class OauthRegistrationActivity extends AbstractRegistrationActivity {
             @Override
             protected void safeRun() throws Exception {
                 T.REGISTRATION();
-                String version = "1";
+                String version = "3";
                 String signature = SecurityUtils.sha256(version + " " + installId + " " + timestamp + " " + deviceId + " "
                         + registrationId + " " + code + state + CloudConstants.REGISTRATION_MAIN_SIGNATURE);
 
                 HttpPost httppost = new HttpPost(CloudConstants.REGISTRATION_OAUTH_REGISTERED_URL);
                 try {
-                    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(8);
+                    List<NameValuePair> nameValuePairs = new ArrayList<>();
                     nameValuePairs.add(new BasicNameValuePair("version", version));
                     nameValuePairs.add(new BasicNameValuePair("registration_time", timestamp));
                     nameValuePairs.add(new BasicNameValuePair("device_id", deviceId));
@@ -237,6 +356,7 @@ public class OauthRegistrationActivity extends AbstractRegistrationActivity {
                     nameValuePairs.add(new BasicNameValuePair("use_xmpp_kick", CloudConstants.USE_XMPP_KICK_CHANNEL
                             + ""));
                     nameValuePairs.add(new BasicNameValuePair("GCM_registration_id", getGCMRegistrationId()));
+                    nameValuePairs.add(new BasicNameValuePair("unique_device_id",  Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID)));
 
                     httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
@@ -263,7 +383,6 @@ public class OauthRegistrationActivity extends AbstractRegistrationActivity {
 
 
                     if (statusCode != 200 || responseMap == null) {
-
                         if (statusCode == 500 && responseMap != null) {
                             final String errorMessage = (String) responseMap.get("error");
                             if (errorMessage != null) {
@@ -289,24 +408,40 @@ public class OauthRegistrationActivity extends AbstractRegistrationActivity {
                         return;
                     }
 
-                    JSONObject account = (JSONObject) responseMap.get("account");
+                    Boolean hasDevices = (Boolean) responseMap.get("has_devices");
                     final String email = (String) responseMap.get("email");
-                    setAgeAndGenderSet((Boolean) responseMap.get("age_and_gender_set"));
-                    final RegistrationInfo info = new RegistrationInfo(email, new Credentials((String) account
-                            .get("account"), (String) account.get("password")));
-                    runOnUI(new SafeRunnable() {
-                        @Override
-                        protected void safeRun() throws Exception {
-                            T.UI();
-                            mWiz.setEmail(email);
-                            mWiz.save();
-                            tryConnect(
-                                    progressDialog,
-                                    1,
-                                    getString(R.string.registration_establish_connection, email,
-                                            getString(R.string.app_name)) + " ", info);
-                        }
-                    });
+                    if (hasDevices) {
+                        final JSONArray deviceNames = (JSONArray) responseMap.get("device_names");
+                        runOnUI(new SafeRunnable() {
+                            @Override
+                            protected void safeRun() throws Exception {
+                                T.UI();
+                                mErrorTextView.setText(R.string.authenticate_first);
+                                progressDialog.dismiss();
+                                mWiz.setEmail(email);
+                                mWiz.setDeviceNames(deviceNames);
+                                mWiz.proceedToNextPage();
+                            }
+                        });
+                    } else {
+                        JSONObject account = (JSONObject) responseMap.get("account");
+                        setAgeAndGenderSet((Boolean) responseMap.get("age_and_gender_set"));
+                        final RegistrationInfo info = new RegistrationInfo(email, new Credentials((String) account
+                                .get("account"), (String) account.get("password")));
+                        runOnUI(new SafeRunnable() {
+                            @Override
+                            protected void safeRun() throws Exception {
+                                T.UI();
+                                mWiz.setEmail(email);
+                                mWiz.save();
+                                tryConnect(
+                                        progressDialog,
+                                        1,
+                                        getString(R.string.registration_establish_connection, email,
+                                                getString(R.string.app_name)) + " ", info);
+                            }
+                        });
+                    }
 
                 } catch (Exception e) {
                     L.d(e);

@@ -25,16 +25,24 @@ import java.util.Map;
 
 public class UnregisterMobileRequestTO implements com.mobicage.rpc.IJSONable {
 
+    public String reason;
 
     public UnregisterMobileRequestTO() {
     }
 
     public UnregisterMobileRequestTO(Map<String, Object> json) throws IncompleteMessageException {
+        if (json.containsKey("reason")) {
+            Object val = json.get("reason");
+            this.reason = (String) val;
+        } else {
+            throw new IncompleteMessageException("com.mobicage.to.system.UnregisterMobileRequestTO object is missing field 'reason'");
+        }
     }
 
     @Override
     public Map<String, Object> toJSONMap() {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
+        obj.put("reason", this.reason);
         return obj;
     }
 

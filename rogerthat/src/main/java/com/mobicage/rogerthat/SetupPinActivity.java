@@ -98,7 +98,7 @@ public class SetupPinActivity extends ServiceBoundActivity implements PinEntryLi
                 return;
             } catch (Exception e) {
                 L.bug(e);
-                //mService.wipe(0); // todo ruben better solution
+                //mService.wipe(0); // todo better solution
             }
         } else {
             mErrorMessage.setText(R.string.pin_did_not_match);
