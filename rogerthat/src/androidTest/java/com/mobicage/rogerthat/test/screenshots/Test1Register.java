@@ -116,6 +116,14 @@ public class Test1Register {
         }
         // Keep activity open until we are properly registered.
         while (!activityTestRule.getActivity().getMainService().getRegisteredFromConfig()) {
+            try {
+                onView(withId(R.id.registration_devices_register))
+                        .perform(click());
+            } catch (PerformException ex) {
+                L.i("Not clicking 'Unregister other devices'");
+            } catch (NoMatchingViewException e) {
+                L.i("devices view not found");
+            }
             Thread.sleep(100);
         }
     }
