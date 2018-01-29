@@ -1103,9 +1103,12 @@ public class FriendStore implements Closeable {
 
     public Map<String, Object> getUserData(final String email, final String type) {
         T.dontCare();
+        Map<String, Object> data = new HashMap<>();
+        if (TextUtils.isEmptyOrWhitespace(email)) {
+            return data;
+        }
         final Cursor curs = mDb.rawQuery(mMainService.getString(R.string.sql_friend_get_user_data), new String[]{email, type});
 
-        Map<String, Object> data = new HashMap<>();
         try {
             if (!curs.moveToFirst()) {
                 return data;
