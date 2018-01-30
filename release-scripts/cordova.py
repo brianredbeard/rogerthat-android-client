@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright 2017 GIG Technology NV
+# Copyright 2018 GIG Technology NV
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# @@license_version:1.3@@
+# @@license_version:1.4@@
 
 import git
 import logging
@@ -39,7 +39,7 @@ LICENSE = app_utils.get_license_header()
 
 PLUGINS = {
     "cordova-plugin-compat": {
-        "url": "cordova-plugin-compat@1.1.0"
+        "url": "cordova-plugin-compat@1.2.0"
     },
     "cordova-plugin-whitelist": {
         "url": "https://github.com/rogerthat-platform/cordova-plugin-whitelist#1.3.2"
@@ -82,13 +82,13 @@ PLUGINS = {
         "url": "https://github.com/rogerthat-platform/cordova-plugin-add-swift-support#1.6.2"
     },
     "cordova-plugin-statusbar": {
-        "url": "cordova-plugin-statusbar@2.2.3"
+        "url": "cordova-plugin-statusbar@2.4.1"
     },
     "cordova-plugin-splashscreen": {
         "url": "https://github.com/rogerthat-platform/cordova-plugin-splashscreen#custom"
     },
     'cordova-plugin-inappbrowser': {
-        'url': 'cordova-plugin-inappbrowser@1.7.1'
+        'url': 'cordova-plugin-inappbrowser@2.0.2'
     },
     'cordova-plugin-browsertab': {
         'url': 'cordova-plugin-browsertab@0.2.0'
