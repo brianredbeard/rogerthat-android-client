@@ -128,6 +128,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
     private long mLasttimeBackPressed = 0;
 
     private WebView mBranding;
+    private WebView mBrandingHttp;
     private String mBrandingKey;
     private String mServiceEmail;
     private String mItemTagHash;
@@ -774,7 +775,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         return wl;
     }
 
-    @SuppressLint({"SetJavaScriptEnabled", "JavascriptInterface"})
+    @SuppressLint({ "SetJavaScriptEnabled", "JavascriptInterface" })
     @Override
     public void onCreate(Bundle savedInstanceState) {
         if (CloudConstants.isContentBrandingApp()) {
@@ -794,6 +795,11 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             brandingSettings.setAllowFileAccessFromFileURLs(true);
         }
+        mBrandingHttp = (WebView) findViewById(R.id.branding_http);
+        mBrandingHttp.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+        WebSettings brandingSettingsHttp = mBrandingHttp.getSettings();
+        brandingSettingsHttp.setJavaScriptEnabled(true);
+        brandingSettingsHttp.setCacheMode(WebSettings.LOAD_DEFAULT);
 
         if (CloudConstants.isContentBrandingApp()) {
             int cameraPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
@@ -806,6 +812,58 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 @Override
                 public void onGlobalLayout() {
                     initFullScreenForContentBranding();
+                }
+            });
+
+            mBrandingHttp.getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    initFullScreenForContentBranding();
+                }
+            });
+        }
+
+        final View brandingHeader = findViewById(R.id.branding_header_container);
+
+        final ImageView brandingHeaderClose = (ImageView) findViewById(R.id.branding_header_close);
+        final TextView brandingHeaderText = (TextView) findViewById(R.id.branding_header_text);
+        brandingHeaderClose.setColorFilter(UIUtils
+                .imageColorFilter(ContextCompat.getColor(this, R.color.mc_homescreen_text)));
+
+        brandingHeaderClose.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mQRCodeScanner != null) {
+                    mQRCodeScanner.onResume();
+                }
+                brandingHeader.setVisibility(View.GONE);
+                mBrandingHttp.setVisibility(View.GONE);
+                mBranding.setVisibility(View.VISIBLE);
+                mBrandingHttp.loadUrl("about:blank");
+            }
+        });
+
+        final View brandingFooter = findViewById(R.id.branding_footer_container);
+
+        if (CloudConstants.isContentBrandingApp()) {
+            brandingHeaderClose.setVisibility(View.GONE);
+            final ImageView brandingFooterClose = (ImageView) findViewById(R.id.branding_footer_close);
+            final TextView brandingFooterText = (TextView) findViewById(R.id.branding_footer_text);
+            brandingFooterText.setText(getString(R.string.back));
+            brandingFooterClose.setColorFilter(UIUtils.imageColorFilter(ContextCompat.getColor(this,
+                R.color.mc_homescreen_text)));
+
+            brandingFooter.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mQRCodeScanner != null) {
+                        mQRCodeScanner.onResume();
+                    }
+                    brandingHeader.setVisibility(View.GONE);
+                    brandingFooter.setVisibility(View.GONE);
+                    mBrandingHttp.setVisibility(View.GONE);
+                    mBranding.setVisibility(View.VISIBLE);
+                    mBrandingHttp.loadUrl("about:blank");
                 }
             });
         }
@@ -854,6 +912,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 return false;
             }
 
+            @SuppressLint("DefaultLocale")
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 L.i("Branding is loading url: " + url);
@@ -868,9 +927,28 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                     poke(tag);
                     return true;
                 } else if (lowerCaseUrl.startsWith("http://") || lowerCaseUrl.startsWith("https://")) {
-                    CustomTabsIntent.Builder customTabsBuilder = new CustomTabsIntent.Builder();
-                    CustomTabsIntent customTabsIntent = customTabsBuilder.build();
-                    customTabsIntent.launchUrl(ActionScreenActivity.this, uri);
+                    mService.runOnUIHandler(new SafeRunnable() {
+                        @Override
+                        protected void safeRun() throws Exception {
+                            if(mQRCodeScanner != null) {
+                                mQRCodeScanner.onPause();
+                            }
+                        }
+                    });
+
+                    if (CloudConstants.isContentBrandingApp()) {
+                        brandingHeaderText.setText(getString(R.string.loading));
+                        brandingHeader.setVisibility(View.VISIBLE);
+                        brandingFooter.setVisibility(View.VISIBLE);
+                        mBranding.setVisibility(View.GONE);
+                        mBrandingHttp.setVisibility(View.VISIBLE);
+                        mBrandingHttp.loadUrl(url);
+                    } else {
+                        CustomTabsIntent.Builder customTabsBuilder = new CustomTabsIntent.Builder();
+                        CustomTabsIntent customTabsIntent = customTabsBuilder.build();
+                        customTabsIntent.launchUrl(ActionScreenActivity.this, uri);
+                    }
+
                     return true;
                 }
                 return false;
@@ -919,6 +997,21 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             }
         });
 
+        mBrandingHttp.setWebViewClient(new WebViewClient() {
+            @SuppressLint("DefaultLocale")
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                L.i("BrandingHttp is loading url: " + url);
+                return false;
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                brandingHeaderText.setText(view.getTitle());
+                L.i("onPageFinished " + url);
+            }
+        });
+
         Intent intent = getIntent();
         mBrandingKey = intent.getStringExtra(BRANDING_KEY);
         mServiceEmail = intent.getStringExtra(SERVICE_EMAIL);
@@ -958,6 +1051,8 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         if (mQRCodeScanner != null) {
             if (mQRCodeScanner.cameraManager == null) {
                 mQRCodeScanner.startCamera();
+            } else if (mBranding.getVisibility() == View.VISIBLE) {
+                mQRCodeScanner.onResume();
             }
         }
 
@@ -978,6 +1073,12 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
                 | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+
+            mBrandingHttp.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
+                    | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
+                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         }
     }
 
@@ -1297,6 +1398,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         super.onActivityResult(requestCode, resultCode, intent);
     }
 
+    @SuppressWarnings("deprecation")
     @SuppressLint({ "SetJavaScriptEnabled", "Wakelock" })
     private void displayBranding() {
         try {
@@ -1524,6 +1626,10 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         if (mBranding != null) {
             // Stop all javascript
             mBranding.loadUrl("about:blank");
+        }
+        if (mBrandingHttp != null) {
+            // Stop all javascript
+            mBrandingHttp.loadUrl("about:blank");
         }
         super.finish();
     }

@@ -17,6 +17,15 @@
  */
 package com.mobicage.rogerthat.plugins.friends;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+import org.json.simple.JSONValue;
+
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -40,15 +49,6 @@ import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
-
-import org.json.simple.JSONValue;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
 
 public abstract class QRCodeScanner {
 
@@ -124,6 +124,13 @@ public abstract class QRCodeScanner {
         wasScanningForQRCodes = scanningForQRCodes;
         if (scanningForQRCodes) {
             stopScanningForQRCodes();
+        }
+    }
+
+    protected void onResume() {
+        if (wasScanningForQRCodes) {
+            startScanningForQRCodes();
+            wasScanningForQRCodes = false;
         }
     }
 
