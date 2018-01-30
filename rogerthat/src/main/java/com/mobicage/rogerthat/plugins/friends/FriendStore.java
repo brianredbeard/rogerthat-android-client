@@ -2005,7 +2005,12 @@ public class FriendStore implements Closeable {
         Map<String, Object> userData = getUserData(serviceEmail, FRIEND_DATA_TYPE_USER);
         JSONArray disabledBroadcastTypes = null;
         if (userData.containsKey(DISABLED_BROADCAST_TYPES_USER_DATA_KEY)) {
-            disabledBroadcastTypes = (JSONArray) userData.get(DISABLED_BROADCAST_TYPES_USER_DATA_KEY);
+            try {
+                disabledBroadcastTypes = (JSONArray) userData.get(DISABLED_BROADCAST_TYPES_USER_DATA_KEY);
+            } catch (Exception e) {
+                String corruptJsonData = JSONValue.toJSONString(userData.get(DISABLED_BROADCAST_TYPES_USER_DATA_KEY));
+                L.bug("Failed to getDisabledBroadcastTypes for service '" + serviceEmail + "' with data: " + corruptJsonData);
+            }
         }
         return disabledBroadcastTypes == null ? new JSONArray() : disabledBroadcastTypes;
     }
