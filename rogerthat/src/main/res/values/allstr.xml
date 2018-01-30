@@ -299,6 +299,7 @@
     <string name="name_required">Name is required</string>
     <string name="navigation_drawer_close">Close navigation view</string>
     <string name="navigation_drawer_open">Open navigation view</string>
+    <string name="mandatory_permission">You need to give some mandatory permissions to continue.</string>
     <string name="need_camera_permission">You need to grant access to the camera in order to continue.</string>
     <string name="need_camera_permission_title">Camera access denied</string>
     <string name="need_location_permission">You need to grant access to your location in order to continue.</string>

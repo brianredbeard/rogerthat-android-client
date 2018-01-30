@@ -35,6 +35,8 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.View;
@@ -67,6 +69,7 @@ import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessageStore;
 import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
+import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
 import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.IOUtils;
 import com.mobicage.rogerthat.util.logging.L;
@@ -615,7 +618,9 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
             @Override
             protected void safeRun() throws Exception {
                 if (mActivity.askPermissionIfNeeded(Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                        PERMISSION_REQUEST_CAMERA, continueRunnable, null))
+                        PERMISSION_REQUEST_CAMERA,
+                        continueRunnable,
+                        mActivity.showMandatoryPermissionPopup(mActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE)))
                     return;
                 continueRunnable.run();
             }
@@ -624,7 +629,9 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
             @Override
             protected void safeRun() throws Exception {
                 if (recordAudio && mActivity.askPermissionIfNeeded(Manifest.permission.RECORD_AUDIO,
-                        PERMISSION_REQUEST_CAMERA, runnableCheckStorage, null))
+                        PERMISSION_REQUEST_CAMERA,
+                        runnableCheckStorage,
+                        mActivity.showMandatoryPermissionPopup(mActivity, Manifest.permission.RECORD_AUDIO)))
                     return;
                 runnableCheckStorage.run();
             }
@@ -633,7 +640,9 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
             @Override
             protected void safeRun() throws Exception {
                 if (mActivity.askPermissionIfNeeded(Manifest.permission.CAMERA,
-                        PERMISSION_REQUEST_CAMERA, runnableCheckRecordAudio, null))
+                        PERMISSION_REQUEST_CAMERA,
+                        runnableCheckRecordAudio,
+                        mActivity.showMandatoryPermissionPopup(mActivity, Manifest.permission.CAMERA)))
                     return;
                 runnableCheckRecordAudio.run();
             }

@@ -49,6 +49,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
@@ -131,7 +132,9 @@ public class PhotoUploadWidget extends Widget {
                     @Override
                     protected void safeRun() throws Exception {
                         if (mActivity.askPermissionIfNeeded(Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                                ServiceMessageDetailActivity.PERMISSION_REQUEST_PHOTO_UPLOAD_WIDGET, runnableContinue, null))
+                                ServiceMessageDetailActivity.PERMISSION_REQUEST_PHOTO_UPLOAD_WIDGET,
+                                runnableContinue,
+                                mActivity.showMandatoryPermissionPopup(mActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE)))
                             return;
                         runnableContinue.run();
                     }
@@ -139,7 +142,9 @@ public class PhotoUploadWidget extends Widget {
 
                 if (TRUE.equals(mWidgetMap.get("camera"))) {
                     if (mActivity.askPermissionIfNeeded(Manifest.permission.CAMERA,
-                            ServiceMessageDetailActivity.PERMISSION_REQUEST_PHOTO_UPLOAD_WIDGET, runnableCheckStorage, null))
+                            ServiceMessageDetailActivity.PERMISSION_REQUEST_PHOTO_UPLOAD_WIDGET,
+                            runnableCheckStorage,
+                            mActivity.showMandatoryPermissionPopup(mActivity, Manifest.permission.CAMERA)))
                         return;
                 }
 
@@ -201,7 +206,7 @@ public class PhotoUploadWidget extends Widget {
                             }
                         };
                         UIUtils.showDialog(mActivity, title, message, R.string.go_to_app_settings, onPositiveClick,
-                                R.id.cancel, null);
+                                R.string.cancel, null);
                     }
                 }
             }

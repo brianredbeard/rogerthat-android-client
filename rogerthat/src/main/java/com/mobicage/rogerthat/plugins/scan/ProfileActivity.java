@@ -32,7 +32,9 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -55,6 +57,7 @@ import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MyIdentity;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
+import com.mobicage.rogerthat.plugins.messaging.MyDigiPassWidgetResult;
 import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.IOUtils;
 import com.mobicage.rogerthat.util.logging.L;
@@ -247,13 +250,17 @@ public class ProfileActivity extends ServiceBoundActivity {
                 @Override
                 protected void safeRun() throws Exception {
                     if (askPermissionIfNeeded(Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                            PERMISSION_REQUEST_CAMERA, continueRunnable, null))
+                            PERMISSION_REQUEST_CAMERA,
+                            continueRunnable,
+                            showMandatoryPermissionPopup(ProfileActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)))
                         return;
                     continueRunnable.run();
                 }
             };
-            if (askPermissionIfNeeded(Manifest.permission.CAMERA, PERMISSION_REQUEST_CAMERA,
-                    runnableCheckStorage, null))
+            if (askPermissionIfNeeded(Manifest.permission.CAMERA,
+                    PERMISSION_REQUEST_CAMERA,
+                    runnableCheckStorage,
+                    showMandatoryPermissionPopup(ProfileActivity.this, Manifest.permission.CAMERA)))
                 return;
             runnableCheckStorage.run();
             return;

@@ -18,6 +18,8 @@
 
 package com.mobicage.rogerthat;
 
+import android.Manifest;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -33,8 +35,10 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -605,6 +609,31 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         } else {
             headerImage.setImageBitmap(background);
         }
+    }
+
+    public SafeRunnable showMandatoryPermissionPopup(final Activity activity, final String permission) {
+        return new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(activity, permission)) {
+                    return;
+                }
+                String message = activity.getString(R.string.mandatory_permission);
+                SafeDialogClick onPositiveClick = new SafeDialogClick() {
+                    @Override
+                    public void safeOnClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                        Intent intent = new Intent();
+                        intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                        Uri uri = Uri.fromParts("package", activity.getPackageName(), null);
+                        intent.setData(uri);
+                        activity.startActivity(intent);
+                    }
+                };
+                UIUtils.showDialog(activity, null, message, R.string.go_to_app_settings, onPositiveClick,
+                        R.string.cancel, null);
+            }
+        };
     }
 
     public boolean askPermissionIfNeeded(final String permission, final int requestCode, final SafeRunnable onGranted,
