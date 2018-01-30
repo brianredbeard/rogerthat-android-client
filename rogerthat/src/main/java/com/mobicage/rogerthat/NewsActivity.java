@@ -472,7 +472,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
         T.UI();
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.news_menu, menu);
-        addIconToMenuItem(menu, R.id.add_qr_code, FontAwesome.Icon.faw_plus);
+        addIconToMenuItem(menu, R.id.saved, FontAwesome.Icon.faw_thumb_tack);
         return true;
     }
 
