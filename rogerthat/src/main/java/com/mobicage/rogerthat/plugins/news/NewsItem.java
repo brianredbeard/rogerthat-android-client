@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 GIG Technology NV
+ * Copyright 2018 GIG Technology NV
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @@license_version:1.3@@
+ * @@license_version:1.4@@
  */
 package com.mobicage.rogerthat.plugins.news;
 
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.to.news.AppNewsItemTO;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @SuppressWarnings("unchecked")
 public class NewsItem extends AppNewsItemTO {
@@ -41,6 +44,20 @@ public class NewsItem extends AppNewsItemTO {
         if (isPartial)
             return null;
         return CloudConstants.CACHED_AVATAR_URL_PREFIX + sender.avatar_id;
+    }
+
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> toJSONMap() {
+        Map<String, Object> obj = super.toJSONMap();
+        obj.put("read", this.read);
+        obj.put("pinned", this.pinned);
+        obj.put("rogered", this.rogered);
+        obj.put("disabled", this.disabled);
+        obj.put("is_partial", this.isPartial);
+        obj.put("sort_key", this.sortKey);
+        return obj;
     }
 
 }

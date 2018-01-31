@@ -54,7 +54,7 @@ CREATE TABLE friend (
 	share_location INTEGER, 
 	shares_location INTEGER,
 	avatar BLOB
-, existence INTEGER DEFAULT 0, "type" INTEGER NOT NULL DEFAULT 1, email_hash TEXT, description TEXT, description_branding TEXT, poke_description TEXT, menu_branding TEXT, main_phone_number TEXT, share INTEGER NOT NULL DEFAULT 0, generation INTEGER NOT NULL DEFAULT 0, share_image_url TEXT, share_description TEXT, share_caption TEXT, share_link_url TEXT, qualified_identifier TEXT, about_label TEXT, messages_label TEXT, call_label TEXT, share_label TEXT, call_confirmation TEXT, user_data TEXT, app_data TEXT, category_id TEXT, broadcast_flow_hash TEXT, organization_type INTEGER DEFAULT 0, callbacks INTEGER DEFAULT 0, versions TEXT NOT NULL DEFAULT "-1", flags INTEGER DEFAULT 0, profile_data TEXT, content_branding_hash TEXT, actions TEXT);
+, existence INTEGER DEFAULT 0, "type" INTEGER NOT NULL DEFAULT 1, email_hash TEXT, description TEXT, description_branding TEXT, poke_description TEXT, menu_branding TEXT, main_phone_number TEXT, share INTEGER NOT NULL DEFAULT 0, generation INTEGER NOT NULL DEFAULT 0, share_image_url TEXT, share_description TEXT, share_caption TEXT, share_link_url TEXT, qualified_identifier TEXT, about_label TEXT, messages_label TEXT, call_label TEXT, share_label TEXT, call_confirmation TEXT, user_data TEXT, app_data TEXT, category_id TEXT, broadcast_flow_hash TEXT, organization_type INTEGER DEFAULT 0, callbacks INTEGER DEFAULT 0, versions TEXT NOT NULL DEFAULT "-1", flags INTEGER DEFAULT 0, profile_data TEXT, content_branding_hash TEXT, actions TEXT, home_branding_hash TEXT);
 CREATE TABLE friend_category (
     id TEXT PRIMARY KEY,
     name TEXT,

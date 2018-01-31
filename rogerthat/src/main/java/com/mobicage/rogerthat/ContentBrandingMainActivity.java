@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 GIG Technology NV
+ * Copyright 2018 GIG Technology NV
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @@license_version:1.3@@
+ * @@license_version:1.4@@
  */
 
 package com.mobicage.rogerthat;
@@ -30,10 +30,10 @@ import android.widget.TextView;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.ActionScreenActivity;
-import com.mobicage.rogerthat.plugins.friends.ContentBrandingActionScreenActivity;
 import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendStore;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
+import com.mobicage.rogerthat.plugins.friends.FullscreenActionScreenActivity;
 import com.mobicage.rogerthat.plugins.messaging.BrandingFailureException;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.system.JSEmbedding;
@@ -138,16 +138,17 @@ public class ContentBrandingMainActivity extends ServiceBoundActivity {
             }
             Friend friend = friendStore.getFriend(friends.get(0));
 
+            BrandingMgr brandingMgr = friendsPlugin.getBrandingMgr();
             boolean brandingAvailable = false;
             try {
-                brandingAvailable = friendsPlugin.getBrandingMgr().isBrandingAvailable(friend.contentBrandingHash);
+                brandingAvailable = brandingMgr.isBrandingAvailable(friend.contentBrandingHash);
             } catch (BrandingFailureException e) {
                 // ignore
             }
 
             if (!brandingAvailable) {
                 L.i("Content branding not available yet");
-                friendsPlugin.getBrandingMgr().queueGenericBranding(friend.contentBrandingHash);
+                brandingMgr.queueGenericBranding(friend.contentBrandingHash);
                 return;
             }
             if (progress < 50) {
@@ -180,8 +181,10 @@ public class ContentBrandingMainActivity extends ServiceBoundActivity {
 
             mTimer.cancel();
 
-            Intent intent = new Intent(ContentBrandingMainActivity.this, ContentBrandingActionScreenActivity.class);
+            Class clazz = brandingMgr.getFullscreenActionScreenActivityClass(friend.contentBrandingHash);
+            Intent intent = new Intent(ContentBrandingMainActivity.this, clazz);
             intent.setFlags(MainActivity.FLAG_CLEAR_STACK_SINGLE_TOP);
+            intent.putExtra(ActionScreenActivity.BRANDING_TYPE, ActionScreenActivity.BRANDING_TYPE_NORMAL);
             intent.putExtra(ActionScreenActivity.BRANDING_KEY, friend.contentBrandingHash);
             intent.putExtra(ActionScreenActivity.SERVICE_EMAIL, friend.email);
             intent.putExtra(ActionScreenActivity.ITEM_TAG_HASH, "");

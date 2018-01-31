@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 GIG Technology NV
+ * Copyright 2018 GIG Technology NV
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @@license_version:1.3@@
+ * @@license_version:1.4@@
  */
 package com.mobicage.rogerthat.plugins.friends;
 
@@ -62,6 +62,8 @@ import com.facebook.share.widget.ShareDialog;
 import com.github.barteksc.pdfviewer.PDFView;
 import com.google.zxing.client.android.CaptureActivity;
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.HomeBrandingActivity;
+import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.plugins.messaging.AttachmentViewerActivity;
@@ -70,6 +72,7 @@ import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr.BrandingResult;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
+import com.mobicage.rogerthat.plugins.news.NewsItem;
 import com.mobicage.rogerthat.plugins.scan.ScanCommunication;
 import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
 import com.mobicage.rogerthat.util.ActionScreenUtils;
@@ -84,6 +87,7 @@ import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.system.TaggedWakeLock;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.CloudConstants;
+import com.mobicage.rpc.config.LookAndFeelConstants;
 
 import org.jivesoftware.smack.util.Base64;
 import org.json.JSONException;
@@ -94,6 +98,7 @@ import org.json.simple.JSONValue;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -103,6 +108,7 @@ import java.util.UUID;
 
 public class ActionScreenActivity extends ServiceBoundActivity {
 
+    public static final String BRANDING_TYPE = "branding_type";
     public static final String BRANDING_KEY = "branding_key";
     public static final String SERVICE_EMAIL = "service_email";
     public static final String ITEM_TAG_HASH = "item_tag_hash";
@@ -111,6 +117,9 @@ public class ActionScreenActivity extends ServiceBoundActivity {
     public static final String CONTEXT_MATCH = "context_match";
     public static final String RUN_IN_BACKGROUND = "run_in_background";
     public static final String CONTEXT = "context";
+
+    public static final String BRANDING_TYPE_NORMAL = "normal";
+    public static final String BRANDING_TYPE_HOME = "home";
 
     private static final String POKE = "poke://";
 
@@ -128,6 +137,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
     private long mLasttimeBackPressed = 0;
 
     private WebView mBranding;
+    private String mBrandingType;
     private WebView mBrandingHttp;
     private String mBrandingKey;
     private String mServiceEmail;
@@ -249,6 +259,14 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             // MESSAGING
             else if ("message/open".equals(action)) {
                 openMessage(params);
+            }
+            // NEWS
+            else if ("news/count".equals(action)) {
+                countNews(params);
+            } else if ("news/get".equals(action)) {
+                getNews(params);
+            } else if ("news/list".equals(action)) {
+                listNews(params);
             }
             // CAMERA
             else if ("camera/startScanningQrCode".equals(action)) {
@@ -546,6 +564,47 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             deliverResult(requestId, null, error);
         }
 
+        private void countNews(final JSONObject params) throws JSONException {
+            if (params == null) {
+                L.w("Expected params != null");
+                return;
+            }
+            final String requestId = params.getString("id");
+            long count = mActionScreenUtils.countNews(params);
+            Map<String, Object> r = new HashMap<>();
+            r.put("count", count);
+            deliverResult(requestId, r, null);
+        }
+
+        private void getNews(final JSONObject params) throws JSONException {
+            if (params == null) {
+                L.w("Expected params != null");
+                return;
+            }
+            final String requestId = params.getString("id");
+            NewsItem item = mActionScreenUtils.getNews(params);
+            Map<String, Object> r = new HashMap<>();
+            r.put("item", item == null ? null : item.toJSONMap());
+            deliverResult(requestId, r, null);
+        }
+
+        private void listNews(final JSONObject params) throws JSONException {
+            if (params == null) {
+                L.w("Expected params != null");
+                return;
+            }
+            final String requestId = params.getString("id");
+            Map<String, Object> result = mActionScreenUtils.listNews(params);
+            List<Map<String, Object>> newsItems = new ArrayList<>();
+            for (NewsItem ni : (List<NewsItem>) result.get("items")) {
+                newsItems.add(ni.toJSONMap());
+            }
+            Map<String, Object> r = new HashMap<>();
+            r.put("cursor", result.get("cursor"));
+            r.put("items", newsItems);
+            deliverResult(requestId, r, null);
+        }
+
         private void createKeyPair(final JSONObject params) throws JSONException {
             if (params == null) {
                 L.w("Expected params != null");
@@ -775,14 +834,14 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         return wl;
     }
 
-    @SuppressLint({ "SetJavaScriptEnabled", "JavascriptInterface" })
+    @SuppressLint({"SetJavaScriptEnabled", "JavascriptInterface"})
     @Override
     public void onCreate(Bundle savedInstanceState) {
         if (CloudConstants.isContentBrandingApp()) {
             super.setTheme(android.R.style.Theme_Black_NoTitleBar_Fullscreen);
         }
         super.onCreate(savedInstanceState);
-        if (this instanceof ContentBrandingActionScreenActivity) {
+        if (this instanceof FullscreenActionScreenActivity) {
             setContentViewWithoutNavigationBar(R.layout.action_screen);
         } else {
             setContentView(R.layout.action_screen);
@@ -851,7 +910,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             final TextView brandingFooterText = (TextView) findViewById(R.id.branding_footer_text);
             brandingFooterText.setText(getString(R.string.back));
             brandingFooterClose.setColorFilter(UIUtils.imageColorFilter(ContextCompat.getColor(this,
-                R.color.mc_homescreen_text)));
+                    R.color.mc_homescreen_text)));
 
             brandingFooter.setOnClickListener(new OnClickListener() {
                 @Override
@@ -930,7 +989,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                     mService.runOnUIHandler(new SafeRunnable() {
                         @Override
                         protected void safeRun() throws Exception {
-                            if(mQRCodeScanner != null) {
+                            if (mQRCodeScanner != null) {
                                 mQRCodeScanner.onPause();
                             }
                         }
@@ -1013,6 +1072,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         });
 
         Intent intent = getIntent();
+        mBrandingType = intent.getStringExtra(BRANDING_TYPE);
         mBrandingKey = intent.getStringExtra(BRANDING_KEY);
         mServiceEmail = intent.getStringExtra(SERVICE_EMAIL);
         mItemTagHash = intent.getStringExtra(ITEM_TAG_HASH);
@@ -1340,9 +1400,12 @@ public class ActionScreenActivity extends ServiceBoundActivity {
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onServiceBound() {
-        if (CloudConstants.isContentBrandingApp()) {
+        int homeActivityLayout = LookAndFeelConstants.getHomeActivityLayout(this);
+        if (CloudConstants.isContentBrandingApp() || BRANDING_TYPE_HOME.equals(mBrandingType)) {
             final IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction(BrandingMgr.SERVICE_BRANDING_AVAILABLE_INTENT);
+            if (CloudConstants.isContentBrandingApp()) {
+                intentFilter.addAction(BrandingMgr.SERVICE_BRANDING_AVAILABLE_INTENT);
+            }
             intentFilter.addAction(FriendsPlugin.FRIEND_UPDATE_INTENT);
             registerReceiver(mBroadcastReceiver, intentFilter);
         }
@@ -1409,7 +1472,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             settings.setBlockNetworkImage(false);
 
             if (mBrandingResult.contentType != null
-                && AttachmentViewerActivity.CONTENT_TYPE_PDF.equalsIgnoreCase(mBrandingResult.contentType)) {
+                    && AttachmentViewerActivity.CONTENT_TYPE_PDF.equalsIgnoreCase(mBrandingResult.contentType)) {
 
                 setContentView(R.layout.pdf_viewer);
                 PDFView viewer = (PDFView) findViewById(R.id.pdfView);
@@ -1459,7 +1522,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
 
     @Override
     protected void onServiceUnbound() {
-        if (CloudConstants.isContentBrandingApp()) {
+        if (CloudConstants.isContentBrandingApp() || BRANDING_TYPE_HOME.equals(mBrandingType)) {
             unregisterReceiver(mBroadcastReceiver);
         }
         if (mIsListeningBacklogConnectivityChanged) {
@@ -1506,6 +1569,20 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         public void onBackendConnectivityChanged(boolean connected) {
             executeJS(false, "if (typeof rogerthat !== 'undefined') rogerthat._onBackendConnectivityChanged(%s)", connected);
         }
+
+        @Override
+        public void newsReceived(long[] ids) {
+            List<Long> newsIds = new ArrayList<>();
+            for (long id : ids) {
+                newsIds.add(id);
+            }
+            executeJS(false, "if (typeof rogerthat !== 'undefined') rogerthat._newsReceived(%s)", JSONValue.toJSONString(newsIds));
+        }
+
+        @Override
+        public void badgeUpdated(Map<String, Object> params) {
+            executeJS(false, "if (typeof rogerthat !== 'undefined') rogerthat._badgeUpdated(%s)", JSONValue.toJSONString(params));
+        }
     };
 
     private BroadcastReceiver mBroadcastReceiver = new SafeBroadcastReceiver() {
@@ -1517,9 +1594,10 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 if (mServiceEmail.equals(intent.getStringExtra(BrandingMgr.SERVICE_EMAIL))) {
                     FriendStore friendStore = mFriendsPlugin.getStore();
                     Friend f = friendStore.getFriend(mServiceEmail);
-                    if (!f.contentBrandingHash.equals(mBrandingKey)
-                        && f.contentBrandingHash.equals(intent.getStringExtra(BrandingMgr.BRANDING_KEY))) {
-                        mBrandingKey = f.contentBrandingHash;
+                    String brandingKey = f.contentBrandingHash;
+                    if (!brandingKey.equals(mBrandingKey)
+                        && brandingKey.equals(intent.getStringExtra(BrandingMgr.BRANDING_KEY))) {
+                        mBrandingKey = brandingKey;
 
                         if (mBranding.getVisibility() == View.VISIBLE) {
                             if (mQRCodeScanner != null) {
@@ -1535,21 +1613,35 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 if (mServiceEmail.equals(intent.getStringExtra(BrandingMgr.SERVICE_EMAIL))) {
                     FriendStore friendStore = mFriendsPlugin.getStore();
                     Friend f = friendStore.getFriend(mServiceEmail);
-                    if (!f.contentBrandingHash.equals(mBrandingKey)) {
-                        BrandingMgr brandingMgr = mMessagingPlugin.getBrandingMgr();
-                        try {
-                            if (brandingMgr.isBrandingAvailable(f.contentBrandingHash)) {
-                                mBrandingKey = f.contentBrandingHash;
-                                if (mBranding.getVisibility() == View.VISIBLE) {
-                                    if (mQRCodeScanner != null) {
-                                        mQRCodeScanner.stopScanningForQRCodes();
+                    String brandingKey;
+                    if (CloudConstants.isContentBrandingApp()) {
+                        brandingKey = f.contentBrandingHash;
+                    } else {
+                        brandingKey = f.homeBrandingHash;
+                    }
+                    if (!brandingKey.equals(mBrandingKey)) {
+                        if (CloudConstants.isContentBrandingApp()) {
+                            BrandingMgr brandingMgr = mMessagingPlugin.getBrandingMgr();
+                            try {
+                                if (brandingMgr.isBrandingAvailable(brandingKey)) {
+                                    mBrandingKey = brandingKey;
+                                    if (mBranding.getVisibility() == View.VISIBLE) {
+                                        if (mQRCodeScanner != null) {
+                                            mQRCodeScanner.stopScanningForQRCodes();
+                                        }
                                     }
+                                    mInfoSet = false;
+                                    displayBranding();
                                 }
-                                mInfoSet = false;
-                                displayBranding();
+                            } catch (BrandingFailureException e) {
+                                L.d(e);
                             }
-                        } catch (BrandingFailureException e) {
-                            L.d(e);
+                        } else {
+                            Intent homeActivityIntent = new Intent(ActionScreenActivity.this, HomeBrandingActivity.class);
+                            homeActivityIntent.setFlags(MainActivity.FLAG_CLEAR_STACK_SINGLE_TOP);
+                            homeActivityIntent.putExtra(HomeBrandingActivity.SERVICE_EMAIL, mServiceEmail);
+                            startActivity(homeActivityIntent);
+                            finish();
                         }
                     }
                 }

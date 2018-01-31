@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 GIG Technology NV
+ * Copyright 2018 GIG Technology NV
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,21 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @@license_version:1.3@@
+ * @@license_version:1.4@@
  */
 
 package com.mobicage.rogerthat.cordova;
 
+import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.HomeBrandingActivity;
+import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.plugins.friends.ActionScreenActivity;
 import com.mobicage.rogerthat.plugins.friends.Friend;
+import com.mobicage.rogerthat.plugins.friends.FriendStore;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.friends.ServiceMenuItemInfo;
 import com.mobicage.rogerthat.plugins.messaging.BrandingFailureException;
@@ -37,7 +44,10 @@ import com.mobicage.rogerthat.plugins.payment.PaymentPlugin;
 import com.mobicage.rogerthat.plugins.system.SystemPlugin;
 import com.mobicage.rogerthat.util.ActionScreenUtils;
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
+import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
+import com.mobicage.rpc.config.CloudConstants;
 
 import org.apache.cordova.ConfigXmlParser;
 import org.apache.cordova.CordovaInterfaceImpl;
@@ -64,6 +74,7 @@ public class CordovaActionScreenActivity extends ServiceBoundActivity {
     protected CordovaInterfaceImpl mCordovaInterface = new CordovaInterfaceImpl(this);
 
     protected CordovaAppType mType;
+    protected  String mBrandingType;
     protected String mBrandingKey;
     protected String mItemLabel;
     protected long[] mItemCoords;
@@ -162,6 +173,7 @@ public class CordovaActionScreenActivity extends ServiceBoundActivity {
         Intent intent = getIntent();
         mEmbeddedApp = intent.getStringExtra(EMBEDDED_APP);
 
+        mBrandingType = intent.getStringExtra(ActionScreenActivity.BRANDING_TYPE);
         mBrandingKey = intent.getStringExtra(ActionScreenActivity.BRANDING_KEY);
         mServiceEmail = intent.getStringExtra(ActionScreenActivity.SERVICE_EMAIL);
         mItemTagHash = intent.getStringExtra(ActionScreenActivity.ITEM_TAG_HASH);
@@ -224,6 +236,9 @@ public class CordovaActionScreenActivity extends ServiceBoundActivity {
 
     @Override
     protected void onServiceUnbound() {
+        if (ActionScreenActivity.BRANDING_TYPE_HOME.equals(mBrandingType)) {
+            unregisterReceiver(mBroadcastReceiver);
+        }
     }
 
     @Override
@@ -238,6 +253,12 @@ public class CordovaActionScreenActivity extends ServiceBoundActivity {
             displayEmbeddedApp();
         } else {
             displayBranding();
+        }
+
+        if (ActionScreenActivity.BRANDING_TYPE_HOME.equals(mBrandingType)) {
+            final IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(FriendsPlugin.FRIEND_UPDATE_INTENT);
+            registerReceiver(mBroadcastReceiver, intentFilter);
         }
     }
 
@@ -272,6 +293,29 @@ public class CordovaActionScreenActivity extends ServiceBoundActivity {
             L.e("Could not display menu item with screen branding.", e);
         }
     }
+
+    private BroadcastReceiver mBroadcastReceiver = new SafeBroadcastReceiver() {
+        @SuppressLint("DefaultLocale")
+        @Override
+        public String[] onSafeReceive(final Context context, final Intent intent) {
+            T.UI();
+            if (FriendsPlugin.FRIEND_UPDATE_INTENT.equals(intent.getAction())) {
+                if (mServiceEmail.equals(intent.getStringExtra(BrandingMgr.SERVICE_EMAIL))) {
+                    FriendStore friendStore = mFriendsPlugin.getStore();
+                    Friend f = friendStore.getFriend(mServiceEmail);
+                    String brandingKey = f.homeBrandingHash;
+                    if (!brandingKey.equals(mBrandingKey)) {
+                        Intent homeActivityIntent = new Intent(CordovaActionScreenActivity.this, HomeBrandingActivity.class);
+                        homeActivityIntent.setFlags(MainActivity.FLAG_CLEAR_STACK_SINGLE_TOP);
+                        homeActivityIntent.putExtra(HomeBrandingActivity.SERVICE_EMAIL, mServiceEmail);
+                        startActivity(homeActivityIntent);
+                        finish();
+                    }
+                }
+            }
+            return null;
+        }
+    };
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {

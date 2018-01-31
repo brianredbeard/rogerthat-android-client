@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 GIG Technology NV
+ * Copyright 2018 GIG Technology NV
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @@license_version:1.3@@
+ * @@license_version:1.4@@
  */
 
 package com.mobicage.rogerthat.util.db;
@@ -40,7 +40,7 @@ import java.util.List;
 public class DatabaseManager implements Closeable {
 
     private final static String DB_NAME = "mc.db";
-    private final static int DB_VERSION = 80;
+    private final static int DB_VERSION = 82;
 
     private final MainService mMainService;
     private final SQLiteDatabase mDb;

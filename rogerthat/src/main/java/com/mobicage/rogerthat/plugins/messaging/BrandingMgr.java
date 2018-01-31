@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 GIG Technology NV
+ * Copyright 2018 GIG Technology NV
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @@license_version:1.3@@
+ * @@license_version:1.4@@
  */
 package com.mobicage.rogerthat.plugins.messaging;
 
@@ -46,6 +46,7 @@ import com.mobicage.rogerthat.cordova.CordovaActionScreenActivity;
 import com.mobicage.rogerthat.cordova.CordovaSettings;
 import com.mobicage.rogerthat.plugins.friends.ActionScreenActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
+import com.mobicage.rogerthat.plugins.friends.FullscreenActionScreenActivity;
 import com.mobicage.rogerthat.plugins.system.JSEmbedding;
 import com.mobicage.rogerthat.plugins.system.SystemPlugin;
 import com.mobicage.rogerthat.util.IOUtils;
@@ -624,6 +625,9 @@ public class BrandingMgr implements Pickleable, Closeable {
         if (friend.contentBrandingHash != null) {
             brandings.add(friend.contentBrandingHash);
         }
+        if (friend.homeBrandingHash != null) {
+            brandings.add(friend.homeBrandingHash);
+        }
         boolean hasQueuedBrandings = false;
         for (String branding : brandings) {
             boolean brandingAvailable = false;
@@ -981,6 +985,12 @@ public class BrandingMgr implements Pickleable, Closeable {
             return true;
         }
         return false;
+    }
+
+    public Class getFullscreenActionScreenActivityClass(String brandingKey) {
+        if (isCordovaBranding(brandingKey))
+            return CordovaActionScreenActivity.class;
+        return FullscreenActionScreenActivity.class;
     }
 
     public Class getActionScreenActivityClass(String brandingKey) {

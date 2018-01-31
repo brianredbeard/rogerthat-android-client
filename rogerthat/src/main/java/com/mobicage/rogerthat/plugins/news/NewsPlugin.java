@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 GIG Technology NV
+ * Copyright 2018 GIG Technology NV
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @@license_version:1.3@@
+ * @@license_version:1.4@@
  */
 
 package com.mobicage.rogerthat.plugins.news;
@@ -332,6 +332,15 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
         }
     }
 
+    public NewsItem getNewsItem(final long id) {
+        NewsItem item = mStore.getNewsItem(id);
+        if (item == null)
+            return null;
+
+        loadNewsItem(item);
+        return item;
+    }
+
     public void getNewsItems(final long[] ids) {
         T.dontCare();
         if (ids.length == 0)
@@ -483,13 +492,25 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
         return mBadgeCount;
     }
 
+    public Map<String, Object> listNewsItems(final String service, final String cursor, final long count) {
+        T.dontCare();
+        return DebugUtils.profile("NewsPlugin.listNewsItems()", new Callable<Map<String, Object>>() {
+            @Override
+            public Map<String, Object> call() throws Exception {
+                Map<String, Object> result = mStore.listNewsItems(service, cursor, count);
+                loadNewsItems((List<NewsItem>) result.get("items"));
+                return result;
+            }
+        });
+    }
+
     public List<NewsItemIndex> getNewsBefore(final long sortKey, final long count, final String qry) {
         T.dontCare();
         return DebugUtils.profile("NewsPlugin.getNewsBefore()", new Callable<List<NewsItemIndex>>() {
             @Override
             public List<NewsItemIndex> call() throws Exception {
                 List<NewsItemIndex> newsItems = qry == null ? mStore.getNewsBefore(sortKey, count) : mStore.getNewsBefore(sortKey, count, qry);
-                loadNewsItems(newsItems);
+                loadNewsItemsByIndex(newsItems);
                 return newsItems;
             }
         });
@@ -501,13 +522,59 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
             @Override
             public List<NewsItemIndex> call() throws Exception {
                 List<NewsItemIndex> newsItems = qry == null ? mStore.getNewsAfter(sortKey, count) : mStore.getNewsAfter(sortKey, count, qry);
-                loadNewsItems(newsItems);
+                loadNewsItemsByIndex(newsItems);
                 return newsItems;
             }
         });
     }
 
-    private void loadNewsItems(List<NewsItemIndex> newsItems) {
+    private void loadNewsItem(NewsItem ni) {
+        T.dontCare();
+        if (TestUtils.isRunningTest()) {
+            return;
+        }
+        List<Long> statsToRequest = new ArrayList<>();
+        List<Long> itemsToRequest = new ArrayList<>();
+
+        statsToRequest.add(ni.id);
+
+        if (ni.isPartial) {
+            itemsToRequest.add(ni.id);
+        }
+        mNewsChannel.statsNews(statsToRequest);
+
+        long[] ids = new long[itemsToRequest.size()];
+        for (int i = 0; i < itemsToRequest.size(); i++) {
+            ids[i] = itemsToRequest.get(i);
+        }
+        getNewsItems(ids);
+    }
+
+    private void loadNewsItems(List<NewsItem> newsItems) {
+        T.dontCare();
+        if (TestUtils.isRunningTest()) {
+            return;
+        }
+        List<Long> statsToRequest = new ArrayList<>();
+        List<Long> itemsToRequest = new ArrayList<>();
+
+        for (NewsItem ni : newsItems) {
+            statsToRequest.add(ni.id);
+
+            if (ni.isPartial) {
+                itemsToRequest.add(ni.id);
+            }
+        }
+        mNewsChannel.statsNews(statsToRequest);
+
+        long[] ids = new long[itemsToRequest.size()];
+        for (int i = 0; i < itemsToRequest.size(); i++) {
+            ids[i] = itemsToRequest.get(i);
+        }
+        getNewsItems(ids);
+    }
+
+    private void loadNewsItemsByIndex(List<NewsItemIndex> newsItems) {
         T.dontCare();
         if (TestUtils.isRunningTest()) {
             return;

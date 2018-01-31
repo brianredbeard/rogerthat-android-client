@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 GIG Technology NV
+ * Copyright 2018 GIG Technology NV
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @@license_version:1.3@@
+ * @@license_version:1.4@@
  */
 
 package com.mobicage.rogerthat;
@@ -757,7 +757,11 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
 
         Bundle extras = new Bundle();
         extras.putBoolean("show_drawer_icon", true);
-        if (LookAndFeelConstants.getHomesActivityLayout(this) == R.layout.messaging) {
+
+        int homeActivityLayout = LookAndFeelConstants.getHomeActivityLayout(this);
+        if (homeActivityLayout == R.layout.home_branding) {
+            ActivityUtils.goToActivity(ServiceBoundActivity.this, "home_branding", true, false, extras);
+        } else  if (homeActivityLayout == R.layout.messaging) {
             ActivityUtils.goToActivity(ServiceBoundActivity.this, "messages", true, false, extras);
         } else {
             ActivityUtils.goToActivity(ServiceBoundActivity.this, "news", true, false, extras);

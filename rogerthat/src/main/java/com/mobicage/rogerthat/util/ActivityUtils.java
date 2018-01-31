@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 GIG Technology NV
+ * Copyright 2018 GIG Technology NV
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @@license_version:1.3@@
+ * @@license_version:1.4@@
  */
 
 package com.mobicage.rogerthat.util;
@@ -30,6 +30,7 @@ import com.commonsware.cwac.cam2.CameraActivity;
 import com.commonsware.cwac.cam2.Facing;
 import com.commonsware.cwac.cam2.FlashMode;
 import com.commonsware.cwac.cam2.VideoRecorderActivity;
+import com.mobicage.rogerthat.HomeBrandingActivity;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.MoreActivity;
@@ -82,6 +83,7 @@ public class ActivityUtils {
         SIMPLE_ACTIONS.put("settings", SettingsActivity.class);
         SIMPLE_ACTIONS.put("stream", HistoryListActivity.class);
         SIMPLE_ACTIONS.put("directory", FriendSearchActivity.class);
+        SIMPLE_ACTIONS.put("home_branding", HomeBrandingActivity.class);
 
         SERVICE_ACTIONS.put("services", FriendStore.SERVICE_ORGANIZATION_TYPE_UNSPECIFIED);
         SERVICE_ACTIONS.put("community_services", FriendStore.SERVICE_ORGANIZATION_TYPE_CITY);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 GIG Technology NV
+ * Copyright 2018 GIG Technology NV
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @@license_version:1.3@@
+ * @@license_version:1.4@@
  */
 package com.mobicage.rogerthat.plugins.news;
 
@@ -26,6 +26,7 @@ import android.database.sqlite.SQLiteStatement;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.util.DebugUtils;
+import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.db.DatabaseManager;
 import com.mobicage.rogerthat.util.db.Transaction;
 import com.mobicage.rogerthat.util.db.TransactionHelper;
@@ -50,6 +51,8 @@ import static com.mobicage.rogerthat.util.db.DBUtils.bindString;
 public class NewsStore implements Closeable {
 
     private final SQLiteStatement mCountNewsItems;
+    private final SQLiteStatement mCountAllNewsItems;
+    private final SQLiteStatement mCountAllNewsItemsService;
     private final SQLiteStatement mCountNewsPinnedItems;
     private final SQLiteStatement mCountNewsPinnedItemsSearch;
     private final SQLiteStatement mCountNewsItemsWithId;
@@ -82,6 +85,8 @@ public class NewsStore implements Closeable {
         mMainService = mainService;
 
         mCountNewsItems = mDb.compileStatement(mMainService.getString(R.string.sql_news_count_items));
+        mCountAllNewsItems = mDb.compileStatement(mMainService.getString(R.string.sql_news_count_all_items));
+        mCountAllNewsItemsService = mDb.compileStatement(mMainService.getString(R.string.sql_news_count_all_items_service));
         mCountNewsPinnedItems = mDb.compileStatement(mMainService.getString(R.string.sql_news_count_pinned_items));
         mCountNewsPinnedItemsSearch = mDb.compileStatement(mMainService.getString(R.string.sql_news_count_pinned_items_search));
         mCountNewsItemsWithId = mDb.compileStatement(mMainService.getString(R.string.sql_news_get_item_existence));
@@ -111,6 +116,8 @@ public class NewsStore implements Closeable {
         T.UI();
 
         mCountNewsItems.close();
+        mCountAllNewsItems.close();
+        mCountAllNewsItemsService.close();
         mCountNewsPinnedItems.close();
         mCountNewsPinnedItemsSearch.close();
         mCountNewsItemsWithId.close();
@@ -538,7 +545,58 @@ public class NewsStore implements Closeable {
         return mCountNewsPinnedItemsSearch.simpleQueryForLong();
     }
 
-    private List<NewsItemIndex> getNewsItemsFromCursor(Cursor c) {
+    public long countAllNewsItems(String service) {
+        if (TextUtils.isEmptyOrWhitespace(service)) {
+            return mCountAllNewsItems.simpleQueryForLong();
+        }
+        mCountAllNewsItemsService.bindString(1, service);
+        return mCountAllNewsItemsService.simpleQueryForLong();
+    }
+
+    public Map<String, Object> listNewsItems(final String service, final String cursor, final long count) {
+        T.dontCare();
+        final String timstamp = cursor == null ? Long.toString(Long.MAX_VALUE) : cursor;
+        final String limit = Long.toString(count);
+
+        Cursor c;
+        if (TextUtils.isEmptyOrWhitespace(service)) {
+            c = mDb.rawQuery(mMainService.getString(R.string.sql_news_list),
+                    new String[]{timstamp, limit});
+        } else {
+            c = mDb.rawQuery(mMainService.getString(R.string.sql_news_list_service),
+                    new String[]{service, timstamp, limit});
+        }
+
+        List<NewsItem> items = getNewsItemFromCursor(c);
+        String newCursor = cursor;
+        if (items.size() > 0) {
+            long lastTimestamp = items.get(items.size() - 1).sort_timestamp;
+            newCursor = Long.toString(lastTimestamp);
+        }
+
+        Map<String, Object> r = new HashMap<>();
+        r.put("cursor", newCursor);
+        r.put("items", items);
+        return r;
+     }
+
+    private List<NewsItem> getNewsItemFromCursor(Cursor c) {
+        T.dontCare();
+        List<NewsItem> newsItems = new ArrayList<>();
+        try {
+            if (!c.moveToFirst()) {
+                return newsItems;
+            }
+            do {
+                newsItems.add(readNewsItem(c));
+            } while (c.moveToNext());
+        } finally {
+            c.close();
+        }
+        return newsItems;
+    }
+
+    private List<NewsItemIndex> getNewsItemIndexesFromCursor(Cursor c) {
         T.dontCare();
         List<NewsItemIndex> newsItems = new ArrayList<>();
         try {
@@ -562,7 +620,7 @@ public class NewsStore implements Closeable {
                 final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_news_get_news_before),
                         new String[]{"" + sortKey, "" + count});
 
-                return getNewsItemsFromCursor(c);
+                return getNewsItemIndexesFromCursor(c);
             }
         });
     }
@@ -573,7 +631,7 @@ public class NewsStore implements Closeable {
         final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_news_get_pinned_news_before),
                 new String[]{"" + sortKey, query, query, query, query, query, "" + count});
 
-        return getNewsItemsFromCursor(c);
+        return getNewsItemIndexesFromCursor(c);
     }
 
     public List<NewsItemIndex> getNewsAfter(final long sortKey, final long count) {
@@ -584,7 +642,7 @@ public class NewsStore implements Closeable {
                 final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_news_get_news_after),
                         new String[]{"" + sortKey, "" + count});
 
-                return getNewsItemsFromCursor(c);
+                return getNewsItemIndexesFromCursor(c);
             }
         });
     }
@@ -596,9 +654,9 @@ public class NewsStore implements Closeable {
         final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_news_get_pinned_news_after),
                 new String[]{"" + sortKey, query, query, query, query, query, "" + count});
 
-        return getNewsItemsFromCursor(c);
+        return getNewsItemIndexesFromCursor(c);
     }
-    
+
     private NewsItem readNewsItem(Cursor c) {
         NewsItem newsItem = new NewsItem();
         newsItem.timestamp = c.getLong(0);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 GIG Technology NV
+ * Copyright 2018 GIG Technology NV
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @@license_version:1.3@@
+ * @@license_version:1.4@@
  */
 package com.mobicage.rogerthat;
 
@@ -58,6 +58,7 @@ import com.mobicage.rogerthat.util.ui.ImageHelper;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
+import com.mobicage.rpc.config.LookAndFeelConstants;
 import com.mobicage.to.friends.ServiceMenuItemTO;
 
 import fr.castorflex.android.verticalviewpager.VerticalViewPager;
@@ -114,17 +115,17 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity {
         super.onCreate(savedInstanceState);
         LayoutInflater inflater = getLayoutInflater();
 
+        int homeActivityLayout = LookAndFeelConstants.getHomeActivityLayout(this);
+        setContentViewWithoutNavigationBar(homeActivityLayout);
 
-        setContentViewWithoutNavigationBar(AppConstants.HOME_ACTIVITY_LAYOUT);
-
-        if (AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.homescreen_3x3_with_qr_code ||
-                AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.homescreen_3x3) {
+        if (homeActivityLayout == R.layout.homescreen_3x3_with_qr_code ||
+                homeActivityLayout == R.layout.homescreen_3x3) {
             FrameLayout mainLayer = (FrameLayout) findViewById(R.id.master);
             inflater.inflate(R.layout.homescreen_3x3_watermark, mainLayer, true);
             inflater.inflate(R.layout.homescreen_3x3_holder, mainLayer, true);
         }
 
-        if (AppConstants.HOME_ACTIVITY_LAYOUT == R.layout.homescreen_3x3_with_qr_code) {
+        if (homeActivityLayout == R.layout.homescreen_3x3_with_qr_code) {
             if (AppConstants.SHOW_HOMESCREEN_FOOTER) {
                 ((TextView) findViewById(R.id.loyalty_text)).setTextColor(ContextCompat.getColor(this, R.color
                         .mc_homescreen_background));

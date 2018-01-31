@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright 2017 GIG Technology NV
+# Copyright 2018 GIG Technology NV
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# @@license_version:1.3@@
+# @@license_version:1.4@@
 
 from contextlib import closing
 import hashlib
@@ -95,6 +95,7 @@ NOTIFICATION_ICON_SIZES = {
     'drawable-xxhdpi-v5': 96,
 }
 
+HOME_SCREEN_STYLE_BRANDING = "branding"
 HOME_SCREEN_STYLE_NEWS = "news"
 HOME_SCREEN_STYLE_MESSAGING = "messaging"
 HOME_SCREEN_STYLE_2X3 = "2x3"
@@ -410,7 +411,8 @@ def convert_config():
 
     ##### HOMESCREEN #############################################
     if doc["HOMESCREEN"].get("style") == HOME_SCREEN_STYLE_MESSAGING or \
-            doc["HOMESCREEN"].get("style") == HOME_SCREEN_STYLE_NEWS:
+        doc["HOMESCREEN"].get("style") == HOME_SCREEN_STYLE_NEWS or \
+        doc["HOMESCREEN"].get("style") == HOME_SCREEN_STYLE_BRANDING:
         logging.info('Not generating homescreen images')
         items = doc['HOMESCREEN'].get('items', [])
         toolbar = doc.get('TOOLBAR')
@@ -619,11 +621,14 @@ def convert_config():
         raise Exception("There is no app_type defined")
 
     home_screen_style = doc['HOMESCREEN']['style']
-
-    if home_screen_style == HOME_SCREEN_STYLE_MESSAGING:
-        home_activity = "R.layout.messaging"
+    if home_screen_style == HOME_SCREEN_STYLE_BRANDING:
+        if not doc["APP_CONSTANTS"]["APP_EMAIL"]:
+            raise Exception("Homescreen type 'branding' requires a main service")
+        home_activity = "R.layout.home_branding"
     elif home_screen_style == HOME_SCREEN_STYLE_NEWS:
         home_activity = "R.layout.news"
+    elif home_screen_style == HOME_SCREEN_STYLE_MESSAGING:
+        home_activity = "R.layout.messaging"
     elif home_screen_style == HOME_SCREEN_STYLE_2X3:
         home_activity = "R.layout.homescreen_2x3"
     elif home_screen_style == HOME_SCREEN_STYLE_3X3:

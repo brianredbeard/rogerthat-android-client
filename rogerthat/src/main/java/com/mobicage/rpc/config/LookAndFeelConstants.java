@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 GIG Technology NV
+ * Copyright 2018 GIG Technology NV
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @@license_version:1.3@@
+ * @@license_version:1.4@@
  */
 
 package com.mobicage.rpc.config;
@@ -50,7 +50,6 @@ public class LookAndFeelConstants {
     private static int sPrimaryColor;
     private static int sPrimaryColorDark;
     private static int sPrimaryIconColor;
-    private static int sSecondaryColor;
 
     private static File lookAndFeelDirectory(Context context) throws IOException {
         File file = IOUtils.getFilesDirectory(context);
@@ -137,6 +136,8 @@ public class LookAndFeelConstants {
                 sHomeActivityLayout = R.layout.news;
             } else if ("messages".equals(request.homescreen.style)) {
                 sHomeActivityLayout = R.layout.messaging;
+            } else if ("home_branding".equals(request.homescreen.style)) {
+                sHomeActivityLayout = R.layout.home_branding;
             } else {
                 sHomeActivityLayout = AppConstants.HOME_ACTIVITY_LAYOUT;
             }
@@ -180,7 +181,7 @@ public class LookAndFeelConstants {
         return true;
     }
 
-    public static int getHomesActivityLayout(Context context) {
+    public static int getHomeActivityLayout(Context context) {
         setup(context, false);
         return sHomeActivityLayout;
     }

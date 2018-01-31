@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 GIG Technology NV
+ * Copyright 2018 GIG Technology NV
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @@license_version:1.3@@
+ * @@license_version:1.4@@
  */
 
 package com.mobicage.to.friends;
@@ -40,6 +40,7 @@ public class FriendTO implements com.mobicage.rpc.IJSONable {
     public long flags;
     public long generation;
     public boolean hasUserData;
+    public String homeBrandingHash;
     public String name;
     public long organizationType;
     public String pokeDescription;
@@ -167,6 +168,12 @@ public class FriendTO implements com.mobicage.rpc.IJSONable {
         } else {
             this.hasUserData = false;
         }
+        if (json.containsKey("homeBrandingHash")) {
+            Object val = json.get("homeBrandingHash");
+            this.homeBrandingHash = (String) val;
+        } else {
+            this.homeBrandingHash = null;
+        }
         if (json.containsKey("name")) {
             Object val = json.get("name");
             this.name = (String) val;
@@ -269,6 +276,7 @@ public class FriendTO implements com.mobicage.rpc.IJSONable {
         obj.put("flags", this.flags);
         obj.put("generation", this.generation);
         obj.put("hasUserData", this.hasUserData);
+        obj.put("homeBrandingHash", this.homeBrandingHash);
         obj.put("name", this.name);
         obj.put("organizationType", this.organizationType);
         obj.put("pokeDescription", this.pokeDescription);

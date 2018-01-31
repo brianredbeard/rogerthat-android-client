@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 GIG Technology NV
+ * Copyright 2018 GIG Technology NV
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @@license_version:1.3@@
+ * @@license_version:1.4@@
  */
 
 package com.mobicage.to.messaging.jsmfr;
@@ -32,6 +32,7 @@ public class MessageFlowMemberResultRequestTO implements com.mobicage.rpc.IJSONa
     public String flush_id;
     public String message_flow_name;
     public boolean results_email;
+    public long timestamp;
 
     public MessageFlowMemberResultRequestTO() {
     }
@@ -87,6 +88,16 @@ public class MessageFlowMemberResultRequestTO implements com.mobicage.rpc.IJSONa
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.jsmfr.MessageFlowMemberResultRequestTO object is missing field 'results_email'");
         }
+        if (json.containsKey("timestamp")) {
+            Object val = json.get("timestamp");
+            if (val instanceof Integer) {
+                this.timestamp = ((Integer) val).longValue();
+            } else {
+                this.timestamp = ((Long) val).longValue();
+            }
+        } else {
+            throw new IncompleteMessageException("com.mobicage.to.messaging.jsmfr.MessageFlowMemberResultRequestTO object is missing field 'timestamp'");
+        }
     }
 
     @Override
@@ -108,6 +119,7 @@ public class MessageFlowMemberResultRequestTO implements com.mobicage.rpc.IJSONa
         obj.put("flush_id", this.flush_id);
         obj.put("message_flow_name", this.message_flow_name);
         obj.put("results_email", this.results_email);
+        obj.put("timestamp", this.timestamp);
         return obj;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 GIG Technology NV
+ * Copyright 2018 GIG Technology NV
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @@license_version:1.3@@
+ * @@license_version:1.4@@
  */
 
 package com.mobicage.rogerthat.util;
@@ -41,6 +41,8 @@ import com.mobicage.rogerthat.plugins.friends.FriendStore;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.friends.ServiceApiCallbackResult;
 import com.mobicage.rogerthat.plugins.history.HistoryItem;
+import com.mobicage.rogerthat.plugins.news.NewsItem;
+import com.mobicage.rogerthat.plugins.news.NewsPlugin;
 import com.mobicage.rogerthat.plugins.scan.GetUserInfoResponseHandler;
 import com.mobicage.rogerthat.plugins.scan.ProcessScanActivity;
 import com.mobicage.rogerthat.plugins.trackme.DiscoveredBeaconProximity;
@@ -76,6 +78,7 @@ public class ActionScreenUtils {
     private IntentCallback mCallback;
 
     private FriendsPlugin mFriendsPlugin;
+    private NewsPlugin mNewsPlugin;
     private TrackmePlugin mTrackmePlugin;
 
     private MediaPlayer mSoundMediaPlayer = null;
@@ -93,6 +96,8 @@ public class ActionScreenUtils {
         void onBeaconOutOfReach(Map<String, Object> beacon);
         void qrCodeScanned(Map<String, Object> result);
         void onBackendConnectivityChanged(boolean connected);
+        void newsReceived(long[] ids);
+        void badgeUpdated(Map<String, Object> params);
     }
 
     private BroadcastReceiver mBroadcastReceiver = new SafeBroadcastReceiver() {
@@ -219,7 +224,25 @@ public class ActionScreenUtils {
                 }
                 return new String[] { intent.getAction() };
 
+            } else if (NewsPlugin.GET_NEWS_ITEMS_RECEIVED_INTENT.equals(intent.getAction())) {
+                mCallback.newsReceived(intent.getLongArrayExtra("ids"));
+                return new String[] { intent.getAction() };
+
+            } else if (NewsPlugin.NEW_NEWS_ITEM_INTENT.equals(intent.getAction())) {
+                mCallback.newsReceived(new long[] {intent.getLongExtra("id", -1)});
+                return new String[] { intent.getAction() };
+
+            } else if (MainService.UPDATE_BADGE_INTENT.equals(intent.getAction())) {
+                String key = intent.getStringExtra("key");
+                long count = intent.getLongExtra("count", 0);
+
+                Map<String, Object> params = new HashMap<>();
+                params.put("key", key);
+                params.put("count", count);
+                mCallback.badgeUpdated(params);
+                return new String[] { intent.getAction() };
             }
+
             return null;
         }
     };
@@ -255,6 +278,7 @@ public class ActionScreenUtils {
 
     public void start(IntentCallback callback) {
         mFriendsPlugin = mMainService.getPlugin(FriendsPlugin.class);
+        mNewsPlugin = mMainService.getPlugin(NewsPlugin.class);
         mCallback = callback;
 
         final IntentFilter intentFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
@@ -267,6 +291,9 @@ public class ActionScreenUtils {
         
         intentFilter.addAction(FriendsPlugin.FRIEND_INFO_RECEIVED_INTENT);
         intentFilter.addAction(ProcessScanActivity.URL_REDIRECTION_DONE);
+        intentFilter.addAction(NewsPlugin.GET_NEWS_ITEMS_RECEIVED_INTENT);
+        intentFilter.addAction(NewsPlugin.NEW_NEWS_ITEM_INTENT);
+        intentFilter.addAction(MainService.UPDATE_BADGE_INTENT);
 
         mActivity.registerReceiver(mBroadcastReceiver, intentFilter);
         mIsStartedListening = true;
@@ -357,6 +384,23 @@ public class ActionScreenUtils {
                 }
             }
         });
+    }
+
+    public long countNews(final JSONObject params) {
+        final String service = TextUtils.optString(params, "service", null);
+        return mNewsPlugin.getStore().countAllNewsItems(service);
+    }
+
+    public NewsItem getNews(final JSONObject params) {
+        final long id = params.optLong("news_id", 0);
+        return mNewsPlugin.getNewsItem(id);
+    }
+
+    public Map<String, Object> listNews(final JSONObject params) {
+        final String service = TextUtils.optString(params, "service", null);
+        final String cursor =  TextUtils.optString(params, "cursor", null);
+        final long limit = params.optLong("limit", 10);
+        return mNewsPlugin.listNewsItems(service, cursor, limit);
     }
 
     private void setupPin(final MainService.SecurityCallback sc) {

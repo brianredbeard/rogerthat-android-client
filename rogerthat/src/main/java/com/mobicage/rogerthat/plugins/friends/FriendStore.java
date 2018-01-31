@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 GIG Technology NV
+ * Copyright 2018 GIG Technology NV
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @@license_version:1.3@@
+ * @@license_version:1.4@@
  */
 
 package com.mobicage.rogerthat.plugins.friends;
@@ -705,10 +705,11 @@ public class FriendStore implements Closeable {
                         bindString(mUpdateFriendHTTP, 28, getStringFromVersions(friend.versions));
                         bindString(mUpdateFriendHTTP, 29, friend.profileData, true);
                         bindString(mUpdateFriendHTTP, 30, friend.contentBrandingHash, true);
-                        bindString(mUpdateFriendHTTP, 31, getActions(friend));
+                        bindString(mUpdateFriendHTTP, 31, friend.homeBrandingHash, true);
+                        bindString(mUpdateFriendHTTP, 32, getActions(friend));
 
                         // Where clause
-                        bindString(mUpdateFriendHTTP, 32, friend.email);
+                        bindString(mUpdateFriendHTTP, 33, friend.email);
                         mUpdateFriendHTTP.execute();
 
                         mFriendNameCache.put(friend.email, friendDisplayName);
@@ -1336,16 +1337,17 @@ public class FriendStore implements Closeable {
             friend.flags = cursor.getLong(14);
             friend.profileData = cursor.getString(15);
             friend.contentBrandingHash = cursor.getString(16);
-            friend.actions = cursor.getString(17);
+            friend.homeBrandingHash = cursor.getString(17);
+            friend.actions = cursor.getString(18);
 
             if (hasCategoryId) {
-                final String emailOrCategoryId = cursor.getString(18);
+                final String emailOrCategoryId = cursor.getString(19);
                 if (!friend.email.equals(emailOrCategoryId)) {
                     friend.category = new FriendCategory();
                     friend.category.id = friend.category_id = emailOrCategoryId;
-                    friend.category.name = cursor.getString(19);
-                    friend.category.avatar = cursor.getBlob(20);
-                    friend.category.friendCount = cursor.getInt(21);
+                    friend.category.name = cursor.getString(20);
+                    friend.category.avatar = cursor.getBlob(21);
+                    friend.category.friendCount = cursor.getInt(22);
                 }
             }
 
@@ -1449,7 +1451,8 @@ public class FriendStore implements Closeable {
         bindString(mInsertFriendHTTP, 31, getStringFromVersions(friend.versions));
         bindString(mInsertFriendHTTP, 32, friend.profileData, true);
         bindString(mInsertFriendHTTP, 33, friend.contentBrandingHash, true);
-        bindString(mInsertFriendHTTP, 34, getActions(friend));
+        bindString(mInsertFriendHTTP, 34, friend.homeBrandingHash, true);
+        bindString(mInsertFriendHTTP, 35, getActions(friend));
         mInsertFriendHTTP.execute();
     }
 

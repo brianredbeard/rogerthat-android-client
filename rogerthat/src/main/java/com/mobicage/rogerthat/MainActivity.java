@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 GIG Technology NV
+ * Copyright 2018 GIG Technology NV
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @@license_version:1.3@@
+ * @@license_version:1.4@@
  */
 
 package com.mobicage.rogerthat;
@@ -321,7 +321,10 @@ public class MainActivity extends ServiceBoundActivity implements PinLockMgr.NoP
                 }
             } else {
                 final Intent i;
-                if (LookAndFeelConstants.getHomesActivityLayout(this) == R.layout.messaging || LookAndFeelConstants.getHomesActivityLayout(this) == R.layout.news) {
+                int homeActivityLayout = LookAndFeelConstants.getHomeActivityLayout(this);
+                if (homeActivityLayout == R.layout.messaging
+                        || homeActivityLayout == R.layout.news
+                        || homeActivityLayout == R.layout.home_branding) {
                     i  = new Intent(this, MessagingActivity.class);
                 } else {
                     i  = new Intent(this, HomeActivity.class);
@@ -647,15 +650,18 @@ public class MainActivity extends ServiceBoundActivity implements PinLockMgr.NoP
     private void launchHomeActivityAndFinish(final Uri qrUri, final int flags) {
         T.UI();
 
+        int homeActivityLayout = LookAndFeelConstants.getHomeActivityLayout(this);
         final Intent homeActivityIntent;
-        if (LookAndFeelConstants.getHomesActivityLayout(this)== R.layout.messaging) {
+        if (homeActivityLayout == R.layout.messaging) {
             homeActivityIntent  = new Intent(this, MessagingActivity.class);
             homeActivityIntent.putExtra("show_drawer", true);
             homeActivityIntent.putExtra("show_drawer_icon", true);
-        } else if (LookAndFeelConstants.getHomesActivityLayout(this) == R.layout.news) {
+        } else if (homeActivityLayout == R.layout.news) {
             homeActivityIntent  = new Intent(this, NewsActivity.class);
             homeActivityIntent.putExtra("show_drawer", true);
             homeActivityIntent.putExtra("show_drawer_icon", true);
+        } else if (homeActivityLayout == R.layout.home_branding) {
+            homeActivityIntent  = new Intent(this, HomeBrandingActivity.class);
         } else {
             homeActivityIntent  = new Intent(this, HomeActivity.class);
         }
