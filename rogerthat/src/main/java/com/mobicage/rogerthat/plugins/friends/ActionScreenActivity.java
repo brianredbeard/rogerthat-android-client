@@ -834,7 +834,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         return wl;
     }
 
-    @SuppressLint({"SetJavaScriptEnabled", "JavascriptInterface"})
+    @SuppressLint({ "SetJavaScriptEnabled", "JavascriptInterface" })
     @Override
     public void onCreate(Bundle savedInstanceState) {
         if (CloudConstants.isContentBrandingApp()) {
@@ -910,7 +910,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             final TextView brandingFooterText = (TextView) findViewById(R.id.branding_footer_text);
             brandingFooterText.setText(getString(R.string.back));
             brandingFooterClose.setColorFilter(UIUtils.imageColorFilter(ContextCompat.getColor(this,
-                    R.color.mc_homescreen_text)));
+                R.color.mc_homescreen_text)));
 
             brandingFooter.setOnClickListener(new OnClickListener() {
                 @Override

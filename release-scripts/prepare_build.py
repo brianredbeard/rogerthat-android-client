@@ -978,6 +978,27 @@ class CustomCloudConstants {
         f.write(output.encode('utf-8'))
 
 
+def setup_supported_languages():
+    languages =  get('BUILD_CONSTANTS.languages', [])
+    if not languages:
+        return
+
+    app_languages = []
+    for dir_name in os.listdir(SRC_RES_DIR):
+        if not dir_name.startswith('values-'):
+            continue
+        app_languages.append(dir_name.split('values-')[1])
+
+    for l in app_languages:
+        if l not in languages:
+            shutil.rmtree(os.path.join(SRC_RES_DIR, 'values-%s' % l))
+
+    if 'en' not in languages:
+        values_dir = os.path.join(SRC_RES_DIR, 'values')
+        shutil.rmtree(values_dir)
+        app_utils.copytree(os.path.join(SRC_RES_DIR, 'values-%s' % languages[0]), values_dir)
+
+
 def resize_more_icon(f, name):
     for drawable_folder, size in ICON_SIZES.iteritems():
         dest = os.path.join(SRC_RES_DIR, drawable_folder, 'more_%s.png' % name)
@@ -1087,6 +1108,7 @@ if __name__ == "__main__":
     else:
         logging.info('app_id was rogerthat, only limited prepare is needed')
     generate_custom_cloud_constants(doc, debug)
+    setup_supported_languages()
 
     cordova_plugins = get('BUILD_CONSTANTS.CORDOVA.plugins', [])
     cordova.install_cordova_plugins(APP_ID, cordova_plugins, get_cordova_apps(), doc['COLORS'])
