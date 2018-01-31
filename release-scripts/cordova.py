@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright 2017 GIG Technology NV
+# Copyright 2018 GIG Technology NV
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# @@license_version:1.3@@
+# @@license_version:1.4@@
 
 import git
 import logging
@@ -38,9 +38,6 @@ sys.path.append(os.path.join(REPOS_DIR, 'rogerthat-build', 'src')); import app_u
 LICENSE = app_utils.get_license_header()
 
 PLUGINS = {
-    "cordova-plugin-compat": {
-        "url": "cordova-plugin-compat@1.1.0"
-    },
     "cordova-plugin-whitelist": {
         "url": "https://github.com/rogerthat-platform/cordova-plugin-whitelist#1.3.2"
     },
@@ -82,13 +79,13 @@ PLUGINS = {
         "url": "https://github.com/rogerthat-platform/cordova-plugin-add-swift-support#1.6.2"
     },
     "cordova-plugin-statusbar": {
-        "url": "cordova-plugin-statusbar@2.2.3"
+        "url": "cordova-plugin-statusbar@2.4.1"
     },
     "cordova-plugin-splashscreen": {
         "url": "https://github.com/rogerthat-platform/cordova-plugin-splashscreen#custom"
     },
     'cordova-plugin-inappbrowser': {
-        'url': 'cordova-plugin-inappbrowser@1.7.1'
+        'url': 'cordova-plugin-inappbrowser@2.0.2'
     },
     'cordova-plugin-browsertab': {
         'url': 'cordova-plugin-browsertab@0.2.0'
@@ -105,7 +102,7 @@ APPS = {
 }
 
 # The order of these is important
-DEFAULT_PLUGINS = ['cordova-plugin-compat', 'cordova-plugin-whitelist', 'rogerthat-plugin',
+DEFAULT_PLUGINS = ['cordova-plugin-whitelist', 'rogerthat-plugin',
                    'cordova-plugin-splashscreen', 'cordova-plugin-statusbar', 'cordova-plugin-inappbrowser',
                    'cordova-plugin-browsertab']
 
@@ -123,8 +120,16 @@ def install_cordova_plugins(app_id, cordova_plugins, cordova_apps, colors):
             _fake_cordova_android_project()
             _update_cordova_android()
             _install_plugins(app_id, plugins, 'cordova_config')
+
+            shutil.copy2('platform/android/app/src/main/assets/www',
+                         os.path.join(ANDROID_REPO, 'rogerthat', 'src', 'main', 'assets', 'cordova'))
+            shutil.copy2('platform/android/app/src/main/AndroidManifest.xml',
+                         os.path.join(ANDROID_REPO, 'rogerthat', 'src', 'main', 'AndroidManifest.xml'))
+
+
     finally:
-        shutil.rmtree(tmp_dir)
+        pass
+        # shutil.rmtree(tmp_dir)
 
 
 def install_cordova_apps(app_id, cordova_apps, colors):
@@ -186,9 +191,8 @@ def _install_cordova_app(app_id, cordova_app_name, colors):
             dest_app_dir = os.path.join(assets_dir, 'cordova-apps', cordova_app_name)
             shutil.rmtree(dest_app_dir, ignore_errors=True)
             os.makedirs(dest_app_dir)
-            cdv_www_dir = os.path.join('platforms', 'android', 'assets', 'www')
-            os.remove(cdv_www_dir)
-            os.symlink(dest_app_dir, cdv_www_dir)
+            cdv_www_dir = os.path.join('platforms', 'android', 'app', 'src', 'main', 'assets', 'www')
+            symlink(dest_app_dir, cdv_www_dir)
 
             # Install cordova and the dependencies of <cordova_app_name>
             _update_cordova_android()
@@ -196,7 +200,8 @@ def _install_cordova_app(app_id, cordova_app_name, colors):
                              _get_plugins(dependencies),
                              'cordova_%s_config' % cordova_app_name.replace('-', '_'))
     finally:
-        shutil.rmtree(tmp_dir)
+        pass
+        # shutil.rmtree(tmp_dir)
 
     # Check if there's something changed since the last time we built
     last_commit = repo.head.object.hexsha
@@ -321,28 +326,58 @@ def _fake_cordova_android_project():
         _mkdir(os.path.join(ANDROID_REPO, 'rogerthat', 'src', 'main', 'assets', 'cordova'))
 
         # Create the src and assets folders in the tmp project
-        _mkdir('assets')
-        _mkdir('src')
+        libs_dir = os.path.join('app', 'src', 'main', 'libs')
+        _mkdir(os.path.join('app', 'src', 'main', 'assets', 'www'))
+        _mkdir(libs_dir)
 
         # Create the symlinks which are in the root folder in rogerthat-android-client and the platform/android dir
-        for src in ('android.json', 'cordova', 'cordovaLib'):
-            os.symlink(os.path.join(ANDROID_REPO, src), src)
+        for src in ('cordova', 'cordovaLib'):
+            symlink(os.path.join(ANDROID_REPO, src), src)
 
-        os.symlink(os.path.join(ANDROID_REPO, 'rogerthat', 'libs'), 'libs')
+        symlink(os.path.join(ANDROID_REPO, 'rogerthat', 'libs'), libs_dir)
 
+    symlink_project_files()
+
+
+def symlink_project_files():
+    with app_utils.pushd(os.path.join('platforms', 'android')):
+        symlink(os.path.join(ANDROID_REPO, 'android.json'), 'android.json')
+    main_dir = os.path.join('platforms', 'android', 'app', 'src', 'main')
+    _mkdir(main_dir)
+    with app_utils.pushd(main_dir):
         # Create symlinks from rogerthat-android-client/src/main/ to the platform/android dir
         for src, dst in (('AndroidManifest.xml', 'AndroidManifest.xml'),
                          ('assets/cordova', 'assets/www'),
                          ('res', 'res')):
-            os.symlink(os.path.join(ANDROID_REPO, 'rogerthat', 'src', 'main', src), dst)
+            symlink(os.path.join(ANDROID_REPO, 'rogerthat', 'src', 'main', src), dst)
+
+
+def symlink(src, dest):
+    real_dest = os.path.realpath(dest)
+    logging.debug('Copying %s to %s', src, real_dest)
+    shutil.copy2(src, dest)
+    return
+    try:
+        if os.path.isfile(real_dest):
+            os.remove(real_dest)
+        elif os.path.isdir(real_dest):
+            shutil.rmtree(real_dest)
+        os.symlink(src, real_dest)
+    except:
+        logging.exception('Failed to symlink %s to %s', src, real_dest)
+        raise
 
 
 def _update_cordova_android():
-    cmd = ['cordova', 'platform', 'update', 'android']
+    cmd = ['cordova', 'platform', 'rm', 'android']
     logging.info('* Executing `%s` in %s', ' '.join(cmd), os.path.abspath(os.path.curdir))
     subprocess.call(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    # For some reason, the first time always fails. The second time too, but it's OK, plugins can be installed
+    cmd = ['cordova', 'platform', 'add', 'android']
+    logging.info('* Executing `%s` in %s', ' '.join(cmd), os.path.abspath(os.path.curdir))
     subprocess.call(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    shutil.copy2(os.path.join('platforms', 'android', 'app', 'src', 'main', 'res', 'xml', 'config.xml'),
+                 os.path.join(ANDROID_REPO, 'rogerthat', 'src', 'main', 'res', 'xml', 'config.xml'))
+    symlink_project_files()
 
 
 def _install_plugins(app_id, plugins, config_filename):
@@ -360,7 +395,7 @@ def _install_plugins(app_id, plugins, config_filename):
         subprocess.check_call(cmd)
 
     # Copy java files. Not working with a symlinks here because cordova doesn't like it when files already exist.
-    app_utils.copytree(os.path.join('platforms', 'android', 'src'),
+    app_utils.copytree(os.path.join('platforms', 'android', 'app', 'src', 'main', 'java'),
                        os.path.join(ANDROID_REPO, 'rogerthat', 'src', 'main', 'java'))
 
     # Correct the package name
