@@ -995,7 +995,11 @@ def setup_supported_languages():
 
     if 'en' not in languages:
         values_dir = os.path.join(SRC_RES_DIR, 'values')
-        shutil.rmtree(values_dir)
+        os.remove(os.path.join(values_dir, 'allstr.xml'))
+        os.remove(os.path.join(values_dir, 'appstr.xml'))
+        os.remove(os.path.join(values_dir, 'mdp_strings.xml'))
+        os.remove(os.path.join(values_dir, 'soundcloud_strings.xml'))
+        os.remove(os.path.join(values_dir, 'zxing_strings.xml'))
         app_utils.copytree(os.path.join(SRC_RES_DIR, 'values-%s' % languages[0]), values_dir)
 
 
