@@ -2068,8 +2068,8 @@ public class BrandingMgr implements Pickleable, Closeable {
             } finally {
                 baos.close();
             }
-        } catch (IOException e) {
-            return L.getStackTraceString(e);
+        } catch (Throwable t) {
+            return L.getStackTraceString(t);
         }
     }
 
