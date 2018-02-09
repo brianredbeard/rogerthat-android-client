@@ -468,9 +468,7 @@ public class BrandingMgr implements Pickleable, Closeable {
 
     public static BrandingMgr createBrandingMgr(ConfigurationProvider cfgProvider, MainService mainService) {
         T.UI();
-
-        final Configuration cfg = cfgProvider.getConfiguration(CONFIGKEY);
-        final String serializedQueue = cfg.get(CONFIG_QUEUE, "");
+        final String serializedQueue = getSerializedQueue(cfgProvider);
         BrandingMgr mgr = null;
         if (!"".equals(serializedQueue)) {
             try {
@@ -484,6 +482,11 @@ public class BrandingMgr implements Pickleable, Closeable {
             mgr = new BrandingMgr();
 
         return mgr;
+    }
+
+    public static String getSerializedQueue(ConfigurationProvider cfgProvider) {
+        final Configuration cfg = cfgProvider.getConfiguration(CONFIGKEY);
+        return cfg.get(CONFIG_QUEUE, "");
     }
 
     private byte[] getEncryptionKey() {
@@ -2053,8 +2056,8 @@ public class BrandingMgr implements Pickleable, Closeable {
             } finally {
                 ois.close();
             }
-        } catch (Exception e) {
-            L.bug(e);
+        } catch (Throwable t) {
+            L.bug(t);
         }
         return null;
     }
@@ -2082,9 +2085,11 @@ public class BrandingMgr implements Pickleable, Closeable {
             Stack<Object> breadcrumb = new Stack<>();
             if (checkObjectForCircularReferences(memLocations, breadcrumb, jsonMap)) {
                 throw new Error("Found circular reference while serializing BrandedItem!\n\nbreadcrumb = "
-                        + breadcrumb + "\n\njsonMap b64 = " + safeSerialize(jsonMap));
+                        + breadcrumb + "\n\njsonMap b64 = " + safeSerialize(jsonMap) + "\n\nQueue was: " +
+                        getSerializedQueue(mMainService.getConfigurationProvider()));
             }
-            throw new Error("Expected to find circular reference in " + safeSerialize(jsonMap));
+            throw new Error("Expected to find circular reference in " + safeSerialize(jsonMap) + "\n\nQueue was: " +
+                    getSerializedQueue(mMainService.getConfigurationProvider()));
         }
     }
 
