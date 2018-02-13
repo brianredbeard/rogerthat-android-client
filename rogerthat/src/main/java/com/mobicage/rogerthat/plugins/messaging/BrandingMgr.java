@@ -257,13 +257,15 @@ public class BrandingMgr implements Pickleable, Closeable {
                     object = new UpdateAppAssetRequestTO((Map<String, Object>) source.get("object"));
                     break;
             }
-            this.calls = new ArrayList<RpcCall>();
+            this.calls = new ArrayList<>();
             JSONArray val_arr = (JSONArray) source.get("calls");
             if (val_arr != null) {
                 for (int i = 0; i < val_arr.size(); i++) {
-                    Map<String, Object> map = (Map<String, Object>) val_arr.get(i);
-                    this.calls.add(BrandingMgr.createRpcCall((String) map.get("function"),
-                            (Map<String, Object>) map.get("arguments")));
+                    final Map<String, Object> map = (Map<String, Object>) val_arr.get(i);
+                    final String function = (String) map.get("function");
+                    final Map<String, Object> arguments = (Map<String, Object>) map.get("arguments");
+                    final Map<String, Object> request = (Map<String, Object>) arguments.get("request");
+                    this.calls.add(BrandingMgr.createRpcCall(function, request));
                 }
             }
 
