@@ -1994,9 +1994,8 @@ public class FriendStore implements Closeable {
             return null;
         }
         disabledBroadcastTypes.add(broadcastType);
-        JSONObject v = new JSONObject();
-        v.put("v", disabledBroadcastTypes);
-        updateUserData(serviceEmail, FRIEND_DATA_TYPE_USER, DISABLED_BROADCAST_TYPES_USER_DATA_KEY, JSONValue.toJSONString(v));
+        updateUserData(serviceEmail, FRIEND_DATA_TYPE_USER, DISABLED_BROADCAST_TYPES_USER_DATA_KEY,
+                disabledBroadcastTypes);
         FriendsPlugin.broadcastServiceDataUpdated(mMainService, serviceEmail, true, false);
 
         userData.put(DISABLED_BROADCAST_TYPES_USER_DATA_KEY, disabledBroadcastTypes);
