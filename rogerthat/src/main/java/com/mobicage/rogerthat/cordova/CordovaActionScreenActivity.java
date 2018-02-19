@@ -47,7 +47,6 @@ import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
-import com.mobicage.rpc.config.CloudConstants;
 
 import org.apache.cordova.ConfigXmlParser;
 import org.apache.cordova.CordovaInterfaceImpl;
@@ -191,7 +190,9 @@ public class CordovaActionScreenActivity extends ServiceBoundActivity {
         parser.parse(this.getResources().getXml(configId));
 
         mBranding = (SystemWebView) findViewById(R.id.branding);
-        mWebInterface = new CordovaWebViewImpl(new SystemWebViewEngine(mBranding));
+        SystemWebViewEngine parentEngine = new SystemWebViewEngine(mBranding);
+        mBranding.setWebChromeClient(new CordovaWebChromeClient(parentEngine));
+        mWebInterface = new CordovaWebViewImpl(parentEngine);
         mWebInterface.init(mCordovaInterface, parser.getPluginEntries(), parser.getPreferences());
 
         setTitle(mItemLabel);

@@ -248,6 +248,9 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
             @Override
             public String[] onSafeReceive(Context context, Intent intent) {
                 T.UI();
+                if (mNewsItem == null) {
+                    return null;
+                }
                 String action = intent.getAction();
                 if (CachedDownloader.CACHED_DOWNLOAD_AVAILABLE_INTENT.equals(action)) {
                     String url = intent.getStringExtra("url");
