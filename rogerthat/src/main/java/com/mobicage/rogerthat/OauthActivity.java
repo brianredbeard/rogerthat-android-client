@@ -17,29 +17,23 @@
  */
 package com.mobicage.rogerthat;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
-import android.webkit.WebViewClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.annotation.SuppressLint;
+import android.webkit.WebViewClient;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.registration.AbstractRegistrationActivity;
 import com.mobicage.rogerthat.util.OauthUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.T;
-import com.mobicage.rpc.config.CloudConstants;
-
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 public class OauthActivity extends ServiceBoundActivity {
 
@@ -104,6 +98,7 @@ public class OauthActivity extends ServiceBoundActivity {
             }
 
             private boolean interceptUrlCompat(WebView view, String url, boolean loadUrl) {
+                sendUrl(url);
                 String redirectUri = OauthUtils.getCallbackUrl();
                 if (OauthUtils.isRedirectUriFound(url, redirectUri)) {
                     Uri uri = Uri.parse(url);
@@ -123,8 +118,6 @@ public class OauthActivity extends ServiceBoundActivity {
                     finish();
 
                     return true;
-                } else {
-                    sendUrl(url);
                 }
                 if (loadUrl) {
                     view.loadUrl(url);
