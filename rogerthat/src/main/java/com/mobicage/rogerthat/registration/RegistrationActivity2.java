@@ -683,6 +683,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                                 T.UI();
                                 progressDialog.dismiss();
                                 hideNotification();
+                                mWiz.setEmail(email);
                                 mWiz.setDeviceNames(deviceNames);
                                 mWiz.proceedToPosition(5);
                             }
