@@ -33,10 +33,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -74,7 +72,6 @@ import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.ServiceHeader;
-import com.mobicage.rogerthat.util.ui.Slider;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rogerthat.util.ui.WrapContentViewPager;
 import com.mobicage.rpc.config.CloudConstants;
@@ -83,9 +80,7 @@ import com.mobicage.to.friends.ServiceMenuItemTO;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ServiceActionMenuActivity extends ServiceBoundActivity {
 

@@ -24,6 +24,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ResultReceiver;
+import android.support.customtabs.CustomTabsIntent;
 
 import com.commonsware.cwac.cam2.AbstractCameraActivity;
 import com.commonsware.cwac.cam2.CameraActivity;
@@ -61,7 +62,6 @@ import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rpc.config.AppConstants;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -72,6 +72,7 @@ public class ActivityUtils {
     private static final Map<String, Integer> SERVICE_ACTIONS = new HashMap<>();
     private static final Map<String, Class<?>> SIMPLE_ACTIONS = new HashMap<>();
     private static final List<String> COMPLEX_ACTIONS = Arrays.asList("qrcode");
+    public static final List<String> CUSTOM_TABS_SCHEMES = Arrays.asList("http", "https", "tel", "sms", "mailto");
 
     static {
         SIMPLE_ACTIONS.put("news", NewsActivity.class);
@@ -334,4 +335,24 @@ public class ActivityUtils {
                 })
                 .build();
     }
+
+    /**
+     * Opens a url in a chrome custom tab if it's supported, else opens it via a regular intent.
+     *
+     * @return Whether or not the url was opened in a custom tab
+     */
+    public static boolean openUrl(Context context, String url, String intentAction) {
+        Uri uri = Uri.parse(url);
+        if (CUSTOM_TABS_SCHEMES.contains(uri.getScheme())) {
+            final CustomTabsIntent.Builder customTabsBuilder = new CustomTabsIntent.Builder();
+            final CustomTabsIntent customTabsIntent = customTabsBuilder.build();
+            customTabsIntent.launchUrl(context, uri);
+            return true;
+        } else {
+            final Intent intent = new Intent(intentAction, uri);
+            context.startActivity(intent);
+            return false;
+        }
+    }
+    
 }

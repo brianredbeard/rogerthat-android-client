@@ -28,7 +28,6 @@ import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.content.ContextCompat;
@@ -61,7 +60,6 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
-import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.IdentityStore;
 import com.mobicage.rogerthat.MainActivity;
@@ -74,6 +72,7 @@ import com.mobicage.rogerthat.plugins.friends.ServiceMenuItemDetails;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr.BrandingResult;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr.ColorScheme;
 import com.mobicage.rogerthat.plugins.messaging.widgets.Widget;
+import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.IOUtils;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
@@ -104,7 +103,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeSet;
 
-import in.uncod.android.bypass.Bypass;
 import thirdparty.nishantnair.FlowLayout;
 
 public class ServiceMessageDetailActivity extends ServiceBoundActivity {
@@ -839,8 +837,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
         // action "poke" is not allowed in message buttons and action "confirm" is already handled.
         if (buttonAction != null && !Message.MC_CONFIRM_PREFIX.equals(buttonAction) && !Message.MC_POKE_PREFIX.equals
                 (buttonAction)) {
-            final Intent intent = new Intent(buttonAction, Uri.parse(buttonUrl));
-            startActivity(intent);
+            ActivityUtils.openUrl(this, buttonUrl, buttonAction);
         }
     }
 

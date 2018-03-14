@@ -60,6 +60,7 @@ import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.plugins.news.NewsItem;
 import com.mobicage.rogerthat.plugins.news.NewsItemIndex;
 import com.mobicage.rogerthat.plugins.news.NewsPlugin;
+import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.CachedDownloader;
 import com.mobicage.rogerthat.util.DebugUtils;
 import com.mobicage.rogerthat.util.DownloadImageTask;
@@ -865,15 +866,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                             mActivity.actionPressed(mNewsItem.sender.email, buttonAction, buttonUrl, null);
                         } else if (buttonAction != null) {
                             mNewsPlugin.saveNewsStatistics(new long[]{mNewsItem.id}, NewsPlugin.STATISTIC_ACTION);
-                            Uri uri = Uri.parse(buttonUrl);
-                            if (buttonUrl.startsWith("http")) {
-                                CustomTabsIntent.Builder customTabsBuilder = new CustomTabsIntent.Builder();
-                                CustomTabsIntent customTabsIntent = customTabsBuilder.build();
-                                customTabsIntent.launchUrl(mActivity, uri);
-                            } else {
-                                final Intent intent = new Intent(buttonAction, uri);
-                                mActivity.startActivity(intent);
-                            }
+                            ActivityUtils.openUrl(mActivity, buttonUrl, buttonAction);
                         }
                     }
                 });

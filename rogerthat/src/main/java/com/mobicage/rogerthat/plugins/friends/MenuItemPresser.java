@@ -23,9 +23,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.customtabs.CustomTabsIntent;
 
 import com.mobicage.api.services.Rpc;
 import com.mobicage.rogerth.at.R;
@@ -41,6 +39,7 @@ import com.mobicage.rogerthat.plugins.messaging.ServiceMessageDetailActivity;
 import com.mobicage.rogerthat.plugins.messaging.mfr.EmptyStaticFlowException;
 import com.mobicage.rogerthat.plugins.messaging.mfr.JsMfr;
 import com.mobicage.rogerthat.plugins.messaging.mfr.MessageFlowRun;
+import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
@@ -349,17 +348,9 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
             return;
         }
 
-        Uri uri = Uri.parse(actionInfo.get("androidUrl"));
-        
-        if (Message.MC_HTTP_PREFIX.equals(buttonAction) || Message.MC_HTTPS_PREFIX.equals(buttonAction)) {
-            CustomTabsIntent.Builder customTabsBuilder = new CustomTabsIntent.Builder();
-            CustomTabsIntent customTabsIntent = customTabsBuilder.build();
-            customTabsIntent.launchUrl(mActivity, uri);
+        if (ActivityUtils.openUrl(mActivity, actionInfo.get("androidUrl"), buttonAction)) {
             return;
         }
-
-        final Intent intent = new Intent(buttonAction, uri);
-        mActivity.startActivity(intent);
         mResultHandler.onSuccess();
         stop();
     }

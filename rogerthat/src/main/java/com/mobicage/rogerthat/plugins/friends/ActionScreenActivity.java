@@ -76,6 +76,7 @@ import com.mobicage.rogerthat.plugins.news.NewsItem;
 import com.mobicage.rogerthat.plugins.scan.ScanCommunication;
 import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
 import com.mobicage.rogerthat.util.ActionScreenUtils;
+import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.FacebookUtils;
 import com.mobicage.rogerthat.util.FacebookUtils.PermissionType;
 import com.mobicage.rogerthat.util.TextUtils;
@@ -977,6 +978,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 L.i("Branding is loading url: " + url);
                 Uri uri = Uri.parse(url);
                 String lowerCaseUrl = url.toLowerCase();
+                // xxx: perhaps open tel and mailto in custom tab too
                 if (lowerCaseUrl.startsWith("tel:") || lowerCaseUrl.startsWith("mailto:") || isExternalUrl(url)) {
                     Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                     startActivity(intent);
@@ -985,7 +987,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                     String tag = url.substring(POKE.length());
                     poke(tag);
                     return true;
-                } else if (lowerCaseUrl.startsWith("http://") || lowerCaseUrl.startsWith("https://")) {
+                } else if (ActivityUtils.CUSTOM_TABS_SCHEMES.contains(uri.getScheme())) {
                     mService.runOnUIHandler(new SafeRunnable() {
                         @Override
                         protected void safeRun() throws Exception {
