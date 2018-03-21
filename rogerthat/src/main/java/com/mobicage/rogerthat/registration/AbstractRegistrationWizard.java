@@ -151,16 +151,10 @@ public abstract class AbstractRegistrationWizard extends Wizard {
             protected Boolean safeDoInBackground(Object... params) {
                 try {
                     HttpClient httpClient = HTTPUtil.getHttpClient(10000, 3);
-                    final HttpPost httpPost = new HttpPost(CloudConstants.REGISTRATION_REGISTER_INSTALL_URL);
-                    httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
-                    httpPost.setHeader("User-Agent", MainService.getUserAgent(mainService));
-                    List<NameValuePair> formParams = new ArrayList<NameValuePair>();
+                    final HttpPost httpPost = HTTPUtil.getHttpPost(mainService, CloudConstants.REGISTRATION_REGISTER_INSTALL_URL);
+                    List<NameValuePair> formParams = HTTPUtil.getRegistrationFormParams(mainService);
                     formParams.add(new BasicNameValuePair("version", MainService.getVersion(mainService)));
                     formParams.add(new BasicNameValuePair("install_id", getInstallationId()));
-                    formParams.add(new BasicNameValuePair("platform", "android"));
-                    formParams.add(new BasicNameValuePair("language", Locale.getDefault().getLanguage()));
-                    formParams.add(new BasicNameValuePair("country", Locale.getDefault().getCountry()));
-                    formParams.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
 
                     UrlEncodedFormEntity entity;
                     try {

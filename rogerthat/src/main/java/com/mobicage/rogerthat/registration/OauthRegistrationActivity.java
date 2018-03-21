@@ -338,25 +338,18 @@ public class OauthRegistrationActivity extends AbstractRegistrationActivity {
                 String signature = SecurityUtils.sha256(version + " " + installId + " " + timestamp + " " + deviceId + " "
                         + registrationId + " " + code + state + CloudConstants.REGISTRATION_MAIN_SIGNATURE);
 
-                HttpPost httppost = new HttpPost(CloudConstants.REGISTRATION_OAUTH_REGISTERED_URL);
+                HttpPost httppost = HTTPUtil.getHttpPost(mService, CloudConstants.REGISTRATION_OAUTH_REGISTERED_URL);
                 try {
-                    List<NameValuePair> nameValuePairs = new ArrayList<>();
+                    List<NameValuePair> nameValuePairs = HTTPUtil.getRegistrationFormParams(mService);
                     nameValuePairs.add(new BasicNameValuePair("version", version));
                     nameValuePairs.add(new BasicNameValuePair("registration_time", timestamp));
                     nameValuePairs.add(new BasicNameValuePair("device_id", deviceId));
                     nameValuePairs.add(new BasicNameValuePair("registration_id", registrationId));
                     nameValuePairs.add(new BasicNameValuePair("signature", signature));
-                    nameValuePairs.add(new BasicNameValuePair("platform", "android"));
                     nameValuePairs.add(new BasicNameValuePair("install_id", installId));
-                    nameValuePairs.add(new BasicNameValuePair("language", Locale.getDefault().getLanguage()));
-                    nameValuePairs.add(new BasicNameValuePair("country", Locale.getDefault().getCountry()));
                     nameValuePairs.add(new BasicNameValuePair("code", code));
                     nameValuePairs.add(new BasicNameValuePair("state", state));
-                    nameValuePairs.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
-                    nameValuePairs.add(new BasicNameValuePair("use_xmpp_kick", CloudConstants.USE_XMPP_KICK_CHANNEL
-                            + ""));
                     nameValuePairs.add(new BasicNameValuePair("GCM_registration_id", getGCMRegistrationId()));
-                    nameValuePairs.add(new BasicNameValuePair("unique_device_id",  Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID)));
 
                     httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 

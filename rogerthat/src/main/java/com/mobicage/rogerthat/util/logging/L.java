@@ -181,9 +181,7 @@ public class L {
                                     if (sMainService == null)
                                         return null;
                                     try {
-                                        HttpPost httpPostRequest = new HttpPost(CloudConstants.LOG_ERROR_URL);
-                                        httpPostRequest.setHeader("Content-Type", "application/x-www-form-urlencoded");
-                                        httpPostRequest.setHeader("User-Agent", MainService.getUserAgent(sMainService));
+                                        HttpPost httpPostRequest = HTTPUtil.getHttpPost(sMainService, CloudConstants.LOG_ERROR_URL);
 
                                         RegistrationWizard2 wiz = RegistrationWizard2.getWizard(sMainService);
 

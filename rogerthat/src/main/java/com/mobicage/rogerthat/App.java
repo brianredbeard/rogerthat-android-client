@@ -227,9 +227,7 @@ public class App extends MultiDexApplication implements Thread.UncaughtException
             }
         }
 
-        final HttpPost httpPost = new HttpPost(CloudConstants.LOG_ERROR_URL);
-        httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
-        httpPost.setHeader("User-Agent", MainService.getUserAgent(mainService));
+        final HttpPost httpPost = HTTPUtil.getHttpPost(mainService, CloudConstants.LOG_ERROR_URL);
 
         if (credentials != null) {
             httpPost.setHeader("X-MCTracker-User",

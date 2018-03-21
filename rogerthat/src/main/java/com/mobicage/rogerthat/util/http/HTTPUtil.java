@@ -17,23 +17,36 @@
  */
 package com.mobicage.rogerthat.util.http;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.KeyStore;
+import android.content.Context;
+import android.provider.Settings;
 
+import com.mobicage.rogerthat.App;
+import com.mobicage.rogerthat.MainService;
+import com.mobicage.rpc.config.CloudConstants;
+
+import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpRequestRetryHandler;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.params.HttpClientParams;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
 
-import com.mobicage.rogerthat.App;
-import com.mobicage.rpc.config.CloudConstants;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyStore;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
+
+import static android.provider.Settings.Secure;
 
 public class HTTPUtil {
 
@@ -106,5 +119,24 @@ public class HTTPUtil {
             }
         }
         return sTrustStore;
+    }
+
+    public static HttpPost getHttpPost(Context context, String url) {
+        HttpPost httpPost = new HttpPost(url);
+        httpPost.setHeader("User-Agent", MainService.getUserAgent(context));
+        httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
+        return httpPost;
+    }
+
+    public static List<NameValuePair> getRegistrationFormParams(Context context) {
+        List<NameValuePair> nameValuePairs = new ArrayList<>();
+        nameValuePairs.add(new BasicNameValuePair("request_id", UUID.randomUUID().toString()));
+        nameValuePairs.add(new BasicNameValuePair("platform", "android"));
+        nameValuePairs.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
+        nameValuePairs.add(new BasicNameValuePair("use_xmpp_kick", CloudConstants.USE_XMPP_KICK_CHANNEL + ""));
+        nameValuePairs.add(new BasicNameValuePair("language", Locale.getDefault().getLanguage()));
+        nameValuePairs.add(new BasicNameValuePair("country", Locale.getDefault().getCountry()));
+        nameValuePairs.add(new BasicNameValuePair("unique_device_id", Settings.Secure.getString(context.getContentResolver(), Secure.ANDROID_ID)));
+        return nameValuePairs;
     }
 }

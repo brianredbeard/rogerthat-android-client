@@ -322,10 +322,8 @@ public abstract class AbstractRegistrationActivity extends ServiceBoundActivity 
 
             @Override
             protected Object safeDoInBackground(Object... params) {
-                final HttpPost httpPost = new HttpPost(CloudConstants.REGISTRATION_LOG_STEP_URL);
-                httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
-                httpPost.setHeader("User-Agent", MainService.getUserAgent(mActivity));
-                List<NameValuePair> formParams = new ArrayList<NameValuePair>();
+                final HttpPost httpPost = HTTPUtil.getHttpPost(mActivity, CloudConstants.REGISTRATION_LOG_STEP_URL);
+                List<NameValuePair> formParams = HTTPUtil.getRegistrationFormParams(mActivity);
                 formParams.add(new BasicNameValuePair("step", step));
                 formParams.add(new BasicNameValuePair("install_id", mWizard.getInstallationId()));
                 formParams.addAll(extraParams);
@@ -397,14 +395,11 @@ public abstract class AbstractRegistrationActivity extends ServiceBoundActivity 
         T.REGISTRATION();
         final String mobileInfo = getMobileInfo();
         HttpClient httpClient = HTTPUtil.getHttpClient();
-        final HttpPost httpPost = new HttpPost(CloudConstants.REGISTRATION_FINISH_URL);
-        httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
-        httpPost.setHeader("User-Agent", MainService.getUserAgent(mActivity));
-        List<NameValuePair> formParams = new ArrayList<NameValuePair>();
+        final HttpPost httpPost = HTTPUtil.getHttpPost(mActivity, CloudConstants.REGISTRATION_FINISH_URL);
+        List<NameValuePair> formParams = HTTPUtil.getRegistrationFormParams(mActivity);
         formParams.add(new BasicNameValuePair("mobileInfo", mobileInfo));
         formParams.add(new BasicNameValuePair("account", username));
         formParams.add(new BasicNameValuePair("password", password));
-        formParams.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
 
         formParams.add(new BasicNameValuePair("invitor_code", invitorCode));
         formParams.add(new BasicNameValuePair("invitor_secret", invitorSecret));
@@ -498,21 +493,15 @@ public abstract class AbstractRegistrationActivity extends ServiceBoundActivity 
                 String signature = SecurityUtils.sha256(version + " " + email + " " + timestamp + " " + deviceId + " "
                         + registrationId + " " + CloudConstants.REGISTRATION_MAIN_SIGNATURE);
 
-                HttpPost httppost = new HttpPost(CloudConstants.REGISTRATION_REGISTER_DEVICE_URL);
+                HttpPost httppost = HTTPUtil.getHttpPost(mActivity, CloudConstants.REGISTRATION_REGISTER_DEVICE_URL);
                 try {
-                    List<NameValuePair> nameValuePairs = new ArrayList<>();
+                    List<NameValuePair> nameValuePairs = HTTPUtil.getRegistrationFormParams(mActivity);
                     nameValuePairs.add(new BasicNameValuePair("version", version));
                     nameValuePairs.add(new BasicNameValuePair("registration_time", timestamp));
                     nameValuePairs.add(new BasicNameValuePair("device_id", deviceId));
                     nameValuePairs.add(new BasicNameValuePair("registration_id", registrationId));
                     nameValuePairs.add(new BasicNameValuePair("signature", signature));
                     nameValuePairs.add(new BasicNameValuePair("email", email));
-                    nameValuePairs.add(new BasicNameValuePair("platform", "android"));
-                    nameValuePairs.add(new BasicNameValuePair("language", Locale.getDefault().getLanguage()));
-                    nameValuePairs.add(new BasicNameValuePair("country", Locale.getDefault().getCountry()));
-                    nameValuePairs.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
-                    nameValuePairs.add(new BasicNameValuePair("use_xmpp_kick", CloudConstants.USE_XMPP_KICK_CHANNEL
-                            + ""));
                     nameValuePairs.add(new BasicNameValuePair("GCM_registration_id", getGCMRegistrationId()));
                     nameValuePairs.add(new BasicNameValuePair("hardware_model", SystemPlugin.getDeviceModelName()));
                     TelephonyManager telephonyManager = (TelephonyManager) mService.getSystemService(Context.TELEPHONY_SERVICE);
