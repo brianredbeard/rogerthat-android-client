@@ -159,6 +159,7 @@ def _install_cordova_app(app_id, cordova_app_name, colors):
         repo = git.Repo(repo_dir)
         repo.git.clean('-df')
         repo.git.reset('--hard')
+        repo.git.pull()
         checkout(repo)
         repo.git.pull()
     else:

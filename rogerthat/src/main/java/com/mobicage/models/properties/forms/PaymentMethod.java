@@ -16,23 +16,24 @@
  * @@license_version:1.4@@
  */
 
-package com.mobicage.to.payment;
+package com.mobicage.models.properties.forms;
 
 import com.mobicage.rpc.IncompleteMessageException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class PaymentAssetBalanceTO implements com.mobicage.rpc.IJSONable {
+public class PaymentMethod implements com.mobicage.rpc.IJSONable {
 
     public long amount;
-    public String description;
+    public String currency;
     public long precision;
+    public String provider_id;
 
-    public PaymentAssetBalanceTO() {
+    public PaymentMethod() {
     }
 
-    public PaymentAssetBalanceTO(Map<String, Object> json) throws IncompleteMessageException {
+    public PaymentMethod(Map<String, Object> json) throws IncompleteMessageException {
         if (json.containsKey("amount")) {
             Object val = json.get("amount");
             if (val instanceof Integer) {
@@ -41,13 +42,13 @@ public class PaymentAssetBalanceTO implements com.mobicage.rpc.IJSONable {
                 this.amount = ((Long) val).longValue();
             }
         } else {
-            throw new IncompleteMessageException("com.mobicage.to.payment.PaymentAssetBalanceTO object is missing field 'amount'");
+            throw new IncompleteMessageException("com.mobicage.models.properties.forms.PaymentMethod object is missing field 'amount'");
         }
-        if (json.containsKey("description")) {
-            Object val = json.get("description");
-            this.description = (String) val;
+        if (json.containsKey("currency")) {
+            Object val = json.get("currency");
+            this.currency = (String) val;
         } else {
-            throw new IncompleteMessageException("com.mobicage.to.payment.PaymentAssetBalanceTO object is missing field 'description'");
+            throw new IncompleteMessageException("com.mobicage.models.properties.forms.PaymentMethod object is missing field 'currency'");
         }
         if (json.containsKey("precision")) {
             Object val = json.get("precision");
@@ -57,7 +58,13 @@ public class PaymentAssetBalanceTO implements com.mobicage.rpc.IJSONable {
                 this.precision = ((Long) val).longValue();
             }
         } else {
-            this.precision = 2;
+            throw new IncompleteMessageException("com.mobicage.models.properties.forms.PaymentMethod object is missing field 'precision'");
+        }
+        if (json.containsKey("provider_id")) {
+            Object val = json.get("provider_id");
+            this.provider_id = (String) val;
+        } else {
+            throw new IncompleteMessageException("com.mobicage.models.properties.forms.PaymentMethod object is missing field 'provider_id'");
         }
     }
 
@@ -65,8 +72,9 @@ public class PaymentAssetBalanceTO implements com.mobicage.rpc.IJSONable {
     public Map<String, Object> toJSONMap() {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
         obj.put("amount", this.amount);
-        obj.put("description", this.description);
+        obj.put("currency", this.currency);
         obj.put("precision", this.precision);
+        obj.put("provider_id", this.provider_id);
         return obj;
     }
 

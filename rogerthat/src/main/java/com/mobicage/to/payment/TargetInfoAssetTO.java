@@ -16,33 +16,41 @@
  * @@license_version:1.4@@
  */
 
-package com.mobicage.to.system;
+package com.mobicage.to.payment;
 
 import com.mobicage.rpc.IncompleteMessageException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class UnregisterMobileRequestTO implements com.mobicage.rpc.IJSONable {
+public class TargetInfoAssetTO implements com.mobicage.rpc.IJSONable {
 
-    public String reason;
+    public String id;
+    public String type;
 
-    public UnregisterMobileRequestTO() {
+    public TargetInfoAssetTO() {
     }
 
-    public UnregisterMobileRequestTO(Map<String, Object> json) throws IncompleteMessageException {
-        if (json.containsKey("reason")) {
-            Object val = json.get("reason");
-            this.reason = (String) val;
+    public TargetInfoAssetTO(Map<String, Object> json) throws IncompleteMessageException {
+        if (json.containsKey("id")) {
+            Object val = json.get("id");
+            this.id = (String) val;
         } else {
-            this.reason = null;
+            throw new IncompleteMessageException("com.mobicage.to.payment.TargetInfoAssetTO object is missing field 'id'");
+        }
+        if (json.containsKey("type")) {
+            Object val = json.get("type");
+            this.type = (String) val;
+        } else {
+            throw new IncompleteMessageException("com.mobicage.to.payment.TargetInfoAssetTO object is missing field 'type'");
         }
     }
 
     @Override
     public Map<String, Object> toJSONMap() {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
-        obj.put("reason", this.reason);
+        obj.put("id", this.id);
+        obj.put("type", this.type);
         return obj;
     }
 

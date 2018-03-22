@@ -419,6 +419,15 @@ public class ResponseReceiverHandler {
                 resp.setResult(Parser.ComMobicageToMessagingFormsSubmitOauthFormResponseTO(rpcr.result));
             ((IResponseHandler<com.mobicage.to.messaging.forms.SubmitOauthFormResponseTO>) responseHandler).handle(resp);
         }
+        if ("com.mobicage.api.messaging.submitPayForm".equals(function)) {
+            final Response<com.mobicage.to.messaging.forms.SubmitPayFormResponseTO> resp = new Response<com.mobicage.to.messaging.forms.SubmitPayFormResponseTO>();
+            resp.setError(rpcr.error);
+            resp.setSuccess(rpcr.success);
+            resp.setCallId(rpcr.callId);
+            if (rpcr.success)
+                resp.setResult(Parser.ComMobicageToMessagingFormsSubmitPayFormResponseTO(rpcr.result));
+            ((IResponseHandler<com.mobicage.to.messaging.forms.SubmitPayFormResponseTO>) responseHandler).handle(resp);
+        }
         if ("com.mobicage.api.messaging.submitPhotoUploadForm".equals(function)) {
             final Response<com.mobicage.to.messaging.forms.SubmitPhotoUploadFormResponseTO> resp = new Response<com.mobicage.to.messaging.forms.SubmitPhotoUploadFormResponseTO>();
             resp.setError(rpcr.error);
@@ -590,6 +599,15 @@ public class ResponseReceiverHandler {
                 resp.setResult(Parser.ComMobicageToPaymentCreateAssetResponseTO(rpcr.result));
             ((IResponseHandler<com.mobicage.to.payment.CreateAssetResponseTO>) responseHandler).handle(resp);
         }
+        if ("com.mobicage.api.payment.createTransaction".equals(function)) {
+            final Response<com.mobicage.to.payment.CreateTransactionResponseTO> resp = new Response<com.mobicage.to.payment.CreateTransactionResponseTO>();
+            resp.setError(rpcr.error);
+            resp.setSuccess(rpcr.success);
+            resp.setCallId(rpcr.callId);
+            if (rpcr.success)
+                resp.setResult(Parser.ComMobicageToPaymentCreateTransactionResponseTO(rpcr.result));
+            ((IResponseHandler<com.mobicage.to.payment.CreateTransactionResponseTO>) responseHandler).handle(resp);
+        }
         if ("com.mobicage.api.payment.getPaymentAssets".equals(function)) {
             final Response<com.mobicage.to.payment.GetPaymentAssetsResponseTO> resp = new Response<com.mobicage.to.payment.GetPaymentAssetsResponseTO>();
             resp.setError(rpcr.error);
@@ -643,6 +661,15 @@ public class ResponseReceiverHandler {
             if (rpcr.success)
                 resp.setResult(Parser.ComMobicageToPaymentGetPendingPaymentSignatureDataResponseTO(rpcr.result));
             ((IResponseHandler<com.mobicage.to.payment.GetPendingPaymentSignatureDataResponseTO>) responseHandler).handle(resp);
+        }
+        if ("com.mobicage.api.payment.getTargetInfo".equals(function)) {
+            final Response<com.mobicage.to.payment.GetTargetInfoResponseTO> resp = new Response<com.mobicage.to.payment.GetTargetInfoResponseTO>();
+            resp.setError(rpcr.error);
+            resp.setSuccess(rpcr.success);
+            resp.setCallId(rpcr.callId);
+            if (rpcr.success)
+                resp.setResult(Parser.ComMobicageToPaymentGetTargetInfoResponseTO(rpcr.result));
+            ((IResponseHandler<com.mobicage.to.payment.GetTargetInfoResponseTO>) responseHandler).handle(resp);
         }
         if ("com.mobicage.api.payment.receivePayment".equals(function)) {
             final Response<com.mobicage.to.payment.ReceivePaymentResponseTO> resp = new Response<com.mobicage.to.payment.ReceivePaymentResponseTO>();

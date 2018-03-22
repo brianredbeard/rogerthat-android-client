@@ -18,111 +18,69 @@
 
 package com.mobicage.rogerthat.util.security.ed25519.entropy;
 
-import android.text.TextUtils;
-
 import com.mobicage.rogerthat.util.security.SecurityUtils;
 
-import java.io.ByteArrayOutputStream;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
+import java.util.StringTokenizer;
 
 public class Mnemonics {
 
-    public static byte[] stringToSeed(String str) throws Exception {
-        return fromPhrase(str.split(" "));
+    public static byte[] stringToSeed(String mnemonic) throws Exception {
+        StringTokenizer tokenizer = new StringTokenizer(mnemonic);
+        int nt = tokenizer.countTokens ();
+        if ( nt % 6 != 0 ) {
+            throw new Exception("invalid mnemonic - word cound not divisible by 6");
+        }
+        boolean[] bits = new boolean[11 * nt];
+        int i = 0;
+        while (tokenizer.hasMoreElements ()) {
+            int c = Arrays.binarySearch(English.WORDS, tokenizer.nextToken());
+            for (int j = 0; j < 11; ++j) {
+                bits[i++] = (c & (1 << (10 - j))) > 0;
+            }
+        }
+        byte[] data = new byte[bits.length / 33 * 4];
+        for (i = 0; i < bits.length / 33 * 32; ++i) {
+            data[i / 8] |= (bits[i] ? 1 : 0) << (7 - (i % 8));
+        }
+        byte[] check = SecurityUtils.sha256Digest(data);
+        for (i = bits.length / 33 * 32; i < bits.length; ++i) {
+            if ((check[(i - bits.length / 33 * 32) / 8] & (1 << (7 - (i % 8))) ^ (bits[i] ? 1 : 0) << (7 - (i % 8))) != 0) {
+                throw new Exception ("invalid mnemonic - checksum failed");
+            }
+        }
+        return data;
     }
 
     public static String seedToString(byte[] seedBytes) throws Exception {
-        final int entropySize = 32;
-        final int seedChecksumSize = 6;
-        final byte[] seed = new byte[entropySize + seedChecksumSize];
-        System.arraycopy(seedBytes, 0, seed, 0, entropySize);
+        if (seedBytes.length % 4 != 0) {
+            throw new Exception("Invalid data length for mnemonic");
+        }
+        byte[] check = SecurityUtils.sha256Digest(seedBytes);
 
-        final byte[] fullChecksum = new byte[seedChecksumSize];
-        System.arraycopy(SecurityUtils.blake2b256Digest(seedBytes), 0, fullChecksum, 0, seedChecksumSize);
+        boolean[] bits = new boolean[seedBytes.length * 8 + seedBytes.length / 4];
 
-        System.arraycopy(fullChecksum, 0, seed, entropySize, seedChecksumSize);
-        return TextUtils.join(" ", toPhrase(seed));
-    }
-
-    public static byte[] fromPhrase(String[] phrase) throws Exception {
-        BigInteger entropy = phraseToInt(phrase);
-        return intToBytes(entropy);
-    }
-
-    public static String[] toPhrase(byte[] entropy) throws Exception {
-        BigInteger intEntropy = bytesToInt(entropy);
-        return intToPhrase(intEntropy);
-    }
-
-    public static BigInteger phraseToInt(String[] phrase) throws Exception {
-        BigInteger base = BigInteger.valueOf(English.WORDS.size());
-        BigInteger exp = BigInteger.ONE;
-        BigInteger result = BigInteger.valueOf(-1);
-        boolean found = false;
-
-        for (String word : phrase) {
-            String prefix = word.substring(0, English.UNIQUE_PREFIX_LENGTH);
-
-            BigInteger index = BigInteger.valueOf(0);
-            for (int i = 0; i < English.WORDS.size(); i++) {
-                String entropyWord = English.WORDS.get(i);
-                if (entropyWord.startsWith(prefix)) {
-                    index = BigInteger.valueOf(i);
-                    found = true;
-                    break;
-                }
+        for (int i = 0; i < seedBytes.length; i++) {
+            for (int j = 0; j < 8; j++)  {
+                bits[8 * i + j] = (seedBytes[i] & (1 << (7 - j))) > 0;
             }
-            if (!found) {
-                throw new Exception("Error unknown word: " + word);
+        }
+        for (int i = 0; i < seedBytes.length / 4; i++) {
+            bits[8 * seedBytes.length + i] = (check[i / 8] & (1 << (7 - (i % 8)))) > 0;
+        }
+
+        int mlen = seedBytes.length * 3 / 4;
+        StringBuffer mnemo = new StringBuffer();
+        for (int i = 0; i < mlen; i++) {
+            int idx = 0;
+            for ( int j = 0; j < 11; j++ ) {
+                idx += (bits[i * 11 + j] ? 1 : 0) << (10 - j);
             }
-
-            index = index.add(BigInteger.ONE);
-            index = index.multiply(exp);
-            exp = exp.multiply(base);
-            result = result.add(index);
+            mnemo.append(English.WORDS[idx]);
+            if (i < mlen - 1) {
+                mnemo.append(" ");
+            }
         }
-        return result;
-    }
-
-    public static String[] intToPhrase(BigInteger intEntropy) throws Exception {
-        BigInteger base = BigInteger.valueOf(English.WORDS.size());
-        List<String> result = new ArrayList<>();
-        while (intEntropy.compareTo(base) >= 0) {
-            int i = intEntropy.mod(base).intValue();
-            result.add(English.WORDS.get(i));
-            intEntropy = intEntropy.subtract(base);
-            intEntropy = intEntropy.divide(base);
-        }
-        result.add(English.WORDS.get(intEntropy.intValue()));
-        return result.toArray(new String[0]);
-    }
-
-    public static BigInteger bytesToInt(byte[] entropy) {
-        BigInteger base = BigInteger.valueOf(256);
-        BigInteger exp = BigInteger.ONE;
-        BigInteger result = BigInteger.valueOf(-1);
-        for (int i = 0; i < entropy.length; i++) {
-            BigInteger index = BigInteger.valueOf(entropy[i] & 0xFF);
-            index = index.add(BigInteger.ONE);
-            index = index.multiply(exp);
-            exp = exp.multiply(base);
-            result = result.add(index);
-        }
-        return result;
-    }
-
-    public static byte[] intToBytes(BigInteger entropy) {
-        BigInteger base = BigInteger.valueOf(256);
-        ByteArrayOutputStream bs = new ByteArrayOutputStream();
-        while (entropy.compareTo(base) >= 0) {
-            int i = entropy.mod(base).intValue();
-            bs.write(i);
-            entropy = entropy.subtract(base);
-            entropy = entropy.divide(base);
-        }
-        bs.write(entropy.intValue());
-        return bs.toByteArray();
+        return mnemo.toString();
     }
 }

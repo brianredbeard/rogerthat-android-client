@@ -65,7 +65,7 @@
     <string name="authorize">Authorize</string>
     <string name="authorize_success">Successfully authorized</string>
     <string name="back">Back</string>
-    <string name="backup_security_key_instructions">To be able to restore your secure key when you re-install the app, write down the algorithm, key name and the 29 words below and store them in a secure location.\n\nNote: When you lose these words, you will lose access to your wallet/coins.\n\nNote: We will never ask you for these words. Never give them to someone else on a forum, via phone or via e-mail.</string>
+    <string name="backup_security_key_instructions">To be able to restore your secure key when you re-install the app, write down the algorithm, key name and the 24 words below and store them in a secure location.\n\nNote: When you lose these words, you will lose access to your wallet/coins.\n\nNote: We will never ask you for these words. Never give them to someone else on a forum, via phone or via e-mail.</string>
     <string name="backup_security_key_later">You can always find these words back later when navigating to %1$s &gt; %2$s. Then select the secure key with name \"%3$s\".</string>
     <string name="birthdate">Day of birth</string>
     <string name="broadcast_subscribed_to">You received this message because you are subscribed to: %1$s.</string>
@@ -268,6 +268,7 @@
     <string name="logs_forwarded">Your %2$s logs are being forwarded to %1$s.</string>
     <string name="loyalty_card_description">Your %1$s loyalty card\n\nScan to earn loyalty points\nScan to connect with friends</string>
     <string name="male">Male</string>
+    <string name="mandatory_permission">You need to give some mandatory permissions to continue.</string>
     <string name="max_date_reached">Cannot select later time.</string>
     <string name="maybe">Maybe</string>
     <string name="member_details">Details</string>
@@ -299,7 +300,6 @@
     <string name="name_required">Name is required</string>
     <string name="navigation_drawer_close">Close navigation view</string>
     <string name="navigation_drawer_open">Open navigation view</string>
-    <string name="mandatory_permission">You need to give some mandatory permissions to continue.</string>
     <string name="need_camera_permission">You need to grant access to the camera in order to continue.</string>
     <string name="need_camera_permission_title">Camera access denied</string>
     <string name="need_location_permission">You need to grant access to your location in order to continue.</string>
@@ -342,6 +342,7 @@
     <string name="no_wifi_available_when_online_transfer_continues_tilte">No WIFI available</string>
     <string name="normal">Normal</string>
     <string name="not_authenticated">Not authenticated</string>
+    <string name="not_paid">Not paid</string>
     <string name="not_yet_received">Not yet received</string>
     <string name="not_yet_replied">Not yet replied</string>
     <string name="notification_settings">Notification settings</string>
@@ -352,7 +353,11 @@
     <string name="or">or</string>
     <string name="order">Order</string>
     <string name="osa_loyalty_welcome_message">Welcome to the Our City App terminal. This app is the perfect complement to your presence in the city app in order to serve your customers even more. We help you to get the loyalty terminal ready for use. Start by scanning your QR code in order to activate your terminal.</string>
+    <string name="paid">Paid</string>
     <string name="passport">%1$s id</string>
+    <string name="pay">Pay</string>
+    <string name="pay_first">You need to pay before you can continue.</string>
+    <string name="payment_not_enabled">Payment is not enabled in your app.</string>
     <string name="payment_providers">Payment providers</string>
     <string name="payment_providers_add">Add payment provider</string>
     <string name="phone">Phone</string>
@@ -387,6 +392,7 @@
     <string name="recommend_to_contacts">Recommend via e-mail</string>
     <string name="recommend_to_friends">Recommend to %1$s contacts</string>
     <string name="recommended_service">Recommended</string>
+    <string name="ref">Ref.</string>
     <string name="register_first">Complete the registration now</string>
     <string name="register_qr_text">Welcome to the %1$s App.\n\nTo get started, visit\n %2$s \nfrom your PC, laptop or tablet and scan your personal QR code.</string>
     <string name="registration_activating_account">Activating your %1$s account…</string>
@@ -510,6 +516,7 @@
     <string name="sounds">Sounds</string>
     <string name="specials">Specials</string>
     <string name="start_registration">Start registration</string>
+    <string name="status">Status</string>
     <string name="sticky">Sticky</string>
     <string name="stop">Stop</string>
     <string name="stream_summary">Show important items only</string>
@@ -521,6 +528,7 @@
     <string name="tab_messaging">Messages</string>
     <string name="tab_services">Services</string>
     <string name="tab_stream">Stream</string>
+    <string name="test_mode">Test mode</string>
     <string name="this_screen_is_not_yet_downloaded_check_network">This screen is not yet downloaded. Check your network.</string>
     <string name="title_buttons">Add quick reply buttons</string>
     <string name="title_message">Enter message</string>
@@ -568,6 +576,7 @@
     <string name="valid_from_to">Valid from %1$s to %2$s</string>
     <string name="validate_discovered_location">Verify if the following location is correct</string>
     <string name="validation_failed">Invalid input</string>
+    <string name="via">Via</string>
     <string name="view_my_profile">View my profile</string>
     <string name="view_security_settings">View security settings</string>
     <string name="wallet">Wallet</string>

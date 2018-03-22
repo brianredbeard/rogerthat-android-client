@@ -65,7 +65,7 @@
     <string name="authorize">Authoriseren</string>
     <string name="authorize_success">Succesvol geautoriseerd</string>
     <string name="back">Terug</string>
-    <string name="backup_security_key_instructions">Om de beveiligingscode te importeren wanneer u de app opnieuw installeert, moet u onderstaande algoritme,  sleutelnaam en 29 woorden opschrijven en op een veilige locatie opslaan.\n\nOpmerking: als u deze woorden verliest, verliest u de toegang tot uw portemonnee/munten.\n\nOpmerking: Wij zullen nooit achter deze woorden vragen. Geef ze nooit aan iemand anders op een forum, via telefoon of via e-mail.</string>
+    <string name="backup_security_key_instructions">Om de beveiligingscode te importeren wanneer u de app opnieuw installeert, moet u onderstaande algoritme,  sleutelnaam en 24 woorden opschrijven en op een veilige locatie opslaan.\n\nOpmerking: als u deze woorden verliest, verliest u de toegang tot uw portemonnee/munten.\n\nOpmerking: Wij zullen nooit achter deze woorden vragen. Geef ze nooit aan iemand anders op een forum, via telefoon of via e-mail.</string>
     <string name="backup_security_key_later">Deze woorden kunnen later nog bekeken worden onder %1$s &gt; %2$s. Selecteer daarna de sleutel met naam \"%3$s\".</string>
     <string name="birthdate">Geboortedatum</string>
     <string name="broadcast_subscribed_to">Je ontvangt dit bericht omdat je bent ingeschreven op: %1$s.</string>
@@ -121,7 +121,7 @@
     <string name="description">Beschrijving</string>
     <string name="deselect_all">Niets selecteren</string>
     <string name="detected_services_title">%1$s detecteerde de volgende diensten op deze locatie. Selecteer de diensten die u wilt toevoegen in uw %1$s app.</string>
-    <string name="device_unregister_others">Deze account is al gebruik op een ander toestel. Wanneer je doorgaat, zullen de onderstaande toestellen uitgelogd worden.</string>
+    <string name="device_unregister_others">Deze account is in gebruik op een ander toestel. Wanneer je doorgaat, zullen onderstaande toestellen uitgelogd worden.</string>
     <string name="device_was_unregistered">Dit toestel is niet langer geregistreerd.</string>
     <string name="dialog_request_location_sharing">%1$s deelt zijn locatie niet met jou.\n\nWens je een aanvraag tot delen te versturen ?</string>
     <string name="disabled">Uitgeschakeld</string>
@@ -268,6 +268,7 @@
     <string name="logs_forwarded">Uw %2$s logs worden doorgezonden naar %1$s.</string>
     <string name="loyalty_card_description">Uw %1$s klantenkaart\n\nScan en spaar bij elke handelaar\nScan om vrienden toe te voegen</string>
     <string name="male">Man</string>
+    <string name="mandatory_permission">De app heeft niet genoeg permissies voor deze actie. Gelieve de permissies te controleren. </string>
     <string name="max_date_reached">Kan geen later tijdstip kiezen.</string>
     <string name="maybe">Misschien</string>
     <string name="member_details">Details</string>
@@ -341,6 +342,7 @@
     <string name="no_wifi_available_when_online_transfer_continues_tilte">Geen WIFI beschikbaar</string>
     <string name="normal">Normaal</string>
     <string name="not_authenticated">Niet geauthenticeerd</string>
+    <string name="not_paid">Niet betaald</string>
     <string name="not_yet_received">Nog niet ontvangen</string>
     <string name="not_yet_replied">Nog niet beantwoord</string>
     <string name="notification_settings">Notificatie instellingen</string>
@@ -351,7 +353,11 @@
     <string name="or">of</string>
     <string name="order">Bestellen</string>
     <string name="osa_loyalty_welcome_message">Welkom op de Onze Stad App terminal. Deze app is de perfecte aanvulling bij uw aanwezigheid in de stad app om zo uw klanten nog meer te bieden. Wij helpen u het getrouwheidssysteem klaar te zetten voor gebruik. Begin met uw QR-code te scannen om zo uw terminal te activeren.</string>
+    <string name="paid">Betaald</string>
     <string name="passport">%1$s id</string>
+    <string name="pay">Betalen</string>
+    <string name="pay_first">Je moet eerst betalen voordat je verder kan gaan.</string>
+    <string name="payment_not_enabled">Betalingen zijn niet ingeschakeld in deze app.</string>
     <string name="payment_providers">Betalingsaanbieders</string>
     <string name="payment_providers_add">Betalingsaanbieder toevoegen</string>
     <string name="phone">Telefoon</string>
@@ -386,6 +392,7 @@
     <string name="recommend_to_contacts">Aanbevelen via e-mail</string>
     <string name="recommend_to_friends">Aanbevelen aan %1$s contacten</string>
     <string name="recommended_service">Aanbevolen</string>
+    <string name="ref">Ref.</string>
     <string name="register_first">Gelieve verder te gaan met de registratie</string>
     <string name="register_qr_text">Welkom bij de %1$s app.\n\nOm van start te gaan, bezoek\n %2$s\nvanaf je PC, laptop of tablet en scan jouw persoonlijke QR-code.</string>
     <string name="registration_activating_account">Uw %1$s account wordt geactiveerd…</string>
@@ -509,6 +516,7 @@
     <string name="sounds">Geluid</string>
     <string name="specials">Aanbieding</string>
     <string name="start_registration">Start registratie</string>
+    <string name="status">Status</string>
     <string name="sticky">Sticky</string>
     <string name="stop">Stop</string>
     <string name="stream_summary">Enkel belangrijkste gegevens</string>
@@ -520,6 +528,7 @@
     <string name="tab_messaging">Berichten</string>
     <string name="tab_services">Diensten</string>
     <string name="tab_stream">Activiteit</string>
+    <string name="test_mode">Testmodus</string>
     <string name="this_screen_is_not_yet_downloaded_check_network">Dit scherm is nog niet geladen. Controleer uw netwerk.</string>
     <string name="title_buttons">Voeg antwoordknoppen toe</string>
     <string name="title_message">Berichttekst</string>
@@ -567,6 +576,7 @@
     <string name="valid_from_to">Geldig van %1$s tot %2$s</string>
     <string name="validate_discovered_location">Controleer of deze locatie de juiste is</string>
     <string name="validation_failed">Ongeldige input</string>
+    <string name="via">Via</string>
     <string name="view_my_profile">Mijn profiel bekijken</string>
     <string name="view_security_settings">Beveiligingsinstellingen bekijken</string>
     <string name="wallet">Portemonnee</string>

@@ -16,33 +16,37 @@
  * @@license_version:1.4@@
  */
 
-package com.mobicage.to.system;
+package com.mobicage.to.messaging.forms;
 
 import com.mobicage.rpc.IncompleteMessageException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class UnregisterMobileRequestTO implements com.mobicage.rpc.IJSONable {
+public class NewPayFormResponseTO implements com.mobicage.rpc.IJSONable {
 
-    public String reason;
+    public long received_timestamp;
 
-    public UnregisterMobileRequestTO() {
+    public NewPayFormResponseTO() {
     }
 
-    public UnregisterMobileRequestTO(Map<String, Object> json) throws IncompleteMessageException {
-        if (json.containsKey("reason")) {
-            Object val = json.get("reason");
-            this.reason = (String) val;
+    public NewPayFormResponseTO(Map<String, Object> json) throws IncompleteMessageException {
+        if (json.containsKey("received_timestamp")) {
+            Object val = json.get("received_timestamp");
+            if (val instanceof Integer) {
+                this.received_timestamp = ((Integer) val).longValue();
+            } else {
+                this.received_timestamp = ((Long) val).longValue();
+            }
         } else {
-            this.reason = null;
+            throw new IncompleteMessageException("com.mobicage.to.messaging.forms.NewPayFormResponseTO object is missing field 'received_timestamp'");
         }
     }
 
     @Override
     public Map<String, Object> toJSONMap() {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
-        obj.put("reason", this.reason);
+        obj.put("received_timestamp", this.received_timestamp);
         return obj;
     }
 

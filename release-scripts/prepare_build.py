@@ -314,9 +314,12 @@ def get_action(item):
 
 def get_cordova_apps():
     cordova_apps = set()
+
     for item in itertools.chain(get('HOMESCREEN.items', []), get('TOOLBAR.items', [])):
         if item['action_type'] == 'cordova':
             cordova_apps.add(item['action'])
+
+    cordova_apps.update(set(get('BUILD_CONSTANTS.EMBEDDED_APPS', [])))
     return list(cordova_apps)
 
 

@@ -16,33 +16,25 @@
  * @@license_version:1.4@@
  */
 
-package com.mobicage.to.system;
+package com.mobicage.to.messaging.forms;
 
 import com.mobicage.rpc.IncompleteMessageException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class UnregisterMobileRequestTO implements com.mobicage.rpc.IJSONable {
+public class UpdatePayFormResponseTO implements com.mobicage.rpc.IJSONable {
 
-    public String reason;
 
-    public UnregisterMobileRequestTO() {
+    public UpdatePayFormResponseTO() {
     }
 
-    public UnregisterMobileRequestTO(Map<String, Object> json) throws IncompleteMessageException {
-        if (json.containsKey("reason")) {
-            Object val = json.get("reason");
-            this.reason = (String) val;
-        } else {
-            this.reason = null;
-        }
+    public UpdatePayFormResponseTO(Map<String, Object> json) throws IncompleteMessageException {
     }
 
     @Override
     public Map<String, Object> toJSONMap() {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
-        obj.put("reason", this.reason);
         return obj;
     }
 

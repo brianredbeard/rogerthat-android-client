@@ -35,6 +35,7 @@ import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
 
 import org.jivesoftware.smack.util.Base64;
 import org.json.simple.JSONValue;
+import org.xbill.DNS.utils.base16;
 
 import java.io.ByteArrayOutputStream;
 import java.security.MessageDigest;
@@ -49,6 +50,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.math.BigInteger;
 
 public class Ed25519 {
 
@@ -80,9 +82,7 @@ public class Ed25519 {
     }
 
     public static String getAddress(MainService mainService, String pin, String name, long index, byte[] seedBytes) throws Exception {
-        final byte[] algorithmBytes = new byte[16];
-        byte[] originalAlgorithmBytes = ALGORITHM.getBytes();
-        System.arraycopy(originalAlgorithmBytes, 0, algorithmBytes, 0, originalAlgorithmBytes.length);
+        final byte[] algorithmBytes = getAlgorithmBytes();
 
         Map<String, Object> keys = createKeyPairForAddress(seedBytes, index);
         EdDSAPublicKey publicKey = (EdDSAPublicKey) keys.get("public_key");
@@ -102,7 +102,7 @@ public class Ed25519 {
 
         List<byte[]> hashList = new ArrayList<>();
         hashList.add(SecurityUtils.blake2b256Digest(addH(0, timelock)));
-        hashList.add(SecurityUtils.blake2b256Digest(addH(0,siaPublicKeys)));
+        hashList.add(SecurityUtils.blake2b256Digest(addH(0, siaPublicKeys)));
         hashList.add(SecurityUtils.blake2b256Digest(addH(0, signaturesRequired)));
 
         MerkleTree mt = new MerkleTree(hashList);
@@ -129,27 +129,7 @@ public class Ed25519 {
             seed = Mnemonics.seedToString(b);
         }
 
-        final byte[] checksumSeedBytes = Mnemonics.stringToSeed(seed);
-        final int entropySize = 32;
-        final int seedChecksumSize = 6;
-
-        if (checksumSeedBytes.length != entropySize + seedChecksumSize) {
-            throw new Exception("checksum seed length is wrong");
-        }
-
-        final byte[] seedBytes = new byte[entropySize];
-        System.arraycopy(checksumSeedBytes, 0, seedBytes, 0, entropySize);
-
-        final byte[] fullChecksum = new byte[seedChecksumSize];
-        System.arraycopy(SecurityUtils.blake2b256Digest(seedBytes), 0, fullChecksum, 0, seedChecksumSize);
-
-        final byte[] checksumBytes = new byte[seedChecksumSize];
-        System.arraycopy(checksumSeedBytes, entropySize, checksumBytes, 0, seedChecksumSize);
-
-        if (!Arrays.equals(fullChecksum, checksumBytes)) {
-            throw new Exception("checksum seed is wrong");
-        }
-
+        final byte[] seedBytes = Mnemonics.stringToSeed(seed);
         Map<String, Object> keys = createKeyPair(seedBytes);
         EdDSAPublicKey publicKey = (EdDSAPublicKey) keys.get("public_key");
         EdDSAPrivateKey privateKey = (EdDSAPrivateKey) keys.get("private_key");
@@ -212,38 +192,42 @@ public class Ed25519 {
         byte[] signaturesRequired = SecurityUtils.longToBytes(Long.reverseBytes(1));
 
         EdDSAPublicKey pk = (EdDSAPublicKey) publicKey;
-        String publicKeyString =  Base64.encodeBytes(publicKey.getEncoded(), Base64.DONT_BREAK_LINES);
+        String publicKeyString =  Base64.encodeBytes(pk.getAbyte(), Base64.DONT_BREAK_LINES);
         final byte[] publicByteSlice = new byte[8];
         publicByteSlice[0] = 32;
 
         ByteArrayOutputStream coinInputBos = new ByteArrayOutputStream();
         ByteArrayOutputStream coinOutputBos = new ByteArrayOutputStream();
 
+        coinInputBos.write(SecurityUtils.longToBytes(Long.reverseBytes(to.data.length))); // length coin inputs
         for (int i = 0; i < to.data.length; i++) {
-            coinInputBos.write(to.data[i].input.parent_id.getBytes());
+            coinInputBos.write(base16.fromString(to.data[i].input.parent_id));
             coinInputBos.write(SecurityUtils.longToBytes(Long.reverseBytes(to.data[i].input.timelock)));
+            coinInputBos.write(SecurityUtils.longToBytes(Long.reverseBytes(1))); // length public keys
             coinInputBos.write(getAlgorithmBytes());
             coinInputBos.write(publicByteSlice);
             coinInputBos.write(pk.getAbyte());
             coinInputBos.write(signaturesRequired);
 
+            coinOutputBos.write(SecurityUtils.longToBytes(Long.reverseBytes(to.data[i].outputs.length))); // length coin outputs
             for (int j = 0; j < to.data[i].outputs.length; j++) {
                 String unlockHash = to.data[i].outputs[j].unlockhash;
                 if (!to.from_address.equals(unlockHash) && !to.to_address.equals(unlockHash)) {
                     throw new Exception("Address did not match");
                 }
-
-                coinOutputBos.write(to.data[i].outputs[j].value.getBytes());
-                coinOutputBos.write(unlockHash.getBytes());
+                byte[] cov = bigIntegerToBytes(new BigInteger(to.data[i].outputs[j].value));
+                coinOutputBos.write(SecurityUtils.longToBytes(Long.reverseBytes(cov.length))); // length of bigint
+                coinOutputBos.write(cov);
+                coinOutputBos.write(copyByteArray(base16.fromString(unlockHash), 32));
             }
         }
         final byte[] coinInputs = coinInputBos.toByteArray();
         final byte[] coinOutputs = coinOutputBos.toByteArray();
-        final byte[] minerfees = to.minerfees.getBytes();
+        final byte[] minerfees = bigIntegerToBytes(new BigInteger(to.minerfees));
         final byte[] publicKeyIndex = SecurityUtils.longToBytes(Long.reverseBytes(index));
 
         for (int i = 0; i < to.data.length; i++) {
-            final byte[] parentId = to.data[i].input.parent_id.getBytes();
+            final byte[] parentId = base16.fromString(to.data[i].input.parent_id);
             final byte[] timelock = SecurityUtils.longToBytes(Long.reverseBytes(to.data[i].timelock));
             final byte[] signatureHash = createTransactionData(publicKeyIndex, timelock, coinInputs, coinOutputs, minerfees, parentId);
             to.data[i].algorithm = ALGORITHM;
@@ -255,11 +239,30 @@ public class Ed25519 {
         return JSONValue.toJSONString(to.toJSONMap());
     }
 
+    public static byte[] copyByteArray(byte[] data, int size) {
+        final byte[] result = new byte[size];
+        System.arraycopy(data, 0, result, 0, size);
+        return result;
+    }
+
+    public static byte[] bigIntegerToBytes(final BigInteger bigInteger) {
+        byte[] bytes = bigInteger.toByteArray();
+        if (bytes[0] == 0) {
+            return Arrays.copyOfRange(bytes, 1, bytes.length);
+        }
+        return bytes;
+    }
+
     private static byte[] createTransactionData(final byte[] fromPublicKeyIndex, final byte[] timelock, final byte[] coinInputs, final byte[] coinOutputs, final byte[] minerfees, final byte[] parentId) throws Exception {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         bos.write(coinInputs);
         bos.write(coinOutputs);
+        bos.write(SecurityUtils.longToBytes(Long.reverseBytes(0))); // BlockStakeInputs
+        bos.write(SecurityUtils.longToBytes(Long.reverseBytes(0))); // BlockStakeOutputs
+        bos.write(SecurityUtils.longToBytes(Long.reverseBytes(1))); // length of minerfees
+        bos.write(SecurityUtils.longToBytes(Long.reverseBytes(minerfees.length))); // length of bigint
         bos.write(minerfees);
+        bos.write(SecurityUtils.longToBytes(Long.reverseBytes(0))); // ArbitraryData
         bos.write(parentId);
         bos.write(fromPublicKeyIndex);
         bos.write(timelock);

@@ -26,6 +26,7 @@ import java.util.Map;
 public class ErrorPaymentTO implements com.mobicage.rpc.IJSONable {
 
     public String code;
+    public String data;
     public String message;
 
     public ErrorPaymentTO() {
@@ -37,6 +38,12 @@ public class ErrorPaymentTO implements com.mobicage.rpc.IJSONable {
             this.code = (String) val;
         } else {
             throw new IncompleteMessageException("com.mobicage.to.payment.ErrorPaymentTO object is missing field 'code'");
+        }
+        if (json.containsKey("data")) {
+            Object val = json.get("data");
+            this.data = (String) val;
+        } else {
+            this.data = null;
         }
         if (json.containsKey("message")) {
             Object val = json.get("message");
@@ -50,6 +57,7 @@ public class ErrorPaymentTO implements com.mobicage.rpc.IJSONable {
     public Map<String, Object> toJSONMap() {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
         obj.put("code", this.code);
+        obj.put("data", this.data);
         obj.put("message", this.message);
         return obj;
     }
