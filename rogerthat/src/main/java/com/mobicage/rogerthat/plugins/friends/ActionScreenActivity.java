@@ -304,7 +304,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 L.w("Expected params != null");
                 return;
             }
-            String data = params.getString("u");
+            String data = TextUtils.optString(params, "u", null);
             boolean smart = params.optBoolean("smart", false);
             mFriendsPlugin.putUserData(mServiceEmail, data, smart);
         }
@@ -355,7 +355,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 L.w("Expected params != null");
                 return;
             }
-            final String e = params.getString("e");
+            final String e = TextUtils.optString(params, "e", null);
             if (e != null) {
                 mActionScreenUtils.logError(mServiceEmail, mItemLabel, mItemCoords, e);
             }
@@ -392,7 +392,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 return;
             }
             final String requestId = params.getString("id");
-            String cameraType = params.getString("camera_type");
+            final String cameraType = params.getString("camera_type");
 
             if (!QRCodeScanner.CAMERA_TYPES.contains(cameraType)) {
                 Map<String, Object> e = new HashMap<>();
@@ -533,9 +533,9 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 return;
             }
             final String requestId = params.getString("id");
-            final String actionType = params.has("action_type") ? params.getString("action_type") : null;
-            final String action = params.has("action") ? params.getString("action") : null;
-            final String title = params.has("title") ? params.getString("title") : null;
+            final String actionType = TextUtils.optString(params, "action_type", null);
+            final String action = TextUtils.optString(params, "action", null);
+            final String title = TextUtils.optString(params, "title", null);
 
             String errorMessage = mActionScreenUtils.openActivity(actionType, action, title);
             Map<String, Object> e = null;
