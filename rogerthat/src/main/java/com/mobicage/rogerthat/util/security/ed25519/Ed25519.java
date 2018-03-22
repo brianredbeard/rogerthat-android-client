@@ -200,6 +200,7 @@ public class Ed25519 {
         ByteArrayOutputStream coinOutputBos = new ByteArrayOutputStream();
 
         coinInputBos.write(SecurityUtils.longToBytes(Long.reverseBytes(to.data.length))); // length coin inputs
+        long numberOfOutputs = 0;
         for (int i = 0; i < to.data.length; i++) {
             coinInputBos.write(base16.fromString(to.data[i].input.parent_id));
             coinInputBos.write(SecurityUtils.longToBytes(Long.reverseBytes(to.data[i].input.timelock)));
@@ -208,9 +209,14 @@ public class Ed25519 {
             coinInputBos.write(publicByteSlice);
             coinInputBos.write(pk.getAbyte());
             coinInputBos.write(signaturesRequired);
-
-            coinOutputBos.write(SecurityUtils.longToBytes(Long.reverseBytes(to.data[i].outputs.length))); // length coin outputs
             for (int j = 0; j < to.data[i].outputs.length; j++) {
+                numberOfOutputs += 1;
+            }
+        }
+        coinOutputBos.write(SecurityUtils.longToBytes(Long.reverseBytes(numberOfOutputs))); // length coin outputs
+        for (int i = 0; i < to.data.length; i++) {
+
+          for (int j = 0; j < to.data[i].outputs.length; j++) {
                 String unlockHash = to.data[i].outputs[j].unlockhash;
                 if (!to.from_address.equals(unlockHash) && !to.to_address.equals(unlockHash)) {
                     throw new Exception("Address did not match");

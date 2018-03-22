@@ -30,6 +30,8 @@ import com.mobicage.rogerthat.util.system.T;
 
 import com.mobicage.to.system.SettingsTO;
 
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class SecurityPlugin implements MobicagePlugin {
@@ -94,6 +96,10 @@ public class SecurityPlugin implements MobicagePlugin {
 
     public String getSecurityKey(final String type, final String algorithm, final String name, final Long index) {
         return mStore.getSecurityKey(type, algorithm, name, getIndexString(index));
+    }
+
+    public List<Map<String, String>> listAddresses(final String algorithm, final String name) {
+        return mStore.listAddresses(algorithm, name);
     }
 
     public void saveSecurityKey(final String algorithm, final String name, final Long index,

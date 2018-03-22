@@ -286,6 +286,8 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 getPublicKey(params);
             } else if ("security/getSeed".equals(action)) {
                 getSeed(params);
+            } else if ("security/listAddresses".equals(action)) {
+                listAddresses(params);
             } else if ("security/getAddress".equals(action)) {
                 getAddress(params);
             } else if ("security/sign".equals(action)) {
@@ -729,6 +731,36 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             };
 
             mActionScreenUtils.getSeed(params, sc);
+        }
+
+        private void listAddresses(final JSONObject params) throws JSONException {
+            if (params == null) {
+                L.w("Expected params != null");
+                return;
+            }
+
+            final String requestId = params.getString("id");
+
+            MainService.SecurityCallback sc = new MainService.SecurityCallback() {
+                @Override
+                public void onSuccess(Object result) {
+                    List<Map<String, String>> addresses = (List<Map<String, String>>) result;
+                    Map<String, Object> r = new HashMap<>();
+                    r.put("addresses", addresses);
+                    deliverResult(requestId, r, null);
+                }
+
+                @Override
+                public void onError(String code, String errorMessage) {
+                    Map<String, Object> e = new HashMap<>();
+                    e.put("code", code);
+                    e.put("message", errorMessage);
+                    e.put("exception", errorMessage); // deprecated
+                    deliverResult(requestId, null, e);
+                }
+            };
+
+            mActionScreenUtils.listAddresses(params, sc);
         }
 
         private void getAddress(final JSONObject params) throws JSONException {

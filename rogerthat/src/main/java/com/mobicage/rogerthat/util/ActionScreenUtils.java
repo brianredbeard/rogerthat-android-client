@@ -513,6 +513,25 @@ public class ActionScreenUtils {
         mMainService.getSeed(keyAlgorithm, keyName, message, callback);
     }
 
+    public void listAddresses(final JSONObject params, final MainService.SecurityCallback callback) {
+        if (!AppConstants.Security.ENABLED) {
+            String errorMessage = mActivity.getString(R.string.security_not_enabled);
+            callback.onError("security_not_enabled", errorMessage);
+            return;
+        }
+
+        final String keyAlgorithm = TextUtils.optString(params, "key_algorithm", null);
+        final String keyName = TextUtils.optString(params, "key_name", null);
+
+        try {
+            callback.onSuccess(SecurityUtils.listAddress(mMainService, keyAlgorithm, keyName));
+        } catch (Exception e) {
+            L.d("SecurityUtils.listAddress failed", e);
+            String errorMessage = mActivity.getString(R.string.unknown_error_occurred);
+            callback.onError("unknown_error_occurred", errorMessage);
+        }
+    }
+
     public void getAddress(final JSONObject params, final MainService.SecurityCallback callback) {
         if (!AppConstants.Security.ENABLED) {
             String errorMessage = mActivity.getString(R.string.security_not_enabled);

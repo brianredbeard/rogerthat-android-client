@@ -216,9 +216,9 @@
     <string name="identify">Identificeren</string>
     <string name="import_existing_key">Bestaande sleutel importeren</string>
     <string name="import_key">Beveiligingssleutel importeren</string>
-    <string name="import_key_failed">De sleutel kon niet geïmporteerd worden. Controleer of het juiste algoritme geselecteerd is en dat de 29 woorden correct geschreven zijn.</string>
+    <string name="import_key_failed">De sleutel kon niet geïmporteerd worden. Controleer of het juiste algoritme geselecteerd is en dat de 24 woorden correct geschreven zijn.</string>
     <string name="import_key_succeeded">De sleutel is succesvol geïmporteerd.</string>
-    <string name="import_security_key_instructions">Om een sleutel te importeren dien je het algoritme te selecteren en de sleutelnaam en de 29 woorden in te geven.</string>
+    <string name="import_security_key_instructions">Om een sleutel te importeren dien je het algoritme te selecteren en de sleutelnaam en de 24 woorden in te geven.</string>
     <string name="initializing">Initialiseren…</string>
     <string name="install">Installeren</string>
     <string name="install_import_secure_key">Wil je een %1$s sleutel importeren of een nieuwe genereren? Als dit de eerste keer is dat je de %1$s app installeert, kies dan \'Nieuwe sleutel genereren\'.</string>
@@ -479,7 +479,7 @@
     <string name="security">Beveiliging</string>
     <string name="security_not_enabled">Beveiliging is niet ingeschakeld voor deze app.</string>
     <string name="security_usage_explanation">Omdat deze app beveiligingsfuncties gebruikt, moet u deze beveiligen met een pincode.</string>
-    <string name="seed_29_words">29 woorden</string>
+    <string name="seed_24_words">24 woorden</string>
     <string name="select_all">Alles selecteren</string>
     <string name="select_colleague">Collega selecteren</string>
     <string name="select_contact">Contact selecteren</string>

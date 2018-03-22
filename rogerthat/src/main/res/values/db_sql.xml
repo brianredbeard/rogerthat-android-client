@@ -536,6 +536,7 @@ ORDER BY ms.acked_timestamp DESC
     <string name="sql_security_delete_group">DELETE FROM security_key WHERE algorithm=? AND name=?</string>
     <string name="sql_security_select_by_key">SELECT data FROM security_key WHERE type = ? AND algorithm = ? AND name = ? AND indexx = ?</string>
     <string name="sql_security_list_public_keys">SELECT name, algorithm FROM security_key WHERE type = \"public\" ORDER BY name, algorithm COLLATE NOCASE</string>
+    <string name="sql_security_list_addresses">SELECT indexx, data FROM security_key WHERE type = \"address\" AND algorithm = ? AND name = ? ORDER BY indexx</string>
 
     <!-- iOS-only queries -->
     <string name="sql_friend_count_by_type">SELECT COUNT(*) FROM friend WHERE (existence = 0 OR existence = 4) AND \"type\" = ?</string>

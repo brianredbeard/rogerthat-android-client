@@ -61,6 +61,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
@@ -310,6 +311,12 @@ public class SecurityUtils {
         return null;
     }
 
+    public static List<Map<String, String>> listAddress(MainService mainService, String algorithm, String name) throws Exception {
+        T.UI();
+        SecurityPlugin securityPlugin = mainService.getPlugin(SecurityPlugin.class);
+        return securityPlugin.listAddresses(algorithm, name);
+    }
+
     public static String getAddress(MainService mainService, String algorithm, String name, long index) throws Exception {
         T.UI();
         SecurityPlugin securityPlugin = mainService.getPlugin(SecurityPlugin.class);
@@ -521,11 +528,14 @@ public class SecurityUtils {
         if (Ed25519.ALGORITHM.equals(algorithm)) {
             PublicKey publicKey = SecurityUtils.getPublicKey(mainService, algorithm, name, index);
             String address = getAddress(mainService, algorithm, name, index);
-            return Ed25519.createTransactionData(publicKey, index, address, data);
+            if (publicKey != null && address != null) {
+                return Ed25519.createTransactionData(publicKey, index, address, data);
+            }
+            L.e("Creating transaction data failed public key or addres was null.");
         } else {
             L.e("Creating transaction data with an algorithm named '" + algorithm + "' is not supported.");
-            return null;
         }
+        return null;
     }
 
     public static void savePublicKey(MainService mainService, String algorithm, final String name, final Long index, final String publicKey) {

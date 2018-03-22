@@ -29,7 +29,9 @@ import com.mobicage.rogerthat.util.system.T;
 
 import java.io.Closeable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.mobicage.rogerthat.util.db.DBUtils.bindString;
 
@@ -115,4 +117,24 @@ public class SecurityStore implements Closeable {
         return publicKeys;
     }
 
+    public List<Map<String, String>> listAddresses(final String algorithm, final String name) {
+        T.dontCare();
+        final List<Map<String, String>> addresses = new ArrayList<>();
+        final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_security_list_addresses), new String[]{
+                algorithm, name});
+        try {
+            if (c.moveToFirst()) {
+                do {
+                    HashMap<String, String> addressInfo = new HashMap<>();
+                    addressInfo.put("index", c.getString(0));
+                    addressInfo.put("address", c.getString(1));
+                    addresses.add(addressInfo);
+                } while (c.moveToNext());
+            }
+        } finally {
+            c.close();
+        }
+
+        return addresses;
+    }
 }

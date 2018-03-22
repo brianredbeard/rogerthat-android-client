@@ -216,9 +216,9 @@
     <string name="identify">Identify</string>
     <string name="import_existing_key">Import existing key</string>
     <string name="import_key">Import secure key</string>
-    <string name="import_key_failed">Your key could not be imported. Please make sure you selected the right algorithm and that all 29 words are written correctly.</string>
+    <string name="import_key_failed">Your key could not be imported. Please make sure you selected the right algorithm and that all 24 words are written correctly.</string>
     <string name="import_key_succeeded">Your key has been successfully imported.</string>
-    <string name="import_security_key_instructions">To import a secure key select the key algorithm and enter the secure key name and the key\'s 29 words.</string>
+    <string name="import_security_key_instructions">To import a secure key select the key algorithm and enter the secure key name and the key\'s 24 words.</string>
     <string name="initializing">Initializing…</string>
     <string name="install">Install</string>
     <string name="install_import_secure_key">Do you want to import a %1$s key or generate a new one? If this is the first time you install the %1$s app, choose \'Generate new key\'.</string>
@@ -479,7 +479,7 @@
     <string name="security">Security</string>
     <string name="security_not_enabled">Security is not enabled in your app.</string>
     <string name="security_usage_explanation">Because this app uses security features, you have to secure it with a PIN code.</string>
-    <string name="seed_29_words">29 words</string>
+    <string name="seed_24_words">24 words</string>
     <string name="select_all">Select all</string>
     <string name="select_colleague">Select colleague</string>
     <string name="select_contact">Select contact</string>
