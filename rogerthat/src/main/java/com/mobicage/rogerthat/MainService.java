@@ -2256,4 +2256,8 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         }
     }
 
+    public Map<String, Long> getBadges() {
+        return badges;
+    }
+
 }

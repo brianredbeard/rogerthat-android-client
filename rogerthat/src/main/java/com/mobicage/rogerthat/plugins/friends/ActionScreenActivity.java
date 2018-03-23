@@ -1058,6 +1058,13 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                     executeJS(true, "if (typeof rogerthat !== 'undefined') rogerthat._setInfo(%s)",
                         JSONValue.toJSONString(info));
                     mInfoSet = true;
+
+                    for (Map.Entry<String, Long> entry : mService.getBadges().entrySet()) {
+                        Map<String, Object> params = new HashMap<>();
+                        params.put("key", entry.getKey());
+                        params.put("count", entry.getValue());
+                        mIntentCallback.badgeUpdated(params);
+                    }
                 }
             }
 
