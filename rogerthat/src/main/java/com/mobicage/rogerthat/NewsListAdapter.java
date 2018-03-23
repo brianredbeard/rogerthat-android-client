@@ -794,7 +794,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                         followButton.setOnClickListener(null);
                         final int currentExistenceStatus = mFriendsPlugin.getStore().getExistence(mNewsItem.sender.email);
                         if (currentExistenceStatus != Friend.ACTIVE) {
-                            mFriendsPlugin.inviteFriend(mNewsItem.sender.email, null, null, false);
+                            mFriendsPlugin.inviteFriend(mNewsItem.sender.email, null, null, false, true);
 
                             SafeRunnable runnable = new SafeRunnable() {
                                 @Override
@@ -858,7 +858,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                                 mActivity.expectedEmailHash = mNewsItem.sender.email;
 
                                 mExecuteAfterBecameFriends = smiClickRunnable;
-                                mFriendsPlugin.inviteFriend(mNewsItem.sender.email, null, null, false);
+                                mFriendsPlugin.inviteFriend(mNewsItem.sender.email, null, null, false, true);
                             }
                         } else if (Message.MC_POKE_PREFIX.equals(buttonAction)) {
                             mNewsPlugin.saveNewsStatistics(new long[]{mNewsItem.id}, NewsPlugin.STATISTIC_ACTION);
