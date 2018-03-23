@@ -536,8 +536,10 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             final String actionType = TextUtils.optString(params, "action_type", null);
             final String action = TextUtils.optString(params, "action", null);
             final String title = TextUtils.optString(params, "title", null);
+            final String service = TextUtils.optString(params, "service", null);
+            final boolean collapse = "true".equalsIgnoreCase(params.getString("collapse"));
 
-            String errorMessage = mActionScreenUtils.openActivity(actionType, action, title);
+            String errorMessage = mActionScreenUtils.openActivity(actionType, action, title, service, collapse);
             Map<String, Object> e = null;
             if (errorMessage != null) {
                 e = new HashMap<>();

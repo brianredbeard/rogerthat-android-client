@@ -342,8 +342,10 @@ public class ActionScreenUtils {
         inputManager.hideSoftInputFromWindow(windowToken, InputMethodManager.HIDE_NOT_ALWAYS);
     }
 
-    public String openActivity(final String actionType, final String action, final String title) {
-        NavigationItem ni = new NavigationItem(FontAwesome.Icon.faw_question_circle_o, actionType, action, title, false);
+    public String openActivity(final String actionType, final String action, final String title,
+                               final String service, final boolean collapse) {
+        NavigationItem ni = new NavigationItem(FontAwesome.Icon.faw_question_circle_o, actionType,
+                action, title, collapse, service, 0);
 
         String errorMessage = ActivityUtils.canOpenNavigationItem(mActivity, ni);
         if (errorMessage != null) {
