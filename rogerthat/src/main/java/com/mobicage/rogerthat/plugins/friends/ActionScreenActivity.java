@@ -806,10 +806,10 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 @Override
                 public void onSuccess(Object result) {
                     try {
-                        byte[] payloadSignature = (byte[]) result;
+                        String payloadSignature = (String) result;
                         Map<String, Object> r = new HashMap<>();
                         r.put("payload", payload);
-                        r.put("payload_signature", Base64.encodeBytes(payloadSignature, Base64.DONT_BREAK_LINES));
+                        r.put("payload_signature", payloadSignature);
                         deliverResult(requestId, r, null);
                     } catch (Exception exc) {
                         L.bug("signPayload onSuccess exception", exc);

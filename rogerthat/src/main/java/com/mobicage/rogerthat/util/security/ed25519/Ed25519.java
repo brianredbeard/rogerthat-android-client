@@ -82,37 +82,27 @@ public class Ed25519 {
     }
 
     public static String getAddress(MainService mainService, String pin, String name, long index, byte[] seedBytes) throws Exception {
-        final byte[] algorithmBytes = getAlgorithmBytes();
-
         Map<String, Object> keys = createKeyPairForAddress(seedBytes, index);
         EdDSAPublicKey publicKey = (EdDSAPublicKey) keys.get("public_key");
         EdDSAPrivateKey privateKey = (EdDSAPrivateKey) keys.get("private_key");
 
-        byte[] timelock = SecurityUtils.longToBytes(0);
-
         final byte[] publicByteSlice = new byte[8];
         publicByteSlice[0] = 32;
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        bos.write(algorithmBytes);
-        bos.write(publicByteSlice);
-        bos.write(publicKey.getAbyte());
-        byte[] siaPublicKeys = bos.toByteArray();
 
-        byte[] signaturesRequired = SecurityUtils.longToBytes(Long.reverseBytes(1));
+        ByteArrayOutputStream conditionBos = new ByteArrayOutputStream();
+        conditionBos.write(getAlgorithmBytes());
+        conditionBos.write(publicByteSlice);
+        conditionBos.write(publicKey.getAbyte());
+        byte[] condition = conditionBos.toByteArray();
+        byte[] conditionLength = SecurityUtils.longToBytes(Long.reverseBytes(condition.length));
+        byte[] conditionDigest = SecurityUtils.blake2b256Digest(conditionLength, condition);
 
-        List<byte[]> hashList = new ArrayList<>();
-        hashList.add(SecurityUtils.blake2b256Digest(addH(0, timelock)));
-        hashList.add(SecurityUtils.blake2b256Digest(addH(0, siaPublicKeys)));
-        hashList.add(SecurityUtils.blake2b256Digest(addH(0, signaturesRequired)));
+        final byte[] addressBytes = new byte[conditionDigest.length + 7];
+        addressBytes[0] = 1;
+        System.arraycopy(conditionDigest, 0, addressBytes, 1, conditionDigest.length);
+        System.arraycopy(SecurityUtils.blake2b256Digest(conditionDigest), 0, addressBytes, 1 + conditionDigest.length, 6);
 
-        MerkleTree mt = new MerkleTree(hashList);
-        byte[] mtRoot = mt.getRoot().sig;
-
-        final byte[] mtRootFullchecksum = new byte[mtRoot.length + 6];
-        System.arraycopy(mtRoot, 0, mtRootFullchecksum, 0, mtRoot.length);
-        System.arraycopy(SecurityUtils.blake2b256Digest(mtRoot), 0, mtRootFullchecksum, mtRoot.length, 6);
-
-        final String address = SecurityUtils.lowercaseHash(mtRootFullchecksum);
+        final String address = SecurityUtils.lowercaseHash(addressBytes);
 
         String publicKeyString =  Base64.encodeBytes(publicKey.getEncoded(), Base64.DONT_BREAK_LINES);
         String publicKeyAbyte = Base64.encodeBytes(publicKey.getAbyte(), Base64.DONT_BREAK_LINES);
@@ -189,26 +179,27 @@ public class Ed25519 {
             throw new Exception("Address did not match");
         }
 
-        byte[] signaturesRequired = SecurityUtils.longToBytes(Long.reverseBytes(1));
-
         EdDSAPublicKey pk = (EdDSAPublicKey) publicKey;
-        String publicKeyString =  Base64.encodeBytes(pk.getAbyte(), Base64.DONT_BREAK_LINES);
         final byte[] publicByteSlice = new byte[8];
         publicByteSlice[0] = 32;
 
         ByteArrayOutputStream coinInputBos = new ByteArrayOutputStream();
         ByteArrayOutputStream coinOutputBos = new ByteArrayOutputStream();
 
-        coinInputBos.write(SecurityUtils.longToBytes(Long.reverseBytes(to.data.length))); // length coin inputs
         long numberOfOutputs = 0;
         for (int i = 0; i < to.data.length; i++) {
+            ByteArrayOutputStream conditionBos = new ByteArrayOutputStream();
+            conditionBos.write(getAlgorithmBytes());
+            conditionBos.write(publicByteSlice);
+            conditionBos.write(pk.getAbyte());
+            byte[] condition = conditionBos.toByteArray();
+            byte[] conditionLength = SecurityUtils.longToBytes(Long.reverseBytes(condition.length));
+            byte[] conditionDigest = SecurityUtils.blake2b256Digest(conditionLength, condition);
+
             coinInputBos.write(base16.fromString(to.data[i].input.parent_id));
-            coinInputBos.write(SecurityUtils.longToBytes(Long.reverseBytes(to.data[i].input.timelock)));
-            coinInputBos.write(SecurityUtils.longToBytes(Long.reverseBytes(1))); // length public keys
-            coinInputBos.write(getAlgorithmBytes());
-            coinInputBos.write(publicByteSlice);
-            coinInputBos.write(pk.getAbyte());
-            coinInputBos.write(signaturesRequired);
+            coinInputBos.write(1); // unlock type
+            coinInputBos.write(conditionDigest);
+
             for (int j = 0; j < to.data[i].outputs.length; j++) {
                 numberOfOutputs += 1;
             }
@@ -220,7 +211,6 @@ public class Ed25519 {
         }
         coinOutputBos.write(SecurityUtils.longToBytes(Long.reverseBytes(numberOfOutputs))); // length coin outputs
         for (int i = 0; i < to.data.length; i++) {
-
           for (int j = 0; j < to.data[i].outputs.length; j++) {
                 String unlockHash = to.data[i].outputs[j].unlockhash;
                 if (!to.from_address.equals(unlockHash) && !to.to_address.equals(unlockHash)) {
@@ -229,21 +219,19 @@ public class Ed25519 {
                 byte[] cov = bigIntegerToBytes(new BigInteger(to.data[i].outputs[j].value));
                 coinOutputBos.write(SecurityUtils.longToBytes(Long.reverseBytes(cov.length))); // length of bigint
                 coinOutputBos.write(cov);
-                coinOutputBos.write(copyByteArray(base16.fromString(unlockHash), 32));
+                coinOutputBos.write(copyByteArray(base16.fromString(unlockHash), 33));
             }
         }
         final byte[] coinInputs = coinInputBos.toByteArray();
         final byte[] coinOutputs = coinOutputBos.toByteArray();
         final byte[] minerfees = bigIntegerToBytes(new BigInteger(to.minerfees));
-        final byte[] publicKeyIndex = SecurityUtils.longToBytes(Long.reverseBytes(index));
 
         for (int i = 0; i < to.data.length; i++) {
-            final byte[] parentId = base16.fromString(to.data[i].input.parent_id);
-            final byte[] timelock = SecurityUtils.longToBytes(Long.reverseBytes(to.data[i].timelock));
-            final byte[] signatureHash = createTransactionData(publicKeyIndex, timelock, coinInputs, coinOutputs, minerfees, parentId);
+            final byte[] inputIndex = SecurityUtils.longToBytes(Long.reverseBytes(i));
+            final byte[] signatureHash = createTransactionData(inputIndex, coinInputs, coinOutputs, minerfees);
             to.data[i].algorithm = ALGORITHM;
             to.data[i].public_key_index = index;
-            to.data[i].public_key = publicKeyString;
+            to.data[i].public_key = SecurityUtils.lowercaseHash(pk.getAbyte());
             to.data[i].signature_hash = Base64.encodeBytes(signatureHash, Base64.DONT_BREAK_LINES);
         }
 
@@ -264,26 +252,15 @@ public class Ed25519 {
         return bytes;
     }
 
-    private static byte[] createTransactionData(final byte[] fromPublicKeyIndex, final byte[] timelock, final byte[] coinInputs, final byte[] coinOutputs, final byte[] minerfees, final byte[] parentId) throws Exception {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        bos.write(coinInputs);
-        bos.write(coinOutputs);
-        bos.write(SecurityUtils.longToBytes(Long.reverseBytes(0))); // BlockStakeInputs
-        bos.write(SecurityUtils.longToBytes(Long.reverseBytes(0))); // BlockStakeOutputs
-        bos.write(SecurityUtils.longToBytes(Long.reverseBytes(1))); // length of minerfees
-        bos.write(SecurityUtils.longToBytes(Long.reverseBytes(minerfees.length))); // length of bigint
-        bos.write(minerfees);
-        bos.write(SecurityUtils.longToBytes(Long.reverseBytes(0))); // ArbitraryData
-        bos.write(parentId);
-        bos.write(fromPublicKeyIndex);
-        bos.write(timelock);
-        return bos.toByteArray();
-    }
-
-    private static byte[] addH(int h, byte[] data) {
-        final byte[] b = new byte[data.length + 1];
-        b[0] = (byte) h;
-        System.arraycopy(data, 0, b, 1, data.length);
-        return b;
+    private static byte[] createTransactionData(final byte[] inputIndex, final byte[] coinInputs, final byte[] coinOutputs, final byte[] minerfees) throws Exception {
+        return SecurityUtils.blake2b256Digest(inputIndex,
+                coinInputs,
+                coinOutputs,
+//                SecurityUtils.longToBytes(Long.reverseBytes(0)), // BlockStakeInputs
+                SecurityUtils.longToBytes(Long.reverseBytes(0)), // BlockStakeOutputs
+                SecurityUtils.longToBytes(Long.reverseBytes(1)), // length of minerfees
+                SecurityUtils.longToBytes(Long.reverseBytes(minerfees.length)), // length of bigint
+                minerfees,
+                SecurityUtils.longToBytes(Long.reverseBytes(0)));
     }
 }

@@ -151,7 +151,6 @@ public class PayWidget extends Widget {
 
     protected IntentFilter getIntentFilter() {
         return new IntentFilter(BrandingMgr.EMBEDDED_APP_AVAILABLE_INTENT);
-
     }
 
     public static String valueString(Context context, Map<String, Object> widget) {

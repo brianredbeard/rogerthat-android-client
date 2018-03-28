@@ -579,6 +579,7 @@ public class ActionScreenUtils {
         final Long keyIndex = TextUtils.optLong(params, "key_index");
         final String message = TextUtils.optString(params, "message", null);
         final boolean forcePin = params.optBoolean("force_pin", false);
+        final boolean hashPayload = params.optBoolean("hash_payload", true);
 
         if (!SecurityUtils.hasKey(mMainService, "public", keyAlgorithm, keyName, keyIndex)) {
             String errorMessage = mActivity.getString(R.string.key_not_found);
@@ -588,9 +589,13 @@ public class ActionScreenUtils {
 
         byte[] payloadData = null;
         try {
-            payloadData = SecurityUtils.getPayload(keyAlgorithm, Base64.decode(payload));
+            if (hashPayload) {
+                payloadData = SecurityUtils.getPayload(keyAlgorithm, Base64.decode(payload));
+            } else {
+                payloadData = Base64.decode(payload);
+            }
         } catch (Exception e) {
-            L.d("SecurityUtils.getPayload failed", e);
+            L.d("Failed to get payload data", e);
         }
         if (payloadData == null) {
             String errorMessage = mActivity.getString(R.string.unknown_error_occurred);

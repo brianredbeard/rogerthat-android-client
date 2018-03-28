@@ -320,7 +320,10 @@ public class SecurityUtils {
     public static String getAddress(MainService mainService, String algorithm, String name, long index) throws Exception {
         T.UI();
         SecurityPlugin securityPlugin = mainService.getPlugin(SecurityPlugin.class);
-        return securityPlugin.getSecurityKey("address", algorithm, name, index);
+        if (Ed25519.ALGORITHM.equals(algorithm)) {
+            return securityPlugin.getSecurityKey("address", algorithm, name, index);
+        }
+        return null;
     }
 
     public static String getAddress(MainService mainService, String pin, String algorithm, String name, long index) throws Exception {
