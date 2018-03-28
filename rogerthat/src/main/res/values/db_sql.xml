@@ -427,6 +427,12 @@ ORDER BY ms.acked_timestamp DESC
     <string name="sql_delete_beacon_discovery_by_uuid_and_name">DELETE FROM beacon_discovery WHERE uuid = ? AND name = ?</string>
     <string name="sql_get_friend_connected_on_beacon_discovery">SELECT bd.friend_email, bd.tag, f.callbacks FROM beacon_discovery as bd INNER JOIN friend as f ON bd.friend_email=f.email WHERE bd.uuid = ? AND bd.name = ? AND (f.existence = 0 OR f.existence = 4)</string>
 
+    <!-- embedded app -->
+    <string name="sql_get_embedded_app">SELECT version FROM embedded_app WHERE name = ?</string>
+    <string name="sql_select_embedded_app">SELECT name, version FROM embedded_app</string>
+    <string name="sql_insert_embedded_app">INSERT OR REPLACE INTO embedded_app(name, version) values (?, ?)</string>
+    <string name="sql_delete_embedded_app">DELETE FROM embedded_app WHERE name = ?</string>
+
     <!-- js embedding -->
     <string name="sql_get_js_embedding">SELECT name, hash, status FROM js_embedding</string>
     <string name="sql_insert_js_embedding">INSERT OR REPLACE INTO js_embedding(name, hash, status) values (?, ?, ?)</string>

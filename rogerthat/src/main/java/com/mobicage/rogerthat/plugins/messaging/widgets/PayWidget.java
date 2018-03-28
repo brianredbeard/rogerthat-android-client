@@ -19,9 +19,12 @@
 package com.mobicage.rogerthat.plugins.messaging.widgets;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.View;
@@ -36,12 +39,16 @@ import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.cordova.CordovaActionScreenActivity;
 import com.mobicage.rogerthat.cordova.CordovaSettings;
 import com.mobicage.rogerthat.plugins.friends.ActionScreenActivity;
+import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
+import com.mobicage.rogerthat.plugins.system.SystemPlugin;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
+import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.rpc.ResponseHandler;
@@ -67,6 +74,9 @@ public class PayWidget extends Widget {
     private PayWidgetResultTO mResult;
     private TextView mResultTextView;
     private LinearLayout mResultData;
+    private SystemPlugin mSystemPlugin;
+    private BroadcastReceiver mBroadcastReceiver;
+    private ProgressDialog mEmbeddedAppDownloadSpinner;
 
     public PayWidget(Context context) {
         super(context);
@@ -74,6 +84,12 @@ public class PayWidget extends Widget {
 
     public PayWidget(Context context, AttributeSet attrs) {
         super(context, attrs);
+    }
+
+    @Override
+    public void onServiceUnbound() {
+        if (mBroadcastReceiver != null)
+            mActivity.unregisterReceiver(mBroadcastReceiver);
     }
 
     @Override
@@ -105,6 +121,37 @@ public class PayWidget extends Widget {
                 L.bug(e); // Should never happen
             }
         }
+
+        mBroadcastReceiver = getBroadcastReceiver();
+        final IntentFilter filter = getIntentFilter();
+        mActivity.registerReceiver(mBroadcastReceiver, filter);
+    }
+
+    protected SafeBroadcastReceiver getBroadcastReceiver() {
+
+        return new SafeBroadcastReceiver() {
+            @Override
+            public String[] onSafeReceive(Context context, Intent intent) {
+                T.UI();
+                String action = intent.getAction();
+                if (BrandingMgr.EMBEDDED_APP_AVAILABLE_INTENT.equals(action) && mEmbeddedAppDownloadSpinner != null) {
+                    String id = intent.getStringExtra("id");
+                    String embeddedAppIdWidget = (String) mWidgetMap.get("embedded_app_id");
+
+                    if (id.equals(embeddedAppIdWidget)) {
+                        mEmbeddedAppDownloadSpinner.dismiss();
+                        pay();
+                        return new String[] { action };
+                    }
+                }
+                return null;
+            }
+        };
+    }
+
+    protected IntentFilter getIntentFilter() {
+        return new IntentFilter(BrandingMgr.EMBEDDED_APP_AVAILABLE_INTENT);
+
     }
 
     public static String valueString(Context context, Map<String, Object> widget) {
@@ -180,10 +227,30 @@ public class PayWidget extends Widget {
     }
 
     private void pay() {
-        if (!CordovaSettings.APPS.contains(APPLICATION_TAG)) {
-            UIUtils.showLongToast(mActivity, mActivity.getString(R.string.payment_not_enabled));
-            return;
+        String embeddedApp = null;
+        String embeddedAppId = null;
+
+        String embeddedAppIdWidget = (String) mWidgetMap.get("embedded_app_id");
+        if (embeddedAppIdWidget != null) {
+            embeddedAppId = embeddedAppIdWidget;
+            if (mSystemPlugin == null) {
+                mSystemPlugin = mActivity.getMainService().getPlugin(SystemPlugin.class);
+            }
+            long version = mSystemPlugin.getStore().getEmbeddedAppVersion(embeddedAppId);
+            if (version < 0 || !mSystemPlugin.getBrandingMgr().embeddedAppExists(embeddedAppId)) {
+                mEmbeddedAppDownloadSpinner = UIUtils.showProgressDialog(mActivity, null, mActivity.getString(R.string.loading), true, false);
+                mSystemPlugin.getEmbeddedApp(embeddedAppId);
+                return;
+            }
+
+        } else {
+            embeddedApp = APPLICATION_TAG;
+            if (!CordovaSettings.APPS.contains(APPLICATION_TAG)) {
+                UIUtils.showLongToast(mActivity, mActivity.getString(R.string.payment_not_enabled));
+                return;
+            }
         }
+
         org.json.simple.JSONObject context = new org.json.simple.JSONObject();
         // t should match a PaymentQRCodeType in rogerthat-payment branding
         // see https://github.com/rogerthat-platform/rogerthat-payment/blob/master/src/interfaces/actions.interfaces.ts
@@ -200,7 +267,8 @@ public class PayWidget extends Widget {
 
         Bundle extras = new Bundle();
         extras.putString(ActionScreenActivity.CONTEXT, context.toString());
-        extras.putString(CordovaActionScreenActivity.EMBEDDED_APP, APPLICATION_TAG);
+        extras.putString(CordovaActionScreenActivity.EMBEDDED_APP, embeddedApp);
+        extras.putString(CordovaActionScreenActivity.EMBEDDED_APP_ID, embeddedAppId);
         extras.putString(CordovaActionScreenActivity.TITLE, "");
 
         final Intent i = new Intent(mActivity, CordovaActionScreenActivity.class);

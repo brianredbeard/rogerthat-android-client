@@ -1008,6 +1008,8 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
     }
 
     private void onPinEntered() {
+        UIUtils.hideKeyboard(this, mEnterPinEditText);
+        mEnterPinEditText.clearFocus();
 
         final String pin = mEnterPinEditText.getText().toString();
         // Validate pin code

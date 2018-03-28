@@ -27,6 +27,7 @@ public class PayTO implements com.mobicage.rpc.IJSONable {
 
     public com.mobicage.models.properties.forms.PaymentMethod[] methods;
     public boolean auto_submit;
+    public String embedded_app_id;
     public String memo;
     public String target;
     public boolean test_mode;
@@ -57,6 +58,12 @@ public class PayTO implements com.mobicage.rpc.IJSONable {
             this.auto_submit = ((Boolean) val).booleanValue();
         } else {
             this.auto_submit = true;
+        }
+        if (json.containsKey("embedded_app_id")) {
+            Object val = json.get("embedded_app_id");
+            this.embedded_app_id = (String) val;
+        } else {
+            this.embedded_app_id = null;
         }
         if (json.containsKey("memo")) {
             Object val = json.get("memo");
@@ -92,6 +99,7 @@ public class PayTO implements com.mobicage.rpc.IJSONable {
             obj.put("methods", arr);
         }
         obj.put("auto_submit", this.auto_submit);
+        obj.put("embedded_app_id", this.embedded_app_id);
         obj.put("memo", this.memo);
         obj.put("target", this.target);
         obj.put("test_mode", this.test_mode);

@@ -63,9 +63,10 @@ import java.io.InputStream;
 
 public class CordovaActionScreenActivity extends ServiceBoundActivity {
 
-    public static enum CordovaAppType { BRANDING, EMBEDDED_APP }
+    public enum CordovaAppType { BRANDING, PACKAGED_EMBEDDED_APP, DYNAMIC_EMBEDDED_APP }
 
     public static final String EMBEDDED_APP = "EMBEDDED_APP";
+    public static final String EMBEDDED_APP_ID = "EMBEDDED_APP_ID";
     public static final String TITLE = ActionScreenActivity.ITEM_LABEL;
 
     protected SystemWebView mBranding;
@@ -83,6 +84,7 @@ public class CordovaActionScreenActivity extends ServiceBoundActivity {
     protected boolean mRunInBackground;
     protected String mContext;
     protected String mEmbeddedApp;
+    protected String mEmbeddedAppId;
 
     protected MessagingPlugin mMessagingPlugin;
     protected FriendsPlugin mFriendsPlugin;
@@ -149,12 +151,21 @@ public class CordovaActionScreenActivity extends ServiceBoundActivity {
     }
 
     public Drawable getSplashScreenDrawable() {
-        if (mType == CordovaAppType.EMBEDDED_APP) {
+        if (mType == CordovaAppType.PACKAGED_EMBEDDED_APP) {
             try {
                 InputStream ims = getAssets().open("cordova-apps/" + mEmbeddedApp + "/resources/splash.png");
                 return Drawable.createFromStream(ims, null);
             } catch (IOException ioe) {
                 L.e(ioe);
+                return null;
+            }
+        } else if (mType == CordovaAppType.DYNAMIC_EMBEDDED_APP && mMessagingPlugin != null) {
+            try {
+                String file = new File(mMessagingPlugin.getBrandingMgr().getEmbeddedAppDirectory(mEmbeddedAppId), "resources/splash.png").getAbsolutePath();
+                return Drawable.createFromPath(file);
+
+            } catch (BrandingFailureException bfe) {
+                L.e(bfe);
                 return null;
             }
         } else if (mBrandingResult != null) {
@@ -171,6 +182,7 @@ public class CordovaActionScreenActivity extends ServiceBoundActivity {
 
         Intent intent = getIntent();
         mEmbeddedApp = intent.getStringExtra(EMBEDDED_APP);
+        mEmbeddedAppId = intent.getStringExtra(EMBEDDED_APP_ID);
 
         mBrandingType = intent.getStringExtra(ActionScreenActivity.BRANDING_TYPE);
         mBrandingKey = intent.getStringExtra(ActionScreenActivity.BRANDING_KEY);
@@ -181,7 +193,13 @@ public class CordovaActionScreenActivity extends ServiceBoundActivity {
         mRunInBackground = intent.getBooleanExtra(ActionScreenActivity.RUN_IN_BACKGROUND, true);
         mContext = intent.getStringExtra(ActionScreenActivity.CONTEXT);
 
-        mType = mEmbeddedApp == null ? CordovaAppType.BRANDING : CordovaAppType.EMBEDDED_APP;
+        if (mEmbeddedAppId != null) {
+            mType = CordovaAppType.DYNAMIC_EMBEDDED_APP;
+        } else if (mEmbeddedApp == null) {
+            mType = CordovaAppType.BRANDING;
+        } else {
+            mType = CordovaAppType.PACKAGED_EMBEDDED_APP;
+        }
 
         setContentViewWithoutNavigationBar(R.layout.cordova_action_screen);
 
@@ -216,7 +234,7 @@ public class CordovaActionScreenActivity extends ServiceBoundActivity {
     }
 
     protected String getCordovaConfigFilename() {
-        if (mType == CordovaAppType.EMBEDDED_APP) {
+        if (mType == CordovaAppType.PACKAGED_EMBEDDED_APP) {
             return "cordova_" + mEmbeddedApp.replace('-', '_') + "_config";
         }
         return "cordova_config";
@@ -250,8 +268,10 @@ public class CordovaActionScreenActivity extends ServiceBoundActivity {
         mPaymentPlugin = mService.getPlugin(PaymentPlugin.class);
 
         mActionScreenUtils = new ActionScreenUtils(this, mServiceEmail, mItemTagHash, mRunInBackground);
-        if (mType == CordovaAppType.EMBEDDED_APP) {
-            displayEmbeddedApp();
+        if (mType == CordovaAppType.DYNAMIC_EMBEDDED_APP) {
+            displayDynamicEmbeddedApp();
+        } else if (mType == CordovaAppType.PACKAGED_EMBEDDED_APP) {
+            displayPackagedEmbeddedApp();
         } else {
             displayBranding();
         }
@@ -263,7 +283,20 @@ public class CordovaActionScreenActivity extends ServiceBoundActivity {
         }
     }
 
-    private void displayEmbeddedApp() {
+    private void displayDynamicEmbeddedApp() {
+        try {
+            String brandingFile = mMessagingPlugin.getBrandingMgr().prepareEmbeddedApp(mEmbeddedAppId);
+            L.d("Loading " + brandingFile);
+            mBranding.loadUrl(brandingFile);
+
+        } catch (BrandingFailureException e) {
+            UIUtils.showLongToast(this, getString(R.string.failed_to_show_action_screen));
+            finish();
+            L.e("Could not display embedded app.", e);
+        }
+    }
+
+    private void displayPackagedEmbeddedApp() {
         String brandingFile = "file:///android_asset/cordova-apps/" + mEmbeddedApp + "/index.html";
         L.d("Loading " + brandingFile);
         mBranding.loadUrl(brandingFile);

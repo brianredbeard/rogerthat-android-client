@@ -30,6 +30,8 @@ public interface IClientRpc {
 
     com.mobicage.to.system.UpdateEmbeddedAppTranslationsResponseTO updateEmbeddedAppTranslations(com.mobicage.to.system.UpdateEmbeddedAppTranslationsRequestTO request) throws java.lang.Exception;
 
+    com.mobicage.to.app.UpdateEmbeddedAppsResponseTO updateEmbeddedApps(com.mobicage.to.app.UpdateEmbeddedAppsRequestTO request) throws java.lang.Exception;
+
     com.mobicage.to.js_embedding.UpdateJSEmbeddingResponseTO updateJsEmbedding(com.mobicage.to.js_embedding.UpdateJSEmbeddingRequestTO request) throws java.lang.Exception;
 
     com.mobicage.to.app.UpdateLookAndFeelResponseTO updateLookAndFeel(com.mobicage.to.app.UpdateLookAndFeelRequestTO request) throws java.lang.Exception;

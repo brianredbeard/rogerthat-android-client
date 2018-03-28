@@ -42,6 +42,28 @@ public class Rpc {
         com.mobicage.rpc.Rpc.call("com.mobicage.api.system.getAppAsset", arguments, responseHandler);
     }
 
+    public static void getEmbeddedApp(com.mobicage.rpc.IResponseHandler<com.mobicage.to.app.GetEmbeddedAppResponseTO> responseHandler,
+            com.mobicage.to.app.GetEmbeddedAppRequestTO request) throws Exception {
+        java.util.Map<java.lang.String, java.lang.Object> arguments = new java.util.LinkedHashMap<java.lang.String, java.lang.Object>();
+        if (request == null) {
+            arguments.put("request", null);
+        } else {
+            arguments.put("request", request.toJSONMap());
+        }
+        com.mobicage.rpc.Rpc.call("com.mobicage.api.system.getEmbeddedApp", arguments, responseHandler);
+    }
+
+    public static void getEmbeddedApps(com.mobicage.rpc.IResponseHandler<com.mobicage.to.app.GetEmbeddedAppsResponseTO> responseHandler,
+            com.mobicage.to.app.GetEmbeddedAppsRequestTO request) throws Exception {
+        java.util.Map<java.lang.String, java.lang.Object> arguments = new java.util.LinkedHashMap<java.lang.String, java.lang.Object>();
+        if (request == null) {
+            arguments.put("request", null);
+        } else {
+            arguments.put("request", request.toJSONMap());
+        }
+        com.mobicage.rpc.Rpc.call("com.mobicage.api.system.getEmbeddedApps", arguments, responseHandler);
+    }
+
     public static void getIdentity(com.mobicage.rpc.IResponseHandler<com.mobicage.to.system.GetIdentityResponseTO> responseHandler,
             com.mobicage.to.system.GetIdentityRequestTO request) throws Exception {
         java.util.Map<java.lang.String, java.lang.Object> arguments = new java.util.LinkedHashMap<java.lang.String, java.lang.Object>();

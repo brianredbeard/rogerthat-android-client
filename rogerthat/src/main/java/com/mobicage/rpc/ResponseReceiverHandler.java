@@ -797,6 +797,24 @@ public class ResponseReceiverHandler {
                 resp.setResult(Parser.ComMobicageToAppGetAppAssetResponseTO(rpcr.result));
             ((IResponseHandler<com.mobicage.to.app.GetAppAssetResponseTO>) responseHandler).handle(resp);
         }
+        if ("com.mobicage.api.system.getEmbeddedApp".equals(function)) {
+            final Response<com.mobicage.to.app.GetEmbeddedAppResponseTO> resp = new Response<com.mobicage.to.app.GetEmbeddedAppResponseTO>();
+            resp.setError(rpcr.error);
+            resp.setSuccess(rpcr.success);
+            resp.setCallId(rpcr.callId);
+            if (rpcr.success)
+                resp.setResult(Parser.ComMobicageToAppGetEmbeddedAppResponseTO(rpcr.result));
+            ((IResponseHandler<com.mobicage.to.app.GetEmbeddedAppResponseTO>) responseHandler).handle(resp);
+        }
+        if ("com.mobicage.api.system.getEmbeddedApps".equals(function)) {
+            final Response<com.mobicage.to.app.GetEmbeddedAppsResponseTO> resp = new Response<com.mobicage.to.app.GetEmbeddedAppsResponseTO>();
+            resp.setError(rpcr.error);
+            resp.setSuccess(rpcr.success);
+            resp.setCallId(rpcr.callId);
+            if (rpcr.success)
+                resp.setResult(Parser.ComMobicageToAppGetEmbeddedAppsResponseTO(rpcr.result));
+            ((IResponseHandler<com.mobicage.to.app.GetEmbeddedAppsResponseTO>) responseHandler).handle(resp);
+        }
         if ("com.mobicage.api.system.getIdentity".equals(function)) {
             final Response<com.mobicage.to.system.GetIdentityResponseTO> resp = new Response<com.mobicage.to.system.GetIdentityResponseTO>();
             resp.setError(rpcr.error);

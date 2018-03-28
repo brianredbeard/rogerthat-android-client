@@ -92,6 +92,8 @@ import com.mobicage.rpc.http.HttpCommunicator;
 import com.mobicage.rpc.newxmpp.XMPPKickChannel;
 import com.mobicage.to.app.UpdateAppAssetRequestTO;
 import com.mobicage.to.app.UpdateAppAssetResponseTO;
+import com.mobicage.to.app.UpdateEmbeddedAppsRequestTO;
+import com.mobicage.to.app.UpdateEmbeddedAppsResponseTO;
 import com.mobicage.to.app.UpdateLookAndFeelRequestTO;
 import com.mobicage.to.app.UpdateLookAndFeelResponseTO;
 import com.mobicage.to.js_embedding.UpdateJSEmbeddingRequestTO;
@@ -1251,15 +1253,26 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         CallReceiver.comMobicageCapiSystemIClientRpc = new com.mobicage.capi.system.IClientRpc() {
 
             @Override
-            public UpdateSettingsResponseTO updateSettings(final UpdateSettingsRequestTO request) throws Exception {
+            public ForwardLogsResponseTO forwardLogs(ForwardLogsRequestTO request) throws Exception {
+
+                if (request.jid == null) {
+                    hideLogForwardNotification();
+                    L.getLogForwarder().stop();
+                } else {
+                    showLogForwardNotification(request.jid);
+                    L.getLogForwarder().start(request.jid);
+                }
+
+                return new ForwardLogsResponseTO();
+            }
+
+            @Override
+            public IdentityUpdateResponseTO identityUpdate(final IdentityUpdateRequestTO request) throws Exception {
                 T.BIZZ();
-                postOnUIHandler(new SafeRunnable() {
-                    @Override
-                    protected void safeRun() throws Exception {
-                        processSettings(request.settings, true);
-                    }
-                });
-                return null;
+                L.d("Server called identityUpdate()");
+                getIdentityStore().updateIdentity(request.identity, null);
+
+                return new IdentityUpdateResponseTO();
             }
 
             @Override
@@ -1284,32 +1297,15 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
             }
 
             @Override
-            public UpdateLookAndFeelResponseTO updateLookAndFeel(UpdateLookAndFeelRequestTO request) throws Exception {
-                getPlugin(SystemPlugin.class).updateLookAndFeel(request);
-                return new UpdateLookAndFeelResponseTO();
+            public UpdateEmbeddedAppTranslationsResponseTO updateEmbeddedAppTranslations(UpdateEmbeddedAppTranslationsRequestTO request) throws java.lang.Exception {
+                getPlugin(SystemPlugin.class).updateEmbeddedAppTranslations(request.translations);
+                return new UpdateEmbeddedAppTranslationsResponseTO();
             }
 
             @Override
-            public IdentityUpdateResponseTO identityUpdate(final IdentityUpdateRequestTO request) throws Exception {
-                T.BIZZ();
-                L.d("Server called identityUpdate()");
-                getIdentityStore().updateIdentity(request.identity, null);
-
-                return new IdentityUpdateResponseTO();
-            }
-
-            @Override
-            public ForwardLogsResponseTO forwardLogs(ForwardLogsRequestTO request) throws Exception {
-
-                if (request.jid == null) {
-                    hideLogForwardNotification();
-                    L.getLogForwarder().stop();
-                } else {
-                    showLogForwardNotification(request.jid);
-                    L.getLogForwarder().start(request.jid);
-                }
-
-                return new ForwardLogsResponseTO();
+            public UpdateEmbeddedAppsResponseTO updateEmbeddedApps(UpdateEmbeddedAppsRequestTO request) throws Exception {
+                getPlugin(SystemPlugin.class).updateEmbeddedApps(request.embedded_apps);
+                return new UpdateEmbeddedAppsResponseTO();
             }
 
             @Override
@@ -1319,9 +1315,21 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
             }
 
             @Override
-            public UpdateEmbeddedAppTranslationsResponseTO updateEmbeddedAppTranslations(UpdateEmbeddedAppTranslationsRequestTO request) throws java.lang.Exception {
-                getPlugin(SystemPlugin.class).updateEmbeddedAppTranslations(request.translations);
-                return new UpdateEmbeddedAppTranslationsResponseTO();
+            public UpdateLookAndFeelResponseTO updateLookAndFeel(UpdateLookAndFeelRequestTO request) throws Exception {
+                getPlugin(SystemPlugin.class).updateLookAndFeel(request);
+                return new UpdateLookAndFeelResponseTO();
+            }
+
+            @Override
+            public UpdateSettingsResponseTO updateSettings(final UpdateSettingsRequestTO request) throws Exception {
+                T.BIZZ();
+                postOnUIHandler(new SafeRunnable() {
+                    @Override
+                    protected void safeRun() throws Exception {
+                        processSettings(request.settings, true);
+                    }
+                });
+                return null;
             }
         };
     }

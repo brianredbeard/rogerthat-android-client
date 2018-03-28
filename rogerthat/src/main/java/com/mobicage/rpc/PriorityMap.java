@@ -111,6 +111,8 @@ public class PriorityMap {
         sPrioritySet.add("com.mobicage.api.services.updateUserData");
         sPrioritySet.add("com.mobicage.api.system.editProfile");
         sPrioritySet.add("com.mobicage.api.system.getAppAsset");
+        sPrioritySet.add("com.mobicage.api.system.getEmbeddedApp");
+        sPrioritySet.add("com.mobicage.api.system.getEmbeddedApps");
         sPrioritySet.add("com.mobicage.api.system.getIdentity");
         sPrioritySet.add("com.mobicage.api.system.getIdentityQRCode");
         sPrioritySet.add("com.mobicage.api.system.getJsEmbedding");

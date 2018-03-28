@@ -181,6 +181,13 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
+    public static com.mobicage.to.app.EmbeddedAppTO ComMobicageToAppEmbeddedAppTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.app.EmbeddedAppTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
     public static com.mobicage.to.app.GetAppAssetRequestTO ComMobicageToAppGetAppAssetRequestTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;
@@ -192,6 +199,34 @@ public class Parser {
         if (value == null)
             return null;
         return new com.mobicage.to.app.GetAppAssetResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.app.GetEmbeddedAppRequestTO ComMobicageToAppGetEmbeddedAppRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.app.GetEmbeddedAppRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.app.GetEmbeddedAppResponseTO ComMobicageToAppGetEmbeddedAppResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.app.GetEmbeddedAppResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.app.GetEmbeddedAppsRequestTO ComMobicageToAppGetEmbeddedAppsRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.app.GetEmbeddedAppsRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.app.GetEmbeddedAppsResponseTO ComMobicageToAppGetEmbeddedAppsResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.app.GetEmbeddedAppsResponseTO((Map<String, Object>) value);
     }
 
     @SuppressWarnings("unchecked")
@@ -234,6 +269,20 @@ public class Parser {
         if (value == null)
             return null;
         return new com.mobicage.to.app.UpdateAppAssetResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.app.UpdateEmbeddedAppsRequestTO ComMobicageToAppUpdateEmbeddedAppsRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.app.UpdateEmbeddedAppsRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.app.UpdateEmbeddedAppsResponseTO ComMobicageToAppUpdateEmbeddedAppsResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.app.UpdateEmbeddedAppsResponseTO((Map<String, Object>) value);
     }
 
     @SuppressWarnings("unchecked")
