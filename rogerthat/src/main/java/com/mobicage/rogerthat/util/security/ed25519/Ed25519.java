@@ -204,11 +204,7 @@ public class Ed25519 {
                 numberOfOutputs += 1;
             }
         }
-        for (int i = 0; i < to.data.length; i++) {
-            for (int j = 0; j < to.data[i].outputs.length; j++) {
-                numberOfOutputs += 1;
-            }
-        }
+
         coinOutputBos.write(SecurityUtils.longToBytes(Long.reverseBytes(numberOfOutputs))); // length coin outputs
         for (int i = 0; i < to.data.length; i++) {
           for (int j = 0; j < to.data[i].outputs.length; j++) {
