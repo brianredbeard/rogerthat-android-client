@@ -82,13 +82,13 @@ PLUGINS = {
         "url": "https://github.com/rogerthat-platform/cordova-plugin-add-swift-support#1.6.2"
     },
     "cordova-plugin-statusbar": {
-        "url": "cordova-plugin-statusbar@2.2.3"
+        "url": "cordova-plugin-statusbar@2.4.1"
     },
     "cordova-plugin-splashscreen": {
         "url": "https://github.com/rogerthat-platform/cordova-plugin-splashscreen#custom"
     },
     'cordova-plugin-inappbrowser': {
-        'url': 'cordova-plugin-inappbrowser@1.7.1'
+        'url': 'cordova-plugin-inappbrowser@2.0.2'
     },
     'cordova-plugin-browsertab': {
         'url': 'cordova-plugin-browsertab@0.2.0'
