@@ -97,11 +97,14 @@ public class Ed25519 {
         byte[] conditionLength = SecurityUtils.longToBytes(Long.reverseBytes(condition.length));
         byte[] conditionDigest = SecurityUtils.blake2b256Digest(conditionLength, condition);
 
+        final byte[] addressHash = new byte[conditionDigest.length + 1];
+        addressHash[0] = 1;
+        System.arraycopy(conditionDigest, 0, addressHash, 1, conditionDigest.length);
+
         final byte[] addressBytes = new byte[conditionDigest.length + 7];
         addressBytes[0] = 1;
         System.arraycopy(conditionDigest, 0, addressBytes, 1, conditionDigest.length);
-        System.arraycopy(SecurityUtils.blake2b256Digest(conditionDigest), 0, addressBytes, 1 + conditionDigest.length, 6);
-
+        System.arraycopy(SecurityUtils.blake2b256Digest(addressHash), 0, addressBytes, 1 + conditionDigest.length, 6); // checksum of type, hash
         final String address = SecurityUtils.lowercaseHash(addressBytes);
 
         String publicKeyString =  Base64.encodeBytes(publicKey.getEncoded(), Base64.DONT_BREAK_LINES);
