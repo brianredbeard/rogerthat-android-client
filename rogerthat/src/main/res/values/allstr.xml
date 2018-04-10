@@ -588,4 +588,5 @@
     <string name="yes">Yes</string>
     <string name="you_are_here">You are here</string>
     <string name="your_location_displayed_friend_have_contacted_for_their_location">Your location is displayed. Your friends (which share their location with you) have been contacted to send you their location.</string>
+    <string name="permission_denied_to_load_seed">You can always find these words by navigating to %1$s &gt; %2$s. Then select the secure key with name \"%3$s\".</string>
 </resources>

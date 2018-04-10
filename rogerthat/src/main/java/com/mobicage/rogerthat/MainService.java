@@ -1842,7 +1842,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         }
 
         public boolean canExecuteFromQueue(String pin, Map<String, PrivateKey> privateKeys) {
-            return pin != null;
+            return false;
         }
     }
 
@@ -2054,10 +2054,13 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
     private void queueSecurityItem(SecurityItem si) {
         T.UI();
         boolean shouldEnterPin = false;
-        if ("keypair".equals(si.type) || "seed".equals(si.type) || "address".equals(si.type)) {
+        if ("keypair".equals(si.type) || "address".equals(si.type)) {
             if (mPin == null) {
                 shouldEnterPin = true;
             }
+        } else if ("seed".equals(si.type)) {
+            shouldEnterPin = true;
+
         } else if ("sign".equals(si.type)) {
             SignSecurityItem ssi = (SignSecurityItem) si;
             if (mPin == null || ssi.forcePin) {

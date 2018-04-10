@@ -512,7 +512,10 @@ public class ActionScreenUtils {
             return;
         }
 
-        mMainService.getSeed(keyAlgorithm, keyName, message, callback);
+        final String errorMessage = mActivity.getString(R.string.permission_denied_to_load_seed, mActivity.getString(R.string.settings), mActivity.getString
+                (R.string.security), keyName);
+        callback.onError("permission_denied", errorMessage);
+        //mMainService.getSeed(keyAlgorithm, keyName, message, callback); // blocked for security reasons
     }
 
     public void listAddresses(final JSONObject params, final MainService.SecurityCallback callback) {
