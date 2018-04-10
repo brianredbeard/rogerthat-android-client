@@ -22,6 +22,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
@@ -29,11 +33,13 @@ import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.news.NewsPlugin;
 import com.mobicage.rogerthat.util.TextUtils;
+import com.mobicage.rogerthat.util.ui.ImageHelper;
 
 import org.json.simple.JSONValue;
 
 public class NavigationItem {
-    public FontAwesome.Icon icon;
+    public int iconId;
+    public FontAwesome.Icon faIcon;
     public String actionType;
     public String action;
     public int labelTextId;
@@ -43,32 +49,43 @@ public class NavigationItem {
     public Map<String, Object> params;
 
     public NavigationItem(FontAwesome.Icon icon, String actionType, String action, int labelTextId) {
-        this(icon, actionType, action, null, labelTextId, null, 0, null);
+        this(0, icon, actionType, action, null, labelTextId, null, 0, null);
     }
 
     public NavigationItem(FontAwesome.Icon icon, String actionType, String action, String labelText) {
-        this(icon, actionType, action, labelText, 0, null, 0, null);
+        this(0, icon, actionType, action, labelText, 0, null, 0, null);
     }
 
     public NavigationItem(FontAwesome.Icon icon, String actionType, String action, int labelTextId,
                           String serviceEmail, int iconColor) {
-        this(icon, actionType, action, null, labelTextId, serviceEmail, iconColor, null);
+        this(0, icon, actionType, action, null, labelTextId, serviceEmail, iconColor, null);
     }
 
     public NavigationItem(FontAwesome.Icon icon, String actionType, String action, String labelText,
                           String serviceEmail, int iconColor) {
-        this(icon, actionType, action, labelText, 0, serviceEmail, iconColor, null);
+        this(0, icon, actionType, action, labelText, 0, serviceEmail, iconColor, null);
     }
 
     public NavigationItem(FontAwesome.Icon icon, String actionType, String action, String labelText,
                           String serviceEmail, int iconColor, Map<String, Object> params) {
-        this(icon, actionType, action, labelText, 0, serviceEmail, iconColor, params);
+        this(0, icon, actionType, action, labelText, 0, serviceEmail, iconColor, params);
     }
 
-    public NavigationItem(FontAwesome.Icon icon, String actionType, String action, String labelText,
+    public NavigationItem(int iconId, String actionType, String action, int labelTextId,
+                          String serviceEmail, int iconColor) {
+        this(iconId, null, actionType, action, null, labelTextId, serviceEmail, iconColor, null);
+    }
+
+    public NavigationItem(int iconId, String actionType, String action, String labelText,
+                          String serviceEmail, int iconColor) {
+        this(iconId, null, actionType, action, labelText, 0, serviceEmail, iconColor, null);
+    }
+
+    public NavigationItem(int iconId, FontAwesome.Icon faIcon, String actionType, String action, String labelText,
                           int textLabelId, String serviceEmail, int iconColor, Map<String, Object> params) {
         super();
-        this.icon = icon;
+        this.iconId = iconId;
+        this.faIcon = faIcon;
         this.actionType = actionType;
         this.action = action;
         this.labelTextId = textLabelId;
@@ -78,8 +95,19 @@ public class NavigationItem {
         this.params = params;
     }
 
-    public IconicsDrawable getIcon(Context context) {
-        return new IconicsDrawable(context, icon).color(ContextCompat.getColor(context, R.color.mc_white)).paddingDp(8);
+    public Drawable getIcon(Context context) {
+        if (this.faIcon == null) {
+            Bitmap bm = ImageHelper.getRoundedCornerAvatar(BitmapFactory.decodeResource(context.getResources(), this.iconId));
+            return new BitmapDrawable(context.getResources(), bm);
+        }
+        return new IconicsDrawable(context, this.faIcon).color(ContextCompat.getColor(context, R.color.mc_white)).paddingDp(8);
+    }
+
+    public Drawable getFooterIcon(Context context) {
+        if (this.faIcon == null) {
+            return context.getResources().getDrawable(this.iconId);
+        }
+        return new IconicsDrawable(context, this.faIcon).color(ContextCompat.getColor(context, R.color.mc_white)).sizeDp(20);
     }
 
     public String actionWithType() {

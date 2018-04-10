@@ -354,7 +354,17 @@ public class NavigationConstants {
         return new NavigationItem[]{''' % dict(LICENSE=LICENSE)
 
     for item in homescreen_items:
-        icon_name = item["icon"].replace("-", "_").replace("fa_", "faw_")
+        icon_name = None
+        fa_icon_name = None
+        if item["icon"].startswith('fa-'):
+            fa_icon_name = u'FontAwesome.Icon.%s' % item["icon"].replace("-", "_").replace("fa_", "faw_")
+        else:
+            source_file = os.path.join(APP_DIR, "images", "custom", item["icon"])
+            image_width = 0.15
+            generate_resource_images(source_file, image_width, 1)
+            icon_name = "R.drawable.%s" % item["icon"].split('.')[0]
+
+
         icon_color = 0
         if item.get("color"):
             icon_color = 'Color.parseColor("#%s")' % item.get("color")
@@ -362,14 +372,23 @@ public class NavigationConstants {
             icon_color = 'Color.parseColor("#%s")' % homescreen_color
 
         action, action_type = get_action(item)
-        output += '''
-                new NavigationItem(FontAwesome.Icon.%(icon_name)s, %(action_type)s, %(action)s, R.string.%(string_id)s, null, %(icon_color)s).setParams(%(params)s),''' % dict(
-            icon_name=icon_name,
-            icon_color=icon_color,
-            action_type=action_type,
-            action=action,
-            string_id=strings_map[item['text']],
-            params=get_params(item))
+
+        d = dict(
+                icon_name=icon_name if icon_name else "null",
+                fa_icon_name=fa_icon_name if fa_icon_name else "null",
+                icon_color=icon_color,
+                action_type=action_type,
+                action=action,
+                string_id=strings_map[item['text']],
+                params=get_params(item)
+        )
+
+        if fa_icon_name:
+            output += '''
+                    new NavigationItem(%(fa_icon_name)s, %(action_type)s, %(action)s, R.string.%(string_id)s, null, %(icon_color)s).setParams(%(params)s),''' % d
+        else:
+            output += '''
+                    new NavigationItem(%(icon_name)s, %(action_type)s, %(action)s, R.string.%(string_id)s, null, %(icon_color)s).setParams(%(params)s),''' % d
 
     output += '''
         };
@@ -417,8 +436,6 @@ def convert_config():
     main_screen_contains_news = False
 
     SERVICE_TYPES = ["services", "community_services", "merchants", "associations", "emergency_services"]
-
-    add_translations(doc)
 
     ##### HOMESCREEN #############################################
     if doc["HOMESCREEN"].get("style") == HOME_SCREEN_STYLE_MESSAGING or \
@@ -1110,6 +1127,8 @@ if __name__ == "__main__":
 
     logging.info('BUILD CFG:')
     logging.info(pprint.pformat(doc))
+
+    add_translations(doc)
 
     strings_map = get_translation_strings()
     if doc.get('TRANSLATIONS'):
