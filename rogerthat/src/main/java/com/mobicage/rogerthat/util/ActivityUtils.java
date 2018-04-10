@@ -137,7 +137,10 @@ public class ActivityUtils {
 
     public static boolean goToActivity(final ServiceBoundActivity context, final NavigationItem ni, final boolean clearStack, final Bundle extras) {
         if (ni.actionType == null) {
-            ActivityUtils.goToActivity(context, ni.action, clearStack, ni.collapse, extras);
+            if (ni.action.equals("news")){
+                extras.putString("feed_name", ni.feedName());
+            }
+            ActivityUtils.goToActivity(context, ni.action, clearStack, ni.isCollapsible(), extras);
         } else if ("action".equals(ni.actionType)) {
             Class clazz;
             if (context.getMainService().getNetworkConnectivityManager().isConnected()) {

@@ -32,6 +32,7 @@ import android.support.v7.app.NotificationCompat;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
+import com.mobicage.rogerthat.NavigationItem;
 import com.mobicage.rogerthat.NewsActivity;
 import com.mobicage.rogerthat.NewsListAdapter;
 import com.mobicage.rogerthat.NewsPinnedActivity;
@@ -53,6 +54,8 @@ import com.mobicage.rogerthat.util.ui.TestUtils;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.CallReceiver;
 import com.mobicage.rpc.ResponseHandler;
+import com.mobicage.rpc.config.LookAndFeelConstants;
+import com.mobicage.rpc.config.NavigationConstants;
 import com.mobicage.to.news.AppNewsInfoTO;
 import com.mobicage.to.news.AppNewsItemTO;
 import com.mobicage.to.news.GetNewsItemsRequestTO;
@@ -63,11 +66,14 @@ import com.mobicage.to.system.SettingsTO;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Callable;
@@ -112,10 +118,11 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
     private boolean mIsLoadingInitial;
     private String mGetNewsCursor;
     private long mUpdatedSince;
-    private long mBadgeCount;
     private long mNewUpdatedSinceTimestamp;
     private boolean mIsSyncing;
-    private long mSyncedNewsCount;
+    private Map<String, Long> mSyncedNewsCounts;
+    private Map<String, Long> mBadgeCounts;
+
 
     public NewsPlugin(final MainService pMainService, ConfigurationProvider pConfigProvider, final DatabaseManager pDatabaseManager) {
         T.UI();
@@ -125,7 +132,11 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
 
         Configuration cfg = mConfigProvider.getConfiguration(CONFIGKEY);
         mUpdatedSince = cfg.get(UPDATED_SINCE, 0);
-        mBadgeCount = cfg.get(BADGE_COUNT, 0);
+        mSyncedNewsCounts = new HashMap<>();
+        mBadgeCounts = new HashMap<>();
+        for (String feedName : getFeedNames()) {
+            mBadgeCounts.put(feedName, cfg.get(getFeedKey(BADGE_COUNT, feedName), 0));
+        }
 
         mMainService.addHighPriorityIntent(GET_NEWS_RECEIVED_INTENT);
         mMainService.addHighPriorityIntent(GET_NEWS_ITEMS_RECEIVED_INTENT);
@@ -273,59 +284,109 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
         return true;
     }
 
-    public void processGetNews(final String newCursor, final AppNewsInfoTO[] partialNewsItems) {
-        T.BIZZ();
-
-        Map<Long, AppNewsInfoTO> partialNewsItemsMap = new HashMap<>();
-        for (int i = 0; i < partialNewsItems.length; i++) {
-            AppNewsInfoTO partialNewsItem = partialNewsItems[i];
-            partialNewsItemsMap.put(partialNewsItem.id, partialNewsItem);
-        }
-
-        Map<String, List<Long>> result = mStore.savePartialNewsItems(partialNewsItems);
-        List<Long> resultNewIds = result.get("new");
-        List<Long> resultUpdatedIds = result.get("updated");
-
+    private void filterOnBroadcastTypes(List<AppNewsInfoTO> newsItems) {
         FriendsPlugin friendsPlugin = mMainService.getPlugin(FriendsPlugin.class);
-        for (Iterator<Long> it = resultNewIds.listIterator(); it.hasNext();) {
-            Long newsId = it.next();
-            AppNewsInfoTO partialNewsItem = partialNewsItemsMap.get(newsId);
+        for (Iterator<AppNewsInfoTO> it = newsItems.listIterator(); it.hasNext();) {
+            AppNewsInfoTO partialNewsItem = it.next();
             if (friendsPlugin.isBroadcastTypeDisabled(partialNewsItem.sender_email, partialNewsItem.broadcast_type)) {
                 it.remove();
             }
         }
+    }
 
-        long[] newIds = new long[resultNewIds.size()];
-        for (int i = 0; i < resultNewIds.size(); i++) {
-            newIds[i] = resultNewIds.get(i);
-            mSyncedNewsCount += 1;
+    private Map<String, List<AppNewsInfoTO>> filterFeedItems(List<AppNewsInfoTO> newsItems) {
+        Map<String, List<AppNewsInfoTO>> items = new HashMap<>();
+
+        for (AppNewsInfoTO newPartialItem : newsItems) {
+            List<AppNewsInfoTO> newsList;
+            String feedName = newPartialItem.feed_name;
+            if (items.containsKey(feedName)) {
+                newsList = items.get(feedName);
+            } else {
+                newsList = new ArrayList<>();
+                items.put(feedName, newsList);
+            }
+            newsList.add(newPartialItem);
         }
 
-        long[] updatedIds = new long[resultUpdatedIds.size()];
-        for (int i = 0; i < resultUpdatedIds.size(); i++) {
-            updatedIds[i] = resultUpdatedIds.get(i);
-        }
+        return items;
+    }
 
+    private List<Long> getItemIds(List<AppNewsInfoTO> items) {
+        List<Long> ids = new ArrayList<>();
+        for (AppNewsInfoTO item : items) {
+            ids.add(item.id);
+        }
+        return ids;
+    }
+
+    private void sendGetNewsUpdates(String feedName, List<AppNewsInfoTO> newItems, List<AppNewsInfoTO> updatedItems) {
         Intent intent = new Intent(NewsPlugin.GET_NEWS_RECEIVED_INTENT);
-        intent.putExtra("new_ids", newIds);
-        intent.putExtra("updated_ids", updatedIds);
+        intent.putExtra("feed_name", feedName);
+        intent.putExtra("new_ids", getItemIds(newItems).toArray());
+        intent.putExtra("updated_ids", getItemIds(updatedItems).toArray());
         intent.putExtra("initial", mIsLoadingInitial);
         mMainService.sendBroadcast(intent);
+    }
+
+    private void saveAndSendUpdates(AppNewsInfoTO[] partialNewsItems) {
+        Map<String, List<AppNewsInfoTO>> result = mStore.savePartialNewsItems(partialNewsItems);
+        List<AppNewsInfoTO> newItems = result.get("new");
+        List<AppNewsInfoTO> updatedItems = result.get("updated");
+
+        // filter first to check if they are all empty later to send an empty update
+        filterOnBroadcastTypes(newItems);
+
+        if (newItems.isEmpty() && updatedItems.isEmpty()) {
+            sendGetNewsUpdates(null, newItems, updatedItems);
+            return;
+        }
+
+        Map<String, List<AppNewsInfoTO>> newFeeds = filterFeedItems(newItems);
+        Map<String, List<AppNewsInfoTO>> updatedFeeds = filterFeedItems(updatedItems);
+
+        Set<String> allFeeds = new HashSet<>(newFeeds.keySet());
+        allFeeds.addAll(updatedFeeds.keySet());
+        for (String feedName : allFeeds) {
+            List<AppNewsInfoTO> feedNewItems = new ArrayList<>();
+            List<AppNewsInfoTO> feedUpdatedItems = new ArrayList<>();
+            if (newFeeds.containsKey(feedName)) {
+                feedNewItems = newFeeds.get(feedName);
+            }
+            if (updatedFeeds.containsKey(feedName)) {
+                feedUpdatedItems = updatedFeeds.get(feedName);
+            }
+
+            if (mSyncedNewsCounts.containsKey(feedName)) {
+                mSyncedNewsCounts.put(feedName, mSyncedNewsCounts.get(feedName) + feedNewItems.size());
+            } else {
+                mSyncedNewsCounts.put(feedName, (long) feedNewItems.size());
+            }
+            sendGetNewsUpdates(feedName, feedNewItems, feedUpdatedItems);
+        }
+    }
+
+    public void processGetNews(final String newCursor, final AppNewsInfoTO[] partialNewsItems) {
+        T.BIZZ();
+
+        saveAndSendUpdates(partialNewsItems);
 
         if (partialNewsItems.length > 0) {
             mGetNewsCursor = newCursor;
             getNews(false, false);
         } else {
+            // no updates
             if (mIsSyncing) {
-                if (mSyncedNewsCount > 0) {
-                    mBadgeCount = mSyncedNewsCount;
-                    storeBadgeCount();
-                    updateBadge();
+                if (mSyncedNewsCounts.size() > 0) {
+                    // count new items for every feed
+                    mBadgeCounts = mSyncedNewsCounts;
+                    storeBadgeCounts();
+                    updateBadges();
                     createNewsCountNotification();
                 }
             }
-            mSyncedNewsCount = 0;
             mIsSyncing = false;
+            mSyncedNewsCounts = new HashMap<>();
             mIsLoadingInitial = false;
             mGetNewsCursor = null;
             putUpdatedSinceTimestamp(mNewUpdatedSinceTimestamp);
@@ -442,86 +503,83 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
         });
     }
 
-    public void reindexSortKeys() {
+    public void reindexSortKeys(String feedName) {
         T.UI();
-        mStore.reindexSortKeys();
+        mStore.reindexSortKeys(feedName);
     }
 
-    private void putUpdatedSinceTimestamp(long updatedSince) {
-        if (updatedSince > mUpdatedSince) {
-            mUpdatedSince = updatedSince;
-            Configuration cfg = mConfigProvider.getConfiguration(CONFIGKEY);
-            cfg.put(UPDATED_SINCE, updatedSince);
-            mConfigProvider.updateConfigurationNow(CONFIGKEY, cfg);
+    public void resetBadgeCount(String feedName) {
+        if (mBadgeCounts.containsKey(feedName)) {
+            long badgeCount = mBadgeCounts.get(feedName);
+            if (badgeCount > 0) {
+                mBadgeCounts.put(feedName, 0L);
+                storeBadgeCount(feedName);
+                updateBadge(feedName);
+            }
         }
     }
 
-    public void resetBadgeCount() {
-        if (mBadgeCount > 0) {
-            mBadgeCount = 0;
-            storeBadgeCount();
-            updateBadge();
-        }
-    }
-
-    public void increaseBadgeCount() {
+    public void increaseBadgeCount(String feedName) {
         Activity currentActivity = UIUtils.getTopActivity();
-        if (currentActivity instanceof NewsActivity || currentActivity instanceof NewsPinnedActivity) {
+        if (currentActivity instanceof NewsPinnedActivity) {
             return;
         }
 
-        mBadgeCount += 1;
-        storeBadgeCount();
-        updateBadge();
+        if (currentActivity instanceof NewsActivity) {
+            if (((NewsActivity) currentActivity).getFeedName() == feedName) {
+                return;
+            }
+        }
+
+        if (mBadgeCounts.containsKey(feedName)) {
+            mBadgeCounts.put(feedName, mBadgeCounts.get(feedName) + 1);
+        } else {
+            mBadgeCounts.put(feedName, 1L);
+        }
+
+        storeBadgeCount(feedName);
+        updateBadge(feedName);
     }
 
-    private void storeBadgeCount() {
-        Configuration cfg = mConfigProvider.getConfiguration(CONFIGKEY);
-        cfg.put(BADGE_COUNT, mBadgeCount);
-        mConfigProvider.updateConfigurationNow(CONFIGKEY, cfg);
-    }
+    private void updateBadge(String feedName) {
+        String key = getFeedKey(feedName);
 
-    private void updateBadge() {
         Intent intent = new Intent(MainService.UPDATE_BADGE_INTENT);
-        intent.putExtra("key", "news");
-        intent.putExtra("count", getBadgeCount());
+        intent.putExtra("key", key);
+        intent.putExtra("count", mBadgeCounts.get(feedName));
         mMainService.sendBroadcast(intent);
     }
 
-    public long getBadgeCount() {
-        return mBadgeCount;
-    }
-
-    public Map<String, Object> listNewsItems(final String service, final String cursor, final long count) {
+    public Map<String, Object> listNewsItems(final String service, final String feedName, final String cursor, final long count) {
         T.dontCare();
         return DebugUtils.profile("NewsPlugin.listNewsItems()", new Callable<Map<String, Object>>() {
             @Override
             public Map<String, Object> call() throws Exception {
-                Map<String, Object> result = mStore.listNewsItems(service, cursor, count);
+                Map<String, Object> result = mStore.listNewsItems(service, feedName, cursor, count);
                 loadNewsItems((List<NewsItem>) result.get("items"));
                 return result;
             }
         });
     }
 
-    public List<NewsItemIndex> getNewsBefore(final long sortKey, final long count, final String qry) {
+    public List<NewsItemIndex> getNewsBefore(final String feedName, final long sortKey, final long count, final String qry) {
         T.dontCare();
         return DebugUtils.profile("NewsPlugin.getNewsBefore()", new Callable<List<NewsItemIndex>>() {
             @Override
             public List<NewsItemIndex> call() throws Exception {
-                List<NewsItemIndex> newsItems = qry == null ? mStore.getNewsBefore(sortKey, count) : mStore.getNewsBefore(sortKey, count, qry);
+                List<NewsItemIndex> newsItems = qry == null ? mStore.getNewsBefore(feedName, sortKey, count) : mStore.getNewsBefore(feedName, sortKey, count, qry);
                 loadNewsItemsByIndex(newsItems);
                 return newsItems;
             }
         });
     }
 
-    public List<NewsItemIndex> getNewsAfter(final long sortKey, final long count, final String qry) {
+    public List<NewsItemIndex> getNewsAfter(final String feedName, final long sortKey, final long count, final String qry) {
         T.dontCare();
         return DebugUtils.profile("NewsPlugin.getNewsAfter()", new Callable<List<NewsItemIndex>>() {
             @Override
             public List<NewsItemIndex> call() throws Exception {
-                List<NewsItemIndex> newsItems = qry == null ? mStore.getNewsAfter(sortKey, count) : mStore.getNewsAfter(sortKey, count, qry);
+                List<NewsItemIndex> newsItems = qry == null ? mStore.getNewsAfter(feedName, sortKey, count) : mStore.getNewsAfter(feedName, sortKey, count, qry);
                 loadNewsItemsByIndex(newsItems);
                 return newsItems;
             }
@@ -638,6 +696,7 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
 
         Bundle b = new Bundle();
         b.putLong("id", newsItem.id);
+        b.putString("feed_name", newsItem.feed_name);
 
         String notificationTitle = newsItem.sender.name;
         String notificationText = message;
@@ -765,9 +824,10 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
                 return;
             }
 
-            increaseBadgeCount();
+            increaseBadgeCount(newsItem.feed_name);
             Intent intent = new Intent(NewsPlugin.NEW_NEWS_ITEM_INTENT);
             intent.putExtra("id", newsItem.id);
+            intent.putExtra("feed_name", newsItem.feed_name);
             mMainService.sendBroadcast(intent);
 
             createNewsNotification(newsItem);
@@ -809,5 +869,70 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
         Intent intent = new Intent(NewsPlugin.STATS_NEWS_STATISTICS_INTENT);
         intent.putExtra("stats", data);
         mMainService.sendBroadcast(intent);
+    }
+
+    private void putUpdatedSinceTimestamp(long updatedSince) {
+        if (updatedSince > mUpdatedSince) {
+            mUpdatedSince = updatedSince;
+            Configuration cfg = mConfigProvider.getConfiguration(CONFIGKEY);
+            cfg.put(UPDATED_SINCE, updatedSince);
+            mConfigProvider.updateConfigurationNow(CONFIGKEY, cfg);
+        }
+    }
+
+    private void storeBadgeCount(String feedName) {
+        if (mBadgeCounts.containsKey(feedName)) {
+            Configuration cfg = mConfigProvider.getConfiguration(CONFIGKEY);
+            cfg.put(getFeedKey(BADGE_COUNT, feedName), mBadgeCounts.get(feedName));
+            mConfigProvider.updateConfigurationNow(CONFIGKEY, cfg);
+        }
+    }
+
+    private void storeBadgeCounts() {
+        for (String feedName : mBadgeCounts.keySet()) {
+            storeBadgeCount(feedName);
+        }
+    }
+
+    private void updateBadges() {
+        for (String feedName : mBadgeCounts.keySet()) {
+            updateBadge(feedName);
+        }
+    }
+
+    public Set<String> getFeedNames() {
+        Set<String> feedNames = new HashSet<>();
+        feedNames.add(null); /* main feed */
+        feedNames.addAll(mBadgeCounts.keySet());
+
+        List<NavigationItem> items = new ArrayList<>();
+        items.addAll(Arrays.asList(LookAndFeelConstants.getNavigationItems(mMainService)));
+        items.addAll(Arrays.asList(LookAndFeelConstants.getNavigationFooterItems(mMainService)));
+        for (NavigationItem item : items) {
+            if (item.action.equals("news")) {
+                feedNames.add(item.feedName());
+            }
+        }
+
+        return feedNames;
+    }
+
+    public static String getFeedKey(String feedName) {
+        return getFeedKey(null, feedName);
+    }
+
+    private static String getFeedKey(String baseName, String feedName) {
+        String key = "news";
+        if (!TextUtils.isEmptyOrWhitespace(baseName)) {
+            key =  baseName + "|" + key;
+        }
+        if (!TextUtils.isEmptyOrWhitespace(feedName)) {
+            key += "|" + feedName;
+        }
+        return key;
+    }
+
+    public long getBadgeCount(String feedName) {
+        return mBadgeCounts.get(feedName);
     }
 }

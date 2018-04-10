@@ -156,7 +156,8 @@ CREATE TABLE news (
     sort_priority INTEGER,
     is_partial INTEGER,
     reindex INTEGER DEFAULT 0,
-    sort_key INTEGER
+    sort_key INTEGER,
+    feed_name TEXT DEFAULT ''
 );
 CREATE TABLE news_buttons (
     news_id INTEGER NOT NULL,

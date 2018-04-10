@@ -314,7 +314,7 @@ public class ProcessScanActivity extends ServiceBoundActivity {
                 JSONObject context = (JSONObject) data.get("c");
 
                 if (CordovaSettings.APPS.contains(applicationTag) && context != null) {
-                    NavigationItem ni = new NavigationItem(FontAwesome.Icon.faw_question_circle_o, "cordova", applicationTag, "", false);
+                    NavigationItem ni = new NavigationItem(FontAwesome.Icon.faw_question_circle_o, "cordova", applicationTag, "");
 
                     String errorMessage = ActivityUtils.canOpenNavigationItem(this, ni);
                     if (errorMessage == null) {

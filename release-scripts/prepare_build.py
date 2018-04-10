@@ -19,6 +19,7 @@
 from contextlib import closing
 import hashlib
 import itertools
+import json
 import logging
 import os
 import pprint
@@ -312,6 +313,13 @@ def get_action(item):
     return action, action_type
 
 
+def get_params(item):
+    params = item.get('params')
+    if params:
+        params = json.dumps(params).replace('"', '\\"')
+    return quoted_str_or_null(params)
+
+
 def get_cordova_apps():
     cordova_apps = set()
 
@@ -355,13 +363,13 @@ public class NavigationConstants {
 
         action, action_type = get_action(item)
         output += '''
-                new NavigationItem(FontAwesome.Icon.%(icon_name)s, %(action_type)s, %(action)s, R.string.%(string_id)s, %(collapse)s, null, %(icon_color)s),''' % dict(
+                new NavigationItem(FontAwesome.Icon.%(icon_name)s, %(action_type)s, %(action)s, R.string.%(string_id)s, null, %(icon_color)s).setParams(%(params)s),''' % dict(
             icon_name=icon_name,
             icon_color=icon_color,
             action_type=action_type,
             action=action,
             string_id=strings_map[item['text']],
-            collapse=bool_str(item.get('params', {}).get('collapse', False)))
+            params=get_params(item))
 
     output += '''
         };
@@ -375,12 +383,12 @@ public class NavigationConstants {
             icon_name = item["icon"].replace("-", "_").replace("fa_", "faw_")
             action, action_type = get_action(item)
             output += '''
-                new NavigationItem(FontAwesome.Icon.%(icon_name)s, %(action_type)s, %(action)s, R.string.%(string_id)s, %(collapse)s),''' % dict(
-                icon_name=icon_name,
-                action_type=action_type,
-                action=action,
-                string_id=strings_map[item['text']] if item.get('text') else u"app_name",
-                collapse=bool_str(item.get('collapse', False)))
+                new NavigationItem(FontAwesome.Icon.%(icon_name)s, %(action_type)s, %(action)s, R.string.%(string_id)s).setParams(%(params)s),''' % dict(
+                    icon_name=icon_name,
+                    action_type=action_type,
+                    action=action,
+                    string_id=strings_map[item['text']] if item.get('text') else u"app_name",
+                    params=get_params(item))
 
     output += '''
         };
@@ -471,11 +479,11 @@ def convert_config():
                     ', '.join(map(str, item["coords"])))
             else:
                 action, action_type = get_action(item)
-                output += 'goToActivity(new NavigationItem(FontAwesome.Icon.faw_question, %(action_type)s, %(action)s, R.string.%(string_id)s, %(collapse)s));' % dict(
+                output += 'goToActivity(new NavigationItem(FontAwesome.Icon.faw_question, %(action_type)s, %(action)s, R.string.%(string_id)s).setParams(%(params)s));' % dict(
                     action_type=action_type,
                     action=action,
                     string_id=strings_map[item['text']],
-                    collapse=bool_str(item.get('collapse', False)))
+                    params=get_params(item))
 
                 if item['action'] == "friends":
                     main_screen_contains_friends = True

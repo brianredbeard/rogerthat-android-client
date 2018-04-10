@@ -51,6 +51,7 @@ import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
+import com.mobicage.rogerthat.util.ui.TestUtils;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
@@ -344,8 +345,12 @@ public class ActionScreenUtils {
 
     public String openActivity(final String actionType, final String action, final String title,
                                final String service, final boolean collapse) {
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("collapse", collapse);
+
         NavigationItem ni = new NavigationItem(FontAwesome.Icon.faw_question_circle_o, actionType,
-                action, title, collapse, service, 0);
+                action, title, service, 0, params);
 
         String errorMessage = ActivityUtils.canOpenNavigationItem(mActivity, ni);
         if (errorMessage != null) {
@@ -390,7 +395,8 @@ public class ActionScreenUtils {
 
     public long countNews(final JSONObject params) {
         final String service = TextUtils.optString(params, "service", null);
-        return mNewsPlugin.getStore().countAllNewsItems(service);
+        final String feedName = TextUtils.optString(params, "feed_name", "");
+        return mNewsPlugin.getStore().countAllNewsItems(service, feedName);
     }
 
     public NewsItem getNews(final JSONObject params) {
@@ -401,8 +407,9 @@ public class ActionScreenUtils {
     public Map<String, Object> listNews(final JSONObject params) {
         final String service = TextUtils.optString(params, "service", null);
         final String cursor =  TextUtils.optString(params, "cursor", null);
+        final String feedName =  TextUtils.optString(params, "feed_name", "");
         final long limit = params.optLong("limit", 10);
-        return mNewsPlugin.listNewsItems(service, cursor, limit);
+        return mNewsPlugin.listNewsItems(service, feedName, cursor, limit);
     }
 
     private void setupPin(final MainService.SecurityCallback sc) {

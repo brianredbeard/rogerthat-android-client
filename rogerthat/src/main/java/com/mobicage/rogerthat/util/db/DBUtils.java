@@ -53,4 +53,12 @@ public class DBUtils {
         }
     }
 
+    public static void bindAsEmptyString(SQLiteStatement statement, int position, String value) {
+        if (value == null || value.trim().isEmpty()) {
+            statement.bindString(position, "");
+        } else {
+            statement.bindString(position, value);
+        }
+    }
+
 }

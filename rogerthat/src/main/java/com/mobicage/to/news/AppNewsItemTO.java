@@ -28,6 +28,7 @@ public class AppNewsItemTO implements com.mobicage.rpc.IJSONable {
     public com.mobicage.to.news.NewsActionButtonTO[] buttons;
     public com.mobicage.to.news.NewsSenderTO sender;
     public String broadcast_type;
+    public String feed_name;
     public long flags;
     public long id;
     public String image_url;
@@ -75,6 +76,12 @@ public class AppNewsItemTO implements com.mobicage.rpc.IJSONable {
             this.broadcast_type = (String) val;
         } else {
             throw new IncompleteMessageException("com.mobicage.to.news.AppNewsItemTO object is missing field 'broadcast_type'");
+        }
+        if (json.containsKey("feed_name")) {
+            Object val = json.get("feed_name");
+            this.feed_name = (String) val;
+        } else {
+            this.feed_name = null;
         }
         if (json.containsKey("flags")) {
             Object val = json.get("flags");
@@ -216,6 +223,7 @@ public class AppNewsItemTO implements com.mobicage.rpc.IJSONable {
         }
         obj.put("sender", this.sender == null ? null : this.sender.toJSONMap());
         obj.put("broadcast_type", this.broadcast_type);
+        obj.put("feed_name", this.feed_name);
         obj.put("flags", this.flags);
         obj.put("id", this.id);
         obj.put("image_url", this.image_url);

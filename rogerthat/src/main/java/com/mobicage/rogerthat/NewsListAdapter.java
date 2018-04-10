@@ -129,7 +129,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     public void refreshView() {
         // When in pinned news never reindex
         if (!(mActivity instanceof NewsPinnedActivity)) {
-            mActivity.newsPlugin.reindexSortKeys();
+            mActivity.newsPlugin.reindexSortKeys(mActivity.getFeedName());
         }
         mNewsItemsByPosition = new SparseArray<>();
         mNewsItemsById = new LongSparseArray<>();
@@ -266,7 +266,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                     return null;
                 } else if (NewsPlugin.PINNED_NEWS_ITEM_INTENT.equals(action)) {
                     if (mActivity instanceof NewsPinnedActivity) {
-                        if (mActivity.newsStore.countNewsPinnedItems() > 0) {
+                        if (mActivity.newsStore.countNewsPinnedItems(mActivity.getFeedName()) > 0) {
                             mNewsListAdapter.refreshView();
                         } else {
                             mActivity.finish();
@@ -998,9 +998,9 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     @Override
     public int getItemCount() {
         if (mActivity instanceof NewsPinnedActivity) {
-            return (int) mActivity.newsStore.countNewsPinnedItemsSearch(mActivity.pinnedSearchQry);
+            return (int) mActivity.newsStore.countNewsPinnedItemsSearch(mActivity.getFeedName(), mActivity.pinnedSearchQry);
         }
-        return (int) mActivity.newsStore.countNewsItems();
+        return (int) mActivity.newsStore.countFeedNewsItems(mActivity.getFeedName());
     }
 
     @Override
@@ -1027,7 +1027,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         @Override
         protected List<NewsItemIndex> safeDoInBackground(FillCacheParams... params) {
             T.dontCare();
-            return mActivity.newsPlugin.getNewsBefore(params[0].sortKey, BATCH_SIZE, params[0].pinnedSearchQry);
+            return mActivity.newsPlugin.getNewsBefore(mActivity.getFeedName(), params[0].sortKey, BATCH_SIZE, params[0].pinnedSearchQry);
         }
 
         @Override
@@ -1042,7 +1042,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         @Override
         protected List<NewsItemIndex> safeDoInBackground(FillCacheParams... params) {
             T.dontCare();
-            return mActivity.newsPlugin.getNewsAfter(params[0].sortKey, BATCH_SIZE, params[0].pinnedSearchQry);
+            return mActivity.newsPlugin.getNewsAfter(mActivity.getFeedName(), params[0].sortKey, BATCH_SIZE, params[0].pinnedSearchQry);
         }
 
         @Override
@@ -1069,7 +1069,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
             }
 
             do {
-                List<NewsItemIndex> newsItems = mActivity.newsPlugin.getNewsBefore(mNewsItemsByPosition.get(mMinPosition).sortKey, BATCH_SIZE, mActivity.pinnedSearchQry);
+                List<NewsItemIndex> newsItems = mActivity.newsPlugin.getNewsBefore(mActivity.getFeedName(), mNewsItemsByPosition.get(mMinPosition).sortKey, BATCH_SIZE, mActivity.pinnedSearchQry);
                 addNewsItemsToFront(newsItems);
             } while (position < mMinPosition);
 
@@ -1085,7 +1085,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
             do {
                 NewsItemIndex newsItemIndex = mNewsItemsByPosition.get(mMaxPosition);
                 long sortKey = newsItemIndex == null ? Long.MAX_VALUE : newsItemIndex.sortKey;
-                List<NewsItemIndex> newsItems = mActivity.newsPlugin.getNewsAfter(sortKey, BATCH_SIZE, mActivity.pinnedSearchQry);
+                List<NewsItemIndex> newsItems = mActivity.newsPlugin.getNewsAfter(mActivity.getFeedName(), sortKey, BATCH_SIZE, mActivity.pinnedSearchQry);
                 addNewsItemsToEnd(newsItems);
             } while (position > mMaxPosition);
         }

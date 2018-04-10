@@ -26,6 +26,7 @@ import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.NavigationItem;
 import com.mobicage.rogerthat.util.IOUtils;
+import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.ui.UIUtils;
@@ -73,8 +74,20 @@ public class LookAndFeelConstants {
         } else if (iconColorString != null) {
             iconColor = Color.parseColor(iconColorString);
         }
-        return new NavigationItem(icon, itemTO.action_type,
-                itemTO.action, itemTO.text, itemTO.collapse, itemTO.service_email, iconColor);
+
+        NavigationItem item =  new NavigationItem(icon, itemTO.action_type,
+                itemTO.action, itemTO.text, itemTO.service_email, iconColor);
+
+        // for backward compatibility, if params is not set
+        // e.g. when loading settings from a file
+        // collapse params should be set
+        if (TextUtils.isEmptyOrWhitespace(itemTO.params)) {
+            item.setParam("collapse", itemTO.collapse);
+        } else {
+            item.setParams(itemTO.params);
+        }
+
+        return item;
     }
 
     private static NavigationItem[] createNavigationItems(NavigationItemTO[] itemTOs, String iconColorString) {

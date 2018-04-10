@@ -75,14 +75,12 @@ class NavigationListViewAdapter extends BaseAdapter {
 
         titleView.setText(navItem.getLabel(mActivity));
         badgeView.setTextColor(LookAndFeelConstants.getPrimaryColor(mActivity));
-        long badgeCount = mActivity.getBadgeCount(navItem.action);
+        long badgeCount = mActivity.getBadgeCount(navItem.actionWithType());
         if (badgeCount > 0) {
             badgeView.setText(badgeCount > 9 ? "9+" : String.valueOf(badgeCount));
             badgeView.setVisibility(View.VISIBLE);
         }
-        boolean isSelected = mActivity.getActivityName() != null && (navItem.actionType == null
-                && navItem.action.equals(activityName)
-                || navItem.actionType != null && activityName.equals(navItem.actionType + "|" + navItem.action));
+        boolean isSelected = mActivity.getActivityName() != null && activityName.equals(navItem.actionWithType());
         if (isSelected) {
             view.setBackgroundResource(R.color.mc_selected_list_item);
         }

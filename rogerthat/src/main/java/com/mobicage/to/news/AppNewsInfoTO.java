@@ -26,6 +26,7 @@ import java.util.Map;
 public class AppNewsInfoTO implements com.mobicage.rpc.IJSONable {
 
     public String broadcast_type;
+    public String feed_name;
     public long id;
     public String sender_email;
     public long sort_priority;
@@ -41,6 +42,12 @@ public class AppNewsInfoTO implements com.mobicage.rpc.IJSONable {
             this.broadcast_type = (String) val;
         } else {
             this.broadcast_type = null;
+        }
+        if (json.containsKey("feed_name")) {
+            Object val = json.get("feed_name");
+            this.feed_name = (String) val;
+        } else {
+            this.feed_name = null;
         }
         if (json.containsKey("id")) {
             Object val = json.get("id");
@@ -94,6 +101,7 @@ public class AppNewsInfoTO implements com.mobicage.rpc.IJSONable {
     public Map<String, Object> toJSONMap() {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
         obj.put("broadcast_type", this.broadcast_type);
+        obj.put("feed_name", this.feed_name);
         obj.put("id", this.id);
         obj.put("sender_email", this.sender_email);
         obj.put("sort_priority", this.sort_priority);

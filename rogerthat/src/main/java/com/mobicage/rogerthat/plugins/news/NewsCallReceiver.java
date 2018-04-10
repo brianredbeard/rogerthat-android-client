@@ -65,7 +65,7 @@ public class NewsCallReceiver implements com.mobicage.capi.news.IClientRpc {
             return response;
         }
 
-        mPlugin.increaseBadgeCount();
+        mPlugin.increaseBadgeCount(request.news_item.feed_name);
 
         Intent intent = new Intent(NewsPlugin.NEW_NEWS_ITEM_INTENT);
         intent.putExtra("id", request.news_item.id);

@@ -2273,7 +2273,10 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         badges.put("messages", messagingPlugin.getBadgeCount());
         if (AppConstants.NEWS_ENABLED) {
             NewsPlugin newsPlugin = getPlugin(NewsPlugin.class);
-            badges.put("news", newsPlugin.getBadgeCount());
+            for (String feedName : newsPlugin.getFeedNames()) {
+                String key = newsPlugin.getFeedKey(feedName);
+                badges.put(key, newsPlugin.getBadgeCount(feedName));
+            }
         }
     }
 

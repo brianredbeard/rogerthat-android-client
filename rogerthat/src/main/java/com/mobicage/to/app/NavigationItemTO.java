@@ -30,6 +30,7 @@ public class NavigationItemTO implements com.mobicage.rpc.IJSONable {
     public boolean collapse;
     public String icon;
     public String icon_color;
+    public String params;
     public String service_email;
     public String text;
 
@@ -53,7 +54,7 @@ public class NavigationItemTO implements com.mobicage.rpc.IJSONable {
             Object val = json.get("collapse");
             this.collapse = ((Boolean) val).booleanValue();
         } else {
-            throw new IncompleteMessageException("com.mobicage.to.app.NavigationItemTO object is missing field 'collapse'");
+            this.collapse = false;
         }
         if (json.containsKey("icon")) {
             Object val = json.get("icon");
@@ -66,6 +67,12 @@ public class NavigationItemTO implements com.mobicage.rpc.IJSONable {
             this.icon_color = (String) val;
         } else {
             throw new IncompleteMessageException("com.mobicage.to.app.NavigationItemTO object is missing field 'icon_color'");
+        }
+        if (json.containsKey("params")) {
+            Object val = json.get("params");
+            this.params = (String) val;
+        } else {
+            this.params = null;
         }
         if (json.containsKey("service_email")) {
             Object val = json.get("service_email");
@@ -89,6 +96,7 @@ public class NavigationItemTO implements com.mobicage.rpc.IJSONable {
         obj.put("collapse", this.collapse);
         obj.put("icon", this.icon);
         obj.put("icon_color", this.icon_color);
+        obj.put("params", this.params);
         obj.put("service_email", this.service_email);
         obj.put("text", this.text);
         return obj;
