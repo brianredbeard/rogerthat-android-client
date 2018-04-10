@@ -250,7 +250,7 @@ public class MyDigiPassWidget extends Widget implements OnMDPAuthenticationListe
         mScopes = Collections.unmodifiableList(Arrays.asList(mScope.split(" ")));
 
         @SuppressWarnings("unchecked")
-        Map<String, Object> result = (Map<String, Object>) mWidgetMap.get("result");
+        Map<String, Object> result = (Map<String, Object>) mWidgetMap.get("value");
         if (result != null) {
             try {
                 mResult = new MyDigiPassWidgetResult(result);
@@ -552,7 +552,7 @@ public class MyDigiPassWidget extends Widget implements OnMDPAuthenticationListe
         new SafeAsyncTask<Object, Object, Boolean>() {
             @Override
             protected Boolean safeDoInBackground(Object... params) {
-                final HttpPost request = new HttpPost(CloudConstants.MDP_SESSION_AUTHORIZED_URL);
+                final HttpPost request  = HTTPUtil.getHttpPost(mActivity, CloudConstants.MDP_SESSION_AUTHORIZED_URL);
                 addCredentials(request);
 
                 final List<NameValuePair> formParams = new ArrayList<NameValuePair>();

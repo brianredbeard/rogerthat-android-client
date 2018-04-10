@@ -46,11 +46,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import static com.mobicage.rogerthat.util.db.DBUtils.bindAsEmptyString;
 import static com.mobicage.rogerthat.util.db.DBUtils.bindString;
 
 public class NewsStore implements Closeable {
 
     private final SQLiteStatement mCountNewsItems;
+    private final SQLiteStatement mCountFeedNewsItems;
     private final SQLiteStatement mCountAllNewsItems;
     private final SQLiteStatement mCountAllNewsItemsService;
     private final SQLiteStatement mCountNewsPinnedItems;
@@ -85,6 +87,7 @@ public class NewsStore implements Closeable {
         mMainService = mainService;
 
         mCountNewsItems = mDb.compileStatement(mMainService.getString(R.string.sql_news_count_items));
+        mCountFeedNewsItems = mDb.compileStatement(mainService.getString(R.string.sql_news_count_feed_items));
         mCountAllNewsItems = mDb.compileStatement(mMainService.getString(R.string.sql_news_count_all_items));
         mCountAllNewsItemsService = mDb.compileStatement(mMainService.getString(R.string.sql_news_count_all_items_service));
         mCountNewsPinnedItems = mDb.compileStatement(mMainService.getString(R.string.sql_news_count_pinned_items));
@@ -116,6 +119,7 @@ public class NewsStore implements Closeable {
         T.UI();
 
         mCountNewsItems.close();
+        mCountFeedNewsItems.close();
         mCountAllNewsItems.close();
         mCountAllNewsItemsService.close();
         mCountNewsPinnedItems.close();
@@ -142,13 +146,13 @@ public class NewsStore implements Closeable {
         mClearNewsItems.close();
     }
 
-    public Map<String, List<Long>> savePartialNewsItems(final AppNewsInfoTO[] partialNewsItems) {
-        return TransactionHelper.runInTransaction(mDb, "savePartialNewsItems", new Transaction<Map<String, List<Long>>>() {
+    public Map<String, List<AppNewsInfoTO>> savePartialNewsItems(final AppNewsInfoTO[] partialNewsItems) {
+        return TransactionHelper.runInTransaction(mDb, "savePartialNewsItems", new Transaction<Map<String, List<AppNewsInfoTO>>>() {
             @Override
-            protected Map<String, List<Long>> run() {
-                Map<String, List<Long>> result = new HashMap<>();
-                List<Long> newIds = new ArrayList<>();
-                List<Long> updatedIds = new ArrayList<>();
+            protected Map<String, List<AppNewsInfoTO>> run() {
+                Map<String, List<AppNewsInfoTO>> result = new HashMap<>();
+                List<AppNewsInfoTO> newItems = new ArrayList<>();
+                List<AppNewsInfoTO> updatedItems = new ArrayList<>();
 
                 long newsCount = countNewsItems();
 
@@ -168,8 +172,9 @@ public class NewsStore implements Closeable {
                             mInsertPartialNewsItem.bindLong(7, newsCount > 0 ? 1 : 0);
                             mInsertPartialNewsItem.bindString(8, partialNewsItem.sender_email);
                             bindString(mInsertPartialNewsItem, 9, partialNewsItem.broadcast_type);
+                            bindAsEmptyString(mInsertPartialNewsItem, 10, partialNewsItem.feed_name);
                             mInsertPartialNewsItem.execute();
-                            newIds.add(partialNewsItem.id);
+                            newItems.add(partialNewsItem);
                             break;
                         } catch (SQLiteConstraintException e) {
                             try {
@@ -184,7 +189,7 @@ public class NewsStore implements Closeable {
                                 // WHERE
                                 mUpdatePartialNewsItem.bindLong(9, partialNewsItem.id);
                                 if (mUpdatePartialNewsItem.executeUpdateDelete() == 1) {
-                                    updatedIds.add(partialNewsItem.id);
+                                    updatedItems.add(partialNewsItem);
                                     break;
                                 }
                             } catch (SQLiteConstraintException e2) {
@@ -194,8 +199,8 @@ public class NewsStore implements Closeable {
                     }
                 }
 
-                result.put("new", newIds);
-                result.put("updated", updatedIds);
+                result.put("new", newItems);
+                result.put("updated", updatedItems);
                 return result;
             }
         });
@@ -270,8 +275,8 @@ public class NewsStore implements Closeable {
                         mInsertNewsItem.bindLong(21, item.sort_priority);
                         mInsertNewsItem.bindLong(22, NewsPlugin.SORT_PRIORITY_BOTTOM);
                         mInsertNewsItem.bindLong(23, item.sort_timestamp + extraSeconds);
+                        bindAsEmptyString(mInsertNewsItem, 24, item.feed_name);
                         mInsertNewsItem.execute();
-
                         break;
                     } catch (SQLiteConstraintException e) {
                         if (!didCheckIfAlreadyExists) {
@@ -516,10 +521,11 @@ public class NewsStore implements Closeable {
         }
     }
 
-    public void reindexSortKeys() {
+    public void reindexSortKeys(final String feedName) {
         TransactionHelper.runInTransaction(mDb, "reindexSortKeys", new TransactionWithoutResult() {
             @Override
             protected void run() {
+                bindAsEmptyString(mUpdateSortIndexes, 1, feedName);
                 int i = mUpdateSortIndexes.executeUpdateDelete();
                 L.d("reindexSortKeys updated " + i + " rows");
             }
@@ -531,40 +537,57 @@ public class NewsStore implements Closeable {
         return mCountNewsItems.simpleQueryForLong();
     }
 
-    public long countNewsPinnedItems() {
+    public long countFeedNewsItems(String feedName) {
+        bindAsEmptyString(mCountFeedNewsItems, 1, feedName);
+        return mCountFeedNewsItems.simpleQueryForLong();
+    }
+
+    public long countNewsPinnedItems(String feedName) {
+        bindAsEmptyString(mCountNewsPinnedItems, 1, feedName);
         return mCountNewsPinnedItems.simpleQueryForLong();
     }
 
-    public long countNewsPinnedItemsSearch(String qry) {
+    public long countNewsPinnedItemsSearch(String feedName, String qry) {
         String query = "%" + qry + "%";
         mCountNewsPinnedItemsSearch.bindString(1, query);
         mCountNewsPinnedItemsSearch.bindString(2, query);
         mCountNewsPinnedItemsSearch.bindString(3, query);
         mCountNewsPinnedItemsSearch.bindString(4, query);
         mCountNewsPinnedItemsSearch.bindString(5, query);
+        bindAsEmptyString(mCountNewsPinnedItemsSearch, 6, feedName);
         return mCountNewsPinnedItemsSearch.simpleQueryForLong();
     }
 
-    public long countAllNewsItems(String service) {
+    public String feedNameOrEmptyString(String name) {
+        if (name == null) {
+            return "";
+        }
+        return name;
+    }
+
+    public long countAllNewsItems(String service, String feedName) {
         if (TextUtils.isEmptyOrWhitespace(service)) {
+            bindAsEmptyString(mCountAllNewsItems, 1, feedName);
             return mCountAllNewsItems.simpleQueryForLong();
         }
         mCountAllNewsItemsService.bindString(1, service);
+        bindAsEmptyString(mCountAllNewsItemsService, 2, feedName);
         return mCountAllNewsItemsService.simpleQueryForLong();
     }
 
-    public Map<String, Object> listNewsItems(final String service, final String cursor, final long count) {
+    public Map<String, Object> listNewsItems(final String service, String feedName, final String cursor, final long count) {
         T.dontCare();
         final String timstamp = cursor == null ? Long.toString(Long.MAX_VALUE) : cursor;
         final String limit = Long.toString(count);
+        final String feed = feedNameOrEmptyString(feedName);
 
         Cursor c;
         if (TextUtils.isEmptyOrWhitespace(service)) {
             c = mDb.rawQuery(mMainService.getString(R.string.sql_news_list),
-                    new String[]{timstamp, limit});
+                    new String[]{timstamp, feed, limit});
         } else {
             c = mDb.rawQuery(mMainService.getString(R.string.sql_news_list_service),
-                    new String[]{service, timstamp, limit});
+                    new String[]{service, timstamp, feed, limit});
         }
 
         List<NewsItem> items = getNewsItemFromCursor(c);
@@ -578,7 +601,7 @@ public class NewsStore implements Closeable {
         r.put("cursor", newCursor);
         r.put("items", items);
         return r;
-     }
+    }
 
     private List<NewsItem> getNewsItemFromCursor(Cursor c) {
         T.dontCare();
@@ -612,35 +635,41 @@ public class NewsStore implements Closeable {
         return newsItems;
     }
 
-    public List<NewsItemIndex> getNewsBefore(final long sortKey, final long count) {
+    public List<NewsItemIndex> getNewsBefore(final String feedName, final long sortKey, final long count) {
         T.dontCare();
+        final String feed = feedNameOrEmptyString(feedName);
+
         return DebugUtils.profile("NewsStore.getNewsBefore()", new Callable<List<NewsItemIndex>>() {
             @Override
             public List<NewsItemIndex> call() throws Exception {
                 final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_news_get_news_before),
-                        new String[]{"" + sortKey, "" + count});
+                        new String[]{"" + sortKey, feed, "" + count});
 
                 return getNewsItemIndexesFromCursor(c);
             }
         });
     }
 
-    public List<NewsItemIndex> getNewsBefore(long sortKey, long count, String qry) {
+    public List<NewsItemIndex> getNewsBefore(String feedName, long sortKey, long count, String qry) {
         T.dontCare();
+        final String feed = feedNameOrEmptyString(feedName);
+
         String query = "%" + qry + "%";
         final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_news_get_pinned_news_before),
-                new String[]{"" + sortKey, query, query, query, query, query, "" + count});
+                new String[]{"" + sortKey, query, query, query, query, query, feed, "" + count});
 
         return getNewsItemIndexesFromCursor(c);
     }
 
-    public List<NewsItemIndex> getNewsAfter(final long sortKey, final long count) {
+    public List<NewsItemIndex> getNewsAfter(final String feedName, final long sortKey, final long count) {
         T.dontCare();
+        final String feed = feedNameOrEmptyString(feedName);
+
         return DebugUtils.profile("NewsStore.getNewsAfter()", new Callable<List<NewsItemIndex>>() {
             @Override
             public List<NewsItemIndex> call() throws Exception {
                 final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_news_get_news_after),
-                        new String[]{"" + sortKey, "" + count});
+                        new String[]{"" + sortKey, feed, "" + count});
 
                 return getNewsItemIndexesFromCursor(c);
             }
@@ -648,11 +677,13 @@ public class NewsStore implements Closeable {
     }
 
 
-    public List<NewsItemIndex> getNewsAfter(long sortKey, long count, String qry) {
+    public List<NewsItemIndex> getNewsAfter(String feedName, long sortKey, long count, String qry) {
         T.dontCare();
+        final String feed = feedNameOrEmptyString(feedName);
+
         String query = "%" + qry + "%";
         final Cursor c = mDb.rawQuery(mMainService.getString(R.string.sql_news_get_pinned_news_after),
-                new String[]{"" + sortKey, query, query, query, query, query, "" + count});
+                new String[]{"" + sortKey, query, query, query, query, query, feed, "" + count});
 
         return getNewsItemIndexesFromCursor(c);
     }

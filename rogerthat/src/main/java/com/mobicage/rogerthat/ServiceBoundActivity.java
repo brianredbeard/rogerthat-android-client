@@ -562,7 +562,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
                     }
                 });
 
-                imageButton.setImageDrawable(new IconicsDrawable(this, ni.icon).color(Color.WHITE).sizeDp(20));
+                imageButton.setImageDrawable(ni.getFooterIcon(this));
                 navigationFooter.addView(footerItem);
             }
 

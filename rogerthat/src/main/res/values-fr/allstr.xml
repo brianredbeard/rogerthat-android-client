@@ -324,6 +324,7 @@
     <string name="or">ou</string>
     <string name="order">Commander</string>
     <string name="osa_loyalty_welcome_message">Bienvenue à Ville Connectée. Cette application est le complément parfait à votre présence dans l\'application de la ville dans le but de servir vos clients encore plus. Nous vous aidons à obtenir le terminal de fidélité prêt à l\'emploi. Commencez par scanner votre code QR pour activer votre terminal.</string>
+    <string name="paid">Payé</string>
     <string name="passport">Id %1$s </string>
     <string name="phone">Téléphone</string>
     <string name="photo">Photo</string>
@@ -467,6 +468,7 @@
     <string name="sounds">Sons</string>
     <string name="specials">Promotions</string>
     <string name="start_registration">Commencer l\'inscription</string>
+    <string name="status">Statut</string>
     <string name="sticky">Gluant</string>
     <string name="stop">Stop</string>
     <string name="stream_summary">Ne montrez que les données importantes</string>

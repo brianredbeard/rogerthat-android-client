@@ -32,6 +32,7 @@ public class PendingPaymentDetailsTO implements com.mobicage.rpc.IJSONable {
     public long amount;
     public String currency;
     public String memo;
+    public long precision;
     public String status;
     public long timestamp;
     public String transaction_id;
@@ -97,6 +98,16 @@ public class PendingPaymentDetailsTO implements com.mobicage.rpc.IJSONable {
         } else {
             throw new IncompleteMessageException("com.mobicage.to.payment.PendingPaymentDetailsTO object is missing field 'memo'");
         }
+        if (json.containsKey("precision")) {
+            Object val = json.get("precision");
+            if (val instanceof Integer) {
+                this.precision = ((Integer) val).longValue();
+            } else {
+                this.precision = ((Long) val).longValue();
+            }
+        } else {
+            throw new IncompleteMessageException("com.mobicage.to.payment.PendingPaymentDetailsTO object is missing field 'precision'");
+        }
         if (json.containsKey("status")) {
             Object val = json.get("status");
             this.status = (String) val;
@@ -140,6 +151,7 @@ public class PendingPaymentDetailsTO implements com.mobicage.rpc.IJSONable {
         obj.put("amount", this.amount);
         obj.put("currency", this.currency);
         obj.put("memo", this.memo);
+        obj.put("precision", this.precision);
         obj.put("status", this.status);
         obj.put("timestamp", this.timestamp);
         obj.put("transaction_id", this.transaction_id);

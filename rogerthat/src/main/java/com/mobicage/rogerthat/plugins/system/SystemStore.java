@@ -36,6 +36,10 @@ import com.mobicage.rogerthat.util.system.T;
 
 public class SystemStore implements Closeable {
 
+    private final SQLiteStatement mGetEmbeddedApp;
+    private final SQLiteStatement mUpdateEmbeddedApp;
+    private final SQLiteStatement mDeleteEmbeddedApp;
+
     private final SQLiteStatement mUpdateJSEmbeddedPacket;
     private final SQLiteStatement mDeleteJSEmbeddedPacket;
 
@@ -53,6 +57,10 @@ public class SystemStore implements Closeable {
         mMainService = mainService;
         mDb = dbManager.getDatabase();
 
+        mGetEmbeddedApp = mDb.compileStatement(mMainService.getString(R.string.sql_get_embedded_app));
+        mUpdateEmbeddedApp = mDb.compileStatement(mMainService.getString(R.string.sql_insert_embedded_app));
+        mDeleteEmbeddedApp = mDb.compileStatement(mMainService.getString(R.string.sql_delete_embedded_app));
+
         mUpdateJSEmbeddedPacket = mDb.compileStatement(mMainService.getString(R.string.sql_insert_js_embedding));
         mDeleteJSEmbeddedPacket = mDb.compileStatement(mMainService.getString(R.string.sql_delete_js_embedding));
 
@@ -66,6 +74,10 @@ public class SystemStore implements Closeable {
     @Override
     public void close() {
         T.UI();
+        mGetEmbeddedApp.close();
+        mUpdateEmbeddedApp.close();
+        mDeleteEmbeddedApp.close();
+
         mUpdateJSEmbeddedPacket.close();
         mDeleteJSEmbeddedPacket.close();
 
@@ -74,6 +86,50 @@ public class SystemStore implements Closeable {
 
         mEmbeddedAppTranslationsInsert.close();
         mEmbeddedAppTranslationsSelect.close();
+    }
+
+    public Map<String, Long> getEmbeddedApps() {
+        T.dontCare();
+        Map<String, Long> apps = new HashMap<>();
+        final Cursor bc = mDb.rawQuery(mMainService.getString(R.string.sql_select_embedded_app), new String[] {});
+        try {
+            if (bc.moveToFirst()) {
+                for (int i = 0; i < bc.getCount(); i++) {
+                    String name = bc.getString(0);
+                    long version = bc.getLong(1);
+                    apps.put(name, version);
+                    if (!bc.moveToNext())
+                        break;
+                }
+            }
+        } finally {
+            bc.close();
+        }
+
+        return apps;
+    }
+
+    public long getEmbeddedAppVersion(final String name) {
+        T.dontCare();
+        mGetEmbeddedApp.bindString(1, name);
+        try {
+            return mGetEmbeddedApp.simpleQueryForLong();
+        } catch (SQLiteDoneException e) {
+            return -1;
+        }
+    }
+
+    public void updateEmbeddedApp(final String name, final long version) {
+        T.dontCare();
+        mUpdateEmbeddedApp.bindString(1, name);
+        mUpdateEmbeddedApp.bindLong(2, version);
+        mUpdateEmbeddedApp.execute();
+    }
+
+    public void deleteEmbeddedApp(final String name) {
+        T.dontCare();
+        mDeleteEmbeddedApp.bindString(1, name);
+        mDeleteEmbeddedApp.execute();
     }
 
     public Map<String, JSEmbedding> getJSEmbeddedPackets() {
@@ -155,6 +211,5 @@ public class SystemStore implements Closeable {
         } catch (SQLiteDoneException e) {
             return null;
         }
-
     }
 }

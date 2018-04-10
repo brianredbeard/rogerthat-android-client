@@ -45,7 +45,9 @@ import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.LookAndFeelConstants;
+import com.mobicage.to.app.EmbeddedAppTO;
 import com.mobicage.to.app.GetAppAssetRequestTO;
+import com.mobicage.to.app.GetEmbeddedAppResponseTO;
 import com.mobicage.to.app.UpdateAppAssetRequestTO;
 import com.mobicage.to.app.UpdateLookAndFeelRequestTO;
 import com.mobicage.to.js_embedding.JSEmbeddingItemTO;
@@ -66,6 +68,7 @@ public class SystemPlugin implements MobicagePlugin {
     public static final String ASSET_CHAT_BACKGROUND = "ChatBackgroundImage";
     public static final String SYSTEM_PLUGIN_MUST_REFRESH_JS_EMBEDDING = "com.mobicage.rogerthat.plugins.system.SYSTEM_PLUGIN_MUST_REFRESH_JS_EMBEDDING";
     public static final String SYSTEM_PLUGIN_MUST_DOWNLOAD_ASSETS = "com.mobicage.rogerthat.plugins.system.SYSTEM_PLUGIN_MUST_DOWNLOAD_ASSETS";
+    public static final String SYSTEM_PLUGIN_MUST_REFRESH_EMBEDDED_APPS = "com.mobicage.rogerthat.plugins.system.SYSTEM_PLUGIN_MUST_REFRESH_EMBEDDED_APPS";
     public static final String ASSET_AVAILABLE_INTENT = "com.mobicage.rogerthat.plugins.system.ASSET_AVAILABLE_INTENT";
     public static final String ASSET_KIND = "asset_kind";
     public static final String LOOK_AND_FEEL_UPDATED_INTENT = "com.mobicage.rogerthat.plugins.system.LOOK_AND_FEEL_UPDATED_INTENT";
@@ -213,25 +216,90 @@ public class SystemPlugin implements MobicagePlugin {
                     @Override
                     protected void safeRun() throws Exception {
                         Set<String> pluginDBUpdates = mMainService.getPluginDBUpdates(SystemPlugin.class);
-                        if (pluginDBUpdates.contains(
-                            SYSTEM_PLUGIN_MUST_REFRESH_JS_EMBEDDING)) {
-
+                        if (pluginDBUpdates.contains(SYSTEM_PLUGIN_MUST_REFRESH_JS_EMBEDDING)) {
                             refreshJsEmdedding();
-
                             mMainService.clearPluginDBUpdate(SystemPlugin.class,
                                 SYSTEM_PLUGIN_MUST_REFRESH_JS_EMBEDDING);
+
                         } else if (pluginDBUpdates.contains(SYSTEM_PLUGIN_MUST_DOWNLOAD_ASSETS)) {
                             GetAppAssetRequestTO getAppAssetRequestTO = new GetAppAssetRequestTO();
                             getAppAssetRequestTO.kind = ASSET_CHAT_BACKGROUND;
                             final GetAppAssetResponseHandler responseHandler = new GetAppAssetResponseHandler();
                             Rpc.getAppAsset(responseHandler, getAppAssetRequestTO);
                             mMainService.clearPluginDBUpdate(SystemPlugin.class, SYSTEM_PLUGIN_MUST_DOWNLOAD_ASSETS);
+
+                        } else if (pluginDBUpdates.contains(SYSTEM_PLUGIN_MUST_REFRESH_EMBEDDED_APPS)) {
+                            refreshEmbeddedApps();
+                            mMainService.clearPluginDBUpdate(SystemPlugin.class,
+                                    SYSTEM_PLUGIN_MUST_REFRESH_EMBEDDED_APPS);
+
                         }
 
                     }
                 });
             }
         });
+    }
+
+    public boolean getWifiOnlyDownloads() {
+        return mWifiOnlyDownloads;
+    }
+
+
+    public void refreshEmbeddedApps() {
+        // Set an empty array in the DB to clear all apps
+        updateEmbeddedApps(new EmbeddedAppTO[0]);
+
+        final com.mobicage.to.app.GetEmbeddedAppsRequestTO request = new com.mobicage.to.app.GetEmbeddedAppsRequestTO();
+        final GetEmbeddedAppsResponseHandler responseHandler = new GetEmbeddedAppsResponseHandler();
+
+        try {
+            com.mobicage.api.system.Rpc.getEmbeddedApps(responseHandler, request);
+        } catch (Exception e) {
+            L.bug(e);
+        }
+    }
+
+    public void getEmbeddedApp(final String name) {
+        final com.mobicage.to.app.GetEmbeddedAppRequestTO request = new com.mobicage.to.app.GetEmbeddedAppRequestTO();
+        final GetEmbeddedAppResponseHandler responseHandler = new GetEmbeddedAppResponseHandler();
+        request.name = name;
+        try {
+            com.mobicage.api.system.Rpc.getEmbeddedApp(responseHandler, request);
+        } catch (Exception e) {
+            L.bug(e);
+        }
+    }
+
+    public void updateEmbeddedApp(final EmbeddedAppTO app) {
+        long version = mStore.getEmbeddedAppVersion(app.name);
+        if (app.version > version || !mBrandingMgr.embeddedAppExists(app.name)) {
+            mBrandingMgr.queue(app);
+        }
+    }
+
+    public void updateEmbeddedApps(final EmbeddedAppTO[] apps) {
+        Map<String, Long> oldApps = mStore.getEmbeddedApps();
+        List<EmbeddedAppTO> appsToDownload = new ArrayList<>();
+        for (final EmbeddedAppTO app : apps) {
+            long version = -1;
+            if (oldApps.containsKey(app.name)) {
+                version = oldApps.get(app.name);
+                oldApps.remove(app.name);
+            }
+            if (app.version > version) {
+                appsToDownload.add(app);
+            }
+        }
+
+        for (final EmbeddedAppTO app : appsToDownload) {
+            mBrandingMgr.queue(app);
+        }
+
+        for (String name : oldApps.keySet()) {
+            mStore.deleteEmbeddedApp(name);
+            mBrandingMgr.cleanupEmbeddedApp(name);
+        }
     }
 
     public void refreshJsEmdedding() {
@@ -247,10 +315,6 @@ public class SystemPlugin implements MobicagePlugin {
         }
     }
 
-    public boolean getWifiOnlyDownloads() {
-        return mWifiOnlyDownloads;
-    }
-
     public Map<String, JSEmbedding> getJSEmbeddedPackets() {
         return mStore.getJSEmbeddedPackets();
     }
@@ -261,7 +325,7 @@ public class SystemPlugin implements MobicagePlugin {
 
     public void updateJSEmbeddedPackets(final JSEmbeddingItemTO[] packets) {
         Map<String, JSEmbedding> oldPackets = getJSEmbeddedPackets();
-        List<JSEmbeddingItemTO> packetsToDownload = new ArrayList<JSEmbeddingItemTO>();
+        List<JSEmbeddingItemTO> packetsToDownload = new ArrayList<>();
         for (final JSEmbeddingItemTO packet : packets) {
             JSEmbedding s = oldPackets.get(packet.name);
             oldPackets.remove(packet.name);

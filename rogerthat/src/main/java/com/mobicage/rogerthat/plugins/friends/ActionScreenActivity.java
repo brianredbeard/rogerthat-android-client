@@ -119,6 +119,9 @@ public class ActionScreenActivity extends ServiceBoundActivity {
     public static final String RUN_IN_BACKGROUND = "run_in_background";
     public static final String CONTEXT = "context";
 
+    public static final String EXIT_APP = "exit_app";
+    public static final String EXIT_APP_RESULT = "exit_app_result";
+
     public static final String BRANDING_TYPE_NORMAL = "normal";
     public static final String BRANDING_TYPE_HOME = "home";
 
@@ -284,6 +287,8 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 getPublicKey(params);
             } else if ("security/getSeed".equals(action)) {
                 getSeed(params);
+            } else if ("security/listAddresses".equals(action)) {
+                listAddresses(params);
             } else if ("security/getAddress".equals(action)) {
                 getAddress(params);
             } else if ("security/sign".equals(action)) {
@@ -300,7 +305,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 L.w("Expected params != null");
                 return;
             }
-            String data = params.getString("u");
+            String data = TextUtils.optString(params, "u", null);
             boolean smart = params.optBoolean("smart", false);
             mFriendsPlugin.putUserData(mServiceEmail, data, smart);
         }
@@ -351,7 +356,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 L.w("Expected params != null");
                 return;
             }
-            final String e = params.getString("e");
+            final String e = TextUtils.optString(params, "e", null);
             if (e != null) {
                 mActionScreenUtils.logError(mServiceEmail, mItemLabel, mItemCoords, e);
             }
@@ -388,7 +393,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 return;
             }
             final String requestId = params.getString("id");
-            String cameraType = params.getString("camera_type");
+            final String cameraType = params.getString("camera_type");
 
             if (!QRCodeScanner.CAMERA_TYPES.contains(cameraType)) {
                 Map<String, Object> e = new HashMap<>();
@@ -529,11 +534,13 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 return;
             }
             final String requestId = params.getString("id");
-            final String actionType = params.has("action_type") ? params.getString("action_type") : null;
-            final String action = params.has("action") ? params.getString("action") : null;
-            final String title = params.has("title") ? params.getString("title") : null;
+            final String actionType = TextUtils.optString(params, "action_type", null);
+            final String action = TextUtils.optString(params, "action", null);
+            final String title = TextUtils.optString(params, "title", null);
+            final String service = TextUtils.optString(params, "service", null);
+            final boolean collapse = "true".equalsIgnoreCase(params.getString("collapse"));
 
-            String errorMessage = mActionScreenUtils.openActivity(actionType, action, title);
+            String errorMessage = mActionScreenUtils.openActivity(actionType, action, title, service, collapse);
             Map<String, Object> e = null;
             if (errorMessage != null) {
                 e = new HashMap<>();
@@ -729,6 +736,36 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             mActionScreenUtils.getSeed(params, sc);
         }
 
+        private void listAddresses(final JSONObject params) throws JSONException {
+            if (params == null) {
+                L.w("Expected params != null");
+                return;
+            }
+
+            final String requestId = params.getString("id");
+
+            MainService.SecurityCallback sc = new MainService.SecurityCallback() {
+                @Override
+                public void onSuccess(Object result) {
+                    List<Map<String, String>> addresses = (List<Map<String, String>>) result;
+                    Map<String, Object> r = new HashMap<>();
+                    r.put("addresses", addresses);
+                    deliverResult(requestId, r, null);
+                }
+
+                @Override
+                public void onError(String code, String errorMessage) {
+                    Map<String, Object> e = new HashMap<>();
+                    e.put("code", code);
+                    e.put("message", errorMessage);
+                    e.put("exception", errorMessage); // deprecated
+                    deliverResult(requestId, null, e);
+                }
+            };
+
+            mActionScreenUtils.listAddresses(params, sc);
+        }
+
         private void getAddress(final JSONObject params) throws JSONException {
             if (params == null) {
                 L.w("Expected params != null");
@@ -770,10 +807,10 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 @Override
                 public void onSuccess(Object result) {
                     try {
-                        byte[] payloadSignature = (byte[]) result;
+                        String payloadSignature = (String) result;
                         Map<String, Object> r = new HashMap<>();
                         r.put("payload", payload);
-                        r.put("payload_signature", Base64.encodeBytes(payloadSignature, Base64.DONT_BREAK_LINES));
+                        r.put("payload_signature", payloadSignature);
                         deliverResult(requestId, r, null);
                     } catch (Exception exc) {
                         L.bug("signPayload onSuccess exception", exc);
@@ -1025,6 +1062,13 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                     executeJS(true, "if (typeof rogerthat !== 'undefined') rogerthat._setInfo(%s)",
                         JSONValue.toJSONString(info));
                     mInfoSet = true;
+
+                    for (Map.Entry<String, Long> entry : mService.getBadges().entrySet()) {
+                        Map<String, Object> params = new HashMap<>();
+                        params.put("key", entry.getKey());
+                        params.put("count", entry.getValue());
+                        mIntentCallback.badgeUpdated(params);
+                    }
                 }
             }
 

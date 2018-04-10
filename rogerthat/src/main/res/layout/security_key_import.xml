@@ -74,7 +74,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:gravity="top"
-                android:hint="@string/seed_29_words"
+                android:hint="@string/seed_24_words"
                 android:inputType="textMultiLine"/>
 
             <android.support.v7.widget.AppCompatButton

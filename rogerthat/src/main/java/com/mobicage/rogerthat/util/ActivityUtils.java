@@ -20,6 +20,7 @@ package com.mobicage.rogerthat.util;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -130,6 +131,15 @@ public class ActivityUtils {
             if (smi == null) {
                 return "ServiceMenuItem not found";
             }
+        } else if ("open".equals(ni.actionType)) {
+            if ("app".equals(ni.action)) {
+                String packageName = (String) ni.getParam("android_app_id");
+                if (TextUtils.isEmptyOrWhitespace(packageName)) {
+                    return "App id not provided";
+                }
+            } else {
+                return "Unknown action";
+            }
         } else {
             return "Unknown action_type: " + ni.actionType;
         }
@@ -138,7 +148,10 @@ public class ActivityUtils {
 
     public static boolean goToActivity(final ServiceBoundActivity context, final NavigationItem ni, final boolean clearStack, final Bundle extras) {
         if (ni.actionType == null) {
-            ActivityUtils.goToActivity(context, ni.action, clearStack, ni.collapse, extras);
+            if (ni.action.equals("news")){
+                extras.putString("feed_name", ni.feedName());
+            }
+            ActivityUtils.goToActivity(context, ni.action, clearStack, ni.isCollapsible(), extras);
         } else if ("action".equals(ni.actionType)) {
             Class clazz;
             if (context.getMainService().getNetworkConnectivityManager().isConnected()) {
@@ -180,6 +193,16 @@ public class ActivityUtils {
             i.addFlags(MainActivity.FLAG_CLEAR_STACK);
             context.startActivity(i);
 
+        } else if ("open".equals(ni.actionType) && "app".equals(ni.action)) {
+            String packageName = (String) ni.getParam("android_app_id");
+            String scheme = (String) ni.getParam("android_scheme");
+
+            if (TextUtils.isEmptyOrWhitespace(scheme)) {
+                openApp(context, packageName);
+            } else {
+                openScheme(context, packageName, scheme);
+            }
+
         } else {
             L.bug("ignoring simulateNavigationItemClick: " + ni.actionType + "|" + ni.action);
             return false;
@@ -201,6 +224,46 @@ public class ActivityUtils {
         }
 
         return true;
+    }
+
+    private static void openStore(Context context, String appPackage) {
+        try {
+            context.startActivity(
+                    new Intent(Intent.ACTION_VIEW,
+                               Uri.parse("market://details?id=" + appPackage)));
+        } catch (android.content.ActivityNotFoundException anfe) {
+            context.startActivity(
+                    new Intent(Intent.ACTION_VIEW,
+                               Uri.parse("http://play.google.com/store/apps/details?id=" + appPackage)));
+        }
+    }
+
+    private static Intent appSchemeIntent(Context context, String scheme) {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(scheme));
+        PackageManager packageManager = context.getPackageManager();
+        if (intent.resolveActivity(packageManager) != null) {
+            return intent;
+        }
+        return null;
+    }
+
+    private static void openScheme(Context context, String appPackage, String scheme) {
+        Intent intent = appSchemeIntent(context, scheme);
+        if (intent == null) {
+            openApp(context, appPackage);
+        } else {
+            context.startActivity(intent);
+        }
+    }
+
+    private static void openApp(Context context, String appPackage) {
+        Intent intent = context.getPackageManager().getLaunchIntentForPackage(appPackage);
+        if (intent == null) {
+            openStore(context, appPackage);
+        } else {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+        }
     }
 
     public static void goToMessagingActivity(Context context, boolean clearStack, Bundle extras) {
@@ -354,5 +417,5 @@ public class ActivityUtils {
             return false;
         }
     }
-    
+
 }

@@ -51,6 +51,7 @@ import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
+import com.mobicage.rogerthat.util.ui.TestUtils;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
@@ -342,8 +343,14 @@ public class ActionScreenUtils {
         inputManager.hideSoftInputFromWindow(windowToken, InputMethodManager.HIDE_NOT_ALWAYS);
     }
 
-    public String openActivity(final String actionType, final String action, final String title) {
-        NavigationItem ni = new NavigationItem(FontAwesome.Icon.faw_question_circle_o, actionType, action, title, false);
+    public String openActivity(final String actionType, final String action, final String title,
+                               final String service, final boolean collapse) {
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("collapse", collapse);
+
+        NavigationItem ni = new NavigationItem(FontAwesome.Icon.faw_question_circle_o, actionType,
+                action, title, service, 0, params);
 
         String errorMessage = ActivityUtils.canOpenNavigationItem(mActivity, ni);
         if (errorMessage != null) {
@@ -388,7 +395,8 @@ public class ActionScreenUtils {
 
     public long countNews(final JSONObject params) {
         final String service = TextUtils.optString(params, "service", null);
-        return mNewsPlugin.getStore().countAllNewsItems(service);
+        final String feedName = TextUtils.optString(params, "feed_name", "");
+        return mNewsPlugin.getStore().countAllNewsItems(service, feedName);
     }
 
     public NewsItem getNews(final JSONObject params) {
@@ -399,8 +407,9 @@ public class ActionScreenUtils {
     public Map<String, Object> listNews(final JSONObject params) {
         final String service = TextUtils.optString(params, "service", null);
         final String cursor =  TextUtils.optString(params, "cursor", null);
+        final String feedName =  TextUtils.optString(params, "feed_name", "");
         final long limit = params.optLong("limit", 10);
-        return mNewsPlugin.listNewsItems(service, cursor, limit);
+        return mNewsPlugin.listNewsItems(service, feedName, cursor, limit);
     }
 
     private void setupPin(final MainService.SecurityCallback sc) {
@@ -510,7 +519,29 @@ public class ActionScreenUtils {
             return;
         }
 
-        mMainService.getSeed(keyAlgorithm, keyName, message, callback);
+        final String errorMessage = mActivity.getString(R.string.permission_denied_to_load_seed, mActivity.getString(R.string.settings), mActivity.getString
+                (R.string.security), keyName);
+        callback.onError("permission_denied", errorMessage);
+        //mMainService.getSeed(keyAlgorithm, keyName, message, callback); // blocked for security reasons
+    }
+
+    public void listAddresses(final JSONObject params, final MainService.SecurityCallback callback) {
+        if (!AppConstants.Security.ENABLED) {
+            String errorMessage = mActivity.getString(R.string.security_not_enabled);
+            callback.onError("security_not_enabled", errorMessage);
+            return;
+        }
+
+        final String keyAlgorithm = TextUtils.optString(params, "key_algorithm", null);
+        final String keyName = TextUtils.optString(params, "key_name", null);
+
+        try {
+            callback.onSuccess(SecurityUtils.listAddress(mMainService, keyAlgorithm, keyName));
+        } catch (Exception e) {
+            L.d("SecurityUtils.listAddress failed", e);
+            String errorMessage = mActivity.getString(R.string.unknown_error_occurred);
+            callback.onError("unknown_error_occurred", errorMessage);
+        }
     }
 
     public void getAddress(final JSONObject params, final MainService.SecurityCallback callback) {
@@ -558,6 +589,7 @@ public class ActionScreenUtils {
         final Long keyIndex = TextUtils.optLong(params, "key_index");
         final String message = TextUtils.optString(params, "message", null);
         final boolean forcePin = params.optBoolean("force_pin", false);
+        final boolean hashPayload = params.optBoolean("hash_payload", true);
 
         if (!SecurityUtils.hasKey(mMainService, "public", keyAlgorithm, keyName, keyIndex)) {
             String errorMessage = mActivity.getString(R.string.key_not_found);
@@ -567,9 +599,13 @@ public class ActionScreenUtils {
 
         byte[] payloadData = null;
         try {
-            payloadData = SecurityUtils.getPayload(keyAlgorithm, Base64.decode(payload));
+            if (hashPayload) {
+                payloadData = SecurityUtils.getPayload(keyAlgorithm, Base64.decode(payload));
+            } else {
+                payloadData = Base64.decode(payload);
+            }
         } catch (Exception e) {
-            L.d("SecurityUtils.getPayload failed", e);
+            L.d("Failed to get payload data", e);
         }
         if (payloadData == null) {
             String errorMessage = mActivity.getString(R.string.unknown_error_occurred);

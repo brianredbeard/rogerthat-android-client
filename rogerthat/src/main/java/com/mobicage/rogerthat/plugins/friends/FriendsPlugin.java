@@ -777,6 +777,11 @@ public class FriendsPlugin implements MobicagePlugin {
 
     public boolean inviteFriend(final String emailOrHash, final String message, final String friendName,
                                 final boolean showNotification) {
+        return inviteFriend(emailOrHash, message, friendName, showNotification, false);
+    }
+
+    public boolean inviteFriend(final String emailOrHash, final String message, final String friendName,
+                                final boolean showNotification, final boolean allowCrossApp) {
         T.UI();
         if (TextUtils.isEmptyOrWhitespace(emailOrHash)) {
             L.bug("Trying to invite friend with email '" + emailOrHash + "'");
@@ -785,6 +790,7 @@ public class FriendsPlugin implements MobicagePlugin {
         InviteFriendRequestTO request = new InviteFriendRequestTO();
         request.email = emailOrHash;
         request.message = message;
+        request.allow_cross_app = allowCrossApp;
         try {
             Rpc.invite(new InviteResponseHandler(emailOrHash), request);
         } catch (Exception e) {

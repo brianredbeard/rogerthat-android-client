@@ -326,6 +326,7 @@
     <string name="or">o</string>
     <string name="order">Pedido</string>
     <string name="osa_loyalty_welcome_message">Bienvenido a la terminal de Nuestra Ciudad App. Esta aplicación es el complemento perfecto a su presencia en la aplicación de la ciudad con el fin de servir a sus clientes aún más. Nos ayudará a conseguir el terminal de lealtad para su uso. Para empezar, el escaneo de su código QR con el fin de activar su terminal.</string>
+    <string name="paid">Pagado</string>
     <string name="passport">%1$s id</string>
     <string name="phone">Teléfono</string>
     <string name="photo">Foto</string>
@@ -474,6 +475,7 @@
     <string name="sounds">Sonido</string>
     <string name="specials">Promociones especiales</string>
     <string name="start_registration">Iniciar registro</string>
+    <string name="status">Estado</string>
     <string name="sticky">Sticky</string>
     <string name="stop">Parar</string>
     <string name="stream_summary">Mostrar sólo las entradas importantes</string>

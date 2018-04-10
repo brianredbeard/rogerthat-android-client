@@ -68,6 +68,7 @@ import com.mobicage.rogerthat.util.geo.GeoLocationProvider;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.net.NetworkConnectivityManager;
 import com.mobicage.rogerthat.util.security.SecurityUtils;
+import com.mobicage.rogerthat.util.security.ed25519.Ed25519;
 import com.mobicage.rogerthat.util.system.SafeAsyncTask;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
@@ -92,6 +93,8 @@ import com.mobicage.rpc.http.HttpCommunicator;
 import com.mobicage.rpc.newxmpp.XMPPKickChannel;
 import com.mobicage.to.app.UpdateAppAssetRequestTO;
 import com.mobicage.to.app.UpdateAppAssetResponseTO;
+import com.mobicage.to.app.UpdateEmbeddedAppsRequestTO;
+import com.mobicage.to.app.UpdateEmbeddedAppsResponseTO;
 import com.mobicage.to.app.UpdateLookAndFeelRequestTO;
 import com.mobicage.to.app.UpdateLookAndFeelResponseTO;
 import com.mobicage.to.js_embedding.UpdateJSEmbeddingRequestTO;
@@ -112,12 +115,14 @@ import com.mobicage.to.system.UpdateSettingsRequestTO;
 import com.mobicage.to.system.UpdateSettingsResponseTO;
 
 import org.altbeacon.beacon.BeaconConsumer;
+import org.jivesoftware.smack.util.Base64;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
+import java.math.BigInteger;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
@@ -1251,15 +1256,26 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         CallReceiver.comMobicageCapiSystemIClientRpc = new com.mobicage.capi.system.IClientRpc() {
 
             @Override
-            public UpdateSettingsResponseTO updateSettings(final UpdateSettingsRequestTO request) throws Exception {
+            public ForwardLogsResponseTO forwardLogs(ForwardLogsRequestTO request) throws Exception {
+
+                if (request.jid == null) {
+                    hideLogForwardNotification();
+                    L.getLogForwarder().stop();
+                } else {
+                    showLogForwardNotification(request.jid);
+                    L.getLogForwarder().start(request.jid);
+                }
+
+                return new ForwardLogsResponseTO();
+            }
+
+            @Override
+            public IdentityUpdateResponseTO identityUpdate(final IdentityUpdateRequestTO request) throws Exception {
                 T.BIZZ();
-                postOnUIHandler(new SafeRunnable() {
-                    @Override
-                    protected void safeRun() throws Exception {
-                        processSettings(request.settings, true);
-                    }
-                });
-                return null;
+                L.d("Server called identityUpdate()");
+                getIdentityStore().updateIdentity(request.identity, null);
+
+                return new IdentityUpdateResponseTO();
             }
 
             @Override
@@ -1284,32 +1300,15 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
             }
 
             @Override
-            public UpdateLookAndFeelResponseTO updateLookAndFeel(UpdateLookAndFeelRequestTO request) throws Exception {
-                getPlugin(SystemPlugin.class).updateLookAndFeel(request);
-                return new UpdateLookAndFeelResponseTO();
+            public UpdateEmbeddedAppTranslationsResponseTO updateEmbeddedAppTranslations(UpdateEmbeddedAppTranslationsRequestTO request) throws java.lang.Exception {
+                getPlugin(SystemPlugin.class).updateEmbeddedAppTranslations(request.translations);
+                return new UpdateEmbeddedAppTranslationsResponseTO();
             }
 
             @Override
-            public IdentityUpdateResponseTO identityUpdate(final IdentityUpdateRequestTO request) throws Exception {
-                T.BIZZ();
-                L.d("Server called identityUpdate()");
-                getIdentityStore().updateIdentity(request.identity, null);
-
-                return new IdentityUpdateResponseTO();
-            }
-
-            @Override
-            public ForwardLogsResponseTO forwardLogs(ForwardLogsRequestTO request) throws Exception {
-
-                if (request.jid == null) {
-                    hideLogForwardNotification();
-                    L.getLogForwarder().stop();
-                } else {
-                    showLogForwardNotification(request.jid);
-                    L.getLogForwarder().start(request.jid);
-                }
-
-                return new ForwardLogsResponseTO();
+            public UpdateEmbeddedAppsResponseTO updateEmbeddedApps(UpdateEmbeddedAppsRequestTO request) throws Exception {
+                getPlugin(SystemPlugin.class).updateEmbeddedApps(request.embedded_apps);
+                return new UpdateEmbeddedAppsResponseTO();
             }
 
             @Override
@@ -1319,9 +1318,21 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
             }
 
             @Override
-            public UpdateEmbeddedAppTranslationsResponseTO updateEmbeddedAppTranslations(UpdateEmbeddedAppTranslationsRequestTO request) throws java.lang.Exception {
-                getPlugin(SystemPlugin.class).updateEmbeddedAppTranslations(request.translations);
-                return new UpdateEmbeddedAppTranslationsResponseTO();
+            public UpdateLookAndFeelResponseTO updateLookAndFeel(UpdateLookAndFeelRequestTO request) throws Exception {
+                getPlugin(SystemPlugin.class).updateLookAndFeel(request);
+                return new UpdateLookAndFeelResponseTO();
+            }
+
+            @Override
+            public UpdateSettingsResponseTO updateSettings(final UpdateSettingsRequestTO request) throws Exception {
+                T.BIZZ();
+                postOnUIHandler(new SafeRunnable() {
+                    @Override
+                    protected void safeRun() throws Exception {
+                        processSettings(request.settings, true);
+                    }
+                });
+                return null;
             }
         };
     }
@@ -1831,7 +1842,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         }
 
         public boolean canExecuteFromQueue(String pin, Map<String, PrivateKey> privateKeys) {
-            return pin != null;
+            return false;
         }
     }
 
@@ -1862,7 +1873,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         public byte[] payload;
         public boolean forcePin;
 
-        public SignSecurityItem(String keyAlgorithm, String keyName, Long keyIndex, String message, byte[] payload, boolean forcePin, final SecurityCallback<byte[]> callback) {
+        public SignSecurityItem(String keyAlgorithm, String keyName, Long keyIndex, String message, byte[] payload, boolean forcePin, final SecurityCallback<String> callback) {
             this.uid = UUID.randomUUID().toString();
             this.type = "sign";
             this.keyAlgorithm = keyAlgorithm;
@@ -2020,7 +2031,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         });
     }
 
-    public void sign(final String keyAlgorithm, final String keyName, final Long keyIndex, final String message, final byte[] payload, final boolean forcePin, final SecurityCallback<byte[]> callback) {
+    public void sign(final String keyAlgorithm, final String keyName, final Long keyIndex, final String message, final byte[] payload, final boolean forcePin, final SecurityCallback<String> callback) {
         T.dontCare();
         runOnUIHandlerNow(new SafeRunnable() {
             @Override
@@ -2043,10 +2054,13 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
     private void queueSecurityItem(SecurityItem si) {
         T.UI();
         boolean shouldEnterPin = false;
-        if ("keypair".equals(si.type) || "seed".equals(si.type) || "address".equals(si.type)) {
+        if ("keypair".equals(si.type) || "address".equals(si.type)) {
             if (mPin == null) {
                 shouldEnterPin = true;
             }
+        } else if ("seed".equals(si.type)) {
+            shouldEnterPin = true;
+
         } else if ("sign".equals(si.type)) {
             SignSecurityItem ssi = (SignSecurityItem) si;
             if (mPin == null || ssi.forcePin) {
@@ -2174,7 +2188,14 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
     private void executeSign(SignSecurityItem si) {
         T.UI();
         try {
-            byte[] payloadSignature = signValue(si.keyAlgorithm, si.keyName, si.keyIndex, si.payload);
+            byte[] payloadSignatureBytes = signValue(si.keyAlgorithm, si.keyName, si.keyIndex, si.payload);
+            String payloadSignature;
+            if (Ed25519.ALGORITHM.equals(si.keyAlgorithm)) {
+                payloadSignature = SecurityUtils.lowercaseHash(payloadSignatureBytes);
+            } else {
+                payloadSignature = Base64.encodeBytes(payloadSignatureBytes, Base64.DONT_BREAK_LINES);
+            }
+
             si.callback.onSuccess(payloadSignature);
         } catch (Exception e) {
             L.bug("Failed to executeSign", e);
@@ -2252,8 +2273,15 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         badges.put("messages", messagingPlugin.getBadgeCount());
         if (AppConstants.NEWS_ENABLED) {
             NewsPlugin newsPlugin = getPlugin(NewsPlugin.class);
-            badges.put("news", newsPlugin.getBadgeCount());
+            for (String feedName : newsPlugin.getFeedNames()) {
+                String key = newsPlugin.getFeedKey(feedName);
+                badges.put(key, newsPlugin.getBadgeCount(feedName));
+            }
         }
+    }
+
+    public Map<String, Long> getBadges() {
+        return badges;
     }
 
 }

@@ -27,6 +27,7 @@ public class PaymentAssetBalanceTO implements com.mobicage.rpc.IJSONable {
 
     public long amount;
     public String description;
+    public long precision;
 
     public PaymentAssetBalanceTO() {
     }
@@ -48,6 +49,16 @@ public class PaymentAssetBalanceTO implements com.mobicage.rpc.IJSONable {
         } else {
             throw new IncompleteMessageException("com.mobicage.to.payment.PaymentAssetBalanceTO object is missing field 'description'");
         }
+        if (json.containsKey("precision")) {
+            Object val = json.get("precision");
+            if (val instanceof Integer) {
+                this.precision = ((Integer) val).longValue();
+            } else {
+                this.precision = ((Long) val).longValue();
+            }
+        } else {
+            this.precision = 2;
+        }
     }
 
     @Override
@@ -55,6 +66,7 @@ public class PaymentAssetBalanceTO implements com.mobicage.rpc.IJSONable {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
         obj.put("amount", this.amount);
         obj.put("description", this.description);
+        obj.put("precision", this.precision);
         return obj;
     }
 

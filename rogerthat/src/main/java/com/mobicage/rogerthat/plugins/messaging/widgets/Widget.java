@@ -54,6 +54,7 @@ public abstract class Widget extends LinearLayout {
     public static final String TYPE_ADVANCED_ORDER = "advanced_order";
     public static final String TYPE_SIGN = "sign";
     public static final String TYPE_OAUTH = "oauth";
+    public static final String TYPE_PAY = "pay";
     // Do not forget to update the valueString function when adding a form type
 
     public final static Map<String, Integer> RESOURCES;
@@ -75,6 +76,7 @@ public abstract class Widget extends LinearLayout {
         RESOURCES.put(TYPE_ADVANCED_ORDER, R.layout.widget_advanced_order);
         RESOURCES.put(TYPE_SIGN, R.layout.widget_sign);
         RESOURCES.put(TYPE_OAUTH, R.layout.widget_oauth);
+        RESOURCES.put(TYPE_PAY, R.layout.widget_pay);
     }
 
     protected Message mMessage;
@@ -176,6 +178,9 @@ public abstract class Widget extends LinearLayout {
 
         if (TYPE_OAUTH.equals(formType))
             return OauthWidget.valueString(context, widget);
+
+        if (TYPE_PAY.equals(formType))
+            return PayWidget.valueString(context, widget);
 
         L.bug("Unexpected form type: " + formType);
         return null;

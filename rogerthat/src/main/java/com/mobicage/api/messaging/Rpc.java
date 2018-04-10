@@ -185,6 +185,17 @@ public class Rpc {
         com.mobicage.rpc.Rpc.call("com.mobicage.api.messaging.submitOauthForm", arguments, responseHandler);
     }
 
+    public static void submitPayForm(com.mobicage.rpc.IResponseHandler<com.mobicage.to.messaging.forms.SubmitPayFormResponseTO> responseHandler,
+            com.mobicage.to.messaging.forms.SubmitPayFormRequestTO request) throws Exception {
+        java.util.Map<java.lang.String, java.lang.Object> arguments = new java.util.LinkedHashMap<java.lang.String, java.lang.Object>();
+        if (request == null) {
+            arguments.put("request", null);
+        } else {
+            arguments.put("request", request.toJSONMap());
+        }
+        com.mobicage.rpc.Rpc.call("com.mobicage.api.messaging.submitPayForm", arguments, responseHandler);
+    }
+
     public static void submitPhotoUploadForm(com.mobicage.rpc.IResponseHandler<com.mobicage.to.messaging.forms.SubmitPhotoUploadFormResponseTO> responseHandler,
             com.mobicage.to.messaging.forms.SubmitPhotoUploadFormRequestTO request) throws Exception {
         java.util.Map<java.lang.String, java.lang.Object> arguments = new java.util.LinkedHashMap<java.lang.String, java.lang.Object>();

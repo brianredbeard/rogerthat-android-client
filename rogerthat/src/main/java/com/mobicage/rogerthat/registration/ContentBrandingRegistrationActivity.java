@@ -254,22 +254,16 @@ public class ContentBrandingRegistrationActivity extends AbstractRegistrationAct
                 String signature = SecurityUtils.sha256(version + " " + installId + " " + timestamp + " " + deviceId + " "
                     + registrationId + " " + qr_url + CloudConstants.REGISTRATION_MAIN_SIGNATURE);
 
-                HttpPost httppost = new HttpPost(CloudConstants.REGISTRATION_QR_URL);
+                HttpPost httppost = HTTPUtil.getHttpPost(mService, CloudConstants.REGISTRATION_QR_URL);
                 try {
-                    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(13);
+                    List<NameValuePair> nameValuePairs = HTTPUtil.getRegistrationFormParams(mService);
                     nameValuePairs.add(new BasicNameValuePair("version", version));
-                    nameValuePairs.add(new BasicNameValuePair("platform", "android"));
                     nameValuePairs.add(new BasicNameValuePair("registration_time", timestamp));
                     nameValuePairs.add(new BasicNameValuePair("device_id", deviceId));
                     nameValuePairs.add(new BasicNameValuePair("registration_id", registrationId));
                     nameValuePairs.add(new BasicNameValuePair("signature", signature));
                     nameValuePairs.add(new BasicNameValuePair("install_id", installId));
                     nameValuePairs.add(new BasicNameValuePair("qr_url", qr_url));
-                    nameValuePairs.add(new BasicNameValuePair("language", Locale.getDefault().getLanguage()));
-                    nameValuePairs.add(new BasicNameValuePair("country", Locale.getDefault().getCountry()));
-                    nameValuePairs.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
-                    nameValuePairs.add(new BasicNameValuePair("use_xmpp_kick", CloudConstants.USE_XMPP_KICK_CHANNEL
-                        + ""));
                     nameValuePairs.add(new BasicNameValuePair("GCM_registration_id", getGCMRegistrationId()));
                     httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
@@ -444,14 +438,11 @@ public class ContentBrandingRegistrationActivity extends AbstractRegistrationAct
         T.REGISTRATION();
         final String mobileInfo = getMobileInfo();
         HttpClient httpClient = HTTPUtil.getHttpClient();
-        final HttpPost httpPost = new HttpPost(CloudConstants.REGISTRATION_FINISH_URL);
-        httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
-        httpPost.setHeader("User-Agent", MainService.getUserAgent(mService));
-        List<NameValuePair> formParams = new ArrayList<NameValuePair>();
+        final HttpPost httpPost = HTTPUtil.getHttpPost(mService, CloudConstants.REGISTRATION_FINISH_URL);
+        List<NameValuePair> formParams = HTTPUtil.getRegistrationFormParams(mService);
         formParams.add(new BasicNameValuePair("mobileInfo", mobileInfo));
         formParams.add(new BasicNameValuePair("account", username));
         formParams.add(new BasicNameValuePair("password", password));
-        formParams.add(new BasicNameValuePair("app_id", CloudConstants.APP_ID));
         formParams.add(new BasicNameValuePair("accounts", ""));
         formParams.add(new BasicNameValuePair("invitor_code", invitorCode));
         formParams.add(new BasicNameValuePair("invitor_secret", invitorSecret));

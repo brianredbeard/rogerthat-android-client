@@ -93,10 +93,13 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
     private BottomSheetDialog mBottomSheetDialog;
     private final List<BroadcastReceiver> mBroadcastReceivers = new ArrayList<>();
 
+    private String feedName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        feedName = getIntent().getStringExtra("feed_name");
+
         setContentView(R.layout.news);
         String message = getString(R.string.loading);
         mProgressDialog = UIUtils.showProgressDialog(this, null, message, true, true, null, ProgressDialog
@@ -146,6 +149,13 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
         }
     }
 
+    private boolean isCurrentFeed(String name) {
+        if (feedName == null) {
+            return name == null;
+        }
+        return feedName.equals(name);
+    }
+
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
@@ -193,7 +203,6 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
             String action = intent.getAction();
             if (NewsPlugin.GET_NEWS_RECEIVED_INTENT.equals(action)) {
                 processNewsReceived(intent, nla);
-
             } else if (FriendsPlugin.FRIEND_INFO_RECEIVED_INTENT.equals(action)) {
                 processFriendInfoReceived(intent);
             } else if (NetworkConnectivityManager.INTENT_NETWORK_UP.equals(action)) {
@@ -207,8 +216,10 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
                     setupConnectedToInternet();
                 }
             } else if (NewsPlugin.NEW_NEWS_ITEM_INTENT.equals(action)) {
-                mNewNewsItems.add(intent.getLongExtra("id", -1));
-                setupUpdatesAvailable();
+                if (isCurrentFeed(intent.getStringExtra("feed_name"))) {
+                    mNewNewsItems.add(intent.getLongExtra("id", -1));
+                    setupUpdatesAvailable();
+                }
             } else if (NewsPlugin.READ_NEWS_STATISTICS_INTENT.equals(action)) {
                 long[] ids = intent.getLongArrayExtra("ids");
                 long[] reach = intent.getLongArrayExtra("reach");
@@ -283,11 +294,10 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
     }
 
     private void processNewsReceived(Intent intent, final NewsListAdapter nla) {
-
         if (swipeContainer.isRefreshing()) {
             swipeContainer.setRefreshing(false);
             resetUpdatesAvailable(nla, (Button) findViewById(R.id.updates_available));
-        } else {
+        } else if (isCurrentFeed(intent.getStringExtra("feed_name"))){
             final boolean isInitial = intent.getBooleanExtra("initial", false);
             if (!isInitial) {
                 final long[] newIds = intent.getLongArrayExtra("new_ids");
@@ -338,14 +348,15 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
 
     @Override
     protected void onServiceBound() {
-        setActivityName("news");
         setTitle(R.string.news);
 
         newsPlugin = mService.getPlugin(NewsPlugin.class);
+        setActivityName(newsPlugin.getFeedKey(feedName));
+
         friendsPlugin = mService.getPlugin(FriendsPlugin.class);
 
         newsStore = newsPlugin.getStore();
-        newsPlugin.resetBadgeCount();
+        newsPlugin.resetBadgeCount(feedName);
 
         if (mIdToShowAtTop > 0) {
             newsPlugin.setNewsItemSortPriority(mIdToShowAtTop, NewsPlugin.SORT_PRIORITY_TOP);
@@ -355,6 +366,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
 
         setRecyclerView((RecyclerView) findViewById(R.id.news_list));
         loadCursorAndSetAdaptar();
+
 
         mIsConnectedToInternet = mService.getNetworkConnectivityManager().isConnected();
         if (mIsConnectedToInternet) {
@@ -398,7 +410,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
             }
 
             if (newsPlugin != null) {
-                newsPlugin.resetBadgeCount();
+                newsPlugin.resetBadgeCount(feedName);
             }
         }
     }
@@ -459,7 +471,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
             MenuItem item = menu.getItem(i);
             switch (item.getItemId()) {
                 case R.id.saved:
-                    item.setVisible(newsStore != null && newsStore.countNewsPinnedItems() > 0);
+                    item.setVisible(newsStore != null && newsStore.countNewsPinnedItems(feedName) > 0);
                     break;
             }
         }
@@ -482,6 +494,7 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
         switch (item.getItemId()) {
             case R.id.saved:
                 Intent i = new Intent(this, NewsPinnedActivity.class);
+                i.putExtra("feed_name", feedName);
                 this.startActivity(i);
                 return true;
         }
@@ -516,5 +529,9 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
 
     public CachedDownloader getCachedDownloader() {
         return cachedDownloader;
+    }
+
+    public String getFeedName() {
+        return feedName;
     }
 }

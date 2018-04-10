@@ -93,6 +93,9 @@ public class CallReceiver {
         if ("com.mobicage.capi.messaging.newOauthForm".equals(function)) {
             return comMobicageCapiMessagingIClientRpc.newOauthForm(Parser.ComMobicageToMessagingFormsNewOauthFormRequestTO(call.arguments.get("request")));
         }
+        if ("com.mobicage.capi.messaging.newPayForm".equals(function)) {
+            return comMobicageCapiMessagingIClientRpc.newPayForm(Parser.ComMobicageToMessagingFormsNewPayFormRequestTO(call.arguments.get("request")));
+        }
         if ("com.mobicage.capi.messaging.newPhotoUploadForm".equals(function)) {
             return comMobicageCapiMessagingIClientRpc.newPhotoUploadForm(Parser.ComMobicageToMessagingFormsNewPhotoUploadFormRequestTO(call.arguments.get("request")));
         }
@@ -149,6 +152,9 @@ public class CallReceiver {
         }
         if ("com.mobicage.capi.messaging.updateOauthForm".equals(function)) {
             return comMobicageCapiMessagingIClientRpc.updateOauthForm(Parser.ComMobicageToMessagingFormsUpdateOauthFormRequestTO(call.arguments.get("request")));
+        }
+        if ("com.mobicage.capi.messaging.updatePayForm".equals(function)) {
+            return comMobicageCapiMessagingIClientRpc.updatePayForm(Parser.ComMobicageToMessagingFormsUpdatePayFormRequestTO(call.arguments.get("request")));
         }
         if ("com.mobicage.capi.messaging.updatePhotoUploadForm".equals(function)) {
             return comMobicageCapiMessagingIClientRpc.updatePhotoUploadForm(Parser.ComMobicageToMessagingFormsUpdatePhotoUploadFormRequestTO(call.arguments.get("request")));
@@ -212,6 +218,9 @@ public class CallReceiver {
         }
         if ("com.mobicage.capi.system.updateEmbeddedAppTranslations".equals(function)) {
             return comMobicageCapiSystemIClientRpc.updateEmbeddedAppTranslations(Parser.ComMobicageToSystemUpdateEmbeddedAppTranslationsRequestTO(call.arguments.get("request")));
+        }
+        if ("com.mobicage.capi.system.updateEmbeddedApps".equals(function)) {
+            return comMobicageCapiSystemIClientRpc.updateEmbeddedApps(Parser.ComMobicageToAppUpdateEmbeddedAppsRequestTO(call.arguments.get("request")));
         }
         if ("com.mobicage.capi.system.updateJsEmbedding".equals(function)) {
             return comMobicageCapiSystemIClientRpc.updateJsEmbedding(Parser.ComMobicageToJs_embeddingUpdateJSEmbeddingRequestTO(call.arguments.get("request")));

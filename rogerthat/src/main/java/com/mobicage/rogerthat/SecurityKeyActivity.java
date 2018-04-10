@@ -265,7 +265,7 @@ public class SecurityKeyActivity extends ServiceBoundActivity implements View.On
     public boolean onContextItemSelected(MenuItem item) {
         if (item.getTitle().equals(getString(R.string.copy_to_clipboard))) {
             ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-            ClipData clipData = ClipData.newPlainText(getString(R.string.seed_29_words), mSeedView.getText());
+            ClipData clipData = ClipData.newPlainText(getString(R.string.seed_24_words), mSeedView.getText());
             clipboard.setPrimaryClip(clipData);
             UIUtils.showLongToast(this, R.string.copied_to_clipboard);
         }

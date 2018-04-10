@@ -69,6 +69,7 @@ public class PriorityMap {
         sPrioritySet.add("com.mobicage.api.messaging.submitMultiSelectForm");
         sPrioritySet.add("com.mobicage.api.messaging.submitMyDigiPassForm");
         sPrioritySet.add("com.mobicage.api.messaging.submitOauthForm");
+        sPrioritySet.add("com.mobicage.api.messaging.submitPayForm");
         sPrioritySet.add("com.mobicage.api.messaging.submitPhotoUploadForm");
         sPrioritySet.add("com.mobicage.api.messaging.submitRangeSliderForm");
         sPrioritySet.add("com.mobicage.api.messaging.submitSignForm");
@@ -88,12 +89,14 @@ public class PriorityMap {
         sPrioritySet.add("com.mobicage.api.payment.cancelPayment");
         sPrioritySet.add("com.mobicage.api.payment.confirmPayment");
         sPrioritySet.add("com.mobicage.api.payment.createAsset");
+        sPrioritySet.add("com.mobicage.api.payment.createTransaction");
         sPrioritySet.add("com.mobicage.api.payment.getPaymentAssets");
         sPrioritySet.add("com.mobicage.api.payment.getPaymentProfile");
         sPrioritySet.add("com.mobicage.api.payment.getPaymentProviders");
         sPrioritySet.add("com.mobicage.api.payment.getPaymentTransactions");
         sPrioritySet.add("com.mobicage.api.payment.getPendingPaymentDetails");
         sPrioritySet.add("com.mobicage.api.payment.getPendingPaymentSignatureData");
+        sPrioritySet.add("com.mobicage.api.payment.getTargetInfo");
         sPrioritySet.add("com.mobicage.api.payment.receivePayment");
         sPrioritySet.add("com.mobicage.api.payment.verifyPaymentAsset");
         sPrioritySet.add("com.mobicage.api.services.findService");
@@ -108,6 +111,8 @@ public class PriorityMap {
         sPrioritySet.add("com.mobicage.api.services.updateUserData");
         sPrioritySet.add("com.mobicage.api.system.editProfile");
         sPrioritySet.add("com.mobicage.api.system.getAppAsset");
+        sPrioritySet.add("com.mobicage.api.system.getEmbeddedApp");
+        sPrioritySet.add("com.mobicage.api.system.getEmbeddedApps");
         sPrioritySet.add("com.mobicage.api.system.getIdentity");
         sPrioritySet.add("com.mobicage.api.system.getIdentityQRCode");
         sPrioritySet.add("com.mobicage.api.system.getJsEmbedding");

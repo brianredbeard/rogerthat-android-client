@@ -25,6 +25,7 @@ import java.util.Map;
 
 public class InviteFriendRequestTO implements com.mobicage.rpc.IJSONable {
 
+    public boolean allow_cross_app;
     public String email;
     public String message;
 
@@ -32,6 +33,12 @@ public class InviteFriendRequestTO implements com.mobicage.rpc.IJSONable {
     }
 
     public InviteFriendRequestTO(Map<String, Object> json) throws IncompleteMessageException {
+        if (json.containsKey("allow_cross_app")) {
+            Object val = json.get("allow_cross_app");
+            this.allow_cross_app = ((Boolean) val).booleanValue();
+        } else {
+            this.allow_cross_app = false;
+        }
         if (json.containsKey("email")) {
             Object val = json.get("email");
             this.email = (String) val;
@@ -49,6 +56,7 @@ public class InviteFriendRequestTO implements com.mobicage.rpc.IJSONable {
     @Override
     public Map<String, Object> toJSONMap() {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
+        obj.put("allow_cross_app", this.allow_cross_app);
         obj.put("email", this.email);
         obj.put("message", this.message);
         return obj;

@@ -53,6 +53,17 @@ public class Rpc {
         com.mobicage.rpc.Rpc.call("com.mobicage.api.payment.createAsset", arguments, responseHandler);
     }
 
+    public static void createTransaction(com.mobicage.rpc.IResponseHandler<com.mobicage.to.payment.CreateTransactionResponseTO> responseHandler,
+            com.mobicage.to.payment.CreateTransactionRequestTO request) throws Exception {
+        java.util.Map<java.lang.String, java.lang.Object> arguments = new java.util.LinkedHashMap<java.lang.String, java.lang.Object>();
+        if (request == null) {
+            arguments.put("request", null);
+        } else {
+            arguments.put("request", request.toJSONMap());
+        }
+        com.mobicage.rpc.Rpc.call("com.mobicage.api.payment.createTransaction", arguments, responseHandler);
+    }
+
     public static void getPaymentAssets(com.mobicage.rpc.IResponseHandler<com.mobicage.to.payment.GetPaymentAssetsResponseTO> responseHandler,
             com.mobicage.to.payment.GetPaymentAssetsRequestTO request) throws Exception {
         java.util.Map<java.lang.String, java.lang.Object> arguments = new java.util.LinkedHashMap<java.lang.String, java.lang.Object>();
@@ -117,6 +128,17 @@ public class Rpc {
             arguments.put("request", request.toJSONMap());
         }
         com.mobicage.rpc.Rpc.call("com.mobicage.api.payment.getPendingPaymentSignatureData", arguments, responseHandler);
+    }
+
+    public static void getTargetInfo(com.mobicage.rpc.IResponseHandler<com.mobicage.to.payment.GetTargetInfoResponseTO> responseHandler,
+            com.mobicage.to.payment.GetTargetInfoRequestTO request) throws Exception {
+        java.util.Map<java.lang.String, java.lang.Object> arguments = new java.util.LinkedHashMap<java.lang.String, java.lang.Object>();
+        if (request == null) {
+            arguments.put("request", null);
+        } else {
+            arguments.put("request", request.toJSONMap());
+        }
+        com.mobicage.rpc.Rpc.call("com.mobicage.api.payment.getTargetInfo", arguments, responseHandler);
     }
 
     public static void receivePayment(com.mobicage.rpc.IResponseHandler<com.mobicage.to.payment.ReceivePaymentResponseTO> responseHandler,

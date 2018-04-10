@@ -43,6 +43,10 @@ CREATE TABLE current_unprocessed_message_index (
 	"index" INTEGER
 , last_inbox_open_time INTEGER NOT NULL DEFAULT 0);
 INSERT INTO "current_unprocessed_message_index" VALUES(-1,0);
+CREATE TABLE embedded_app (
+    name TEXT PRIMARY KEY,
+    version INTEGER DEFAULT 0
+);
 CREATE TABLE embedded_app_translations (
      id TEXT PRIMARY KEY,
      content TEXT
@@ -152,7 +156,8 @@ CREATE TABLE news (
     sort_priority INTEGER,
     is_partial INTEGER,
     reindex INTEGER DEFAULT 0,
-    sort_key INTEGER
+    sort_key INTEGER,
+    feed_name TEXT DEFAULT ''
 );
 CREATE TABLE news_buttons (
     news_id INTEGER NOT NULL,

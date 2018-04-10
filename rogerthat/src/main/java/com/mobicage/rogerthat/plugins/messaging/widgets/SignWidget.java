@@ -161,7 +161,7 @@ public class SignWidget extends Widget {
         }
     }
 
-    private byte[] getPayloadHash() throws Exception {
+    private byte[] getPayload() throws Exception {
         final String payload = (String) mWidgetMap.get("payload");
         if (payload == null) {
             return null;
@@ -201,18 +201,18 @@ public class SignWidget extends Widget {
           1. sign(the hash of the message + the hash of the payload + the hash of all the attachments)
          */
         final String[] signatures = new String[2];
-        final byte[] payloadHash;
+        final byte[] payload;
         try {
-            payloadHash = getPayloadHash();
+            payload = getPayload();
         } catch (Exception e) {
-            L.d("Failed to get payload hash", e);
+            L.d("Failed to get payload", e);
             UIUtils.showErrorPleaseRetryDialog(mActivity);
             return;
         }
-        final MainService.SecurityCallback<byte[]> signMessageCallback = new MainService.SecurityCallback<byte[]>() {
+        final MainService.SecurityCallback<String> signMessageCallback = new MainService.SecurityCallback<String>() {
             @Override
-            public void onSuccess(byte[] result) {
-                signatures[1] = result == null ? null : Base64.encodeBytes(result);
+            public void onSuccess(String result) {
+                signatures[1] = result;
 
                 mResult = new SignWidgetResultTO();
                 mResult.payload_signature = signatures[0];
@@ -235,10 +235,10 @@ public class SignWidget extends Widget {
                 }
             }
         };
-        final MainService.SecurityCallback<byte[]> signPayloadCallback = new MainService.SecurityCallback<byte[]>() {
+        final MainService.SecurityCallback<String> signPayloadCallback = new MainService.SecurityCallback<String>() {
             @Override
-            public void onSuccess(byte[] result) {
-                signatures[0] = (payloadHash == null || result == null) ? null : Base64.encodeBytes(result);
+            public void onSuccess(String result) {
+                signatures[0] = result;
 
                 final List<byte[]> hashes = new ArrayList<>(mMessage.attachments.length + 2);
                 try {
@@ -248,8 +248,8 @@ public class SignWidget extends Widget {
                     UIUtils.showErrorPleaseRetryDialog(mActivity);
                     return;
                 }
-                if (payloadHash != null) {
-                    hashes.add(payloadHash);
+                if (payload != null) {
+                    hashes.add(payload);
                 }
 
                 if (mMessage.attachments.length != 0) {
@@ -285,7 +285,7 @@ public class SignWidget extends Widget {
                     return;
                 }
                 L.i("Combined hash: " + TextUtils.toHex(hash));
-                mActivity.getMainService().sign(mKeyAlgorithm, mKeyName, mKeyIndex, mCaption, hash, payloadHash == null, signMessageCallback);
+                mActivity.getMainService().sign(mKeyAlgorithm, mKeyName, mKeyIndex, mCaption, hash, payload == null, signMessageCallback);
             }
 
             @Override
@@ -296,9 +296,9 @@ public class SignWidget extends Widget {
              }
         };
 
-        if (payloadHash != null) {
+        if (payload != null) {
             // Sign the payload
-            mActivity.getMainService().sign(mKeyAlgorithm, mKeyName, mKeyIndex, mCaption, payloadHash, true, signPayloadCallback);
+            mActivity.getMainService().sign(mKeyAlgorithm, mKeyName, mKeyIndex, mCaption, payload, true, signPayloadCallback);
         } else {
             signPayloadCallback.onSuccess(null);
         }

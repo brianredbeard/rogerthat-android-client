@@ -39,4 +39,5 @@ else:
         s = re.sub('android:versionName=".*"', 'android:versionName="%s"' % VERSION_NAME, s)
         f.seek(0)
         f.write(s)
+        print 'Result manifest: %s' % s
         f.truncate()

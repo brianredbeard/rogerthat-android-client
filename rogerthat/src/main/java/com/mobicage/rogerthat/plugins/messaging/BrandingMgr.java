@@ -69,6 +69,7 @@ import com.mobicage.rpc.IJSONable;
 import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.rpc.RpcCall;
 import com.mobicage.rpc.config.CloudConstants;
+import com.mobicage.to.app.EmbeddedAppTO;
 import com.mobicage.to.app.UpdateAppAssetRequestTO;
 import com.mobicage.to.friends.FriendTO;
 import com.mobicage.to.friends.ServiceMenuItemTO;
@@ -134,6 +135,7 @@ public class BrandingMgr implements Pickleable, Closeable {
         protected static final int TYPE_LOCAL_FLOW_BRANDING = 6;
         protected static final int TYPE_ATTACHMENT = 7;
         protected static final int TYPE_APP_ASSET = 8;
+        protected static final int TYPE_EMBEDDED_APP = 9;
 
         protected static final int STATUS_TODO = 1;
         protected static final int STATUS_DONE = 2;
@@ -148,6 +150,7 @@ public class BrandingMgr implements Pickleable, Closeable {
             DOWNLOAD_PRIORITIES.put(TYPE_LOCAL_FLOW_ATTACHMENT, 8);
             DOWNLOAD_PRIORITIES.put(TYPE_LOCAL_FLOW_BRANDING, 8);
             DOWNLOAD_PRIORITIES.put(TYPE_JS_EMBEDDING_PACKET, 4);
+            DOWNLOAD_PRIORITIES.put(TYPE_EMBEDDED_APP, 4);
             DOWNLOAD_PRIORITIES.put(TYPE_ATTACHMENT, 1);
             DOWNLOAD_PRIORITIES.put(TYPE_GENERIC, 0);
             DOWNLOAD_PRIORITIES.put(TYPE_FRIEND, -4);
@@ -194,6 +197,14 @@ public class BrandingMgr implements Pickleable, Closeable {
             this.status = STATUS_TODO;
             this.object = appAsset;
             this.brandingKey = url;
+            this.attemptsLeft = 3;
+        }
+
+        public BrandedItem(EmbeddedAppTO app) {
+            this.type = TYPE_EMBEDDED_APP;
+            this.status = STATUS_TODO;
+            this.object = app;
+            this.brandingKey = app.name;
             this.attemptsLeft = 3;
         }
 
@@ -255,6 +266,9 @@ public class BrandingMgr implements Pickleable, Closeable {
                     break;
                 case TYPE_APP_ASSET:
                     object = new UpdateAppAssetRequestTO((Map<String, Object>) source.get("object"));
+                    break;
+                case TYPE_EMBEDDED_APP:
+                    object = new EmbeddedAppTO((Map<String, Object>) source.get("object"));
                     break;
             }
             this.calls = new ArrayList<>();
@@ -338,6 +352,12 @@ public class BrandingMgr implements Pickleable, Closeable {
                     UpdateAppAssetRequestTO asset = (UpdateAppAssetRequestTO) object;
                     UpdateAppAssetRequestTO otherAsset = (UpdateAppAssetRequestTO) other.object;
                     if (!asset.kind.equals(otherAsset.kind)) {
+                        return false;
+                    }
+                } else if (type == TYPE_EMBEDDED_APP) {
+                    EmbeddedAppTO app = (EmbeddedAppTO) object;
+                    EmbeddedAppTO otherApp = (EmbeddedAppTO) other.object;
+                    if (app.name != otherApp.name) {
                         return false;
                     }
                 }
@@ -448,6 +468,7 @@ public class BrandingMgr implements Pickleable, Closeable {
     public static final String JS_EMBEDDING_AVAILABLE_INTENT = "com.mobicage.rogerthat.plugins.system.JS_EMBEDDING_AVAILABLE_INTENT";
     public static final String JS_EMBEDDING_NAME = "js_embedding_name";
     public static final String MUST_DELETE_ATTACHMENTS_INTENT = "com.mobicage.rogerthat.plugins.messaging.MUST_DELETE_ATTACHMENTS_INTENT";
+    public static final String EMBEDDED_APP_AVAILABLE_INTENT = "com.mobicage.rogerthat.plugins.system.EMBEDDED_APP_AVAILABLE_INTENT";
 
     private static final int BUFFER_SIZE = 16384;
     protected final List<BrandedItem> mQueue = Collections.synchronizedList(new ArrayList<BrandedItem>());
@@ -648,6 +669,11 @@ public class BrandingMgr implements Pickleable, Closeable {
             }
         }
         return hasQueuedBrandings;
+    }
+
+    public boolean queue(EmbeddedAppTO app) {
+        T.dontCare();
+        return queue(new BrandedItem(app));
     }
 
     public boolean queue(JSEmbeddingItemTO packet) {
@@ -939,6 +965,31 @@ public class BrandingMgr implements Pickleable, Closeable {
                     }
                 }
             });
+        } else if (item.type == BrandedItem.TYPE_EMBEDDED_APP) {
+            mMainService.postOnBIZZHandler(new SafeRunnable() {
+                @Override
+                protected void safeRun() throws Exception {
+                    synchronized (mLock) {
+                        T.BIZZ();
+                        final EmbeddedAppTO app = (EmbeddedAppTO) item.object;
+                        deleteItemFromQueue(item);
+                        if (!failed) {
+                            try {
+                                SystemPlugin systemPlugin = mMainService.getPlugin(SystemPlugin.class);
+                                systemPlugin.getStore().updateEmbeddedApp(app.name, app.version);
+
+                                Intent intent = new Intent(EMBEDDED_APP_AVAILABLE_INTENT);
+                                intent.putExtra("id", app.name);
+                                mMainService.sendBroadcast(intent);
+
+                            } catch (Exception e) {
+                                L.bug("Could not unpack embedded app", e);
+                            }
+                        }
+                    }
+                }
+            });
+
         } else {
             boolean brandingAvailable = false;
             try {
@@ -1391,7 +1442,7 @@ public class BrandingMgr implements Pickleable, Closeable {
     }
 
     private void extractJSEmbedding(final JSEmbeddingItemTO packet) throws BrandingFailureException,
-            NoSuchAlgorithmException, FileNotFoundException, IOException {
+            NoSuchAlgorithmException, IOException {
         File brandingCache = getJSEmbeddingPacketFile(packet.name);
         if (!brandingCache.exists())
             throw new BrandingFailureException("Javascript package not found!");
@@ -1439,6 +1490,87 @@ public class BrandingMgr implements Pickleable, Closeable {
             }
         } finally {
             dis.close();
+        }
+    }
+
+    public boolean embeddedAppExists(final String name) {
+        try {
+            File brandingCache = getEmbeddedAppFile(name);
+            return brandingCache.exists();
+        } catch (BrandingFailureException bfe) {
+            L.e(bfe);
+            return false;
+        }
+    }
+
+    public String prepareEmbeddedApp(final String name) throws BrandingFailureException {
+        File brandingCache = getEmbeddedAppFile(name);
+        if (!brandingCache.exists()) {
+            throw new BrandingFailureException("Embedded app " + name + " not found!");
+        }
+        File tmpBrandingLocation = getEmbeddedAppsRootDirectory();
+        if (!(tmpBrandingLocation.exists() || tmpBrandingLocation.mkdir()))
+            throw new BrandingFailureException("Could not create private embedded app dir!");
+        File tmpBrandingDir = getEmbeddedAppDirectory(name);
+        if (tmpBrandingDir.exists() && !SystemUtils.deleteDir(tmpBrandingDir))
+            throw new BrandingFailureException("Could not delete existing embedded app dir");
+        if (!tmpBrandingDir.mkdir())
+            throw new BrandingFailureException("Could not create embedded app dir");
+
+        L.i("Extracting embedded app with name: " + name);
+        extractEmbeddedApp(brandingCache, tmpBrandingDir);
+
+        try {
+            IOUtils.copyAssetFolder(mMainService.getAssets(), "cordova", tmpBrandingDir.getAbsolutePath());
+        } catch (IOException e) {
+            L.bug(e);
+            throw new BrandingFailureException("Could not copy the cordova asset folder", e);
+        }
+        return "file://" + new File(tmpBrandingDir, "index.html").getAbsolutePath();
+    }
+
+    private void extractEmbeddedApp(final File zipFile, final File targetDir) throws BrandingFailureException {
+        try {
+            MessageDigest digester = MessageDigest.getInstance("SHA256");
+            DigestInputStream dis = new DigestInputStream(new BufferedInputStream(new FileInputStream(zipFile)),
+                    digester);
+            try {
+                ZipInputStream zis = new ZipInputStream(dis);
+                try {
+                    byte data[] = new byte[BUFFER_SIZE];
+                    ZipEntry entry;
+                    while ((entry = zis.getNextEntry()) != null) {
+                        L.d("Extracting: " + entry);
+                        int count = 0;
+                        if (entry.isDirectory()) {
+                            L.d("Skipping dir " + entry.getName());
+                            continue;
+                        }
+                        File destination = new File(targetDir, entry.getName());
+                        destination.getParentFile().mkdirs();
+                        final OutputStream fos = new BufferedOutputStream(new FileOutputStream(destination), BUFFER_SIZE);
+                        try {
+                            while ((count = zis.read(data, 0, BUFFER_SIZE)) != -1) {
+                                fos.write(data, 0, count);
+                            }
+                        } finally {
+                            fos.close();
+                        }
+                    }
+                    while (dis.read(data) >= 0)
+                        ;
+                } finally {
+                    zis.close();
+                }
+            } finally {
+                dis.close();
+            }
+        } catch (IOException e) {
+            L.e(e);
+            throw new BrandingFailureException("Error copying cached embedded app file to private space", e);
+        } catch (NoSuchAlgorithmException e) {
+            L.e(e);
+            throw new BrandingFailureException("Cannot validate ", e);
         }
     }
 
@@ -1525,6 +1657,22 @@ public class BrandingMgr implements Pickleable, Closeable {
             tmpFile.delete();
         } catch (BrandingFailureException ex) {
             L.bug("Failed to cleanup JSEmbedding tmp download file with name: " + name, ex);
+        }
+    }
+
+    public void cleanupEmbeddedApp(String name) {
+        T.dontCare();
+        try {
+            L.d("Cleanup embedded app: " + name);
+            File parentDir = getEmbeddedAppsRootDirectory();
+            if (!parentDir.exists())
+                return;
+            File zipFile = getEmbeddedAppFile(name);
+            if (!zipFile.exists())
+                return;
+            zipFile.delete();
+        } catch (BrandingFailureException ex) {
+            L.bug("Failed to cleanup embedded app tmp download file with name: " + name, ex);
         }
     }
 
@@ -1674,6 +1822,9 @@ public class BrandingMgr implements Pickleable, Closeable {
         } else if (item.type == BrandedItem.TYPE_APP_ASSET) {
             final UpdateAppAssetRequestTO assetRequestTO = (UpdateAppAssetRequestTO) item.object;
             return getAssetFile(mMainService, assetRequestTO.kind);
+        } else if (item.type == BrandedItem.TYPE_EMBEDDED_APP) {
+            final EmbeddedAppTO app = (EmbeddedAppTO) item.object;
+            return getEmbeddedAppFile(app.name);
         } else {
             return getBrandingFile(item.brandingKey);
         }
@@ -1726,7 +1877,8 @@ public class BrandingMgr implements Pickleable, Closeable {
                 if (item.type == BrandedItem.TYPE_JS_EMBEDDING_PACKET
                         || item.type == BrandedItem.TYPE_LOCAL_FLOW_ATTACHMENT
                         || item.type == BrandedItem.TYPE_ATTACHMENT
-                        || item.type == BrandedItem.TYPE_APP_ASSET) {
+                        || item.type == BrandedItem.TYPE_APP_ASSET
+                        || item.type == BrandedItem.TYPE_EMBEDDED_APP) {
                     IOUtils.copy(dis, output, BUFFER_SIZE);
                 } else {
                     try {
@@ -1739,9 +1891,8 @@ public class BrandingMgr implements Pickleable, Closeable {
                 dis.close();
             }
 
-            if (item.type == BrandedItem.TYPE_LOCAL_FLOW_ATTACHMENT || item.type == BrandedItem.TYPE_ATTACHMENT
-                    || item.type == BrandedItem.TYPE_APP_ASSET) {
-            } else {
+            if (item.type != BrandedItem.TYPE_LOCAL_FLOW_ATTACHMENT && item.type != BrandedItem.TYPE_ATTACHMENT
+                    && item.type != BrandedItem.TYPE_APP_ASSET && item.type != BrandedItem.TYPE_EMBEDDED_APP) {
                 String hexDigest = com.mobicage.rogerthat.util.TextUtils.toHex(digester.digest());
                 if (!getCleanBrandingKey(brandingKey).equals(hexDigest))
                     throw new BrandingFailureException(
@@ -1761,6 +1912,9 @@ public class BrandingMgr implements Pickleable, Closeable {
                     || item.type == BrandedItem.TYPE_ATTACHMENT
                     || item.type == BrandedItem.TYPE_APP_ASSET) {
                 url = item.brandingKey;
+            } else if (item.type == BrandedItem.TYPE_EMBEDDED_APP) {
+                EmbeddedAppTO app = (EmbeddedAppTO) item.object;
+                url = app.serving_url;
             } else {
                 url = CloudConstants.BRANDING_URL_PREFIX + item.brandingKey;
             }
@@ -1840,6 +1994,9 @@ public class BrandingMgr implements Pickleable, Closeable {
                 } else if (item.type == BrandedItem.TYPE_APP_ASSET) {
                     UpdateAppAssetRequestTO appAssetRequestTO = (UpdateAppAssetRequestTO) item.object;
                     errorMessage += " for app asset of kind " + appAssetRequestTO.kind + " in message ";
+                } else if (item.type == BrandedItem.TYPE_EMBEDDED_APP) {
+                    EmbeddedAppTO app = (EmbeddedAppTO) item.object;
+                    errorMessage += " for embedded app: " + app.name;
                 }
 
                 if (e instanceof IOException) {
@@ -1939,6 +2096,27 @@ public class BrandingMgr implements Pickleable, Closeable {
     private File getJSEmbeddingRootDirectory() throws BrandingFailureException {
         T.dontCare();
         File file = new File(mMainService.getFilesDir(), "javascript");
+        IOUtils.createDirIfNotExistsBranding(mMainService, file);
+        return file;
+    }
+
+    private File getEmbeddedAppFile(String name) throws BrandingFailureException {
+        T.dontCare();
+        File dir = getEmbeddedAppsRootDirectory();
+        return new File(dir, name + ".zip");
+    }
+
+    public File getEmbeddedAppDirectory(String name) throws BrandingFailureException {
+        T.dontCare();
+        File dir = new File(mContext.getCacheDir(), "embedded_apps");
+        File file = new File(dir, name + "");
+        IOUtils.createDirIfNotExistsBranding(mMainService, file);
+        return file;
+    }
+
+    private File getEmbeddedAppsRootDirectory() throws BrandingFailureException {
+        T.dontCare();
+        File file = new File(mMainService.getFilesDir(), "embedded_apps");
         IOUtils.createDirIfNotExistsBranding(mMainService, file);
         return file;
     }

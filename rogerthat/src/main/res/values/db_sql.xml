@@ -25,10 +25,10 @@
     <string name="sql_user_friend_list_cursor">SELECT rowid as _id, email, name, share_location, shares_location, avatar, existence, \"type\", description, description_branding, poke_description, qualified_identifier, organization_type, callbacks, flags, profile_data, content_branding_hash, home_branding_hash, actions FROM friend WHERE existence = 0 and \"type\" = 1 ORDER BY name COLLATE NOCASE</string>
     <string name="sql_service_friend_list_cursor">
         SELECT f.rowid as _id, f.email, f.name, f.share_location, f.shares_location, f.avatar, f.existence, f.type, f.description, f.description_branding, f.poke_description, f.qualified_identifier, f.organization_type, f.callbacks, f.flags, f.profile_data, f.content_branding_hash, f.home_branding_hash, f.actions,
-            IFNULL(c.id, f.email) AS cat_id, ifnull(c.name, f.name) AS cat_name, c.avatar, count(f.email) 
-        FROM friend f LEFT OUTER JOIN friend_category c ON c.id = f.category_id 
-        WHERE (f.existence = 0 OR f.existence = 4) AND f.type = 2 
-        GROUP BY cat_id 
+            IFNULL(c.id, f.email) AS cat_id, ifnull(c.name, f.name) AS cat_name, c.avatar, count(f.email)
+        FROM friend f LEFT OUTER JOIN friend_category c ON c.id = f.category_id
+        WHERE (f.existence = 0 OR f.existence = 4) AND f.type = 2
+        GROUP BY cat_id
         ORDER BY cat_name COLLATE NOCASE
     </string>
     <string name="sql_service_actions_list_cursor">
@@ -427,6 +427,12 @@ ORDER BY ms.acked_timestamp DESC
     <string name="sql_delete_beacon_discovery_by_uuid_and_name">DELETE FROM beacon_discovery WHERE uuid = ? AND name = ?</string>
     <string name="sql_get_friend_connected_on_beacon_discovery">SELECT bd.friend_email, bd.tag, f.callbacks FROM beacon_discovery as bd INNER JOIN friend as f ON bd.friend_email=f.email WHERE bd.uuid = ? AND bd.name = ? AND (f.existence = 0 OR f.existence = 4)</string>
 
+    <!-- embedded app -->
+    <string name="sql_get_embedded_app">SELECT version FROM embedded_app WHERE name = ?</string>
+    <string name="sql_select_embedded_app">SELECT name, version FROM embedded_app</string>
+    <string name="sql_insert_embedded_app">INSERT OR REPLACE INTO embedded_app(name, version) values (?, ?)</string>
+    <string name="sql_delete_embedded_app">DELETE FROM embedded_app WHERE name = ?</string>
+
     <!-- js embedding -->
     <string name="sql_get_js_embedding">SELECT name, hash, status FROM js_embedding</string>
     <string name="sql_insert_js_embedding">INSERT OR REPLACE INTO js_embedding(name, hash, status) values (?, ?, ?)</string>
@@ -470,9 +476,9 @@ ORDER BY ms.acked_timestamp DESC
     <string name="sql_services_count_by_organization_type">SELECT COUNT(*) FROM (SELECT IFNULL(category_id, email) AS category FROM friend WHERE type=2 AND (existence = 0 OR existence = 4) AND organization_type=? GROUP BY category)</string>
 
     <!-- news -->
-    <string name="sql_news_insert_partial_item">INSERT INTO news (id, version, sort_timestamp, sort_priority, sort_key, reindex, is_partial, sender_email, broadcast_type) values (?, ?, ?, ?, (((127 - ?) &lt;&lt; 48) + ?), ?, 1, ?, ?)</string>
+    <string name="sql_news_insert_partial_item">INSERT INTO news (id, version, sort_timestamp, sort_priority, sort_key, reindex, is_partial, sender_email, broadcast_type, feed_name) values (?, ?, ?, ?, (((127 - ?) &lt;&lt; 48) + ?), ?, 1, ?, ?, ?)</string>
     <string name="sql_news_update_partial_item">UPDATE news set version = ?, sort_timestamp = ?, sort_priority = ?, is_partial = 1, sort_key = (((127 - ?) &lt;&lt; 48) + ?), reindex = ?, sender_email = ?, broadcast_type = ? WHERE id = ?</string>
-    <string name="sql_news_insert_item">INSERT INTO news (id, \"timestamp\", sender_email, sender_name, sender_avatar_id, title, message, image_url, broadcast_type, reach, qr_code_content, qr_code_caption, version, flags, type, \"read\", pinned, rogered, disabled, sort_timestamp, sort_priority, sort_key, is_partial, reindex) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, (((127 - ?) &lt;&lt; 48) + ?), 0, 1)</string>
+    <string name="sql_news_insert_item">INSERT INTO news (id, \"timestamp\", sender_email, sender_name, sender_avatar_id, title, message, image_url, broadcast_type, reach, qr_code_content, qr_code_caption, version, flags, type, \"read\", pinned, rogered, disabled, sort_timestamp, sort_priority, sort_key, is_partial, reindex, feed_name) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, (((127 - ?) &lt;&lt; 48) + ?), 0, 1, ?)</string>
     <string name="sql_news_update_item">UPDATE news set \"timestamp\" = ?, sender_email = ?, sender_name = ?, sender_avatar_id = ?, title = ?, message = ?, image_url = ?, broadcast_type = ?, \"reach\" = ?, qr_code_content= ?, qr_code_caption = ?, version = ?, flags = ?, type = ?, is_partial = 0 WHERE id = ?</string>
     <string name="sql_news_insert_button">INSERT OR REPLACE INTO news_buttons (news_id, id, caption, \"action\", flow_params, \"index\") VALUES (?,?,?,?,?,?)</string>
     <string name="sql_news_insert_rogered_user">INSERT OR REPLACE INTO news_rogered_users (news_id, friend) VALUES (?,?)</string>
@@ -482,11 +488,11 @@ ORDER BY ms.acked_timestamp DESC
     <string name="sql_news_get_rogered_users">SELECT friend FROM news_rogered_users WHERE news_id = ?</string>
     <string name="sql_news_list">
         SELECT timestamp, sender_email, sender_name, sender_avatar_id, title, message, image_url, broadcast_type, reach, qr_code_content, qr_code_caption, version, flags, type, read, pinned, rogered, disabled, is_partial, id, sort_key
-        FROM news WHERE sort_timestamp &lt; ? ORDER BY sort_timestamp DESC LIMIT ?
+        FROM news WHERE sort_timestamp &lt; ? AND feed_name = ? ORDER BY sort_timestamp DESC LIMIT ?
     </string>
     <string name="sql_news_list_service">
         SELECT timestamp, sender_email, sender_name, sender_avatar_id, title, message, image_url, broadcast_type, reach, qr_code_content, qr_code_caption, version, flags, type, read, pinned, rogered, disabled, is_partial, id, sort_key
-        FROM news WHERE sender_email = ? and sort_timestamp &lt; ? ORDER BY sort_timestamp DESC LIMIT ?
+        FROM news WHERE sender_email = ? AND sort_timestamp &lt; ? AND feed_name = ? ORDER BY sort_timestamp DESC LIMIT ?
     </string>
     <string name="sql_news_update_read">UPDATE news SET read = ?, sort_priority = 50, reindex = 1 WHERE id = ? AND read = 0</string>
     <string name="sql_news_update_pinned">UPDATE news SET pinned = ? WHERE id = ?</string>
@@ -494,19 +500,18 @@ ORDER BY ms.acked_timestamp DESC
     <string name="sql_news_update_disabled">UPDATE news SET disabled = ? WHERE id = ?</string>
     <string name="sql_news_delete_buttons">DELETE FROM news_buttons WHERE news_id = ?</string>
     <string name="sql_news_delete_rogerthat_users">DELETE FROM news_rogered_users WHERE news_id = ?</string>
-    <string name="sql_news_reindex">UPDATE news SET sort_key = ((127 - sort_priority) &lt;&lt; 48) + sort_timestamp, reindex = 0 WHERE reindex = 1</string>
+    <string name="sql_news_reindex">UPDATE news SET sort_key = ((127 - sort_priority) &lt;&lt; 48) + sort_timestamp, reindex = 0 WHERE reindex = 1 and feed_name = ?</string>
     <string name="sql_news_update_sort_priority">UPDATE news SET sort_priority = ?, reindex = 1 WHERE id = ? AND sort_priority != ?</string>
-    <string name="sql_news_count_pinned">SELECT COUNT(id) FROM news WHERE pinned = 1</string>
     <string name="sql_news_count_items">SELECT COUNT(id) FROM news WHERE sort_key &gt;= (1 &lt;&lt; 48)</string>
-    <string name="sql_news_count_all_items">SELECT COUNT(id) FROM news</string>
-    <string name="sql_news_count_all_items_service">SELECT COUNT(id) FROM news WHERE sender_email = ?</string>
-    <string name="sql_news_get_news_before">SELECT id, sort_key, is_partial FROM news WHERE sort_key &gt; ? ORDER BY sort_key ASC LIMIT ?</string>
-    <string name="sql_news_get_news_after">SELECT id, sort_key, is_partial FROM news WHERE sort_key &lt; ? and sort_key &gt;= (1 &lt;&lt; 48) ORDER BY sort_key DESC LIMIT ?</string>
-    <string name="sql_news_unread_since">SELECT sender_email, broadcast_type FROM news WHERE read = 0 and timestamp > ? ORDER BY sender_email, broadcast_type</string>
-    <string name="sql_news_count_pinned_items">SELECT COUNT(id) FROM news WHERE pinned = 1 AND sort_key &gt;= (1 &lt;&lt; 48)</string>
-    <string name="sql_news_count_pinned_items_search">SELECT COUNT(id) FROM news WHERE pinned = 1 AND sort_key &gt;= (1 &lt;&lt; 48) AND (sender_name LIKE ? OR title LIKE ? OR message LIKE ? OR broadcast_type LIKE ? OR qr_code_caption LIKE ?)</string>
-    <string name="sql_news_get_pinned_news_before">SELECT id, sort_key, is_partial FROM news WHERE pinned = 1 AND sort_key &gt; ? AND (sender_name LIKE ? OR title LIKE ? OR message LIKE ? OR broadcast_type LIKE ? OR qr_code_caption LIKE ?) ORDER BY sort_key ASC LIMIT ?</string>
-    <string name="sql_news_get_pinned_news_after">SELECT id, sort_key, is_partial FROM news WHERE pinned = 1 AND sort_key &lt; ? and sort_key &gt;= (1 &lt;&lt; 48) AND (sender_name LIKE ? OR title LIKE ? OR message LIKE ? OR broadcast_type LIKE ? OR qr_code_caption LIKE ?) ORDER BY sort_key DESC LIMIT ?</string>
+    <string name="sql_news_count_feed_items">SELECT COUNT(id) FROM news WHERE sort_key &gt;= (1 &lt;&lt; 48) AND feed_name = ?</string>
+    <string name="sql_news_count_all_items">SELECT COUNT(id) FROM news where feed_name = ?</string>
+    <string name="sql_news_count_all_items_service">SELECT COUNT(id) FROM news WHERE sender_email = ? AND feed_name = ?</string>
+    <string name="sql_news_get_news_before">SELECT id, sort_key, is_partial FROM news WHERE sort_key &gt; ? AND feed_name = ? ORDER BY sort_key ASC LIMIT ?</string>
+    <string name="sql_news_get_news_after">SELECT id, sort_key, is_partial FROM news WHERE sort_key &lt; ? and sort_key &gt;= (1 &lt;&lt; 48) AND feed_name = ? ORDER BY sort_key DESC LIMIT ?</string>
+    <string name="sql_news_count_pinned_items">SELECT COUNT(id) FROM news WHERE pinned = 1 AND sort_key &gt;= (1 &lt;&lt; 48) AND feed_name = ?</string>
+    <string name="sql_news_count_pinned_items_search">SELECT COUNT(id) FROM news WHERE pinned = 1 AND sort_key &gt;= (1 &lt;&lt; 48) AND (sender_name LIKE ? OR title LIKE ? OR message LIKE ? OR broadcast_type LIKE ? OR qr_code_caption LIKE ?) AND feed_name = ?</string>
+    <string name="sql_news_get_pinned_news_before">SELECT id, sort_key, is_partial FROM news WHERE pinned = 1 AND sort_key &gt; ? AND (sender_name LIKE ? OR title LIKE ? OR message LIKE ? OR broadcast_type LIKE ? OR qr_code_caption LIKE ?) AND feed_name = ? ORDER BY sort_key ASC LIMIT ?</string>
+    <string name="sql_news_get_pinned_news_after">SELECT id, sort_key, is_partial FROM news WHERE pinned = 1 AND sort_key &lt; ? and sort_key &gt;= (1 &lt;&lt; 48) AND (sender_name LIKE ? OR title LIKE ? OR message LIKE ? OR broadcast_type LIKE ? OR qr_code_caption LIKE ?) AND feed_name = ? ORDER BY sort_key DESC LIMIT ?</string>
     <string name="sql_news_clear_all">DELETE FROM news</string>
 
     <!-- my qr codes -->
@@ -535,7 +540,8 @@ ORDER BY ms.acked_timestamp DESC
     <string name="sql_security_insert">INSERT INTO security_key (type, algorithm, name, indexx, data) VALUES (?, ?, ?, ?, ?)</string>
     <string name="sql_security_delete_group">DELETE FROM security_key WHERE algorithm=? AND name=?</string>
     <string name="sql_security_select_by_key">SELECT data FROM security_key WHERE type = ? AND algorithm = ? AND name = ? AND indexx = ?</string>
-    <string name="sql_security_list_public_keys">SELECT name, algorithm FROM security_key WHERE type = \"public\" ORDER BY name, algorithm COLLATE NOCASE</string>
+    <string name="sql_security_list_public_keys">SELECT name, algorithm FROM security_key WHERE type = \"public\" AND indexx = \"root\" ORDER BY name, algorithm COLLATE NOCASE</string>
+    <string name="sql_security_list_addresses">SELECT indexx, data FROM security_key WHERE type = \"address\" AND algorithm = ? AND name = ? ORDER BY indexx</string>
 
     <!-- iOS-only queries -->
     <string name="sql_friend_count_by_type">SELECT COUNT(*) FROM friend WHERE (existence = 0 OR existence = 4) AND \"type\" = ?</string>
@@ -597,4 +603,6 @@ ORDER BY m.thread_dirty DESC, m.\"timestamp\" DESC;
     <string name="sql_configprovider_insert">INSERT OR REPLACE INTO ConfigurationProvider(category, valuetype, key, value) values (?, ?, ?, ?)</string>
     <string name="sql_configprovider_get">SELECT value FROM ConfigurationProvider WHERE category=? AND valuetype=? AND key=?</string>
     <string name="sql_configprovider_delete">DELETE FROM ConfigurationProvider WHERE category=? AND valuetype=? AND key=?</string>
+
+    <string name="sql_news_unread_since">SELECT sender_email, broadcast_type FROM news WHERE read = 0 and timestamp > ? ORDER BY sender_email, broadcast_type</string>
 </resources>

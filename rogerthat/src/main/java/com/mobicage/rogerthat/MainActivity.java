@@ -346,6 +346,7 @@ public class MainActivity extends ServiceBoundActivity implements PinLockMgr.NoP
             Intent i = new Intent(this, NewsActivity.class);
             i.putExtra("show_drawer_icon", true);
             i.putExtra("id", intent.getLongExtra("id", -1));
+            i.putExtra("feed_name", intent.getStringExtra("feed_name"));
             startActivity(i);
             finish();
         } else {

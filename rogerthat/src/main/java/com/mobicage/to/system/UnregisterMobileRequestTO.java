@@ -35,7 +35,7 @@ public class UnregisterMobileRequestTO implements com.mobicage.rpc.IJSONable {
             Object val = json.get("reason");
             this.reason = (String) val;
         } else {
-            throw new IncompleteMessageException("com.mobicage.to.system.UnregisterMobileRequestTO object is missing field 'reason'");
+            this.reason = null;
         }
     }
 
