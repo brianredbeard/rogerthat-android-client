@@ -360,6 +360,7 @@
     <string name="payment_not_enabled">Betalingen zijn niet ingeschakeld in deze app.</string>
     <string name="payment_providers">Betalingsaanbieders</string>
     <string name="payment_providers_add">Betalingsaanbieder toevoegen</string>
+    <string name="permission_denied_to_load_seed">Deze woorden kunnen bekeken worden onder %1$s &gt; %2$s. Selecteer daarna de sleutel met naam \"%3$s\".</string>
     <string name="phone">Telefoon</string>
     <string name="photo">Foto</string>
     <string name="pin_confirm">Bevestig uw pincode.</string>
