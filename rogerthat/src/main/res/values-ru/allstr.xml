@@ -329,7 +329,7 @@
     <string name="processing_scan">Обработка скана…</string>
     <string name="profile">Профиль</string>
     <string name="qr_call_tel">Вы хотите позвонить %1$s?</string>
-    <string name="qr_open_url">Вы хотите открыть следующую веб-страницу:\n\n%1$</string>
+    <string name="qr_open_url">Вы хотите открыть следующую веб-страницу:\n\n%1$s</string>
     <string name="reach">Охват:</string>
     <string name="read_less">Меньше…</string>
     <string name="read_more">Больше…</string>

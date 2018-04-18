@@ -21,9 +21,6 @@ package com.mobicage.rogerthat.util;
 import android.content.Context;
 import android.graphics.Typeface;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.math.BigInteger;
 import java.util.HashMap;
 
@@ -92,21 +89,6 @@ public class TextUtils {
         Bypass bypass = new Bypass(context);
         // Duplicate newlines so it is consistent with the iOS app
         return bypass.markdownToSpannable(message.replace("\n", "\n\n"));
-    }
-
-    public static String optString(JSONObject json, String key, String fallback) {
-        // http://code.google.com/p/android/issues/detail?id=13830
-        if (json.isNull(key))
-            return null;
-        else
-            return json.optString(key, fallback);
-    }
-
-    public static Long optLong(JSONObject json, String key) throws JSONException {
-        long l = json.optLong(key, -1);
-        if (l == -1)
-            return null;
-        return l;
     }
 
 }

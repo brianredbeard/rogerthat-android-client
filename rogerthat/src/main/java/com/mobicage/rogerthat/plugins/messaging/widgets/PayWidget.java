@@ -43,6 +43,7 @@ import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.plugins.system.SystemPlugin;
+import com.mobicage.rogerthat.util.JsonUtils;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
@@ -284,12 +285,12 @@ public class PayWidget extends Widget {
                     JSONObject args = new JSONObject(result);
                     if (args.optBoolean("success")) {
                         mResult = new PayWidgetResultTO();
-                        mResult.provider_id = TextUtils.optString(args, "provider_id", null);
-                        mResult.transaction_id = TextUtils.optString(args, "transaction_id", null);
-                        mResult.status = TextUtils.optString(args, "status", null);
+                        mResult.provider_id = JsonUtils.optString(args, "provider_id", null);
+                        mResult.transaction_id = JsonUtils.optString(args, "transaction_id", null);
+                        mResult.status = JsonUtils.optString(args, "status", null);
                         showResult();
 
-                        String message = TextUtils.optString(args, "message", null);
+                        String message = JsonUtils.optString(args, "message", null);
                         if (!TextUtils.isEmptyOrWhitespace(message)) {
                             SafeDialogClick onPositiveClick = new SafeDialogClick() {
                                 @Override
@@ -307,8 +308,8 @@ public class PayWidget extends Widget {
                         }
 
                     } else {
-                        String code = TextUtils.optString(args, "code", null);
-                        String message = TextUtils.optString(args, "message", null);
+                        String code = JsonUtils.optString(args, "code", null);
+                        String message = JsonUtils.optString(args, "message", null);
                         if (TextUtils.isEmptyOrWhitespace(code) || TextUtils.isEmptyOrWhitespace(message)) {
                             L.e("Failed to make payment: unknown reason!");
                             UIUtils.showDialog(mActivity, null, R.string.error_please_try_again);
