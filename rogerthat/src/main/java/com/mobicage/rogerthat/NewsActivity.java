@@ -44,6 +44,7 @@ import com.mobicage.rogerthat.plugins.news.NewsPlugin;
 import com.mobicage.rogerthat.plugins.news.NewsStore;
 import com.mobicage.rogerthat.plugins.scan.GetUserInfoResponseHandler;
 import com.mobicage.rogerthat.plugins.scan.ProcessScanActivity;
+import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.CachedDownloader;
 import com.mobicage.rogerthat.util.RegexPatterns;
 import com.mobicage.rogerthat.util.logging.L;
@@ -524,6 +525,9 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
             }
             mPoker = new Poker<>(this, serviceEmail);
             mPoker.poke(buttonUrl, null);
+
+        } else if (Message.MC_OPEN_PREFIX.equals(buttonAction)) {
+            ActivityUtils.openUrl(this, buttonUrl);
         }
     }
 

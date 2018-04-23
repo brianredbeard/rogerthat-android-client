@@ -665,8 +665,10 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                         askConfirmation(message, button, buttonUrl);
                     } else {
                         if (buttonAction != null) {
-                            final Intent intent = new Intent(buttonAction, Uri.parse(buttonUrl));
-                            startActivity(intent);
+                            if (Intent.ACTION_VIEW.equals(buttonAction) || Intent.ACTION_DIAL.equals(buttonAction)) {
+                                final Intent intent = new Intent(buttonAction, Uri.parse(buttonUrl));
+                                startActivity(intent);
+                            }
                         }
                         ackMessage(message, button);
                     }

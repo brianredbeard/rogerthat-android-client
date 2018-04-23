@@ -41,6 +41,7 @@ import com.mobicage.rogerthat.plugins.messaging.ServiceMessageDetailActivity;
 import com.mobicage.rogerthat.plugins.messaging.mfr.EmptyStaticFlowException;
 import com.mobicage.rogerthat.plugins.messaging.mfr.JsMfr;
 import com.mobicage.rogerthat.plugins.messaging.mfr.MessageFlowRun;
+import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
@@ -93,7 +94,7 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
 
     // fields set by the constructor
     private final ResultHandler mDefaultResultHandler = new ResultHandler();
-    private final T mActivity;
+    private final ServiceBoundActivity mActivity;
     private final MainService mService;
     private final String mEmail;
 
@@ -103,7 +104,7 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
     private ServiceMenuItemTO mItem;
     private long mLastTimeClicked = 0;
 
-    public MenuItemPresser(T activity, String email) {
+    public MenuItemPresser(ServiceBoundActivity activity, String email) {
         mActivity = activity;
         mService = mActivity.getMainService();
         mEmail = email;
@@ -192,7 +193,6 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
         }
 
         final PressMenuIconRequestTO request = poke(item, menuGeneration);
-
         if (item.link != null) {
             openLink(item.link);
         } else if (item.screenBranding != null) {
@@ -349,8 +349,14 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
             return;
         }
 
-        Uri uri = Uri.parse(actionInfo.get("androidUrl"));
-        
+        String buttonUrl = actionInfo.get("androidUrl");
+        if (Message.MC_OPEN_PREFIX.equals(buttonAction)) {
+            ActivityUtils.openUrl(mActivity, buttonUrl);
+            return;
+        }
+
+        Uri uri = Uri.parse(buttonUrl);
+
         if (Message.MC_HTTP_PREFIX.equals(buttonAction) || Message.MC_HTTPS_PREFIX.equals(buttonAction)) {
             CustomTabsIntent.Builder customTabsBuilder = new CustomTabsIntent.Builder();
             CustomTabsIntent customTabsIntent = customTabsBuilder.build();
@@ -358,10 +364,12 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
             return;
         }
 
-        final Intent intent = new Intent(buttonAction, uri);
-        mActivity.startActivity(intent);
-        mResultHandler.onSuccess();
-        stop();
+        if (Intent.ACTION_VIEW.equals(buttonAction) || Intent.ACTION_DIAL.equals(buttonAction)) {
+            final Intent intent = new Intent(buttonAction, uri);
+            mActivity.startActivity(intent);
+            mResultHandler.onSuccess();
+            stop();
+        }
     }
 
     @Override

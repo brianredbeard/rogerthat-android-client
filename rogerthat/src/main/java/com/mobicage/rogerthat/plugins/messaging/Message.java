@@ -43,6 +43,7 @@ public class Message extends MessageTO {
     public final static String MC_MAILTO_PREFIX = "mailto://";
     public final static String MC_SMI_PREFIX = "smi://";
     public final static String MC_POKE_PREFIX = "poke://";
+    public final static String MC_OPEN_PREFIX = "open://";
 
     public boolean dirty;
     public boolean needsMyAnswer;
