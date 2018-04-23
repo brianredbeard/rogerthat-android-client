@@ -976,7 +976,7 @@ public class BrandingMgr implements Pickleable, Closeable {
                         if (!failed) {
                             try {
                                 SystemPlugin systemPlugin = mMainService.getPlugin(SystemPlugin.class);
-                                systemPlugin.getStore().updateEmbeddedApp(app.name, app.version);
+                                systemPlugin.getStore().updateEmbeddedApp(app.name, app.version, app.url_regexes);
 
                                 Intent intent = new Intent(EMBEDDED_APP_AVAILABLE_INTENT);
                                 intent.putExtra("id", app.name);

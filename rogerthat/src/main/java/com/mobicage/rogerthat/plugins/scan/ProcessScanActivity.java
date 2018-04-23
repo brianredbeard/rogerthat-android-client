@@ -28,13 +28,16 @@ import android.os.Bundle;
 
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MyIdentity;
 import com.mobicage.rogerthat.NavigationItem;
 import com.mobicage.rogerthat.ServiceBoundActivity;
+import com.mobicage.rogerthat.cordova.CordovaActionScreenActivity;
 import com.mobicage.rogerthat.cordova.CordovaSettings;
 import com.mobicage.rogerthat.plugins.friends.ActionScreenActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.history.HistoryItem;
+import com.mobicage.rogerthat.plugins.system.SystemPlugin;
 import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.RegexPatterns;
 import com.mobicage.rogerthat.util.TextUtils;
@@ -56,9 +59,11 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ProcessScanActivity extends ServiceBoundActivity {
 
@@ -278,7 +283,33 @@ public class ProcessScanActivity extends ServiceBoundActivity {
         abortProcessing();
     }
 
+    private String getEmbeddedAppMatch(final String url) {
+        try {
+            String embeddedAppName = null;
+            final SystemPlugin plugin = mService.getPlugin(SystemPlugin.class);
+            Map<String, List<String>> urls = plugin.getStore().getEmbeddedAppUrlRegex();
+            for (String name : urls.keySet()) {
+                if (embeddedAppName != null) {
+                    break;
+                }
+                for (String urlRegex : urls.get(name)) {
+                    Pattern p = Pattern.compile(urlRegex);
+                    Matcher m = p.matcher(url);
+                    if (m.matches()) {
+                        embeddedAppName = name;
+                        break;
+                    }
+                }
+            }
+            return embeddedAppName;
+        } catch (Exception e) {
+            L.e(e);
+        }
+        return null;
+    }
+
     private void processUrl(final String url) {
+        String embeddedAppName = null;
         String trimmedLowerCaseUrl = url.trim().toLowerCase(Locale.US);
         if (trimmedLowerCaseUrl.startsWith(URL_ROGERTHAT_PREFIX)) {
             if (url.contains("?")) {
@@ -286,6 +317,7 @@ public class ProcessScanActivity extends ServiceBoundActivity {
             } else {
                 processEmailHash(url.substring(URL_ROGERTHAT_PREFIX.length()));
             }
+            return;
 
         } else if (trimmedLowerCaseUrl.startsWith(URL_ROGERTHAT_SID_PREFIX)) {
             Matcher match = RegexPatterns.SERVICE_INTERACT_URL.matcher(url);
@@ -293,47 +325,51 @@ public class ProcessScanActivity extends ServiceBoundActivity {
             String emailHash = match.group(1);
             String sid = match.group(2);
             getServiceActionInfo(emailHash, sid);
+            return;
 
         } else if (trimmedLowerCaseUrl.startsWith(SHORT_HTTPS_URL_PREFIX)) {
             mScanCommunication = new ScanCommunication(mService);
             mScanCommunication.resolveUrl(url);
+            return;
 
         } else if (trimmedLowerCaseUrl.startsWith("http://") || trimmedLowerCaseUrl.startsWith("https://")) {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-            scannedUnknownQR(getString(R.string.qr_open_url, TextUtils.trimString(url, 100, true)), intent);
+            embeddedAppName = getEmbeddedAppMatch(trimmedLowerCaseUrl);
+            if (embeddedAppName == null) {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                scannedUnknownQR(getString(R.string.qr_open_url, TextUtils.trimString(url, 100, true)), intent);
+                return;
+            }
 
         } else if (trimmedLowerCaseUrl.startsWith("tel:")) {
             String number = url.substring(4);
             Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + number));
             scannedUnknownQR(getString(R.string.qr_call_tel, number), intent);
+            return;
+        }
 
-        } else {
-            try {
-                Map<String, Object> data = (Map<String, Object>) JSONValue.parse(url);
-                String applicationTag = (String) data.get("t");
-                JSONObject context = (JSONObject) data.get("c");
-
-                if (CordovaSettings.APPS.contains(applicationTag) && context != null) {
-                    NavigationItem ni = new NavigationItem(FontAwesome.Icon.faw_question_circle_o, "cordova", applicationTag, "");
-
-                    String errorMessage = ActivityUtils.canOpenNavigationItem(this, ni);
-                    if (errorMessage == null) {
-                        Bundle extras = new Bundle();
-                        extras.putString(ActionScreenActivity.CONTEXT, context.toJSONString());
-                        ActivityUtils.goToActivity(this, ni, false, extras);
-                        finish();
-                        return;
-                    }
-                    L.d(errorMessage);
-                }
-
-            } catch (Exception e) {
-                L.d("Failed to process url into an application", e);
-            }
+        if (embeddedAppName == null) {
+            embeddedAppName = getEmbeddedAppMatch(trimmedLowerCaseUrl);
+        }
+        if (embeddedAppName == null) {
             L.d("Cannot process url " + url);
             UIUtils.showLongToast(this, getResources().getString(R.string.unrecognized_scan_result));
             finish();
+            return;
         }
+        org.json.simple.JSONObject context = new org.json.simple.JSONObject();
+        context.put("launched_by", "scan");
+        context.put("content", url);
+
+        Bundle extras = new Bundle();
+        extras.putString(ActionScreenActivity.CONTEXT, context.toString());
+        extras.putString(CordovaActionScreenActivity.EMBEDDED_APP_ID, embeddedAppName);
+        extras.putString(CordovaActionScreenActivity.TITLE, "");
+
+        final Intent i = new Intent(this, CordovaActionScreenActivity.class);
+        i.putExtras(extras);
+        i.addFlags(MainActivity.FLAG_CLEAR_STACK);
+        startActivity(i);
+        finish();
     }
 
     private void startSpinner(boolean isScan) {

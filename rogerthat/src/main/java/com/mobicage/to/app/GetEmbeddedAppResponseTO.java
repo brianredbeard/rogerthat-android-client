@@ -27,6 +27,7 @@ public class GetEmbeddedAppResponseTO implements com.mobicage.rpc.IJSONable {
 
     public String name;
     public String serving_url;
+    public String[] url_regexes;
     public long version;
 
     public GetEmbeddedAppResponseTO() {
@@ -45,6 +46,19 @@ public class GetEmbeddedAppResponseTO implements com.mobicage.rpc.IJSONable {
         } else {
             throw new IncompleteMessageException("com.mobicage.to.app.GetEmbeddedAppResponseTO object is missing field 'serving_url'");
         }
+        if (json.containsKey("url_regexes")) {
+            org.json.simple.JSONArray val_arr = (org.json.simple.JSONArray) json.get("url_regexes");
+            if (val_arr == null) {
+                this.url_regexes = null;
+            } else {
+                this.url_regexes = new String[val_arr.size()];
+                for (int i=0; i < val_arr.size(); i++) {
+                    this.url_regexes[i] = (String) val_arr.get(i);
+                }
+            }
+        } else {
+            this.url_regexes = new String[0];
+        }
         if (json.containsKey("version")) {
             Object val = json.get("version");
             if (val instanceof Integer) {
@@ -58,10 +72,20 @@ public class GetEmbeddedAppResponseTO implements com.mobicage.rpc.IJSONable {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Map<String, Object> toJSONMap() {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
         obj.put("name", this.name);
         obj.put("serving_url", this.serving_url);
+        if (this.url_regexes == null) {
+            obj.put("url_regexes", null);
+        } else {
+            org.json.simple.JSONArray arr = new org.json.simple.JSONArray();
+            for (int i=0; i < this.url_regexes.length; i++) {
+                arr.add(this.url_regexes[i]);
+            }
+            obj.put("url_regexes", arr);
+        }
         obj.put("version", this.version);
         return obj;
     }

@@ -302,15 +302,18 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
             final boolean isInitial = intent.getBooleanExtra("initial", false);
             if (!isInitial) {
                 final long[] newIds = intent.getLongArrayExtra("new_ids");
-                for (long newsId : newIds) {
-                    mNewNewsItems.add(newsId);
+                if (newIds != null) {
+                    for (long newsId : newIds) {
+                        mNewNewsItems.add(newsId);
+                    }
+                    if (newIds.length > 0) {
+                        setupUpdatesAvailable();
+                    }
                 }
-                if (newIds.length > 0) {
-                    setupUpdatesAvailable();
-                }
-
                 final long[] updatedIds = intent.getLongArrayExtra("updated_ids");
-                nla.updateNewsItems(updatedIds);
+                if (updatedIds != null) {
+                    nla.updateNewsItems(updatedIds);
+                }
             }
         }
     }

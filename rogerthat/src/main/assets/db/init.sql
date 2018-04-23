@@ -51,6 +51,11 @@ CREATE TABLE embedded_app_translations (
      id TEXT PRIMARY KEY,
      content TEXT
   );
+CREATE TABLE embedded_app_url_regex (
+    name TEXT,
+    url_regex TEXT,
+    PRIMARY KEY (name, url_regex)
+);
 CREATE TABLE friend (
 	email TEXT PRIMARY KEY,
 	name TEXT,
@@ -156,9 +161,9 @@ CREATE TABLE news (
     sort_priority INTEGER,
     is_partial INTEGER,
     reindex INTEGER DEFAULT 0,
-    sort_key INTEGER,
-    feed_name TEXT DEFAULT ''
-);
+    sort_key INTEGER
+, feed_name TEXT
+DEFAULT '');
 CREATE TABLE news_buttons (
     news_id INTEGER NOT NULL,
     id TEXT NOT NULL,
@@ -364,4 +369,5 @@ CREATE INDEX ix_news_pinned_sort_key ON news ("pinned", "sort_key");
 CREATE INDEX ix_mq_qr_codes_name ON my_qr_codes ("name");
 CREATE INDEX ix_payment_provider_name ON payment_provider ("name");
 CREATE INDEX ix_payment_asset_name ON payment_asset ("name");
+CREATE INDEX embedded_app_url_regex_name ON embedded_app_url_regex ("name");
 COMMIT;

@@ -23,28 +23,28 @@ import com.mobicage.rpc.IncompleteMessageException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class EmbeddedAppTO implements com.mobicage.rpc.IJSONable {
+public class UpdateEmbeddedAppRequestTO implements com.mobicage.rpc.IJSONable {
 
     public String name;
     public String serving_url;
     public String[] url_regexes;
     public long version;
 
-    public EmbeddedAppTO() {
+    public UpdateEmbeddedAppRequestTO() {
     }
 
-    public EmbeddedAppTO(Map<String, Object> json) throws IncompleteMessageException {
+    public UpdateEmbeddedAppRequestTO(Map<String, Object> json) throws IncompleteMessageException {
         if (json.containsKey("name")) {
             Object val = json.get("name");
             this.name = (String) val;
         } else {
-            throw new IncompleteMessageException("com.mobicage.to.app.EmbeddedAppTO object is missing field 'name'");
+            throw new IncompleteMessageException("com.mobicage.to.app.UpdateEmbeddedAppRequestTO object is missing field 'name'");
         }
         if (json.containsKey("serving_url")) {
             Object val = json.get("serving_url");
             this.serving_url = (String) val;
         } else {
-            throw new IncompleteMessageException("com.mobicage.to.app.EmbeddedAppTO object is missing field 'serving_url'");
+            throw new IncompleteMessageException("com.mobicage.to.app.UpdateEmbeddedAppRequestTO object is missing field 'serving_url'");
         }
         if (json.containsKey("url_regexes")) {
             org.json.simple.JSONArray val_arr = (org.json.simple.JSONArray) json.get("url_regexes");
@@ -67,7 +67,7 @@ public class EmbeddedAppTO implements com.mobicage.rpc.IJSONable {
                 this.version = ((Long) val).longValue();
             }
         } else {
-            throw new IncompleteMessageException("com.mobicage.to.app.EmbeddedAppTO object is missing field 'version'");
+            throw new IncompleteMessageException("com.mobicage.to.app.UpdateEmbeddedAppRequestTO object is missing field 'version'");
         }
     }
 

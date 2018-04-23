@@ -39,6 +39,8 @@ public class SystemStore implements Closeable {
     private final SQLiteStatement mGetEmbeddedApp;
     private final SQLiteStatement mUpdateEmbeddedApp;
     private final SQLiteStatement mDeleteEmbeddedApp;
+    private final SQLiteStatement mUpdateEmbeddedAppUrlRegex;
+    private final SQLiteStatement mDeleteEmbeddedAppUrlRegexes;
 
     private final SQLiteStatement mUpdateJSEmbeddedPacket;
     private final SQLiteStatement mDeleteJSEmbeddedPacket;
@@ -60,6 +62,8 @@ public class SystemStore implements Closeable {
         mGetEmbeddedApp = mDb.compileStatement(mMainService.getString(R.string.sql_get_embedded_app));
         mUpdateEmbeddedApp = mDb.compileStatement(mMainService.getString(R.string.sql_insert_embedded_app));
         mDeleteEmbeddedApp = mDb.compileStatement(mMainService.getString(R.string.sql_delete_embedded_app));
+        mUpdateEmbeddedAppUrlRegex = mDb.compileStatement(mMainService.getString(R.string.sql_insert_embedded_app_url_regex));
+        mDeleteEmbeddedAppUrlRegexes = mDb.compileStatement(mMainService.getString(R.string.sql_delete_embedded_app_url_regexes));
 
         mUpdateJSEmbeddedPacket = mDb.compileStatement(mMainService.getString(R.string.sql_insert_js_embedding));
         mDeleteJSEmbeddedPacket = mDb.compileStatement(mMainService.getString(R.string.sql_delete_js_embedding));
@@ -77,6 +81,8 @@ public class SystemStore implements Closeable {
         mGetEmbeddedApp.close();
         mUpdateEmbeddedApp.close();
         mDeleteEmbeddedApp.close();
+        mUpdateEmbeddedAppUrlRegex.close();
+        mDeleteEmbeddedAppUrlRegexes.close();
 
         mUpdateJSEmbeddedPacket.close();
         mDeleteJSEmbeddedPacket.close();
@@ -119,17 +125,58 @@ public class SystemStore implements Closeable {
         }
     }
 
-    public void updateEmbeddedApp(final String name, final long version) {
+    public void updateEmbeddedApp(final String name, final long version, final String[] urlRegexes) {
         T.dontCare();
         mUpdateEmbeddedApp.bindString(1, name);
         mUpdateEmbeddedApp.bindLong(2, version);
         mUpdateEmbeddedApp.execute();
+
+        deleteEmbeddedAppUrlRegexes(name);
+        updateEmbeddedAppUrlRegex(name, urlRegexes);
     }
 
     public void deleteEmbeddedApp(final String name) {
         T.dontCare();
         mDeleteEmbeddedApp.bindString(1, name);
         mDeleteEmbeddedApp.execute();
+    }
+
+    public Map<String, List<String>> getEmbeddedAppUrlRegex() {
+        T.dontCare();
+        Map<String, List<String>> urls = new HashMap<>();
+        final Cursor bc = mDb.rawQuery(mMainService.getString(R.string.sql_select_embedded_app_url_regex), new String[] {});
+        try {
+            if (bc.moveToFirst()) {
+                for (int i = 0; i < bc.getCount(); i++) {
+                    String name = bc.getString(0);
+                    String urlRegex = bc.getString(1);
+                    if (!urls.containsKey(name)) {
+                        urls.put(name, new ArrayList<String>());
+                    }
+                    urls.get(name).add(urlRegex);
+                    if (!bc.moveToNext())
+                        break;
+                }
+            }
+        } finally {
+            bc.close();
+        }
+        return urls;
+    }
+
+    private void updateEmbeddedAppUrlRegex(final String name, final String[] urlRegexes) {
+        T.dontCare();
+        for (String urlRegex : urlRegexes) {
+            mUpdateEmbeddedAppUrlRegex.bindString(1, name);
+            mUpdateEmbeddedAppUrlRegex.bindString(2, urlRegex);
+            mUpdateEmbeddedAppUrlRegex.execute();
+        }
+    }
+
+    private void deleteEmbeddedAppUrlRegexes(final String name) {
+        T.dontCare();
+        mDeleteEmbeddedAppUrlRegexes.bindString(1, name);
+        mDeleteEmbeddedAppUrlRegexes.execute();
     }
 
     public Map<String, JSEmbedding> getJSEmbeddedPackets() {
