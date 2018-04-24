@@ -357,7 +357,10 @@ public class BrandingMgr implements Pickleable, Closeable {
                 } else if (type == TYPE_EMBEDDED_APP) {
                     EmbeddedAppTO app = (EmbeddedAppTO) object;
                     EmbeddedAppTO otherApp = (EmbeddedAppTO) other.object;
-                    if (app.name != otherApp.name) {
+                    if (!app.name.equals(otherApp.name)) {
+                        return false;
+                    }
+                    if (app.version != app.version) {
                         return false;
                     }
                 }
