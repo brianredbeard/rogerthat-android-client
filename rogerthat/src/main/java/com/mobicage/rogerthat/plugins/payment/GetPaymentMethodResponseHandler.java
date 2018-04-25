@@ -57,7 +57,7 @@ public class GetPaymentMethodResponseHandler extends ResponseHandler<GetPaymentM
             intent.putExtra("json", JSONValue.toJSONString(resp.toJSONMap()));
         } catch (Exception e) {
             L.d(e);
-            intent.setAction(PaymentPlugin.GET_PAYMENT_METHODS_RESULT_INTENT);
+            intent.setAction(PaymentPlugin.GET_PAYMENT_METHODS_FAILED_INTENT);
             intent.putExtra("error", e.getMessage());
         }
         mMainService.sendBroadcast(intent);

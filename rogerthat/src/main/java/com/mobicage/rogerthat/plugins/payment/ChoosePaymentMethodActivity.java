@@ -20,7 +20,6 @@ package com.mobicage.rogerthat.plugins.payment;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -34,10 +33,8 @@ import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
-import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.IncompleteMessageException;
-import com.mobicage.to.payment.GetPaymentMethodsRequestTO;
 import com.mobicage.to.payment.GetPaymentMethodsResponseTO;
 import com.mobicage.to.payment.PayMethodTO;
 import com.mobicage.to.payment.PaymentProviderMethodsTO;
@@ -52,7 +49,6 @@ import java.util.Map;
 public class ChoosePaymentMethodActivity extends ServiceBoundActivity {
     public static final String PICKED_PAYMENT_METHOD = "com.mobicage.rogerthat.plugins.payment.PICKED_PAYMENT_METHOD";
     public static final String RESULT_DATA_KEY = "json";
-    GetPaymentMethodsRequestTO mRequest;
     ProgressBar mProgressBar;
     ListView mListView;
     ArrayAdapter<PaymentProviderMethod> mAdapter;
@@ -64,11 +60,6 @@ public class ChoosePaymentMethodActivity extends ServiceBoundActivity {
         BroadcastReceiver broadcastReceiver = getBroadcastReceiver();
         final IntentFilter filter = getIntentFilter();
         registerReceiver(broadcastReceiver, filter);
-        try {
-            mRequest = new GetPaymentMethodsRequestTO((Map<String, Object>) JSONValue.parse(getIntent().getStringExtra("request")));
-        } catch (IncompleteMessageException e) {
-            L.bug(e);
-        }
         this.mProgressBar = (ProgressBar) findViewById(R.id.loading_progress_bar);
         this.mListView = (ListView) findViewById(R.id.payment_methods_list);
         this.mAdapter = new PaymentMethodsAdapter(this);
@@ -97,18 +88,7 @@ public class ChoosePaymentMethodActivity extends ServiceBoundActivity {
 
     @Override
     protected void onServiceBound() {
-        PaymentPlugin paymentPlugin = mService.getPlugin(PaymentPlugin.class);
-        if (mService.getNetworkConnectivityManager().isConnected()) {
-            paymentPlugin.getPaymentMethods(mRequest);
-        } else {
-            SafeDialogClick onClick = new SafeDialogClick() {
-                @Override
-                public void safeOnClick(DialogInterface dialog, int id) {
-                    finish();
-                }
-            };
-            UIUtils.showDialog(mService, getString(R.string.no_internet_connection), getString(R.string.no_internet_connection_try_again), onClick);
-        }
+
     }
 
     @Override

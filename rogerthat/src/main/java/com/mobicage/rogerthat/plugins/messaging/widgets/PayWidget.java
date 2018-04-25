@@ -37,6 +37,7 @@ import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.api.messaging.Rpc;
 import com.mobicage.models.properties.forms.BasePaymentMethod;
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.cordova.CordovaActionScreenActivity;
 import com.mobicage.rogerthat.plugins.friends.ActionScreenActivity;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
@@ -46,6 +47,7 @@ import com.mobicage.rogerthat.plugins.payment.ChoosePaymentMethodActivity;
 import com.mobicage.rogerthat.plugins.payment.PayContextType;
 import com.mobicage.rogerthat.plugins.payment.PayWidgetContext;
 import com.mobicage.rogerthat.plugins.payment.PayWidgetContextData;
+import com.mobicage.rogerthat.plugins.payment.PaymentPlugin;
 import com.mobicage.rogerthat.plugins.payment.PaymentProviderMethod;
 import com.mobicage.rogerthat.plugins.system.SystemPlugin;
 import com.mobicage.rogerthat.util.JsonUtils;
@@ -76,7 +78,6 @@ import java.util.Map;
 
 public class PayWidget extends Widget {
 
-    private final String APPLICATION_TAG = "rogerthat-payment";
     private static final int START_CORDOVA_APP_REQUEST_CODE = 123;
     private static final int SHOW_PAYMENT_METHODS_CODE = 124;
 
@@ -151,7 +152,6 @@ public class PayWidget extends Widget {
                     if (id.equals(mChosenPaymentProviderMethod.provider.embedded_app_id)) {
                         mEmbeddedAppDownloadSpinner.dismiss();
                         openEmbeddedApp(mChosenPaymentProviderMethod);
-                        mChosenPaymentProviderMethod = null;
                         return new String[] { action };
                     }
                 }
@@ -237,6 +237,13 @@ public class PayWidget extends Widget {
     }
 
     private void pay() {
+        MainService mainService = mActivity.getMainService();
+        if (!mainService.getNetworkConnectivityManager().isConnected()) {
+            UIUtils.showDialog(mActivity,
+                    mainService.getString(R.string.no_internet_connection),
+                    mainService.getString(R.string.no_internet_connection_try_again));
+            return;
+        }
         try {
 
             JSONArray methodsArr = (JSONArray) mWidgetMap.get("methods");
@@ -249,8 +256,8 @@ public class PayWidget extends Widget {
             request.target = (String) mWidgetMap.get("target");
             request.methods = methods;
             request.test_mode = (boolean) mWidgetMap.get("test_mode");
+            mainService.getPlugin(PaymentPlugin.class).getPaymentMethods(request);
             Intent intent = new Intent(this.mActivity, ChoosePaymentMethodActivity.class);
-            intent.putExtra("request", JSONValue.toJSONString(request.toJSONMap()));
             mActivity.startActivityForResult(intent, SHOW_PAYMENT_METHODS_CODE);
         } catch (IncompleteMessageException e) {
             e.printStackTrace();
@@ -261,7 +268,7 @@ public class PayWidget extends Widget {
         mChosenPaymentProviderMethod = null;
         String embeddedAppId = paymentProviderMethod.provider.embedded_app_id;
         // Should always be set, but just in case.
-        if (paymentProviderMethod.provider.embedded_app_id == null) {
+        if (embeddedAppId == null) {
             UIUtils.showLongToast(mActivity, mActivity.getString(R.string.payment_not_enabled));
             return;
         }
