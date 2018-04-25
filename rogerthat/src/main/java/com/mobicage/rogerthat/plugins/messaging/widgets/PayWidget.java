@@ -35,13 +35,18 @@ import android.widget.TextView;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.api.messaging.Rpc;
+import com.mobicage.models.properties.forms.BasePaymentMethod;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.cordova.CordovaActionScreenActivity;
-import com.mobicage.rogerthat.cordova.CordovaSettings;
 import com.mobicage.rogerthat.plugins.friends.ActionScreenActivity;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
+import com.mobicage.rogerthat.plugins.payment.ChoosePaymentMethodActivity;
+import com.mobicage.rogerthat.plugins.payment.PayContextType;
+import com.mobicage.rogerthat.plugins.payment.PayWidgetContext;
+import com.mobicage.rogerthat.plugins.payment.PayWidgetContextData;
+import com.mobicage.rogerthat.plugins.payment.PaymentProviderMethod;
 import com.mobicage.rogerthat.plugins.system.SystemPlugin;
 import com.mobicage.rogerthat.util.JsonUtils;
 import com.mobicage.rogerthat.util.TextUtils;
@@ -55,12 +60,15 @@ import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.rpc.config.LookAndFeelConstants;
 import com.mobicage.to.messaging.forms.PayWidgetResultTO;
+import com.mobicage.to.messaging.forms.PaymentMethodTO;
 import com.mobicage.to.messaging.forms.SubmitPayFormRequestTO;
 import com.mobicage.to.messaging.forms.SubmitPayFormResponseTO;
+import com.mobicage.to.payment.GetPaymentMethodsRequestTO;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,6 +78,7 @@ public class PayWidget extends Widget {
 
     private final String APPLICATION_TAG = "rogerthat-payment";
     private static final int START_CORDOVA_APP_REQUEST_CODE = 123;
+    private static final int SHOW_PAYMENT_METHODS_CODE = 124;
 
     private Button mPayBtn;
     private PayWidgetResultTO mResult;
@@ -78,6 +87,7 @@ public class PayWidget extends Widget {
     private SystemPlugin mSystemPlugin;
     private BroadcastReceiver mBroadcastReceiver;
     private ProgressDialog mEmbeddedAppDownloadSpinner;
+    private PaymentProviderMethod mChosenPaymentProviderMethod;
 
     public PayWidget(Context context) {
         super(context);
@@ -126,6 +136,7 @@ public class PayWidget extends Widget {
         mBroadcastReceiver = getBroadcastReceiver();
         final IntentFilter filter = getIntentFilter();
         mActivity.registerReceiver(mBroadcastReceiver, filter);
+        mSystemPlugin = mActivity.getMainService().getPlugin(SystemPlugin.class);
     }
 
     protected SafeBroadcastReceiver getBroadcastReceiver() {
@@ -137,11 +148,10 @@ public class PayWidget extends Widget {
                 String action = intent.getAction();
                 if (BrandingMgr.EMBEDDED_APP_AVAILABLE_INTENT.equals(action) && mEmbeddedAppDownloadSpinner != null) {
                     String id = intent.getStringExtra("id");
-                    String embeddedAppIdWidget = (String) mWidgetMap.get("embedded_app_id");
-
-                    if (id.equals(embeddedAppIdWidget)) {
+                    if (id.equals(mChosenPaymentProviderMethod.provider.embedded_app_id)) {
                         mEmbeddedAppDownloadSpinner.dismiss();
-                        pay();
+                        openEmbeddedApp(mChosenPaymentProviderMethod);
+                        mChosenPaymentProviderMethod = null;
                         return new String[] { action };
                     }
                 }
@@ -227,49 +237,53 @@ public class PayWidget extends Widget {
     }
 
     private void pay() {
-        String embeddedApp = null;
-        String embeddedAppId = null;
+        try {
 
-        String embeddedAppIdWidget = (String) mWidgetMap.get("embedded_app_id");
-        if (embeddedAppIdWidget != null) {
-            embeddedAppId = embeddedAppIdWidget;
-            if (mSystemPlugin == null) {
-                mSystemPlugin = mActivity.getMainService().getPlugin(SystemPlugin.class);
+            JSONArray methodsArr = (JSONArray) mWidgetMap.get("methods");
+            PaymentMethodTO[] methods = new PaymentMethodTO[methodsArr.size()];
+            for (int i = 0; i < methodsArr.size(); i++) {
+                methods[i] = new PaymentMethodTO((Map<String, Object>) methodsArr.get(i));
             }
-            long version = mSystemPlugin.getStore().getEmbeddedAppVersion(embeddedAppId);
-            if (version < 0 || !mSystemPlugin.getBrandingMgr().embeddedAppExists(embeddedAppId)) {
-                mEmbeddedAppDownloadSpinner = UIUtils.showProgressDialog(mActivity, null, mActivity.getString(R.string.loading), true, false);
-                mSystemPlugin.getEmbeddedApp(embeddedAppId);
-                return;
-            }
+            GetPaymentMethodsRequestTO request = new GetPaymentMethodsRequestTO();
+            request.base_method = new BasePaymentMethod((Map<String, Object>) mWidgetMap.get("base_method"));
+            request.target = (String) mWidgetMap.get("target");
+            request.methods = methods;
+            request.test_mode = (boolean) mWidgetMap.get("test_mode");
+            Intent intent = new Intent(this.mActivity, ChoosePaymentMethodActivity.class);
+            intent.putExtra("request", JSONValue.toJSONString(request.toJSONMap()));
+            mActivity.startActivityForResult(intent, SHOW_PAYMENT_METHODS_CODE);
+        } catch (IncompleteMessageException e) {
+            e.printStackTrace();
+        }
+    }
 
-        } else {
-            embeddedApp = APPLICATION_TAG;
-            if (!CordovaSettings.APPS.contains(APPLICATION_TAG)) {
-                UIUtils.showLongToast(mActivity, mActivity.getString(R.string.payment_not_enabled));
-                return;
-            }
+    private void openEmbeddedApp(PaymentProviderMethod paymentProviderMethod) {
+        mChosenPaymentProviderMethod = null;
+        String embeddedAppId = paymentProviderMethod.provider.embedded_app_id;
+        // Should always be set, but just in case.
+        if (paymentProviderMethod.provider.embedded_app_id == null) {
+            UIUtils.showLongToast(mActivity, mActivity.getString(R.string.payment_not_enabled));
+            return;
+        }
+        long version = mSystemPlugin.getStore().getEmbeddedAppVersion(embeddedAppId);
+        if (version < 0 || !mSystemPlugin.getBrandingMgr().embeddedAppExists(embeddedAppId)) {
+            mEmbeddedAppDownloadSpinner = UIUtils.showProgressDialog(mActivity, null, mActivity.getString(R.string.loading), true, false);
+            mChosenPaymentProviderMethod = paymentProviderMethod;
+            mSystemPlugin.getEmbeddedApp(embeddedAppId);
+            return;
         }
 
-        org.json.simple.JSONObject context = new org.json.simple.JSONObject();
-        // t should match a PaymentQRCodeType in rogerthat-payment branding
-        // see https://github.com/rogerthat-platform/rogerthat-payment/blob/master/src/interfaces/actions.interfaces.ts
-        context.put("t", 2);
-        // result_type is the way we return our data
-        // plugin needs to be used when using startActivityForResult
-        context.put("result_type", "plugin");
-        context.put("message_key", mMessage.key);
-        JSONArray methods = (JSONArray) mWidgetMap.get("methods");
-        context.put("methods", methods);
-        context.put("memo", mWidgetMap.get("memo"));
-        context.put("target", mWidgetMap.get("target"));
-        context.put("test_mode", mWidgetMap.get("test_mode"));
-
+        PayWidgetContextData data = new PayWidgetContextData((boolean) mWidgetMap.get("test_mode"),
+                mMessage.key,
+                (String) mWidgetMap.get("memo"),
+                paymentProviderMethod.method,
+                paymentProviderMethod.provider,
+                (String) mWidgetMap.get("target"));
+        PayWidgetContext context = new PayWidgetContext(PayContextType.PAY.toString(), data);
         Bundle extras = new Bundle();
-        extras.putString(ActionScreenActivity.CONTEXT, context.toString());
-        extras.putString(CordovaActionScreenActivity.EMBEDDED_APP, embeddedApp);
+        extras.putString(ActionScreenActivity.CONTEXT, JSONValue.toJSONString(context.toJSONMap()));
         extras.putString(CordovaActionScreenActivity.EMBEDDED_APP_ID, embeddedAppId);
-        extras.putString(CordovaActionScreenActivity.TITLE, "");
+        extras.putString(CordovaActionScreenActivity.TITLE, paymentProviderMethod.provider.name);
 
         final Intent i = new Intent(mActivity, CordovaActionScreenActivity.class);
         i.putExtras(extras);
@@ -321,6 +335,16 @@ public class PayWidget extends Widget {
                 } catch (JSONException e) {
                     L.e("Failed to make payment", e);
                     UIUtils.showDialog(mActivity, null, R.string.error_please_try_again);
+                }
+            }
+        } else if (requestCode == SHOW_PAYMENT_METHODS_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                final String result = data.getStringExtra(ChoosePaymentMethodActivity.RESULT_DATA_KEY);
+                Map<String, Object> obj = (Map<String, Object>) JSONValue.parse(result);
+                try {
+                    openEmbeddedApp(new PaymentProviderMethod(obj));
+                } catch (IncompleteMessageException e) {
+                    L.bug(e);
                 }
             }
         }

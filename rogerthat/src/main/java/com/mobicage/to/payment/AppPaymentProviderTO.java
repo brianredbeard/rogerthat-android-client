@@ -31,6 +31,7 @@ public class AppPaymentProviderTO implements com.mobicage.rpc.IJSONable {
     public String button_color;
     public String[] currencies;
     public String description;
+    public String embedded_app_id;
     public boolean enabled;
     public String id;
     public String logo_url;
@@ -92,6 +93,12 @@ public class AppPaymentProviderTO implements com.mobicage.rpc.IJSONable {
             this.description = (String) val;
         } else {
             throw new IncompleteMessageException("com.mobicage.to.payment.AppPaymentProviderTO object is missing field 'description'");
+        }
+        if (json.containsKey("embedded_app_id")) {
+            Object val = json.get("embedded_app_id");
+            this.embedded_app_id = (String) val;
+        } else {
+            this.embedded_app_id = null;
         }
         if (json.containsKey("enabled")) {
             Object val = json.get("enabled");
@@ -167,6 +174,7 @@ public class AppPaymentProviderTO implements com.mobicage.rpc.IJSONable {
             obj.put("currencies", arr);
         }
         obj.put("description", this.description);
+        obj.put("embedded_app_id", this.embedded_app_id);
         obj.put("enabled", this.enabled);
         obj.put("id", this.id);
         obj.put("logo_url", this.logo_url);

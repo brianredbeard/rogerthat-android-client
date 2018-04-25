@@ -16,14 +16,14 @@
  * @@license_version:1.4@@
  */
 
-package com.mobicage.models.properties.forms;
+package com.mobicage.to.messaging.forms;
 
 import com.mobicage.rpc.IncompleteMessageException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class PaymentMethod implements com.mobicage.rpc.IJSONable {
+public class PaymentMethodTO implements com.mobicage.rpc.IJSONable {
 
     public long amount;
     public boolean calculate_amount;
@@ -32,10 +32,10 @@ public class PaymentMethod implements com.mobicage.rpc.IJSONable {
     public String provider_id;
     public String target;
 
-    public PaymentMethod() {
+    public PaymentMethodTO() {
     }
 
-    public PaymentMethod(Map<String, Object> json) throws IncompleteMessageException {
+    public PaymentMethodTO(Map<String, Object> json) throws IncompleteMessageException {
         if (json.containsKey("amount")) {
             Object val = json.get("amount");
             if (val instanceof Integer) {
@@ -44,7 +44,7 @@ public class PaymentMethod implements com.mobicage.rpc.IJSONable {
                 this.amount = ((Long) val).longValue();
             }
         } else {
-            throw new IncompleteMessageException("com.mobicage.models.properties.forms.PaymentMethod object is missing field 'amount'");
+            throw new IncompleteMessageException("com.mobicage.to.messaging.forms.PaymentMethodTO object is missing field 'amount'");
         }
         if (json.containsKey("calculate_amount")) {
             Object val = json.get("calculate_amount");
@@ -56,7 +56,7 @@ public class PaymentMethod implements com.mobicage.rpc.IJSONable {
             Object val = json.get("currency");
             this.currency = (String) val;
         } else {
-            throw new IncompleteMessageException("com.mobicage.models.properties.forms.PaymentMethod object is missing field 'currency'");
+            throw new IncompleteMessageException("com.mobicage.to.messaging.forms.PaymentMethodTO object is missing field 'currency'");
         }
         if (json.containsKey("precision")) {
             Object val = json.get("precision");
@@ -66,13 +66,13 @@ public class PaymentMethod implements com.mobicage.rpc.IJSONable {
                 this.precision = ((Long) val).longValue();
             }
         } else {
-            throw new IncompleteMessageException("com.mobicage.models.properties.forms.PaymentMethod object is missing field 'precision'");
+            throw new IncompleteMessageException("com.mobicage.to.messaging.forms.PaymentMethodTO object is missing field 'precision'");
         }
         if (json.containsKey("provider_id")) {
             Object val = json.get("provider_id");
             this.provider_id = (String) val;
         } else {
-            throw new IncompleteMessageException("com.mobicage.models.properties.forms.PaymentMethod object is missing field 'provider_id'");
+            throw new IncompleteMessageException("com.mobicage.to.messaging.forms.PaymentMethodTO object is missing field 'provider_id'");
         }
         if (json.containsKey("target")) {
             Object val = json.get("target");

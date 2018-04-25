@@ -237,7 +237,7 @@ public class CordovaActionScreenActivity extends ServiceBoundActivity {
         if (mType == CordovaAppType.PACKAGED_EMBEDDED_APP) {
             return "cordova_" + mEmbeddedApp.replace('-', '_') + "_config";
         }
-        return "cordova_config";
+        return "config";
     }
 
     @Override

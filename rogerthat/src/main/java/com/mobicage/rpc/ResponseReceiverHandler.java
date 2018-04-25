@@ -617,6 +617,15 @@ public class ResponseReceiverHandler {
                 resp.setResult(Parser.ComMobicageToPaymentGetPaymentAssetsResponseTO(rpcr.result));
             ((IResponseHandler<com.mobicage.to.payment.GetPaymentAssetsResponseTO>) responseHandler).handle(resp);
         }
+        if ("com.mobicage.api.payment.getPaymentMethods".equals(function)) {
+            final Response<com.mobicage.to.payment.GetPaymentMethodsResponseTO> resp = new Response<com.mobicage.to.payment.GetPaymentMethodsResponseTO>();
+            resp.setError(rpcr.error);
+            resp.setSuccess(rpcr.success);
+            resp.setCallId(rpcr.callId);
+            if (rpcr.success)
+                resp.setResult(Parser.ComMobicageToPaymentGetPaymentMethodsResponseTO(rpcr.result));
+            ((IResponseHandler<com.mobicage.to.payment.GetPaymentMethodsResponseTO>) responseHandler).handle(resp);
+        }
         if ("com.mobicage.api.payment.getPaymentProfile".equals(function)) {
             final Response<com.mobicage.to.payment.GetPaymentProfileResponseTO> resp = new Response<com.mobicage.to.payment.GetPaymentProfileResponseTO>();
             resp.setError(rpcr.error);

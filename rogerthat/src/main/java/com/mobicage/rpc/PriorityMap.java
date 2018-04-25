@@ -91,6 +91,7 @@ public class PriorityMap {
         sPrioritySet.add("com.mobicage.api.payment.createAsset");
         sPrioritySet.add("com.mobicage.api.payment.createTransaction");
         sPrioritySet.add("com.mobicage.api.payment.getPaymentAssets");
+        sPrioritySet.add("com.mobicage.api.payment.getPaymentMethods");
         sPrioritySet.add("com.mobicage.api.payment.getPaymentProfile");
         sPrioritySet.add("com.mobicage.api.payment.getPaymentProviders");
         sPrioritySet.add("com.mobicage.api.payment.getPaymentTransactions");

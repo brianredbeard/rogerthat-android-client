@@ -16,79 +16,58 @@
  * @@license_version:1.4@@
  */
 
-package com.mobicage.to.messaging.forms;
+package com.mobicage.to.payment;
 
 import com.mobicage.rpc.IncompleteMessageException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class PayTO implements com.mobicage.rpc.IJSONable {
+public class GetPaymentMethodsRequestTO implements com.mobicage.rpc.IJSONable {
 
     public com.mobicage.models.properties.forms.BasePaymentMethod base_method;
-    public com.mobicage.models.properties.forms.PaymentMethod[] methods;
-    public boolean auto_submit;
-    public String embedded_app_id;
-    public String memo;
+    public com.mobicage.to.messaging.forms.PaymentMethodTO[] methods;
     public String target;
     public boolean test_mode;
 
-    public PayTO() {
+    public GetPaymentMethodsRequestTO() {
     }
 
     @SuppressWarnings("unchecked")
-    public PayTO(Map<String, Object> json) throws IncompleteMessageException {
+    public GetPaymentMethodsRequestTO(Map<String, Object> json) throws IncompleteMessageException {
         if (json.containsKey("base_method")) {
             Object val = json.get("base_method");
             this.base_method = val == null ? null : new com.mobicage.models.properties.forms.BasePaymentMethod((Map<String, Object>) val);
         } else {
-            this.base_method = null;
+            throw new IncompleteMessageException("com.mobicage.to.payment.GetPaymentMethodsRequestTO object is missing field 'base_method'");
         }
         if (json.containsKey("methods")) {
             org.json.simple.JSONArray val_arr = (org.json.simple.JSONArray) json.get("methods");
             if (val_arr == null) {
                 this.methods = null;
             } else {
-                this.methods = new com.mobicage.models.properties.forms.PaymentMethod[val_arr.size()];
+                this.methods = new com.mobicage.to.messaging.forms.PaymentMethodTO[val_arr.size()];
                 for (int i=0; i < val_arr.size(); i++) {
                     Object item = val_arr.get(i);
                     if (item != null) {
-                        this.methods[i] = new com.mobicage.models.properties.forms.PaymentMethod((Map<String, Object>) item);
+                        this.methods[i] = new com.mobicage.to.messaging.forms.PaymentMethodTO((Map<String, Object>) item);
                     }
                 }
             }
         } else {
-            throw new IncompleteMessageException("com.mobicage.to.messaging.forms.PayTO object is missing field 'methods'");
-        }
-        if (json.containsKey("auto_submit")) {
-            Object val = json.get("auto_submit");
-            this.auto_submit = ((Boolean) val).booleanValue();
-        } else {
-            this.auto_submit = true;
-        }
-        if (json.containsKey("embedded_app_id")) {
-            Object val = json.get("embedded_app_id");
-            this.embedded_app_id = (String) val;
-        } else {
-            this.embedded_app_id = null;
-        }
-        if (json.containsKey("memo")) {
-            Object val = json.get("memo");
-            this.memo = (String) val;
-        } else {
-            throw new IncompleteMessageException("com.mobicage.to.messaging.forms.PayTO object is missing field 'memo'");
+            throw new IncompleteMessageException("com.mobicage.to.payment.GetPaymentMethodsRequestTO object is missing field 'methods'");
         }
         if (json.containsKey("target")) {
             Object val = json.get("target");
             this.target = (String) val;
         } else {
-            throw new IncompleteMessageException("com.mobicage.to.messaging.forms.PayTO object is missing field 'target'");
+            throw new IncompleteMessageException("com.mobicage.to.payment.GetPaymentMethodsRequestTO object is missing field 'target'");
         }
         if (json.containsKey("test_mode")) {
             Object val = json.get("test_mode");
             this.test_mode = ((Boolean) val).booleanValue();
         } else {
-            this.test_mode = false;
+            throw new IncompleteMessageException("com.mobicage.to.payment.GetPaymentMethodsRequestTO object is missing field 'test_mode'");
         }
     }
 
@@ -106,9 +85,6 @@ public class PayTO implements com.mobicage.rpc.IJSONable {
             }
             obj.put("methods", arr);
         }
-        obj.put("auto_submit", this.auto_submit);
-        obj.put("embedded_app_id", this.embedded_app_id);
-        obj.put("memo", this.memo);
         obj.put("target", this.target);
         obj.put("test_mode", this.test_mode);
         return obj;

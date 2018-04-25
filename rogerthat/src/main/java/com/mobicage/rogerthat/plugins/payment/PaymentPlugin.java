@@ -37,6 +37,7 @@ import com.mobicage.to.payment.ConfirmPaymentRequestTO;
 import com.mobicage.to.payment.CreateAssetRequestTO;
 import com.mobicage.to.payment.CreateTransactionRequestTO;
 import com.mobicage.to.payment.CryptoTransactionTO;
+import com.mobicage.to.payment.GetPaymentMethodsRequestTO;
 import com.mobicage.to.payment.GetPaymentProfileRequestTO;
 import com.mobicage.to.payment.GetPaymentProvidersRequestTO;
 import com.mobicage.to.payment.GetPaymentTransactionsRequestTO;
@@ -112,6 +113,9 @@ public class PaymentPlugin implements MobicagePlugin {
     public static final String PAYMENT_ASSETS_UPDATED_INTENT = "com.mobicage.rogerthat.plugins.payment.PAYMENT_ASSETS_UPDATED_INTENT";
     public static final String PAYMENT_ASSET_UPDATED_INTENT = "com.mobicage.rogerthat.plugins.payment.PAYMENT_ASSET_UPDATED_INTENT";
     public static final String UPDATE_RECEIVE_PAYMENT_STATUS_UPDATED_INTENT = "com.mobicage.rogerthat.plugins.payment.UPDATE_RECEIVE_PAYMENT_STATUS_UPDATED_INTENT";
+
+    public static final String GET_PAYMENT_METHODS_RESULT_INTENT = "com.mobicage.rogerthat.plugins.payment.GET_PAYMENT_METHODS_RESULT_INTENT";
+    public static final String GET_PAYMENT_METHODS_FAILED_INTENT = "com.mobicage.rogerthat.plugins.payment.GET_PAYMENT_METHODS_FAILED_INTENT";
 
     private final ConfigurationProvider mConfigProvider;
     private final MainService mMainService;
@@ -459,5 +463,13 @@ public class PaymentPlugin implements MobicagePlugin {
             return false;
         }
         return true;
+    }
+
+    public void getPaymentMethods(GetPaymentMethodsRequestTO request) {
+        try {
+            Rpc.getPaymentMethods(new GetPaymentMethodResponseHandler(), request);
+        } catch (Exception e) {
+            L.bug("Error while executing getPaymentMethods", e);
+        }
     }
 }

@@ -595,6 +595,11 @@
             android:theme="@style/AppTheme.NoActionBar" >
         </activity>
 
+        <activity
+            android:name="com.mobicage.rogerthat.plugins.payment.ChoosePaymentMethodActivity"
+            android:label="@string/title_activity_choose_payment_method">
+        </activity>
+
         <!--todo: Needs to be restyled-->
         <!--<receiver-->
             <!--android:name="com.mobicage.rogerthat.widget.RogerthatWidgetProvider"-->

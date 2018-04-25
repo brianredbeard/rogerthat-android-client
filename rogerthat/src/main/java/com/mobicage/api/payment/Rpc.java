@@ -75,6 +75,17 @@ public class Rpc {
         com.mobicage.rpc.Rpc.call("com.mobicage.api.payment.getPaymentAssets", arguments, responseHandler);
     }
 
+    public static void getPaymentMethods(com.mobicage.rpc.IResponseHandler<com.mobicage.to.payment.GetPaymentMethodsResponseTO> responseHandler,
+            com.mobicage.to.payment.GetPaymentMethodsRequestTO request) throws Exception {
+        java.util.Map<java.lang.String, java.lang.Object> arguments = new java.util.LinkedHashMap<java.lang.String, java.lang.Object>();
+        if (request == null) {
+            arguments.put("request", null);
+        } else {
+            arguments.put("request", request.toJSONMap());
+        }
+        com.mobicage.rpc.Rpc.call("com.mobicage.api.payment.getPaymentMethods", arguments, responseHandler);
+    }
+
     public static void getPaymentProfile(com.mobicage.rpc.IResponseHandler<com.mobicage.to.payment.GetPaymentProfileResponseTO> responseHandler,
             com.mobicage.to.payment.GetPaymentProfileRequestTO request) throws Exception {
         java.util.Map<java.lang.String, java.lang.Object> arguments = new java.util.LinkedHashMap<java.lang.String, java.lang.Object>();

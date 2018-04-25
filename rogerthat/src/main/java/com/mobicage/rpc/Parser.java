@@ -41,6 +41,13 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
+    public static com.mobicage.models.properties.forms.BasePaymentMethod ComMobicageModelsPropertiesFormsBasePaymentMethod(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.models.properties.forms.BasePaymentMethod((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
     public static com.mobicage.models.properties.forms.FormResult ComMobicageModelsPropertiesFormsFormResult(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;
@@ -1665,6 +1672,13 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
+    public static com.mobicage.to.messaging.forms.PaymentMethodTO ComMobicageToMessagingFormsPaymentMethodTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.messaging.forms.PaymentMethodTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
     public static com.mobicage.to.messaging.forms.PhotoUploadFormMessageTO ComMobicageToMessagingFormsPhotoUploadFormMessageTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;
@@ -2575,6 +2589,20 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.GetPaymentMethodsRequestTO ComMobicageToPaymentGetPaymentMethodsRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.GetPaymentMethodsRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.GetPaymentMethodsResponseTO ComMobicageToPaymentGetPaymentMethodsResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.GetPaymentMethodsResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
     public static com.mobicage.to.payment.GetPaymentProfileRequestTO ComMobicageToPaymentGetPaymentProfileRequestTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;
@@ -2659,6 +2687,13 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.PayMethodTO ComMobicageToPaymentPayMethodTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.PayMethodTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
     public static com.mobicage.to.payment.PaymentAssetBalanceTO ComMobicageToPaymentPaymentAssetBalanceTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;
@@ -2677,6 +2712,13 @@ public class Parser {
         if (value == null)
             return null;
         return new com.mobicage.to.payment.PaymentProviderAssetTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.payment.PaymentProviderMethodsTO ComMobicageToPaymentPaymentProviderMethodsTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.payment.PaymentProviderMethodsTO((Map<String, Object>) value);
     }
 
     @SuppressWarnings("unchecked")

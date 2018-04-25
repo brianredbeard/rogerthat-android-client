@@ -122,7 +122,7 @@ def install_cordova_plugins(app_id, cordova_plugins, cordova_apps, colors):
         with app_utils.pushd(tmp_dir):
             _fake_cordova_android_project()
             _update_cordova_android()
-            _install_plugins(app_id, plugins, 'cordova_config')
+            _install_plugins(app_id, plugins, 'config')
     finally:
         shutil.rmtree(tmp_dir)
 
