@@ -364,7 +364,6 @@ public class NavigationConstants {
             icon_path = item.get('icon_path')
             if icon_path:
                 source_file = os.path.join(APP_DIR, "images", "custom", icon_path)
-                icon = icon or os.path.basename(icon_path).split('.')[0]
                 generate_resource_images(source_file, image_width, 1)
             else:
                 color = item.get("color", doc['HOMESCREEN'].get('color'))
