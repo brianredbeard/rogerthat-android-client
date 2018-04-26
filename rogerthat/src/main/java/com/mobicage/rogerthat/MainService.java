@@ -91,8 +91,11 @@ import com.mobicage.rpc.http.HttpBacklog;
 import com.mobicage.rpc.http.HttpBacklogItem;
 import com.mobicage.rpc.http.HttpCommunicator;
 import com.mobicage.rpc.newxmpp.XMPPKickChannel;
+import com.mobicage.to.app.EmbeddedAppTO;
 import com.mobicage.to.app.UpdateAppAssetRequestTO;
 import com.mobicage.to.app.UpdateAppAssetResponseTO;
+import com.mobicage.to.app.UpdateEmbeddedAppRequestTO;
+import com.mobicage.to.app.UpdateEmbeddedAppResponseTO;
 import com.mobicage.to.app.UpdateEmbeddedAppsRequestTO;
 import com.mobicage.to.app.UpdateEmbeddedAppsResponseTO;
 import com.mobicage.to.app.UpdateLookAndFeelRequestTO;
@@ -1303,6 +1306,12 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
             public UpdateEmbeddedAppTranslationsResponseTO updateEmbeddedAppTranslations(UpdateEmbeddedAppTranslationsRequestTO request) throws java.lang.Exception {
                 getPlugin(SystemPlugin.class).updateEmbeddedAppTranslations(request.translations);
                 return new UpdateEmbeddedAppTranslationsResponseTO();
+            }
+
+            @Override
+            public UpdateEmbeddedAppResponseTO updateEmbeddedApp(UpdateEmbeddedAppRequestTO request) throws Exception {
+                getPlugin(SystemPlugin.class).updateEmbeddedApp(new EmbeddedAppTO(request.toJSONMap()));
+                return new UpdateEmbeddedAppResponseTO();
             }
 
             @Override

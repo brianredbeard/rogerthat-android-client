@@ -31,6 +31,7 @@ import com.commonsware.cwac.cam2.CameraActivity;
 import com.commonsware.cwac.cam2.Facing;
 import com.commonsware.cwac.cam2.FlashMode;
 import com.commonsware.cwac.cam2.VideoRecorderActivity;
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mobicage.rogerthat.HomeBrandingActivity;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
@@ -62,6 +63,8 @@ import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rpc.config.AppConstants;
 
+
+import org.json.simple.JSONValue;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -223,6 +226,32 @@ public class ActivityUtils {
         }
 
         return true;
+    }
+
+    public static boolean openUrl(ServiceBoundActivity context, String url) {
+        try {
+            Map<String, Object> data = (Map<String, Object>) JSONValue.parse(url);
+            String actionType = (String) data.get("action_type");
+            String action = (String) data.get("action");
+            String title = (String) data.get("title");
+            String service = (String) data.get("service");
+
+            NavigationItem ni = new NavigationItem(FontAwesome.Icon.faw_question_circle_o, actionType,
+                    action, title, service, 0, data);
+
+            String errorMessage = ActivityUtils.canOpenNavigationItem(context, ni);
+            if (errorMessage == null) {
+                Bundle extras = new Bundle();
+                ActivityUtils.goToActivity(context, ni, false, extras);
+
+                return true;
+            }
+            L.d(errorMessage);
+
+        } catch (Exception e) {
+            L.d("Failed to open url", e);
+        }
+        return false;
     }
 
     private static void openStore(Context context, String appPackage) {

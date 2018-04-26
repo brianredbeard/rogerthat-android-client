@@ -272,6 +272,20 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
+    public static com.mobicage.to.app.UpdateEmbeddedAppRequestTO ComMobicageToAppUpdateEmbeddedAppRequestTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.app.UpdateEmbeddedAppRequestTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.app.UpdateEmbeddedAppResponseTO ComMobicageToAppUpdateEmbeddedAppResponseTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.app.UpdateEmbeddedAppResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
     public static com.mobicage.to.app.UpdateEmbeddedAppsRequestTO ComMobicageToAppUpdateEmbeddedAppsRequestTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;

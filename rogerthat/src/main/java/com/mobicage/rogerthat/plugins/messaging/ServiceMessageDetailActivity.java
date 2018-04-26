@@ -74,6 +74,7 @@ import com.mobicage.rogerthat.plugins.friends.ServiceMenuItemDetails;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr.BrandingResult;
 import com.mobicage.rogerthat.plugins.messaging.BrandingMgr.ColorScheme;
 import com.mobicage.rogerthat.plugins.messaging.widgets.Widget;
+import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.IOUtils;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
@@ -824,6 +825,15 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
                     buttonPressed(button, buttonAction, buttonUrl, container);
                 }
             });
+        } else if (Message.MC_OPEN_PREFIX.equals(buttonAction)) {
+            if (ActivityUtils.openUrl(this, buttonUrl)) {
+                buttonPressed(button, container, 0);
+                overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_up);
+                finish();
+            } else {
+                // Continue with the button press, just as if there was no open://
+                buttonPressed(button, buttonAction, buttonUrl, container);
+            }
         } else {
             buttonPressed(button, buttonAction, buttonUrl, container);
         }
@@ -836,11 +846,11 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
         if (!mTransfering)
             jumpToServiceHomeScreen(button, null);
 
-        // action "poke" is not allowed in message buttons and action "confirm" is already handled.
-        if (buttonAction != null && !Message.MC_CONFIRM_PREFIX.equals(buttonAction) && !Message.MC_POKE_PREFIX.equals
-                (buttonAction)) {
-            final Intent intent = new Intent(buttonAction, Uri.parse(buttonUrl));
-            startActivity(intent);
+        if (buttonAction != null) {
+            if (Intent.ACTION_VIEW.equals(buttonAction) || Intent.ACTION_DIAL.equals(buttonAction)) {
+                final Intent intent = new Intent(buttonAction, Uri.parse(buttonUrl));
+                startActivity(intent);
+            }
         }
     }
 
