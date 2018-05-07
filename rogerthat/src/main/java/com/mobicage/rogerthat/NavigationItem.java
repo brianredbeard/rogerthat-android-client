@@ -32,6 +32,7 @@ import com.mobicage.rogerthat.plugins.news.NewsPlugin;
 import com.mobicage.rogerthat.util.JsonUtils;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
+import com.mobicage.rogerthat.util.ui.UIUtils;
 
 import org.json.simple.JSONValue;
 
@@ -106,7 +107,10 @@ public class NavigationItem {
 
     public Drawable getFooterIcon(Context context) {
         if (this.faIcon == null) {
-            return context.getResources().getDrawable(this.iconId);
+            BitmapDrawable image = (BitmapDrawable) context.getResources().getDrawable(this.iconId);
+            int w = UIUtils.convertDipToPixels(context, 34);
+            Bitmap bitmapResized = Bitmap.createScaledBitmap(image.getBitmap(), w, w, false);
+            return new BitmapDrawable(context.getResources(), bitmapResized);
         }
         return new IconicsDrawable(context, this.faIcon).color(ContextCompat.getColor(context, R.color.mc_white)).sizeDp(20);
     }
