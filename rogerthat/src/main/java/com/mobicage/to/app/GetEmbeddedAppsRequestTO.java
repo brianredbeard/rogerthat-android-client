@@ -25,16 +25,24 @@ import java.util.Map;
 
 public class GetEmbeddedAppsRequestTO implements com.mobicage.rpc.IJSONable {
 
+    public String type;
 
     public GetEmbeddedAppsRequestTO() {
     }
 
     public GetEmbeddedAppsRequestTO(Map<String, Object> json) throws IncompleteMessageException {
+        if (json.containsKey("type")) {
+            Object val = json.get("type");
+            this.type = (String) val;
+        } else {
+            this.type = null;
+        }
     }
 
     @Override
     public Map<String, Object> toJSONMap() {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
+        obj.put("type", this.type);
         return obj;
     }
 

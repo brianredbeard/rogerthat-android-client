@@ -27,6 +27,7 @@ public class MessageTO implements com.mobicage.rpc.IJSONable {
 
     public com.mobicage.to.messaging.AttachmentTO[] attachments;
     public com.mobicage.to.messaging.ButtonTO[] buttons;
+    public com.mobicage.models.properties.messaging.MessageEmbeddedApp embedded_app;
     public com.mobicage.to.messaging.MemberStatusTO[] members;
     public long alert_flags;
     public String branding;
@@ -86,6 +87,12 @@ public class MessageTO implements com.mobicage.rpc.IJSONable {
             }
         } else {
             throw new IncompleteMessageException("com.mobicage.to.messaging.MessageTO object is missing field 'buttons'");
+        }
+        if (json.containsKey("embedded_app")) {
+            Object val = json.get("embedded_app");
+            this.embedded_app = val == null ? null : new com.mobicage.models.properties.messaging.MessageEmbeddedApp((Map<String, Object>) val);
+        } else {
+            this.embedded_app = null;
         }
         if (json.containsKey("members")) {
             org.json.simple.JSONArray val_arr = (org.json.simple.JSONArray) json.get("members");
@@ -293,6 +300,7 @@ public class MessageTO implements com.mobicage.rpc.IJSONable {
             }
             obj.put("buttons", arr);
         }
+        obj.put("embedded_app", this.embedded_app == null ? null : this.embedded_app.toJSONMap());
         if (this.members == null) {
             obj.put("members", null);
         } else {

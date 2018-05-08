@@ -618,4 +618,6 @@
     <string name="you_are_here">You are here</string>
     <string name="your_location_displayed_friend_have_contacted_for_their_location">Your location is displayed. Your friends (which share their location with you) have been contacted to send you their location.</string>
     <string name="title_activity_choose_payment_method">Choose payment method</string>
+    <string name="title_activity_choose_embedded_app">Choose payment application</string>
+    <string name="amount">Amount</string>
 </resources>

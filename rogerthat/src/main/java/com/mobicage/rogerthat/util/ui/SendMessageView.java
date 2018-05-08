@@ -35,8 +35,6 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.provider.Settings;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.View;
@@ -55,6 +53,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.commonsware.cwac.cam2.Facing;
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.CannedButton;
 import com.mobicage.rogerthat.CannedButtons;
@@ -69,7 +69,8 @@ import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessageStore;
 import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
-import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
+import com.mobicage.rogerthat.plugins.payment.ChooseEmbeddedAppActivity;
+import com.mobicage.rogerthat.plugins.system.SystemPlugin;
 import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.IOUtils;
 import com.mobicage.rogerthat.util.logging.L;
@@ -81,6 +82,7 @@ import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rpc.ResponseHandler;
+import com.mobicage.to.app.EmbeddedAppTO;
 import com.mobicage.to.messaging.AttachmentTO;
 import com.mobicage.to.messaging.ButtonTO;
 import com.mobicage.to.messaging.MessageTO;
@@ -88,6 +90,7 @@ import com.mobicage.to.messaging.SendMessageRequestTO;
 import com.mobicage.to.messaging.SendMessageResponseTO;
 
 import org.jivesoftware.smack.util.Base64;
+import org.json.simple.JSONValue;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -99,6 +102,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -114,6 +118,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
     private static final int PICK_IMAGE = 1;
     private static final int PICK_VIDEO = 2;
     private static final int PICK_BUTTON = 3;
+    private static final int PICK_PAYMENT_PROVIDER = 4;
 
     private final int PERMISSION_REQUEST_CAMERA = 1;
     private final int IMAGE_BUTTON_TEXT = 1;
@@ -123,6 +128,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
     private final int IMAGE_BUTTON_PRIORITY = 5;
     private final int IMAGE_BUTTON_STICKY = 6;
     private final int IMAGE_BUTTON_MORE = 7;
+    private final int IMAGE_BUTTON_PAYMENT = 8;
     private final int IMAGE_BUTTON_PADDING = 10;
 
     private int _5_DP_IN_PX;
@@ -134,6 +140,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
     private String mRepliedToKey = null;
 
     private MessagingPlugin mMessagingPlugin;
+    private SystemPlugin mSystemPlugin;
     private String mKey;
 
     private MainService mMainService;
@@ -149,6 +156,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
     private boolean mHasVideoSelected = false;
     private String mUploadFileExtenstion = null;
     private File mTmpUploadFile = null;
+    private EmbeddedAppTO mChosenEmbeddedApp = null;
 
     private List<Integer> mImageButtons;
     private int mMaxImageButtonsOnScreen;
@@ -179,6 +187,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
                           long defaultPriority, boolean defaultSticky) {
         mMainService = mainService;
         mMessagingPlugin = mainService.getPlugin(MessagingPlugin.class);
+        mSystemPlugin = mainService.getPlugin(SystemPlugin.class);
         mActivity = activity;
         mFriendRecipients = friendRecipients;
         mParentKey = parentKey;
@@ -340,10 +349,10 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
                     mUploadFileExtenstion = AttachmentViewerActivity.CONTENT_TYPE_JPEG;
                     if (data != null && data.getData() != null) {
                         final Uri selectedImage = data.getData();
-                        setFileExtemsionFromUri(selectedImage);
+                        setFileExtensionFromUri(selectedImage);
                         setAttachmentSelected(selectedImage);
                     } else {
-                        setFileExtemsionFromUri(mUriSavedFile);
+                        setFileExtensionFromUri(mUriSavedFile);
                         setAttachmentSelected(mUriSavedFile);
                     }
                 }
@@ -356,10 +365,10 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
                     mUploadFileExtenstion = AttachmentViewerActivity.CONTENT_TYPE_VIDEO_MP4;
                     if (data != null && data.getData() != null) {
                         final Uri selectedVideo = data.getData();
-                        setFileExtemsionFromUri(selectedVideo);
+                        setFileExtensionFromUri(selectedVideo);
                         setAttachmentSelected(selectedVideo);
                     } else {
-                        setFileExtemsionFromUri(mUriSavedFile);
+                        setFileExtensionFromUri(mUriSavedFile);
                         setAttachmentSelected(mUriSavedFile);
                     }
                 }
@@ -398,12 +407,25 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
                     }
                 }
                 break;
+            case PICK_PAYMENT_PROVIDER:
+                if (resultCode == Activity.RESULT_OK) {
+                    try {
+                        String stringResult = data.getStringExtra(ChooseEmbeddedAppActivity.RESULT_KEY);
+                        if (stringResult != null) {
+                            mChosenEmbeddedApp = new EmbeddedAppTO((Map<String, Object>) JSONValue.parse(stringResult));
+                            // TODO show this somewhere
+                        }
+                    } catch (Exception e) {
+                        L.bug(e);
+                    }
+                }
+                break;
 
         }
     }
 
-    private void setFileExtemsionFromUri(Uri file) {
-        L.d("setFileExtemsionFromUri: " + file.toString());
+    private void setFileExtensionFromUri(Uri file) {
+        L.d("setFileExtensionFromUri: " + file.toString());
         final ContentResolver cr = mActivity.getContentResolver();
         final String fileType = cr.getType(file);
         L.d("fileType: " + fileType);
@@ -472,6 +494,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
         boolean addButtons = true;
         boolean addPriority = false;
         boolean addSticky = false;
+        boolean addPayment = true;  // TODO false by default
         if (SystemUtils.isFlagEnabled(mParentFlags, MessagingPlugin.FLAG_DYNAMIC_CHAT)) {
             if (!SystemUtils.isFlagEnabled(mParentFlags, MessagingPlugin.FLAG_ALLOW_CHAT_PICTURE)) {
                 addPicture = false;
@@ -487,6 +510,9 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
             }
             if (SystemUtils.isFlagEnabled(mParentFlags, MessagingPlugin.FLAG_ALLOW_CHAT_STICKY)) {
                 addSticky = true;
+            }
+            if (SystemUtils.isFlagEnabled(mParentFlags, MessagingPlugin.FLAG_ALLOW_CHAT_PAYMENTS)) {
+                addPayment = true;
             }
         }
         mImageButtons = new ArrayList<Integer>();
@@ -511,6 +537,10 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
 
         if (addSticky) {
             mImageButtons.add(IMAGE_BUTTON_STICKY);
+        }
+
+        if (addPayment) {
+            mImageButtons.add(IMAGE_BUTTON_PAYMENT);
         }
 
         if (mImageButtons.size() > mMaxImageButtonsOnScreen) {
@@ -540,9 +570,16 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
     private ImageView generateImageView(final int imageButton, final int visible) {
         ImageView iv = new ImageView(mActivity);
         iv.setVisibility(visible);
-        final int imageResourse = getImageResourceForKey(imageButton);
-        if (imageResourse != 0)
-            iv.setImageResource(imageResourse);
+        final int imageResource = getImageResourceForKey(imageButton);
+        if (imageResource != 0) {
+            iv.setImageResource(imageResource);
+        } else {
+            Drawable drawable = getImageDrawableForKey(imageButton);
+            if (drawable != null) {
+                iv.setImageDrawable(drawable);
+            }
+        }
+
         iv.setOnClickListener(new SafeViewOnClickListener() {
             @Override
             public void safeOnClick(View v) {
@@ -560,16 +597,29 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
         return iv;
     }
 
-    private int getImageResourceForKey(final int key) {
+    private Drawable getImageDrawableForKey(final int key) {
+        FontAwesome.Icon icon = null;
         if (IMAGE_BUTTON_TEXT == key) {
-            return R.drawable.fa_font;
+            icon = FontAwesome.Icon.faw_font;
         } else if (IMAGE_BUTTON_BUTTONS == key) {
-            return R.drawable.fa_list;
+            icon = FontAwesome.Icon.faw_list;
         } else if (IMAGE_BUTTON_PICTURE == key) {
-            return R.drawable.fa_camera;
+            icon = FontAwesome.Icon.faw_camera;
         } else if (IMAGE_BUTTON_VIDEO == key) {
-            return R.drawable.fa_video_camera;
-        } else if (IMAGE_BUTTON_PRIORITY == key) {
+            icon = FontAwesome.Icon.faw_video_camera;
+        } else if (IMAGE_BUTTON_PAYMENT == key) {
+            icon = FontAwesome.Icon.faw_money;
+        } else if (IMAGE_BUTTON_MORE == key) {
+            icon = FontAwesome.Icon.faw_ellipsis_h;
+        }
+        if (icon != null) {
+            return new IconicsDrawable(mMainService, icon);
+        }
+        return null;
+    }
+
+    private int getImageResourceForKey(final int key) {
+        if (IMAGE_BUTTON_PRIORITY == key) {
             if (mPriority == Message.PRIORITY_HIGH) {
                 return R.drawable.fa_priority_2;
             } else if (mPriority == Message.PRIORITY_URGENT) {
@@ -585,12 +635,9 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
             } else {
                 return R.drawable.fa_sticky_0;
             }
-        } else if (IMAGE_BUTTON_MORE == key) {
-            return R.drawable.fa_ellipsis_h;
         } else if (IMAGE_BUTTON_PADDING == key) {
             return 0;
         } else {
-            L.d("Could not find image resource for key: " + key);
             return 0;
         }
     }
@@ -718,6 +765,12 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
         }
 
         mActivity.startActivityForResult(chooserIntent, PICK_VIDEO);
+    }
+
+    private void getPaymentProvider() {
+        mSystemPlugin.getEmbeddedApps(false);
+        final Intent intent = new Intent(mActivity, ChooseEmbeddedAppActivity.class);
+        mActivity.startActivityForResult(intent, PICK_PAYMENT_PROVIDER);
     }
 
     private ProgressDialog showProcessing() {
@@ -1079,6 +1132,8 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
                     processOnClickListenerForKey(item.imageButtonKey);
                 }
             });
+        } else if (IMAGE_BUTTON_PAYMENT == key) {
+            getPaymentProvider();
         } else {
             L.d("Could not find processOnClickListener for key: " + key);
         }

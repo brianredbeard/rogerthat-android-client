@@ -27,6 +27,7 @@ public class GetEmbeddedAppResponseTO implements com.mobicage.rpc.IJSONable {
 
     public String name;
     public String serving_url;
+    public String title;
     public String[] url_regexes;
     public long version;
 
@@ -45,6 +46,12 @@ public class GetEmbeddedAppResponseTO implements com.mobicage.rpc.IJSONable {
             this.serving_url = (String) val;
         } else {
             throw new IncompleteMessageException("com.mobicage.to.app.GetEmbeddedAppResponseTO object is missing field 'serving_url'");
+        }
+        if (json.containsKey("title")) {
+            Object val = json.get("title");
+            this.title = (String) val;
+        } else {
+            throw new IncompleteMessageException("com.mobicage.to.app.GetEmbeddedAppResponseTO object is missing field 'title'");
         }
         if (json.containsKey("url_regexes")) {
             org.json.simple.JSONArray val_arr = (org.json.simple.JSONArray) json.get("url_regexes");
@@ -77,6 +84,7 @@ public class GetEmbeddedAppResponseTO implements com.mobicage.rpc.IJSONable {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
         obj.put("name", this.name);
         obj.put("serving_url", this.serving_url);
+        obj.put("title", this.title);
         if (this.url_regexes == null) {
             obj.put("url_regexes", null);
         } else {

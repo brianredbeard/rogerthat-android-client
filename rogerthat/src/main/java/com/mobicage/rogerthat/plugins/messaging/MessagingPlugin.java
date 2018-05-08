@@ -166,8 +166,9 @@ public class MessagingPlugin implements MobicagePlugin {
     public final static long FLAG_CHAT_STICKY = 4096;
     public final static long FLAG_ALLOW_CHAT_PICTURE = 8192;
     public final static long FLAG_ALLOW_CHAT_VIDEO = 16384;
-    public final static long FLAG_ALLOW_CHAT_PRIORITY = 32768;
-    public final static long FLAG_ALLOW_CHAT_STICKY = 65536;
+    public final static long FLAG_ALLOW_CHAT_PRIORITY = 0x8000;
+    public final static long FLAG_ALLOW_CHAT_STICKY = 0x10000;
+    public final static long FLAG_ALLOW_CHAT_PAYMENTS = 131072;
 
     public final static long STATUS_RECEIVED = 1;
     public final static long STATUS_ACKED = 2;

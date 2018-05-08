@@ -44,10 +44,10 @@ import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
+import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.rpc.config.LookAndFeelConstants;
 import com.mobicage.to.app.EmbeddedAppTO;
 import com.mobicage.to.app.GetAppAssetRequestTO;
-import com.mobicage.to.app.GetEmbeddedAppResponseTO;
 import com.mobicage.to.app.UpdateAppAssetRequestTO;
 import com.mobicage.to.app.UpdateLookAndFeelRequestTO;
 import com.mobicage.to.js_embedding.JSEmbeddingItemTO;
@@ -79,6 +79,8 @@ public class SystemPlugin implements MobicagePlugin {
     private static final String HEARTBEAT_INFO = "heartbeat_info";
 
     private static final String CONFIG_WIFI_ONLY_DOWNLOADS = "wifiOnlyDownloads";
+    public static final String GET_EMBEDDED_APPS_RESULT_INTENT = "com.mobicage.rogerthat.plugins.GET_EMBEDDED_APPS_RESULT_INTENT";
+    public static final String GET_EMBEDDED_APPS_FAILED_INTENT = "com.mobicage.rogerthat.plugins.GET_EMBEDDED_APPS_FAILED_INTENT";
 
     private final ConfigurationProvider mConfigProvider;
     private final NetworkConnectivityManager mNetworkConnectivityManager;
@@ -229,7 +231,7 @@ public class SystemPlugin implements MobicagePlugin {
                             mMainService.clearPluginDBUpdate(SystemPlugin.class, SYSTEM_PLUGIN_MUST_DOWNLOAD_ASSETS);
 
                         } else if (pluginDBUpdates.contains(SYSTEM_PLUGIN_MUST_REFRESH_EMBEDDED_APPS)) {
-                            refreshEmbeddedApps();
+                            getEmbeddedApps(true);
                             mMainService.clearPluginDBUpdate(SystemPlugin.class,
                                     SYSTEM_PLUGIN_MUST_REFRESH_EMBEDDED_APPS);
 
@@ -246,12 +248,16 @@ public class SystemPlugin implements MobicagePlugin {
     }
 
 
-    public void refreshEmbeddedApps() {
-        // Set an empty array in the DB to clear all apps
-        updateEmbeddedApps(new EmbeddedAppTO[0]);
-
+    public void getEmbeddedApps(boolean saveToDb) {
         final com.mobicage.to.app.GetEmbeddedAppsRequestTO request = new com.mobicage.to.app.GetEmbeddedAppsRequestTO();
-        final GetEmbeddedAppsResponseHandler responseHandler = new GetEmbeddedAppsResponseHandler();
+        final ResponseHandler responseHandler;
+        if (saveToDb) {
+            // Set an empty array in the DB to clear all apps
+            updateEmbeddedApps(new EmbeddedAppTO[0]);
+            responseHandler = new GetEmbeddedAppsResponseHandler();
+        } else {
+            responseHandler = new GetEmbeddedAppsIntentResponseHandler();
+        }
 
         try {
             com.mobicage.api.system.Rpc.getEmbeddedApps(responseHandler, request);

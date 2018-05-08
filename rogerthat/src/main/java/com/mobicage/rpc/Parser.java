@@ -97,6 +97,13 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
+    public static com.mobicage.models.properties.messaging.MessageEmbeddedApp ComMobicageModelsPropertiesMessagingMessageEmbeddedApp(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.models.properties.messaging.MessageEmbeddedApp((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
     public static com.mobicage.models.properties.profiles.PublicKeyTO ComMobicageModelsPropertiesProfilesPublicKeyTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;
