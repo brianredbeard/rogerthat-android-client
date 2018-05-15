@@ -105,8 +105,6 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
 
     private final static String HINT_SWIPE = "com.mobicage.rogerthat.plugins.messaging.FriendsThreadActivity.HINT_SWIPE";
 
-
-
     private boolean mScrollToBottomOnUpdate = false;
     private String mParentMessageKey;
     private MessagingPlugin mMessagingPlugin;
@@ -171,6 +169,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         filter2.addAction(MessagingPlugin.THREAD_MODIFIED_INTENT);
         filter2.addAction(FriendsPlugin.FRIEND_INFO_RECEIVED_INTENT);
         filter2.addAction(SystemPlugin.ASSET_AVAILABLE_INTENT);
+        filter2.addAction(BrandingMgr.EMBEDDED_APP_AVAILABLE_INTENT);
         registerReceiver(mReceiver, filter2);
     }
 
@@ -181,10 +180,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         if (mMessagingPlugin != null) {
             mMessagingPlugin.cleanThreadDirtyFlags(mParentMessageKey);
             if (!SystemUtils.isFlagEnabled(mFlags, MessagingPlugin.FLAG_DYNAMIC_CHAT) && mParentMessage.threadDirty) {
-                List<String> dirties = new ArrayList<>(mRenderedMessages.size());
-                for (String key : mRenderedMessages)
-                    dirties.add(key);
-                mMessagingPlugin.markMessagesAsRead(mParentMessageKey, dirties.toArray(new String[dirties.size()]));
+                mMessagingPlugin.markMessagesAsRead(mParentMessageKey, mRenderedMessages.toArray(new String[mRenderedMessages.size()]));
             }
         }
         super.onDestroy();
@@ -426,6 +422,10 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                 if (SystemPlugin.ASSET_CHAT_BACKGROUND.equals(kind)) {
                     setThreadBackground();
                 }
+            }
+            if (BrandingMgr.EMBEDDED_APP_AVAILABLE_INTENT.equals(intent.getAction())) {
+                String id = intent.getStringExtra("id");
+                mSendMessageView.onEmbeddedAppAvailable(id);
             }
             return null;
         }

@@ -58,18 +58,23 @@ import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.CannedButton;
 import com.mobicage.rogerthat.CannedButtons;
+import com.mobicage.rogerthat.ChooseEmbeddedAppActivity;
 import com.mobicage.rogerthat.HomeActivity;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.SendMessageButtonActivity;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.config.Configuration;
+import com.mobicage.rogerthat.cordova.CordovaActionScreenActivity;
+import com.mobicage.rogerthat.plugins.friends.ActionScreenActivity;
 import com.mobicage.rogerthat.plugins.messaging.AttachmentViewerActivity;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessageStore;
 import com.mobicage.rogerthat.plugins.messaging.MessagingActivity;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
-import com.mobicage.rogerthat.plugins.payment.ChooseEmbeddedAppActivity;
+import com.mobicage.rogerthat.plugins.payment.OpenEmbeddedAppContext;
+import com.mobicage.rogerthat.plugins.payment.OpenEmbeddedAppContextType;
+import com.mobicage.rogerthat.plugins.system.EmbeddedAppType;
 import com.mobicage.rogerthat.plugins.system.SystemPlugin;
 import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.IOUtils;
@@ -99,6 +104,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -115,10 +121,11 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
     public static final String CONFIGKEY = "SEND_NEW_MESSAGE_WIZARD";
     public static final String CANNED_BUTTONS = "CANNED_BUTTONS";
 
-    private static final int PICK_IMAGE = 1;
-    private static final int PICK_VIDEO = 2;
-    private static final int PICK_BUTTON = 3;
-    private static final int PICK_PAYMENT_PROVIDER = 4;
+    private static final int PICK_IMAGE_CODE = 1;
+    private static final int PICK_VIDEO_CODE = 2;
+    private static final int PICK_BUTTON_CODE = 3;
+    private static final int PICK_EMBEDDED_APP_CODE = 4;
+    private static final int START_EMBEDDED_APP_REQUEST_CODE = 100;
 
     private final int PERMISSION_REQUEST_CAMERA = 1;
     private final int IMAGE_BUTTON_TEXT = 1;
@@ -157,6 +164,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
     private String mUploadFileExtenstion = null;
     private File mTmpUploadFile = null;
     private EmbeddedAppTO mChosenEmbeddedApp = null;
+    private ProgressDialog mEmbeddedAppDownloadSpinner = null;
 
     private List<Integer> mImageButtons;
     private int mMaxImageButtonsOnScreen;
@@ -341,7 +349,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
 
     public void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
         switch (requestCode) {
-            case PICK_IMAGE:
+            case PICK_IMAGE_CODE:
                 if (resultCode == Activity.RESULT_OK) {
                     if (mUriSavedFile == null) {
                         setupUploadFile("jpg", false);
@@ -357,7 +365,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
                     }
                 }
                 break;
-            case PICK_VIDEO:
+            case PICK_VIDEO_CODE:
                 if (resultCode == Activity.RESULT_OK) {
                     if (mUriSavedFile == null) {
                         setupUploadFile("mp4", false);
@@ -374,7 +382,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
                 }
                 break;
 
-            case PICK_BUTTON:
+            case PICK_BUTTON_CODE:
                 if (resultCode == Activity.RESULT_OK) {
                     try {
                         mCannedButtons = (CannedButtons) Pickler.createObjectFromPickle(data.getByteArrayExtra(SendMessageButtonActivity.CANNED_BUTTONS));
@@ -407,17 +415,23 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
                     }
                 }
                 break;
-            case PICK_PAYMENT_PROVIDER:
+            case PICK_EMBEDDED_APP_CODE:
                 if (resultCode == Activity.RESULT_OK) {
                     try {
                         String stringResult = data.getStringExtra(ChooseEmbeddedAppActivity.RESULT_KEY);
                         if (stringResult != null) {
-                            mChosenEmbeddedApp = new EmbeddedAppTO((Map<String, Object>) JSONValue.parse(stringResult));
-                            // TODO show this somewhere
+                            EmbeddedAppTO chosenEmbeddedApp = new EmbeddedAppTO((Map<String, Object>) JSONValue.parse(stringResult));
+                            openEmbeddedAppForPayment(chosenEmbeddedApp);
                         }
                     } catch (Exception e) {
                         L.bug(e);
                     }
+                }
+                break;
+            case START_EMBEDDED_APP_REQUEST_CODE:
+                if (resultCode == Activity.RESULT_OK) {
+                    // todo: show payment somewhere (under where the added buttons would show probably?)
+                    L.i("Received result from embedded app " + data.toString());
                 }
                 break;
 
@@ -730,7 +744,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
             chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{cameraIntent});
         }
 
-        mActivity.startActivityForResult(chooserIntent, PICK_IMAGE);
+        mActivity.startActivityForResult(chooserIntent, PICK_IMAGE_CODE);
     }
 
     private void getNewVideo() {
@@ -764,13 +778,13 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
             chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{cameraIntent});
         }
 
-        mActivity.startActivityForResult(chooserIntent, PICK_VIDEO);
+        mActivity.startActivityForResult(chooserIntent, PICK_VIDEO_CODE);
     }
 
-    private void getPaymentProvider() {
-        mSystemPlugin.getEmbeddedApps(false);
+    private void showChooseEmbeddedApp() {
+        mSystemPlugin.getEmbeddedApps(false, EmbeddedAppType.CHAT_PAYMENT);
         final Intent intent = new Intent(mActivity, ChooseEmbeddedAppActivity.class);
-        mActivity.startActivityForResult(intent, PICK_PAYMENT_PROVIDER);
+        mActivity.startActivityForResult(intent, PICK_EMBEDDED_APP_CODE);
     }
 
     private ProgressDialog showProcessing() {
@@ -960,6 +974,14 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
         return imagesFolder;
     }
 
+    public void onEmbeddedAppAvailable(String id) {
+        if (mEmbeddedAppDownloadSpinner != null && id.equals(mChosenEmbeddedApp.name)) {
+            mEmbeddedAppDownloadSpinner.dismiss();
+            mEmbeddedAppDownloadSpinner = null;
+            openEmbeddedAppForPayment(mChosenEmbeddedApp);
+        }
+    }
+
     private class PickMoreItem {
         int imageButtonKey;
         int iv;
@@ -1017,7 +1039,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
                     primitiveLongArray[i] = longArray[i].longValue();
                 }
                 intent.putExtra(SendMessageButtonActivity.BUTTONS, primitiveLongArray);
-                mActivity.startActivityForResult(intent, PICK_BUTTON);
+                mActivity.startActivityForResult(intent, PICK_BUTTON_CODE);
             } catch (Exception e) {
                 L.bug(e);
             }
@@ -1133,7 +1155,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
                 }
             });
         } else if (IMAGE_BUTTON_PAYMENT == key) {
-            getPaymentProvider();
+            showChooseEmbeddedApp();
         } else {
             L.d("Could not find processOnClickListener for key: " + key);
         }
@@ -1286,5 +1308,27 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
                 && store.messageNeedsAnswerUI(repliedToKey)) {
             mMessagingPlugin.ackMessage(message, null, null, null, mActivity, null);
         }
+    }
+
+    /**
+     * Opens the embedded app. Sets the context so the embedded app knows it has to return payment information.
+     */
+    private void openEmbeddedAppForPayment(EmbeddedAppTO embeddedAppTO) {
+        long version = mSystemPlugin.getStore().getEmbeddedAppVersion(embeddedAppTO.name);
+        if (version < embeddedAppTO.version || !mSystemPlugin.getBrandingMgr().embeddedAppExists(embeddedAppTO.name)) {
+            mEmbeddedAppDownloadSpinner = UIUtils.showProgressDialog(mActivity, null, mActivity.getString(R.string.loading), true, false);
+            mChosenEmbeddedApp = embeddedAppTO;
+            mSystemPlugin.getEmbeddedApp(embeddedAppTO.name);
+            return;
+        } else {
+            mChosenEmbeddedApp = null;
+        }
+        HashMap<String, Object> data = new HashMap<>();
+        OpenEmbeddedAppContext context = new OpenEmbeddedAppContext(OpenEmbeddedAppContextType.CREATE_PAYMENT_REQUEST, data);
+        final Intent i = new Intent(mActivity, CordovaActionScreenActivity.class);
+        i.putExtra(ActionScreenActivity.CONTEXT, JSONValue.toJSONString(context.toJSONMap()));
+        i.putExtra(CordovaActionScreenActivity.EMBEDDED_APP_ID, embeddedAppTO.name);
+        i.putExtra(CordovaActionScreenActivity.TITLE, embeddedAppTO.title);
+        mActivity.startActivityForResult(i, START_EMBEDDED_APP_REQUEST_CODE);
     }
 }

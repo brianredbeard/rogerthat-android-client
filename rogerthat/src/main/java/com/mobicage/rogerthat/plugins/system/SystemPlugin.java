@@ -231,7 +231,7 @@ public class SystemPlugin implements MobicagePlugin {
                             mMainService.clearPluginDBUpdate(SystemPlugin.class, SYSTEM_PLUGIN_MUST_DOWNLOAD_ASSETS);
 
                         } else if (pluginDBUpdates.contains(SYSTEM_PLUGIN_MUST_REFRESH_EMBEDDED_APPS)) {
-                            getEmbeddedApps(true);
+                            getEmbeddedApps(true, null);
                             mMainService.clearPluginDBUpdate(SystemPlugin.class,
                                     SYSTEM_PLUGIN_MUST_REFRESH_EMBEDDED_APPS);
 
@@ -248,8 +248,11 @@ public class SystemPlugin implements MobicagePlugin {
     }
 
 
-    public void getEmbeddedApps(boolean saveToDb) {
+    public void getEmbeddedApps(boolean saveToDb, EmbeddedAppType type) {
         final com.mobicage.to.app.GetEmbeddedAppsRequestTO request = new com.mobicage.to.app.GetEmbeddedAppsRequestTO();
+        if (type != null) {
+            request.type = type.toString();
+        }
         final ResponseHandler responseHandler;
         if (saveToDb) {
             // Set an empty array in the DB to clear all apps

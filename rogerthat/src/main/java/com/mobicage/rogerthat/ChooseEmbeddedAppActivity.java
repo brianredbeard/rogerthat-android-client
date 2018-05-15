@@ -16,7 +16,7 @@
  * @@license_version:1.4@@
  */
 
-package com.mobicage.rogerthat.plugins.payment;
+package com.mobicage.rogerthat;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -25,18 +25,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 
-import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mobicage.rogerth.at.R;
-import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.plugins.system.SystemPlugin;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
-import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.to.app.EmbeddedAppTO;
@@ -44,13 +39,15 @@ import com.mobicage.to.app.GetEmbeddedAppsResponseTO;
 
 import org.json.simple.JSONValue;
 
+import java.util.Arrays;
 import java.util.Map;
 
-public class ChooseEmbeddedAppActivity extends ServiceBoundActivity {
+public class ChooseEmbeddedAppActivity extends ServiceBoundActivity implements EmbeddedAppFragment.OnListFragmentInteractionListener {
 
     public static String RESULT_KEY = "result";
     ProgressBar mProgressBar;
-    private EmbeddedAppTO mPickedEmbeddedApp;
+    private BroadcastReceiver mBroadcastReceiver;
+    private EmbeddedAppFragment mEmbeddedAppFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,8 +55,10 @@ public class ChooseEmbeddedAppActivity extends ServiceBoundActivity {
         setContentView(R.layout.activity_choose_embedded_app);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        registerReceiver(getBroadcastReceiver(), getIntentFilter());
+        mBroadcastReceiver = getBroadcastReceiver();
+        registerReceiver(mBroadcastReceiver, getIntentFilter());
         this.mProgressBar = (ProgressBar) findViewById(R.id.loading_progress_bar);
+        mEmbeddedAppFragment = (EmbeddedAppFragment) getSupportFragmentManager().findFragmentById(R.id.embedded_app_fragment);
     }
 
     @Override
@@ -68,7 +67,7 @@ public class ChooseEmbeddedAppActivity extends ServiceBoundActivity {
 
     @Override
     protected void onServiceUnbound() {
-
+        unregisterReceiver(mBroadcastReceiver);
     }
 
     private BroadcastReceiver getBroadcastReceiver() {
@@ -87,7 +86,7 @@ public class ChooseEmbeddedAppActivity extends ServiceBoundActivity {
                             break;
                         case SystemPlugin.GET_EMBEDDED_APPS_FAILED_INTENT:
                             String error = intent.getStringExtra("error");
-                            UIUtils.showDialog(mService, getString(R.string.activity_error), error);
+                            UIUtils.showDialog(ChooseEmbeddedAppActivity.this, getString(R.string.activity_error), error);
                             break;
                     }
                 } catch (IncompleteMessageException e) {
@@ -98,41 +97,10 @@ public class ChooseEmbeddedAppActivity extends ServiceBoundActivity {
         };
     }
 
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        T.UI();
-        super.onCreateOptionsMenu(menu);
-        getMenuInflater().inflate(R.menu.send_message_button_menu, menu);
-        addIconToMenuItem(menu, R.id.save, FontAwesome.Icon.faw_check);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        T.UI();
-
-        switch (item.getItemId()) {
-            case R.id.save:
-                if (mPickedEmbeddedApp != null) {
-                    Intent resultIntent = new Intent();
-                    resultIntent.putExtra(RESULT_KEY, JSONValue.toJSONString(mPickedEmbeddedApp.toJSONMap()));
-                    setResult(Activity.RESULT_OK, resultIntent);
-
-                } else {
-                    setResult(Activity.RESULT_CANCELED);
-                }
-                finish();
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
     private void showEmbeddedApps(GetEmbeddedAppsResponseTO response) {
-        L.i("Received payment providers");
         mProgressBar.setVisibility(View.GONE);
-        // TODO show list of payment providers
-        // TODO onclick set mPickedEmbeddedApp
+        mEmbeddedAppFragment.setAdapter(new EmbeddedAppRecyclerViewAdapter(Arrays.asList(response.embedded_apps),
+                mEmbeddedAppFragment.getInteractionListener()));
     }
 
     private IntentFilter getIntentFilter() {
@@ -140,5 +108,13 @@ public class ChooseEmbeddedAppActivity extends ServiceBoundActivity {
         filter.addAction(SystemPlugin.GET_EMBEDDED_APPS_RESULT_INTENT);
         filter.addAction(SystemPlugin.GET_EMBEDDED_APPS_FAILED_INTENT);
         return filter;
+    }
+
+    @Override
+    public void onListFragmentInteraction(EmbeddedAppTO embeddedAppTO) {
+        Intent intent = new Intent();
+        intent.putExtra(RESULT_KEY, JSONValue.toJSONString(embeddedAppTO.toJSONMap()));
+        setResult(Activity.RESULT_OK, intent);
+        finish();
     }
 }

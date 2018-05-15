@@ -25,9 +25,11 @@ import java.util.Map;
 
 public class GetEmbeddedAppResponseTO implements com.mobicage.rpc.IJSONable {
 
+    public String description;
     public String name;
     public String serving_url;
     public String title;
+    public String[] types;
     public String[] url_regexes;
     public long version;
 
@@ -35,6 +37,12 @@ public class GetEmbeddedAppResponseTO implements com.mobicage.rpc.IJSONable {
     }
 
     public GetEmbeddedAppResponseTO(Map<String, Object> json) throws IncompleteMessageException {
+        if (json.containsKey("description")) {
+            Object val = json.get("description");
+            this.description = (String) val;
+        } else {
+            throw new IncompleteMessageException("com.mobicage.to.app.GetEmbeddedAppResponseTO object is missing field 'description'");
+        }
         if (json.containsKey("name")) {
             Object val = json.get("name");
             this.name = (String) val;
@@ -52,6 +60,19 @@ public class GetEmbeddedAppResponseTO implements com.mobicage.rpc.IJSONable {
             this.title = (String) val;
         } else {
             throw new IncompleteMessageException("com.mobicage.to.app.GetEmbeddedAppResponseTO object is missing field 'title'");
+        }
+        if (json.containsKey("types")) {
+            org.json.simple.JSONArray val_arr = (org.json.simple.JSONArray) json.get("types");
+            if (val_arr == null) {
+                this.types = null;
+            } else {
+                this.types = new String[val_arr.size()];
+                for (int i=0; i < val_arr.size(); i++) {
+                    this.types[i] = (String) val_arr.get(i);
+                }
+            }
+        } else {
+            this.types = new String[0];
         }
         if (json.containsKey("url_regexes")) {
             org.json.simple.JSONArray val_arr = (org.json.simple.JSONArray) json.get("url_regexes");
@@ -82,9 +103,19 @@ public class GetEmbeddedAppResponseTO implements com.mobicage.rpc.IJSONable {
     @SuppressWarnings("unchecked")
     public Map<String, Object> toJSONMap() {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
+        obj.put("description", this.description);
         obj.put("name", this.name);
         obj.put("serving_url", this.serving_url);
         obj.put("title", this.title);
+        if (this.types == null) {
+            obj.put("types", null);
+        } else {
+            org.json.simple.JSONArray arr = new org.json.simple.JSONArray();
+            for (int i=0; i < this.types.length; i++) {
+                arr.add(this.types[i]);
+            }
+            obj.put("types", arr);
+        }
         if (this.url_regexes == null) {
             obj.put("url_regexes", null);
         } else {

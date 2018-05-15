@@ -18,11 +18,12 @@
 
 package com.mobicage.rogerthat.plugins.payment;
 
-public enum PayContextType {
-    PAY("pay"),;
+public enum OpenEmbeddedAppContextType {
+    PAY_WIDGET("pay"),
+    CREATE_PAYMENT_REQUEST("create-payment-request");
     private final String value;
 
-    PayContextType(final String value) {
+    OpenEmbeddedAppContextType(final String value) {
         this.value = value;
     }
 

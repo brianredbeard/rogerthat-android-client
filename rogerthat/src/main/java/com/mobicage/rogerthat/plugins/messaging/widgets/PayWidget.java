@@ -44,9 +44,8 @@ import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.plugins.payment.ChoosePaymentMethodActivity;
-import com.mobicage.rogerthat.plugins.payment.PayContextType;
-import com.mobicage.rogerthat.plugins.payment.PayWidgetContext;
-import com.mobicage.rogerthat.plugins.payment.PayWidgetContextData;
+import com.mobicage.rogerthat.plugins.payment.OpenEmbeddedAppContext;
+import com.mobicage.rogerthat.plugins.payment.OpenEmbeddedAppContextType;
 import com.mobicage.rogerthat.plugins.payment.PaymentPlugin;
 import com.mobicage.rogerthat.plugins.payment.PaymentProviderMethod;
 import com.mobicage.rogerthat.plugins.system.SystemPlugin;
@@ -73,6 +72,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONValue;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -280,13 +280,14 @@ public class PayWidget extends Widget {
             return;
         }
 
-        PayWidgetContextData data = new PayWidgetContextData((boolean) mWidgetMap.get("test_mode"),
-                mMessage.key,
-                (String) mWidgetMap.get("memo"),
-                paymentProviderMethod.method,
-                paymentProviderMethod.provider,
-                (String) mWidgetMap.get("target"));
-        PayWidgetContext context = new PayWidgetContext(PayContextType.PAY.toString(), data);
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("test_mode", mWidgetMap.get("test_mode"));
+        data.put("message_key", mMessage.key);
+        data.put("memo", mWidgetMap.get("memo"));
+        data.put("target", mWidgetMap.get("target"));
+        data.put("method", paymentProviderMethod.method.toJSONMap());
+        data.put("provider", paymentProviderMethod.provider.toJSONMap());
+        OpenEmbeddedAppContext context = new OpenEmbeddedAppContext(OpenEmbeddedAppContextType.PAY_WIDGET, data);
         Bundle extras = new Bundle();
         extras.putString(ActionScreenActivity.CONTEXT, JSONValue.toJSONString(context.toJSONMap()));
         extras.putString(CordovaActionScreenActivity.EMBEDDED_APP_ID, embeddedAppId);

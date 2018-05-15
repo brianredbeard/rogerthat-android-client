@@ -594,41 +594,21 @@
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar" >
         </activity>
-
-        <activity
-            android:name="com.mobicage.rogerthat.plugins.payment.ChoosePaymentMethodActivity"
-            android:label="@string/title_activity_choose_payment_method">
+        <activity android:label="@string/title_activity_choose_payment_method" android:name="com.mobicage.rogerthat.plugins.payment.ChoosePaymentMethodActivity">
         </activity>
-
-        <!--todo: Needs to be restyled-->
-        <!--<receiver-->
-            <!--android:name="com.mobicage.rogerthat.widget.RogerthatWidgetProvider"-->
-            <!--android:exported="false"-->
-            <!--android:label="@string/widget_name" >-->
-            <!--<intent-filter>-->
-                <!--<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />-->
-            <!--</intent-filter>-->
-
-            <!--<meta-data-->
-                <!--android:name="android.appwidget.provider"-->
-                <!--android:resource="@xml/rogerthat_widget_provider" />-->
-        <!--</receiver>-->
-
-        <receiver
-            android:name="com.mobicage.rogerthat.GCMReveiver"
-            android:permission="com.google.android.c2dm.permission.SEND" >
+        <activity android:label="@string/title_activity_choose_embedded_app" android:name="com.mobicage.rogerthat.ChooseEmbeddedAppActivity">
+        </activity>
+        <receiver android:name="com.mobicage.rogerthat.GCMReveiver" android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-                <category android:name="${applicationId}"/>
+                <category android:name="${applicationId}" />
             </intent-filter>
         </receiver>
-
-        <receiver android:name="com.mobicage.rogerthat.MainBroadcastReceiver" >
+        <receiver android:name="com.mobicage.rogerthat.MainBroadcastReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-
         <service android:name="com.mobicage.rogerthat.MainService" />
         <service android:name="com.mobicage.rogerthat.registration.RegistrationService" />
         <service

@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.mobicage.rogerthat.plugins.payment.ChooseEmbeddedAppActivity">
+    tools:context="com.mobicage.rogerthat.ChooseEmbeddedAppActivity">
 
     <include layout="@layout/content_get_choose_embedded_app"/>
 

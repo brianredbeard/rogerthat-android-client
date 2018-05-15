@@ -16,27 +16,20 @@
  * @@license_version:1.4@@
  */
 
-package com.mobicage.rogerthat.plugins.payment;
+package com.mobicage.rogerthat.plugins.system;
 
-import com.mobicage.rpc.IJSONable;
+public enum EmbeddedAppType {
+    CHAT_PAYMENT("chat-payment"),
+    PAY_WIDGET("pay-widget");
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+    private String type;
 
-public class PayWidgetContext implements IJSONable {
-    public String type;
-    public PayWidgetContextData data;
-
-    public PayWidgetContext(String type, PayWidgetContextData data) {
+    EmbeddedAppType(String type) {
         this.type = type;
-        this.data = data;
     }
 
     @Override
-    public Map<String, Object> toJSONMap() {
-        Map<String, Object> obj = new LinkedHashMap<>();
-        obj.put("type", this.type);
-        obj.put("data", this.data.toJSONMap());
-        return obj;
+    public String toString() {
+        return this.type;
     }
 }
