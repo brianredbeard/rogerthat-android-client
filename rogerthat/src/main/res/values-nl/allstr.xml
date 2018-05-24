@@ -442,7 +442,7 @@
     <string name="registration_no_attempts_left">U heeft drie keer een foute activatiecode ingevoerd.\n\nU moet de registratie herbeginnen.</string>
     <string name="registration_notification_types_city_app">Er zijn 3 soorten berichten:\n1. Berichten die specifiek gericht zijn aan jou. Deze kunnen komen van vrienden of van organisaties (bijvoorbeeld informatie over een bestelling of een antwoord op een vraag).\n2. Nieuws, info en evenementen vanuit de stad of gemeente.\n3. Nieuws, info en evenementen van de handelaars en verenigingen die je volgt.\n\nJe kan altijd nieuws filteren, waardoor je enkel nieuwsberichten ziet die relevant zijn voor jou.</string>
     <string name="registration_notification_types_general">Er zijn 2 soorten berichten:\n1. Berichten die specifiek gericht zijn aan jou. Deze kunnen komen van vrienden of van organisaties.\n2. Algemene berichten van diensten die je volgt.\n\nOp algemene berichten kan u zich steeds uitschrijven, zodat u enkel berichten ontvangt die relevant zijn voor u.</string>
-    <string name="registration_notifications_header">%1$@ is een app waarmee u kan communiceren met personen en organisaties. Deze communicatie gebeurt via berichten. De %1$@ app gebruikt notificaties om u op de hoogte te houden van nieuwe berichten. Daarom is het belangrijk om notificaties toe te staan voor de %1$@ app.</string>
+    <string name="registration_notifications_header">%1$s is een app waarmee u kan communiceren met personen en organisaties. Deze communicatie gebeurt via berichten. De %1$s app gebruikt notificaties om u op de hoogte te houden van nieuwe berichten. Daarom is het belangrijk om notificaties toe te staan voor de %1$s app.</string>
     <string name="registration_option_email">Optie 2:\nLog in met je e-mailadres.</string>
     <string name="registration_option_fb">Optie 1:\nLog in met je Facebook profiel.</string>
     <string name="registration_pin_was_mailed_no_html">Jouw activatiecode is verzonden naar %1$s om %2$s\nHet zou kunnen dat de mail beland is in je Spam of Ongewenste Email map.</string>
@@ -465,7 +465,7 @@
     <string name="registration_use_fb">Gebruik Facebook</string>
     <string name="registration_welcome">Welkom bij %1$s!</string>
     <string name="registration_welcome_text">Welkom in de %1$s app. De app waarmee je verbinding met je dienstverleners maakt en hen met je vrienden deelt.\n\nVoor je van start kunt gaan, moet je je even registreren. Tik op de knop \'Aanvaarden &amp; doorgaan\' om verder te gaan.</string>
-    <string name="registration_welcome_text_start_registration">Welkom in de %1$@ app. De app waarmee je verbinding met je dienstverleners maakt en hen met je vrienden deelt.\n\nVoor je van start kunt gaan, moet je je even registreren. Tik op de knop \'Registratie starten\' om verder te gaan.</string>
+    <string name="registration_welcome_text_start_registration">Welkom in de %1$s app. De app waarmee je verbinding met je dienstverleners maakt en hen met je vrienden deelt.\n\nVoor je van start kunt gaan, moet je je even registreren. Tik op de knop \'Registratie starten\' om verder te gaan.</string>
     <string name="remove_canned_button">Wenst u antwoordknop \"%1$s\" te verwijderen?</string>
     <string name="remove_friend">Verwijder als vriend</string>
     <string name="remove_service">Dienst ontvolgen</string>
