@@ -25,6 +25,7 @@ import java.util.Map;
 
 public class SettingsTO implements com.mobicage.rpc.IJSONable {
 
+    public com.mobicage.to.system.ConsentSettingsTO consent;
     public long[] backgroundFetchTimestamps;
     public long geoLocationSamplingIntervalBattery;
     public long geoLocationSamplingIntervalCharging;
@@ -45,7 +46,14 @@ public class SettingsTO implements com.mobicage.rpc.IJSONable {
     public SettingsTO() {
     }
 
+    @SuppressWarnings("unchecked")
     public SettingsTO(Map<String, Object> json) throws IncompleteMessageException {
+        if (json.containsKey("consent")) {
+            Object val = json.get("consent");
+            this.consent = val == null ? null : new com.mobicage.to.system.ConsentSettingsTO((Map<String, Object>) val);
+        } else {
+            this.consent = null;
+        }
         if (json.containsKey("backgroundFetchTimestamps")) {
             org.json.simple.JSONArray val_arr = (org.json.simple.JSONArray) json.get("backgroundFetchTimestamps");
             if (val_arr == null) {
@@ -197,6 +205,7 @@ public class SettingsTO implements com.mobicage.rpc.IJSONable {
     @SuppressWarnings("unchecked")
     public Map<String, Object> toJSONMap() {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
+        obj.put("consent", this.consent == null ? null : this.consent.toJSONMap());
         if (this.backgroundFetchTimestamps == null) {
             obj.put("backgroundFetchTimestamps", null);
         } else {

@@ -15,12 +15,15 @@
         <com.mobicage.rogerthat.util.ui.SafeViewFlipper
             android:id="@+id/registration_viewFlipper"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:measureAllChildren="false">
+
+            <include layout="@layout/registration_start"/>
 
             <include layout="@layout/registration_tos"/>
 
-            <include layout="@layout/registration_beacons"/>
-
+            <include layout="@layout/registration_notifications"/>
+            
             <include layout="@layout/registration_oauth"/>
 
             <include layout="@layout/registration_create_account"/>

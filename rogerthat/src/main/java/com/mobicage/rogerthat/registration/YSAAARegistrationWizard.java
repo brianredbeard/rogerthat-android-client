@@ -167,8 +167,4 @@ public class YSAAARegistrationWizard extends AbstractRegistrationWizard {
         setRegistrationId(UUID.randomUUID().toString());
         save();
     }
-
-    public Set<BeaconDiscoveredRequestTO> getDetectedBeacons() {
-        return null;
-    }
 }

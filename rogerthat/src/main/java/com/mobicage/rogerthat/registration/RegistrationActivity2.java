@@ -18,7 +18,6 @@
 package com.mobicage.rogerthat.registration;
 
 import android.Manifest;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -26,33 +25,29 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Typeface;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.RemoteException;
-import android.provider.Settings;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.text.Editable;
-import android.text.Html;
 import android.text.TextWatcher;
-import android.text.method.LinkMovementMethod;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -61,8 +56,6 @@ import android.widget.ViewFlipper;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.login.LoginResult;
-import com.mikepenz.fontawesome_typeface_library.FontAwesome;
-import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.Installation;
 import com.mobicage.rogerthat.MainService;
@@ -70,7 +63,6 @@ import com.mobicage.rogerthat.OauthActivity;
 import com.mobicage.rogerthat.config.Configuration;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
 import com.mobicage.rogerthat.plugins.scan.ProcessScanActivity;
-import com.mobicage.rogerthat.plugins.trackme.BeaconRegion;
 import com.mobicage.rogerthat.registration.AccountManager.Account;
 import com.mobicage.rogerthat.util.FacebookUtils;
 import com.mobicage.rogerthat.util.FacebookUtils.PermissionType;
@@ -78,6 +70,8 @@ import com.mobicage.rogerthat.util.GoogleServicesUtils;
 import com.mobicage.rogerthat.util.GoogleServicesUtils.GCMRegistrationIdFoundCallback;
 import com.mobicage.rogerthat.util.RegexPatterns;
 import com.mobicage.rogerthat.util.TextUtils;
+import com.mobicage.rogerthat.util.consent.ConsentProvider;
+import com.mobicage.rogerthat.util.net.NetworkConnectivityManager;
 import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
@@ -92,18 +86,6 @@ import com.mobicage.rogerthat.util.ui.Wizard;
 import com.mobicage.rpc.Credentials;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
-import com.mobicage.rpc.config.LookAndFeelConstants;
-import com.mobicage.to.beacon.BeaconRegionTO;
-
-import org.altbeacon.beacon.Beacon;
-import org.altbeacon.beacon.BeaconManager;
-import org.altbeacon.beacon.BeaconParser;
-import org.altbeacon.beacon.BleNotAvailableException;
-import org.altbeacon.beacon.MonitorNotifier;
-import org.altbeacon.beacon.RangeNotifier;
-import org.altbeacon.beacon.Region;
-import org.altbeacon.beacon.logging.LogManager;
-import org.altbeacon.beacon.logging.Loggers;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -120,11 +102,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
 
 // TODO: this class still has lots of duplicated code
 
@@ -135,16 +114,16 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
     public static final String QRSCAN_CONFIGKEY = "QR_SCAN";
     public static final String OPENED_URL_CONFIGKEY = "opened_url";
 
-    private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
-    private static final int PERMISSION_REQUEST_GET_ACCOUNTS = 2;
+    private static final int PERMISSION_REQUEST_GET_ACCOUNTS = 1;
 
     private static final int START_OAUTH_REQUEST_CODE = 1;
 
-    private static final int[] NORMAL_WIDTH_ROGERTHAT_LOGOS = new int[] { R.id.rogerthat_logo, R.id.rogerthat_logo1,
-            R.id.rogerthat_logo2, R.id.rogerthat_logo3, R.id.rogerthat_logo4, R.id.rogerthat_logo5};
+    private static final int[] NORMAL_WIDTH_ROGERTHAT_LOGOS = new int[] { R.id.rogerthat_logo,
+            R.id.rogerthat_logo1, R.id.rogerthat_logo2, R.id.rogerthat_logo3, R.id.rogerthat_logo4,
+            R.id.rogerthat_logo5};
     private static final int[] FULL_WIDTH_ROGERTHAT_LOGOS = new int[] { R.id.full_width_rogerthat_logo,
-            R.id.full_width_rogerthat_logo1, R.id.full_width_rogerthat_logo2, R.id.full_width_rogerthat_logo3, R.id
-            .full_width_rogerthat_logo4, R.id.full_width_rogerthat_logo5};
+            R.id.full_width_rogerthat_logo1,  R.id.full_width_rogerthat_logo2, R.id.full_width_rogerthat_logo3,
+            R.id.full_width_rogerthat_logo4, R.id.full_width_rogerthat_logo5};
 
     private Intent mNotYetProcessedIntent = null;
 
@@ -153,31 +132,23 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
     private EditText mEnterPinEditText;
     private HttpClient mHttpClient;
 
-    private BeaconManager mBeaconManager;
+    private WebView mTOSWebview;
 
     private BroadcastReceiver mBroadcastReceiver = new SafeBroadcastReceiver() {
         @Override
         public String[] onSafeReceive(Context context, Intent intent) {
             T.UI();
-            if (RegistrationWizard2.INTENT_GOT_BEACON_REGIONS.equals(intent.getAction())) {
-                if (mWiz != null && mWiz.getBeaconRegions() != null && mBeaconManager == null) {
-                    bindBeaconManager();
-                }
-            } else if (MainService.INTENT_BEACON_SERVICE_CONNECTED.equals(intent.getAction())) {
-                mBeaconManager.setBackgroundMode(!mService.getScreenIsOn());
-                startMonitoringBeaconRegions();
-            } else if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
-                if (mBeaconManager != null) {
-                    mBeaconManager.setBackgroundMode(true);
-                }
-            } else if (Intent.ACTION_SCREEN_ON.equals(intent.getAction())) {
-                if (mBeaconManager != null) {
-                    mBeaconManager.setBackgroundMode(false);
-                }
-            } else if (INTENT_LOG_URL.equals(intent.getAction())) {
+            final String action = intent.getAction();
+            if (INTENT_LOG_URL.equals(action)) {
                 String url = intent.getStringExtra("url");
                 int count = intent.getIntExtra("count", 0);
                 sendRegistrationUrl(url, count);
+            } else if (NetworkConnectivityManager.INTENT_NETWORK_UP.equals(action)) {
+                int position = mWiz.getPosition();
+                if (position == 1) { // tos
+                    mTOSWebview = (WebView) findViewById(R.id.tos_webview);
+                    mTOSWebview.loadUrl(AppConstants.TERMS_OF_SERVICE_URL);
+                }
             }
 
             return null;
@@ -194,11 +165,8 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
 
         mHttpClient = HTTPUtil.getHttpClient(HTTP_TIMEOUT, HTTP_RETRY_COUNT);
 
-        final IntentFilter filter = new IntentFilter(MainService.INTENT_BEACON_SERVICE_CONNECTED);
-        filter.addAction(RegistrationWizard2.INTENT_GOT_BEACON_REGIONS);
-        filter.addAction(Intent.ACTION_SCREEN_OFF);
-        filter.addAction(Intent.ACTION_SCREEN_ON);
-        filter.addAction(INTENT_LOG_URL);
+        final IntentFilter filter = new IntentFilter(INTENT_LOG_URL);
+        filter.addAction(NetworkConnectivityManager.INTENT_NETWORK_UP);
         registerReceiver(mBroadcastReceiver, filter);
 
         // TODO: This has to be improved.
@@ -321,44 +289,173 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
 
         handleScreenOrientation(getResources().getConfiguration().orientation);
 
-        TextView tosTextView = (TextView) findViewById(R.id.registration_tos);
-        tosTextView.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/lato_light_italic.ttf"));
-        tosTextView.setTextColor(ContextCompat.getColor(RegistrationActivity2.this, R.color.mc_default_text));
+        initStartStep();
+        initTOStep();
+        initNotificationsStep();
+        initOauthStep();
+        initChooseLoginMethodStep();
+        initEnterPinStep();
+        initDevicesStep();
 
+        mWiz = RegistrationWizard2.getWizard(mService);
+        mWiz.setFlipper((ViewFlipper) findViewById(R.id.registration_viewFlipper));
+        setWizard(mWiz);
+        setFinishHandler();
+        addStartHandler(); // 0
+        addAgreeTOSHandler(); // 1
+        addNotificationsHandler(); // 2
+        addOauthMethodHandler(); // 3
+        addChooseLoginMethodHandler(); // 4
+        addEnterPinHandler(); // 5
+        addRegisterDeviceHandler(); // 6
+        mWiz.run();
+        mWiz.setDeviceId(Installation.id(this));
+
+        handleEnterEmail();
+
+        if (CloudConstants.USE_GCM_KICK_CHANNEL && GoogleServicesUtils.checkPlayServices(this, true)) {
+            GoogleServicesUtils.registerGCMRegistrationId(mService, new GCMRegistrationIdFoundCallback() {
+                @Override
+                public void idFound(String registrationId) {
+                    setGCMRegistrationId(registrationId);
+                }
+            });
+        }
+
+        // unregister reason
+        String reason = mService.getUnregisterReason();
+        if (!TextUtils.isEmptyOrWhitespace(reason)) {
+            SafeDialogClick onPositiveClick = new SafeDialogClick() {
+                @Override
+                public void safeOnClick(DialogInterface dialog, int id) {
+                    dialog.dismiss();
+                    mService.deleteUnregisterFile();
+                }
+            };
+            UIUtils.showDialog(this, null, reason, getString(R.string.rogerthat), onPositiveClick,
+                    null, null);
+        }
+    }
+
+    private void initStartStep() {
+        final Button startBtn = (Button) findViewById(R.id.registration_start);
+        TextView rogerthatWelcomeTextView = (TextView) findViewById(R.id.rogerthat_welcome);
+        if (CloudConstants.isEnterpriseApp()) {
+            rogerthatWelcomeTextView.setText(getString(R.string.rogerthat_welcome_enterprise,
+                    getString(R.string.app_name)));
+        } else {
+            rogerthatWelcomeTextView.setText(getString(R.string.registration_welcome_text_start_registration,
+                    getString(R.string.app_name)));
+        }
+
+        startBtn.setOnClickListener(new SafeViewOnClickListener() {
+            @Override
+            public void safeOnClick(View v) {
+                startBtn.setEnabled(false);
+                sendRegistrationStep(RegistrationWizard2.REGISTRATION_STEP_CREATE_ACCOUNT);
+                mWiz.proceedToNextPage();
+            }
+        });
+    }
+
+    private void initTOStep() {
+        final Button tosAgreeBtn = (Button) findViewById(R.id.tos_agree);
+        tosAgreeBtn.setOnClickListener(new SafeViewOnClickListener() {
+            @Override
+            public void safeOnClick(View v) {
+                tosAgreeBtn.setEnabled(false);
+                final CheckBox tosAgeCheckbox = (CheckBox) findViewById(R.id.tos_age);
+                if (!tosAgeCheckbox.isChecked()) {
+                    final String message = RegistrationActivity2.this.getString( R.string.tos_parent_consent);
+                    final String positiveBtn = RegistrationActivity2.this.getString(R.string.grant_permission);
+                    final String negativeButtonCaption = RegistrationActivity2.this.getString(R.string.abort);
+                    SafeDialogClick positiveClick = new SafeDialogClick() {
+                        @Override
+                        public void safeOnClick(DialogInterface dialog, int id) {
+                            T.UI();
+                            dialog.dismiss();
+                            mWiz.setTOSAge(ConsentProvider.TOS_AGE_PARENTAL);
+                            sendRegistrationStep(RegistrationWizard2.REGISTRATION_STEP_TOS);
+                            mWiz.proceedToNextPage();
+                        }
+                    };
+                    SafeDialogClick negativeClick = new SafeDialogClick() {
+                        @Override
+                        public void safeOnClick(DialogInterface dialog, int id) {
+                            T.UI();
+                            dialog.dismiss();
+                            tosAgreeBtn.setEnabled(true);
+                        }
+                    };
+                    UIUtils.showDialog(RegistrationActivity2.this, null, message, positiveBtn, positiveClick, negativeButtonCaption, negativeClick);
+                } else {
+                    mWiz.setTOSAge(ConsentProvider.TOS_AGE_16);
+                    sendRegistrationStep(RegistrationWizard2.REGISTRATION_STEP_TOS);
+                    mWiz.proceedToNextPage();
+                }
+            }
+        });
+    }
+
+    private void initNotificationsStep() {
+        TextView notificationsTextView = (TextView) findViewById(R.id.notifications_text);
+        final String header = getString(R.string.registration_notifications_header, getString(R.string.app_name));
+        final String reason = getString(CloudConstants.isCityApp() ? R.string.registration_notification_types_city_app : R.string.registration_notification_types_general);
+        notificationsTextView.setText(header + "\n\n" + reason);
+        final Button notificationsButton = (Button) findViewById(R.id.notifications_continue);
+        notificationsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                notificationsButton.setEnabled(false);
+                final String title = RegistrationActivity2.this.getString( R.string.notifications_consent_title);
+                final String message = RegistrationActivity2.this.getString( R.string.notifications_consent_message);
+                final String positiveBtn = RegistrationActivity2.this.getString(R.string.allow);
+                final String negativeButtonCaption = RegistrationActivity2.this.getString(R.string.dont_allow);
+                SafeDialogClick positiveClick = new SafeDialogClick() {
+                    @Override
+                    public void safeOnClick(DialogInterface dialog, int id) {
+                        T.UI();
+                        dialog.dismiss();
+                        savePushNotifications(true);
+                        sendRegistrationStep(RegistrationWizard2.REGISTRATION_STEP_NOTIFICATION_USAGE);
+                        mWiz.proceedToNextPage();
+                    }
+                };
+                SafeDialogClick negativeClick = new SafeDialogClick() {
+                    @Override
+                    public void safeOnClick(DialogInterface dialog, int id) {
+                        T.UI();
+                        dialog.dismiss();
+                        savePushNotifications(false);
+                        sendRegistrationStep(RegistrationWizard2.REGISTRATION_STEP_NOTIFICATION_USAGE);
+                        mWiz.proceedToNextPage();
+                    }
+                };
+                UIUtils.showDialog(RegistrationActivity2.this, title, message, positiveBtn, positiveClick, negativeButtonCaption, negativeClick);
+            }
+        });
+    }
+
+    private void initOauthStep() {
+        View.OnClickListener oauthLoginListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getOauthRegistrationInfo();
+            }
+        };
+
+        TextView oauthText = (TextView)findViewById(R.id.oauth_text);
+        oauthText.setText(getString(R.string.authenticate_via_your_oauth_account, AppConstants.REGISTRATION_TYPE_OAUTH_DOMAIN));
+
+        findViewById(R.id.login_via_oauth).setOnClickListener(oauthLoginListener);
+    }
+
+    private void initChooseLoginMethodStep() {
         TextView signupTextView = (TextView) findViewById(R.id.registration);
         signupTextView.setText(getString(CloudConstants.isCityApp() ? R.string.registration_city_app_sign_up : R
                 .string.registration_sign_up, getString(R.string.app_name)));
 
         mEnterEmailAutoCompleteTextView = (AutoCompleteTextView) findViewById(R.id.registration_enter_email);
-
-        final Button agreeBtn = (Button) findViewById(R.id.registration_agree_tos);
-        TextView rogerthatWelcomeTextView = (TextView) findViewById(R.id.rogerthat_welcome);
-        if (CloudConstants.isEnterpriseApp()) {
-            rogerthatWelcomeTextView.setText(getString(R.string.rogerthat_welcome_enterprise,
-                    getString(R.string.app_name)));
-            tosTextView.setVisibility(View.GONE);
-            agreeBtn.setText(R.string.start_registration);
-        } else {
-            rogerthatWelcomeTextView.setText(getString(R.string.registration_welcome_text,
-                    getString(R.string.app_name)));
-
-            tosTextView.setText(Html.fromHtml("<a href=\"" + AppConstants.TERMS_OF_SERVICE_URL + "\">"
-                    + tosTextView.getText() + "</a>"));
-            tosTextView.setMovementMethod(LinkMovementMethod.getInstance());
-
-            agreeBtn.setText(R.string.registration_btn_agree_tos);
-        }
-
-        agreeBtn.setOnClickListener(new SafeViewOnClickListener() {
-            @Override
-            public void safeOnClick(View v) {
-                agreeBtn.setEnabled(false);
-                sendRegistrationStep(RegistrationWizard2.REGISTRATION_STEP_AGREED_TOS);
-                mWiz.proceedToNextPage();
-            }
-        });
-
-        initLocationUsageStep();
 
         final Button emailButton = (Button) findViewById(R.id.login_via_email);
         View.OnClickListener emailLoginListener = new View.OnClickListener() {
@@ -419,8 +516,6 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
 
         facebookButton.setOnClickListener(facebookLoginListener);
 
-        initOauthStep();
-
         final ImageButton getAccountsButton = (ImageButton) findViewById(R.id.get_accounts);
         if (configureEmailAutoComplete()) {
             // GET_ACCOUNTS permission is granted
@@ -434,7 +529,9 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                 }
             });
         }
+    }
 
+    private void initEnterPinStep() {
         mEnterPinEditText = (EditText) findViewById(R.id.registration_enter_pin);
 
         mEnterPinEditText.addTextChangedListener(new TextWatcher() {
@@ -462,7 +559,9 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                     onPinEntered();
             }
         });
+    }
 
+    private void initDevicesStep() {
         final Button registerBtn = (Button) findViewById(R.id.registration_devices_register);
         final Button cancelBtn = (Button) findViewById(R.id.registration_devices_cancel);
 
@@ -486,103 +585,26 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                 cancelBtn.setEnabled(false);
 
                 if (AppConstants.getRegistrationType() == AppConstants.REGISTRATION_TYPE_OAUTH) {
-                    mWiz.proceedToPosition(2);
+                    mWiz.proceedToPosition(3); // oauth
                 } else {
-                    mWiz.proceedToPosition(3);
+                    mWiz.proceedToPosition(4); // choose login
                 }
-            }
-        });
-
-        mWiz = RegistrationWizard2.getWizard(mService);
-        mWiz.setFlipper((ViewFlipper) findViewById(R.id.registration_viewFlipper));
-        setWizard(mWiz);
-        setFinishHandler();
-        addAgreeTOSHandler(); // 0
-        addIBeaconUsageHandler(); // 1
-        addOauthMethodHandler(); // 2
-        addChooseLoginMethodHandler(); // 3
-        addEnterPinHandler(); // 4
-        addRegisterDeviceHandler(); // 5
-        mWiz.run();
-        mWiz.setDeviceId(Installation.id(this));
-
-        handleEnterEmail();
-
-        if (mWiz.getBeaconRegions() != null && mBeaconManager == null) {
-            bindBeaconManager();
-        }
-
-        if (CloudConstants.USE_GCM_KICK_CHANNEL && GoogleServicesUtils.checkPlayServices(this, true)) {
-            GoogleServicesUtils.registerGCMRegistrationId(mService, new GCMRegistrationIdFoundCallback() {
-                @Override
-                public void idFound(String registrationId) {
-                    setGCMRegistrationId(registrationId);
-                }
-            });
-        }
-
-        // Colors
-        int primaryIconColor = LookAndFeelConstants.getPrimaryColor(this);
-        ((ImageView) findViewById(R.id.ibeacon_usage_icon)).setImageDrawable(new IconicsDrawable(mService,
-                FontAwesome.Icon.faw_compass).color(primaryIconColor).sizeDp(75));
-
-        // unregister reason
-        String reason = mService.getUnregisterReason();
-        if (!TextUtils.isEmptyOrWhitespace(reason)) {
-            SafeDialogClick onPositiveClick = new SafeDialogClick() {
-                @Override
-                public void safeOnClick(DialogInterface dialog, int id) {
-                    dialog.dismiss();
-                    mService.deleteUnregisterFile();
-                }
-            };
-            UIUtils.showDialog(this, null, reason, getString(R.string.rogerthat), onPositiveClick,
-                    null, null);
-        }
-    }
-
-    private void initLocationUsageStep() {
-
-        final String appName = getString(R.string.app_name);
-        ((TextView) findViewById(R.id.ibeacon_usage_augment_experience)).setText(getString(R.string
-                .ibeacon_usage_augment_experience, appName));
-        ((TextView) findViewById(R.id.ibeacon_usage_used_for)).setText(getString(R.string
-                .ibeacon_usage_used_for, appName));
-        ((TextView) findViewById(R.id.ibeacon_usage_not_used_for)).setText(getString(R.string
-                .ibeacon_usage_not_used_for, appName));
-
-        findViewById(R.id.registration_beacon_usage_continue).setOnClickListener(new SafeViewOnClickListener() {
-            @Override
-            public void safeOnClick(View v) {
-                ActivityCompat.requestPermissions(RegistrationActivity2.this, new String[]{Manifest.permission
-                        .ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_COARSE_LOCATION);
             }
         });
     }
 
-    private void initOauthStep() {
-        View.OnClickListener oauthLoginListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getOauthRegistrationInfo();
-            }
-        };
-
-        TextView oauthText = (TextView)findViewById(R.id.oauth_text);
-        oauthText.setText(getString(R.string.authenticate_via_your_oauth_account, AppConstants.REGISTRATION_TYPE_OAUTH_DOMAIN));
-
-        findViewById(R.id.login_via_oauth).setOnClickListener(oauthLoginListener);
+    private void savePushNotifications(boolean enabled) {
+        mWiz.setPushNotificationEnabled(enabled);
+        final SharedPreferences options = PreferenceManager.getDefaultSharedPreferences(RegistrationActivity2.this);
+        final SharedPreferences.Editor editor = options.edit();
+        editor.putBoolean(MainService.PREFERENCE_PUSH_NOTIFICATIONS, enabled);
+        final boolean success = editor.commit();
+        L.d("savePushNotifications success: " + success);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         switch (requestCode) {
-            case PERMISSION_REQUEST_COARSE_LOCATION:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    mWiz.requestBeaconRegions(mService);
-                }
-                mWiz.proceedToNextPage();
-                break;
             case PERMISSION_REQUEST_GET_ACCOUNTS:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     configureEmailAutoComplete(true);
@@ -595,6 +617,8 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
     }
 
     private void registerWithAccessToken(final String accessToken) {
+        final String tosAge = mWiz.getTOSAge();
+        final String pushNotifcationsEnabled = mWiz.getPushNotificationEnabled();
         final String timestamp = "" + mWiz.getTimestamp();
         final String deviceId = mWiz.getDeviceId();
         final String registrationId = mWiz.getRegistrationId();
@@ -629,6 +653,8 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                     nameValuePairs.add(new BasicNameValuePair("signature", signature));
                     nameValuePairs.add(new BasicNameValuePair("install_id", installId));
                     nameValuePairs.add(new BasicNameValuePair("access_token", accessToken));
+                    nameValuePairs.add(new BasicNameValuePair("tos_age", tosAge));
+                    nameValuePairs.add(new BasicNameValuePair("push_notifications_enabled", pushNotifcationsEnabled));
                     nameValuePairs.add(new BasicNameValuePair("GCM_registration_id", getGCMRegistrationId()));
 
                     httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
@@ -678,7 +704,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                                 hideNotification();
                                 mWiz.setEmail(email);
                                 mWiz.setDeviceNames(deviceNames);
-                                mWiz.proceedToPosition(5);
+                                mWiz.proceedToPosition(6); // devices
                             }
                         });
                     } else {
@@ -810,6 +836,8 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
     }
 
     private void registerWithOauthCode(final String code, final String state) {
+        final String tosAge = mWiz.getTOSAge();
+        final String pushNotifcationsEnabled = mWiz.getPushNotificationEnabled();
         final String timestamp = "" + mWiz.getTimestamp();
         final String deviceId = mWiz.getDeviceId();
         final String registrationId = mWiz.getRegistrationId();
@@ -844,6 +872,8 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                     nameValuePairs.add(new BasicNameValuePair("install_id", installId));
                     nameValuePairs.add(new BasicNameValuePair("code", code));
                     nameValuePairs.add(new BasicNameValuePair("state", state));
+                    nameValuePairs.add(new BasicNameValuePair("tos_age", tosAge));
+                    nameValuePairs.add(new BasicNameValuePair("push_notifications_enabled", pushNotifcationsEnabled));
                     nameValuePairs.add(new BasicNameValuePair("GCM_registration_id", getGCMRegistrationId()));
 
                     httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
@@ -894,7 +924,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                                 hideNotification();
                                 mWiz.setEmail(email);
                                 mWiz.setDeviceNames(deviceNames);
-                                mWiz.proceedToPosition(5);
+                                mWiz.proceedToPosition(6); // devices
                             }
                         });
                     } else {
@@ -1029,6 +1059,8 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
             }
         };
         final String email = mWiz.getEmail();
+        final String tosAge = mWiz.getTOSAge();
+        final String pushNotifcationsEnabled = mWiz.getPushNotificationEnabled();
         final String timestamp = "" + mWiz.getTimestamp();
         final String registrationId = mWiz.getRegistrationId();
         final String deviceId = mWiz.getDeviceId();
@@ -1046,6 +1078,8 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                     List<NameValuePair> nameValuePairs = HTTPUtil.getRegistrationFormParams(mService);
                     nameValuePairs.add(new BasicNameValuePair("version", version));
                     nameValuePairs.add(new BasicNameValuePair("email", email));
+                    nameValuePairs.add(new BasicNameValuePair("tos_age", tosAge));
+                    nameValuePairs.add(new BasicNameValuePair("push_notifications_enabled", pushNotifcationsEnabled));
                     nameValuePairs.add(new BasicNameValuePair("registration_time", timestamp));
                     nameValuePairs.add(new BasicNameValuePair("device_id", deviceId));
                     nameValuePairs.add(new BasicNameValuePair("registration_id", registrationId));
@@ -1077,7 +1111,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                                     progressDialog.dismiss();
                                     hideNotification();
                                     mWiz.setDeviceNames(deviceNames);
-                                    mWiz.proceedToPosition(5);
+                                    mWiz.proceedToPosition(6); // devices
                                 }
                             });
                         } else {
@@ -1162,7 +1196,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
         });
     }
 
-    private void addAgreeTOSHandler() {
+    private void addStartHandler() {
         mWiz.addPageHandler(new Wizard.PageHandler() {
 
             @Override
@@ -1186,16 +1220,47 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
         });
     }
 
-    private void addIBeaconUsageHandler() {
+    private void addAgreeTOSHandler() {
         mWiz.addPageHandler(new Wizard.PageHandler() {
 
             @Override
             public void pageDisplayed(Button back, Button next, ViewFlipper switcher) {
-                mEnterEmailAutoCompleteTextView.setThreshold(1000); // Prevent popping up automatically
-                if (!AppConstants.REGISTRATION_ASKS_LOCATION_PERMISSION || Build.VERSION.SDK_INT < 18 ||
-                        !supportsBeacons() || mService.isPermitted(Manifest.permission.ACCESS_COARSE_LOCATION)) {
-                    mWiz.proceedToNextPage(); // Skip the iBeacon usage step
+                if (CloudConstants.isEnterpriseApp()) {
+                    mWiz.proceedToNextPage();
+                } else if (!mService.getNetworkConnectivityManager().isConnected()) {
+                    int message = R.string.no_internet_connection_try_again;
+                    UIUtils.showDialog(RegistrationActivity2.this, null, message);
+                } else {
+                    mTOSWebview = (WebView) findViewById(R.id.tos_webview);
+                    mTOSWebview.loadUrl(AppConstants.TERMS_OF_SERVICE_URL);
                 }
+            }
+
+            @Override
+            public String getTitle() {
+                return null;
+            }
+
+            @Override
+            public boolean beforeNextClicked(Button back, Button next, ViewFlipper switcher) {
+                if (mTOSWebview != null) {
+                    mTOSWebview.loadUrl("about:blank");
+                }
+                return false;
+            }
+
+            @Override
+            public boolean beforeBackClicked(Button back, Button next, ViewFlipper switcher) {
+                return false;
+            }
+        });
+    }
+
+    private void addNotificationsHandler() {
+        mWiz.addPageHandler(new Wizard.PageHandler() {
+
+            @Override
+            public void pageDisplayed(Button back, Button next, ViewFlipper switcher) {
             }
 
             @Override
@@ -1473,127 +1538,12 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             int position = mWiz.getPosition();
-            // 4 == Enter activation code
-            if (position == 4) {
+            // 5 == Enter activation code
+            if (position == 5) {
                 mWiz.goBack();
                 return true;
             }
         }
         return super.onKeyDown(keyCode, event);
-    }
-
-    @TargetApi(18)
-    private boolean supportsBeacons() {
-        boolean available = false;
-        try {
-            available = BeaconManager.getInstanceForApplication(mService).checkAvailability();
-        } catch (NullPointerException ex) {
-            L.i("BLE not available", ex);
-        } catch (BleNotAvailableException ex) {
-            L.d(ex.getMessage());
-        }
-        if (!available) {
-            L.d("Bluetooth is not enabled");
-        }
-        return available;
-    }
-
-    @TargetApi(18)
-    private void bindBeaconManager() {
-        if (CloudConstants.DEBUG_LOGGING) {
-            LogManager.setLogger(Loggers.verboseLogger());
-            LogManager.setVerboseLoggingEnabled(true);
-        } else {
-            LogManager.setLogger(Loggers.empty());
-            LogManager.setVerboseLoggingEnabled(false);
-        }
-
-        if (!mService.isPermitted(Manifest.permission.ACCESS_COARSE_LOCATION)) {
-            L.w("ACCESS_COARSE_LOCATION is not permitted!");
-            return;
-        }
-
-        mBeaconManager = BeaconManager.getInstanceForApplication(mService);
-        if (!mBeaconManager.isAnyConsumerBound()) {
-            mBeaconManager.getBeaconParsers().add(
-                    new BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25"));
-        }
-
-        try {
-            if (!mBeaconManager.checkAvailability()) {
-                L.d("Bluetooth is not enabled");
-            }
-            mBeaconManager.bind(mService);
-            mBeaconManager.setBackgroundMode(!mService.getScreenIsOn());
-        } catch (NullPointerException ex) {
-            L.i("BLE not available", ex);
-        } catch (BleNotAvailableException ex) {
-            L.d(ex.getMessage());
-        }
-    }
-
-    private void startMonitoringBeaconRegions() {
-        mBeaconManager.setMonitorNotifier(getBeaconMonitorNotifier());
-        mBeaconManager.setRangeNotifier(getBeaconRangeNotifier());
-
-        final BeaconRegionTO[] beaconRegions = mWiz.getBeaconRegions();
-        if (beaconRegions != null) {
-            for (BeaconRegionTO br : beaconRegions) {
-                String regionId = BeaconRegion.getUniqueRegionId(br);
-                L.d("Start monitoring region: " + regionId);
-
-                try {
-                    mBeaconManager.startMonitoringBeaconsInRegion(new Region(regionId, BeaconRegion.getId1(br),
-                            BeaconRegion.getId2(br), BeaconRegion.getId3(br)));
-                } catch (RemoteException e) {
-                    L.e(e);
-                }
-            }
-        }
-    }
-
-    private RangeNotifier getBeaconRangeNotifier() {
-        return new RangeNotifier() {
-
-            @Override
-            public void didRangeBeaconsInRegion(Collection<Beacon> iBeacons, Region region) {
-                L.v("\n- Current beacons in region: " + region.getUniqueId() + " (" + iBeacons.size() + "):");
-                for (Beacon b : iBeacons) {
-                    String uuid = b.getId1().toUuidString();
-                    int major = b.getId2().toInt();
-                    int minor = b.getId3().toInt();
-                    mWiz.addDetectedBeacon(uuid, major, minor);
-                }
-            }
-        };
-    }
-
-    private MonitorNotifier getBeaconMonitorNotifier() {
-        return new MonitorNotifier() {
-
-            @Override
-            public void didEnterRegion(Region region) {
-                L.d("didEnterRegion: " + region.getUniqueId());
-                try {
-                    mBeaconManager.startRangingBeaconsInRegion(region);
-                } catch (RemoteException e) {
-                    L.e(e);
-                }
-            }
-
-            @Override
-            public void didExitRegion(Region region) {
-                L.d("didExitRegion: " + region.getUniqueId());
-                try {
-                    mBeaconManager.stopRangingBeaconsInRegion(region);
-                } catch (RemoteException e) {
-                    L.e(e);
-                }
-            }
-
-            @Override
-            public void didDetermineStateForRegion(int state, Region region) {
-            }
-        };
     }
 }

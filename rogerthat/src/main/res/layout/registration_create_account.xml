@@ -38,7 +38,8 @@
             android:paddingLeft="40dp"
             android:paddingRight="40dp"
             android:textColor="@color/mc_homescreen_text"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:text="@string/registration_sign_up"/>
 
         <View
             android:layout_width="match_parent"

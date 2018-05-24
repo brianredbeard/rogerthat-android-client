@@ -22,12 +22,14 @@ import android.provider.Settings;
 
 import com.mobicage.rogerthat.App;
 import com.mobicage.rogerthat.MainService;
+import com.mobicage.rpc.Credentials;
 import com.mobicage.rpc.config.CloudConstants;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.params.HttpClientParams;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.SSLSocketFactory;
@@ -37,6 +39,7 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
+import org.jivesoftware.smack.util.Base64;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -138,5 +141,14 @@ public class HTTPUtil {
         nameValuePairs.add(new BasicNameValuePair("country", Locale.getDefault().getCountry()));
         nameValuePairs.add(new BasicNameValuePair("unique_device_id", Settings.Secure.getString(context.getContentResolver(), Secure.ANDROID_ID)));
         return nameValuePairs;
+    }
+
+    @SuppressWarnings("deprecation")
+    public static void addCredentials(MainService mainService, HttpPost request) {
+        final Credentials credentials = mainService.getCredentials();
+        request.setHeader("X-MCTracker-User",
+                Base64.encodeBytes(credentials.getUsername().getBytes(), Base64.DONT_BREAK_LINES));
+        request.setHeader("X-MCTracker-Pass",
+                Base64.encodeBytes(credentials.getPassword().getBytes(), Base64.DONT_BREAK_LINES));
     }
 }

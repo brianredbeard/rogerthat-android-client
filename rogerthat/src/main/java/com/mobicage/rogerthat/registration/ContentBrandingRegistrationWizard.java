@@ -148,8 +148,4 @@ public class ContentBrandingRegistrationWizard extends AbstractRegistrationWizar
         setRegistrationId(UUID.randomUUID().toString());
         save();
     }
-
-    public Set<BeaconDiscoveredRequestTO> getDetectedBeacons() {
-        return null;
-    }
 }

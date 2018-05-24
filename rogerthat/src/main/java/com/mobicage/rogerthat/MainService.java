@@ -63,6 +63,7 @@ import com.mobicage.rogerthat.util.CachedDownloader;
 import com.mobicage.rogerthat.util.GoogleServicesUtils;
 import com.mobicage.rogerthat.util.IOUtils;
 import com.mobicage.rogerthat.util.TextUtils;
+import com.mobicage.rogerthat.util.consent.ConsentProvider;
 import com.mobicage.rogerthat.util.db.DatabaseManager;
 import com.mobicage.rogerthat.util.geo.GeoLocationProvider;
 import com.mobicage.rogerthat.util.logging.L;
@@ -108,6 +109,7 @@ import com.mobicage.to.system.IdentityUpdateRequestTO;
 import com.mobicage.to.system.IdentityUpdateResponseTO;
 import com.mobicage.to.system.LogErrorRequestTO;
 import com.mobicage.to.system.LogErrorResponseTO;
+import com.mobicage.to.system.PushNotificationSettingsTO;
 import com.mobicage.to.system.SaveSettingsRequest;
 import com.mobicage.to.system.SettingsTO;
 import com.mobicage.to.system.UnregisterMobileRequestTO;
@@ -150,17 +152,26 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
     public final static String INTENT_BEACON_SERVICE_CONNECTED = "com.mobicage.rogerthat.BEACON_SERVICE_CONNECTED";
     private final static String INTENT_SHOULD_CLEANUP = "com.mobicage.rogerthat.INTENT_SHOULD_CLEANUP";
 
-    public final static String PREFERENCES_KEY = "general_settings";
+    private final static String PREFERENCES_READY = "ready";
+    public final static String PREFERENCE_EMAIL = "email";
+
     public final static String PREFERENCE_TRACKING = "tracking";
     public final static String PREFERENCE_STREAM_ONLY_IMPORTANT = "stream_only_important";
     public final static String PREFERENCE_UPLOAD_PHOTO_WIFI = "upload_photo_wifi";
-    private final static String PREFERENCES_READY = "ready";
-    public final static String PREFERENCE_EMAIL = "email";
-    public final static String PREFERENCE_MY_PROFILE = "my_profile";
-    public final static String PREFERENCE_ABOUT = "about";
+
+    public final static String PREFERENCE_PUSH_NOTIFICATIONS = "push_notifications";
     public final static String PREFERENCE_ALARM_SOUND = "alarm_sound";
     public final static String PREFERENCE_ALARM_TITLE = "alarm_title";
+
+    public final static String PREFERENCE_MY_PROFILE = "my_profile";
     public final static String PREFERENCE_SECURITY = "security";
+    public final static String PREFERENCE_DATA_DOWNLOAD = "data_download";
+    public final static String PREFERENCE_LOGOUT = "log_out";
+    public final static String PREFERENCE_DELETE_ACCOUNT = "delete_account";
+
+    public final static String PREFERENCE_APP_INFO = "app_info";
+    public final static String PREFERENCE_PRIVACY_POLICY = "privacy_policy";
+    public final static String PREFERENCE_TERMS_OF_SERVICE = "terms_of_service";
 
     private final static String CONFIGKEY = "com.mobicage.rogerthat";
 
@@ -230,6 +241,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
     private long mCurrentSettingsVersion;
 
     private GeoLocationProvider mGeoLocationProvider;
+    private ConsentProvider mConsentProvider;
 
     private NetworkConnectivityManager mNetworkConnectivityManager;
 
@@ -320,6 +332,7 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
             mLOCSDCardLogger = new SDCardLogger(MainService.this, "location_log.txt", "LOC");
         }
         mGeoLocationProvider = new GeoLocationProvider(this, mConfigProvider, mLOCSDCardLogger);
+        mConsentProvider = new ConsentProvider(mConfigProvider);
 
         setupNetworkConnectivityManager();
         setupRPC();
@@ -803,6 +816,8 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
 
         teardownNetworkConnectivityManager();
         teardownGeoLocationProvider();
+        teardownConsentProvider();
+
 
         teardownConfiguration();
 
@@ -846,6 +861,16 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
     private void teardownGeoLocationProvider() {
         T.UI();
         mGeoLocationProvider.close();
+    }
+
+    private void teardownConsentProvider() {
+        T.UI();
+        mConsentProvider.close();
+    }
+
+    public ConsentProvider getConsentProvider() {
+        T.UI();
+        return mConsentProvider;
     }
 
     private void setupNetworkConnectivityManager() {
@@ -1647,34 +1672,45 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             T.UI();
-            try {
-                if (mPlugins != null) {
-                    TrackmePlugin trackmePlugin = getPlugin(TrackmePlugin.class);
+            if (mPlugins != null) {
+                TrackmePlugin trackmePlugin = getPlugin(TrackmePlugin.class);
 
-                    if (PREFERENCE_UPLOAD_PHOTO_WIFI.equals(key)) {
-                        mHttpCommunicator.setWifiOnlyEnabled(sharedPreferences.getBoolean(key, false));
-                    } else {
-                        boolean trackingEnabled = sharedPreferences.getBoolean(PREFERENCE_TRACKING, true);
-                        if (key.equals(PREFERENCE_TRACKING)) {
-                            // immediately change the setting - even if it does not make it yet to the server
-                            trackmePlugin.setEnabled(trackingEnabled);
-                        }
-                        SaveSettingsRequest request = new SaveSettingsRequest();
-                        request.callLogging = false;
-                        request.tracking = trackingEnabled;
-                        try {
-                            com.mobicage.api.system.Rpc.saveSettings(new SaveSettingsResponseHandler(), request);
-                        } catch (Exception e) {
-                            UIUtils.showLongToast(MainService.this, getString(R.string.update_settings_failure));
-                            L.bug("Could not send saveSettings call", e);
-                        }
-                    }
+                if (PREFERENCE_UPLOAD_PHOTO_WIFI.equals(key)) {
+                    mHttpCommunicator.setWifiOnlyEnabled(sharedPreferences.getBoolean(key, false));
+
+                } else if (PREFERENCE_TRACKING.equals(key)){
+                    boolean trackingEnabled = sharedPreferences.getBoolean(key, true);
+                    // immediately change the setting - even if it does not make it yet to the server
+                    trackmePlugin.setEnabled(trackingEnabled);
+                    saveSettings(trackingEnabled, null);
+
+                } else if (PREFERENCE_PUSH_NOTIFICATIONS.equals(key)) {
+                    boolean trackingEnabled = sharedPreferences.getBoolean(PREFERENCE_TRACKING, true);
+                    boolean pushNotificationsEnabled = sharedPreferences.getBoolean(key, false);
+                    saveSettings(trackingEnabled, pushNotificationsEnabled);
                 }
-            } catch (Exception e) {
-                L.bug(e);
             }
         }
     };
+
+    private void saveSettings(final boolean tracking, final Boolean pushNotifcations) {
+        SaveSettingsRequest request = new SaveSettingsRequest();
+        request.callLogging = false;
+        request.tracking = tracking;
+        if (pushNotifcations == null) {
+            request.push_notifications = null;
+        } else {
+            request.push_notifications = new PushNotificationSettingsTO();
+            request.push_notifications.enabled = pushNotifcations;
+        }
+
+        try {
+            com.mobicage.api.system.Rpc.saveSettings(new SaveSettingsResponseHandler(), request);
+        } catch (Exception e) {
+            UIUtils.showLongToast(MainService.this, getString(R.string.update_settings_failure));
+            L.bug("Could not send saveSettings call", e);
+        }
+    }
 
     private void initPreferences() {
         T.UI();

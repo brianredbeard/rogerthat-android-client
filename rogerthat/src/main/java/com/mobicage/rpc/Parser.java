@@ -2988,6 +2988,13 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
+    public static com.mobicage.to.system.ConsentSettingsTO ComMobicageToSystemConsentSettingsTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.system.ConsentSettingsTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
     public static com.mobicage.to.system.EditProfileRequestTO ComMobicageToSystemEditProfileRequestTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;
@@ -3097,6 +3104,13 @@ public class Parser {
         if (value == null)
             return null;
         return new com.mobicage.to.system.LogErrorResponseTO((Map<String, Object>) value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static com.mobicage.to.system.PushNotificationSettingsTO ComMobicageToSystemPushNotificationSettingsTO(Object value) throws IncompleteMessageException {
+        if (value == null)
+            return null;
+        return new com.mobicage.to.system.PushNotificationSettingsTO((Map<String, Object>) value);
     }
 
     @SuppressWarnings("unchecked")

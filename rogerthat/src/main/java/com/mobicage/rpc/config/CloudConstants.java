@@ -75,6 +75,11 @@ public class CloudConstants {
     public final static String MDP_SESSION_INIT_URL = HTTPS_BASE_URL + "/mobi/rest/mdp/session/init";
     public final static String MDP_SESSION_AUTHORIZED_URL = HTTPS_BASE_URL + "/mobi/rest/mdp/session/authorized";
 
+    public final static String ACCOUNT_LOGOUT_URL = HTTPS_BASE_URL + "/mobi/rest/account/logout";
+    public final static String ACCOUNT_DELETE_URL = HTTPS_BASE_URL + "/mobi/rest/account/delete";
+    public final static String ACCOUNT_DATA_DOWNLOAD_URL = HTTPS_BASE_URL + "/mobi/rest/account/data_download";
+    public final static String ACCOUNT_CONSENT_URL = HTTPS_BASE_URL + "/mobi/rest/account/consent";
+
     public final static String REGISTRATION_YSAAA_URL = HTTPS_BASE_URL
         + "/unauthenticated/mobi/registration/init_service_app";
 

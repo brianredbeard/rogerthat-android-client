@@ -80,6 +80,8 @@ public class AbstractAboutActivity extends ServiceBoundActivity {
                 startActivity(i);
             }
         });
+
+        setTitle(R.string.app_info);
     }
 
     @Override

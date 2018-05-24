@@ -2,12 +2,14 @@
 <resources>
     <string name="__me_as_recipient">me</string>
     <string name="__me_as_sender">me</string>
+    <string name="abort">Abort</string>
     <string name="about">About</string>
     <string name="about_more_info">For more information about %1$s and other Rogerthat based products, please visit:</string>
     <string name="about_more_info_enterprise">The %1$s app is built on the Rogerthat Enterprise platform. Do you want to know what Rogerthat Enterprise can do for your company? Visit:</string>
     <string name="about_provided_by">Rogerthat is proudly presented by</string>
     <string name="about_provided_by_enterprise">The %1$s app is built on</string>
     <string name="about_text">Rogerthat is a product of Mobicage, NV.\n\nFeedback, support and in-browser messaging at</string>
+    <string name="account">Account</string>
     <string name="action_geo">geo</string>
     <string name="action_not_valid">The action is not valid.</string>
     <string name="action_scheduled">Hmmm, some delay on the network. We\'ll get back to you shortly.</string>
@@ -45,6 +47,7 @@
     <string name="add_via_facebook_waiting">You will receive a notification when your Facebook friends are scanned.</string>
     <string name="address">Address</string>
     <string name="agenda">Agenda</string>
+    <string name="agree">Agree</string>
     <string name="alarm_sound">Alarm sound</string>
     <string name="alarm_sound_custom">Custom sound</string>
     <string name="alarm_sound_default">Default sound</string>
@@ -54,6 +57,8 @@
     <string name="all_items">All items</string>
     <string name="allow">Allow</string>
     <string name="already_friend">You are already friends with %1$s.</string>
+    <string name="app_info">App info</string>
+    <string name="are_you_sure_you_want_to_do_this">Are you sure you want to do this?</string>
     <string name="ask_a_question">Ask a question</string>
     <string name="associations">Associations</string>
     <string name="attachment_can_not_be_displayed_in_your_version">The selected attachment cannot be displayed in this version of the %1$s app.</string>
@@ -111,8 +116,12 @@
     <string name="create_groups_short">Create a new group</string>
     <string name="current_location">Current location</string>
     <string name="customers_and_partners">Customers / Partners</string>
+    <string name="data_download">Data download</string>
+    <string name="data_download_details">We\'ll email you a link to a file with messages, profile information and more. It may take some time to collect this data and send it to you.</string>
+    <string name="data_download_slogan">Download a copy of your information to keep, or to transfer to another service</string>
     <string name="debug">Debug</string>
     <string name="delete">Delete</string>
+    <string name="delete_account">Delete account</string>
     <string name="delete_conversation">Delete conversation</string>
     <string name="delete_conversations">Delete conversations</string>
     <string name="delete_group">Delete group</string>
@@ -129,6 +138,7 @@
     <string name="dismissed_at">Acknowledged %1$s.</string>
     <string name="do_you_want_to_follow_service">Do you want to follow %1$s?</string>
     <string name="done">Done</string>
+    <string name="dont_allow">Don\'t Allow</string>
     <string name="dont_like">Don\'t like</string>
     <string name="downloading">Downloading…</string>
     <string name="edit">Edit</string>
@@ -197,6 +207,7 @@
     <string name="government_service">Government services</string>
     <string name="gps_coordinates_assisitant">GPS coordinates helper</string>
     <string name="gps_is_not_enabled">GPS is not enabled on your phone. Do you want to go the settings page to turn it on?</string>
+    <string name="grant_permission">Grant permission</string>
     <string name="group_chat">Group chat</string>
     <string name="groups">Groups</string>
     <string name="help">Help</string>
@@ -207,6 +218,7 @@
     <string name="hint_broadcast_icon">Press this icon at the top right to select which messages of %1$s you don\'t want to receive anymore.</string>
     <string name="hint_double_tap">Double tap to reply</string>
     <string name="hint_swipe">Swipe to jump to another conversation</string>
+    <string name="i_am_older_than_16y">I am older than 16 years</string>
     <string name="ibeacon_usage_augment_experience">The %1$s app uses iBeacons to augment your user experience.</string>
     <string name="ibeacon_usage_discover_services_automatically">Discover customer services automatically</string>
     <string name="ibeacon_usage_not_used_for">%1$s does not:</string>
@@ -265,6 +277,7 @@
     <string name="location_usage_store">Store your location.</string>
     <string name="location_usage_track_location_without_concent">Track your location without your prior consent.</string>
     <string name="locking">Locking message, please wait…</string>
+    <string name="log_out">Log out</string>
     <string name="logs_forwarded">Your %2$s logs are being forwarded to %1$s.</string>
     <string name="loyalty_card_description">Your %1$s loyalty card\n\nScan to earn loyalty points\nScan to connect with friends</string>
     <string name="male">Male</string>
@@ -346,6 +359,9 @@
     <string name="not_yet_received">Not yet received</string>
     <string name="not_yet_replied">Not yet replied</string>
     <string name="notification_settings">Notification settings</string>
+    <string name="notifications">Notifications</string>
+    <string name="notifications_consent_message">Notifications may include sounds and icon badges. This can be configured in Settings.</string>
+    <string name="notifications_consent_title">Push Notifications</string>
     <string name="ok">OK</string>
     <string name="one_updated_message">1 updated message.</string>
     <string name="open_attachments_before_signing">Please review the attached documents before signing</string>
@@ -353,6 +369,7 @@
     <string name="or">or</string>
     <string name="order">Order</string>
     <string name="osa_loyalty_welcome_message">Welcome to the Our City App terminal. This app is the perfect complement to your presence in the city app in order to serve your customers even more. We help you to get the loyalty terminal ready for use. Start by scanning your QR code in order to activate your terminal.</string>
+    <string name="other">Other</string>
     <string name="paid">Paid</string>
     <string name="passport">%1$s id</string>
     <string name="pay">Pay</string>
@@ -372,11 +389,14 @@
     <string name="previousButton">Back</string>
     <string name="previous_in_thread">Previous messages in this conversation</string>
     <string name="priority">Priority</string>
+    <string name="privacy_policy">Privacy Policy</string>
     <string name="processing">Processing…</string>
     <string name="processing_scan">Processing scan…</string>
     <string name="profile">Profile</string>
+    <string name="profile_data_usage_info">We use your gender and date of birth for the sorting algorithm of the news feed.</string>
     <string name="promo">Promo</string>
     <string name="provide_qr_code_name">Provide a name for the QR code</string>
+    <string name="push_notifications">Push notifications</string>
     <string name="qr_call_tel">Do you wish to call %1$s?</string>
     <string name="qr_code">QR code</string>
     <string name="qr_code_scanned">QR code scanned</string>
@@ -420,6 +440,9 @@
     <string name="registration_need_your_email">To validate your e-mail address we will send an e-mail containing your activation code.</string>
     <string name="registration_need_your_email_enterprise">To validate your account we will send you an e-mail containing your activation code.</string>
     <string name="registration_no_attempts_left">You entered a wrong activation code three times.\n\nPlease restart your registration.</string>
+    <string name="registration_notification_types_city_app">There are three types of messages:\n1. Messages specifically directed to you. These can come from friends or from organizations (e.g. keeping you informed about an order).\n2. News, info and events of the municipality.\n3. News, info and events of the merchants and assocations that you follow.\n\nYou can always filter news, making sure you only see news articles that are relevant to you.</string>
+    <string name="registration_notification_types_general">There are two types of messages:\n1. Messages specifically directed to you. These can come from friends or from organizations (e.g. keeping you informed about an order).\n2. General messages of organizations that you follow.\n\nYou can always unsubscribe from general messages, making sure you only receive messages that are relevant to you.</string>
+    <string name="registration_notifications_header">%1$s is an app that allows you to communicate with people and organizations. The communication is done via messages. The %1$s app uses notifications to keep you informed about new messages. Therefore it is important to allow notifications for the %1$s app.</string>
     <string name="registration_option_email">Option 2:\nLog in using your e-mail address.</string>
     <string name="registration_option_fb">Option 1:\nLog in using your Facebook account.</string>
     <string name="registration_pin_was_mailed_no_html">Your activation code was mailed to %1$s at %2$s\nYou might need to check your Spam or Junk mail folders.</string>
@@ -442,6 +465,7 @@
     <string name="registration_use_fb">Use Facebook</string>
     <string name="registration_welcome">Welcome to %1$s!</string>
     <string name="registration_welcome_text">Welcome to the %1$s App. Your app to connect with your service providers and share them with friends.\n\nBefore you can start you need to register. Tap the “Agree &amp; Continue” button to proceed.</string>
+    <string name="registration_welcome_text_start_registration">Welcome to the %1$s App. Your app to connect with your service providers and share them with friends.\n\nBefore you can start you need to register. Tap the \"Start registration\" button to proceed.</string>
     <string name="remove_canned_button">Do you want to remove button \"%1$s\" from the list?</string>
     <string name="remove_friend">Unfriend</string>
     <string name="remove_service">Unfollow service</string>
@@ -450,6 +474,7 @@
     <string name="replied_at">Replied %1$s at %2$s.</string>
     <string name="reply">Reply</string>
     <string name="report_card">Report Card</string>
+    <string name="request_download">Request download</string>
     <string name="request_location_of">Request location of %1$s</string>
     <string name="reserve">Reserve</string>
     <string name="retrieving_information">Retrieving information from server…</string>
@@ -529,6 +554,7 @@
     <string name="tab_messaging">Messages</string>
     <string name="tab_services">Services</string>
     <string name="tab_stream">Stream</string>
+    <string name="terms_of_service">Terms &amp; Conditions</string>
     <string name="test_mode">Test mode</string>
     <string name="this_screen_is_not_yet_downloaded_check_network">This screen is not yet downloaded. Check your network.</string>
     <string name="title_buttons">Add quick reply buttons</string>
@@ -537,6 +563,8 @@
     <string name="title_new_message_video">Add a video</string>
     <string name="title_recipients">Select recipients</string>
     <string name="topic">Topic</string>
+    <string name="tos_parent_consent">I am the person who bears parental responsibility for the child, and I give permission to the child to use this app.</string>
+    <string name="tos_tap_agree">Tap \"Agree\" to accept our Terms</string>
     <string name="tracking_summary">Selected friends can find out where I am.</string>
     <string name="tracking_title">Find Me</string>
     <string name="trainings">Trainings</string>

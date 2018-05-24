@@ -2,12 +2,14 @@
 <resources>
     <string name="__me_as_recipient">mij</string>
     <string name="__me_as_sender">ik</string>
+    <string name="abort">Afbreken</string>
     <string name="about">Info</string>
     <string name="about_more_info">Voor meer informatie over %1$s en andere producten gebaseerd op Rogerthat, bezoek:</string>
     <string name="about_more_info_enterprise">De %1$s app is gebouwd op het Rogerthat Enterprise platform. Wilt u meer weten wat Rogerthat Enterprise voor uw bedrijf kan betekenen. Bezoek:</string>
     <string name="about_provided_by">Rogerthat is een product van</string>
     <string name="about_provided_by_enterprise">De %1$s app is gebouwd op</string>
     <string name="about_text">Rogerthat is een product van Mobicage.\n\nFeedback, support en in-browser messaging vind je op</string>
+    <string name="account">Account</string>
     <string name="action_geo">geo</string>
     <string name="action_not_valid">Ongeldige actie.</string>
     <string name="action_scheduled">Het netwerk is traag. Je krijgt zo snel mogelijk een bericht.</string>
@@ -45,6 +47,7 @@
     <string name="add_via_facebook_waiting">Je ontvangt een notificatie van zodra we jouw Facebook vrienden gescand hebben.</string>
     <string name="address">Adres</string>
     <string name="agenda">Agenda</string>
+    <string name="agree">Aanvaarden</string>
     <string name="alarm_sound">Alarm geluid</string>
     <string name="alarm_sound_custom">Eigen geluid</string>
     <string name="alarm_sound_default">Standaard geluid</string>
@@ -54,6 +57,8 @@
     <string name="all_items">Alle items</string>
     <string name="allow">Toestaan</string>
     <string name="already_friend">Je bent al vriend met %1$s.</string>
+    <string name="app_info">App info</string>
+    <string name="are_you_sure_you_want_to_do_this">Bent u zeker dat u dit wilt doen?</string>
     <string name="ask_a_question">Stel een vraag</string>
     <string name="associations">Verenigingen</string>
     <string name="attachment_can_not_be_displayed_in_your_version">De geselecteerde bijlage kon niet worden weergegeven in deze versie van de %1$s app.</string>
@@ -111,8 +116,12 @@
     <string name="create_groups_short">Nieuwe groep aanmaken</string>
     <string name="current_location">Huidige locatie</string>
     <string name="customers_and_partners">Klanten / Partners</string>
+    <string name="data_download">Data downloaden</string>
+    <string name="data_download_details">We zullen u een link doormailen naar een bestand die uw berichten, informatie over uw profiel en dergelijke bevat. Het kan even duren vooraleer deze data verzameld is en doorgestuurd wordt naar u.</string>
+    <string name="data_download_slogan">Download een kopie van uw gegevens om te bewaren of om over te zetten naar een andere dienst.</string>
     <string name="debug">Debug</string>
     <string name="delete">Verwijderen</string>
+    <string name="delete_account">Account verwijderen</string>
     <string name="delete_conversation">Conversatie verwijderen</string>
     <string name="delete_conversations">Conversaties verwijderen</string>
     <string name="delete_group">Groep verwijderen</string>
@@ -129,6 +138,7 @@
     <string name="dismissed_at">Bevestigd: %1$s.</string>
     <string name="do_you_want_to_follow_service">Wens je %1$s te volgen?</string>
     <string name="done">Gereed</string>
+    <string name="dont_allow">Niet toestaan</string>
     <string name="dont_like">Vind ik niet leuk</string>
     <string name="downloading">Downloaden…</string>
     <string name="edit">Wijzigen</string>
@@ -197,6 +207,7 @@
     <string name="government_service">Gemeentediensten</string>
     <string name="gps_coordinates_assisitant">GPS assistent</string>
     <string name="gps_is_not_enabled">GPS staat af op je toestel. Wens je nu naar de GPS instellingen te gaan?</string>
+    <string name="grant_permission">Toestaan</string>
     <string name="group_chat">Groepschat</string>
     <string name="groups">Groepen</string>
     <string name="help">Help</string>
@@ -207,6 +218,7 @@
     <string name="hint_broadcast_icon">Druk op dit icoon rechtsboven om the kiezen welke berichten van %1$s al dan niet wil ontvangen.</string>
     <string name="hint_double_tap">Dubbelklik om een antwoord te schrijven</string>
     <string name="hint_swipe">Swipe naar een andere conversatie</string>
+    <string name="i_am_older_than_16y">Ik ben ouder dan 16 jaar</string>
     <string name="ibeacon_usage_augment_experience">De %1$s app maakt gebruik van iBeacons om uw gebruiksgemak te vergroten.</string>
     <string name="ibeacon_usage_discover_services_automatically">Automatisch ontdekken van mobiele diensten.</string>
     <string name="ibeacon_usage_not_used_for">Wat de %1$s app niet doet:</string>
@@ -265,6 +277,7 @@
     <string name="location_usage_store">Uw locatie opslaan.</string>
     <string name="location_usage_track_location_without_concent">Uw locatie opvragen zonder uw voorafgaande toestemming.</string>
     <string name="locking">Bericht verzegelen…</string>
+    <string name="log_out">Afmelden</string>
     <string name="logs_forwarded">Uw %2$s logs worden doorgezonden naar %1$s.</string>
     <string name="loyalty_card_description">Uw %1$s klantenkaart\n\nScan en spaar bij elke handelaar\nScan om vrienden toe te voegen</string>
     <string name="male">Man</string>
@@ -346,6 +359,9 @@
     <string name="not_yet_received">Nog niet ontvangen</string>
     <string name="not_yet_replied">Nog niet beantwoord</string>
     <string name="notification_settings">Notificatie instellingen</string>
+    <string name="notifications">Notificaties</string>
+    <string name="notifications_consent_message">Meldingen kunnen geluiden en icon badges bevatten. Dit kan worden geconfigureerd in Instellingen.</string>
+    <string name="notifications_consent_title">Push Meldingen</string>
     <string name="ok">OK</string>
     <string name="one_updated_message">1 aangepast bericht.</string>
     <string name="open_attachments_before_signing">Lees de bijgevoegde documenten voor u deze ondertekend</string>
@@ -353,6 +369,7 @@
     <string name="or">of</string>
     <string name="order">Bestellen</string>
     <string name="osa_loyalty_welcome_message">Welkom op de Onze Stad App terminal. Deze app is de perfecte aanvulling bij uw aanwezigheid in de stad app om zo uw klanten nog meer te bieden. Wij helpen u het getrouwheidssysteem klaar te zetten voor gebruik. Begin met uw QR-code te scannen om zo uw terminal te activeren.</string>
+    <string name="other">Ander</string>
     <string name="paid">Betaald</string>
     <string name="passport">%1$s id</string>
     <string name="pay">Betalen</string>
@@ -372,11 +389,14 @@
     <string name="previousButton">Terug</string>
     <string name="previous_in_thread">Oudere berichten in deze conversatie</string>
     <string name="priority">Prioriteit</string>
+    <string name="privacy_policy">Privacybeleid</string>
     <string name="processing">Verwerken…</string>
     <string name="processing_scan">Scan verwerken…</string>
     <string name="profile">Profiel</string>
+    <string name="profile_data_usage_info">We gebruiken uw geslacht en geboortedatum voor het sorteringsalgoritme van de nieuwsfeed.</string>
     <string name="promo">Promo</string>
     <string name="provide_qr_code_name">Geef een naam aan de QR-code</string>
+    <string name="push_notifications">Push meldingen</string>
     <string name="qr_call_tel">Wenst u te bellen naar %1$s?</string>
     <string name="qr_code">QR-code</string>
     <string name="qr_code_scanned">QR-code gescand</string>
@@ -420,6 +440,9 @@
     <string name="registration_need_your_email">Om jouw e-mailadres te valideren, zullen we een e-mail sturen met jouw activatiecode.</string>
     <string name="registration_need_your_email_enterprise">Om jouw account te valideren, zullen we een e-mail sturen met jouw activatiecode.</string>
     <string name="registration_no_attempts_left">U heeft drie keer een foute activatiecode ingevoerd.\n\nU moet de registratie herbeginnen.</string>
+    <string name="registration_notification_types_city_app">Er zijn 3 soorten berichten:\n1. Berichten die specifiek gericht zijn aan jou. Deze kunnen komen van vrienden of van organisaties (bijvoorbeeld informatie over een bestelling of een antwoord op een vraag).\n2. Nieuws, info en evenementen vanuit de stad of gemeente.\n3. Nieuws, info en evenementen van de handelaars en verenigingen die je volgt.\n\nJe kan altijd nieuws filteren, waardoor je enkel nieuwsberichten ziet die relevant zijn voor jou.</string>
+    <string name="registration_notification_types_general">Er zijn 2 soorten berichten:\n1. Berichten die specifiek gericht zijn aan jou. Deze kunnen komen van vrienden of van organisaties.\n2. Algemene berichten van diensten die je volgt.\n\nOp algemene berichten kan u zich steeds uitschrijven, zodat u enkel berichten ontvangt die relevant zijn voor u.</string>
+    <string name="registration_notifications_header">%1$@ is een app waarmee u kan communiceren met personen en organisaties. Deze communicatie gebeurt via berichten. De %1$@ app gebruikt notificaties om u op de hoogte te houden van nieuwe berichten. Daarom is het belangrijk om notificaties toe te staan voor de %1$@ app.</string>
     <string name="registration_option_email">Optie 2:\nLog in met je e-mailadres.</string>
     <string name="registration_option_fb">Optie 1:\nLog in met je Facebook profiel.</string>
     <string name="registration_pin_was_mailed_no_html">Jouw activatiecode is verzonden naar %1$s om %2$s\nHet zou kunnen dat de mail beland is in je Spam of Ongewenste Email map.</string>
@@ -442,6 +465,7 @@
     <string name="registration_use_fb">Gebruik Facebook</string>
     <string name="registration_welcome">Welkom bij %1$s!</string>
     <string name="registration_welcome_text">Welkom in de %1$s app. De app waarmee je verbinding met je dienstverleners maakt en hen met je vrienden deelt.\n\nVoor je van start kunt gaan, moet je je even registreren. Tik op de knop \'Aanvaarden &amp; doorgaan\' om verder te gaan.</string>
+    <string name="registration_welcome_text_start_registration">Welkom in de %1$@ app. De app waarmee je verbinding met je dienstverleners maakt en hen met je vrienden deelt.\n\nVoor je van start kunt gaan, moet je je even registreren. Tik op de knop \'Registratie starten\' om verder te gaan.</string>
     <string name="remove_canned_button">Wenst u antwoordknop \"%1$s\" te verwijderen?</string>
     <string name="remove_friend">Verwijder als vriend</string>
     <string name="remove_service">Dienst ontvolgen</string>
@@ -450,6 +474,7 @@
     <string name="replied_at">Antwoord %1$s verstuurd om %2$s.</string>
     <string name="reply">Antwoorden</string>
     <string name="report_card">Meldingskaart</string>
+    <string name="request_download">Download aanvragen</string>
     <string name="request_location_of">Locatie opvragen van %1$s</string>
     <string name="reserve">Reserveren</string>
     <string name="retrieving_information">Informatie ophalen van de server…</string>
@@ -516,7 +541,7 @@
     <string name="smartsmiley_services">Diensten en service</string>
     <string name="sounds">Geluid</string>
     <string name="specials">Aanbieding</string>
-    <string name="start_registration">Start registratie</string>
+    <string name="start_registration">Registratie starten</string>
     <string name="status">Status</string>
     <string name="sticky">Sticky</string>
     <string name="stop">Stop</string>
@@ -529,6 +554,7 @@
     <string name="tab_messaging">Berichten</string>
     <string name="tab_services">Diensten</string>
     <string name="tab_stream">Activiteit</string>
+    <string name="terms_of_service">Algemene voorwaarden</string>
     <string name="test_mode">Testmodus</string>
     <string name="this_screen_is_not_yet_downloaded_check_network">Dit scherm is nog niet geladen. Controleer uw netwerk.</string>
     <string name="title_buttons">Voeg antwoordknoppen toe</string>
@@ -537,6 +563,8 @@
     <string name="title_new_message_video">Video toevoegen</string>
     <string name="title_recipients">Kies ontvangers</string>
     <string name="topic">Onderwerp</string>
+    <string name="tos_parent_consent">Ik ben de persoon die de ouderlijke verantwoordelijkheid voor het kind draagt, en ik geef de toestemming aan het kind om deze app te gebruiken.</string>
+    <string name="tos_tap_agree">Druk op \"Aanvaarden\" om onze voorwaarden te accepteren.</string>
     <string name="tracking_summary">Bepaalde vrienden zien mijn locatie.</string>
     <string name="tracking_title">Locatie delen</string>
     <string name="trainings">Opleidingen</string>

@@ -158,6 +158,16 @@
 
             </LinearLayout>
 
+            <TextView
+                android:id="@+id/textview_profile_data_usage_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/profile_data_usage_info">
+
+            </TextView>
+
             <LinearLayout
                 android:id="@+id/profile_data"
                 android:layout_width="match_parent"
