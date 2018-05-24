@@ -804,6 +804,7 @@ public class AppConstants {
     public static final String[] PROFILE_DATA_FIELDS = new String[] { };
     public static final boolean PROFILE_SHOW_GENDER_AND_BIRTHDATE = %(profile_show_gender_and_birthdate)s;
 
+    public static final String PRIVACY_POLICY_URL = "https://rogerth.at/legal?doc=privacy-policy";
     public static final String TERMS_OF_SERVICE_URL = "%(tos_url)s";
 
     public static final String ABOUT_WEBSITE = "%(about_website)s";
