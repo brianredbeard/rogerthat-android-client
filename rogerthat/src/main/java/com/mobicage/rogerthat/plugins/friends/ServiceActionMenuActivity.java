@@ -715,7 +715,9 @@ public class ServiceActionMenuActivity extends ServiceBoundActivity {
 
         public Cell createCell(final int x, final int y, final int z) {
             if (mPages.size() < z + 1) {
-                createPage(z);
+                for (int i = mPages.size(); i < z + 1; i++) {
+                    createPage(i);
+                }
             }
             addCell(x, y ,z);
             View page = mPages.get(z);
