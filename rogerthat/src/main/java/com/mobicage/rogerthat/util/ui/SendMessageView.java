@@ -35,7 +35,9 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.AppCompatTextView;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,6 +57,7 @@ import android.widget.TextView;
 import com.commonsware.cwac.cam2.Facing;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.iconics.IconicsDrawable;
+import com.mobicage.models.properties.messaging.MessageEmbeddedApp;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.CannedButton;
 import com.mobicage.rogerthat.CannedButtons;
@@ -86,6 +89,7 @@ import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
+import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.to.app.EmbeddedAppTO;
 import com.mobicage.to.messaging.AttachmentTO;
@@ -111,6 +115,18 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+
+class EmbeddedAppViewHolder {
+    ConstraintLayout container;
+    AppCompatTextView titleView;
+    ImageButton removeButton;
+
+    EmbeddedAppViewHolder(ConstraintLayout container, AppCompatTextView titleView, ImageButton removeButton) {
+        this.container = container;
+        this.titleView = titleView;
+        this.removeButton = removeButton;
+    }
+}
 
 public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayout {
 
@@ -157,6 +173,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
     private ImageView mAttachmentPreview;
     private LinearLayout mButtonsContainer;
     private EditText mMessage;
+    private EmbeddedAppViewHolder mEmbeddedAppViewHolder;
 
     private String[] mFriendRecipients;
     private boolean mHasImageSelected = false;
@@ -164,7 +181,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
     private String mUploadFileExtenstion = null;
     private File mTmpUploadFile = null;
     private EmbeddedAppTO mChosenEmbeddedApp = null;
-    private ProgressDialog mEmbeddedAppDownloadSpinner = null;
+    private MessageEmbeddedApp mMessageEmbeddedApp = null;
 
     private List<Integer> mImageButtons;
     private int mMaxImageButtonsOnScreen;
@@ -311,6 +328,17 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
             optionButtons.setVisibility(View.VISIBLE);
             initImageButtonsNavigation();
         }
+        this.mEmbeddedAppViewHolder = new EmbeddedAppViewHolder(
+                (ConstraintLayout) findViewById(R.id.embedded_app_preview),
+                (AppCompatTextView) findViewById(R.id.embedded_app_preview_title),
+                (ImageButton) findViewById(R.id.btn_embedded_app_remove)
+        );
+        this.mEmbeddedAppViewHolder.removeButton.setOnClickListener(new SafeViewOnClickListener() {
+            @Override
+            public void safeOnClick(View v) {
+                SendMessageView.this.removeMessageEmbeddedApp();
+            }
+        });
     }
 
     private void resetLayout() {
@@ -421,6 +449,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
                         String stringResult = data.getStringExtra(ChooseEmbeddedAppActivity.RESULT_KEY);
                         if (stringResult != null) {
                             EmbeddedAppTO chosenEmbeddedApp = new EmbeddedAppTO((Map<String, Object>) JSONValue.parse(stringResult));
+                            mChosenEmbeddedApp = chosenEmbeddedApp;
                             openEmbeddedAppForPayment(chosenEmbeddedApp);
                         }
                     } catch (Exception e) {
@@ -430,8 +459,24 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
                 break;
             case START_EMBEDDED_APP_REQUEST_CODE:
                 if (resultCode == Activity.RESULT_OK) {
-                    // todo: show payment somewhere (under where the added buttons would show probably?)
-                    L.i("Received result from embedded app " + data.toString());
+                    String resultStr = data.getStringExtra(ActionScreenActivity.EXIT_APP_RESULT);
+                    final Map<String, Object> parsedResult = (Map<String, Object>) JSONValue.parse(resultStr);
+                    if (parsedResult.containsKey("success") && !(boolean) parsedResult.get("success")) {
+//                        String code = (String) parsedResult.get("code");
+                        String msg = (String) parsedResult.get("message");
+                        if (msg != null) {
+                            UIUtils.showLongToast(mActivity, msg);
+                        }
+                    } else {
+                        if (!parsedResult.containsKey("id")) {
+                            parsedResult.put("id", this.mChosenEmbeddedApp.name);
+                        }
+                        try {
+                            handleCreatePaymentRequestResult(new MessageEmbeddedApp(parsedResult));
+                        } catch (IncompleteMessageException e) {
+                            L.bug("Could not parse embedded app result to MessageEmbeddedApp!", e);
+                        }
+                    }
                 }
                 break;
 
@@ -781,12 +826,6 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
         mActivity.startActivityForResult(chooserIntent, PICK_VIDEO_CODE);
     }
 
-    private void showChooseEmbeddedApp() {
-        mSystemPlugin.getEmbeddedApps(false, EmbeddedAppType.CHAT_PAYMENT);
-        final Intent intent = new Intent(mActivity, ChooseEmbeddedAppActivity.class);
-        mActivity.startActivityForResult(intent, PICK_EMBEDDED_APP_CODE);
-    }
-
     private ProgressDialog showProcessing() {
         String message = mActivity.getString(R.string.processing);
         return UIUtils.showProgressDialog(mActivity, null, message, true, false);
@@ -972,14 +1011,6 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
             throw new IOException(mActivity.getString(R.string.unable_to_create_images_directory, mActivity.getString(R.string.app_name)));
         }
         return imagesFolder;
-    }
-
-    public void onEmbeddedAppAvailable(String id) {
-        if (mEmbeddedAppDownloadSpinner != null && id.equals(mChosenEmbeddedApp.name)) {
-            mEmbeddedAppDownloadSpinner.dismiss();
-            mEmbeddedAppDownloadSpinner = null;
-            openEmbeddedAppForPayment(mChosenEmbeddedApp);
-        }
     }
 
     private class PickMoreItem {
@@ -1310,19 +1341,16 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
         }
     }
 
+    private void showChooseEmbeddedApp() {
+        mSystemPlugin.getEmbeddedApps(false, EmbeddedAppType.CHAT_PAYMENT);
+        final Intent intent = new Intent(mActivity, ChooseEmbeddedAppActivity.class);
+        mActivity.startActivityForResult(intent, PICK_EMBEDDED_APP_CODE);
+    }
+
     /**
      * Opens the embedded app. Sets the context so the embedded app knows it has to return payment information.
      */
     private void openEmbeddedAppForPayment(EmbeddedAppTO embeddedAppTO) {
-        long version = mSystemPlugin.getStore().getEmbeddedAppVersion(embeddedAppTO.name);
-        if (version < embeddedAppTO.version || !mSystemPlugin.getBrandingMgr().embeddedAppExists(embeddedAppTO.name)) {
-            mEmbeddedAppDownloadSpinner = UIUtils.showProgressDialog(mActivity, null, mActivity.getString(R.string.loading), true, false);
-            mChosenEmbeddedApp = embeddedAppTO;
-            mSystemPlugin.getEmbeddedApp(embeddedAppTO.name);
-            return;
-        } else {
-            mChosenEmbeddedApp = null;
-        }
         HashMap<String, Object> data = new HashMap<>();
         OpenEmbeddedAppContext context = new OpenEmbeddedAppContext(OpenEmbeddedAppContextType.CREATE_PAYMENT_REQUEST, data);
         final Intent i = new Intent(mActivity, CordovaActionScreenActivity.class);
@@ -1330,5 +1358,22 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
         i.putExtra(CordovaActionScreenActivity.EMBEDDED_APP_ID, embeddedAppTO.name);
         i.putExtra(CordovaActionScreenActivity.TITLE, embeddedAppTO.title);
         mActivity.startActivityForResult(i, START_EMBEDDED_APP_REQUEST_CODE);
+    }
+
+    /**
+     * Shows title of the embedded app that will be added above the message box.
+     *
+     * @param result Result received from the embedded app.
+     */
+    private void handleCreatePaymentRequestResult(MessageEmbeddedApp result) {
+        this.mMessageEmbeddedApp = result;
+        this.mEmbeddedAppViewHolder.container.setVisibility(View.VISIBLE);
+        this.mEmbeddedAppViewHolder.titleView.setText(result.title);
+        // TODO: add this.mMessageEmbeddedApp to message when submitting message
+    }
+
+    private void removeMessageEmbeddedApp() {
+        this.mMessageEmbeddedApp = null;
+        this.mEmbeddedAppViewHolder.container.setVisibility(View.GONE);
     }
 }

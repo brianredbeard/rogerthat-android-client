@@ -46,7 +46,7 @@ public class MessageEmbeddedApp implements com.mobicage.rpc.IJSONable {
             Object val = json.get("description");
             this.description = (String) val;
         } else {
-            throw new IncompleteMessageException("com.mobicage.models.properties.messaging.MessageEmbeddedApp object is missing field 'description'");
+            this.description = null;
         }
         if (json.containsKey("id")) {
             Object val = json.get("id");
@@ -58,13 +58,13 @@ public class MessageEmbeddedApp implements com.mobicage.rpc.IJSONable {
             Object val = json.get("image_url");
             this.image_url = (String) val;
         } else {
-            throw new IncompleteMessageException("com.mobicage.models.properties.messaging.MessageEmbeddedApp object is missing field 'image_url'");
+            this.image_url = null;
         }
         if (json.containsKey("result")) {
             Object val = json.get("result");
             this.result = (String) val;
         } else {
-            throw new IncompleteMessageException("com.mobicage.models.properties.messaging.MessageEmbeddedApp object is missing field 'result'");
+            this.result = null;
         }
         if (json.containsKey("title")) {
             Object val = json.get("title");

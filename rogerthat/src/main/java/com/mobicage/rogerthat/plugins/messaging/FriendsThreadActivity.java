@@ -169,7 +169,6 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         filter2.addAction(MessagingPlugin.THREAD_MODIFIED_INTENT);
         filter2.addAction(FriendsPlugin.FRIEND_INFO_RECEIVED_INTENT);
         filter2.addAction(SystemPlugin.ASSET_AVAILABLE_INTENT);
-        filter2.addAction(BrandingMgr.EMBEDDED_APP_AVAILABLE_INTENT);
         registerReceiver(mReceiver, filter2);
     }
 
@@ -422,10 +421,6 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                 if (SystemPlugin.ASSET_CHAT_BACKGROUND.equals(kind)) {
                     setThreadBackground();
                 }
-            }
-            if (BrandingMgr.EMBEDDED_APP_AVAILABLE_INTENT.equals(intent.getAction())) {
-                String id = intent.getStringExtra("id");
-                mSendMessageView.onEmbeddedAppAvailable(id);
             }
             return null;
         }

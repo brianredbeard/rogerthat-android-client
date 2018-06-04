@@ -19,13 +19,13 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_margin="16dp"
+		android:clickable="true"
 		app:elevation="4dp"
 		app:fabSize="normal"
-		android:clickable="true"
-		app:layout_anchor="@id/button_list"
 		app:ico_color="@color/mc_white"
 		app:ico_icon="@string/faw_plus"
 		app:ico_size="24dp"
-		app:layout_anchorGravity="bottom|right|end" />
+		app:layout_anchor="@id/button_list"
+		app:layout_anchorGravity="bottom|right|end"/>
 
 </android.support.design.widget.CoordinatorLayout>

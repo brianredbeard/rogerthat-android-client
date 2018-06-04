@@ -19,16 +19,19 @@
 package com.mobicage.rogerthat;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ProgressBar;
 
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.system.SystemPlugin;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
@@ -44,10 +47,13 @@ import java.util.Map;
 
 public class ChooseEmbeddedAppActivity extends ServiceBoundActivity implements EmbeddedAppFragment.OnListFragmentInteractionListener {
 
-    public static String RESULT_KEY = "result";
+    public static String RESULT_KEY = "ChooseEmbeddedAppActivity.result";
     ProgressBar mProgressBar;
     private BroadcastReceiver mBroadcastReceiver;
     private EmbeddedAppFragment mEmbeddedAppFragment;
+    private EmbeddedAppTO mChosenEmbeddedApp = null;
+    private ProgressDialog mEmbeddedAppDownloadSpinner = null;
+    private SystemPlugin mSystemPlugin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +69,7 @@ public class ChooseEmbeddedAppActivity extends ServiceBoundActivity implements E
 
     @Override
     protected void onServiceBound() {
+        mSystemPlugin = mService.getPlugin(SystemPlugin.class);
     }
 
     @Override
@@ -88,6 +95,13 @@ public class ChooseEmbeddedAppActivity extends ServiceBoundActivity implements E
                             String error = intent.getStringExtra("error");
                             UIUtils.showDialog(ChooseEmbeddedAppActivity.this, getString(R.string.activity_error), error);
                             break;
+                        case BrandingMgr.EMBEDDED_APP_AVAILABLE_INTENT:
+                            String id = intent.getStringExtra("id");
+                            if (mChosenEmbeddedApp != null && mChosenEmbeddedApp.name.equals(id)) {
+                                mEmbeddedAppDownloadSpinner.dismiss();
+                                mEmbeddedAppDownloadSpinner = null;
+                                ChooseEmbeddedAppActivity.this.setEmbeddedAppResult(mChosenEmbeddedApp);
+                            }
                     }
                 } catch (IncompleteMessageException e) {
                     L.bug(e);
@@ -107,11 +121,37 @@ public class ChooseEmbeddedAppActivity extends ServiceBoundActivity implements E
         final IntentFilter filter = new IntentFilter();
         filter.addAction(SystemPlugin.GET_EMBEDDED_APPS_RESULT_INTENT);
         filter.addAction(SystemPlugin.GET_EMBEDDED_APPS_FAILED_INTENT);
+        filter.addAction(BrandingMgr.EMBEDDED_APP_AVAILABLE_INTENT);
         return filter;
     }
 
     @Override
     public void onListFragmentInteraction(EmbeddedAppTO embeddedAppTO) {
+        boolean downloaded = this.ensureEmbeddedAppIsDownloaded(embeddedAppTO);
+        if (downloaded) {
+            this.setEmbeddedAppResult(embeddedAppTO);
+        }
+    }
+
+    /**
+     * @param embeddedAppTO
+     * @return Whether or not the latest version of this embedded app is already downloaded
+     */
+    private boolean ensureEmbeddedAppIsDownloaded(@NonNull EmbeddedAppTO embeddedAppTO) {
+        long version = mSystemPlugin.getStore().getEmbeddedAppVersion(embeddedAppTO.name);
+        if (version < embeddedAppTO.version || !mSystemPlugin.getBrandingMgr().embeddedAppExists(embeddedAppTO.name)) {
+            // Show loading spinner until embedded app is downloaded. (via onEmbeddedAppAvailable callback)
+            mEmbeddedAppDownloadSpinner = UIUtils.showProgressDialog(this, null, getString(R.string.loading), true, false);
+            mChosenEmbeddedApp = embeddedAppTO;
+            mSystemPlugin.getEmbeddedApp(embeddedAppTO.name);
+            return false;
+        } else {
+            mChosenEmbeddedApp = null;
+            return true;
+        }
+    }
+
+    private void setEmbeddedAppResult(@NonNull EmbeddedAppTO embeddedAppTO) {
         Intent intent = new Intent();
         intent.putExtra(RESULT_KEY, JSONValue.toJSONString(embeddedAppTO.toJSONMap()));
         setResult(Activity.RESULT_OK, intent);
