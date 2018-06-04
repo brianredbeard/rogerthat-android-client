@@ -357,7 +357,7 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
 
         Uri uri = Uri.parse(buttonUrl);
 
-        if (Message.MC_HTTP_PREFIX.equals(buttonAction) || Message.MC_HTTPS_PREFIX.equals(buttonAction)) {
+        if (buttonUrl.startsWith("http") && !link.external) {
             CustomTabsIntent.Builder customTabsBuilder = new CustomTabsIntent.Builder();
             CustomTabsIntent customTabsIntent = customTabsBuilder.build();
             customTabsIntent.launchUrl(mActivity, uri);
