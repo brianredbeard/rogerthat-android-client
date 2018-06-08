@@ -147,7 +147,7 @@
     <string name="sql_service_api_call_remove">DELETE FROM service_api_calls WHERE id=?</string>
 
     <!-- messaging -->
-    <string name="sql_message_insert">INSERT INTO message (\"key\", parent_key, sender, message, timeout, \"timestamp\", flags, needs_my_answer, branding, sortid, dirty, recipients, recipients_status, alert_flags, day, form, dismiss_button_ui_flags, last_thread_message, thread_show_in_list, broadcast_type, thread_avatar_hash, thread_background_color, thread_text_color, priority, default_priority, default_sticky) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)</string>
+    <string name="sql_message_insert">INSERT INTO message (\"key\", parent_key, sender, message, timeout, \"timestamp\", flags, needs_my_answer, branding, sortid, dirty, recipients, recipients_status, alert_flags, day, form, dismiss_button_ui_flags, last_thread_message, thread_show_in_list, broadcast_type, thread_avatar_hash, thread_background_color, thread_text_color, priority, default_priority, default_sticky, embedded_app) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)</string>
     <string name="sql_message_get_parent_sortid">SELECT sortid FROM message WHERE \"key\" = ?</string>
     <string name="sql_message_get_highest_sortid">SELECT MAX(sortid) FROM message</string>
     <string name="sql_message_max_timestamp_by_sortid">SELECT MAX(timestamp) FROM message WHERE sortid = ?</string>
@@ -186,7 +186,7 @@ WHERE
     <string name="sql_message_get_needs_answer">SELECT needs_my_answer FROM message WHERE \"key\" = ?</string>
     <string name="sql_message_get_unprocessed_message_after_timestamp_keys">SELECT key FROM message WHERE show_in_message_list = 1 AND existence = 1 AND thread_dirty = 1 AND \"timestamp\" > ?</string>
     <string name="sql_message_get_unprocessed_message_count_for_sender">SELECT count(*) FROM message WHERE show_in_message_list > 0  AND existence = 1 AND thread_dirty = 1 AND sender = ?</string>
-    <string name="sql_message_get_message_by_key">SELECT \"key\", parent_key, sender, message, \"timestamp\", flags, branding, alert_flags, needs_my_answer, reply_count, dirty, recipients_status, recipients, form, thread_dirty, thread_needs_my_answer, dismiss_button_ui_flags, last_thread_message, thread_show_in_list, broadcast_type, thread_avatar_hash, thread_background_color, thread_text_color, priority, default_priority, default_sticky FROM message WHERE \"key\" = ?</string>
+    <string name="sql_message_get_message_by_key">SELECT \"key\", parent_key, sender, message, \"timestamp\", flags, branding, alert_flags, needs_my_answer, reply_count, dirty, recipients_status, recipients, form, thread_dirty, thread_needs_my_answer, dismiss_button_ui_flags, last_thread_message, thread_show_in_list, broadcast_type, thread_avatar_hash, thread_background_color, thread_text_color, priority, default_priority, default_sticky, embedded_app FROM message WHERE \"key\" = ?</string>
     <string name="sql_message_get_message_buttons">SELECT id, caption, action, ui_flags, color FROM button WHERE message = ? ORDER BY \"index\"</string>
     <string name="sql_message_get_message_members_statusses">SELECT member, received_timestamp, acked_timestamp, button, custom_reply, status FROM member_status WHERE message = ? </string>
     <string name="sql_message_get_message_members">SELECT member FROM member_status WHERE message = ? </string>
@@ -261,11 +261,11 @@ WHERE (m1.show_in_message_list > 0) AND m1.existence = 1 AND (ms1.member = ? or 
 ORDER BY m1.thread_dirty DESC, m1.\"timestamp\" DESC;
 </string>
     <string name="sql_message_cursor_full_thread">
-SELECT \"key\", parent_key, sender, message, \"timestamp\", flags, branding, alert_flags, priority, default_priority, default_sticky, needs_my_answer, reply_count, dirty, recipients_status, recipients, form, rowid as "_id", thread_needs_my_answer
+SELECT \"key\", parent_key, sender, message, \"timestamp\", flags, branding, alert_flags, priority, default_priority, default_sticky, needs_my_answer, reply_count, dirty, recipients_status, recipients, form, rowid as "_id", thread_needs_my_answer, embedded_app
 FROM message
 WHERE \"key\" = ? AND flags &amp; 512 != 512 AND existence = 1
 UNION
-SELECT \"key\", parent_key, sender, message, \"timestamp\", flags, branding, alert_flags, priority, default_priority, default_sticky, needs_my_answer, reply_count, dirty, recipients_status, recipients, form, rowid as "_id", thread_needs_my_answer
+SELECT \"key\", parent_key, sender, message, \"timestamp\", flags, branding, alert_flags, priority, default_priority, default_sticky, needs_my_answer, reply_count, dirty, recipients_status, recipients, form, rowid as "_id", thread_needs_my_answer, embedded_app
 FROM message
 WHERE parent_key = ? AND existence = 1
 ORDER BY \"timestamp\" ASC

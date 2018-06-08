@@ -87,6 +87,8 @@ import com.mobicage.to.messaging.MessageLockedRequestTO;
 import com.mobicage.to.messaging.MessageTO;
 import com.mobicage.to.messaging.SendMessageRequestTO;
 import com.mobicage.to.messaging.StartFlowRequestTO;
+import com.mobicage.to.messaging.UpdateMessageEmbeddedAppRequestTO;
+import com.mobicage.to.messaging.UpdateMessageEmbeddedAppResponseTO;
 import com.mobicage.to.messaging.UpdateMessageRequestTO;
 import com.mobicage.to.messaging.UploadChunkRequestTO;
 import com.mobicage.to.messaging.forms.AdvancedOrderWidgetResultTO;
@@ -276,6 +278,7 @@ public class MessagingPlugin implements MobicagePlugin {
 
         message.default_priority = Message.PRIORITY_NORMAL;
         message.default_sticky = false;
+        message.embedded_app = request.embedded_app;
 
         newMessage(message, true, true);
         return message;
@@ -932,7 +935,8 @@ public class MessagingPlugin implements MobicagePlugin {
         }
 
         boolean messageFound = mStore.updateMessage(request.message_key, request.parent_message_key, flags, existence,
-            request.message, request.thread_avatar_hash, request.thread_background_color, request.thread_text_color);
+                request.message, request.thread_avatar_hash, request.thread_background_color, request.thread_text_color,
+                request.embedded_app);
 
         final String threadKey = TextUtils.isEmptyOrWhitespace(request.parent_message_key) ? request.message_key
             : request.parent_message_key;
@@ -972,6 +976,15 @@ public class MessagingPlugin implements MobicagePlugin {
             if (!messageFound || offset != null) {
                 requestConversation(threadKey, offset);
             }
+        }
+    }
+
+    public void updateMessageEmbeddedApp(UpdateMessageEmbeddedAppRequestTO request) {
+        try {
+            Rpc.updateMessageEmbeddedApp(new ResponseHandler<UpdateMessageEmbeddedAppResponseTO>(), request);
+        } catch (Exception e) {
+            // No exception will actually be thrown
+            L.bug(e);
         }
     }
 

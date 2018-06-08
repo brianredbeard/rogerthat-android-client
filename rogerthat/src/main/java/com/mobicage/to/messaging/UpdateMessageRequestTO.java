@@ -25,6 +25,7 @@ import java.util.Map;
 
 public class UpdateMessageRequestTO implements com.mobicage.rpc.IJSONable {
 
+    public com.mobicage.models.properties.messaging.MessageEmbeddedApp embedded_app;
     public long existence;
     public long flags;
     public boolean has_existence;
@@ -40,7 +41,14 @@ public class UpdateMessageRequestTO implements com.mobicage.rpc.IJSONable {
     public UpdateMessageRequestTO() {
     }
 
+    @SuppressWarnings("unchecked")
     public UpdateMessageRequestTO(Map<String, Object> json) throws IncompleteMessageException {
+        if (json.containsKey("embedded_app")) {
+            Object val = json.get("embedded_app");
+            this.embedded_app = val == null ? null : new com.mobicage.models.properties.messaging.MessageEmbeddedApp((Map<String, Object>) val);
+        } else {
+            this.embedded_app = null;
+        }
         if (json.containsKey("existence")) {
             Object val = json.get("existence");
             if (val instanceof Integer) {
@@ -120,6 +128,7 @@ public class UpdateMessageRequestTO implements com.mobicage.rpc.IJSONable {
     @Override
     public Map<String, Object> toJSONMap() {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
+        obj.put("embedded_app", this.embedded_app == null ? null : this.embedded_app.toJSONMap());
         obj.put("existence", this.existence);
         obj.put("flags", this.flags);
         obj.put("has_existence", this.has_existence);

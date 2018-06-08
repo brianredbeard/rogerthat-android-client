@@ -20,7 +20,8 @@ package com.mobicage.rogerthat.plugins.payment;
 
 public enum OpenEmbeddedAppContextType {
     PAY_WIDGET("pay"),
-    CREATE_PAYMENT_REQUEST("create-payment-request");
+    CREATE_PAYMENT_REQUEST("create-payment-request"),
+    PAYMENT_REQUEST("payment-request");
     private final String value;
 
     OpenEmbeddedAppContextType(final String value) {

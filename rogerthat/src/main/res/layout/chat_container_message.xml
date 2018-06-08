@@ -172,19 +172,20 @@
                 android:visibility="gone"
                 tools:visibility="visible">
 
-                <android.support.v7.widget.AppCompatTextView
-                    android:id="@+id/embedded_app_preview_title"
-                    android:layout_width="0dp"
-                    android:layout_height="32dp"
-                    android:layout_marginRight="8dp"
-                    android:gravity="center"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/btn_embedded_app_remove"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:text="This is a sample embedded app title"/>
+				<android.support.v7.widget.AppCompatTextView
+					android:id="@+id/embedded_app_preview_title"
+					android:layout_width="0dp"
+					android:layout_height="32dp"
+					android:layout_marginRight="8dp"
+					android:gravity="center"
+					app:layout_constraintBottom_toBottomOf="parent"
+					app:layout_constraintEnd_toStartOf="@+id/btn_embedded_app_remove"
+					app:layout_constraintHorizontal_bias="0.0"
+					app:layout_constraintStart_toStartOf="parent"
+					app:layout_constraintTop_toTopOf="parent"
+					app:layout_constraintVertical_bias="1.0"
+					tools:text="This is a sample embedded app title"/>
 
-                <!-- TODO for some reason the icon doesn't show up -->
                 <ImageButton
                     android:id="@+id/btn_embedded_app_remove"
                     android:layout_width="32dp"

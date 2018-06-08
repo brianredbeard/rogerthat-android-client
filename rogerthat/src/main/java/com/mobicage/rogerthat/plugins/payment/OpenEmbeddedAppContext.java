@@ -27,7 +27,7 @@ public class OpenEmbeddedAppContext implements IJSONable {
     public OpenEmbeddedAppContextType type;
     public Map<String, Object> data;
 
-    public OpenEmbeddedAppContext(OpenEmbeddedAppContextType type, HashMap<String, Object> data) {
+    public OpenEmbeddedAppContext(OpenEmbeddedAppContextType type, Map<String, Object> data) {
         this.type = type;
         this.data = data;
     }

@@ -491,6 +491,15 @@ public class ResponseReceiverHandler {
                 resp.setResult(Parser.ComMobicageToMessagingFormsSubmitTextLineFormResponseTO(rpcr.result));
             ((IResponseHandler<com.mobicage.to.messaging.forms.SubmitTextLineFormResponseTO>) responseHandler).handle(resp);
         }
+        if ("com.mobicage.api.messaging.updateMessageEmbeddedApp".equals(function)) {
+            final Response<com.mobicage.to.messaging.UpdateMessageEmbeddedAppResponseTO> resp = new Response<com.mobicage.to.messaging.UpdateMessageEmbeddedAppResponseTO>();
+            resp.setError(rpcr.error);
+            resp.setSuccess(rpcr.success);
+            resp.setCallId(rpcr.callId);
+            if (rpcr.success)
+                resp.setResult(Parser.ComMobicageToMessagingUpdateMessageEmbeddedAppResponseTO(rpcr.result));
+            ((IResponseHandler<com.mobicage.to.messaging.UpdateMessageEmbeddedAppResponseTO>) responseHandler).handle(resp);
+        }
         if ("com.mobicage.api.messaging.uploadChunk".equals(function)) {
             final Response<com.mobicage.to.messaging.UploadChunkResponseTO> resp = new Response<com.mobicage.to.messaging.UploadChunkResponseTO>();
             resp.setError(rpcr.error);

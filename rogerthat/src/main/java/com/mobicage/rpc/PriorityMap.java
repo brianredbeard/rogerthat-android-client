@@ -77,6 +77,7 @@ public class PriorityMap {
         sPrioritySet.add("com.mobicage.api.messaging.submitSingleSliderForm");
         sPrioritySet.add("com.mobicage.api.messaging.submitTextBlockForm");
         sPrioritySet.add("com.mobicage.api.messaging.submitTextLineForm");
+        sPrioritySet.add("com.mobicage.api.messaging.updateMessageEmbeddedApp");
         sPrioritySet.add("com.mobicage.api.messaging.uploadChunk");
         sPrioritySet.add("com.mobicage.api.messaging.jsmfr.flowStarted");
         sPrioritySet.add("com.mobicage.api.messaging.jsmfr.messageFlowError");

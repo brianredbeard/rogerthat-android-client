@@ -75,6 +75,7 @@ public class Message extends MessageTO {
         msg.alert_flags = ((Long) form.get("alert_flags")).longValue();
         msg.branding = (String) form.get("branding");
         msg.flags = ((Long) form.get("flags")).longValue();
+        msg.embedded_app = null;
         msg.form = ((Map<String, Object>) form.get("form"));
         msg.key = (String) form.get("key");
         msg.message = (String) form.get("message");

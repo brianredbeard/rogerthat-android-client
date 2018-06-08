@@ -111,7 +111,7 @@ CREATE TABLE message (
 	needs_my_answer INTEGER,
 	branding TEXT,
 	sortid INTEGER, dirty INTEGER, recipients TEXT, reply_count INTEGER DEFAULT 0, recipients_status INTEGER DEFAULT -1, alert_flags INTEGER NOT NULL DEFAULT 2, thread_dirty INTEGER NOT NULL DEFAULT 0, last_thread_message TEXT, show_in_message_list INTEGER NOT NULL DEFAULT 0, day INTEGER NOT NULL DEFAULT 0, form TEXT, dismiss_button_ui_flags INTEGER NOT NULL DEFAULT 0, thread_needs_my_answer INTEGER NOT NULL DEFAULT 0, last_updated_on INTEGER NOT NULL DEFAULT 0, existence INTEGER NOT NULL DEFAULT 1, thread_show_in_list INTEGER NOT NULL DEFAULT 0, broadcast_type TEXT, thread_avatar_hash TEXT DEFAULT NULL, thread_background_color TEXT DEFAULT NULL, thread_text_color TEXT DEFAULT NULL, priority INTEGER DEFAULT 1, default_priority INTEGER DEFAULT 1, default_sticky INTEGER DEFAULT 0,
-	FOREIGN KEY (parent_key) REFERENCES message ("key")
+	 embedded_app TEXT DEFAULT NULL, FOREIGN KEY (parent_key) REFERENCES message ("key")
 );
 CREATE TABLE message_attachment (
     message TEXT NOT NULL,

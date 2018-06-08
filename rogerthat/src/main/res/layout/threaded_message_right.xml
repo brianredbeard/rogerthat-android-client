@@ -1,54 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="fill_parent"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_height="wrap_content">
-
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                             xmlns:app="http://schemas.android.com/apk/res-auto"
+                                             xmlns:tools="http://schemas.android.com/tools"
+                                             android:layout_width="match_parent"
+                                             android:layout_height="wrap_content">
     <ImageView
         android:id="@+id/sender_avatar"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_alignParentLeft="true"
-        android:layout_alignBottom="@id/text_bubble"
-        android:layout_marginBottom="5dp"
-        android:layout_marginLeft="5dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="344dp"
+        android:layout_marginRight="344dp"
         android:background="@drawable/avatar_background_black"
-        android:padding="1dp"
-        android:src="@drawable/unknown_avatar" >
+        android:src="@drawable/unknown_avatar"
+        app:layout_constraintBottom_toBottomOf="@+id/text_bubble"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent">
     </ImageView>
 
-    <RelativeLayout
+    <android.support.constraint.ConstraintLayout
         android:id="@+id/text_bubble"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_marginRight="50dp"
-        android:background="@drawable/textballoon2_left"
-        android:layout_toRightOf="@id/sender_avatar"
-        android:padding="25dp">
+        android:layout_marginEnd="4dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginStart="8dp"
+        android:background="@drawable/textballoon2_right"
+        android:padding="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="@id/sender_avatar"
+        app:layout_constraintStart_toEndOf="@+id/sender_avatar"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_max="wrap"
+        tools:layout_editor_absoluteY="16dp">
+
+        <TextView
+            android:id="@+id/message_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:ellipsize="start"
+            android:singleLine="true"
+            android:textColor="@color/mc_primary_color"
+            android:textStyle="italic"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Gert Cornelis - 12:30">
+        </TextView>
 
         <ImageView
             android:id="@+id/status"
             android:layout_width="16dp"
             android:layout_height="16dp"
-            android:layout_alignParentTop="true"
-            android:layout_marginLeft="5dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
             android:layout_toRightOf="@id/message_info"
-            android:src="@drawable/lock" >
+            android:src="@drawable/lock"
+            app:layout_constraintEnd_toStartOf="@+id/message_info"
+            app:layout_constraintTop_toTopOf="parent">
         </ImageView>
-
-        <TextView
-            android:id="@+id/message_info"
-            fontPath="fonts/lato_light_italic.ttf"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:ellipsize="start"
-            android:maxLines="1"
-            android:layout_width="wrap_content"
-            android:textColor="@color/mc_primary_color"
-            tools:text="Gert Cornelis - 12:30">
-        </TextView>
 
         <LinearLayout
             android:id="@+id/message_attachments"
@@ -56,7 +72,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/message_info"
             android:orientation="vertical"
-            android:visibility="gone" >
+            android:visibility="gone">
         </LinearLayout>
 
         <TextView
@@ -64,50 +80,135 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/message_attachments"
-            android:layout_marginTop="10dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
             android:textColor="@android:color/primary_text_light"
-            android:textSize="17sp"
-            tools:text="Alles goed bartjeeeeeeeee!!!!!??">
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/message_attachments"
+            app:layout_constraintTop_toBottomOf="@+id/message_info"
+            tools:text="Alles goed bartjeeeeeeeeee!!!!!??">
         </TextView>
-    </RelativeLayout>
 
-    <LinearLayout
-        android:id="@+id/buttons"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_below="@id/text_bubble"
-        android:layout_marginLeft="60dp"
-        android:layout_marginRight="1dp"
-        android:layout_marginTop="5dp"
-        android:orientation="vertical" >
-    </LinearLayout>
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/embedded_app_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/gray_border"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:orientation="horizontal"
+            android:paddingBottom="8dp"
+            android:paddingTop="8dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/message"
+            tools:visibility="visible">
+
+            <ImageView
+                android:id="@+id/embedded_app_image"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_marginLeft="2dp"
+                android:src="@drawable/unknown_avatar"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toRightOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="visible"/>
+
+            <android.support.constraint.ConstraintLayout
+                android:layout_width="230dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintLeft_toRightOf="@id/embedded_app_image"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:id="@+id/embedded_app_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginStart="8dp"
+                    android:singleLine="true"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="This is the pretty long title of the embedded app"/>
+
+                <TextView
+                    android:id="@+id/embedded_app_description"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginStart="8dp"
+                    android:maxLines="3"
+                    android:textSize="12sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/embedded_app_title"
+                    tools:text="This is a longer description of the embedded app that can be longer than one line, but at most 3 lines. Any longer will just get cut off."/>
+
+                <android.support.constraint.Guideline
+                    android:id="@+id/guideline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_begin="20dp"/>
+            </android.support.constraint.ConstraintLayout>
+        </android.support.constraint.ConstraintLayout>
+    </android.support.constraint.ConstraintLayout>
 
     <LinearLayout
         android:id="@+id/read_friends_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/buttons"
-        android:layout_margin="5dp"
+        android:layout_marginTop="8dp"
         android:gravity="right"
-        android:orientation="horizontal" />
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="@id/buttons"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_bubble"/>
+
+    <!--Rogerthat button and other buttons will never be shown at the same time -->
+    <LinearLayout
+        android:id="@+id/buttons"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/text_bubble"
+        android:layout_marginRight="12dp"
+        android:orientation="vertical"
+        app:layout_constraintRight_toRightOf="@+id/sender_avatar"
+        app:layout_constraintTop_toBottomOf="@+id/read_friends_container"
+        tools:visibility="visible">
+    </LinearLayout>
 
     <android.support.v7.widget.AppCompatButton
         android:id="@+id/rogerthat_button"
         style="@style/RogerthatButtonTheme"
-        fontPath="fonts/lato_bold.ttf"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_below="@id/read_friends_container"
-        android:layout_marginBottom="5dp"
-        android:layout_marginLeft="1dp"
-        android:layout_marginRight="1dp"
-        android:layout_marginTop="5dp"
+        android:layout_margin="8dp"
         android:text="@string/rogerthat"
         android:textColor="@color/mc_white"
-        android:visibility="gone"/>
+        android:textStyle="bold"
+        android:visibility="invisible"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/read_friends_container"
+        tools:visibility="visible"/>
 
-</RelativeLayout>
+</android.support.constraint.ConstraintLayout>

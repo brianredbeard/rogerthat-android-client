@@ -249,7 +249,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
             public void safeOnClick(View v) {
                 try {
                     if ("".equals(mMessage.getText().toString().trim()) && mButtons.size() == 0 && !mHasImageSelected
-                            && !mHasVideoSelected) {
+                            && !mHasVideoSelected && mMessageEmbeddedApp == null) {
                         UIUtils.showLongToast(mActivity, mActivity.getString(R.string.message_or_buttons_required));
                         return;
                     }
@@ -350,8 +350,10 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
         mSelectedButton = NO_BUTTON_SELECTED;
         mHasImageSelected = false;
         mHasVideoSelected = false;
+        mMessageEmbeddedApp = null;
         mAttachmentContainer.setVisibility(View.GONE);
         mButtonsContainer.removeAllViews();
+        mEmbeddedAppViewHolder.container.setVisibility(View.GONE);
 
         final LinearLayout optionButtons = (LinearLayout) findViewById(R.id.imageButtons);
         optionButtons.setVisibility(View.GONE);
@@ -1211,8 +1213,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
         request.priority = mPriority;
         Long[] btnIds = mButtons.toArray(new Long[mButtons.size()]);
         List<ButtonTO> buttons = new ArrayList<ButtonTO>();
-        for (int i = 0; i < btnIds.length; i++) {
-            Long buttonId = btnIds[i];
+        for (Long buttonId : btnIds) {
             CannedButton cannedButton = mCannedButtons.getById(buttonId);
             if (cannedButton == null)
                 continue;
@@ -1225,9 +1226,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
         request.buttons = buttons.toArray(new ButtonTO[buttons.size()]);
         if (mParentKey == null) {
             request.members = new String[mFriendRecipients.length + 1];
-            for (int i = 0; i < request.members.length - 1 ; i++) {
-                request.members[i] = mFriendRecipients[i];
-            }
+            System.arraycopy(mFriendRecipients, 0, request.members, 0, request.members.length - 1);
             request.members[request.members.length - 1] = me;
         } else
             request.members = new String[0]; // Server calculates members in case of reply
@@ -1237,7 +1236,7 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
         } else {
             request.sender_reply = String.valueOf(selectedButton);
         }
-
+        request.embedded_app = mMessageEmbeddedApp;
         final String selectedButtonId = mSelectedButton == NO_BUTTON_SELECTED ? null : String.valueOf(mSelectedButton);
         if (mHasImageSelected || mHasVideoSelected) {
             AttachmentTO att = new AttachmentTO();
@@ -1369,7 +1368,6 @@ public class SendMessageView<T extends ServiceBoundActivity> extends LinearLayou
         this.mMessageEmbeddedApp = result;
         this.mEmbeddedAppViewHolder.container.setVisibility(View.VISIBLE);
         this.mEmbeddedAppViewHolder.titleView.setText(result.title);
-        // TODO: add this.mMessageEmbeddedApp to message when submitting message
     }
 
     private void removeMessageEmbeddedApp() {

@@ -273,6 +273,17 @@ public class Rpc {
         com.mobicage.rpc.Rpc.call("com.mobicage.api.messaging.submitTextLineForm", arguments, responseHandler);
     }
 
+    public static void updateMessageEmbeddedApp(com.mobicage.rpc.IResponseHandler<com.mobicage.to.messaging.UpdateMessageEmbeddedAppResponseTO> responseHandler,
+            com.mobicage.to.messaging.UpdateMessageEmbeddedAppRequestTO request) throws Exception {
+        java.util.Map<java.lang.String, java.lang.Object> arguments = new java.util.LinkedHashMap<java.lang.String, java.lang.Object>();
+        if (request == null) {
+            arguments.put("request", null);
+        } else {
+            arguments.put("request", request.toJSONMap());
+        }
+        com.mobicage.rpc.Rpc.call("com.mobicage.api.messaging.updateMessageEmbeddedApp", arguments, responseHandler);
+    }
+
     public static void uploadChunk(com.mobicage.rpc.IResponseHandler<com.mobicage.to.messaging.UploadChunkResponseTO> responseHandler,
             com.mobicage.to.messaging.UploadChunkRequestTO request) throws Exception {
         java.util.Map<java.lang.String, java.lang.Object> arguments = new java.util.LinkedHashMap<java.lang.String, java.lang.Object>();

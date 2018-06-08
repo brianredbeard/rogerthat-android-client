@@ -54,11 +54,16 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.mobicage.models.properties.messaging.MessageEmbeddedApp;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.FriendDetailOrInviteActivity;
 import com.mobicage.rogerthat.IdentityStore;
 import com.mobicage.rogerthat.ServiceBoundCursorListActivity;
+import com.mobicage.rogerthat.cordova.CordovaActionScreenActivity;
+import com.mobicage.rogerthat.plugins.friends.ActionScreenActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
+import com.mobicage.rogerthat.plugins.payment.OpenEmbeddedAppContext;
+import com.mobicage.rogerthat.plugins.payment.OpenEmbeddedAppContextType;
 import com.mobicage.rogerthat.plugins.scan.ProfileActivity;
 import com.mobicage.rogerthat.plugins.system.SystemPlugin;
 import com.mobicage.rogerthat.util.TextUtils;
@@ -80,6 +85,8 @@ import com.mobicage.rpc.config.LookAndFeelConstants;
 import com.mobicage.to.messaging.ButtonTO;
 import com.mobicage.to.messaging.MemberStatusTO;
 import com.mobicage.to.messaging.MessageTO;
+import com.mobicage.to.messaging.UpdateMessageEmbeddedAppRequestTO;
+import com.squareup.picasso.Picasso;
 
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -98,18 +105,30 @@ import java.util.Set;
 import thirdparty.nishantnair.FlowLayout;
 import thirdparty.nishantnair.FlowLayoutRTL;
 
+class CurrentEmbeddedAppHolder {
+    ProgressDialog downloadSpinner;
+    Message message;
+
+    CurrentEmbeddedAppHolder(Message message, ProgressDialog downloadSpinner) {
+        this.message = message;
+        this.downloadSpinner = downloadSpinner;
+    }
+}
+
 public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
 
     public static final String PARENT_MESSAGE_KEY = "parent_message_key";
     public static final String MESSAGE_FLAGS = "message_flags";
 
     private final static String HINT_SWIPE = "com.mobicage.rogerthat.plugins.messaging.FriendsThreadActivity.HINT_SWIPE";
+    private static final int FRIEND_THREAD_START_EMBEDDED_APP_REQUEST_CODE = 1000;
 
     private boolean mScrollToBottomOnUpdate = false;
     private String mParentMessageKey;
     private MessagingPlugin mMessagingPlugin;
     private MessageStore mMessageStore;
     private FriendsPlugin mFriendsPlugin;
+    private SystemPlugin mSystemPlugin;
     private String mMyEmail;
     private Scroller mScroller;
     private int mMessageCount;
@@ -126,6 +145,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
     private int _4_DP_IN_PX;
     private int _20_DP_IN_PX;
     private int _42_DP_IN_PX;
+    public CurrentEmbeddedAppHolder mCurrentEmbeddedAppHolder;
 
     public static Intent createIntent(Context context, String threadKey, long messageFlags, String memberFilter) {
         Intent intent = new Intent(context, FriendsThreadActivity.class);
@@ -169,6 +189,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         filter2.addAction(MessagingPlugin.THREAD_MODIFIED_INTENT);
         filter2.addAction(FriendsPlugin.FRIEND_INFO_RECEIVED_INTENT);
         filter2.addAction(SystemPlugin.ASSET_AVAILABLE_INTENT);
+        filter2.addAction(BrandingMgr.EMBEDDED_APP_AVAILABLE_INTENT);
         registerReceiver(mReceiver, filter2);
     }
 
@@ -195,6 +216,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
     protected void onServiceBound() {
         mMessagingPlugin = mService.getPlugin(MessagingPlugin.class);
         mFriendsPlugin = mService.getPlugin(FriendsPlugin.class);
+        mSystemPlugin = mService.getPlugin(SystemPlugin.class);
         mMessageStore = mMessagingPlugin.getStore();
         mMyEmail = mService.getIdentityStore().getIdentity().getEmail();
         createCursor();
@@ -268,6 +290,35 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
         if (mSendMessageView != null) {
             mSendMessageView.onActivityResult(requestCode, resultCode, data);
         }
+        if (requestCode == FRIEND_THREAD_START_EMBEDDED_APP_REQUEST_CODE && data != null) {
+            String resultStr = data.getStringExtra(ActionScreenActivity.EXIT_APP_RESULT);
+            if (!TextUtils.isEmptyOrWhitespace(resultStr)) {
+                final Map<String, Object> parsedResult = (Map<String, Object>) JSONValue.parse(resultStr);
+                if (!parsedResult.containsKey("id")) {
+                    parsedResult.put("id", this.mCurrentEmbeddedAppHolder.message.embedded_app.id);
+                }
+                try {
+                    updateMessageEmbeddedApp(this.mCurrentEmbeddedAppHolder.message, new MessageEmbeddedApp(parsedResult));
+                } catch (IncompleteMessageException e) {
+                    L.i("Ignoring result from embedded app because it couldn't be parsed as a MessageEmbeddedApp: " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    /**
+     * Updates the embedded_app property of a message & send it to the server
+     *
+     * @param message            the original message
+     * @param updatedEmbeddedApp the updated embedded app
+     */
+    private void updateMessageEmbeddedApp(Message message, MessageEmbeddedApp updatedEmbeddedApp) {
+        UpdateMessageEmbeddedAppRequestTO request = new UpdateMessageEmbeddedAppRequestTO();
+        request.embedded_app = updatedEmbeddedApp;
+        request.message_key = message.key;
+        request.parent_message_key = message.parent_key;
+        mMessagingPlugin.updateMessageEmbeddedApp(request);
+
     }
 
     @Override
@@ -422,12 +473,39 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
                     setThreadBackground();
                 }
             }
+            if (BrandingMgr.EMBEDDED_APP_AVAILABLE_INTENT.equals(intent.getAction())) {
+                String id = intent.getStringExtra("id");
+                if (mCurrentEmbeddedAppHolder != null && mCurrentEmbeddedAppHolder.message.embedded_app.id.equals(id)) {
+                    mCurrentEmbeddedAppHolder.downloadSpinner.dismiss();
+                    mCurrentEmbeddedAppHolder.downloadSpinner = null;
+                    openEmbeddedAppForMessage(mCurrentEmbeddedAppHolder.message);
+                    return new String[]{intent.getAction()};
+                }
+            }
             return null;
         }
     };
 
     private void scrollToPosition(int position) {
         mScroller.scrollToPosition(position);
+    }
+
+
+    private void openEmbeddedAppForMessage(Message message) {
+        MessageEmbeddedApp embeddedApp = message.embedded_app;
+        long version = mSystemPlugin.getStore().getEmbeddedAppVersion(embeddedApp.id);
+        mCurrentEmbeddedAppHolder = new CurrentEmbeddedAppHolder(message, null);
+        if (version < 15 || !mSystemPlugin.getBrandingMgr().embeddedAppExists(embeddedApp.id)) {
+            mCurrentEmbeddedAppHolder.downloadSpinner = UIUtils.showProgressDialog(FriendsThreadActivity.this, null, getString(R.string.loading), true, false);
+            mSystemPlugin.getEmbeddedApp(embeddedApp.id);
+            return;
+        }
+        OpenEmbeddedAppContext context = new OpenEmbeddedAppContext(OpenEmbeddedAppContextType.PAYMENT_REQUEST, embeddedApp.toJSONMap());
+        final Intent i = new Intent(FriendsThreadActivity.this, CordovaActionScreenActivity.class);
+        i.putExtra(ActionScreenActivity.CONTEXT, JSONValue.toJSONString(context.toJSONMap()));
+        i.putExtra(CordovaActionScreenActivity.EMBEDDED_APP_ID, embeddedApp.id);
+        i.putExtra(CordovaActionScreenActivity.TITLE, embeddedApp.title);
+        startActivityForResult(i, FRIEND_THREAD_START_EMBEDDED_APP_REQUEST_CODE);
     }
 
     private class MessageThreadAdapter extends CursorAdapter {
@@ -480,7 +558,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             } else {
                 mMessagingPlugin.ackChat(message.getThreadKey());
             }
-
+            setEmbeddedApp(message, view);
             return view;
         }
 
@@ -615,7 +693,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             }
             if (!isChat) {
                 boolean addRogerthatButton = message.threadNeedsMyAnswer
-                    && cursor.getPosition() == cursor.getCount() - 1;
+                        && cursor.getPosition() == cursor.getCount() - 1;
                 Button rogerThatButton = (Button) view.findViewById(R.id.rogerthat_button);
                 rogerThatButton.setVisibility(addRogerthatButton ? View.VISIBLE : View.GONE);
                 if (addRogerthatButton) {
@@ -629,6 +707,31 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             }
         }
 
+        private void setEmbeddedApp(final Message message, final View view) {
+            View container = view.findViewById(R.id.embedded_app_container);
+            if (message.embedded_app == null) {
+                container.setVisibility(View.GONE);
+            } else {
+                container.setVisibility(View.VISIBLE);
+                TextView titleView = (TextView) container.findViewById(R.id.embedded_app_title);
+                TextView descriptionView = (TextView) container.findViewById(R.id.embedded_app_description);
+                ImageView imageView = (ImageView) container.findViewById(R.id.embedded_app_image);
+                titleView.setText(message.embedded_app.title);
+                descriptionView.setText(message.embedded_app.description);
+                if (message.embedded_app.image_url != null) {
+                    imageView.setVisibility(View.VISIBLE);
+                    Picasso.get().load(message.embedded_app.image_url).into(imageView);
+                } else {
+                    imageView.setVisibility(View.GONE);
+                }
+                container.setOnClickListener(new SafeViewOnClickListener() {
+                    @Override
+                    public void safeOnClick(View v) {
+                        openEmbeddedAppForMessage(message);
+                    }
+                });
+            }
+        }
 
         private void addButton(final MessageTO message, boolean left, boolean canEdit, final LinearLayout buttons,
                                final ButtonTO button, final boolean isChat) {

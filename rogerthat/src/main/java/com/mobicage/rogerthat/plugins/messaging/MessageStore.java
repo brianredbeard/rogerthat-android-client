@@ -25,11 +25,13 @@ import android.database.sqlite.SQLiteStatement;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import com.mobicage.models.properties.messaging.MessageEmbeddedApp;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.messaging.mfr.MessageFlowRun;
 import com.mobicage.rogerthat.util.TextUtils;
+import com.mobicage.rogerthat.util.db.DBUtils;
 import com.mobicage.rogerthat.util.db.DatabaseManager;
 import com.mobicage.rogerthat.util.db.MultiThreadedSQLStatement;
 import com.mobicage.rogerthat.util.db.Transaction;
@@ -40,6 +42,7 @@ import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.time.TimeUtils;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
+import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.to.messaging.AttachmentTO;
 import com.mobicage.to.messaging.ButtonTO;
@@ -458,6 +461,12 @@ public class MessageStore implements Closeable {
                 mInsertMessageBIZZ.bindLong(24, message.priority);
                 mInsertMessageBIZZ.bindLong(25, message.default_priority);
                 mInsertMessageBIZZ.bindLong(26, message.default_sticky ? 1 : 0);
+                if (message.embedded_app == null) {
+                    mInsertMessageBIZZ.bindNull(27);
+                } else {
+                    String embeddedAppString = JSONValue.toJSONString(message.embedded_app.toJSONMap());
+                    DBUtils.bindString(mInsertMessageBIZZ, 27, embeddedAppString);
+                }
 
                 mInsertMessageBIZZ.execute();
 
@@ -672,8 +681,8 @@ public class MessageStore implements Closeable {
     }
 
     public boolean updateMessage(final String messageKey, final String parentMessageKey, final Long flags,
-        final Long existence, final String message, final String threadAvatarHash, final String threadBackgroundColor,
-        final String threadTextolor) throws MessageUpdateNotAllowedException {
+                                 final Long existence, final String message, final String threadAvatarHash, final String threadBackgroundColor,
+                                 final String threadTextColor, final MessageEmbeddedApp messageEmbeddedApp) throws MessageUpdateNotAllowedException {
 
         final boolean updateWholeThread = messageKey == null;
 
@@ -707,8 +716,11 @@ public class MessageStore implements Closeable {
                     values.put("thread_background_color", threadBackgroundColor.length() == 0 ? null
                         : threadBackgroundColor);
                 }
-                if (threadTextolor != null) {
-                    values.put("thread_text_color", threadTextolor.length() == 0 ? null : threadTextolor);
+                if (threadTextColor != null) {
+                    values.put("thread_text_color", threadTextColor.length() == 0 ? null : threadTextColor);
+                }
+                if (messageEmbeddedApp != null) {
+                    values.put("embedded_app", JSONValue.toJSONString(messageEmbeddedApp.toJSONMap()));
                 }
 
                 final String whereClause;
@@ -1285,13 +1297,26 @@ public class MessageStore implements Closeable {
         return button;
     }
 
+    private MessageEmbeddedApp parseMessageEmbeddedApp(String embeddedAppString) {
+        if (embeddedAppString == null) {
+            return null;
+        }
+        Map parsed = (Map<String, Object>) JSONValue.parse(embeddedAppString);
+        try {
+            return new MessageEmbeddedApp(parsed);
+        } catch (IncompleteMessageException e) {
+            L.bug(e);
+            return null;
+        }
+    }
+
     @SuppressWarnings("unchecked")
     private Message toFullMessage(Cursor curs, int query) {
         // 8 columns --> sql_message_get_message_by_unprocessed_message_index
         // 15 columns -> sql_message_cursor_full_thread
         // 21 columns -> sql_message_get_message_by_key
         Message message = new Message();
-        String formString = null;
+        String formString;
         switch (query) {
         case R.string.sql_message_get_message_by_key:
             message.key = curs.getString(0);
@@ -1322,6 +1347,7 @@ public class MessageStore implements Closeable {
             message.priority = curs.getLong(23);
             message.default_priority = curs.getLong(24);
             message.default_sticky = curs.getLong(25) != 0;
+            message.embedded_app = this.parseMessageEmbeddedApp(curs.getString(26));
             break;
         case R.string.sql_message_cursor_full_thread:
             message.key = curs.getString(0);
@@ -1345,6 +1371,7 @@ public class MessageStore implements Closeable {
                 message.form = (Map<String, Object>) JSONValue.parse(formString);
             // column 15: rowid
             message.threadNeedsMyAnswer = curs.getLong(18) != 0;
+            message.embedded_app = this.parseMessageEmbeddedApp(curs.getString(19));
         }
         addButtonsToMessageObject(message);
         message.attachments = getAttachmentsFromMessage(message.key);
