@@ -55,7 +55,6 @@ import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.CallReceiver;
 import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.rpc.config.LookAndFeelConstants;
-import com.mobicage.rpc.config.NavigationConstants;
 import com.mobicage.to.news.AppNewsInfoTO;
 import com.mobicage.to.news.AppNewsItemTO;
 import com.mobicage.to.news.GetNewsItemsRequestTO;
@@ -312,10 +311,10 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
         return items;
     }
 
-    private List<Long> getItemIds(List<AppNewsInfoTO> items) {
-        List<Long> ids = new ArrayList<>();
-        for (AppNewsInfoTO item : items) {
-            ids.add(item.id);
+    private long[] getItemIds(List<AppNewsInfoTO> items) {
+        long[] ids = new long[items.size()];
+        for (int i = 0; i < items.size(); i++) {
+            ids[i] = items.get(i).id;
         }
         return ids;
     }
@@ -323,8 +322,8 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
     private void sendGetNewsUpdates(String feedName, List<AppNewsInfoTO> newItems, List<AppNewsInfoTO> updatedItems) {
         Intent intent = new Intent(NewsPlugin.GET_NEWS_RECEIVED_INTENT);
         intent.putExtra("feed_name", feedName);
-        intent.putExtra("new_ids", getItemIds(newItems).toArray());
-        intent.putExtra("updated_ids", getItemIds(updatedItems).toArray());
+        intent.putExtra("new_ids", getItemIds(newItems));
+        intent.putExtra("updated_ids", getItemIds(updatedItems));
         intent.putExtra("initial", mIsLoadingInitial);
         mMainService.sendBroadcast(intent);
     }
@@ -526,7 +525,8 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
         }
 
         if (currentActivity instanceof NewsActivity) {
-            if (((NewsActivity) currentActivity).getFeedName() == feedName) {
+            String currentFeedName = ((NewsActivity) currentActivity).getFeedName();
+            if (currentFeedName != null && currentFeedName.equals(feedName)) {
                 return;
             }
         }
