@@ -58,8 +58,8 @@ public class ConsentProvider implements Reconfigurable, Closeable {
     public void reconfigure() {
         T.UI();
         final Configuration cfg = mConfigProvider.getConfiguration(CONFIGKEY);
-        final boolean askTOS = cfg.get(CONFIG_ASK_TOS_KEY, false);
-        final boolean askPushNotifications = cfg.get(CONFIG_ASK_PUSH_NOTIFICATIONS_KEY, false);
+        final boolean askTOS = cfg.get(CONFIG_ASK_TOS_KEY, true);
+        final boolean askPushNotifications = cfg.get(CONFIG_ASK_PUSH_NOTIFICATIONS_KEY, true);
         setConsent(askTOS, askPushNotifications);
     }
 
