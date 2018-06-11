@@ -50,19 +50,17 @@ import java.util.UUID;
 
 public class RegistrationWizard2 extends AbstractRegistrationWizard {
 
-    public final static String INTENT_GOT_BEACON_REGIONS = "com.mobicage.rogerthat.registration.gotBeaconReagions";
-
     public final static String CONFIGKEY = "Registration";
     private final static String CONFIG_PICKLED_WIZARD_KEY = "RegistrationWizard2";
 
-    public static final String REGISTRATION_STEP_AGREED_TOS = "1";
+    public static final String REGISTRATION_STEP_CREATE_ACCOUNT = "1";
+    public static final String REGISTRATION_STEP_LOCATION_USAGE = "1a";
+    public static final String REGISTRATION_STEP_NOTIFICATION_USAGE = "1b";
+    public static final String REGISTRATION_STEP_TOS = "1c";
     public static final String REGISTRATION_STEP_FACEBOOK_LOGIN = "2a";
     public static final String REGISTRATION_STEP_EMAIL_LOGIN = "2b";
 
-    private GetBeaconRegionsResponseTO mBeaconRegions = null;
-    private Set<String> mDetectedBeacons = null;
-
-    private final static Integer PICKLE_CLASS_VERSION = 3;
+    private final static Integer PICKLE_CLASS_VERSION = 4;
 
     public static RegistrationWizard2 getWizard(final MainService mainService) {
         T.UI();
@@ -81,8 +79,6 @@ public class RegistrationWizard2 extends AbstractRegistrationWizard {
         if (wiz == null) {
             wiz = new RegistrationWizard2();
             wiz.init(mainService);
-        } else if (wiz.mBeaconRegions == null) {
-            wiz.requestBeaconRegions(mainService);
         }
 
         wiz.setPersister(new Wizard.Persister() {
@@ -136,24 +132,23 @@ public class RegistrationWizard2 extends AbstractRegistrationWizard {
         out.writeBoolean(getInGoogleAuthenticationProcess());
         out.writeUTF(getInstallationId());
         out.writeUTF(getDeviceId());
-        set = mBeaconRegions != null;
+        set = false; // old beaconRegions
         out.writeBoolean(set);
-        if (set)
-            out.writeUTF(JSONValue.toJSONString(mBeaconRegions.toJSONMap()));
-        set = mDetectedBeacons != null;
+        set = false; // old detectedBeacons
         out.writeBoolean(set);
-        if (set) {
-            JSONArray db1 = new JSONArray();
-            for (String db : mDetectedBeacons) {
-                db1.add(db);
-            }
-            out.writeUTF(JSONValue.toJSONString(db1));
-        }
         set = getDeviceNames() != null;
         out.writeBoolean(set);
         if (set) {
             out.writeUTF(JSONValue.toJSONString(getDeviceNames()));
         }
+        set = getTOSAge() != null;
+        out.writeBoolean(set);
+        if (set)
+            out.writeUTF(getTOSAge());
+        set = getPushNotificationEnabled() != null;
+        out.writeBoolean(set);
+        if (set)
+            out.writeUTF(getPushNotificationEnabled());
     }
 
     @SuppressWarnings("unchecked")
@@ -177,28 +172,13 @@ public class RegistrationWizard2 extends AbstractRegistrationWizard {
             setDeviceId(null);
         }
         if (version >= 2) {
-            try {
-                set = in.readBoolean();
-                mBeaconRegions = set ? new GetBeaconRegionsResponseTO((Map<String, Object>) JSONValue.parse(in
-                    .readUTF())) : null;
-
-                set = in.readBoolean();
-                if (set) {
-                    String detectedBeacons = in.readUTF();
-                    JSONArray db1 = (JSONArray) JSONValue.parse(detectedBeacons);
-                    if (db1 != null) {
-                        mDetectedBeacons = new HashSet<String>();
-                        for (int i = 0; i < db1.size(); i++) {
-                            mDetectedBeacons.add((String) db1.get(i));
-                        }
-                    } else {
-                        mDetectedBeacons = null;
-                    }
-                } else {
-                    mDetectedBeacons = null;
-                }
-            } catch (IncompleteMessageException e) {
-                L.bug(e);
+            set = in.readBoolean(); // old beaconRegions
+            if (set) {
+                in.readUTF();
+            }
+            set = in.readBoolean(); // old detectedBeacons
+            if (set) {
+                in.readUTF();
             }
         }
 
@@ -212,59 +192,20 @@ public class RegistrationWizard2 extends AbstractRegistrationWizard {
                 }
             }
         }
-    }
 
-
-    public BeaconRegionTO[] getBeaconRegions() {
-        if (mBeaconRegions == null)
-            return null;
-        return mBeaconRegions.regions;
-    }
-
-    public Set<BeaconDiscoveredRequestTO> getDetectedBeacons() {
-        Set<BeaconDiscoveredRequestTO> detectedBeacons = new HashSet<BeaconDiscoveredRequestTO>();
-        if (mDetectedBeacons != null) {
-            for (String beacon : mDetectedBeacons) {
-                BeaconDiscoveredRequestTO bdr = new BeaconDiscoveredRequestTO();
-                String[] b = beacon.split("\\|", 2);
-                bdr.uuid = b[0];
-                bdr.name = b[1];
-                detectedBeacons.add(bdr);
-            }
+        if (version >= 4) {
+            set = in.readBoolean();
+            setTOSAge(set ? in.readUTF() : null);
+            set = in.readBoolean();
+            setPushNotificationEnabled(set ? in.readUTF() : null);
         }
-        return detectedBeacons;
-    }
-
-    public void addDetectedBeacon(String uuid, int major, int minor) {
-        if (mDetectedBeacons == null) {
-            mDetectedBeacons = new HashSet<String>();
-        }
-        mDetectedBeacons.add(getBeaconProximityKey(uuid, major, minor));
-    }
-
-    private String getBeaconProximityKey(String uuid, int major, int minor) {
-        return uuid + "|" + major + "|" + minor;
     }
 
     public void init(final MainService mainService) {
         T.UI();
         setInstallationId(UUID.randomUUID().toString());
         reInit();
-        requestBeaconRegions(mainService);
    }
-
-    public void requestBeaconRegions(final MainService mainService) {
-        sendInstallationId(mainService);
-    }
-
-    @Override
-    protected void processBeaconRegions(GetBeaconRegionsResponseTO response, MainService mainService) {
-        if (!mainService.isPermitted(Manifest.permission.ACCESS_COARSE_LOCATION)) {
-            return;
-        }
-        mBeaconRegions = response;
-        mainService.sendBroadcast(new Intent(INTENT_GOT_BEACON_REGIONS));
-    }
 
     public void reInit() {
         T.UI();

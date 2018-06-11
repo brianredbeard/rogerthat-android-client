@@ -48,7 +48,6 @@ import com.mobicage.rpc.Credentials;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.rpc.newxmpp.XMPPConfigurationFactory;
-import com.mobicage.to.location.BeaconDiscoveredRequestTO;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -63,7 +62,6 @@ import org.apache.http.protocol.HTTP;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.Logger;
 import org.jivesoftware.smack.XMPPConnection;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
@@ -72,7 +70,6 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import javax.net.ssl.SSLException;
@@ -102,7 +99,6 @@ public abstract class AbstractRegistrationActivity extends ServiceBoundActivity 
 
     private String mGCMRegistrationId = "";
     private boolean mAgeAndGenderSet = true;
-    private String mDiscoveredBeacons = null;
 
     public void init(Activity activity) {
         T.UI();
@@ -173,14 +169,7 @@ public abstract class AbstractRegistrationActivity extends ServiceBoundActivity 
     }
 
     public void startMainActivity(boolean directly) {
-        if (!directly && getDiscoveredBeacons() != null) {
-            Intent intent = new Intent(mActivity, MainActivity.class);
-            intent.setAction(MainActivity.ACTION_SHOW_DETECTED_BEACONS);
-            intent.putExtra(DetectedBeaconActivity.EXTRA_DETECTED_BEACONS, getDiscoveredBeacons());
-            intent.putExtra(DetectedBeaconActivity.EXTRA_AGE_AND_GENDER_SET, getAgeAndGenderSet());
-            intent.setFlags(MainActivity.FLAG_CLEAR_STACK_SINGLE_TOP);
-            startActivity(intent);
-        } else if (!directly && AppConstants.PROFILE_SHOW_GENDER_AND_BIRTHDATE && !getAgeAndGenderSet()) {
+        if (!directly && AppConstants.PROFILE_SHOW_GENDER_AND_BIRTHDATE && !getAgeAndGenderSet()) {
             Intent intent = new Intent(mActivity, MainActivity.class);
             intent.setAction(MainActivity.ACTION_COMPLETE_PROFILE);
             intent.setFlags(MainActivity.FLAG_CLEAR_STACK_SINGLE_TOP);
@@ -405,11 +394,6 @@ public abstract class AbstractRegistrationActivity extends ServiceBoundActivity 
         formParams.add(new BasicNameValuePair("invitor_secret", invitorSecret));
 
         org.json.simple.JSONArray beacons = new org.json.simple.JSONArray();
-        if (mWizard.getDetectedBeacons() != null) {
-            for (BeaconDiscoveredRequestTO bdr : mWizard.getDetectedBeacons()) {
-                beacons.add(bdr.toJSONMap());
-            }
-        }
         formParams.add(new BasicNameValuePair("beacons", beacons.toString()));
 
         httpPost.setEntity(new UrlEncodedFormEntity(formParams, HTTP.UTF_8));
@@ -432,13 +416,6 @@ public abstract class AbstractRegistrationActivity extends ServiceBoundActivity 
         if (responseMap == null) {
             throw new IOException("HTTP request responseMap was null");
         }
-
-        JSONArray beaconRegions = (JSONArray) responseMap.get("discovered_beacons");
-        if (beaconRegions != null && beaconRegions.size() > 0) {
-            mDiscoveredBeacons = JSONValue.toJSONString(beaconRegions);
-        } else {
-            mDiscoveredBeacons = null;
-        }
     }
 
     public String getGCMRegistrationId() {
@@ -451,10 +428,6 @@ public abstract class AbstractRegistrationActivity extends ServiceBoundActivity 
 
     public void setWizard(AbstractRegistrationWizard wizard) {
         mWizard = wizard;
-    }
-
-    public String getDiscoveredBeacons() {
-        return mDiscoveredBeacons;
     }
 
     public boolean getAgeAndGenderSet() {
@@ -470,6 +443,8 @@ public abstract class AbstractRegistrationActivity extends ServiceBoundActivity 
         T.UI();
         final HttpClient httpClient = HTTPUtil.getHttpClient();
         final String email = mWizard.getEmail();
+        final String tosAge = mWizard.getTOSAge();
+        final String pushNotifcationsEnabled = mWizard.getPushNotificationEnabled();
         final String timestamp = "" + mWizard.getTimestamp();
         final String deviceId = mWizard.getDeviceId();
         final String registrationId = mWizard.getRegistrationId();
@@ -502,6 +477,8 @@ public abstract class AbstractRegistrationActivity extends ServiceBoundActivity 
                     nameValuePairs.add(new BasicNameValuePair("registration_id", registrationId));
                     nameValuePairs.add(new BasicNameValuePair("signature", signature));
                     nameValuePairs.add(new BasicNameValuePair("email", email));
+                    nameValuePairs.add(new BasicNameValuePair("tos_age", tosAge));
+                    nameValuePairs.add(new BasicNameValuePair("push_notifications_enabled", pushNotifcationsEnabled));
                     nameValuePairs.add(new BasicNameValuePair("GCM_registration_id", getGCMRegistrationId()));
                     nameValuePairs.add(new BasicNameValuePair("hardware_model", SystemPlugin.getDeviceModelName()));
                     TelephonyManager telephonyManager = (TelephonyManager) mService.getSystemService(Context.TELEPHONY_SERVICE);

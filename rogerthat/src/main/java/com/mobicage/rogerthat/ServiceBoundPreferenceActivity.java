@@ -18,9 +18,11 @@
 
 package com.mobicage.rogerthat;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -30,6 +32,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
@@ -43,12 +46,23 @@ public abstract class ServiceBoundPreferenceActivity extends PreferenceActivity 
     protected volatile MainService mService;
     protected boolean mServiceIsBound = false; // Owned by UI thread
 
+    private BroadcastReceiver closeActivityListener = new SafeBroadcastReceiver() {
+        @Override
+        public String[] onSafeReceive(Context context, Intent intent) {
+            L.d("Received CLOSE_ACTIVITY_INTENT");
+            finish();
+            return null;
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         T.setUIThread("ServiceBoundActivity.onCreate()");
         super.onCreate(savedInstanceState);
         logMethod("onCreate");
         SystemUtils.logIntentFlags(getIntent());
+        IntentFilter filter = new IntentFilter(MainService.CLOSE_ACTIVITY_INTENT);
+        registerReceiver(closeActivityListener, filter);
         doBindService();
     }
 
@@ -63,6 +77,7 @@ public abstract class ServiceBoundPreferenceActivity extends PreferenceActivity 
         T.UI();
         logMethod("onDestroy");
         super.onDestroy();
+        unregisterReceiver(closeActivityListener);
         doUnbindService();
     }
 

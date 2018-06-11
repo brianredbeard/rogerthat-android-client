@@ -20,7 +20,6 @@ package com.mobicage.rogerthat.plugins.scan;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -32,9 +31,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.provider.MediaStore;
-import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.ActivityCompat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -57,7 +54,6 @@ import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MyIdentity;
 import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
-import com.mobicage.rogerthat.plugins.messaging.MyDigiPassWidgetResult;
 import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.IOUtils;
 import com.mobicage.rogerthat.util.logging.L;
@@ -95,7 +91,7 @@ public class ProfileActivity extends ServiceBoundActivity {
     private int mPhoneExifRotation;
     private boolean mPhotoSelecting;
 
-    private long mGender;
+    private int mGender;
     private Calendar mBirthdateCalender;
     private boolean mNeedBirthdate = false;
 
@@ -158,25 +154,35 @@ public class ProfileActivity extends ServiceBoundActivity {
                     final View dialogView = getLayoutInflater().inflate(R.layout.profile_update_gender, null);
                     final RadioButton maleRadioButton = ((RadioButton) dialogView.findViewById(R.id.gender_male));
                     final RadioButton femaleRadioButton = ((RadioButton) dialogView.findViewById(R.id.gender_female));
+                    final RadioButton otherRadioButton = ((RadioButton) dialogView.findViewById(R.id.gender_other));
                     final TextView friendGender = ((TextView) findViewById(R.id.profile_gender_text));
-
+                    maleRadioButton.setChecked(false);
+                    femaleRadioButton.setChecked(false);
+                    otherRadioButton.setChecked(false);
                     if (mGender == MyIdentity.GENDER_FEMALE) {
-                        maleRadioButton.setChecked(false);
                         femaleRadioButton.setChecked(true);
-                    } else {
+                    } else if (mGender == MyIdentity.GENDER_MALE) {
                         maleRadioButton.setChecked(true);
-                        femaleRadioButton.setChecked(false);
+                    } else if (mGender == MyIdentity.GENDER_CUSTOM_FACEBOOK) {
+                        otherRadioButton.setChecked(true);
                     }
                     String title = getString(R.string.gender);
                     SafeDialogClick onPositiveClick = new SafeDialogClick() {
                         @Override
                         public void safeOnClick(DialogInterface di, int id) {
-                            mGender = femaleRadioButton.isChecked() ? MyIdentity.GENDER_FEMALE : MyIdentity.GENDER_MALE;
-                            friendGender.setText(mGender == MyIdentity.GENDER_FEMALE ? R.string.female : R.string.male);
+                            if (maleRadioButton.isChecked()) {
+                                mGender = MyIdentity.GENDER_MALE;
+                            } else if (femaleRadioButton.isChecked()) {
+                                mGender = MyIdentity.GENDER_FEMALE;
+                            } else {
+                                mGender = MyIdentity.GENDER_CUSTOM_FACEBOOK;
+                            }
+                            final int genderTextResource = MyIdentity.getGenderTextResource(mGender);
+                            friendGender.setText(genderTextResource);
                         }
                     };
-                    AlertDialog dialog = UIUtils.showDialog(ProfileActivity.this, title, null, R.string.ok,
-                            onPositiveClick, R.string.cancel, null, dialogView);
+                    UIUtils.showDialog(ProfileActivity.this, title, null, R.string.ok, onPositiveClick,
+                            R.string.cancel, null, dialogView);
                 }
             });
 
@@ -410,17 +416,12 @@ public class ProfileActivity extends ServiceBoundActivity {
         friendBirthdate.setText(birthdateString);
 
         mGender = mIdentity.getGender();
-        if (mGender == MyIdentity.GENDER_UNDEFINED) {
-            friendGender.setText(R.string.unknown);
-        } else if (mGender == MyIdentity.GENDER_MALE) {
-            friendGender.setText(R.string.male);
-        } else {
-            friendGender.setText(R.string.female);
-        }
+        friendGender.setText(MyIdentity.getGenderTextResource(mGender));
 
         if (!AppConstants.PROFILE_SHOW_GENDER_AND_BIRTHDATE) {
             findViewById(R.id.profile_birthdate).setVisibility(View.GONE);
             findViewById(R.id.profile_gender).setVisibility(View.GONE);
+            findViewById(R.id.textview_profile_data_usage_info).setVisibility(View.GONE);
         }
 
         LinearLayout profileDataContainer = (LinearLayout) findViewById(R.id.profile_data);
@@ -579,7 +580,8 @@ public class ProfileActivity extends ServiceBoundActivity {
                 return true;
             case R.id.save_profile:
                 if (mEditing && AppConstants.PROFILE_SHOW_GENDER_AND_BIRTHDATE) {
-                    if ((mGender != MyIdentity.GENDER_MALE && mGender != MyIdentity.GENDER_FEMALE) || mNeedBirthdate) {
+                    final boolean needsGender = !MyIdentity.ALLOWED_GENDERS.contains(mGender);
+                    if (needsGender || mNeedBirthdate) {
                         String title = getString(R.string.complete_your_profile);
                         StringBuilder errorMessage = new StringBuilder();
                         if (mNeedBirthdate) {
@@ -587,7 +589,7 @@ public class ProfileActivity extends ServiceBoundActivity {
                             errorMessage.append("\n");
                         }
 
-                        if (mGender != MyIdentity.GENDER_MALE && mGender != MyIdentity.GENDER_FEMALE) {
+                        if (needsGender) {
                             errorMessage.append(getString(R.string.missing_gender));
                         }
                         UIUtils.showDialog(ProfileActivity.this, title, errorMessage.toString());

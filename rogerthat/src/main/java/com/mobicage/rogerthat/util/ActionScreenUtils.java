@@ -344,10 +344,7 @@ public class ActionScreenUtils {
     }
 
     public String openActivity(final String actionType, final String action, final String title,
-                               final String service, final boolean collapse) {
-
-        Map<String, Object> params = new HashMap<>();
-        params.put("collapse", collapse);
+                               final String service, final  Map<String, Object> params) {
 
         NavigationItem ni = new NavigationItem(FontAwesome.Icon.faw_question_circle_o, actionType,
                 action, title, service, 0, params);
@@ -394,8 +391,8 @@ public class ActionScreenUtils {
     }
 
     public long countNews(final JSONObject params) {
-        final String service = TextUtils.optString(params, "service", null);
-        final String feedName = TextUtils.optString(params, "feed_name", "");
+        final String service = JsonUtils.optString(params, "service", null);
+        final String feedName = JsonUtils.optString(params, "feed_name", "");
         return mNewsPlugin.getStore().countAllNewsItems(service, feedName);
     }
 
@@ -405,9 +402,9 @@ public class ActionScreenUtils {
     }
 
     public Map<String, Object> listNews(final JSONObject params) {
-        final String service = TextUtils.optString(params, "service", null);
-        final String cursor =  TextUtils.optString(params, "cursor", null);
-        final String feedName =  TextUtils.optString(params, "feed_name", "");
+        final String service = JsonUtils.optString(params, "service", null);
+        final String cursor =  JsonUtils.optString(params, "cursor", null);
+        final String feedName =  JsonUtils.optString(params, "feed_name", "");
         final long limit = params.optLong("limit", 10);
         return mNewsPlugin.listNewsItems(service, feedName, cursor, limit);
     }
@@ -423,11 +420,11 @@ public class ActionScreenUtils {
             return;
         }
 
-        final String keyAlgorithm = TextUtils.optString(params, "key_algorithm", null);
-        final String keyName = TextUtils.optString(params, "key_name", null);
-        final String message = TextUtils.optString(params, "message", null);
+        final String keyAlgorithm = JsonUtils.optString(params, "key_algorithm", null);
+        final String keyName = JsonUtils.optString(params, "key_name", null);
+        final String message = JsonUtils.optString(params, "message", null);
         final boolean forceCreate = params.optBoolean("force", false);
-        final String seed = TextUtils.optString(params, "seed", null);
+        final String seed = JsonUtils.optString(params, "seed", null);
 
         if (!SecurityUtils.createKeyAlgorithmSupported(keyAlgorithm)) {
             String errorMessage = mActivity.getString(R.string.algorithm_not_supported);
@@ -468,9 +465,9 @@ public class ActionScreenUtils {
             return;
         }
 
-        final String keyAlgorithm = TextUtils.optString(params, "key_algorithm", null);
-        final String keyName = TextUtils.optString(params, "key_name", null);
-        final Long keyIndex = TextUtils.optLong(params, "key_index");
+        final String keyAlgorithm = JsonUtils.optString(params, "key_algorithm", null);
+        final String keyName = JsonUtils.optString(params, "key_name", null);
+        final Long keyIndex = JsonUtils.optLong(params, "key_index");
         callback.onSuccess(SecurityUtils.hasKey(mMainService, "public", keyAlgorithm, keyName, keyIndex));
     }
 
@@ -481,9 +478,9 @@ public class ActionScreenUtils {
             return;
         }
 
-        final String keyAlgorithm = TextUtils.optString(params, "key_algorithm", null);
-        final String keyName = TextUtils.optString(params, "key_name", null);
-        final Long keyIndex = TextUtils.optLong(params, "key_index");
+        final String keyAlgorithm = JsonUtils.optString(params, "key_algorithm", null);
+        final String keyName = JsonUtils.optString(params, "key_name", null);
+        final Long keyIndex = JsonUtils.optLong(params, "key_index");
 
         if (!SecurityUtils.hasKey(mMainService, "public", keyAlgorithm, keyName, keyIndex)) {
             callback.onSuccess(null);
@@ -509,9 +506,9 @@ public class ActionScreenUtils {
             return;
         }
 
-        final String keyAlgorithm = TextUtils.optString(params, "key_algorithm", null);
-        final String keyName = TextUtils.optString(params, "key_name", null);
-        final String message = TextUtils.optString(params, "message", null);
+        final String keyAlgorithm = JsonUtils.optString(params, "key_algorithm", null);
+        final String keyName = JsonUtils.optString(params, "key_name", null);
+        final String message = JsonUtils.optString(params, "message", null);
 
         if (!SecurityUtils.hasKey(mMainService, "seed", keyAlgorithm, keyName, null)) {
             String errorMessage = mActivity.getString(R.string.key_not_found);
@@ -532,8 +529,8 @@ public class ActionScreenUtils {
             return;
         }
 
-        final String keyAlgorithm = TextUtils.optString(params, "key_algorithm", null);
-        final String keyName = TextUtils.optString(params, "key_name", null);
+        final String keyAlgorithm = JsonUtils.optString(params, "key_algorithm", null);
+        final String keyName = JsonUtils.optString(params, "key_name", null);
 
         try {
             callback.onSuccess(SecurityUtils.listAddress(mMainService, keyAlgorithm, keyName));
@@ -551,10 +548,10 @@ public class ActionScreenUtils {
             return;
         }
 
-        final String keyAlgorithm = TextUtils.optString(params, "key_algorithm", null);
-        final String keyName = TextUtils.optString(params, "key_name", null);
+        final String keyAlgorithm = JsonUtils.optString(params, "key_algorithm", null);
+        final String keyName = JsonUtils.optString(params, "key_name", null);
         final long keyIndex = params.optLong("key_index", 0);
-        final String message = TextUtils.optString(params, "message", null);
+        final String message = JsonUtils.optString(params, "message", null);
 
         if (SecurityUtils.hasKey(mMainService, "address", keyAlgorithm, keyName, keyIndex)) {
             try {
@@ -584,10 +581,10 @@ public class ActionScreenUtils {
             return;
         }
 
-        final String keyAlgorithm = TextUtils.optString(params, "key_algorithm", null);
-        final String keyName = TextUtils.optString(params, "key_name", null);
-        final Long keyIndex = TextUtils.optLong(params, "key_index");
-        final String message = TextUtils.optString(params, "message", null);
+        final String keyAlgorithm = JsonUtils.optString(params, "key_algorithm", null);
+        final String keyName = JsonUtils.optString(params, "key_name", null);
+        final Long keyIndex = JsonUtils.optLong(params, "key_index");
+        final String message = JsonUtils.optString(params, "message", null);
         final boolean forcePin = params.optBoolean("force_pin", false);
         final boolean hashPayload = params.optBoolean("hash_payload", true);
 
@@ -622,11 +619,11 @@ public class ActionScreenUtils {
             return;
         }
 
-        final String keyAlgorithm = TextUtils.optString(params, "key_algorithm", null);
-        final String keyName = TextUtils.optString(params, "key_name", null);
-        final Long keyIndex = TextUtils.optLong(params, "key_index");
-        final String payload = TextUtils.optString(params, "payload", null);
-        final String payloadSignature = TextUtils.optString(params, "payload_signature", null);
+        final String keyAlgorithm = JsonUtils.optString(params, "key_algorithm", null);
+        final String keyName = JsonUtils.optString(params, "key_name", null);
+        final Long keyIndex = JsonUtils.optLong(params, "key_index");
+        final String payload = JsonUtils.optString(params, "payload", null);
+        final String payloadSignature = JsonUtils.optString(params, "payload_signature", null);
 
         if (!SecurityUtils.hasKey(mMainService, "public", keyAlgorithm, keyName, keyIndex)) {
             String errorMessage = mActivity.getString(R.string.key_not_found);

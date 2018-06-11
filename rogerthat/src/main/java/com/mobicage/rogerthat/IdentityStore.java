@@ -199,9 +199,9 @@ public class IdentityStore implements Closeable {
             Long birthdate = null;
             if (!curs.isNull(7))
                 birthdate = curs.getLong(7);
-            Long gender = null;
+            Integer gender = null;
             if (!curs.isNull(8))
-                gender = curs.getLong(8);
+                gender = curs.getInt(8);
             String profileData = curs.getString(9);
             if ((qrBytes == null || shortLink == null) && !"dummy".equals(email))
                 lazyLoadQR = true;

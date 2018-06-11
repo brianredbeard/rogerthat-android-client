@@ -27,6 +27,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -45,6 +46,7 @@ import android.graphics.drawable.ShapeDrawable;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore.Video.Thumbnails;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputLayout;
@@ -212,6 +214,13 @@ public class UIUtils {
                                       long timestamp, int priority, List<NotificationCompat.Action> actionButtons,
                                       String longNotificationText, Bitmap largeIcon, String category) {
         T.dontCare();
+        SharedPreferences options = PreferenceManager.getDefaultSharedPreferences(pContext);
+        final boolean pushNotifications = options.getBoolean(MainService.PREFERENCE_PUSH_NOTIFICATIONS, false);
+        if (!pushNotifications) {
+            L.d("push notifications are disabled");
+            return;
+        }
+
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(pContext);
         int defaults = 0;
         if (withSound) {

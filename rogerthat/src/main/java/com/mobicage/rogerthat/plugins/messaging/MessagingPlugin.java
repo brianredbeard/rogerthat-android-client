@@ -604,7 +604,7 @@ public class MessagingPlugin implements MobicagePlugin {
 
             } else {
                 for (final String prefix : new String[]{Message.MC_CONFIRM_PREFIX, Message.MC_SMI_PREFIX, Message
-                        .MC_POKE_PREFIX}) {
+                        .MC_POKE_PREFIX, Message.MC_OPEN_PREFIX}) {
                     if (action.startsWith(prefix)) {
                         buttonAction = prefix;
                         buttonUrl = action.substring(prefix.length());

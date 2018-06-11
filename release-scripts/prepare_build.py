@@ -163,10 +163,10 @@ def sha256_hash(val):
     return digester.hexdigest()
 
 
-def generate_resource_images(source_file_name, size, height_width_ratio):
+def generate_resource_images(source_file_name, size, height_width_ratio, resource_name=None):
     # size: percentage of screen width
     # height_width_ratio: 1/2 means that the image should be twice as wide compared to its height.
-    resource_name = os.path.split(source_file_name)[1]
+    resource_name = resource_name or os.path.split(source_file_name)[1]
 
     im1 = Image.open(source_file_name)
     im1_width, im1_height = im1.size
@@ -331,14 +331,60 @@ def get_cordova_apps():
     return list(cordova_apps)
 
 
+def write_item(output, doc, item, is_toolbar_item):
+    icon_name = None
+    fa_icon_name = None
+    icon = item.get('icon')
+    if icon and icon.startswith('fa-'):
+        fa_icon_name = u'FontAwesome.Icon.%s' % icon.replace("-", "_").replace("fa_", "faw_")
+    else:
+        image_width = 0.15
+        icon_path = item.get('icon_path')
+        if icon_path:
+            source_file = os.path.join(APP_DIR, "images", "custom", icon_path)
+            generate_resource_images(source_file, image_width, 1)
+        else:
+            color = item.get("color", doc['HOMESCREEN'].get('color'))
+            with tempfile.NamedTemporaryFile(suffix=".png") as temp:
+                tmp = temp.name
+                app_utils.download_icon(icon, 'FFFFFF', 512, tmp)
+                if not is_toolbar_item:
+                    app_utils.with_background_color(tmp, tmp, color)
+                icon_name = "R.drawable.menu_icon_%s" % icon
+                generate_resource_images(tmp, image_width, 1, resource_name='menu_icon_%s.png' % icon)
+
+    color = item.get("color", doc['HOMESCREEN'].get('color'))
+    icon_color = 'Color.parseColor("#%s")' % color if color else 0
+
+    action, action_type = get_action(item)
+
+    d = dict(
+        icon_name=icon_name or "null",
+        fa_icon_name=fa_icon_name or "null",
+        icon_color=icon_color,
+        action_type=action_type,
+        action=action,
+        string_id=strings_map[item['text']] if item.get('text') else u'app_name',
+        params=get_params(item)
+    )
+
+    if fa_icon_name:
+        output += '''
+                new NavigationItem(%(fa_icon_name)s, %(action_type)s, %(action)s, R.string.%(string_id)s, null, %(icon_color)s).setParams(%(params)s),''' % d
+    else:
+        output += '''
+                new NavigationItem(%(icon_name)s, %(action_type)s, %(action)s, R.string.%(string_id)s, null, %(icon_color)s).setParams(%(params)s),''' % d
+
+    return output
+
+
 def generate_navigation_menu(doc, strings_map):
     app_type = doc.get('APP_CONSTANTS')['APP_TYPE']
-    homescreen_color = doc['HOMESCREEN'].get('color', None)
     homescreen_items = doc['HOMESCREEN'].get('items', [])
     if app_type == 'cityapp' and not homescreen_items:
         raise Exception('No homescreen items are specified in build.yaml')
 
-    output = u'''%(LICENSE)s
+    output = '''%(LICENSE)s
 
 package com.mobicage.rpc.config;
 
@@ -354,41 +400,7 @@ public class NavigationConstants {
         return new NavigationItem[]{''' % dict(LICENSE=LICENSE)
 
     for item in homescreen_items:
-        icon_name = None
-        fa_icon_name = None
-        if item["icon"].startswith('fa-'):
-            fa_icon_name = u'FontAwesome.Icon.%s' % item["icon"].replace("-", "_").replace("fa_", "faw_")
-        else:
-            source_file = os.path.join(APP_DIR, "images", "custom", item["icon"])
-            image_width = 0.15
-            generate_resource_images(source_file, image_width, 1)
-            icon_name = "R.drawable.%s" % item["icon"].split('.')[0]
-
-
-        icon_color = 0
-        if item.get("color"):
-            icon_color = 'Color.parseColor("#%s")' % item.get("color")
-        elif homescreen_color:
-            icon_color = 'Color.parseColor("#%s")' % homescreen_color
-
-        action, action_type = get_action(item)
-
-        d = dict(
-                icon_name=icon_name if icon_name else "null",
-                fa_icon_name=fa_icon_name if fa_icon_name else "null",
-                icon_color=icon_color,
-                action_type=action_type,
-                action=action,
-                string_id=strings_map[item['text']],
-                params=get_params(item)
-        )
-
-        if fa_icon_name:
-            output += '''
-                    new NavigationItem(%(fa_icon_name)s, %(action_type)s, %(action)s, R.string.%(string_id)s, null, %(icon_color)s).setParams(%(params)s),''' % d
-        else:
-            output += '''
-                    new NavigationItem(%(icon_name)s, %(action_type)s, %(action)s, R.string.%(string_id)s, null, %(icon_color)s).setParams(%(params)s),''' % d
+        output = write_item(output, doc, item, is_toolbar_item=False)
 
     output += '''
         };
@@ -399,15 +411,7 @@ public class NavigationConstants {
 
     if doc.get('TOOLBAR') and doc['TOOLBAR'].get('items'):
         for item in doc['TOOLBAR']['items']:
-            icon_name = item["icon"].replace("-", "_").replace("fa_", "faw_")
-            action, action_type = get_action(item)
-            output += '''
-                new NavigationItem(FontAwesome.Icon.%(icon_name)s, %(action_type)s, %(action)s, R.string.%(string_id)s).setParams(%(params)s),''' % dict(
-                    icon_name=icon_name,
-                    action_type=action_type,
-                    action=action,
-                    string_id=strings_map[item['text']] if item.get('text') else u"app_name",
-                    params=get_params(item))
+            output = write_item(output, doc, item, is_toolbar_item=True)
 
     output += '''
         };
@@ -439,8 +443,8 @@ def convert_config():
 
     ##### HOMESCREEN #############################################
     if doc["HOMESCREEN"].get("style") == HOME_SCREEN_STYLE_MESSAGING or \
-        doc["HOMESCREEN"].get("style") == HOME_SCREEN_STYLE_NEWS or \
-        doc["HOMESCREEN"].get("style") == HOME_SCREEN_STYLE_BRANDING:
+            doc["HOMESCREEN"].get("style") == HOME_SCREEN_STYLE_NEWS or \
+            doc["HOMESCREEN"].get("style") == HOME_SCREEN_STYLE_BRANDING:
         logging.info('Not generating homescreen images')
         items = doc['HOMESCREEN'].get('items', [])
         toolbar = doc.get('TOOLBAR')
@@ -800,6 +804,7 @@ public class AppConstants {
     public static final String[] PROFILE_DATA_FIELDS = new String[] { };
     public static final boolean PROFILE_SHOW_GENDER_AND_BIRTHDATE = %(profile_show_gender_and_birthdate)s;
 
+    public static final String PRIVACY_POLICY_URL = "https://rogerth.at/legal?doc=privacy-policy";
     public static final String TERMS_OF_SERVICE_URL = "%(tos_url)s";
 
     public static final String ABOUT_WEBSITE = "%(about_website)s";
@@ -1007,7 +1012,7 @@ class CustomCloudConstants {
 
 
 def setup_supported_languages():
-    languages =  get('BUILD_CONSTANTS.languages', [])
+    languages = get('BUILD_CONSTANTS.languages', [])
     if not languages:
         return
 

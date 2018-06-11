@@ -834,10 +834,8 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                     @Override
                     public void safeOnClick(View v) {
                         if (Message.MC_CONFIRM_PREFIX.equals(buttonAction)) {
-                            return;
-                        }
-
-                        if (Message.MC_SMI_PREFIX.equals(buttonAction)) {
+                            // do nothing
+                        } else if (Message.MC_SMI_PREFIX.equals(buttonAction)) {
                             final SafeRunnable smiClickRunnable = new SafeRunnable() {
                                 @Override
                                 protected void safeRun() throws Exception {
@@ -864,6 +862,11 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                         } else if (Message.MC_POKE_PREFIX.equals(buttonAction)) {
                             mNewsPlugin.saveNewsStatistics(new long[]{mNewsItem.id}, NewsPlugin.STATISTIC_ACTION);
                             mActivity.actionPressed(mNewsItem.sender.email, buttonAction, buttonUrl, null);
+
+                        } else if (Message.MC_OPEN_PREFIX.equals(buttonAction)) {
+                            mNewsPlugin.saveNewsStatistics(new long[]{mNewsItem.id}, NewsPlugin.STATISTIC_ACTION);
+                            mActivity.actionPressed(mNewsItem.sender.email, buttonAction, buttonUrl, null);
+
                         } else if (buttonAction != null) {
                             mNewsPlugin.saveNewsStatistics(new long[]{mNewsItem.id}, NewsPlugin.STATISTIC_ACTION);
                             ActivityUtils.openUrl(mActivity, buttonUrl, buttonAction);

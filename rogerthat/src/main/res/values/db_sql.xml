@@ -432,6 +432,9 @@ ORDER BY ms.acked_timestamp DESC
     <string name="sql_select_embedded_app">SELECT name, version FROM embedded_app</string>
     <string name="sql_insert_embedded_app">INSERT OR REPLACE INTO embedded_app(name, version) values (?, ?)</string>
     <string name="sql_delete_embedded_app">DELETE FROM embedded_app WHERE name = ?</string>
+    <string name="sql_select_embedded_app_url_regex">SELECT name, url_regex FROM embedded_app_url_regex</string>
+    <string name="sql_insert_embedded_app_url_regex">INSERT OR REPLACE INTO embedded_app_url_regex (name, url_regex) VALUES (?, ?)</string>
+    <string name="sql_delete_embedded_app_url_regexes">DELETE FROM embedded_app_url_regex WHERE name=?</string>
 
     <!-- js embedding -->
     <string name="sql_get_js_embedding">SELECT name, hash, status FROM js_embedding</string>

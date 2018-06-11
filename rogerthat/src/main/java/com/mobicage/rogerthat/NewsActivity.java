@@ -44,6 +44,7 @@ import com.mobicage.rogerthat.plugins.news.NewsPlugin;
 import com.mobicage.rogerthat.plugins.news.NewsStore;
 import com.mobicage.rogerthat.plugins.scan.GetUserInfoResponseHandler;
 import com.mobicage.rogerthat.plugins.scan.ProcessScanActivity;
+import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.CachedDownloader;
 import com.mobicage.rogerthat.util.RegexPatterns;
 import com.mobicage.rogerthat.util.logging.L;
@@ -301,15 +302,18 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
             final boolean isInitial = intent.getBooleanExtra("initial", false);
             if (!isInitial) {
                 final long[] newIds = intent.getLongArrayExtra("new_ids");
-                for (long newsId : newIds) {
-                    mNewNewsItems.add(newsId);
+                if (newIds != null) {
+                    for (long newsId : newIds) {
+                        mNewNewsItems.add(newsId);
+                    }
+                    if (newIds.length > 0) {
+                        setupUpdatesAvailable();
+                    }
                 }
-                if (newIds.length > 0) {
-                    setupUpdatesAvailable();
-                }
-
                 final long[] updatedIds = intent.getLongArrayExtra("updated_ids");
-                nla.updateNewsItems(updatedIds);
+                if (updatedIds != null) {
+                    nla.updateNewsItems(updatedIds);
+                }
             }
         }
     }
@@ -524,6 +528,9 @@ public class NewsActivity extends ServiceBoundCursorRecyclerActivity {
             }
             mPoker = new Poker<>(this, serviceEmail);
             mPoker.poke(buttonUrl, null);
+
+        } else if (Message.MC_OPEN_PREFIX.equals(buttonAction)) {
+            ActivityUtils.openUrl(this, buttonUrl);
         }
     }
 

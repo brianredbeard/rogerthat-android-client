@@ -92,7 +92,7 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
 
     // fields set by the constructor
     private final ResultHandler mDefaultResultHandler = new ResultHandler();
-    private final T mActivity;
+    private final ServiceBoundActivity mActivity;
     private final MainService mService;
     private final String mEmail;
 
@@ -102,7 +102,7 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
     private ServiceMenuItemTO mItem;
     private long mLastTimeClicked = 0;
 
-    public MenuItemPresser(T activity, String email) {
+    public MenuItemPresser(ServiceBoundActivity activity, String email) {
         mActivity = activity;
         mService = mActivity.getMainService();
         mEmail = email;
@@ -191,7 +191,6 @@ public class MenuItemPresser<T extends Activity & MenuItemPressingActivity> exte
         }
 
         final PressMenuIconRequestTO request = poke(item, menuGeneration);
-
         if (item.link != null) {
             openLink(item.link);
         } else if (item.screenBranding != null) {

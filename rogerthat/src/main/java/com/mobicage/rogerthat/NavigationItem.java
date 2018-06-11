@@ -18,9 +18,6 @@
 
 package com.mobicage.rogerthat;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -32,10 +29,15 @@ import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.news.NewsPlugin;
+import com.mobicage.rogerthat.util.JsonUtils;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
+import com.mobicage.rogerthat.util.ui.UIUtils;
 
 import org.json.simple.JSONValue;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class NavigationItem {
     public int iconId;
@@ -105,7 +107,10 @@ public class NavigationItem {
 
     public Drawable getFooterIcon(Context context) {
         if (this.faIcon == null) {
-            return context.getResources().getDrawable(this.iconId);
+            BitmapDrawable image = (BitmapDrawable) context.getResources().getDrawable(this.iconId);
+            int w = UIUtils.convertDipToPixels(context, 34);
+            Bitmap bitmapResized = Bitmap.createScaledBitmap(image.getBitmap(), w, w, false);
+            return new BitmapDrawable(context.getResources(), bitmapResized);
         }
         return new IconicsDrawable(context, this.faIcon).color(ContextCompat.getColor(context, R.color.mc_white)).sizeDp(20);
     }
@@ -155,7 +160,10 @@ public class NavigationItem {
     }
 
     public boolean isCollapsible() {
-        return (boolean) getParam("collapse", false);
+        boolean fallback = false;
+        Object object = getParam("collapse", fallback);
+        Boolean result = JsonUtils.toBoolean(object);
+        return result != null ? result : fallback;
     }
 
     public String feedName() {

@@ -19,7 +19,9 @@
 package com.mobicage.rogerthat.plugins.news;
 
 
+import com.mobicage.rogerthat.IdentityStore;
 import com.mobicage.rogerthat.MainService;
+import com.mobicage.rogerthat.MyIdentity;
 import com.mobicage.rogerthat.config.Configuration;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
@@ -28,8 +30,6 @@ import com.mobicage.rogerthat.util.net.NetworkConnectivityManager;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.TestUtils;
-import com.mobicage.rogerthat.MyIdentity;
-import com.mobicage.rogerthat.IdentityStore;
 import com.mobicage.rpc.Credentials;
 import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.rpc.config.AppConstants;
@@ -56,7 +56,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 
-import javax.net.ssl.SSLException;
 import javax.net.ssl.TrustManagerFactory;
 
 import io.netty.bootstrap.Bootstrap;
@@ -414,7 +413,7 @@ public class NewsChannel extends SimpleChannelInboundHandler<String> {
 
         Map<String, Long> profile = new HashMap();
         profile.put("birthdate", identity.getBirthdate());
-        profile.put("gender", identity.getGender());
+        profile.put("gender", (long) identity.getGender());
         sendCommand(Command.SET_INFO, String.format("PROFILE %s", JSONValue.toJSONString(profile)));
 
         keepAlive();

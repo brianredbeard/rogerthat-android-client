@@ -25,13 +25,21 @@ import java.util.Map;
 
 public class SaveSettingsRequest implements com.mobicage.rpc.IJSONable {
 
+    public com.mobicage.to.system.PushNotificationSettingsTO push_notifications;
     public boolean callLogging;
     public boolean tracking;
 
     public SaveSettingsRequest() {
     }
 
+    @SuppressWarnings("unchecked")
     public SaveSettingsRequest(Map<String, Object> json) throws IncompleteMessageException {
+        if (json.containsKey("push_notifications")) {
+            Object val = json.get("push_notifications");
+            this.push_notifications = val == null ? null : new com.mobicage.to.system.PushNotificationSettingsTO((Map<String, Object>) val);
+        } else {
+            this.push_notifications = null;
+        }
         if (json.containsKey("callLogging")) {
             Object val = json.get("callLogging");
             this.callLogging = ((Boolean) val).booleanValue();
@@ -49,6 +57,7 @@ public class SaveSettingsRequest implements com.mobicage.rpc.IJSONable {
     @Override
     public Map<String, Object> toJSONMap() {
         Map<String, Object> obj = new LinkedHashMap<String, Object>();
+        obj.put("push_notifications", this.push_notifications == null ? null : this.push_notifications.toJSONMap());
         obj.put("callLogging", this.callLogging);
         obj.put("tracking", this.tracking);
         return obj;

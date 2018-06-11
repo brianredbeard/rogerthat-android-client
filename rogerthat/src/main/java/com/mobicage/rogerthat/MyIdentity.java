@@ -17,22 +17,25 @@
  */
 package com.mobicage.rogerthat;
 
-import java.text.DateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Map;
-
-import org.json.simple.JSONValue;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.support.annotation.StringRes;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.EmailHashCalculator;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.ui.ImageHelper;
+
+import org.json.simple.JSONValue;
+
+import java.text.DateFormat;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 public class MyIdentity {
     private final String mEmail;
@@ -45,16 +48,18 @@ public class MyIdentity {
     private final String mQualifiedIdentifier;
     private final Long mAvatarId;
     private final Long mBirthdate;
-    private final Long mGender;
+    private final Integer mGender;
     private final String mProfileData;
     private Map<String, String> mCachedProfileDataDict = null;
-    public static final long GENDER_UNDEFINED = 0;
-    public static final long GENDER_MALE = 1;
-    public static final long GENDER_FEMALE = 2;
-    public static final long GENDER_CUSTOM_FACEBOOK = 3;
+    public static final int GENDER_UNDEFINED = 0;
+    public static final int GENDER_MALE = 1;
+    public static final int GENDER_FEMALE = 2;
+    public static final int GENDER_CUSTOM_FACEBOOK = 3;
+    public static final List<Integer> ALLOWED_GENDERS = Arrays.asList(MyIdentity.GENDER_MALE, MyIdentity.GENDER_FEMALE,
+            MyIdentity.GENDER_CUSTOM_FACEBOOK);
 
     public MyIdentity(String email, String name, byte[] avatarBytes, byte[] qrBytes, String shortLink,
-        String qualifiedIdentifier, Long avatarId, Long birthdate, Long gender, String profileData, Context context) {
+                      String qualifiedIdentifier, Long avatarId, Long birthdate, Integer gender, String profileData, Context context) {
         mEmail = email;
         mEmailHash = EmailHashCalculator.calculateEmailHash(email, FriendsPlugin.FRIEND_TYPE_USER);
         mName = name;
@@ -140,14 +145,8 @@ public class MyIdentity {
         return DateFormat.getDateInstance().format(date);
     }
 
-    public long getGender() {
-        if (mGender == null) {
-            return GENDER_UNDEFINED;
-        } else if (mGender == GENDER_FEMALE) {
-            return GENDER_FEMALE;
-        } else {
-            return GENDER_MALE;
-        }
+    public int getGender() {
+        return mGender == null ? GENDER_UNDEFINED : mGender;
     }
 
     public boolean hasBirthdate() {
@@ -168,5 +167,19 @@ public class MyIdentity {
             mCachedProfileDataDict = mProfileData == null ? null : (Map<String, String>) JSONValue.parse(mProfileData);
         }
         return mCachedProfileDataDict;
+    }
+
+    @StringRes
+    public static int getGenderTextResource(int gender) {
+        switch (gender) {
+            case MyIdentity.GENDER_MALE:
+                return R.string.male;
+            case MyIdentity.GENDER_FEMALE:
+                return R.string.female;
+            case MyIdentity.GENDER_CUSTOM_FACEBOOK:
+                return R.string.other;
+            default:
+                return R.string.unknown;
+        }
     }
 }

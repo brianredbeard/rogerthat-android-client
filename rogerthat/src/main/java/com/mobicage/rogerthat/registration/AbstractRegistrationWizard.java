@@ -18,6 +18,7 @@
 package com.mobicage.rogerthat.registration;
 
 import com.mobicage.rogerthat.MainService;
+import com.mobicage.rogerthat.util.consent.ConsentProvider;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeAsyncTask;
@@ -61,6 +62,9 @@ public abstract class AbstractRegistrationWizard extends Wizard {
     private boolean mInGoogleAuthenticationProcess = false;
     private String mDeviceId = null;
     private JSONArray mDeviceNames = null;
+    private String mTOSAge = null;
+    private Boolean mPushNotificationEnabled = null;
+
 
     public Credentials getCredentials() {
         T.UI();
@@ -123,8 +127,6 @@ public abstract class AbstractRegistrationWizard extends Wizard {
         mDeviceId = deviceId;
     }
 
-    public abstract Set<BeaconDiscoveredRequestTO> getDetectedBeacons();
-
     public JSONArray getDeviceNames() {
         T.UI();
         return mDeviceNames;
@@ -133,6 +135,43 @@ public abstract class AbstractRegistrationWizard extends Wizard {
     public void setDeviceNames(JSONArray deviceNames) {
         T.UI();
         mDeviceNames = deviceNames;
+    }
+
+    public String getTOSAge() {
+        T.UI();
+        return mTOSAge;
+    }
+
+    public void setTOSAge(final String age) {
+        T.UI();
+        mTOSAge = age;
+    }
+
+    public String getPushNotificationEnabled() {
+        T.UI();
+        if (mPushNotificationEnabled == null) {
+            return null;
+        } else if (mPushNotificationEnabled) {
+            return "yes";
+        } else {
+            return "no";
+        }
+    }
+
+    public void setPushNotificationEnabled(final String enabled) {
+        T.UI();
+        if ("yes".equals(enabled)) {
+            mPushNotificationEnabled = true;
+        } else if ("no".equals(enabled)) {
+            mPushNotificationEnabled = false;
+        } {
+            mPushNotificationEnabled = null;
+        }
+    }
+
+    public void setPushNotificationEnabled(final boolean enabled) {
+        T.UI();
+        mPushNotificationEnabled = enabled;
     }
 
     public abstract void init(final MainService mainService);
@@ -191,9 +230,6 @@ public abstract class AbstractRegistrationWizard extends Wizard {
                             L.e("HTTP request result was not 'success' but: " + responseMap.get("result"));
                             return false;
                         }
-
-                        JSONObject beaconRegions = (JSONObject) responseMap.get("beacon_regions");
-                        processBeaconRegions(new GetBeaconRegionsResponseTO(beaconRegions), mainService);
                         return true;
 
                     } catch (ClientProtocolException e) {
@@ -211,10 +247,4 @@ public abstract class AbstractRegistrationWizard extends Wizard {
 
         }.execute();
     }
-
-    protected void processBeaconRegions(GetBeaconRegionsResponseTO response, MainService mainService) {
-        // Can be overridden by registration wizards that are interested in this
-    }
-
-
 }

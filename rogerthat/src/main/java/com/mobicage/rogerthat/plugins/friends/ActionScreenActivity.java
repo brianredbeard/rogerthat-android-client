@@ -79,7 +79,7 @@ import com.mobicage.rogerthat.util.ActionScreenUtils;
 import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.FacebookUtils;
 import com.mobicage.rogerthat.util.FacebookUtils.PermissionType;
-import com.mobicage.rogerthat.util.TextUtils;
+import com.mobicage.rogerthat.util.JsonUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
@@ -90,7 +90,6 @@ import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.rpc.config.LookAndFeelConstants;
 
-import org.jivesoftware.smack.util.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -305,7 +304,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 L.w("Expected params != null");
                 return;
             }
-            String data = TextUtils.optString(params, "u", null);
+            String data = JsonUtils.optString(params, "u", null);
             boolean smart = params.optBoolean("smart", false);
             mFriendsPlugin.putUserData(mServiceEmail, data, smart);
         }
@@ -356,7 +355,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 L.w("Expected params != null");
                 return;
             }
-            final String e = TextUtils.optString(params, "e", null);
+            final String e = JsonUtils.optString(params, "e", null);
             if (e != null) {
                 mActionScreenUtils.logError(mServiceEmail, mItemLabel, mItemCoords, e);
             }
@@ -534,13 +533,13 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 return;
             }
             final String requestId = params.getString("id");
-            final String actionType = TextUtils.optString(params, "action_type", null);
-            final String action = TextUtils.optString(params, "action", null);
-            final String title = TextUtils.optString(params, "title", null);
-            final String service = TextUtils.optString(params, "service", null);
-            final boolean collapse = "true".equalsIgnoreCase(params.getString("collapse"));
+            final String actionType = JsonUtils.optString(params, "action_type", null);
+            final String action = JsonUtils.optString(params, "action", null);
+            final String title = JsonUtils.optString(params, "title", null);
+            final String service = JsonUtils.optString(params, "service", null);
 
-            String errorMessage = mActionScreenUtils.openActivity(actionType, action, title, service, collapse);
+            String errorMessage = mActionScreenUtils.openActivity(actionType, action, title, service, JsonUtils.toMap
+                    (params));
             Map<String, Object> e = null;
             if (errorMessage != null) {
                 e = new HashMap<>();
@@ -801,7 +800,7 @@ public class ActionScreenActivity extends ServiceBoundActivity {
                 return;
             }
             final String requestId = params.getString("id");
-            final String payload = TextUtils.optString(params, "payload", null);
+            final String payload = JsonUtils.optString(params, "payload", null);
 
             MainService.SecurityCallback sc = new MainService.SecurityCallback() {
                 @Override

@@ -822,6 +822,15 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
                     buttonPressed(button, buttonAction, buttonUrl, container);
                 }
             });
+        } else if (Message.MC_OPEN_PREFIX.equals(buttonAction)) {
+            if (ActivityUtils.openUrl(this, buttonUrl)) {
+                buttonPressed(button, container, 0);
+                overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_up);
+                finish();
+            } else {
+                // Continue with the button press, just as if there was no open://
+                buttonPressed(button, buttonAction, buttonUrl, container);
+            }
         } else {
             buttonPressed(button, buttonAction, buttonUrl, container);
         }

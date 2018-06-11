@@ -47,9 +47,7 @@ import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
 import com.mobicage.rogerthat.plugins.security.PinLockMgr;
 import com.mobicage.rogerthat.plugins.security.SecurityPlugin;
 import com.mobicage.rogerthat.registration.ContentBrandingRegistrationActivity;
-import com.mobicage.rogerthat.registration.DetectedBeaconActivity;
 import com.mobicage.rogerthat.registration.OauthRegistrationActivity;
-import com.mobicage.rogerthat.registration.QRRegistrationActivity;
 import com.mobicage.rogerthat.registration.RegistrationActivity2;
 import com.mobicage.rogerthat.registration.RegistrationWizard2;
 import com.mobicage.rogerthat.registration.YSAAARegistrationActivity;
@@ -96,7 +94,6 @@ public class MainActivity extends ServiceBoundActivity implements PinLockMgr.NoP
     public static final String ACTION_REGISTERED = "ROGERTHAT_ACTION_REGISTERED";
     public static final String ACTION_COMPLETE_PROFILE = "ROGERTHAT_ACTION_COMPLETE_PROFILE";
     public static final String ACTION_COMPLETE_PROFILE_FINISHED = "ROGERTHAT_ACTION_COMPLETE_PROFILE_FINISHED";
-    public static final String ACTION_SHOW_DETECTED_BEACONS = "ROGERTHAT_ACTION_SHOW_DETECTED_BEACONS";
 
     private ProgressDialog mDialog;
 
@@ -448,10 +445,6 @@ public class MainActivity extends ServiceBoundActivity implements PinLockMgr.NoP
         } else if (ACTION_COMPLETE_PROFILE_FINISHED.equals(intentAction)) {
             showRegistrationCompleteDialogAndGoToHomeActivity();
 
-        } else if (ACTION_SHOW_DETECTED_BEACONS.equals(intentAction)) {
-            launchDetectedBeaconsAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP,
-                intent.getStringExtra(DetectedBeaconActivity.EXTRA_DETECTED_BEACONS),
-                intent.getBooleanExtra(DetectedBeaconActivity.EXTRA_AGE_AND_GENDER_SET, true));
         } else {
             final Uri qrUri;
             final int flags;
@@ -493,8 +486,14 @@ public class MainActivity extends ServiceBoundActivity implements PinLockMgr.NoP
                 }
             }
 
+
+
             if (!hasRegistered) {
                 launchRegistrationActivityAndFinish(qrUri, flags);
+            } else if (mService.getConsentProvider().shouldAskConsentForTOS()) {
+                launchConsentForTOSActivityAndFinish();
+            } else if (mService.getConsentProvider().shouldAskConsentForPushNotifications()) {
+                launchConsentForPushNotificationsActivityAndFinish();
             } else if (CloudConstants.isContentBrandingApp()) {
                 launchContentBrandingMainActivityAndFinish();
             } else if (CloudConstants.isYSAAA()) {
@@ -533,6 +532,22 @@ public class MainActivity extends ServiceBoundActivity implements PinLockMgr.NoP
                 dialog.setCancelable(false);
             }
         }
+    }
+
+    private void launchConsentForTOSActivityAndFinish() {
+        T.UI();
+        Intent intent = new Intent(this, ConsentTOSActivity.class);
+        intent.setFlags(MainActivity.FLAG_CLEAR_STACK_SINGLE_TOP);
+        startActivity(intent);
+        this.finish();
+    }
+
+    private void launchConsentForPushNotificationsActivityAndFinish() {
+        T.UI();
+        Intent intent = new Intent(this, ConsentPushNotificationsActivity.class);
+        intent.setFlags(MainActivity.FLAG_CLEAR_STACK_SINGLE_TOP);
+        startActivity(intent);
+        this.finish();
     }
 
     private void launchContentBrandingMainActivityAndFinish() {
@@ -591,13 +606,6 @@ public class MainActivity extends ServiceBoundActivity implements PinLockMgr.NoP
             intent.setData(qrUri);
             intent.setFlags(flags);
             L.d("Starting OauthRegistrationActivity");
-            startActivity(intent);
-            finish();
-        } else if (AppConstants.getRegistrationType() == AppConstants.REGISTRATION_TYPE_QR) {
-            final Intent intent = new Intent(this, QRRegistrationActivity.class);
-            intent.setData(qrUri);
-            intent.setFlags(flags);
-            L.d("Starting QRRegistrationActivity");
             startActivity(intent);
             finish();
         } else {
@@ -701,18 +709,6 @@ public class MainActivity extends ServiceBoundActivity implements PinLockMgr.NoP
         L.d("Starting HomeActivity");
         startActivity(homeActivityIntent);
         finish();
-    }
-
-    private void launchDetectedBeaconsAndFinish(final Uri qrUri, final int flags, final String discoveredBeacons,
-        final boolean ageGenderSet) {
-        T.UI();
-        final Intent intent = new Intent(this, DetectedBeaconActivity.class);
-        intent.setData(qrUri);
-        intent.setFlags(flags);
-        intent.putExtra(DetectedBeaconActivity.EXTRA_DETECTED_BEACONS, discoveredBeacons);
-        intent.putExtra(DetectedBeaconActivity.EXTRA_AGE_AND_GENDER_SET, ageGenderSet);
-        L.d("Starting DetectedBeaconActivity");
-        startActivity(intent);
     }
 
     private void launchProfileActivityAndFinish(final Uri qrUri, final int flags, final boolean ageGenderSet) {
