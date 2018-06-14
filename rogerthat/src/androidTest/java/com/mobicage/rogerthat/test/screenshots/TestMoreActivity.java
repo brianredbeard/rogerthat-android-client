@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.ActivityTestRule;
-import android.support.test.runner.AndroidJUnit4;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MoreActivity;
@@ -33,23 +32,19 @@ import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
+import tools.fastlane.screengrab.FalconScreenshotStrategy;
 import tools.fastlane.screengrab.Screengrab;
-import tools.fastlane.screengrab.UiAutomatorScreenshotStrategy;
 import tools.fastlane.screengrab.locale.LocaleTestRule;
 
-@RunWith(AndroidJUnit4.class)
+@RunWith(JUnit4.class)
 public class TestMoreActivity {
     @ClassRule
     public static final LocaleTestRule localeTestRule = new LocaleTestRule();
 
     @Rule
     public ActivityTestRule<MoreActivity> activityTestRule = new ActivityTestRule<>(MoreActivity.class, true, false);
-
-    @Before
-    public void setup() throws Throwable {
-        Screengrab.setDefaultScreenshotStrategy(new UiAutomatorScreenshotStrategy());
-    }
 
     @SuppressWarnings("ConstantConditions")
     @Test
@@ -60,6 +55,7 @@ public class TestMoreActivity {
                     .getTargetContext();
             Intent intent = new Intent(targetContext, MoreActivity.class);
             activityTestRule.launchActivity(intent);
+            Screengrab.setDefaultScreenshotStrategy(new FalconScreenshotStrategy(activityTestRule.getActivity()));
             Screengrab.screenshot("more");
         }
     }

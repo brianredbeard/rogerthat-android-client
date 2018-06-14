@@ -24,11 +24,13 @@ import android.support.test.annotation.UiThreadTest;
 import android.support.test.espresso.Espresso;
 import android.support.test.espresso.NoMatchingViewException;
 import android.support.test.espresso.PerformException;
+import android.support.test.espresso.ViewAction;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.WindowManager;
 
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.registration.RegistrationActivity2;
 import com.mobicage.rogerthat.test.ui_test_helpers.PermissionsRule;
 import com.mobicage.rogerthat.util.logging.L;
@@ -43,8 +45,10 @@ import tools.fastlane.screengrab.locale.LocaleTestRule;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.action.ViewActions.scrollTo;
 import static android.support.test.espresso.action.ViewActions.typeText;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.matcher.RootMatchers.isDialog;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 
@@ -58,6 +62,25 @@ public class Test1Register {
     @Rule
     public final PermissionsRule permissionsRule = new PermissionsRule(
             new String[]{Manifest.permission.READ_CONTACTS, Manifest.permission.ACCESS_COARSE_LOCATION});
+
+    private void execWithRetries(int resId, ViewAction action, int retryCount) throws InterruptedException {
+        int tries = 0;
+        while (true) {
+            tries++;
+            try {
+                onView(withId(resId))
+                        .check(matches(isDisplayed()))
+                        .perform(scrollTo(), action);
+                break;
+            } catch (NoMatchingViewException | PerformException error) {
+                if (tries > retryCount) {
+                    throw error;
+                } else {
+                    Thread.sleep(100);
+                }
+            }
+        }
+    }
 
     @UiThreadTest
     @Before
@@ -77,45 +100,39 @@ public class Test1Register {
     }
     @Test
     public void testRegister() throws InterruptedException {
-        boolean isRegistered = activityTestRule.getActivity().getMainService().getRegisteredFromConfig();
+        MainService mainService = activityTestRule.getActivity().getMainService();
+        boolean isRegistered = mainService.getRegisteredFromConfig();
         // User already registered. Skip this test. (For screenshot tests)
         if(isRegistered){
             return;
         }
+        // Click the 'Start registration' button
         try {
-            onView(withId(R.id.registration_agree_tos))
-                    .perform(click());
-        } catch (PerformException ex) {
-            L.i("Not clicking 'agree to TOS because it was already clicked'");
+            onView(withId(R.id.registration_start)).perform(click());
+        } catch (PerformException ignored) {
         }
+        try {
+            // Accept terms of use
+            onView(withId(R.id.tos_age)).perform(click());
+            onView(withId(R.id.tos_agree)).perform(click());
+        } catch (PerformException ex) {
+            L.i("Not clicking 'agree to TOS' because it was already clicked'");
+        }
+        // Accept notification usage
+        execWithRetries(R.id.notifications_continue, click(), 50);
+        // Click 'allow' in the push notification dialog
+        onView(withId(android.R.id.button1)).inRoot(isDialog()).perform(click());
         // Fill in email field
         try {
             onView(withId(R.id.registration_enter_email))
                     .perform(typeText("apple.review@rogerth.at"));
             Espresso.closeSoftKeyboard();
-            onView(withId(R.id.login_via_email))
-                    .perform(click());
+            onView(withId(R.id.login_via_email)).perform(click());
         } catch (PerformException ignored) {
         }
-        int tries = 0;
-        // tries 100 times, max 10 sec
-        while (true) {
-            tries++;
-            try {
-                onView(withId(R.id.registration_enter_pin))
-                        .check(matches(isDisplayed()))
-                        .perform(typeText("0666"));
-                break;
-            } catch (NoMatchingViewException ignored) {
-                if (tries > 100) {
-                    throw ignored;
-                } else {
-                    Thread.sleep(100);
-                }
-            }
-        }
+        execWithRetries(R.id.registration_enter_pin, typeText("0666"), 100);
         // Keep activity open until we are properly registered.
-        while (!activityTestRule.getActivity().getMainService().getRegisteredFromConfig()) {
+        while (!mainService.getRegisteredFromConfig()) {
             try {
                 onView(withId(R.id.registration_devices_register))
                         .perform(click());

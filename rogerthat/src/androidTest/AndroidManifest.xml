@@ -1,0 +1,9 @@
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="${applicationId}.test"
+    android:configChanges="orientation|screenSize">
+
+    <!-- to allow for using ui automator with minSdk < 18 -->
+    <uses-sdk tools:overrideLibrary="android.support.test.uiautomator.v18"/>
+</manifest>

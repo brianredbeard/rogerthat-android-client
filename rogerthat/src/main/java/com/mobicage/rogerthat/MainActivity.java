@@ -58,6 +58,7 @@ import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
+import com.mobicage.rogerthat.util.ui.TestUtils;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
@@ -487,12 +488,12 @@ public class MainActivity extends ServiceBoundActivity implements PinLockMgr.NoP
             }
 
 
-
-            if (!hasRegistered) {
+            boolean isTesting = TestUtils.isRunningTest();
+            if (!isTesting && !hasRegistered) {
                 launchRegistrationActivityAndFinish(qrUri, flags);
-            } else if (mService.getConsentProvider().shouldAskConsentForTOS()) {
+            } else if (!isTesting && mService.getConsentProvider().shouldAskConsentForTOS()) {
                 launchConsentForTOSActivityAndFinish();
-            } else if (mService.getConsentProvider().shouldAskConsentForPushNotifications()) {
+            } else if (!isTesting && mService.getConsentProvider().shouldAskConsentForPushNotifications()) {
                 launchConsentForPushNotificationsActivityAndFinish();
             } else if (CloudConstants.isContentBrandingApp()) {
                 launchContentBrandingMainActivityAndFinish();

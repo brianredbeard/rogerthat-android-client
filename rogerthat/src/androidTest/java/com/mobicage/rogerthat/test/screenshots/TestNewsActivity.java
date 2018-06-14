@@ -27,14 +27,13 @@ import android.support.test.runner.AndroidJUnit4;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rpc.config.AppConstants;
 
-import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import tools.fastlane.screengrab.FalconScreenshotStrategy;
 import tools.fastlane.screengrab.Screengrab;
-import tools.fastlane.screengrab.UiAutomatorScreenshotStrategy;
 import tools.fastlane.screengrab.locale.LocaleTestRule;
 
 
@@ -48,11 +47,6 @@ public class TestNewsActivity {
     @Rule
     public ActivityTestRule<FakeNewsActivity> activityTestRule = new ActivityTestRule<>(FakeNewsActivity.class, true, false);
 
-    @Before
-    public void setup() throws Throwable {
-        Screengrab.setDefaultScreenshotStrategy(new UiAutomatorScreenshotStrategy());
-    }
-
     @Test
     public void takeNewsScreenshot() {
 
@@ -64,6 +58,7 @@ public class TestNewsActivity {
             activityTestRule.launchActivity(intent);
             // Ensure the drawer is closed because for some reason it is opened sometimes
             activityTestRule.getActivity().closeNavigationView();
+            Screengrab.setDefaultScreenshotStrategy(new FalconScreenshotStrategy(activityTestRule.getActivity()));
             Screengrab.screenshot("news");
         }
     }

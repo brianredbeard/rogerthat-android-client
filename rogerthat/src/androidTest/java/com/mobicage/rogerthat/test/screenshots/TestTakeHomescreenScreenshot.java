@@ -18,19 +18,21 @@
 
 package com.mobicage.rogerthat.test.screenshots;
 
+import android.content.Context;
+import android.content.Intent;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.mobicage.rogerthat.MainActivity;
 
-import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import tools.fastlane.screengrab.FalconScreenshotStrategy;
 import tools.fastlane.screengrab.Screengrab;
-import tools.fastlane.screengrab.UiAutomatorScreenshotStrategy;
 import tools.fastlane.screengrab.locale.LocaleTestRule;
 
 @RunWith(AndroidJUnit4.class)
@@ -40,17 +42,16 @@ public class TestTakeHomescreenScreenshot {
     public static final LocaleTestRule localeTestRule = new LocaleTestRule();
 
     @Rule
-    public ActivityTestRule<MainActivity> activityTestRule = new ActivityTestRule<>(MainActivity.class);
+    public ActivityTestRule<MainActivity> activityTestRule = new ActivityTestRule<>(MainActivity.class, true, false);
 
-    @Before
-    public void setup() throws Throwable {
-        Screengrab.setDefaultScreenshotStrategy(new UiAutomatorScreenshotStrategy());
-    }
-
-    @SuppressWarnings("ConstantConditions")
     @Test
-    public void takeHomeScreenScreenshot(){
+    public void takeHomeScreenScreenshot() {
         // homescreen will be news with the sidebar open for apps with news and else the old homescreen with icons
+        Context targetContext = InstrumentationRegistry.getInstrumentation()
+                .getTargetContext();
+        Intent intent = new Intent(targetContext, MainActivity.class);
+        activityTestRule.launchActivity(intent);
+        Screengrab.setDefaultScreenshotStrategy(new FalconScreenshotStrategy(activityTestRule.getActivity()));
         Screengrab.screenshot("homescreen");
     }
 }
