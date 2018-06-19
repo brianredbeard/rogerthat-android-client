@@ -390,6 +390,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                     UIUtils.showDialog(RegistrationActivity2.this, null, message, positiveBtn, positiveClick, negativeButtonCaption, negativeClick);
                 } else {
                     mWiz.setTOSAge(ConsentProvider.TOS_AGE_16);
+                    mService.getConsentProvider().saveConsentForTOS();
                     sendRegistrationStep(RegistrationWizard2.REGISTRATION_STEP_TOS);
                     mWiz.proceedToNextPage();
                 }
@@ -595,6 +596,7 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
 
     private void savePushNotifications(boolean enabled) {
         mWiz.setPushNotificationEnabled(enabled);
+        mService.getConsentProvider().saveConsentForPushNotifications();
         final SharedPreferences options = PreferenceManager.getDefaultSharedPreferences(RegistrationActivity2.this);
         final SharedPreferences.Editor editor = options.edit();
         editor.putBoolean(MainService.PREFERENCE_PUSH_NOTIFICATIONS, enabled);

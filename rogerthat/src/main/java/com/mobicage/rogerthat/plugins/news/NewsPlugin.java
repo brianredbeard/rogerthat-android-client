@@ -526,7 +526,8 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
 
         if (currentActivity instanceof NewsActivity) {
             String currentFeedName = ((NewsActivity) currentActivity).getFeedName();
-            if (currentFeedName != null && currentFeedName.equals(feedName)) {
+            if (currentFeedName == null && feedName == null) {
+            } else if (currentFeedName != null && currentFeedName.equals(feedName)) {
                 return;
             }
         }
