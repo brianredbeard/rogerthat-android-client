@@ -17,9 +17,6 @@
  */
 package com.mobicage.rogerthat.registration;
 
-import android.Manifest;
-import android.content.Intent;
-
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.config.Configuration;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
@@ -30,10 +27,6 @@ import com.mobicage.rogerthat.util.pickle.Pickler;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.Wizard;
 import com.mobicage.rpc.Credentials;
-import com.mobicage.rpc.IncompleteMessageException;
-import com.mobicage.to.beacon.BeaconRegionTO;
-import com.mobicage.to.beacon.GetBeaconRegionsResponseTO;
-import com.mobicage.to.location.BeaconDiscoveredRequestTO;
 
 import org.jivesoftware.smack.util.Base64;
 import org.json.simple.JSONArray;
@@ -43,9 +36,6 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.EOFException;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 public class RegistrationWizard2 extends AbstractRegistrationWizard {

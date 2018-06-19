@@ -17,45 +17,22 @@
  */
 package com.mobicage.rogerthat.registration;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HTTP;
-import org.jivesoftware.smack.util.Base64;
-import org.json.simple.JSONValue;
-
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.config.Configuration;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
-import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.pickle.Pickle;
 import com.mobicage.rogerthat.util.pickle.PickleException;
-import com.mobicage.rogerthat.util.pickle.Pickleable;
 import com.mobicage.rogerthat.util.pickle.Pickler;
-import com.mobicage.rogerthat.util.system.SafeAsyncTask;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.Credentials;
-import com.mobicage.rpc.config.CloudConstants;
-import com.mobicage.to.location.BeaconDiscoveredRequestTO;
+
+import org.jivesoftware.smack.util.Base64;
+
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.util.UUID;
 
 public class YSAAARegistrationWizard extends AbstractRegistrationWizard {
 

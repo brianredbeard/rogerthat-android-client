@@ -42,9 +42,6 @@ public class CallReceiver {
         if ("com.mobicage.capi.friends.updateGroups".equals(function)) {
             return comMobicageCapiFriendsIClientRpc.updateGroups(Parser.ComMobicageToFriendsUpdateGroupsRequestTO(call.arguments.get("request")));
         }
-        if ("com.mobicage.capi.location.deleteBeaconDiscovery".equals(function)) {
-            return comMobicageCapiLocationIClientRpc.deleteBeaconDiscovery(Parser.ComMobicageToLocationDeleteBeaconDiscoveryRequestTO(call.arguments.get("request")));
-        }
         if ("com.mobicage.capi.location.getLocation".equals(function)) {
             return comMobicageCapiLocationIClientRpc.getLocation(Parser.ComMobicageToLocationGetLocationRequestTO(call.arguments.get("request")));
         }
@@ -53,9 +50,6 @@ public class CallReceiver {
         }
         if ("com.mobicage.capi.location.trackLocation".equals(function)) {
             return comMobicageCapiLocationIClientRpc.trackLocation(Parser.ComMobicageToLocationTrackLocationRequestTO(call.arguments.get("request")));
-        }
-        if ("com.mobicage.capi.location.updateBeaconRegions".equals(function)) {
-            return comMobicageCapiLocationIClientRpc.updateBeaconRegions(Parser.ComMobicageToBeaconUpdateBeaconRegionsRequestTO(call.arguments.get("request")));
         }
         if ("com.mobicage.capi.messaging.conversationDeleted".equals(function)) {
             return comMobicageCapiMessagingIClientRpc.conversationDeleted(Parser.ComMobicageToMessagingConversationDeletedRequestTO(call.arguments.get("request")));

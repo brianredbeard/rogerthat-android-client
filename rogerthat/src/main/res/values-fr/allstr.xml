@@ -193,12 +193,6 @@
     <string name="hint_broadcast_icon">Appuyez sur cette icône en haut à droite pour sélectionner les messages de %1$s que vous ne souhaitez plus recevoir.</string>
     <string name="hint_double_tap">Double-cliquez pour répondre</string>
     <string name="hint_swipe">Glissez votre doigt pour ouvrir une autre conversation</string>
-    <string name="ibeacon_usage_augment_experience">%1$s utilise des iBeacons afin d\'améliorer votre expérience utilisateur.</string>
-    <string name="ibeacon_usage_discover_services_automatically">Retrouver automatiquement des services.</string>
-    <string name="ibeacon_usage_not_used_for">%1$s ne fait pas:</string>
-    <string name="ibeacon_usage_store">Sauvegarder votre position.</string>
-    <string name="ibeacon_usage_track_location_without_concent">Repérer votre position sans votre consentement préalable.</string>
-    <string name="ibeacon_usage_used_for">%1$s utilise votre position pour:</string>
     <string name="identify">Identifier</string>
     <string name="initializing">Initialisation…</string>
     <string name="install">Installer</string>

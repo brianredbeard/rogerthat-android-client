@@ -219,12 +219,6 @@
     <string name="hint_double_tap">Double tap to reply</string>
     <string name="hint_swipe">Swipe to jump to another conversation</string>
     <string name="i_am_older_than_16y">I am older than 16 years</string>
-    <string name="ibeacon_usage_augment_experience">The %1$s app uses iBeacons to augment your user experience.</string>
-    <string name="ibeacon_usage_discover_services_automatically">Discover customer services automatically</string>
-    <string name="ibeacon_usage_not_used_for">%1$s does not:</string>
-    <string name="ibeacon_usage_store">Store your location</string>
-    <string name="ibeacon_usage_track_location_without_concent">Track your location without your prior consent</string>
-    <string name="ibeacon_usage_used_for">The %1$s app uses your location to:</string>
     <string name="identify">Identify</string>
     <string name="import_existing_key">Import existing key</string>
     <string name="import_key">Import secure key</string>

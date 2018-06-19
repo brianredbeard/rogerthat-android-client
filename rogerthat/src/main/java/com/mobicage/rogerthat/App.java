@@ -33,10 +33,8 @@ import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeAsyncTask;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rpc.Credentials;
-import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
 
-import org.altbeacon.beacon.powersave.BackgroundPowerSaver;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
@@ -60,7 +58,6 @@ public class App extends MultiDexApplication implements Thread.UncaughtException
 
     private static App sContext;
 
-    protected BackgroundPowerSaver mBackgroundPowerSaver;
     protected PinLockMgr mPinLockMgr;
 
     public static App getContext() {
@@ -89,12 +86,6 @@ public class App extends MultiDexApplication implements Thread.UncaughtException
         AppEventsLogger.activateApp(this);
 
         Fabric.with(this, new Crashlytics());
-
-        // Simply constructing this class and holding a reference to it in your custom Application class enables auto
-        // battery saving of about 60%
-        if (android.os.Build.VERSION.SDK_INT >= 18) {
-            mBackgroundPowerSaver = new BackgroundPowerSaver(this);
-        }
 
         Iconics.registerFont(new FontAwesome());
 

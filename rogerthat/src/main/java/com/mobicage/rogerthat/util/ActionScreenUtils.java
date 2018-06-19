@@ -45,13 +45,10 @@ import com.mobicage.rogerthat.plugins.news.NewsItem;
 import com.mobicage.rogerthat.plugins.news.NewsPlugin;
 import com.mobicage.rogerthat.plugins.scan.GetUserInfoResponseHandler;
 import com.mobicage.rogerthat.plugins.scan.ProcessScanActivity;
-import com.mobicage.rogerthat.plugins.trackme.DiscoveredBeaconProximity;
-import com.mobicage.rogerthat.plugins.trackme.TrackmePlugin;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
-import com.mobicage.rogerthat.util.ui.TestUtils;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
@@ -66,7 +63,6 @@ import org.json.simple.JSONValue;
 import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class ActionScreenUtils {
@@ -80,7 +76,6 @@ public class ActionScreenUtils {
 
     private FriendsPlugin mFriendsPlugin;
     private NewsPlugin mNewsPlugin;
-    private TrackmePlugin mTrackmePlugin;
 
     private MediaPlayer mSoundMediaPlayer = null;
     private HandlerThread mSoundThread = null;
@@ -93,8 +88,6 @@ public class ActionScreenUtils {
         boolean apiResult(ServiceApiCallbackResult result);
         void userDataUpdated(String userData);
         void serviceDataUpdated(String serviceData);
-        void onBeaconInReach(Map<String, Object> beacon);
-        void onBeaconOutOfReach(Map<String, Object> beacon);
         void qrCodeScanned(Map<String, Object> result);
         void onBackendConnectivityChanged(boolean connected);
         void newsReceived(long[] ids);
@@ -128,28 +121,6 @@ public class ActionScreenUtils {
                         mCallback.serviceDataUpdated(JSONValue.toJSONString(appData));
                     }
                     return new String[] { FriendsPlugin.SERVICE_DATA_UPDATED };
-                }
-
-            } else if (FriendsPlugin.BEACON_IN_REACH.equals(intent.getAction())) {
-                if (mServiceEmail.equals(intent.getStringExtra("email"))) {
-                    final Map<String, Object> result = new HashMap<>();
-                    result.put("uuid", intent.getStringExtra("uuid").toLowerCase());
-                    result.put("major", "" + intent.getIntExtra("major", 0));
-                    result.put("minor", "" + intent.getIntExtra("minor", 0));
-                    result.put("tag", "" + intent.getStringExtra("tag"));
-                    result.put("proximity", "" + intent.getIntExtra("proximity", 0));
-                    mCallback.onBeaconInReach(result);
-                }
-
-            } else if (FriendsPlugin.BEACON_OUT_OF_REACH.equals(intent.getAction())) {
-                if (mServiceEmail.equals(intent.getStringExtra("email"))) {
-                    final Map<String, Object> result = new HashMap<String, Object>();
-                    result.put("uuid", intent.getStringExtra("uuid").toLowerCase());
-                    result.put("major", "" + intent.getIntExtra("major", 0));
-                    result.put("minor", "" + intent.getIntExtra("minor", 0));
-                    result.put("tag", "" + intent.getStringExtra("tag"));
-                    result.put("proximity", "" + intent.getIntExtra("proximity", 0));
-                    mCallback.onBeaconOutOfReach(result);
                 }
 
             } else if (ProcessScanActivity.URL_REDIRECTION_DONE.equals(intent.getAction())) {
@@ -286,8 +257,6 @@ public class ActionScreenUtils {
         if (mServiceEmail != null) {
             intentFilter.addAction(FriendsPlugin.SERVICE_API_CALL_ANSWERED_INTENT);
             intentFilter.addAction(FriendsPlugin.SERVICE_DATA_UPDATED);
-            intentFilter.addAction(FriendsPlugin.BEACON_IN_REACH);
-            intentFilter.addAction(FriendsPlugin.BEACON_OUT_OF_REACH);
         }
         
         intentFilter.addAction(FriendsPlugin.FRIEND_INFO_RECEIVED_INTENT);
@@ -329,13 +298,6 @@ public class ActionScreenUtils {
                 store.removeServiceApiCall(r.id);
             }
         }
-    }
-
-    public List<DiscoveredBeaconProximity> getBeaconsInReach() {
-        if (mTrackmePlugin == null) {
-            mTrackmePlugin = mMainService.getPlugin(TrackmePlugin.class);
-        }
-        return mTrackmePlugin.getBeaconsInReach(mServiceEmail);
     }
 
     public void hideKeyboard(final IBinder windowToken)  {

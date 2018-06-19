@@ -393,9 +393,6 @@ public abstract class AbstractRegistrationActivity extends ServiceBoundActivity 
         formParams.add(new BasicNameValuePair("invitor_code", invitorCode));
         formParams.add(new BasicNameValuePair("invitor_secret", invitorSecret));
 
-        org.json.simple.JSONArray beacons = new org.json.simple.JSONArray();
-        formParams.add(new BasicNameValuePair("beacons", beacons.toString()));
-
         httpPost.setEntity(new UrlEncodedFormEntity(formParams, HTTP.UTF_8));
         L.d("before http final post");
         HttpResponse response = httpClient.execute(httpPost);

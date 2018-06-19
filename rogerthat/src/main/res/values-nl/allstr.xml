@@ -219,12 +219,6 @@
     <string name="hint_double_tap">Dubbelklik om een antwoord te schrijven</string>
     <string name="hint_swipe">Swipe naar een andere conversatie</string>
     <string name="i_am_older_than_16y">Ik ben ouder dan 16 jaar</string>
-    <string name="ibeacon_usage_augment_experience">De %1$s app maakt gebruik van iBeacons om uw gebruiksgemak te vergroten.</string>
-    <string name="ibeacon_usage_discover_services_automatically">Automatisch ontdekken van mobiele diensten.</string>
-    <string name="ibeacon_usage_not_used_for">Wat de %1$s app niet doet:</string>
-    <string name="ibeacon_usage_store">Uw locatie opslaan.</string>
-    <string name="ibeacon_usage_track_location_without_concent">Uw locatie opvragen zonder uw voorafgaande toestemming.</string>
-    <string name="ibeacon_usage_used_for">De %1$s app gebruikt uw locatie voor:</string>
     <string name="identify">Identificeren</string>
     <string name="import_existing_key">Bestaande sleutel importeren</string>
     <string name="import_key">Beveiligingssleutel importeren</string>

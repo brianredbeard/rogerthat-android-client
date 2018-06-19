@@ -119,7 +119,6 @@ import com.mobicage.to.system.UpdateEmbeddedAppTranslationsResponseTO;
 import com.mobicage.to.system.UpdateSettingsRequestTO;
 import com.mobicage.to.system.UpdateSettingsResponseTO;
 
-import org.altbeacon.beacon.BeaconConsumer;
 import org.jivesoftware.smack.util.Base64;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -127,7 +126,6 @@ import org.json.simple.parser.JSONParser;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
-import java.math.BigInteger;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
@@ -146,10 +144,9 @@ import java.util.concurrent.ConcurrentMap;
 
 import static com.mobicage.rpc.config.LookAndFeelConstants.removeLookAndFeel;
 
-public class MainService extends Service implements TimeProvider, BeaconConsumer {
+public class MainService extends Service implements TimeProvider {
 
     public final static String PREFERENCES_UPDATE_INTENT = "com.mobicage.rogerthat.PREFERENCES_UPDATE";
-    public final static String INTENT_BEACON_SERVICE_CONNECTED = "com.mobicage.rogerthat.BEACON_SERVICE_CONNECTED";
     private final static String INTENT_SHOULD_CLEANUP = "com.mobicage.rogerthat.INTENT_SHOULD_CLEANUP";
 
     private final static String PREFERENCES_READY = "ready";
@@ -1798,11 +1795,6 @@ public class MainService extends Service implements TimeProvider, BeaconConsumer
             }
         }
         return !plugged;
-    }
-
-    @Override
-    public void onBeaconServiceConnect() {
-        sendBroadcast(new Intent(INTENT_BEACON_SERVICE_CONNECTED));
     }
 
     public int getScreenScale() {

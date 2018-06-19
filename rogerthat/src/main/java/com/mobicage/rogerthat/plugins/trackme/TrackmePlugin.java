@@ -18,34 +18,12 @@
 
 package com.mobicage.rogerthat.plugins.trackme;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
-
-import org.altbeacon.beacon.Beacon;
-import org.altbeacon.beacon.BeaconManager;
-import org.altbeacon.beacon.BeaconParser;
-import org.altbeacon.beacon.BleNotAvailableException;
-import org.altbeacon.beacon.MonitorNotifier;
-import org.altbeacon.beacon.RangeNotifier;
-import org.altbeacon.beacon.Region;
-import org.altbeacon.beacon.logging.LogManager;
-import org.altbeacon.beacon.logging.Loggers;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONValue;
-
 import android.Manifest;
 import android.annotation.TargetApi;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.RemoteException;
+import android.support.annotation.NonNull;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -55,7 +33,6 @@ import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListe
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.mobicage.api.location.Rpc;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.config.Configuration;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
@@ -65,9 +42,7 @@ import com.mobicage.rogerthat.util.db.DatabaseManager;
 import com.mobicage.rogerthat.util.geo.GeoLocationCallback;
 import com.mobicage.rogerthat.util.geo.GeoLocationProvider;
 import com.mobicage.rogerthat.util.logging.L;
-import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
-import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.time.TimeUtils;
 import com.mobicage.rpc.CallReceiver;
@@ -75,22 +50,11 @@ import com.mobicage.rpc.IJSONable;
 import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.rpc.SDCardLogger;
-import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.to.activity.GeoPointTO;
 import com.mobicage.to.activity.LocationRecordTO;
 import com.mobicage.to.activity.LogLocationRecipientTO;
 import com.mobicage.to.activity.LogLocationsRequestTO;
 import com.mobicage.to.activity.LogLocationsResponseTO;
-import com.mobicage.to.beacon.GetBeaconRegionsRequestTO;
-import com.mobicage.to.beacon.UpdateBeaconRegionsRequestTO;
-import com.mobicage.to.beacon.UpdateBeaconRegionsResponseTO;
-import com.mobicage.to.location.BeaconDiscoveredRequestTO;
-import com.mobicage.to.location.BeaconInReachRequestTO;
-import com.mobicage.to.location.BeaconInReachResponseTO;
-import com.mobicage.to.location.BeaconOutOfReachRequestTO;
-import com.mobicage.to.location.BeaconOutOfReachResponseTO;
-import com.mobicage.to.location.DeleteBeaconDiscoveryRequestTO;
-import com.mobicage.to.location.DeleteBeaconDiscoveryResponseTO;
 import com.mobicage.to.location.GetLocationErrorTO;
 import com.mobicage.to.location.GetLocationRequestTO;
 import com.mobicage.to.location.GetLocationResponseTO;
@@ -99,6 +63,14 @@ import com.mobicage.to.location.LocationResultResponseTO;
 import com.mobicage.to.location.TrackLocationRequestTO;
 import com.mobicage.to.location.TrackLocationResponseTO;
 import com.mobicage.to.system.SettingsTO;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONValue;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TimeZone;
 
 public class TrackmePlugin implements MobicagePlugin, com.mobicage.capi.location.IClientRpc, ConnectionCallbacks,
     OnConnectionFailedListener {
@@ -171,9 +143,6 @@ public class TrackmePlugin implements MobicagePlugin, com.mobicage.capi.location
         }
     }
 
-    public static final String TRACKME_PLUGIN_MUST_GET_BEACON_REGIONS = "com.mobicage.rogerthat.plugins.trackme.TRACKME_PLUGIN_MUST_GET_BEACON_REGIONS";
-    public static final String BEACON_REGIONS_UPDATED = "com.mobicage.rogerthat.plugins.trackme.BEACON_REGIONS_UPDATED";
-
     private final static String CONFIGKEY = "com.mobicage.rogerthat.plugins.trackme";
 
     private final static String CONFIG_GEO_LOCATION_TRACKING_ENABLED_KEY = "geoTrackingEnabled";
@@ -233,19 +202,6 @@ public class TrackmePlugin implements MobicagePlugin, com.mobicage.capi.location
 
     private boolean mTracking = false;
 
-    private BeaconManager mBeaconManager;
-    private final Map<String, DiscoveredBeaconProximity> mBeaconsInProximity = new HashMap<String, DiscoveredBeaconProximity>();
-    private final Map<String, ArrayList<BeaconProximity>> mLastBeaconsInProximity = new HashMap<String, ArrayList<BeaconProximity>>();
-    private final Map<String, Long> mDetectedBeaconsHistory = new HashMap<String, Long>();
-    private final Map<String, Long> mKnownBeacons = new HashMap<String, Long>();
-
-    private final TrackmeStore mStore;
-
-    private MonitorNotifier mBeaconMonitorNotifier = null;
-    private RangeNotifier mBeaconRangeNotifier = null;
-    private boolean mBeaconManagerStarted = false;
-    private List<BeaconRegion> mCurrentBeaconRegions = null;
-
     @TargetApi(18)
     public TrackmePlugin(final ConfigurationProvider pConfigProvider, final MainService service,
         final GeoLocationProvider pGeoLocationProvider, final SDCardLogger pLogger, final DatabaseManager dbManager) {
@@ -253,7 +209,6 @@ public class TrackmePlugin implements MobicagePlugin, com.mobicage.capi.location
         T.UI();
         mMainService = service;
         mConfigProvider = pConfigProvider;
-        mStore = new TrackmeStore(mMainService, dbManager);
 
         mGeoLocationProvider = pGeoLocationProvider;
         CallReceiver.comMobicageCapiLocationIClientRpc = this;
@@ -287,11 +242,7 @@ public class TrackmePlugin implements MobicagePlugin, com.mobicage.capi.location
     @Override
     public void destroy() {
         T.UI();
-        if (mBeaconManager != null) {
-            mBeaconManager.unbind(mMainService);
-        }
         mConfigProvider.unregisterListener(CONFIGKEY, this);
-        mMainService.unregisterReceiver(mBroadcastReceiver);
     }
 
     @Override
@@ -379,98 +330,12 @@ public class TrackmePlugin implements MobicagePlugin, com.mobicage.capi.location
         });
     }
 
-    public TrackmeStore getStore() {
-        T.dontCare();
-        return mStore;
-    }
-
-    private final BroadcastReceiver mBroadcastReceiver = new SafeBroadcastReceiver() {
-        @Override
-        public String[] onSafeReceive(Context context, Intent intent) {
-            T.UI();
-            if (MainService.INTENT_BEACON_SERVICE_CONNECTED.equals(intent.getAction())) {
-                mBeaconManager.setBackgroundMode(!mMainService.getScreenIsOn());
-                if (!mBeaconManagerStarted)
-                    startMonitoringBeaconRegions();
-                return null;
-            } else if (BEACON_REGIONS_UPDATED.equals(intent.getAction())) {
-                if (mBeaconManagerStarted)
-                    startMonitoringBeaconRegions();
-                return new String[] { intent.getAction() };
-            } else if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
-                if (mBeaconManager != null) {
-                    mBeaconManager.setBackgroundMode(true);
-                }
-                return null;
-            } else if (Intent.ACTION_SCREEN_ON.equals(intent.getAction())) {
-                if (mBeaconManager != null) {
-                    mBeaconManager.setBackgroundMode(false);
-                }
-                return null;
-            }
-            return null;
-        }
-    };
-
     @SuppressWarnings("unchecked")
     @Override
     public void initialize() {
         T.UI();
         reconfigure();
         mConfigProvider.registerListener(CONFIGKEY, this);
-
-        mMainService.postOnUIHandler(new SafeRunnable() {
-            @Override
-            protected void safeRun() throws Exception {
-                T.UI();
-                mMainService.postOnBIZZHandler(new SafeRunnable() {
-                    @Override
-                    protected void safeRun() throws Exception {
-                        if (mMainService.getPluginDBUpdates(TrackmePlugin.class).contains(
-                            TRACKME_PLUGIN_MUST_GET_BEACON_REGIONS)) {
-                            requestBeaconRegions();
-                            mMainService.clearPluginDBUpdate(TrackmePlugin.class,
-                                TRACKME_PLUGIN_MUST_GET_BEACON_REGIONS);
-                        }
-                    }
-                });
-            }
-        });
-
-        final IntentFilter intentFilter = new IntentFilter(BEACON_REGIONS_UPDATED);
-        intentFilter.addAction(MainService.INTENT_BEACON_SERVICE_CONNECTED);
-        intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
-        intentFilter.addAction(Intent.ACTION_SCREEN_ON);
-        mMainService.registerReceiver(mBroadcastReceiver, intentFilter);
-
-        if (mMainService.isPermitted(Manifest.permission.ACCESS_COARSE_LOCATION)) {
-            if (CloudConstants.DEBUG_LOGGING) {
-                LogManager.setLogger(Loggers.verboseLogger());
-                LogManager.setVerboseLoggingEnabled(true);
-            } else {
-                LogManager.setLogger(Loggers.empty());
-                LogManager.setVerboseLoggingEnabled(false);
-            }
-
-            mBeaconManager = BeaconManager.getInstanceForApplication(mMainService);
-            if (!mBeaconManager.isAnyConsumerBound()) {
-                mBeaconManager.getBeaconParsers().add(
-                        new BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25"));
-            }
-
-            try {
-                if (!mBeaconManager.checkAvailability()) {
-                    L.d("Bluetooth is not enabled");
-                }
-                mBeaconManager.bind(mMainService);
-            } catch (NullPointerException ex) {
-                L.i("BLE not available", ex);
-            } catch (BleNotAvailableException ex) {
-                L.d(ex.getMessage());
-            } catch (SecurityException ex) {
-                L.bug(ex);
-            }
-        }
 
         if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(mMainService) == ConnectionResult.SUCCESS) {
             final Configuration cfg = mConfigProvider.getConfiguration(TRACKING_CONFIGKEY);
@@ -597,333 +462,6 @@ public class TrackmePlugin implements MobicagePlugin, com.mobicage.capi.location
         return new LocationResultResponseTO();
     }
 
-    private void removeBeaconFromCaches(String key) {
-        mLastBeaconsInProximity.remove(key);
-        mBeaconsInProximity.remove(key);
-        mDetectedBeaconsHistory.remove(key);
-        mKnownBeacons.remove(key);
-    }
-
-    public void deleteBeaconDiscovery(String friendEmail) {
-        L.d("Received delete beaconDiscovery for friend: " + friendEmail);
-        mStore.deleteBeaconDiscovery(friendEmail);
-        for (DiscoveredBeaconProximity dbp : getBeaconsInReach(friendEmail)) {
-            String key = getBeaconProximityKey(dbp.uuid, getBeaconName(dbp.major, dbp.minor));
-            removeBeaconFromCaches(key);
-        }
-    }
-
-    @Override
-    public DeleteBeaconDiscoveryResponseTO deleteBeaconDiscovery(DeleteBeaconDiscoveryRequestTO request)
-        throws Exception {
-        L.d("Received delete beaconDiscovery with uuid: " + request.uuid + " name: " + request.name);
-        mStore.deleteBeaconDiscovery(request.uuid, request.name);
-        String key = getBeaconProximityKey(request.uuid, request.name);
-        removeBeaconFromCaches(key);
-        return new DeleteBeaconDiscoveryResponseTO();
-    }
-
-    @Override
-    public UpdateBeaconRegionsResponseTO updateBeaconRegions(UpdateBeaconRegionsRequestTO request) throws Exception {
-        requestBeaconRegions();
-        return new UpdateBeaconRegionsResponseTO();
-    }
-
-    public boolean requestBeaconRegions() {
-        T.dontCare();
-        GetBeaconRegionsRequestTO request = new GetBeaconRegionsRequestTO();
-        try {
-            Rpc.getBeaconRegions(new GetBeaconRegionsResponseHandler(), request);
-        } catch (Exception e) {
-            L.bug("Error while sending get beacon regions rpc request", e);
-            return false;
-        }
-        return true;
-    }
-
-    public static String getBeaconProximityKey(String uuid, String beaconName) {
-        return uuid + "|" + beaconName;
-    }
-
-    public static String getBeaconName(int major, int minor) {
-        return major + "|" + minor;
-    }
-
-    private boolean shouldNotifyBeaconInReach(String uuid, int major, int minor, int proximity) {
-        String beaconName = getBeaconName(major, minor);
-        String key = getBeaconProximityKey(uuid, beaconName);
-        L.v("shouldNotifyBeaconInReach: " + key + " => " + proximity);
-
-        BeaconProximity bp = new BeaconProximity();
-        bp.uuid = uuid;
-        bp.major = major;
-        bp.minor = minor;
-        bp.proximity = proximity;
-
-        ArrayList<BeaconProximity> lastBeacons = mLastBeaconsInProximity.get(key);
-        if (lastBeacons == null) {
-            lastBeacons = new ArrayList<BeaconProximity>();
-            mLastBeaconsInProximity.put(key, lastBeacons);
-        } else if (lastBeacons.size() > 2) {
-            lastBeacons.remove(0);
-        }
-        lastBeacons.add(bp);
-
-        DiscoveredBeaconProximity bpLive = mBeaconsInProximity.get(key);
-        if (bpLive != null) {
-            if (proximity == bpLive.proximity || lastBeacons.size() < 3) {
-                return false;
-            } else {
-                for (BeaconProximity bpp : lastBeacons) {
-                    if (bpp.proximity != proximity) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return true;
-    }
-
-    private void notifyBeaconInReach(String uuid, int major, int minor, int proximity) {
-        String beaconName = getBeaconName(major, minor);
-        Map<String, Object> beaconInfo = mStore.getFriendConnectedToBeaconDiscovery(uuid, beaconName);
-        if (beaconInfo != null) {
-            L.d("Beacon in reach with uuid: " + uuid + " Major: " + major + " Minor: " + minor);
-
-            String friendEmail = (String) beaconInfo.get("email");
-            String tag = (String) beaconInfo.get("tag");
-            long callbacks = (Long) beaconInfo.get("callbacks");
-
-            DiscoveredBeaconProximity bp = new DiscoveredBeaconProximity();
-            bp.uuid = uuid;
-            bp.major = major;
-            bp.minor = minor;
-            bp.friendEmail = friendEmail;
-            bp.tag = tag;
-            bp.proximity = proximity;
-
-            String key = getBeaconProximityKey(uuid, beaconName);
-            mBeaconsInProximity.put(key, bp);
-
-            Intent intent = new Intent(FriendsPlugin.BEACON_IN_REACH);
-            intent.putExtra("email", friendEmail);
-            intent.putExtra("uuid", uuid);
-            intent.putExtra("major", major);
-            intent.putExtra("minor", minor);
-            intent.putExtra("tag", tag);
-            intent.putExtra("proximity", proximity);
-            mMainService.sendBroadcast(intent);
-
-            if (SystemUtils.isFlagEnabled(callbacks, FriendsPlugin.SERVICE_CALLBACK_FRIEND_IN_REACH)) {
-                BeaconInReachRequestTO request = new BeaconInReachRequestTO();
-                request.uuid = uuid;
-                request.name = beaconName;
-                request.friend_email = friendEmail;
-                request.proximity = proximity;
-
-                try {
-                    com.mobicage.api.location.Rpc
-                        .beaconInReach(new ResponseHandler<BeaconInReachResponseTO>(), request);
-                } catch (Exception e) {
-                    L.bug(e);
-                    return;
-                }
-            }
-        }
-    }
-
-    private void notifyBeaconOutOfReach(String uuid, int major, int minor) {
-        String beaconName = getBeaconName(major, minor);
-        String beaconKey = getBeaconProximityKey(uuid, beaconName);
-
-        if (mBeaconsInProximity.containsKey(beaconKey)) {
-            mBeaconsInProximity.remove(beaconKey);
-            mLastBeaconsInProximity.remove(beaconKey);
-
-            Map<String, Object> beaconInfo = mStore.getFriendConnectedToBeaconDiscovery(uuid, beaconName);
-            if (beaconInfo != null) {
-                L.d("Beacon out of reach with uuid: " + uuid + " Major: " + major + " Minor: " + minor);
-                String friendEmail = (String) beaconInfo.get("email");
-                String tag = (String) beaconInfo.get("tag");
-                long callbacks = (Long) beaconInfo.get("callbacks");
-
-                Intent intent = new Intent(FriendsPlugin.BEACON_OUT_OF_REACH);
-                intent.putExtra("email", friendEmail);
-                intent.putExtra("uuid", uuid);
-                intent.putExtra("major", major);
-                intent.putExtra("minor", minor);
-                intent.putExtra("tag", tag);
-                intent.putExtra("proximity", BeaconProximity.PROXIMITY_UNKNOWN);
-                mMainService.sendBroadcast(intent);
-
-                if (SystemUtils.isFlagEnabled(callbacks, FriendsPlugin.SERVICE_CALLBACK_FRIEND_OUT_OF_REACH)) {
-                    BeaconOutOfReachRequestTO request = new BeaconOutOfReachRequestTO();
-                    request.uuid = uuid;
-                    request.name = beaconName;
-                    request.friend_email = friendEmail;
-
-                    try {
-                        com.mobicage.api.location.Rpc.beaconOutOfReach(
-                            new ResponseHandler<BeaconOutOfReachResponseTO>(), request);
-                    } catch (Exception e) {
-                        L.bug(e);
-                        return;
-                    }
-                }
-            }
-        }
-    }
-
-    public List<DiscoveredBeaconProximity> getBeaconsInReach(String friendEmail) {
-        List<DiscoveredBeaconProximity> beaconsInReach = new ArrayList<DiscoveredBeaconProximity>();
-        for (DiscoveredBeaconProximity bp : mBeaconsInProximity.values()) {
-            if (friendEmail.equals(bp.friendEmail)) {
-                beaconsInReach.add(bp);
-            }
-        }
-        return beaconsInReach;
-    }
-
-    public void startMonitoringBeaconRegions() {
-        mBeaconManagerStarted = true;
-        mBeaconManager.setMonitorNotifier(getBeaconMonitorNotifier());
-        mBeaconManager.setRangeNotifier(getBeaconRangeNotifier());
-
-        try {
-            List<BeaconRegion> beaconRegions = mStore.getBeaconRegions();
-            if (mCurrentBeaconRegions != null) {
-                for (BeaconRegion br : mCurrentBeaconRegions) {
-                    if (!beaconRegions.contains(br)) {
-                        final Region r = new Region(br.getUniqueRegionId(), BeaconRegion.getId1(br),
-                            BeaconRegion.getId2(br), BeaconRegion.getId3(br));
-                        L.d("Stop monitoring region: " + r.getUniqueId());
-                        mBeaconManager.stopRangingBeaconsInRegion(r);
-                        mBeaconManager.stopMonitoringBeaconsInRegion(r);
-                    }
-                }
-            }
-
-            for (BeaconRegion br : beaconRegions) {
-                if (mCurrentBeaconRegions == null || !mCurrentBeaconRegions.contains(br)) {
-                    final Region r = new Region(br.getUniqueRegionId(), BeaconRegion.getId1(br),
-                        BeaconRegion.getId2(br), BeaconRegion.getId3(br));
-                    L.d("Start monitoring region: " + r.getUniqueId());
-                    mBeaconManager.startMonitoringBeaconsInRegion(r);
-                }
-            }
-            mCurrentBeaconRegions = beaconRegions;
-        } catch (RemoteException e) {
-            L.e(e);
-        }
-    }
-
-    private MonitorNotifier getBeaconMonitorNotifier() {
-        if (mBeaconMonitorNotifier == null) {
-            mBeaconMonitorNotifier = new MonitorNotifier() {
-
-                @Override
-                public void didEnterRegion(Region region) {
-                    L.d("didEnterRegion: " + region.getUniqueId());
-                    try {
-                        mBeaconManager.startRangingBeaconsInRegion(region);
-                    } catch (RemoteException e) {
-                        L.e(e);
-                    }
-                }
-
-                @Override
-                public void didExitRegion(Region region) {
-                    L.d("didExitRegion: " + region.getUniqueId());
-                    try {
-                        mBeaconManager.stopRangingBeaconsInRegion(region);
-                    } catch (RemoteException e) {
-                        L.e(e);
-                    }
-                }
-
-                @Override
-                public void didDetermineStateForRegion(int state, Region region) {
-                }
-            };
-        }
-        return mBeaconMonitorNotifier;
-    }
-
-    private RangeNotifier getBeaconRangeNotifier() {
-        if (mBeaconRangeNotifier == null) {
-            mBeaconRangeNotifier = new RangeNotifier() {
-
-                @Override
-                public void didRangeBeaconsInRegion(final Collection<Beacon> iBeacons, final Region region) {
-                    L.v("\n- Current beacons in region: " + region.getUniqueId() + " (" + iBeacons.size() + "):");
-                    final long now = System.currentTimeMillis();
-
-                    mMainService.postOnBIZZHandler(new SafeRunnable() {
-                        @Override
-                        protected void safeRun() throws Exception {
-                            T.BIZZ();
-                            for (Beacon b : iBeacons) {
-                                String uuid = b.getId1().toUuid().toString();
-                                int major = b.getId2().toInt();
-                                int minor = b.getId3().toInt();
-                                String beaconName = getBeaconName(major, minor);
-                                int proximity = BeaconProximity.calculateProximity(b.getDistance());
-                                String beaconKey = getBeaconProximityKey(uuid, beaconName);
-
-                                boolean exists = mKnownBeacons.containsKey(beaconKey)
-                                    || mStore.beaconDiscoveryExists(uuid, beaconName);
-
-                                if (exists) {
-                                    mKnownBeacons.put(beaconKey, now);
-                                    if (shouldNotifyBeaconInReach(uuid, major, minor, proximity)) {
-                                        notifyBeaconInReach(uuid, major, minor, proximity);
-                                    }
-                                } else {
-                                    BeaconDiscoveredRequestTO request = new BeaconDiscoveredRequestTO();
-                                    request.uuid = uuid;
-                                    request.name = beaconName;
-
-                                    final BeaconDiscoveredResponseHandler responseHandler = new BeaconDiscoveredResponseHandler();
-                                    responseHandler.setUUID(uuid);
-                                    responseHandler.setMajor(major);
-                                    responseHandler.setMinor(minor);
-                                    responseHandler.setProximity(proximity);
-
-                                    try {
-                                        com.mobicage.api.location.Rpc.beaconDiscovered(responseHandler, request);
-                                    } catch (Exception e) {
-                                        L.bug(e);
-                                        return;
-                                    }
-
-                                    mStore.saveBeaconDiscovery(uuid, beaconName);
-                                }
-                                mDetectedBeaconsHistory.put(beaconKey, now);
-                            }
-
-                            // TODO: does this work as expected with more beaconRegions?
-                            ArrayList<String> beaconsOutOfReach = new ArrayList<String>();
-                            for (String beaconKey : mDetectedBeaconsHistory.keySet()) {
-                                long timestamp = mDetectedBeaconsHistory.get(beaconKey);
-                                if (timestamp < now - 10000) {
-                                    beaconsOutOfReach.add(beaconKey);
-                                }
-                            }
-                            for (String boor : beaconsOutOfReach) {
-                                mDetectedBeaconsHistory.remove(boor);
-                                String[] beacon = boor.split("\\|");
-                                notifyBeaconOutOfReach(beacon[0], Integer.parseInt(beacon[1]),
-                                    Integer.parseInt(beacon[2]));
-                            }
-                        }
-                    });
-
-                }
-            };
-        }
-        return mBeaconRangeNotifier;
-    }
-
     private void buildGoogleApiClient() {
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(mMainService).addConnectionCallbacks(this)
@@ -949,7 +487,7 @@ public class TrackmePlugin implements MobicagePlugin, com.mobicage.capi.location
     }
 
     @Override
-    public void onConnectionFailed(ConnectionResult result) {
+    public void onConnectionFailed(@NonNull ConnectionResult result) {
         // Refer to the javadoc for ConnectionResult to see what error codes might be returned in
         // onConnectionFailed.
         L.i("Connection failed: ConnectionResult.getErrorCode() = " + result.getErrorCode());

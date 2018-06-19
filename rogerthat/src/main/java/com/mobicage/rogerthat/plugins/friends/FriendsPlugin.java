@@ -146,8 +146,6 @@ public class FriendsPlugin implements MobicagePlugin {
     public static final String FRIEND_SEARCH_FAILED_INTENT = "com.mobicage.rogerthat.plugins.friends.FRIEND_SEARCH_FAILED_INTENT";
     public static final String SERVICE_API_CALL_ANSWERED_INTENT = "com.mobicage.rogerthat.plugins.friends.SERVICE_API_CALL_ANSWERED";
     public static final String SERVICE_DATA_UPDATED = "com.mobicage.rogerthat.plugins.friends.SERVICE_DATA_UPDATED";
-    public static final String BEACON_IN_REACH = "com.mobicage.rogerthat.plugins.friends.BEACON_IN_REACH";
-    public static final String BEACON_OUT_OF_REACH = "com.mobicage.rogerthat.plugins.friends.BEACON_OUT_OF_REACH";
     public final static String FRIEND_INFO_RECEIVED_INTENT = "com.mobicage.rogerthat.plugins.friends.FRIEND_INFO_RECEIVED";
     public static final String SERVICE_ACTION_INFO_RECEIVED_INTENT = "com.mobicage.rogerthat.plugins.friends.SERVICE_ACTION_INFO_RECEIVED";
     public static final String FRIENDS_PLUGIN_MUST_DO_FULL_REFRESH_INTENT = "com.mobicage.rogerthat.plugins.friends.FRIENDS_PLUGIN_MUST_DO_FULL_REFRESH_INTENT";
@@ -502,8 +500,6 @@ public class FriendsPlugin implements MobicagePlugin {
                         mStore.deleteFromFriendSet(removedFriend);
                         mStore.deleteFriend(removedFriend);
                         mStore.clearGroupMember(removedFriend);
-
-                        mTrackmePlugin.deleteBeaconDiscovery(removedFriend);
                     }
                     mStore.clearEmptyGroup();
 
@@ -740,9 +736,6 @@ public class FriendsPlugin implements MobicagePlugin {
                 T.BIZZ();
                 mStore.clearGroupMember(email);
                 mStore.clearEmptyGroup();
-
-                mTrackmePlugin.deleteBeaconDiscovery(email);
-
                 mStore.setFriendExistence(email, Friend.DELETION_PENDING);
                 Intent intent = new Intent(FRIEND_MARKED_FOR_REMOVAL_INTENT);
                 intent.putExtra("email", email);

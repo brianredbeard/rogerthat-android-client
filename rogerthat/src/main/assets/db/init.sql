@@ -17,19 +17,6 @@ CREATE TABLE ConfigurationProvider(
 	valuetype TEXT, 
 	key TEXT UNIQUE, 
 	value TEXT);
-CREATE TABLE beacon_discovery (
-    uuid TEXT NOT NULL,
-    name TEXT NOT NULL,
-    timestamp INTEGER,
-    friend_email TEXT, tag TEXT,
-    CONSTRAINT beacon_discovery_primary PRIMARY KEY(uuid,name)
-);
-CREATE TABLE beacon_region (
-    uuid TEXT NOT NULL,
-    major INTEGER,
-    minor INTEGER,
-    CONSTRAINT beacon_region_primary PRIMARY KEY(uuid,major,minor)
-);
 CREATE TABLE button (
 	message TEXT NOT NULL,
 	id TEXT NOT NULL,

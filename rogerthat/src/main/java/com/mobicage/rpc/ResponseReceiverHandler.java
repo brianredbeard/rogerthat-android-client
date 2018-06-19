@@ -230,42 +230,6 @@ public class ResponseReceiverHandler {
                 resp.setResult(Parser.ComMobicageToFriendsUserScannedResponseTO(rpcr.result));
             ((IResponseHandler<com.mobicage.to.friends.UserScannedResponseTO>) responseHandler).handle(resp);
         }
-        if ("com.mobicage.api.location.beaconDiscovered".equals(function)) {
-            final Response<com.mobicage.to.location.BeaconDiscoveredResponseTO> resp = new Response<com.mobicage.to.location.BeaconDiscoveredResponseTO>();
-            resp.setError(rpcr.error);
-            resp.setSuccess(rpcr.success);
-            resp.setCallId(rpcr.callId);
-            if (rpcr.success)
-                resp.setResult(Parser.ComMobicageToLocationBeaconDiscoveredResponseTO(rpcr.result));
-            ((IResponseHandler<com.mobicage.to.location.BeaconDiscoveredResponseTO>) responseHandler).handle(resp);
-        }
-        if ("com.mobicage.api.location.beaconInReach".equals(function)) {
-            final Response<com.mobicage.to.location.BeaconInReachResponseTO> resp = new Response<com.mobicage.to.location.BeaconInReachResponseTO>();
-            resp.setError(rpcr.error);
-            resp.setSuccess(rpcr.success);
-            resp.setCallId(rpcr.callId);
-            if (rpcr.success)
-                resp.setResult(Parser.ComMobicageToLocationBeaconInReachResponseTO(rpcr.result));
-            ((IResponseHandler<com.mobicage.to.location.BeaconInReachResponseTO>) responseHandler).handle(resp);
-        }
-        if ("com.mobicage.api.location.beaconOutOfReach".equals(function)) {
-            final Response<com.mobicage.to.location.BeaconOutOfReachResponseTO> resp = new Response<com.mobicage.to.location.BeaconOutOfReachResponseTO>();
-            resp.setError(rpcr.error);
-            resp.setSuccess(rpcr.success);
-            resp.setCallId(rpcr.callId);
-            if (rpcr.success)
-                resp.setResult(Parser.ComMobicageToLocationBeaconOutOfReachResponseTO(rpcr.result));
-            ((IResponseHandler<com.mobicage.to.location.BeaconOutOfReachResponseTO>) responseHandler).handle(resp);
-        }
-        if ("com.mobicage.api.location.getBeaconRegions".equals(function)) {
-            final Response<com.mobicage.to.beacon.GetBeaconRegionsResponseTO> resp = new Response<com.mobicage.to.beacon.GetBeaconRegionsResponseTO>();
-            resp.setError(rpcr.error);
-            resp.setSuccess(rpcr.success);
-            resp.setCallId(rpcr.callId);
-            if (rpcr.success)
-                resp.setResult(Parser.ComMobicageToBeaconGetBeaconRegionsResponseTO(rpcr.result));
-            ((IResponseHandler<com.mobicage.to.beacon.GetBeaconRegionsResponseTO>) responseHandler).handle(resp);
-        }
         if ("com.mobicage.api.location.getFriendLocation".equals(function)) {
             final Response<com.mobicage.to.location.GetFriendLocationResponseTO> resp = new Response<com.mobicage.to.location.GetFriendLocationResponseTO>();
             resp.setError(rpcr.error);

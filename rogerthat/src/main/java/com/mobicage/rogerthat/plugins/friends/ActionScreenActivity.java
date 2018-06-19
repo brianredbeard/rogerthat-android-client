@@ -242,10 +242,6 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             else if ("user/put".equals(action)) {
                 putUserData(params);
             }
-            // SERVICE
-            else if ("service/getBeaconsInReach".equals(action)) {
-                getBeaconsInReach(params);
-            }
             // SYSTEM
             else if ("system/onBackendConnectivityChanged".equals(action)) {
                 onBackendConnectivityChanged(params);
@@ -306,17 +302,6 @@ public class ActionScreenActivity extends ServiceBoundActivity {
             String data = JsonUtils.optString(params, "u", null);
             boolean smart = params.optBoolean("smart", false);
             mFriendsPlugin.putUserData(mServiceEmail, data, smart);
-        }
-
-        private void getBeaconsInReach(final JSONObject params) throws JSONException {
-            if (params == null) {
-                L.w("Expected params != null");
-                return;
-            }
-            String requestId = params.getString("id");
-            Map<String, Object> result = new HashMap<String, Object>();
-            result.put("beacons", mActionScreenUtils.getBeaconsInReach());
-            deliverResult(requestId, result, null);
         }
 
         private void onBackendConnectivityChanged(final JSONObject params) throws JSONException {
@@ -1591,16 +1576,6 @@ public class ActionScreenActivity extends ServiceBoundActivity {
         @Override
         public void serviceDataUpdated(String serviceData) {
             executeJS(false, "if (typeof rogerthat !== 'undefined') rogerthat._serviceDataUpdated(%s)", serviceData);
-        }
-
-        @Override
-        public void onBeaconInReach(Map<String, Object> beacon) {
-            executeJS(false, "if (typeof rogerthat !== 'undefined') rogerthat._onBeaconInReach(%s)", JSONValue.toJSONString(beacon));
-        }
-
-        @Override
-        public void onBeaconOutOfReach(Map<String, Object> beacon) {
-            executeJS(false, "if (typeof rogerthat !== 'undefined') rogerthat._onBeaconOutOfReach(%s)", JSONValue.toJSONString(beacon));
         }
 
         @Override

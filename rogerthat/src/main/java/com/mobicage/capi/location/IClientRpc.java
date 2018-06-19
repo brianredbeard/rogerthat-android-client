@@ -20,14 +20,10 @@ package com.mobicage.capi.location;
 
 public interface IClientRpc {
 
-    com.mobicage.to.location.DeleteBeaconDiscoveryResponseTO deleteBeaconDiscovery(com.mobicage.to.location.DeleteBeaconDiscoveryRequestTO request) throws java.lang.Exception;
-
     com.mobicage.to.location.GetLocationResponseTO getLocation(com.mobicage.to.location.GetLocationRequestTO request) throws java.lang.Exception;
 
     com.mobicage.to.location.LocationResultResponseTO locationResult(com.mobicage.to.location.LocationResultRequestTO request) throws java.lang.Exception;
 
     com.mobicage.to.location.TrackLocationResponseTO trackLocation(com.mobicage.to.location.TrackLocationRequestTO request) throws java.lang.Exception;
-
-    com.mobicage.to.beacon.UpdateBeaconRegionsResponseTO updateBeaconRegions(com.mobicage.to.beacon.UpdateBeaconRegionsRequestTO request) throws java.lang.Exception;
 
 }

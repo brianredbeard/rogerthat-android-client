@@ -35,9 +35,9 @@ import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
 import com.mobicage.rogerthat.util.GoogleServicesUtils;
 import com.mobicage.rogerthat.util.GoogleServicesUtils.GCMRegistrationIdFoundCallback;
-import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.security.SecurityUtils;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
 import com.mobicage.rogerthat.util.system.SystemUtils;
@@ -52,7 +52,6 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
@@ -66,9 +65,7 @@ import org.json.simple.JSONValue;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 public class ContentBrandingRegistrationActivity extends AbstractRegistrationActivity {
@@ -434,7 +431,7 @@ public class ContentBrandingRegistrationActivity extends AbstractRegistrationAct
 
     @SuppressWarnings("unchecked")
     private void postFinishRegistration(final String username, final String password, final String invitorCode,
-        final String invitorSecret) throws ClientProtocolException, IOException {
+                                        final String invitorSecret) throws IOException {
         T.REGISTRATION();
         final String mobileInfo = getMobileInfo();
         HttpClient httpClient = HTTPUtil.getHttpClient();
@@ -446,7 +443,6 @@ public class ContentBrandingRegistrationActivity extends AbstractRegistrationAct
         formParams.add(new BasicNameValuePair("accounts", ""));
         formParams.add(new BasicNameValuePair("invitor_code", invitorCode));
         formParams.add(new BasicNameValuePair("invitor_secret", invitorSecret));
-        formParams.add(new BasicNameValuePair("beacons", ""));
 
         httpPost.setEntity(new UrlEncodedFormEntity(formParams, HTTP.UTF_8));
         L.d("before http final post");

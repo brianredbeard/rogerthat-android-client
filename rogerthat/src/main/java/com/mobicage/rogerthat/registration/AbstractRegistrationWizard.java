@@ -18,7 +18,6 @@
 package com.mobicage.rogerthat.registration;
 
 import com.mobicage.rogerthat.MainService;
-import com.mobicage.rogerthat.util.consent.ConsentProvider;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeAsyncTask;
@@ -26,8 +25,6 @@ import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.Wizard;
 import com.mobicage.rpc.Credentials;
 import com.mobicage.rpc.config.CloudConstants;
-import com.mobicage.to.beacon.GetBeaconRegionsResponseTO;
-import com.mobicage.to.location.BeaconDiscoveredRequestTO;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -40,17 +37,13 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 public abstract class AbstractRegistrationWizard extends Wizard {
 

@@ -51,7 +51,6 @@ public class Updates {
         mUpdates.put(57, new RequestFriendSet());
         mUpdates.put(58, new RequestFriendSet());
         mUpdates.put(59, new RequestGroups());
-        mUpdates.put(60, new RequestBeaconRegions());
         mUpdates.put(62, new RequestJsEmbeddings());
         mUpdates.put(65, new RequestUpdateEmailHashes());
         mUpdates.put(69, new DeleteAttachments());

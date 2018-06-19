@@ -314,41 +314,6 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
-    public static com.mobicage.to.beacon.BeaconRegionTO ComMobicageToBeaconBeaconRegionTO(Object value) throws IncompleteMessageException {
-        if (value == null)
-            return null;
-        return new com.mobicage.to.beacon.BeaconRegionTO((Map<String, Object>) value);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static com.mobicage.to.beacon.GetBeaconRegionsRequestTO ComMobicageToBeaconGetBeaconRegionsRequestTO(Object value) throws IncompleteMessageException {
-        if (value == null)
-            return null;
-        return new com.mobicage.to.beacon.GetBeaconRegionsRequestTO((Map<String, Object>) value);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static com.mobicage.to.beacon.GetBeaconRegionsResponseTO ComMobicageToBeaconGetBeaconRegionsResponseTO(Object value) throws IncompleteMessageException {
-        if (value == null)
-            return null;
-        return new com.mobicage.to.beacon.GetBeaconRegionsResponseTO((Map<String, Object>) value);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static com.mobicage.to.beacon.UpdateBeaconRegionsRequestTO ComMobicageToBeaconUpdateBeaconRegionsRequestTO(Object value) throws IncompleteMessageException {
-        if (value == null)
-            return null;
-        return new com.mobicage.to.beacon.UpdateBeaconRegionsRequestTO((Map<String, Object>) value);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static com.mobicage.to.beacon.UpdateBeaconRegionsResponseTO ComMobicageToBeaconUpdateBeaconRegionsResponseTO(Object value) throws IncompleteMessageException {
-        if (value == null)
-            return null;
-        return new com.mobicage.to.beacon.UpdateBeaconRegionsResponseTO((Map<String, Object>) value);
-    }
-
-    @SuppressWarnings("unchecked")
     public static com.mobicage.to.friends.AckInvitationByInvitationSecretRequestTO ComMobicageToFriendsAckInvitationByInvitationSecretRequestTO(Object value) throws IncompleteMessageException {
         if (value == null)
             return null;
@@ -801,62 +766,6 @@ public class Parser {
         if (value == null)
             return null;
         return new com.mobicage.to.js_embedding.UpdateJSEmbeddingResponseTO((Map<String, Object>) value);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static com.mobicage.to.location.BeaconDiscoveredRequestTO ComMobicageToLocationBeaconDiscoveredRequestTO(Object value) throws IncompleteMessageException {
-        if (value == null)
-            return null;
-        return new com.mobicage.to.location.BeaconDiscoveredRequestTO((Map<String, Object>) value);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static com.mobicage.to.location.BeaconDiscoveredResponseTO ComMobicageToLocationBeaconDiscoveredResponseTO(Object value) throws IncompleteMessageException {
-        if (value == null)
-            return null;
-        return new com.mobicage.to.location.BeaconDiscoveredResponseTO((Map<String, Object>) value);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static com.mobicage.to.location.BeaconInReachRequestTO ComMobicageToLocationBeaconInReachRequestTO(Object value) throws IncompleteMessageException {
-        if (value == null)
-            return null;
-        return new com.mobicage.to.location.BeaconInReachRequestTO((Map<String, Object>) value);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static com.mobicage.to.location.BeaconInReachResponseTO ComMobicageToLocationBeaconInReachResponseTO(Object value) throws IncompleteMessageException {
-        if (value == null)
-            return null;
-        return new com.mobicage.to.location.BeaconInReachResponseTO((Map<String, Object>) value);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static com.mobicage.to.location.BeaconOutOfReachRequestTO ComMobicageToLocationBeaconOutOfReachRequestTO(Object value) throws IncompleteMessageException {
-        if (value == null)
-            return null;
-        return new com.mobicage.to.location.BeaconOutOfReachRequestTO((Map<String, Object>) value);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static com.mobicage.to.location.BeaconOutOfReachResponseTO ComMobicageToLocationBeaconOutOfReachResponseTO(Object value) throws IncompleteMessageException {
-        if (value == null)
-            return null;
-        return new com.mobicage.to.location.BeaconOutOfReachResponseTO((Map<String, Object>) value);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static com.mobicage.to.location.DeleteBeaconDiscoveryRequestTO ComMobicageToLocationDeleteBeaconDiscoveryRequestTO(Object value) throws IncompleteMessageException {
-        if (value == null)
-            return null;
-        return new com.mobicage.to.location.DeleteBeaconDiscoveryRequestTO((Map<String, Object>) value);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static com.mobicage.to.location.DeleteBeaconDiscoveryResponseTO ComMobicageToLocationDeleteBeaconDiscoveryResponseTO(Object value) throws IncompleteMessageException {
-        if (value == null)
-            return null;
-        return new com.mobicage.to.location.DeleteBeaconDiscoveryResponseTO((Map<String, Object>) value);
     }
 
     @SuppressWarnings("unchecked")

@@ -20,50 +20,6 @@ package com.mobicage.api.location;
 
 public class Rpc {
 
-    public static void beaconDiscovered(com.mobicage.rpc.IResponseHandler<com.mobicage.to.location.BeaconDiscoveredResponseTO> responseHandler,
-            com.mobicage.to.location.BeaconDiscoveredRequestTO request) throws Exception {
-        java.util.Map<java.lang.String, java.lang.Object> arguments = new java.util.LinkedHashMap<java.lang.String, java.lang.Object>();
-        if (request == null) {
-            arguments.put("request", null);
-        } else {
-            arguments.put("request", request.toJSONMap());
-        }
-        com.mobicage.rpc.Rpc.call("com.mobicage.api.location.beaconDiscovered", arguments, responseHandler);
-    }
-
-    public static void beaconInReach(com.mobicage.rpc.IResponseHandler<com.mobicage.to.location.BeaconInReachResponseTO> responseHandler,
-            com.mobicage.to.location.BeaconInReachRequestTO request) throws Exception {
-        java.util.Map<java.lang.String, java.lang.Object> arguments = new java.util.LinkedHashMap<java.lang.String, java.lang.Object>();
-        if (request == null) {
-            arguments.put("request", null);
-        } else {
-            arguments.put("request", request.toJSONMap());
-        }
-        com.mobicage.rpc.Rpc.call("com.mobicage.api.location.beaconInReach", arguments, responseHandler);
-    }
-
-    public static void beaconOutOfReach(com.mobicage.rpc.IResponseHandler<com.mobicage.to.location.BeaconOutOfReachResponseTO> responseHandler,
-            com.mobicage.to.location.BeaconOutOfReachRequestTO request) throws Exception {
-        java.util.Map<java.lang.String, java.lang.Object> arguments = new java.util.LinkedHashMap<java.lang.String, java.lang.Object>();
-        if (request == null) {
-            arguments.put("request", null);
-        } else {
-            arguments.put("request", request.toJSONMap());
-        }
-        com.mobicage.rpc.Rpc.call("com.mobicage.api.location.beaconOutOfReach", arguments, responseHandler);
-    }
-
-    public static void getBeaconRegions(com.mobicage.rpc.IResponseHandler<com.mobicage.to.beacon.GetBeaconRegionsResponseTO> responseHandler,
-            com.mobicage.to.beacon.GetBeaconRegionsRequestTO request) throws Exception {
-        java.util.Map<java.lang.String, java.lang.Object> arguments = new java.util.LinkedHashMap<java.lang.String, java.lang.Object>();
-        if (request == null) {
-            arguments.put("request", null);
-        } else {
-            arguments.put("request", request.toJSONMap());
-        }
-        com.mobicage.rpc.Rpc.call("com.mobicage.api.location.getBeaconRegions", arguments, responseHandler);
-    }
-
     public static void getFriendLocation(com.mobicage.rpc.IResponseHandler<com.mobicage.to.location.GetFriendLocationResponseTO> responseHandler,
             com.mobicage.to.location.GetFriendLocationRequestTO request) throws Exception {
         java.util.Map<java.lang.String, java.lang.Object> arguments = new java.util.LinkedHashMap<java.lang.String, java.lang.Object>();

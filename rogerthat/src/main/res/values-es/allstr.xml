@@ -195,12 +195,6 @@
     <string name="hint_broadcast_icon">Pulsa este icono en la parte superior derecha para seleccionar los mensajes de %1$s que no desea recibir.</string>
     <string name="hint_double_tap">Haga doble click para responder</string>
     <string name="hint_swipe">Arrastre con el dedo para cambiar a otra conversación</string>
-    <string name="ibeacon_usage_augment_experience">%1$s utiliza iBeacons para aumentar su experiencia de usuario</string>
-    <string name="ibeacon_usage_discover_services_automatically">Descubre automáticamente los servicios móviles</string>
-    <string name="ibeacon_usage_not_used_for">Lo que %1$s no:</string>
-    <string name="ibeacon_usage_store">Almacene su ubicación</string>
-    <string name="ibeacon_usage_track_location_without_concent">Seguimiento de su ubicación sin su consentimiento previo</string>
-    <string name="ibeacon_usage_used_for">%1$s utiliza su ubicación para:</string>
     <string name="identify">Identificate</string>
     <string name="initializing">Inicializando ...</string>
     <string name="install">Instalar</string>

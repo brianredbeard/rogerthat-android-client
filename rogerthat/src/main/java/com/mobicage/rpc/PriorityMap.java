@@ -48,10 +48,6 @@ public class PriorityMap {
         sPrioritySet.add("com.mobicage.api.friends.requestShareLocation");
         sPrioritySet.add("com.mobicage.api.friends.shareLocation");
         sPrioritySet.add("com.mobicage.api.friends.userScanned");
-        sPrioritySet.add("com.mobicage.api.location.beaconDiscovered");
-        sPrioritySet.add("com.mobicage.api.location.beaconInReach");
-        sPrioritySet.add("com.mobicage.api.location.beaconOutOfReach");
-        sPrioritySet.add("com.mobicage.api.location.getBeaconRegions");
         sPrioritySet.add("com.mobicage.api.location.getFriendLocation");
         sPrioritySet.add("com.mobicage.api.location.getFriendLocations");
         sPrioritySet.add("com.mobicage.api.messaging.ackMessage");

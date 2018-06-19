@@ -26,14 +26,12 @@ import com.mobicage.rogerthat.util.pickle.PickleException;
 import com.mobicage.rogerthat.util.pickle.Pickler;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.Credentials;
-import com.mobicage.to.location.BeaconDiscoveredRequestTO;
 
 import org.jivesoftware.smack.util.Base64;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.Set;
 import java.util.UUID;
 
 public class ContentBrandingRegistrationWizard extends AbstractRegistrationWizard {

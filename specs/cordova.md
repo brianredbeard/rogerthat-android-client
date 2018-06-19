@@ -94,7 +94,6 @@ rogerthat.user.put();
 - **rogerthat.service.name**: retrieve service name
 - **rogerthat.service.account**: retrieve the service account
 - **rogerthat.service.data**: retrieve the service data
-- **rogerthat.service.getBeaconsInReach(function(beacons){})**: list beacons which are in reach
 
 Example:
 ```javascript
@@ -102,23 +101,7 @@ var name = rogerthat.service.name;
 var account = rogerthat.sevice.account;
 var data = rogerthat.service.data;
 var room = rogerthat.service.data.room;
-rogerthat.service.getBeaconInReach(function(beacons){
-    console.log(beacons);
-}, function(error){
-     console.log("Error occurred while checking if beacon was in range... (Should never happen)");
-});
 ```
-
-beacons: array with beacon objects:
-- **uuid**: string which contains beacon universal unique identifier
-- **major**: string which contains the major of the beacon
-- **minor**: string which contains the minor of the beacon
-- **tag**: string which contains beacon tag
-- **proximity**: integer which defines the proximity:
-  - BEACON_PROXIMITY_UNKNOWN = 0
-  - BEACON_PROXIMITY_IMMEDIATE = 1
-  - BEACON_PROXIMITY_NEAR = 2
-  - BEACON_PROXIMITY_FAR = 3
 
 ## <a name="rogerthat.system"></a>rogerthat.system
 ```javascript
@@ -222,7 +205,6 @@ rogerthat.security.sign(message, payload, true, function(signature) {
 ## <a name="rogerthat.features"></a>rogerthat.features
 - **rogerthat.features.base64URI**: check if the user’s device supports loading images via base64 encoded data
 - **rogerthat.features.backgroundSize**: check if the user’s device supports CSS3
-- **rogerthat.features.beacons**: check if the user’s device has iBeacon support
 - **rogerthat.features.callback**: a callback which will be called after the availability of a feature has been verified
 
 The result can take these values:
@@ -239,8 +221,7 @@ function alertAfterFeaturesChecked (feature) {
     }
 
     if (rogerthat.features.base64URI === FEATURE_CHECKING
-            || rogerthat.features.backgroundSize === FEATURE_CHECKING
-            || rogerthat.features.beacons === FEATURE_CHECKING) {
+            || rogerthat.features.backgroundSize === FEATURE_CHECKING) {
 
         // wait until all features are verified
         rogerthat.features.callback = alertAfterFeaturesChecked;
@@ -282,8 +263,6 @@ rogerthat.util.isConnectedToInternet(function(result) {
 - **rogerthat.callbacks.userDataUpdated(function(){})**: The app received an update and rogerthat.user.data is updated.
 - **rogerthat.callbacks.serviceDataUpdated(function(){})**: The app received an update and rogerthat.service.data is updated.
 - **rogerthat.callbacks.onBackendConnectivityChanged(function(result){})**: The device its Internet connectivity has changed.
-- **rogerthat.callbacks.onBeaconInReach(function(beacon){})**: The app detected a beacon.
-- **rogerthat.callbacks.onBeaconOutOfReach(function(beacon){})**: The user went out of reach of a beacon.
 - **rogerthat.callbacks.qrCodeScanned(function(result){})**: A QR code has been scanned as result of - rogerthat.camera.startScanningQrCode
 
 Example:
@@ -309,16 +288,6 @@ rogerthat.callbacks.onBackendConnectivityChanged(function(isConnected) {
 rogerthat.system.onBackendConnectivityChanged(function(result) {
     // From now on, we will receive updates on rogerthat.callbacks.onBackendConnectivityChanged
     console.log(result.connected ? 'We are connected to the Internet' : 'There is no Internet connectivity');
-});
-
-// --- Beacons ----------------------------
-
-rogerthat.callbacks.onBeaconInReach(function(beacon){
-    console.log(beacon)
-};
-
-rogerthat.callbacks.onBeaconOutOfReach(function(beacon){
-    console.log(beacon);
 });
 
 // --- Camera ----------------------------

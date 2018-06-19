@@ -159,12 +159,6 @@
     <string name="high">Alto</string>
     <string name="hint_double_tap">Toque duas vezes para responder</string>
     <string name="hint_swipe">Deslize a tela para passar para outra conversa</string>
-    <string name="ibeacon_usage_augment_experience">%1$s utiliza iBeacons para melhorar sua experiência de usuário</string>
-    <string name="ibeacon_usage_discover_services_automatically">Encontrar serviços ao consumidor automaticamente.</string>
-    <string name="ibeacon_usage_not_used_for">%1$s não:</string>
-    <string name="ibeacon_usage_store">Guardar sua localização.</string>
-    <string name="ibeacon_usage_track_location_without_concent">Rastrear sua localização sem consentimento prévio.</string>
-    <string name="ibeacon_usage_used_for">%1$s utiliza sua localização para:</string>
     <string name="identify">Identificar</string>
     <string name="invitation_acception_failure">Ocorreu um erro ao aceitar o convite. Tente novamente.</string>
     <string name="invitation_sent_successfully">Convite enviado com sucesso.</string>

@@ -185,11 +185,6 @@
     <string name="hint_broadcast">Вы можете отменить подписку в «Настройках уведомлений», если не хотите больше получать сообщения «%1$s» от %2$s.</string>
     <string name="hint_double_tap">Нажмите 2 раза, чтобы ответить</string>
     <string name="hint_swipe">Провести пальцем, чтобы перейти к другой беседе</string>
-    <string name="ibeacon_usage_augment_experience">Приложение %1$s использует iBeacons, чтобы сделать ваше использование приложения более удобным.</string>
-    <string name="ibeacon_usage_discover_services_automatically">Находите службы поддержки автоматически</string>
-    <string name="ibeacon_usage_store">Сохранить ваше местоположение</string>
-    <string name="ibeacon_usage_track_location_without_concent">Отслеживать мое местоположение без предварительного согласия</string>
-    <string name="ibeacon_usage_used_for">Приложение %1$s использует ваше местоположение, чтобы:</string>
     <string name="identify">идентифицировать</string>
     <string name="initializing">Инициализация…</string>
     <string name="install">Установить</string>
