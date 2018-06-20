@@ -49,7 +49,6 @@
     <string name="all_items">Все элементы</string>
     <string name="allow">Разрешить</string>
     <string name="already_friend">Вы уже дружите с %1$s.</string>
-    <string name="ask_a_question">Задать вопрос</string>
     <string name="associations">Ассоциации</string>
     <string name="attachment_can_not_be_displayed_in_your_version">Выбранное вложение не может быть отображено в этой версии приложения %1$s.</string>
     <string name="attachment_name_image">&lt;Picture&gt;</string>

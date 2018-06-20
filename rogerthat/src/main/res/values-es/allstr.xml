@@ -52,7 +52,6 @@
     <string name="all_items">Todos los items</string>
     <string name="allow">Permitir</string>
     <string name="already_friend">Ya eres amigo de %1$s.</string>
-    <string name="ask_a_question">Contacto</string>
     <string name="associations">Asociaciones</string>
     <string name="attachment_can_not_be_displayed_in_your_version">El adjunto seleccionado no puede visualizarse en esta versión de la aplicación %1$s.</string>
     <string name="attachment_name_image">&lt;imagen&gt;</string>

@@ -52,7 +52,6 @@
     <string name="all_items">Tous les éléments</string>
     <string name="allow">Autoriser</string>
     <string name="already_friend">Vous êtes déjà ami avec %1$s.</string>
-    <string name="ask_a_question">Poser une question</string>
     <string name="associations">Associations</string>
     <string name="attachment_can_not_be_displayed_in_your_version">Le document sélectionné ne peut pas être affiché dans cette version de %1$s application.</string>
     <string name="attachment_name_image">&lt;Image&gt;</string>

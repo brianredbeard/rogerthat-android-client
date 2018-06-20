@@ -47,7 +47,6 @@
     <string name="alarm_sound_default">Sunetul implicit</string>
     <string name="all_friends">Toti prietenii</string>
     <string name="already_friend">Sunteti deja prieteni cu %1$s.</string>
-    <string name="ask_a_question">Pune o intrebare</string>
     <string name="associations">Asociatii</string>
     <string name="attachment_can_not_be_displayed_in_your_version">Atasamentul selectat nu poate fi afisat in aceasta versiune de aplicatie %1$s.</string>
     <string name="attachment_name_image">&lt;Imagine&gt;</string>
