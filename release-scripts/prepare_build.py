@@ -16,7 +16,6 @@
 #
 # @@license_version:1.4@@
 
-from contextlib import closing
 import hashlib
 import itertools
 import json
@@ -27,13 +26,10 @@ import re
 import shutil
 import sys
 import tempfile
-from xml.dom import minidom
-
-from PIL import Image
 import yaml
-
-import cordova
-
+from PIL import Image
+from contextlib import closing
+from xml.dom import minidom
 
 logging.basicConfig(
     level=logging.INFO,
@@ -335,6 +331,7 @@ def write_item(output, doc, item, is_toolbar_item):
     icon_name = None
     fa_icon_name = None
     icon = item.get('icon')
+    homescreen_color = doc['HOMESCREEN']['color']
     if icon and icon.startswith('fa-'):
         fa_icon_name = u'FontAwesome.Icon.%s' % icon.replace("-", "_").replace("fa_", "faw_")
     else:
@@ -344,7 +341,7 @@ def write_item(output, doc, item, is_toolbar_item):
             source_file = os.path.join(APP_DIR, "images", "custom", icon_path)
             generate_resource_images(source_file, image_width, 1)
         else:
-            color = item.get("color", doc['HOMESCREEN'].get('color'))
+            color = item.get("color") or homescreen_color
             with tempfile.NamedTemporaryFile(suffix=".png") as temp:
                 tmp = temp.name
                 app_utils.download_icon(icon, 'FFFFFF', 512, tmp)
@@ -353,7 +350,7 @@ def write_item(output, doc, item, is_toolbar_item):
                 icon_name = "R.drawable.menu_icon_%s" % icon
                 generate_resource_images(tmp, image_width, 1, resource_name='menu_icon_%s.png' % icon)
 
-    color = item.get("color", doc['HOMESCREEN'].get('color'))
+    color = item.get("color") or homescreen_color
     icon_color = 'Color.parseColor("#%s")' % color if color else 0
 
     action, action_type = get_action(item)
