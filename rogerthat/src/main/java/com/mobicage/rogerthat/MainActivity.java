@@ -30,6 +30,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.webkit.WebView;
 
+import com.mobicage.rogerth.at.BuildConfig;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.config.Configuration;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
@@ -116,7 +117,7 @@ public class MainActivity extends ServiceBoundActivity implements PinLockMgr.NoP
         T.UI();
         setContentViewWithoutNavigationBar(R.layout.blank);
         //noinspection PointlessBooleanExpression
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && CloudConstants.DEBUG_LOGGING) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && BuildConfig.DEBUG) {
             WebView.setWebContentsDebuggingEnabled(true);
         }
     }

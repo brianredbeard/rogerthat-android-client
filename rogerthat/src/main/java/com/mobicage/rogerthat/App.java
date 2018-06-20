@@ -22,10 +22,12 @@ import android.content.Context;
 import android.support.multidex.MultiDexApplication;
 
 import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.core.CrashlyticsCore;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.iconics.Iconics;
+import com.mobicage.rogerth.at.BuildConfig;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.security.PinLockMgr;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
@@ -85,7 +87,12 @@ public class App extends MultiDexApplication implements Thread.UncaughtException
         FacebookSdk.sdkInitialize(getApplicationContext());
         AppEventsLogger.activateApp(this);
 
-        Fabric.with(this, new Crashlytics());
+        // Set up Crashlytics, disabled for debug builds
+        Crashlytics crashlyticsKit = new Crashlytics.Builder()
+                .core(new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build())
+                .build();
+
+        Fabric.with(this, crashlyticsKit);
 
         Iconics.registerFont(new FontAwesome());
 
