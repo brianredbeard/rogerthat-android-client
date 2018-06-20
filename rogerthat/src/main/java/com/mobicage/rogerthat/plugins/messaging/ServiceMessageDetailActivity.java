@@ -31,6 +31,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.AppCompatButton;
@@ -61,7 +62,6 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
-import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.IdentityStore;
 import com.mobicage.rogerthat.MainActivity;
@@ -78,6 +78,7 @@ import com.mobicage.rogerthat.util.ActivityUtils;
 import com.mobicage.rogerthat.util.IOUtils;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.system.CompletionHandler;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
@@ -105,7 +106,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeSet;
 
-import in.uncod.android.bypass.Bypass;
 import thirdparty.nishantnair.FlowLayout;
 
 public class ServiceMessageDetailActivity extends ServiceBoundActivity {
@@ -808,9 +808,18 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
                 @Override
                 public void onSuccess() {
                     // ack the message and finish without showing progress bar
-                    buttonPressed(button, container, 0);
-                    overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_up);
-                    finish();
+                    buttonPressed(button, container, 0, new CompletionHandler<Boolean>() {
+                        @Override
+                        public void run(Boolean submitted) {
+                            mService.runOnUIHandler(new SafeRunnable() {
+                                @Override
+                                protected void safeRun() {
+                                    overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_up);
+                                    finish();
+                                }
+                            });
+                        }
+                    });
                 }
 
                 @Override
@@ -822,36 +831,52 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
                 @Override
                 public void onTimeout() {
                     // Continue with the button press, just as if there was no smi://
-                    buttonPressed(button, buttonAction, buttonUrl, container);
+                    buttonPressed(button, buttonAction, buttonUrl, container,
+                            CompletionHandler.getNullHandler(Boolean.class));
                 }
             });
         } else if (Message.MC_OPEN_PREFIX.equals(buttonAction)) {
             if (ActivityUtils.openUrl(this, buttonUrl)) {
-                buttonPressed(button, container, 0);
-                overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_up);
-                finish();
+                buttonPressed(button, container, 0, new CompletionHandler<Boolean>() {
+                    @Override
+                    public void run(Boolean ignored) {
+                        mService.runOnUIHandler(new SafeRunnable() {
+                            @Override
+                            protected void safeRun() {
+                                overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_up);
+                                finish();
+                            }
+                        });
+                    }
+                });
             } else {
                 // Continue with the button press, just as if there was no open://
-                buttonPressed(button, buttonAction, buttonUrl, container);
+                buttonPressed(button, buttonAction, buttonUrl, container, CompletionHandler.getNullHandler(Boolean.class));
             }
         } else {
-            buttonPressed(button, buttonAction, buttonUrl, container);
+            buttonPressed(button, buttonAction, buttonUrl, container, CompletionHandler.getNullHandler(Boolean.class));
         }
     }
 
-    private void buttonPressed(ButtonTO button, String buttonAction, String buttonUrl, LinearLayout container) {
-        if (!buttonPressed(button, container))
-            return;
+    private void buttonPressed(final ButtonTO button, final String buttonAction, final String buttonUrl,
+                               final LinearLayout container, @NonNull final CompletionHandler<Boolean> completionRunnable) {
+        buttonPressed(button, container, new CompletionHandler<Boolean>() {
+            @Override
+            public void run(Boolean submitted) {
+                if (submitted) {
+                    if (!mTransfering)
+                        jumpToServiceHomeScreen(button, null);
 
-        if (!mTransfering)
-            jumpToServiceHomeScreen(button, null);
-
-        if (buttonAction != null) {
-            if (Intent.ACTION_VIEW.equals(buttonAction) || Intent.ACTION_DIAL.equals(buttonAction)) {
-                final Intent intent = new Intent(buttonAction, Uri.parse(buttonUrl));
-                startActivity(intent);
+                    if (buttonAction != null) {
+                        if (Intent.ACTION_VIEW.equals(buttonAction) || Intent.ACTION_DIAL.equals(buttonAction)) {
+                            final Intent intent = new Intent(buttonAction, Uri.parse(buttonUrl));
+                            startActivity(intent);
+                        }
+                    }
+                }
+                completionRunnable.run(submitted);
             }
-        }
+        });
     }
 
     private void askConfirmation(final ButtonTO button, final String text, final LinearLayout container) {
@@ -867,21 +892,35 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
         UIUtils.showDialog(this, title, text, R.string.yes, onPositiveClick, R.string.no, null);
     }
 
-    private boolean buttonPressed(final ButtonTO button, final LinearLayout container) {
-        return buttonPressed(button, container, getExpectNext(button));
+    private void buttonPressed(final ButtonTO button, final LinearLayout container,
+                               @NonNull final CompletionHandler<Boolean> completionRunnable) {
+        buttonPressed(button, container, getExpectNext(button), completionRunnable);
     }
 
-    private boolean buttonPressed(final ButtonTO button, final LinearLayout container, final long expectNext) {
-        boolean submitted = true;
+    private void buttonPressed(final ButtonTO button, final LinearLayout container, final long expectNext, @NonNull final CompletionHandler<Boolean> completionRunnable) {
         if (mCurrentMessage.form == null) {
             ackMessage(button, expectNext, container);
+            if (!mTransfering) {
+                animateAfterAck(expectNext);
+            }
         } else {
-            submitted = submitForm(button);
+            mService.postOnBIZZHandler(new SafeRunnable() {
+                @Override
+                protected void safeRun() {
+                    submitForm(button, new CompletionHandler<Boolean>() {
+                        @Override
+                        public void run(Boolean submitted) {
+                            if (!mTransfering && submitted) {
+                                animateAfterAck(expectNext);
+                            }
+                            completionRunnable.run(submitted);
+                        }
+                    });
+
+                }
+            });
         }
-        if (!mTransfering && submitted) {
-            animateAfterAck(expectNext);
-        }
-        return submitted;
+
     }
 
     private void ackMessage(final ButtonTO button, final long expectNext, final LinearLayout container) {
@@ -903,44 +942,59 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
             ServiceMessageDetailActivity.this, container);
     }
 
-    private boolean submitForm(final ButtonTO button) {
+    private void submitForm(final ButtonTO button, final CompletionHandler<Boolean> completionHandler) {
         LinearLayout widgetLayout = (LinearLayout) findViewById(R.id.widget_layout);
-        Widget widget = (Widget) widgetLayout.getChildAt(0);
+        T.BIZZ();
+        final Widget widget = (Widget) widgetLayout.getChildAt(0);
 
         if (Message.POSITIVE.equals(button.id)) {
             widget.putValue();
         }
 
         if (!widget.proceedWithSubmit(button.id)) {
-            return false;
+            completionHandler.run(false);
+            return;
         }
 
         if (Message.POSITIVE.equals(button.id)) {
-            try {
-                final IJSONable formResult = widget.getWidgetResult();
-                if (formResult != null) {
-                    String validationError = mMessagingPlugin.validateFormResult(mCurrentMessage, formResult);
-                    if (validationError != null) {
-                        String title = getString(R.string.validation_failed);
-                        UIUtils.showDialog(this, title, validationError);
-                        return false;
+            final IJSONable formResult = widget.getWidgetResult();
+            if (formResult != null) {
+                mMessagingPlugin.validateFormResult(mCurrentMessage, formResult, new CompletionHandler<String>() {
+                    @Override
+                    public void run(String validationError) {
+                        if (validationError != null) {
+                            String title = getString(R.string.validation_failed);
+                            UIUtils.showDialog(ServiceMessageDetailActivity.this, title, validationError);
+                            completionHandler.run(false);
+                        } else {
+                            afterSubmit(button, widget, completionHandler);
+                        }
                     }
-                }
-            } catch (Exception e) {
-                L.bug(e);
+                });
+            } else {
+                afterSubmit(button, widget, completionHandler);
             }
+        } else {
+            afterSubmit(button, widget, completionHandler);
         }
+    }
 
-        try {
-            widget.submit(button.id, mService.currentTimeMillis() / 1000);
-        } catch (Exception e) {
-            L.bug(e);
-            dismissTransferingDialog();
-            return false;
-        }
-
-        mMessagingPlugin.formSubmitted(mCurrentMessage, button.id);
-        return true;
+    private void afterSubmit(final ButtonTO button, final Widget widget, final CompletionHandler<Boolean> completionHandler) {
+        mService.runOnUIHandler(new SafeRunnable() {
+            @Override
+            protected void safeRun() {
+                try {
+                    widget.submit(button.id, mService.currentTimeMillis() / 1000);
+                } catch (Exception e) {
+                    L.bug(e);
+                    dismissTransferingDialog();
+                    completionHandler.run(false);
+                    return;
+                }
+                mMessagingPlugin.formSubmitted(mCurrentMessage, button.id);
+                completionHandler.run(true);
+            }
+        });
     }
 
     private void addButton(String myEmail, boolean somebodyAnswered, boolean canEdit,
@@ -1412,33 +1466,39 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
         }
     }
 
-    private void animateAfterAck(long expectNext) {
-        mDialog = UIUtils.showProgressDialog(ServiceMessageDetailActivity.this, null, getString(R.string.transmitting),
-                true, expectNext != 0);
-        mDialog.show();
+    private void animateAfterAck(final long expectNext) {
+        mService.runOnUIHandler(new SafeRunnable() {
+            @Override
+            protected void safeRun() throws Exception {
 
-        if (expectNext == 0 || (mCurrentMessage.flags & MessagingPlugin.FLAG_SENT_BY_JSMFR) == 0
-            && !checkConnectivity()) {
-            dismissTransferingDialog();
-            quit();
-        } else {
-            mExpectNextTimer = new Timer("expect_next");
-            mExpectNextTimer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    if (mService != null) {
-                        mService.postOnUIHandler(new SafeRunnable() {
-                            @Override
-                            public void safeRun() {
-                                T.UI();
-                                dismissTransferingDialog();
-                                finish();
+                mDialog = UIUtils.showProgressDialog(ServiceMessageDetailActivity.this, null, getString(R.string.transmitting),
+                        true, expectNext != 0);
+                mDialog.show();
+
+                if (expectNext == 0 || (mCurrentMessage.flags & MessagingPlugin.FLAG_SENT_BY_JSMFR) == 0
+                        && !checkConnectivity()) {
+                    dismissTransferingDialog();
+                    quit();
+                } else {
+                    mExpectNextTimer = new Timer("expect_next");
+                    mExpectNextTimer.schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            if (mService != null) {
+                                mService.postOnUIHandler(new SafeRunnable() {
+                                    @Override
+                                    public void safeRun() {
+                                        T.UI();
+                                        dismissTransferingDialog();
+                                        finish();
+                                    }
+                                });
                             }
-                        });
-                    }
+                        }
+                    }, 1000 * expectNext);
                 }
-            }, 1000 * expectNext);
-        }
+            }
+        });
     }
 
     public String getParentMessageKey() {

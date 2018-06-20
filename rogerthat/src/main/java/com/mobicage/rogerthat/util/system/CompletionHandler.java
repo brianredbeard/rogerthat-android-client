@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 GIG Technology NV
+ * Copyright 2017 GIG Technology NV
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @@license_version:1.4@@
+ * @@license_version:1.3@@
  */
 
-package com.mobicage.rogerthat.plugins.messaging.mfr;
+package com.mobicage.rogerthat.util.system;
 
-import org.mozilla.javascript.ClassShutter;
+public abstract class CompletionHandler<T> {
 
-public class SandboxClassShutter implements ClassShutter {
-    @Override
-    public boolean visibleToScripts(String fullClassName) {
-        if (fullClassName.startsWith("com.mobicage.rogerthat.jsapi"))
-            return true;
+    public abstract void run(T result);
 
-        return false;
+
+    public static <T extends Object> CompletionHandler<T> getNullHandler(Class<T> clazz) {
+        return new CompletionHandler<T>() {
+            @Override
+            public void run(T result) {
+
+            }
+        };
     }
 }

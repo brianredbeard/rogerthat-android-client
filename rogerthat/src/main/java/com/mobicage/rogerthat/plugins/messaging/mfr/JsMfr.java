@@ -18,10 +18,14 @@
 
 package com.mobicage.rogerthat.plugins.messaging.mfr;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 
+import com.eclipsesource.v8.V8;
+import com.eclipsesource.v8.V8Array;
+import com.eclipsesource.v8.V8Function;
+import com.eclipsesource.v8.V8Object;
+import com.eclipsesource.v8.V8ScriptExecutionException;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.MyIdentity;
@@ -30,6 +34,7 @@ import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.system.CompletionHandler;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.CallReceiver;
@@ -42,23 +47,14 @@ import com.mobicage.to.messaging.jsmfr.MessageFlowErrorResponseTO;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
-import org.mozilla.javascript.Callable;
-import org.mozilla.javascript.ConsString;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.NativeArray;
-import org.mozilla.javascript.NativeObject;
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
-import org.mozilla.javascript.UniqueTag;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -66,6 +62,10 @@ import java.util.regex.Pattern;
 public class JsMfr {
 
     private MainService mService;
+    private static V8 sV8Runtime;  // Must only be accessed from BIZZ thread
+    private static JSConsole sJSConsole;  // Must only be accessed from BIZZ thread
+    private static long sV8LastUsedTime;
+    private static int FIVE_MINUTES = 300000;
 
     @SuppressWarnings("serial")
     private static class JsMfrError extends Exception {
@@ -93,105 +93,8 @@ public class JsMfr {
         }
     }
 
-    public static Scriptable toScriptable(Context context, Scriptable scope, Map<String, Object> object) {
-        Scriptable result = context.newObject(scope);
-        for (String key : object.keySet() ) {
-            Object value = object.get(key);
-            if (value == null || value instanceof String || value instanceof Number || value instanceof Boolean) {
-                ScriptableObject.putProperty(result, key, value);
-            } else if (value instanceof List) {
-                ScriptableObject.putProperty(result, key, toScriptable(context, scope, (List)value));
-            } else if (value instanceof Map) {
-                ScriptableObject.putProperty(result, key, toScriptable(context, scope, (Map)value));
-            } else
-                throw new NoSuchElementException();
-        }
-        return result;
-    }
-
-    public static Scriptable toScriptable(Context context, Scriptable scope, List object) {
-        Scriptable result = context.newArray(scope, object.size());
-        int counter = 0;
-        for (Object value : (List)object) {
-            if (value == null || value instanceof String || value instanceof Number || value instanceof Boolean) {
-                ScriptableObject.putProperty(result, counter++, value);
-            } else if (value instanceof List) {
-                ScriptableObject.putProperty(result, counter++, toScriptable(context, scope, (List) value));
-            } else if (value instanceof Map) {
-                ScriptableObject.putProperty(result, counter++, toScriptable(context, scope, (Map) value));
-            } else
-                throw new NoSuchElementException();
-        }
-        return result;
-    }
-
-    public static JSONObject serializeNativeObject(NativeObject object){
-        JSONObject result = new JSONObject();
-        Object[] propIds = NativeObject.getPropertyIds(object);
-        for(Object propId: propIds) {
-            String key = propId.toString();
-            Object value = NativeObject.getProperty(object, key);
-            if (value instanceof Callable || value instanceof UniqueTag) {
-            } else if (value instanceof NativeArray) {
-                result.put(key, JsMfr.serializeNativeArray((NativeArray) value));
-            } else if (value instanceof NativeObject) {
-                result.put(key, JsMfr.serializeNativeObject((NativeObject) value));
-            } else if (value instanceof Double) {
-                long longValue = ((Double) value).longValue();
-                if (value.equals(new Long(longValue).doubleValue()))
-                    result.put(key, longValue);
-                else
-                    result.put(key, value);
-            } else if (value instanceof Float) {
-                long longValue = ((Float) value).longValue();
-                if (value.equals(new Long(longValue).floatValue()))
-                    result.put(key, longValue);
-                else
-                    result.put(key, value);
-            } else if (value == null || value instanceof String || value instanceof Number || value instanceof  Boolean) {
-                result.put(key, value);
-            } else if (value instanceof ConsString) {
-                result.put(key, value.toString());
-            } else
-                L.d(value.getClass().getName() + ": "+ value.toString());
-        }
-        return result;
-    }
-
-    public static JSONArray serializeNativeArray(NativeArray object){
-        JSONArray result = new JSONArray();
-        for(Object value: object) {
-            if (value instanceof NativeArray) {
-                result.add(JsMfr.serializeNativeArray((NativeArray) value));
-            } else if (value instanceof NativeObject) {
-                result.add(JsMfr.serializeNativeObject((NativeObject) value));
-            } else if (value instanceof Double) {
-                long longValue = ((Double) value).longValue();
-                if (value.equals(new Long(longValue).doubleValue()))
-                    result.add(longValue);
-                else
-                    result.add(value);
-            } else if (value instanceof Float) {
-                long longValue = ((Float) value).longValue();
-                if (value.equals(new Long(longValue).floatValue()))
-                    result.add(longValue);
-                else
-                    result.add(value);
-            } else if (value == null || value instanceof String || value instanceof Number || value instanceof  Boolean) {
-                result.add(value);
-            } else if (value instanceof ConsString) {
-                result.add(value.toString());
-            } else
-                L.d(value.getClass().getName() + ": "+ value.toString());
-        }
-        return result;
-    }
-
-    @SuppressLint("SetJavaScriptEnabled")
     public static void executeMfr(final MessageFlowRun mfr, final Map<String, Object> userInput,
-        final MainService mainService, final boolean throwIfNotReady) throws EmptyStaticFlowException {
-        T.UI();
-
+                                  final MainService mainService, final boolean throwIfNotReady) throws EmptyStaticFlowException {
         final JsMfr jsMfr = new JsMfr();
         jsMfr.mService = mainService;
 
@@ -244,7 +147,7 @@ public class JsMfr {
                     state.put("service", info.get("service"));
                     state.put("system", info.get("system"));
                 } else if (!state.containsKey("user")) {
-                    Map<String, Object> empty = new HashMap<String, Object>();
+                    Map<String, Object> empty = new HashMap();
                     state.put("user", empty);
                     state.put("service", empty);
                     state.put("system", empty);
@@ -261,142 +164,146 @@ public class JsMfr {
 
                 L.d("Executing JSMFR command");
 
-                SandboxContextFactory contextFactory = new SandboxContextFactory();
-                Context cx = contextFactory.makeContext();
-                contextFactory.enterContext(cx);
-                ScriptableObject prototype = cx.initStandardObjects();
-                prototype.setParentScope(null);
-                Scriptable scope = cx.newObject(prototype);
-                scope.setPrototype(prototype);
+                String JS_PATTERN = "(?s)<script language=\"javascript\" type=\"text/javascript\">\\s(.*)</script>";
+                Pattern jsPattern = Pattern.compile(JS_PATTERN);
+                Matcher matcher = jsPattern.matcher(htmlString);
+                List<String> jsCode = new ArrayList();
+
+                while (matcher.find()) {
+                    jsCode.add(matcher.group(1));
+                }
+
+                String command = jsCode.get(0);
+                long startTime = System.currentTimeMillis();
+                sV8LastUsedTime = startTime;
+                if (sV8Runtime == null) {
+                    sV8Runtime = createV8Runtime();
+                    L.d(String.format("Creating v8 runtime took %sms", System.currentTimeMillis() - startTime));
+                }
+                long createTime = System.currentTimeMillis();
                 try {
-                    String JS_PATTERN = "(?s)<script language=\"javascript\" type=\"text/javascript\">\\s(.*)</script>";
-                    Pattern jsPattern = Pattern.compile(JS_PATTERN);
-                    Matcher matcher = jsPattern.matcher(htmlString);
-                    List<String> jsCode = new ArrayList<String>();
+                    V8Object script = (V8Object) sV8Runtime.executeScript(command);
+                    L.d(String.format("Script execution took %sms", System.currentTimeMillis() - createTime));
+                    long functionStartTime = System.currentTimeMillis();
+                    String jsonState = state.toJSONString();
+                    String jsonUi = ui.toJSONString();
+                    long scriptRunTimeStart = System.currentTimeMillis();
+                    L.d(String.format("JSON formatting took %sms", scriptRunTimeStart - functionStartTime));
 
-                    while (matcher.find()) {
-                        jsCode.add(matcher.group(1));
+                    V8Function transitionFunction = (V8Function) sV8Runtime.getObject("transition");
+                    V8Array parameters = new V8Array(sV8Runtime);
+                    parameters.push(transitionFunction);
+                    parameters.push(appVersion);
+                    parameters.push(jsonState);
+                    parameters.push(jsonUi);
+                    parameters.push(mainService.getAdjustedTimeDiff());
+                    String rs;
+                    try {
+                        rs = sV8Runtime.executeStringFunction("mc_run_ext", parameters);
+                    } finally {
+                        transitionFunction.release();
+                        parameters.release();
+                        script.release();
                     }
-
-                    String command = jsCode.get(0);
-                    cx.evaluateString(scope, command, null, -1, null);
-                    L.d("FlowCodeEvalSucces");
-
-                    Object rs = null;
-                    Object runTag = scope.get("mc_run_ext", scope);
-                    Object transitionTag = scope.get("transition", scope);
-
-                    L.d("version: " + appVersion);
-
-                    if (runTag != UniqueTag.NOT_FOUND) {
-                        Function runFct = (Function) runTag;
-                        Function transitionFct = (Function) transitionTag;
-
-                        final Object scriptableState;
-                        final Object scriptableUI;
-                        if (command.contains("returnScriptable")) {
-                            L.d("converting state to scriptable");
-                            scriptableState = toScriptable(cx, scope, state);
-                            L.d("converting ui to scriptable");
-                            scriptableUI = toScriptable(cx, scope, ui);
-                        } else {
-                            L.d("converting state to json");
-                            scriptableState = state.toJSONString();
-                            L.d("converting ui to json");
-                            scriptableUI = ui.toJSONString();
-                        }
-                        L.d("calling doTopCall");
-                        ScriptableObject.putProperty(scope, "returnScriptable", true);
-                        rs = contextFactory.doTopCall(runFct, cx, scope, scope, new Object[] { transitionFct,
-                                appVersion, scriptableState, scriptableUI, mainService.getAdjustedTimeDiff()});
-
-                        L.d("FlowCodeResult");
-                    } else {
-                        // Should not be possible
-                        L.d("Function not found");
-                    }
+                    L.d(String.format("Executing function took %sms", System.currentTimeMillis() - scriptRunTimeStart));
 
                     if (rs != null) {
-                        final String jsCommand = String.format("mc_run_ext(transition, \"%s\", %s, %s, %s)", appVersion,
-                                state.toJSONString(), JSONValue.toJSONString(userInput), mainService.getAdjustedTimeDiff());
-                        final JsMfrWebviewTag tag = new JsMfrWebviewTag(mfr.parentKey, context, jsCommand);
-                        if (rs instanceof String) {
-                            try {
-                                jsMfr.processResult((JSONObject) JSONValue.parse((String)rs), tag);
-                            } catch (Exception e) {
-                                jsMfr.handleException(new JsMfrError("JSONDecodeError", "Can not decode JSON:\n" + (String)rs, e.getClass() + ": "
-                                        + e.getMessage() + "\n" + L.getStackTraceString(e)), tag);
-                            }
-                        } else {
-                            jsMfr.processResult(serializeNativeObject((NativeObject)rs), tag);
+                        long startParsingTime = System.currentTimeMillis();
+                        try {
+                            jsMfr.processResult((JSONObject) JSONValue.parse(rs));
+                        } catch (Exception e) {
+                            String stack = String.format("%s: %s\n%s", e.getClass(), e.getMessage(), L.getStackTraceString(e));
+                            final String jsCommand = String.format("mc_run_ext(transition, \"%s\", %s, %s, %s)", appVersion,
+                                    state.toJSONString(), JSONValue.toJSONString(userInput), mainService.getAdjustedTimeDiff());
+                            final JsMfrWebviewTag tag = new JsMfrWebviewTag(mfr.parentKey, context, jsCommand);
+                            jsMfr.handleException(new JsMfrError("JSONDecodeError", "Can not decode JSON:\n" + rs, stack), tag);
                         }
+                        L.d(String.format("Processing JSMFR result took %sms", System.currentTimeMillis() - startParsingTime));
                     } else {
                         L.d("FlowCodeResult: NULL");
                     }
 
+                } catch (V8ScriptExecutionException e) {
+                    String sourceLine = e.getSourceLine();
+                    // Avoid logging the entire file in case of minified js
+                    if (sourceLine.length() > 200) {
+                        int endColumn = Math.min(sourceLine.length(), e.getEndColumn() + 100);
+                        sourceLine = sourceLine.substring(e.getStartColumn(), endColumn);
+                    }
+                    L.bug("Error while executing JSMFR\nStack: %s\nSource: %s", e.getJSStackTrace(), sourceLine);
                 } catch (Exception e) {
                     L.bug("JsMfr Exception", e);
                 } finally {
-                    Context.exit();
+                    mainService.postDelayedOnBIZZHandler(new SafeRunnable() {
+                        @Override
+                        protected void safeRun() {
+                            releaseV8Runtime();
+                        }
+                    }, FIVE_MINUTES);
+                    L.d(String.format("JSMFR command took %sms in total", System.currentTimeMillis() - startTime));
                 }
             }
         });
-
     }
 
-    void processResult(final JSONObject result, final JsMfrWebviewTag tag) {
-        try {
-            L.d("Got JSMFR result");
 
-            if ((Boolean) result.get("success")) {
-                final Map<String, Object> realResult = (Map<String, Object>) result.get("result");
-                final Map<String, Object> newState = (Map<String, Object>) realResult.get("newstate");
-                final JSONArray serverActions = (JSONArray) realResult.get("server_actions");
-                final JSONArray localActions = (JSONArray) realResult.get("local_actions");
-
-                final MessageFlowRun mfr = new MessageFlowRun();
-                mfr.parentKey = (String) ((Map<String, Object>) newState.get("run")).get("parent_message_key");
-                mfr.state = JSONObject.toJSONString(newState);
-                mfr.staticFlowHash = (String) newState.get("static_flow_hash");
-
-                mService.postAtFrontOfBIZZHandler(new SafeRunnable() {
-                    @Override
-                    protected void safeRun() throws Exception {
-                        MessagingPlugin plugin = mService.getPlugin(MessagingPlugin.class);
-                        plugin.getStore().saveMessageFlowRun(mfr);
-                        for (RpcCall rpcCall : createRpcCallsFromActions(localActions)) {
-                            CallReceiver.processCall(rpcCall);
-                        }
-                    }
-                });
-
-                mService.postOnBIZZHandler(new SafeRunnable() {
-                    @Override
-                    protected void safeRun() throws Exception {
-                        for (RpcCall rpcCall : createRpcCallsFromActions(serverActions)) {
-                            Rpc.call(rpcCall.function, rpcCall.arguments, new ResponseHandler<Object>());
-                        }
-                    }
-                });
-
-            } else {
-                String errMessage = (String) result.get("errmessage");
-                String errName = (String) result.get("errname");
-                String errStack = (String) result.get("errstack");
-
-                throw new JsMfrError(errName, errMessage, errStack);
-            }
-
-        } catch (Exception e) {
-            handleException(e, tag);
+    private static void releaseV8Runtime() {
+        long fiveMinutesAgo = System.currentTimeMillis() - FIVE_MINUTES;
+        if (sV8LastUsedTime <= fiveMinutesAgo) {
+            L.d("Releasing V8 runtime");
+            sJSConsole.release();
+            sV8Runtime.release();
+            sJSConsole = null;
+            sV8Runtime = null;
         }
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
-    public static String executeFormResultValidation(final String serviceEmail, final String parentKey,
-        final String javascriptValidationCode, final Map<String, Object> formResult, final MainService mainService) {
-        T.UI();
+    private void processResult(final JSONObject result) throws Exception {
+        L.d("Processing JSMFR result");
+        if ((Boolean) result.get("success")) {
+            final Map<String, Object> realResult = (Map<String, Object>) result.get("result");
+            final Map<String, Object> newState = (Map<String, Object>) realResult.get("newstate");
+            final JSONArray serverActions = (JSONArray) realResult.get("server_actions");
+            final JSONArray localActions = (JSONArray) realResult.get("local_actions");
 
+            final MessageFlowRun mfr = new MessageFlowRun();
+            mfr.parentKey = (String) ((Map<String, Object>) newState.get("run")).get("parent_message_key");
+            mfr.state = JSONObject.toJSONString(newState);
+            mfr.staticFlowHash = (String) newState.get("static_flow_hash");
+
+            mService.postAtFrontOfBIZZHandler(new SafeRunnable() {
+                @Override
+                protected void safeRun() throws Exception {
+                    MessagingPlugin plugin = mService.getPlugin(MessagingPlugin.class);
+                    plugin.getStore().saveMessageFlowRun(mfr);
+                    for (RpcCall rpcCall : createRpcCallsFromActions(localActions)) {
+                        CallReceiver.processCall(rpcCall);
+                    }
+                }
+            });
+
+            mService.postOnBIZZHandler(new SafeRunnable() {
+                @Override
+                protected void safeRun() {
+                    for (RpcCall rpcCall : createRpcCallsFromActions(serverActions)) {
+                        Rpc.call(rpcCall.function, rpcCall.arguments, new ResponseHandler());
+                    }
+                }
+            });
+
+        } else {
+            String errMessage = (String) result.get("errmessage");
+            String errName = (String) result.get("errname");
+            String errStack = (String) result.get("errstack");
+
+            throw new JsMfrError(errName, errMessage, errStack);
+        }
+    }
+
+    public static void executeFormResultValidation(final String serviceEmail, final String parentKey,
+                                                   final String javascriptValidationCode, final Map<String, Object> formResult, final MainService mainService,
+                                                   @NonNull final CompletionHandler<String> completionHandler) {
+        T.BIZZ();
         final JsMfr jsMfr = new JsMfr();
         jsMfr.mService = mainService;
         FriendsPlugin friendsPlugin = jsMfr.mService.getPlugin(FriendsPlugin.class);
@@ -418,59 +325,93 @@ public class JsMfr {
             rt.put("system", null);
         }
 
-        final String jsCommand = String.format("mc_run_ext(validation, %s, %s, %s)", rt.toJSONString(),
-            JSONValue.toJSONString(formResult), javascriptValidationCode);
-
-        L.d("Executing JS Validation command");
-
-        final JsMfrWebviewTag tag = new JsMfrWebviewTag(parentKey, null, jsCommand);
-        SandboxContextFactory contextFactory = new SandboxContextFactory();
-        Context cx = contextFactory.makeContext();
-        contextFactory.enterContext(cx);
-        ScriptableObject prototype = cx.initStandardObjects();
-        prototype.setParentScope(null);
-        Scriptable scope = cx.newObject(prototype);
-        scope.setPrototype(prototype);
+        sV8LastUsedTime = System.currentTimeMillis();
+        if (sV8Runtime == null) {
+            sV8Runtime = createV8Runtime();
+        }
         try {
-            cx.evaluateReader(scope, new InputStreamReader(mainService.getAssets().open("mfr/validation.js")), null,
-                -1, null);
+            BufferedReader br = new BufferedReader(new InputStreamReader(mainService.getAssets().open("mfr/validation.js")));
+            StringBuilder sb = new StringBuilder();
+            try {
+                String line = br.readLine();
 
-            L.d("JavascriptFormResultValidationEvalSucces");
-
-            Object rs = null;
-            Object runTag = scope.get("mc_run_ext", scope);
-            Object validationTag = scope.get("validation", scope);
-
-            if (runTag != UniqueTag.NOT_FOUND && validationTag != UniqueTag.NOT_FOUND) {
-                Function runFct = (Function) runTag;
-                Function validationFct = (Function) validationTag;
-
-                L.d("converting rt to scriptable");
-                final Scriptable scriptableRT = toScriptable(cx, scope, rt);
-                L.d("converting result to scriptable");
-                final Scriptable scriptableResult = toScriptable(cx, scope, formResult);
-                L.d("calling doTopCall");
-                rs = contextFactory.doTopCall(runFct, cx, scope, scope, new Object[] { validationFct,
-                        scriptableRT, scriptableResult, javascriptValidationCode });
-                L.d("JavascriptFormResultValidationResult");
-            } else {
-                // Should not be possible
-                L.d("Function not found");
+                while (line != null) {
+                    sb.append(line);
+                    sb.append("\n");
+                    line = br.readLine();
+                }
+            } finally {
+                br.close();
+            }
+            V8Object script = (V8Object) sV8Runtime.executeScript(sb.toString());
+            V8Function validateFunction = (V8Function) sV8Runtime.getObject("validation");
+            V8Array parameters = new V8Array(sV8Runtime);
+            parameters.push(validateFunction);
+            parameters.push(rt.toJSONString());
+            parameters.push(JSONValue.toJSONString(formResult));
+            parameters.push(javascriptValidationCode);
+            parameters.push(mainService.getAdjustedTimeDiff());
+            String rs;
+            try {
+                // TODO this might be faster when not json stringfying the result and converting V8Object to JSONObject here instead
+                rs = sV8Runtime.executeStringFunction("mc_run_ext", parameters);
+            } finally {
+                validateFunction.release();
+                parameters.release();
+                script.release();
             }
 
             if (rs != null) {
-                return jsMfr.processJavascriptFormResultValidationResult(serializeNativeObject((NativeObject)rs), tag);
+                try {
+                    String validationResult = jsMfr.processJavascriptFormResultValidationResult((JSONObject) JSONValue.parse(rs));
+                    completionHandler.run(validationResult);
+                } catch (Exception e) {
+                    final String jsCommand = String.format("mc_run_ext(validation, %s, %s, %s)", rt.toJSONString(),
+                            JSONValue.toJSONString(formResult), javascriptValidationCode);
+                    final JsMfrWebviewTag tag = new JsMfrWebviewTag(parentKey, null, jsCommand);
+                    jsMfr.handleException(e, tag);
+                    completionHandler.run(null);
+                }
+                return;
             } else {
                 L.d("JavascriptFormResultValidationResult: NULL");
             }
 
+        } catch (V8ScriptExecutionException e) {
+            String sourceLine = e.getSourceLine();
+            // Avoid logging the entire file in case of minified js
+            if (sourceLine.length() > 200) {
+                int endColumn = Math.min(sourceLine.length(), e.getEndColumn() + 100);
+                sourceLine = sourceLine.substring(e.getStartColumn(), endColumn);
+            }
+            L.bug("Error while executing JS validation\nStack: %s\nSource: %s", e.getJSStackTrace(), sourceLine);
         } catch (Exception e) {
             L.bug("JavascriptFormResultValidation Exception", e);
         } finally {
-            Context.exit();
+            mainService.postDelayedOnBIZZHandler(new SafeRunnable() {
+                @Override
+                protected void safeRun() {
+                    releaseV8Runtime();
+                }
+            }, FIVE_MINUTES);
         }
+        completionHandler.run(null);
+    }
 
-        return null;
+    private static V8 createV8Runtime() {
+        V8 runtime = V8.createV8Runtime();
+        // Add console callbacks
+        JSConsole console = new JSConsole(runtime, "[FLOW] ");
+        sJSConsole = console;
+        V8Object v8Console = new V8Object(runtime);
+        runtime.add("console", v8Console);
+        v8Console.registerJavaMethod(console, "debug", "debug", new Class<?>[]{Object[].class});
+        v8Console.registerJavaMethod(console, "log", "info", new Class<?>[]{Object[].class});
+        v8Console.registerJavaMethod(console, "log", "log", new Class<?>[]{Object[].class});
+        v8Console.registerJavaMethod(console, "warn", "warn", new Class<?>[]{Object[].class});
+        v8Console.registerJavaMethod(console, "error", "error", new Class<?>[]{Object[].class});
+        v8Console.release();
+        return runtime;
     }
 
     @NonNull
@@ -484,40 +425,33 @@ public class JsMfr {
         return internet;
     }
 
-    String processJavascriptFormResultValidationResult(final JSONObject result, final JsMfrWebviewTag tag) {
-        try {
-            L.d("Got JS Validation result");
+    private String processJavascriptFormResultValidationResult(final JSONObject result) throws Exception {
+        L.d("Got JS Validation result");
 
-            if ((Boolean) result.get("success")) {
-                final Map<String, Object> realResult = (Map<String, Object>) result.get("result");
-                final JSONArray serverActions = (JSONArray) realResult.get("server_actions");
-                final Object returnValue = realResult.get("return_value");
+        if ((Boolean) result.get("success")) {
+            final Map<String, Object> realResult = (Map<String, Object>) result.get("result");
+            final JSONArray serverActions = (JSONArray) realResult.get("server_actions");
+            final Object returnValue = realResult.get("return_value");
 
-                mService.postOnBIZZHandler(new SafeRunnable() {
-                    @Override
-                    protected void safeRun() throws Exception {
-                        for (RpcCall rpcCall : createRpcCallsFromActions(serverActions)) {
-                            Rpc.call(rpcCall.function, rpcCall.arguments, new ResponseHandler<Object>());
-                        }
+            mService.postOnBIZZHandler(new SafeRunnable() {
+                @Override
+                protected void safeRun() {
+                    for (RpcCall rpcCall : createRpcCallsFromActions(serverActions)) {
+                        Rpc.call(rpcCall.function, rpcCall.arguments, new ResponseHandler());
                     }
-                });
-
-                if (returnValue != null && returnValue instanceof String) {
-                    return (String) returnValue;
                 }
+            });
 
-            } else {
-                String errMessage = (String) result.get("errmessage");
-                String errName = (String) result.get("errname");
-                String errStack = (String) result.get("errstack");
-
-                throw new JsMfrError(errName, errMessage, errStack);
+            if (returnValue != null && returnValue instanceof String) {
+                return (String) returnValue;
             }
 
-        } catch (JsMfrError e) {
-            handleException(e, tag);
-        } catch (Exception e) {
-            handleException(e, tag);
+        } else {
+            String errMessage = (String) result.get("errmessage");
+            String errName = (String) result.get("errname");
+            String errStack = (String) result.get("errstack");
+
+            throw new JsMfrError(errName, errMessage, errStack);
         }
         return null;
     }

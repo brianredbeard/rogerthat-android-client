@@ -2,8 +2,8 @@ function validation(rt, result, js_code) {
     var serverActions = [];
     var returnValue = null;
     var locals = {
-        context_result : cloneObj(result),
-        rogerthat : cloneObj(rt),
+        context_result : JSON.parse(result),
+        rogerthat : JSON.parse(rt),
         window : {},
         document : {}
     };
@@ -156,7 +156,7 @@ function mc_run(func, arg_list) {
         r['errstack'] = getStackTrace(err, true);
     }
 
-    return r;
+    return JSON.stringify(r);
 }
 
 function mc_run_ext(func) {

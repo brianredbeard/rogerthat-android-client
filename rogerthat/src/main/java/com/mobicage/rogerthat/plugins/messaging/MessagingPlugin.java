@@ -58,6 +58,7 @@ import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.db.DatabaseManager;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.security.SecurityUtils;
+import com.mobicage.rogerthat.util.system.CompletionHandler;
 import com.mobicage.rogerthat.util.system.SafeBroadcastReceiver;
 import com.mobicage.rogerthat.util.system.SafeDialogClick;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
@@ -1673,20 +1674,19 @@ public class MessagingPlugin implements MobicagePlugin {
         updateBadge();
     }
 
-    public String validateFormResult(Message message, IJSONable formResult) {
+    public void validateFormResult(Message message, IJSONable formResult, CompletionHandler<String> completionHandler) {
         String javascriptValidation = (String) message.form.get("javascript_validation");
         if (!TextUtils.isEmptyOrWhitespace(javascriptValidation)) {
-            return validateFormResult(message.sender, message.getThreadKey(), javascriptValidation, formResult);
+            validateFormResult(message.sender, message.getThreadKey(), javascriptValidation, formResult, completionHandler);
         } else {
-            return null;
+            completionHandler.run(null);
         }
     }
 
-    public String validateFormResult(String serviceEmail, String threadKey, String javascriptValidationCode,
-        IJSONable formResult) {
-        T.UI();
-        return JsMfr.executeFormResultValidation(serviceEmail, threadKey, javascriptValidationCode,
-            formResult.toJSONMap(), mMainService);
+    public void validateFormResult(String serviceEmail, String threadKey, String javascriptValidationCode,
+                                     IJSONable formResult, CompletionHandler<String> completionHandler) {
+        JsMfr.executeFormResultValidation(serviceEmail, threadKey, javascriptValidationCode, formResult.toJSONMap(),
+                mMainService, completionHandler);
     }
 
     public void answerJsMfrMessage(MessageTO message, Map<String, Object> request, String function,
@@ -1697,8 +1697,6 @@ public class MessagingPlugin implements MobicagePlugin {
 
     public void answerJsMfrMessage(String threadKey, Map<String, Object> request, String function,
         ServiceBound activity, ViewGroup parentView) {
-        T.UI();
-
         MessageFlowRun mfr = mStore.getMessageFlowRun(threadKey);
         if (mfr == null) {
             L.bug("MessageFlowRun not found for threadKey: " + threadKey);

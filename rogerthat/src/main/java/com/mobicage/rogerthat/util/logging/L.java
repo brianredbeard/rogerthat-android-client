@@ -64,7 +64,6 @@ public class L {
 
     public final static String SEPARATOR = "------------------------------------------------------";
     public final static String TAG = "MC";
-    private final static String BUG = "Bug!";
     private final static int BLOB_PIECE_SIZE = 120;
     private final static String BLOB_LINE_PREFIX = "   ";
 
@@ -111,14 +110,13 @@ public class L {
     }
 
     public static void bug(String s) {
-        s = BUG + '\n' + s;
         Log.d(TAG, T.getThreadName() + s);
         logToServer(s, null);
         logToXmpp("BUG", s, null);
     }
 
     public static void bug(Throwable t) {
-        Log.d(TAG, T.getThreadName() + BUG, t);
+        Log.d(TAG, T.getThreadName(), t);
         logToServer(null, t);
         logToXmpp("BUG", "", t);
     }
@@ -135,7 +133,6 @@ public class L {
     }
 
     public static void bug(String s, Throwable t) {
-        s = BUG + '\n' + s;
         Log.d(TAG, T.getThreadName() + s, t);
         logToServer(s, t);
         logToXmpp("BUG", s, t);

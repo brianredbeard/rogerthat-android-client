@@ -45,6 +45,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore.Video.Thumbnails;
@@ -887,6 +888,9 @@ public class UIUtils {
     }
 
     public static void setColors(int color, View... views) {
+        if (Build.VERSION.SDK_INT >= 27) {
+            return;
+        }
         for (View view : views) {
             if (view instanceof CheckBox) {
                 CheckBox checkbox = (CheckBox) view;

@@ -18,7 +18,6 @@
 
 package com.mobicage.rogerthat;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -90,6 +89,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
+import me.leolin.shortcutbadger.ShortcutBadgeException;
 import me.leolin.shortcutbadger.ShortcutBadger;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
@@ -773,7 +773,11 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         for (Long c : mService.badges.values()) {
             count += c.longValue();
         }
-        ShortcutBadger.applyCount(mService, count);
+        try {
+            ShortcutBadger.applyCountOrThrow(mService, count);
+        } catch (ShortcutBadgeException ignored) {
+            // Probably not supported, ignore error
+        }
     }
 
     private void setupBadges() {

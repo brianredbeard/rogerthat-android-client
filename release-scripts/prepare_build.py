@@ -31,6 +31,8 @@ from PIL import Image
 from contextlib import closing
 from xml.dom import minidom
 
+import cordova
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(levelname)s [%(asctime)s] [%(funcName)s:%(lineno)d] %(message)s",

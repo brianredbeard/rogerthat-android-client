@@ -995,7 +995,6 @@ public class FriendStore implements Closeable {
     }
 
     public String getStaticFlow(final String staticFlowHash) throws IOException {
-        T.UI();
         final Cursor curs = mDb.rawQuery(mMainService.getString(R.string.sql_friend_static_flow_get),
                 new String[]{staticFlowHash});
 
