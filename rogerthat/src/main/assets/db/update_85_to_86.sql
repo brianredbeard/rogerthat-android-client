@@ -1,0 +1,2 @@
+ALTER TABLE message
+ADD COLUMN embedded_app TEXT DEFAULT NULL;
