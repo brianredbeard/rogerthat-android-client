@@ -273,6 +273,9 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
     protected void onDestroy() {
         inactivityTimer.shutdown();
         super.onDestroy();
+        // **** MODIFIED ****/
+        unregisterReceiver(broadcast_reciever);
+        // **** END MODIFIED ****/
     }
 
     @Override
