@@ -91,7 +91,6 @@ import java.util.Queue;
 
 import me.leolin.shortcutbadger.ShortcutBadgeException;
 import me.leolin.shortcutbadger.ShortcutBadger;
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public abstract class ServiceBoundActivity extends AppCompatActivity implements Pausable, ServiceBound,
         MenuItemPressingActivity, PokingActivity {
@@ -188,12 +187,6 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         mTransmitProgressDialog = UIUtils.showProgressDialog(this, null, getString(R.string.transmitting), true,
                 true, onCancelListener, ProgressDialog.STYLE_HORIZONTAL, false);
     }
-
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
-    }
-
 
     @Override
     protected void onDestroy() {

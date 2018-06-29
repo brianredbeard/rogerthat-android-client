@@ -20,14 +20,10 @@ package com.mobicage.rogerthat.util.ui;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -46,15 +42,12 @@ import android.graphics.drawable.ShapeDrawable;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.provider.MediaStore.Video.Thumbnails;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.CompoundButtonCompat;
-import android.support.v7.app.NotificationCompat;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -83,7 +76,6 @@ import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.App;
-import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
@@ -98,12 +90,7 @@ import com.mobicage.rpc.config.LookAndFeelConstants;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class UIUtils {
 
@@ -114,17 +101,13 @@ public class UIUtils {
     private final static float UNINITIALIZED_PIXEL_SCALE = -1;
     private final static int UNINITIALIZED_PIXEL_WIDTH = -1;
 
-    // Owned by UI thread
-    private final static Set<Integer> sNotificationIDs = new HashSet<Integer>();
     private static boolean sHardKeyboardInitialized = false;
     private static boolean sHasHardKeyboard;
     private static float sPixelScale = UNINITIALIZED_PIXEL_SCALE;
     private static int sPixelWith = UNINITIALIZED_PIXEL_WIDTH;
 
-    public static final String NOTIFICATION_TIMESTAMP = "NOTIFICATION_TIMESTAMP";
 
     private static List<Activity> sActivities = new ArrayList<Activity>();
-    private static Map<Object, Integer> notificationIds = new HashMap<>();
 
     public static int getNumberOfActivities() {
         if (T.getThreadType() != T.UI) {
@@ -191,121 +174,6 @@ public class UIUtils {
     public static Toast showLongToast(final Context context, final int resource) {
         T.UI();
         return showLongToast(context, context.getString(resource));
-    }
-
-    public static void doNotification(Context pContext, String title, String message, int notificationId,
-                                      String action, boolean withSound, boolean withVibration, boolean withLight,
-                                      boolean autoCancel, int icon, int notificationNumber, String extra,
-                                      String extraData, String tickerText, long timestamp, int priority,
-                                      List<NotificationCompat.Action> actionButtons,
-                                      String longNotificationText, Bitmap largeIcon, String category) {
-        Bundle b = null;
-        if (extra != null) {
-            b = new Bundle();
-            b.putString(extra, extraData);
-        }
-        doNotification(pContext, title, message, notificationId, action, withSound, withVibration, withLight,
-                autoCancel, icon, notificationNumber, b, tickerText, timestamp, priority, actionButtons,
-                longNotificationText, largeIcon, category);
-    }
-
-    public static void doNotification(Context pContext, String title, String message, int notificationId, String action,
-                                      boolean withSound, boolean withVibration, boolean withLight, boolean autoCancel,
-                                      int icon, int notificationNumber, Bundle extras, String tickerText,
-                                      long timestamp, int priority, List<NotificationCompat.Action> actionButtons,
-                                      String longNotificationText, Bitmap largeIcon, String category) {
-        T.dontCare();
-        SharedPreferences options = PreferenceManager.getDefaultSharedPreferences(pContext);
-        final boolean pushNotifications = options.getBoolean(MainService.PREFERENCE_PUSH_NOTIFICATIONS, false);
-        if (!pushNotifications) {
-            L.d("push notifications are disabled");
-            return;
-        }
-
-        final NotificationCompat.Builder builder = new NotificationCompat.Builder(pContext);
-        int defaults = 0;
-        if (withSound) {
-            defaults |= Notification.DEFAULT_SOUND;
-        }
-        if (withVibration) {
-            defaults |= Notification.DEFAULT_VIBRATE;
-        }
-        builder.setDefaults(defaults);
-
-        if (withLight) {
-            builder.setLights(0xff00ff00, 300, 3000);
-        }
-
-        builder.setAutoCancel(autoCancel);
-        builder.setOngoing(!autoCancel);
-        builder.setCategory(category);
-
-        if (message != null) {
-            builder.setSmallIcon(icon);
-            if (largeIcon != null) {
-                builder.setLargeIcon(largeIcon);
-            }
-            if (tickerText != null) {
-                builder.setTicker(tickerText);
-            }
-            builder.setWhen(System.currentTimeMillis());
-            final Intent intent = new Intent(action, null, pContext, MainActivity.class);
-            intent.addFlags(MainActivity.FLAG_CLEAR_STACK_SINGLE_TOP);
-            if (extras != null)
-                intent.putExtras(extras);
-            intent.putExtra(NOTIFICATION_TIMESTAMP, timestamp);
-
-            final PendingIntent pi = PendingIntent.getActivity(pContext, NotificationID.next(), intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT);
-
-            builder.setContentIntent(pi);
-            builder.setContentText(message);
-            builder.setContentTitle(title);
-            if (!TextUtils.isEmptyOrWhitespace(longNotificationText)) {
-                builder.setStyle(new NotificationCompat.BigTextStyle().bigText(longNotificationText));
-            }
-            builder.setPriority(priority);
-            if (actionButtons != null) {
-                for (NotificationCompat.Action actionButton : actionButtons) {
-                    builder.addAction(actionButton);
-                }
-            }
-        }
-
-        builder.setNumber(notificationNumber);
-
-        final NotificationManager nm = (NotificationManager) pContext.getSystemService(Context.NOTIFICATION_SERVICE);
-        nm.notify(notificationId, builder.build());
-        sNotificationIDs.add(notificationId);
-    }
-
-    public static int getNotificationId(final Object notificationKey, boolean createIfNotExists) {
-        if (notificationIds.containsKey(notificationKey)) {
-            if (createIfNotExists) {
-                return notificationIds.get(notificationKey);
-            } else {
-                return notificationIds.remove(notificationKey);
-            }
-        }
-        if (!createIfNotExists) {
-            return -1;
-        }
-        int notificationID = NotificationID.next();
-        notificationIds.put(notificationKey, notificationID);
-        return notificationID;
-    }
-
-    public static void cancelNotification(final Context pContext, final int pNotificationId) {
-        T.dontCare();
-        final NotificationManager nm = (NotificationManager) pContext.getSystemService(Context.NOTIFICATION_SERVICE);
-        nm.cancel(pNotificationId);
-    }
-
-    public static void cancelNotification(final Context context, final Object notificationKey) {
-        int notificationId = getNotificationId(notificationKey, false);
-        if (notificationId != -1) {
-            cancelNotification(context, notificationId);
-        }
     }
 
     public static boolean hasHardKeyboard(Context pContext) {
@@ -951,13 +819,5 @@ public class UIUtils {
                 UIUtils.setColorsRecursive(context, (ViewGroup) view);
             }
         }
-    }
-}
-
-class NotificationID {
-    private final static AtomicInteger c = new AtomicInteger(1000);
-
-    public static int next() {
-        return c.incrementAndGet();
     }
 }

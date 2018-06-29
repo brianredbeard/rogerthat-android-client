@@ -205,15 +205,6 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        if (mCurrentMessage != null) {
-            UIUtils.cancelNotification(this, mCurrentMessage.getThreadKey());
-        }
-    }
-
-
-    @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             View v = getCurrentFocus();
@@ -275,6 +266,10 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
 
         ((TextView) findViewById(R.id.show_magic_message_header)).setText(getString(R.string.show_message_header,
             getString(R.string.app_name)));
+        if (mCurrentMessage != null) {
+            mService.getNotificationHelper().cancelNotification(mCurrentMessage.getThreadKey());
+        }
+        
     }
 
     @Override

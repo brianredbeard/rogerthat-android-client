@@ -16,8 +16,6 @@
 
 package com.google.zxing.client.android;
 
-import java.util.Map;
-
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
@@ -34,6 +32,8 @@ import com.google.zxing.ReaderException;
 import com.google.zxing.Result;
 import com.google.zxing.common.HybridBinarizer;
 import com.mobicage.rogerth.at.R;
+
+import java.util.Map;
 
 final class DecodeHandler extends Handler {
 

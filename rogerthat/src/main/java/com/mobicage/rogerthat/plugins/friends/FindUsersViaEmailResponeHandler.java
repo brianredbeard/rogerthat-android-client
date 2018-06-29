@@ -20,11 +20,13 @@ package com.mobicage.rogerthat.plugins.friends;
 
 import android.app.Notification;
 import android.content.Intent;
-import android.support.v7.app.NotificationCompat;
+import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.AddFriendsActivity;
 import com.mobicage.rogerthat.MainActivity;
+import com.mobicage.rogerthat.NotificationChannelId;
 import com.mobicage.rogerthat.config.Configuration;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
@@ -54,15 +56,14 @@ public class FindUsersViaEmailResponeHandler extends ResponseHandler<FindRogerth
         boolean autoCancel = true;
         int icon = R.drawable.notification_icon;
         int notificationNumber = 0;
-        String extra = AddFriendsActivity.INTENT_KEY_LAUNCHINFO;
-        String extraData = AddFriendsActivity.INTENT_VALUE_SHOW_CONTACTS;
         String tickerText = null;
         long timestamp = mMainService.currentTimeMillis();
-
-        UIUtils.doNotification(mMainService, title, message, notificationId,
+        Bundle extras = new Bundle();
+        extras.putString(AddFriendsActivity.INTENT_KEY_LAUNCHINFO, AddFriendsActivity.INTENT_VALUE_SHOW_CONTACTS);
+        mMainService.getNotificationHelper().doNotification(title, message, notificationId,
             MainActivity.ACTION_NOTIFICATION_ADDRESSBOOK_SCAN, withSound, withVibration, withLight, autoCancel, icon,
-                notificationNumber, extra, extraData, tickerText, timestamp, Notification.PRIORITY_LOW, null, null,
-                null, NotificationCompat.CATEGORY_EVENT);
+                notificationNumber, extras, tickerText, timestamp, Notification.PRIORITY_LOW, null, null,
+                null, NotificationCompat.CATEGORY_EVENT, NotificationChannelId.DEFAULT);
     }
 
     @Override

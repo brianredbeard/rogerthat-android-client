@@ -430,7 +430,7 @@ public class AddFriendsActivity extends ServiceBoundActivity {
 
     private void displayContactsResult(String jsonResult) {
         T.UI();
-        UIUtils.cancelNotification(this, R.integer.ab_scan_finished);
+        mService.getNotificationHelper().cancelNotification(R.integer.ab_scan_finished);
 
         @SuppressWarnings("unchecked")
         Map<String, Object> responseMap = (Map<String, Object>) JSONValue.parse(jsonResult);
@@ -722,7 +722,7 @@ public class AddFriendsActivity extends ServiceBoundActivity {
     @SuppressWarnings("unchecked")
     private void displayFacebookResult(final String jsonResult) {
         T.UI();
-        UIUtils.cancelNotification(this, R.integer.fb_scan_finished);
+        mService.getNotificationHelper().cancelNotification(R.integer.fb_scan_finished);
 
         Map<String, Object> responseMap = (Map<String, Object>) JSONValue.parse(jsonResult);
         final FindRogerthatUsersViaFacebookResponseTO responseTO;

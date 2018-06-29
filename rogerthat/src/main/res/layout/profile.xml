@@ -87,7 +87,7 @@
                     android:layout_weight="6"
                     android:gravity="right"
                     android:text="@string/birthdate"
-                    fontPath="fonts/lato_bold.ttf"
+                    android:textStyle="bold"
                     android:textSize="16sp"
                     tools:text="Geboortedatum"/>
 
@@ -131,7 +131,7 @@
                     android:layout_weight="6"
                     android:gravity="right"
                     android:text="@string/gender"
-                    fontPath="fonts/lato_bold.ttf"
+                    android:textStyle="bold"
                     android:textSize="16sp"/>
 
                 <TextView

@@ -619,7 +619,6 @@ def convert_config():
 
     elif doc["APP_CONSTANTS"]["APP_TYPE"] == APP_TYPE_CITYPAPP:
         app_type = "APP_TYPE_CITYAPP"
-        home_activity = "R.layout.homescreen_3x3_with_qr_code"
         show_profile_in_more = bool_str(not main_screen_contains_profile)
         show_scan_in_more = bool_str(not main_screen_contains_scan)
         services_enabled = bool_str(main_screen_contains_services)

@@ -57,7 +57,7 @@
                 android:text="9+"
                 android:textColor="#FFFFFF"
                 android:textSize="12dp"
-                fontPath="fonts/lato_bold.ttf"
+                android:textStyle="bold"
                 tools:ignore="HardcodedText"
                 android:visibility="gone">
             </TextView>

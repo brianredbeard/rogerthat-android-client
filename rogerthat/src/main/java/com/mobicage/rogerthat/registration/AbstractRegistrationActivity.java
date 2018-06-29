@@ -116,8 +116,6 @@ public abstract class AbstractRegistrationActivity extends ServiceBoundActivity 
                 T.setRegistrationThread("RegistrationProcedureActivity.WORKER");
             }
         });
-
-        startRegistrationService();
     }
 
     public void closeWorkerThread() {
@@ -158,14 +156,6 @@ public abstract class AbstractRegistrationActivity extends ServiceBoundActivity 
         MobileInfo info = SystemPlugin.gatherMobileInfo(mService);
         String json = JSONValue.toJSONString(info.toJSONMap());
         return json;
-    }
-
-    private void startRegistrationService() {
-        startService(new Intent(this, RegistrationService.class));
-    }
-
-    private void stopRegistrationService() {
-        stopService(new Intent(this, RegistrationService.class));
     }
 
     public void startMainActivity(boolean directly) {
@@ -267,7 +257,6 @@ public abstract class AbstractRegistrationActivity extends ServiceBoundActivity 
                             launchServiceIntent.putExtra(MainService.START_INTENT_JUST_REGISTERED, true);
                             launchServiceIntent.putExtra(MainService.START_INTENT_MY_EMAIL, mWizard.getEmail());
                             mActivity.startService(launchServiceIntent);
-                            stopRegistrationService();
                             pd.dismiss();
 
                             mWizard.finish(); // finish

@@ -22,7 +22,7 @@
         android:layout_marginTop="5dp"
         android:gravity="center_horizontal"
         android:textSize="12.5dp"
-        fontPath="fonts/lato_bold.ttf" >
+        android:textStyle="bold" >
     </TextView>
 
 </RelativeLayout>

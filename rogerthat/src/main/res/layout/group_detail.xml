@@ -94,7 +94,7 @@
 			        android:ellipsize="end"
 			        android:singleLine="true"
 					android:textSize="20sp"
-			        fontPath="fonts/lato_bold.ttf" >
+			        android:textStyle="bold" >
 			    </TextView>
 			</RelativeLayout>
 
@@ -164,7 +164,7 @@
 
                 <EditText
 					android:id="@+id/update_group_name_value"
-					fontPath="fonts/lato_bold.ttf"
+					android:textStyle="bold"
 					android:layout_width="fill_parent"
 					android:layout_height="wrap_content"
 					android:layout_centerInParent="true"

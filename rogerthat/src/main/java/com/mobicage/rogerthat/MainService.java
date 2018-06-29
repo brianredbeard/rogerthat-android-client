@@ -40,8 +40,8 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.NotificationCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
@@ -280,6 +280,8 @@ public class MainService extends Service implements TimeProvider {
     private Credentials mCredentials;
     // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    private NotificationHelper mNotificationHelper;
+
     public static MainService getInstance() {
         return current;
     }
@@ -292,6 +294,7 @@ public class MainService extends Service implements TimeProvider {
     public void onCreate() {
         super.onCreate();
         L.d(getPackageName() + "::MainService.OnCreate");
+        this.mNotificationHelper = new NotificationHelper(this);
         try {
             PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), 0);
             mIsDebug = (info.applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) == ApplicationInfo.FLAG_DEBUGGABLE;
@@ -365,6 +368,10 @@ public class MainService extends Service implements TimeProvider {
 
         // This should remain the last line of this method.
         current = this;
+    }
+
+    public NotificationHelper getNotificationHelper() {
+        return mNotificationHelper;
     }
 
     public void registerPluginDBUpdate(final Class<?> pluginClass, final String update) {
@@ -1383,14 +1390,14 @@ public class MainService extends Service implements TimeProvider {
         String extraData = null;
         String tickerText = null;
         long timestamp = currentTimeMillis();
-
-        UIUtils.doNotification(MainService.this, title, message, notificationId, action, withSound, withVibration,
-                withLight, autoCancel, icon, notificationNumber, extra, extraData, tickerText, timestamp,
-                Notification.PRIORITY_DEFAULT, null, null, null, NotificationCompat.CATEGORY_PROGRESS);
+        this.getNotificationHelper().doNotification(title, message, notificationId, action, withSound, withVibration,
+                withLight, autoCancel, icon, notificationNumber, null, tickerText, timestamp,
+                Notification.PRIORITY_DEFAULT, null, null, null,
+                NotificationCompat.CATEGORY_PROGRESS, NotificationChannelId.DEFAULT);
     }
 
     private void hideLogForwardNotification() {
-        UIUtils.cancelNotification(MainService.this, R.integer.forwarding_logs);
+        this.getNotificationHelper().cancelNotification(R.integer.forwarding_logs);
     }
 
     public void processExceptionViaHTTP(Exception ex) {

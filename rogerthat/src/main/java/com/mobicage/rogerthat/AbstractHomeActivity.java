@@ -25,14 +25,9 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.PagerAdapter;
 import android.util.SparseIntArray;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -60,8 +55,6 @@ import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.rpc.config.LookAndFeelConstants;
 import com.mobicage.to.friends.ServiceMenuItemTO;
-
-import fr.castorflex.android.verticalviewpager.VerticalViewPager;
 
 /**
  * Super class for HomeActivity | Only used in City & Enterprise Apps
@@ -105,57 +98,15 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity {
 
     protected SparseIntArray mServiceCountByOrganizationType = new SparseIntArray();
 
-    private VerticalViewPager mPager;
-
     abstract ItemDef[] getItemDefs();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         T.UI();
         super.onCreate(savedInstanceState);
-        LayoutInflater inflater = getLayoutInflater();
 
         int homeActivityLayout = LookAndFeelConstants.getHomeActivityLayout(this);
         setContentViewWithoutNavigationBar(homeActivityLayout);
-
-        if (homeActivityLayout == R.layout.homescreen_3x3_with_qr_code ||
-                homeActivityLayout == R.layout.homescreen_3x3) {
-            FrameLayout mainLayer = (FrameLayout) findViewById(R.id.master);
-            inflater.inflate(R.layout.homescreen_3x3_watermark, mainLayer, true);
-            inflater.inflate(R.layout.homescreen_3x3_holder, mainLayer, true);
-        }
-
-        if (homeActivityLayout == R.layout.homescreen_3x3_with_qr_code) {
-            if (AppConstants.SHOW_HOMESCREEN_FOOTER) {
-                ((TextView) findViewById(R.id.loyalty_text)).setTextColor(ContextCompat.getColor(this, R.color
-                        .mc_homescreen_background));
-            }
-
-            mPager = (VerticalViewPager) findViewById(R.id.view_pager);
-            mPager.setAdapter(new PagerAdapter() {
-                @Override
-                public Object instantiateItem(ViewGroup container, int position) {
-                    return mPager.getChildAt(position);
-                }
-
-                @Override
-                public int getCount() {
-                    return 2;
-                }
-
-                @Override
-                public boolean isViewFromObject(View arg0, Object arg1) {
-                    return arg0 == arg1;
-                }
-            });
-
-            findViewById(R.id.scan_btn).setOnClickListener(new SafeViewOnClickListener() {
-                @Override
-                public void safeOnClick(View v) {
-                    ActivityUtils.goToScanActivity(AbstractHomeActivity.this, false, null);
-                }
-            });
-        }
 
         if (!AppConstants.SHOW_HOMESCREEN_FOOTER) {
             for (int id : new int[]{R.id.homescreen_footer, R.id.invisible_homescreen_footer}) {
@@ -183,7 +134,7 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity {
     }
 
     private void initUI() {
-        mBadgeMessages = (TextView) findViewById(R.id.badge_0x0);
+        mBadgeMessages = findViewById(R.id.badge_0x0);
 
         for (ItemDef i : getItemDefs()) {
             final ImageView icon = (ImageView) findViewById(i.iconId);
@@ -453,25 +404,6 @@ public abstract class AbstractHomeActivity extends ServiceBoundActivity {
     @Override
     public MainService getMainService() {
         return mService;
-    }
-
-    private boolean resetPager() {
-        if (mPager != null && mPager.getCurrentItem() == 1) {
-            mPager.setCurrentItem(0, true);
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean onKeyDown(final int keyCode, final KeyEvent event) {
-        return keyCode == KeyEvent.KEYCODE_BACK && resetPager() || super.onKeyDown(keyCode, event);
-    }
-
-    @Override
-    protected void onPause() {
-        resetPager();
-        super.onPause();
     }
 
 }

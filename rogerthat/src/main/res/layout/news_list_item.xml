@@ -172,7 +172,7 @@
 
                 <TextView
                     android:id="@+id/qr_code_caption"
-                    fontPath="fonts/lato_bold.ttf"
+                    android:textStyle="bold"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
@@ -212,7 +212,7 @@
 
                         <TextView
                             android:id="@+id/title"
-                            fontPath="fonts/lato_bold.ttf"
+                            android:textStyle="bold"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textColor="@color/mc_primary_color"
@@ -290,7 +290,7 @@
 
                     <TextView
                         android:id="@+id/reach"
-                        fontPath="fonts/lato_bold.ttf"
+                        android:textStyle="bold"
                         android:layout_width="wrap_content"
                         android:layout_height="14dp"
                         android:textSize="12sp"

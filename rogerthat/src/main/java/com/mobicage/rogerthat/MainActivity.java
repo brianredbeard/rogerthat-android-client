@@ -275,7 +275,7 @@ public class MainActivity extends ServiceBoundActivity implements PinLockMgr.NoP
 
     private void processPhotoUploadDoneIntent(Intent intent, boolean hasRegistered) {
         if (hasRegistered) {
-            UIUtils.cancelNotification(mService, R.integer.transfer_complete_continue);
+            mService.getNotificationHelper().cancelNotification(R.integer.transfer_complete_continue);
             launchHomeActivityAndFinish(null, FLAG_CLEAR_STACK_SINGLE_TOP);
 
             Intent i = new Intent(this, ServiceMessageDetailActivity.class);

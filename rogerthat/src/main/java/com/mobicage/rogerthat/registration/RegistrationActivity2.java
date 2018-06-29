@@ -244,14 +244,6 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
         UIUtils.showDialog(this, null, message);
     }
 
-    private void showNotification() {
-        mService.sendBroadcast(new Intent(RegistrationService.INTENT_SHOW_NOTIFICATION));
-    }
-
-    private void hideNotification() {
-        mService.sendBroadcast(new Intent(RegistrationService.INTENT_HIDE_NOTIFICATION));
-    }
-
     @Override
     protected void onDestroy() {
         closeWorkerThread();
@@ -574,7 +566,6 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
             public void safeOnClick(View v) {
                 registerBtn.setEnabled(false);
                 cancelBtn.setEnabled(false);
-                hideNotification();
                 registerDevice();
             }
         });
@@ -703,7 +694,6 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                             protected void safeRun() throws Exception {
                                 T.UI();
                                 progressDialog.dismiss();
-                                hideNotification();
                                 mWiz.setEmail(email);
                                 mWiz.setDeviceNames(deviceNames);
                                 mWiz.proceedToPosition(6); // devices
@@ -721,7 +711,6 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                                 T.UI();
                                 mWiz.setEmail(email);
                                 mWiz.save();
-                                hideNotification();
                                 tryConnect(
                                         progressDialog,
                                         1,
@@ -923,7 +912,6 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                             protected void safeRun() throws Exception {
                                 T.UI();
                                 progressDialog.dismiss();
-                                hideNotification();
                                 mWiz.setEmail(email);
                                 mWiz.setDeviceNames(deviceNames);
                                 mWiz.proceedToPosition(6); // devices
@@ -942,7 +930,6 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                                 progressDialog.dismiss();
                                 mWiz.setEmail(email);
                                 mWiz.save();
-                                hideNotification();
                                 tryConnect(
                                         progressDialog,
                                         1,
@@ -1111,7 +1098,6 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                                 protected void safeRun() throws Exception {
                                     T.UI();
                                     progressDialog.dismiss();
-                                    hideNotification();
                                     mWiz.setDeviceNames(deviceNames);
                                     mWiz.proceedToPosition(6); // devices
                                 }
@@ -1126,7 +1112,6 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                                     @Override
                                     protected void safeRun() throws Exception {
                                         T.UI();
-                                        hideNotification();
                                         tryConnect(
                                                 progressDialog,
                                                 1,
@@ -1149,7 +1134,6 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                                     UIUtils.showDialog(RegistrationActivity2.this, title, message);
                                     mEnterPinEditText.setText("");
                                 } else {
-                                    hideNotification();
                                     String message = getString(R.string.registration_no_attempts_left);
                                     String positiveCaption = getString(R.string.try_again);
                                     UIUtils.showDialog(RegistrationActivity2.this, null, message, positiveCaption, null, null, null);
@@ -1489,7 +1473,6 @@ public class RegistrationActivity2 extends AbstractRegistrationActivity {
                                 mWiz.save();
                                 progressDialog.dismiss();
                                 mWiz.proceedToNextPage();
-                                showNotification();
                             }
                         });
                     } else if (statusCode == 502) {

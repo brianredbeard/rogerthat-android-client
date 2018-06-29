@@ -43,7 +43,7 @@
          android:layout_margin="20dp"
          android:textColor="@android:color/primary_text_light"
          android:textSize="18sp"
-         fontPath="fonts/lato_bold.ttf"
+         android:textStyle="bold"
          android:text="@string/retry"
          android:theme="@style/ButtonTheme"
          android:visibility="gone" />

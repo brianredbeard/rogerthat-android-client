@@ -63,8 +63,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
-
 public abstract class ServiceBoundMapActivity extends AppCompatActivity implements Pausable, ServiceBound,
         OnMapReadyCallback,
         ActivityCompat.OnRequestPermissionsResultCallback,
@@ -123,11 +121,6 @@ public abstract class ServiceBoundMapActivity extends AppCompatActivity implemen
         };
         mTransmitProgressDialog = UIUtils.showProgressDialog(this, null, getString(R.string.transmitting), true,
                 true, onCancelListener, ProgressDialog.STYLE_HORIZONTAL, false);
-    }
-
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
     @Override

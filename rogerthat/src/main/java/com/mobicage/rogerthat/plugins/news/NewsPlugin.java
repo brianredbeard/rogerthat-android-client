@@ -27,7 +27,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.support.v7.app.NotificationCompat;
+import android.support.v4.app.NotificationCompat;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainActivity;
@@ -36,6 +36,8 @@ import com.mobicage.rogerthat.NavigationItem;
 import com.mobicage.rogerthat.NewsActivity;
 import com.mobicage.rogerthat.NewsListAdapter;
 import com.mobicage.rogerthat.NewsPinnedActivity;
+import com.mobicage.rogerthat.NotificationChannelId;
+import com.mobicage.rogerthat.NotificationHelper;
 import com.mobicage.rogerthat.config.Configuration;
 import com.mobicage.rogerthat.config.ConfigurationProvider;
 import com.mobicage.rogerthat.plugins.MobicagePlugin;
@@ -671,13 +673,11 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
         boolean autoCancel = true;
         int icon = R.drawable.notification_icon;
         int notificationNumber = 0;
-        String tickerText = null;
         long timestamp = mMainService.currentTimeMillis();
-
-        UIUtils.doNotification(mMainService, title, message, notificationId,
+        mMainService.getNotificationHelper().doNotification(title, message, notificationId,
                 MainActivity.ACTION_NOTIFICATION_NEW_NEWS, withSound, withVibration, withLight, autoCancel, icon,
-                notificationNumber, null, null, tickerText, timestamp, Notification.PRIORITY_LOW, null, null,
-                null, NotificationCompat.CATEGORY_EVENT);
+                notificationNumber, null, null, timestamp, Notification.PRIORITY_LOW, null, null,
+                null, NotificationCompat.CATEGORY_EVENT, NotificationChannelId.NEWS);
     }
 
     public void createNewsNotification(final AppNewsItemTO newsItem) {
@@ -704,15 +704,16 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
         String longNotificationText = newsItem.qr_code_caption != null ? newsItem.qr_code_caption : newsItem.message;
         int count = 0;
         Bitmap largeIcon = mMainService.getPlugin(FriendsPlugin.class).getAvatarBitmap(newsItem.sender.email);
-        UIUtils.doNotification(mMainService, notificationTitle, notificationText, UIUtils.getNotificationId(newsItem.id, true),
+        NotificationHelper helper = mMainService.getNotificationHelper();
+        helper.doNotification(notificationTitle, notificationText, helper.getNotificationId(newsItem.id, true),
                 MainActivity.ACTION_NOTIFICATION_NEW_NEWS, true, true, true, true, R.drawable.notification_icon,
                 count, b, null, mMainService.currentTimeMillis(), NotificationCompat.PRIORITY_DEFAULT, null,
-                longNotificationText, largeIcon, NotificationCompat.CATEGORY_PROMO);
+                longNotificationText, largeIcon, NotificationCompat.CATEGORY_PROMO, NotificationChannelId.NEWS);
     }
 
     public void removeNotification(long newsId) {
-        UIUtils.cancelNotification(mMainService, R.integer.news_sync);
-        UIUtils.cancelNotification(mMainService, newsId);
+        mMainService.getNotificationHelper().cancelNotification(R.integer.news_sync);
+        mMainService.getNotificationHelper().cancelNotification(newsId);
     }
 
     private void scheduleSyncNews() {

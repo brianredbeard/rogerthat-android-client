@@ -37,8 +37,6 @@ import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rogerthat.util.ui.UIUtils;
 
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
-
 public abstract class ServiceBoundPreferenceActivity extends PreferenceActivity implements ServiceBound {
 
     public static final long MAX_TRANSMIT = 10 * 1000;
@@ -65,12 +63,6 @@ public abstract class ServiceBoundPreferenceActivity extends PreferenceActivity 
         registerReceiver(closeActivityListener, filter);
         doBindService();
     }
-
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
-    }
-
 
     @Override
     protected void onDestroy() {

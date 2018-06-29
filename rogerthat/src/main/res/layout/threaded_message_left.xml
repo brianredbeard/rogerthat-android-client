@@ -17,7 +17,7 @@
 
         <TextView
             android:id="@+id/message_info"
-            fontPath="fonts/lato_light_italic.ttf"
+            android:textStyle="bold|italic"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
@@ -108,7 +108,7 @@
         android:layout_marginTop="5dp"
         android:text="@string/rogerthat"
         android:textColor="@color/mc_white"
-        fontPath="fonts/lato_bold.ttf"
+        android:textStyle="bold"
         android:visibility="gone" />
 
 </RelativeLayout>

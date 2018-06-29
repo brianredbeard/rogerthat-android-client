@@ -34,7 +34,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v7.app.NotificationCompat;
+import android.support.v4.app.NotificationCompat;
 import android.view.ViewGroup;
 
 import com.mobicage.api.messaging.Rpc;
@@ -42,6 +42,8 @@ import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.HomeActivity;
 import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
+import com.mobicage.rogerthat.NotificationChannelId;
+import com.mobicage.rogerthat.NotificationHelper;
 import com.mobicage.rogerthat.QuickReplyActivity;
 import com.mobicage.rogerthat.ServiceBound;
 import com.mobicage.rogerthat.config.Configuration;
@@ -458,7 +460,7 @@ public class MessagingPlugin implements MobicagePlugin {
                 context.startActivity(intent);
 
                 String parentKey = message.parent_key != null ? message.parent_key : message.key;
-                UIUtils.cancelNotification(context, parentKey);
+                mMainService.getNotificationHelper().cancelNotification(parentKey);
             } else {
                 Intent intent = ServiceThreadActivity.createIntent(context, threadKey, memberFilter,
                     message.parent_key != null);
@@ -874,7 +876,8 @@ public class MessagingPlugin implements MobicagePlugin {
             actionButtons.add(replyAction);
         }
 
-        int notificationId = UIUtils.getNotificationId(threadKey, true);
+        NotificationHelper notificationHelper = mMainService.getNotificationHelper();
+        int notificationId = notificationHelper.getNotificationId(threadKey, true);
 
         if (isFromOneFriend) {
             largeIcon = friendsPlugin.getAvatarBitmap(lastSender, false, getNotificationIconSize());
@@ -885,11 +888,11 @@ public class MessagingPlugin implements MobicagePlugin {
         Bundle extras = new Bundle();
         extras.putString(HomeActivity.INTENT_KEY_LAUNCHINFO, HomeActivity.INTENT_VALUE_SHOW_NEW_MESSAGES);
         extras.putString(HomeActivity.INTENT_KEY_MESSAGE, threadKey);
-        UIUtils.doNotification(mMainService, notificationTitle, notificationText, notificationId,
+        notificationHelper.doNotification(notificationTitle, notificationText, notificationId,
                 MainActivity.ACTION_NOTIFICATION_MESSAGE_RECEIVED, true, true, true, true,
                 R.drawable.notification_icon, unreadInThreadCount, extras, null, mMainService.currentTimeMillis(),
                 priority, actionButtons, longNotificationText.toString(), largeIcon,
-                NotificationCompat.CATEGORY_MESSAGE);
+                NotificationCompat.CATEGORY_MESSAGE, NotificationChannelId.CHAT_MESSAGE);
     }
 
     private int getNotificationIconSize() {
@@ -1338,7 +1341,7 @@ public class MessagingPlugin implements MobicagePlugin {
     }
 
     public void removeNotificationForThread(String threadKey) {
-        UIUtils.cancelNotification(mMainService, threadKey);
+        mMainService.getNotificationHelper().cancelNotification(threadKey);
     }
 
     public void conversationDeleted(final String threadKey) {
@@ -1843,10 +1846,11 @@ public class MessagingPlugin implements MobicagePlugin {
                                 String tickerText = null;
                                 long timestamp = mMainService.currentTimeMillis();
 
-                                UIUtils.doNotification(mMainService, title, n_message, notificationId,
+                                mMainService.getNotificationHelper().doNotification(title, n_message, notificationId,
                                         MainActivity.ACTION_NOTIFICATION_PHOTO_UPLOAD_DONE, withSound, withVibration,
                                         withLight, autoCancel, icon, notificationNumber, b, tickerText, timestamp,
-                                        Notification.PRIORITY_LOW, null, null, null, NotificationCompat.CATEGORY_EVENT);
+                                        Notification.PRIORITY_LOW, null, null, null,
+                                        NotificationCompat.CATEGORY_EVENT, NotificationChannelId.DEFAULT);
                             }
                         });
                     }
@@ -1865,7 +1869,7 @@ public class MessagingPlugin implements MobicagePlugin {
 
     private void hideTransferPendingNotification() {
         T.dontCare();
-        UIUtils.cancelNotification(mMainService, R.integer.photo_upload_pending);
+        mMainService.getNotificationHelper().cancelNotification(R.integer.photo_upload_pending);
     }
 
     private void showTransferPendingNotification(String notificationMessage) {

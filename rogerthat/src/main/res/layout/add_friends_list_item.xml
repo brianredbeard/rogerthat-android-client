@@ -38,7 +38,7 @@
             android:ellipsize="end"
             android:singleLine="true"
             android:textSize="16sp"
-            fontPath="fonts/lato_bold.ttf"
+            android:textStyle="bold"
             tools:text="Friend name" />
 
         <TextView

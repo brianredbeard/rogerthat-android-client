@@ -12,7 +12,7 @@
 
     <!-- Allows changing locales -->
     <uses-permission android:name="android.permission.CHANGE_CONFIGURATION"/>
-    <application>
+    <application android:networkSecurityConfig="@xml/debug_network_security_config">
         <activity android:name="com.mobicage.rogerthat.test.screenshots.FakeNewsActivity"/>
     </application>
 </manifest>

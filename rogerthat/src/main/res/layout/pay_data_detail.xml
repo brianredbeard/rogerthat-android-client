@@ -29,7 +29,7 @@
 
     <TextView
         android:id="@+id/pay_data_detail_key"
-        fontPath="fonts/lato_bold.ttf"
+        android:textStyle="bold"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="2"

@@ -19,18 +19,11 @@
 package com.mobicage.rogerthat.plugins.news;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.os.Bundle;
-import android.support.v7.app.NotificationCompat;
 
-import com.mobicage.rogerth.at.R;
-import com.mobicage.rogerthat.MainActivity;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.plugins.friends.Friend;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
-import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.system.T;
-import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.to.news.DisableNewsRequestTO;
 import com.mobicage.to.news.DisableNewsResponseTO;
 import com.mobicage.to.news.NewNewsRequestTO;

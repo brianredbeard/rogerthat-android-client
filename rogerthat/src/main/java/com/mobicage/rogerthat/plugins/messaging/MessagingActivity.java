@@ -720,14 +720,12 @@ public class MessagingActivity extends ServiceBoundCursorListActivity {
                 messageUnreadCount--;
             }
             if (messageUnreadCount >= 1) {
-                Typeface boldFont = TextUtils.getFont(MessagingActivity.this);
-                holder.recipientsView.setTypeface(boldFont);
-                holder.messageView.setTypeface(boldFont);
+                holder.recipientsView.setTypeface(holder.recipientsView.getTypeface(), Typeface.BOLD);
+                holder.messageView.setTypeface(holder.messageView.getTypeface(), Typeface.BOLD);
                 messageCountView.setVisibility(View.VISIBLE);
             } else {
-                Typeface normalFont = TextUtils.getFont(MessagingActivity.this, "regular");
-                holder.recipientsView.setTypeface(normalFont);
-                holder.messageView.setTypeface(normalFont);
+                holder.recipientsView.setTypeface(holder.recipientsView.getTypeface(), Typeface.NORMAL);
+                holder.messageView.setTypeface(holder.messageView.getTypeface(), Typeface.NORMAL);
                 messageCountView.setVisibility(View.GONE);
             }
 

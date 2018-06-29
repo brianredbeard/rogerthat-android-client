@@ -28,7 +28,6 @@ import com.facebook.appevents.AppEventsLogger;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.iconics.Iconics;
 import com.mobicage.rogerth.at.BuildConfig;
-import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.security.PinLockMgr;
 import com.mobicage.rogerthat.util.http.HTTPUtil;
 import com.mobicage.rogerthat.util.logging.L;
@@ -54,7 +53,6 @@ import java.util.List;
 import java.util.Locale;
 
 import io.fabric.sdk.android.Fabric;
-import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
 public class App extends MultiDexApplication implements Thread.UncaughtExceptionHandler {
 
@@ -76,12 +74,6 @@ public class App extends MultiDexApplication implements Thread.UncaughtException
 
         Thread.setDefaultUncaughtExceptionHandler(this);
         sContext = this;
-
-        CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
-                .setDefaultFontPath("fonts/lato_regular.ttf")
-                .setFontAttrId(R.attr.fontPath)
-                .build()
-        );
 
         // Initialize the SDK before executing any other operations,
         FacebookSdk.sdkInitialize(getApplicationContext());

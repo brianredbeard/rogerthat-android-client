@@ -191,12 +191,6 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        UIUtils.cancelNotification(this, mParentMessageKey);
-    }
-
-    @Override
     protected void onServiceBound() {
         mMessagingPlugin = mService.getPlugin(MessagingPlugin.class);
         mFriendsPlugin = mService.getPlugin(FriendsPlugin.class);
@@ -236,6 +230,7 @@ public class FriendsThreadActivity extends ServiceBoundCursorListActivity {
             mSendMessageView.setVisibility(View.GONE);
         }
         setThreadBackground();
+        mService.getNotificationHelper().cancelNotification(mParentMessageKey);
     }
 
     private void setThreadBackground() {

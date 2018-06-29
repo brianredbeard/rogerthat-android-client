@@ -16,8 +16,6 @@
 
 package com.google.zxing.client.android;
 
-import java.util.Map;
-
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
@@ -35,6 +33,8 @@ import com.google.zxing.common.HybridBinarizer;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.plugins.friends.QRCodeScanner;
 import com.mobicage.rogerthat.util.logging.L;
+
+import java.util.Map;
 
 final class QRCodeScannerDecodeHandler extends Handler {
 
