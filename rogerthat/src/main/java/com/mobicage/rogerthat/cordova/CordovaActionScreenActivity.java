@@ -52,7 +52,6 @@ import org.apache.cordova.ConfigXmlParser;
 import org.apache.cordova.CordovaInterfaceImpl;
 import org.apache.cordova.CordovaWebView;
 import org.apache.cordova.CordovaWebViewImpl;
-import org.apache.cordova.PluginManager;
 import org.apache.cordova.engine.SystemWebView;
 import org.apache.cordova.engine.SystemWebViewEngine;
 import org.json.JSONException;
@@ -207,7 +206,7 @@ public class CordovaActionScreenActivity extends ServiceBoundActivity {
         final ConfigXmlParser parser = new ConfigXmlParser();
         parser.parse(this.getResources().getXml(configId));
 
-        mBranding = (SystemWebView) findViewById(R.id.branding);
+        mBranding = findViewById(R.id.branding);
         SystemWebViewEngine parentEngine = new SystemWebViewEngine(mBranding);
         mBranding.setWebChromeClient(new CordovaWebChromeClient(parentEngine));
         mWebInterface = new CordovaWebViewImpl(parentEngine);
@@ -243,14 +242,10 @@ public class CordovaActionScreenActivity extends ServiceBoundActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        PluginManager pluginManager = mWebInterface.getPluginManager();
-        if (pluginManager != null) {
-            pluginManager.onDestroy();
-        }
-        mWebInterface.clearHistory();
-        mWebInterface.clearCache();
-        mWebInterface.loadUrl("about:blank");
-        mWebInterface = null;
+        // some parts from mWebInterface.handleDestroy(); - not calling this method because it triggers an error
+        // Forward to plugins
+        mWebInterface.getPluginManager().onDestroy();
+        mWebInterface.getEngine().destroy();
     }
 
     @Override

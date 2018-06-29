@@ -137,12 +137,12 @@ public class PluginResult {
     @Deprecated // Use sendPluginResult instead of sendJavascript.
     public String toCallbackString(String callbackId) {
         // If no result to be sent and keeping callback, then no need to sent back to JavaScript
-        if ((status == PluginResult.Status.NO_RESULT.ordinal()) && keepCallback) {
+        if ((status == Status.NO_RESULT.ordinal()) && keepCallback) {
         	return null;
         }
 
         // Check the success (OK, NO_RESULT & !KEEP_CALLBACK)
-        if ((status == PluginResult.Status.OK.ordinal()) || (status == PluginResult.Status.NO_RESULT.ordinal())) {
+        if ((status == Status.OK.ordinal()) || (status == Status.NO_RESULT.ordinal())) {
             return toSuccessCallbackString(callbackId);
         }
 
