@@ -249,7 +249,7 @@ public class JsMfr {
 
     private static void releaseV8Runtime() {
         long fiveMinutesAgo = System.currentTimeMillis() - FIVE_MINUTES;
-        if (sV8LastUsedTime <= fiveMinutesAgo) {
+        if (sV8LastUsedTime <= fiveMinutesAgo && sV8Runtime != null) {
             L.d("Releasing V8 runtime");
             sJSConsole.release();
             sV8Runtime.release();
