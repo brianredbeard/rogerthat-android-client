@@ -289,9 +289,14 @@ public final class QRCodeEncoder {
 
     private void encodeQRCodeContents(AddressBookParsedResult contact) {
         ContactEncoder encoder = useVCard ? new VCardContactEncoder() : new MECARDContactEncoder();
+        String url = null;
+        String[] urls = contact.getURLs();
+        if (urls.length > 0) {
+            url = urls[0];
+        }
         String[] encoded = encoder.encode(toIterable(contact.getNames()), contact.getOrg(),
             toIterable(contact.getAddresses()), toIterable(contact.getPhoneNumbers()), toIterable(contact.getEmails()),
-            contact.getURLs()[0], null);
+                url, null);
         // Make sure we've encoded at least one field.
         if (encoded[1].length() > 0) {
             contents = encoded[0];

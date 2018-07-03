@@ -93,7 +93,9 @@ repositories {
         url "https://jitpack.io"
     }
 }
-
+configurations.all {
+    resolutionStrategy.force "com.google.zxing:core:3.3.0"  // For some reason it resolves to version 3.6.0 otherwise
+}
 dependencies {
     implementation project(':CordovaLib')
     implementation 'net.i2p.crypto:eddsa:0.3.0'
