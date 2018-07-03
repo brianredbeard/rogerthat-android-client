@@ -437,6 +437,9 @@ public class GPSLocationWidget extends Widget {
     public static String valueString(Context context, Map<String, Object> widget) {
         @SuppressWarnings("unchecked")
         Map<String, Object> locationResult = (Map<String, Object>) widget.get("value");
+        if (locationResult == null) {
+            return null;
+        }
         return String.format(Locale.US, "<%.03f, %.03f> ± %.02fm", locationResult.get("latitude"),
             locationResult.get("longitude"), locationResult.get("horizontal_accuracy"));
     }
