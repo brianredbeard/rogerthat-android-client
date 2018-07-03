@@ -903,6 +903,7 @@ public class ServiceMessageDetailActivity extends ServiceBoundActivity {
             if (!mTransfering) {
                 animateAfterAck(expectNext);
             }
+            completionRunnable.run(true);
         } else {
             mService.postOnBIZZHandler(new SafeRunnable() {
                 @Override
