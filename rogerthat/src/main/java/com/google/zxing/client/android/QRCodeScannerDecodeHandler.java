@@ -98,7 +98,8 @@ final class QRCodeScannerDecodeHandler extends Handler {
             if (handler != null) {
                 Message message = Message.obtain(handler, R.id.decode_succeeded, rawResult);
                 Bundle bundle = new Bundle();
-                Bitmap grayscaleBitmap = toBitmap(source, source.renderCroppedGreyscaleBitmap());
+                // MODIFIED - See https://github.com/kennydude/zxing-lib/pull/8/files
+                Bitmap grayscaleBitmap = toBitmap(source.renderThumbnail(), source.getThumbnailWidth(), source.getThumbnailHeight());
                 bundle.putParcelable(DecodeThread.BARCODE_BITMAP, grayscaleBitmap);
                 message.setData(bundle);
                 message.sendToTarget();
@@ -111,9 +112,8 @@ final class QRCodeScannerDecodeHandler extends Handler {
         }
     }
 
-    private static Bitmap toBitmap(LuminanceSource source, int[] pixels) {
-        int width = source.getWidth();
-        int height = source.getHeight();
+    // MODIFIED - See https://github.com/kennydude/zxing-lib/pull/8/files
+    private static Bitmap toBitmap(int[] pixels, int width, int height) {
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         bitmap.setPixels(pixels, 0, width, 0, 0, width, height);
         return bitmap;

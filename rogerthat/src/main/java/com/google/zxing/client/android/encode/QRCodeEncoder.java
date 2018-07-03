@@ -291,7 +291,7 @@ public final class QRCodeEncoder {
         ContactEncoder encoder = useVCard ? new VCardContactEncoder() : new MECARDContactEncoder();
         String[] encoded = encoder.encode(toIterable(contact.getNames()), contact.getOrg(),
             toIterable(contact.getAddresses()), toIterable(contact.getPhoneNumbers()), toIterable(contact.getEmails()),
-            contact.getURL(), null);
+            contact.getURLs()[0], null);
         // Make sure we've encoded at least one field.
         if (encoded[1].length() > 0) {
             contents = encoded[0];
