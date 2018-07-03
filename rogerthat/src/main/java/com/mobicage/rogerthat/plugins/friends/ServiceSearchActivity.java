@@ -132,8 +132,8 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
             }
         }
 
-        mSearchCategoryLabels = (LinearLayout) findViewById(R.id.search_category);
-        mSearchCategoryViewFlipper = (SafeViewFlipper) findViewById(R.id.search_result_lists);
+        mSearchCategoryLabels = findViewById(R.id.search_category);
+        mSearchCategoryViewFlipper = findViewById(R.id.search_result_lists);
 
         mSearchInfoByCategory = new HashMap<>();
         mSearchInfoByListView = new HashMap<>();
@@ -141,7 +141,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
         mGestureScanner = new GestureDetector(mService, new ViewFlipperSlider(mOnSwipeLeft, mOnSwipeRight));
 
         final Context ctx = this;
-        final EditText editText = (EditText) findViewById(R.id.search_text);
+        final EditText editText = findViewById(R.id.search_text);
         editText.setOnEditorActionListener(new OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -172,7 +172,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
             }
         });
 
-        final ImageButton searchButton = (ImageButton) findViewById(R.id.search_button);
+        final ImageButton searchButton = findViewById(R.id.search_button);
         searchButton.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_search).color(LookAndFeelConstants.getPrimaryIconColor(this)).sizeDp(24));
         searchButton.setOnClickListener(new SafeViewOnClickListener() {
             @Override
@@ -421,7 +421,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
 
     private TextView setSelectedCategory(LinearLayout label, final boolean selected) {
         final View labelIndicatorView = label.findViewById(R.id.indicator);
-        final TextView labelTextView = (TextView) label.findViewById(R.id.category);
+        final TextView labelTextView = label.findViewById(R.id.category);
         labelIndicatorView.setVisibility(selected ? View.VISIBLE : View.INVISIBLE);
         labelTextView.setTypeface(Typeface.create(labelTextView.getTypeface(), selected ? Typeface.BOLD : Typeface.NORMAL));
         return labelTextView;
@@ -446,7 +446,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
             final LinearLayout v = si.label;
             setSelectedCategory(v, selected);
             if (selected) {
-                final HorizontalScrollView sv = (HorizontalScrollView) findViewById(R.id.search_category_scroll_container);
+                final HorizontalScrollView sv = findViewById(R.id.search_category_scroll_container);
                 sv.post(new SafeRunnable() {
                     @Override
                     public void safeRun() {
@@ -535,8 +535,7 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
 
             if (position == mItems.size() && mSearchInfo.cursor != null) {
                 View loadingView = getLayoutInflater().inflate(R.layout.list_loading_more_indicator, null);
-                ProgressBar progressBar = (ProgressBar) loadingView.findViewById(R.id.loading_list_progress_bar);
-                UIUtils.setColors(mService, progressBar);
+                loadingView.findViewById(R.id.loading_list_progress_bar);
                 return loadingView;
             }
 
@@ -556,20 +555,20 @@ public class ServiceSearchActivity extends ServiceBoundActivity {
             // Set avatar
             byte[] img = Base64.decode(item.avatar);
             Bitmap avatar = ImageHelper.getRoundedCornerAvatar(BitmapFactory.decodeByteArray(img, 0, img.length));
-            ImageView avatarView = (ImageView) v.findViewById(R.id.friend_avatar);
+            ImageView avatarView = v.findViewById(R.id.friend_avatar);
             avatarView.setImageBitmap(avatar);
             LayoutParams lp = avatarView.getLayoutParams();
             lp.width = lp.height = UIUtils.convertDipToPixels(ServiceSearchActivity.this, 40);
 
             // Set name
             ((TextView) v.findViewById(R.id.friend_name)).setText(item.name);
-            final TextView detailTextView = (TextView) v.findViewById(R.id.friend_subtitle);
+            final TextView detailTextView = v.findViewById(R.id.friend_subtitle);
             detailTextView.setText(item.detail_text);
 
             // Set status icon
             v.findViewById(R.id.friend_existence_layout).setVisibility(View.VISIBLE);
-            ProgressBar spinnerView = (ProgressBar) v.findViewById(R.id.friend_spinner);
-            final ImageView statusView = (ImageView) v.findViewById(R.id.friend_existence);
+            ProgressBar spinnerView = v.findViewById(R.id.friend_spinner);
+            final ImageView statusView = v.findViewById(R.id.friend_existence);
             int buttonColor = ContextCompat.getColor(ServiceSearchActivity.this, R.color.mc_default_text_inverse);
 
             switch (existence) {

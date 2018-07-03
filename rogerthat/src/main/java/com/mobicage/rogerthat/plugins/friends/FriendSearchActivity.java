@@ -95,10 +95,10 @@ public class FriendSearchActivity extends ServiceBoundActivity {
         setActivityName("directory");
 
         mSearchInfo = new SearchInfo();
-        mSearchInfo.results = (ListView) findViewById(R.id.search_result_lists);
+        mSearchInfo.results = findViewById(R.id.search_result_lists);
 
         final Context ctx = this;
-        final EditText editText = (EditText) findViewById(R.id.search_text);
+        final EditText editText = findViewById(R.id.search_text);
         editText.setOnEditorActionListener(new OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -129,7 +129,7 @@ public class FriendSearchActivity extends ServiceBoundActivity {
             }
         });
 
-        final ImageButton searchButton = (ImageButton) findViewById(R.id.search_button);
+        final ImageButton searchButton = findViewById(R.id.search_button);
         searchButton.setImageDrawable(new IconicsDrawable(this, FontAwesome.Icon.faw_search).color(LookAndFeelConstants.getPrimaryIconColor(this)).sizeDp(24));
         searchButton.setOnClickListener(new SafeViewOnClickListener() {
             @Override
@@ -320,8 +320,7 @@ public class FriendSearchActivity extends ServiceBoundActivity {
 
             if (position == mItems.size() && mSearchInfo.cursor != null) {
                 View loadingView = getLayoutInflater().inflate(R.layout.list_loading_more_indicator, null);
-                ProgressBar progressBar = (ProgressBar) loadingView.findViewById(R.id.loading_list_progress_bar);
-                UIUtils.setColors(mService, progressBar);
+                loadingView.findViewById(R.id.loading_list_progress_bar);
                 return loadingView;
             }
 
@@ -339,7 +338,7 @@ public class FriendSearchActivity extends ServiceBoundActivity {
             v.setTag(tag);
 
             // Set avatar
-            final ImageView avatarView = (ImageView) v.findViewById(R.id.friend_avatar);
+            final ImageView avatarView = v.findViewById(R.id.friend_avatar);
             avatarView.setImageBitmap(null);
             LayoutParams lp = avatarView.getLayoutParams();
             lp.width = lp.height = UIUtils.convertDipToPixels(FriendSearchActivity.this, 40);
@@ -395,8 +394,8 @@ public class FriendSearchActivity extends ServiceBoundActivity {
 
             // Set status icon
             v.findViewById(R.id.friend_existence_layout).setVisibility(View.VISIBLE);
-            ProgressBar spinnerView = (ProgressBar) v.findViewById(R.id.friend_spinner);
-            ImageView statusView = (ImageView) v.findViewById(R.id.friend_existence);
+            ProgressBar spinnerView = v.findViewById(R.id.friend_spinner);
+            ImageView statusView = v.findViewById(R.id.friend_existence);
             spinnerView.setVisibility(View.GONE);
             statusView.setVisibility(View.VISIBLE);
             statusView.setImageResource(R.drawable.ic_btn_arrow_right_unselected);

@@ -20,6 +20,6 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:padding="8dip"
-        tools:progress="50"></SeekBar>
+        tools:progress="50"/>
 
 </com.mobicage.rogerthat.plugins.messaging.widgets.SingleSliderWidget>

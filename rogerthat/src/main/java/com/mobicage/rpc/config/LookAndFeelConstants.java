@@ -30,7 +30,6 @@ import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SystemUtils;
 import com.mobicage.rogerthat.util.ui.UIUtils;
-import com.mobicage.to.app.ColorSettingsTO;
 import com.mobicage.to.app.LookAndFeelTO;
 import com.mobicage.to.app.NavigationItemTO;
 
@@ -98,16 +97,6 @@ public class LookAndFeelConstants {
         return arr;
     }
 
-    private static int getCustomColor(Context context, int defaultColor, String customColor) {
-        if (customColor != null) {
-            try {
-                return Color.parseColor(customColor);
-            } catch (IllegalArgumentException ignored) {
-            }
-        }
-        return ContextCompat.getColor(context, defaultColor);
-    }
-
     private static void setup(Context context, boolean force) {
         if (!sNeedsSetup && !force) {
             return;
@@ -154,10 +143,9 @@ public class LookAndFeelConstants {
             } else {
                 sHomeActivityLayout = AppConstants.HOME_ACTIVITY_LAYOUT;
             }
-            ColorSettingsTO colors = request.colors;
-            sPrimaryColor = getCustomColor(context, R.color.mc_primary_color, colors.primary_color);
-            sPrimaryColorDark = getCustomColor(context, R.color.mc_primary_color_dark, colors.primary_color_dark);
-            sPrimaryIconColor = getCustomColor(context, R.color.mc_primary_icon, colors.primary_icon_color);
+            sPrimaryColor = ContextCompat.getColor(context, R.color.mc_primary_color);
+            sPrimaryColorDark = ContextCompat.getColor(context, R.color.mc_primary_color_dark);
+            sPrimaryIconColor = ContextCompat.getColor(context, R.color.mc_primary_icon);
 
             sDrawerNavigationItems = createNavigationItems(request.homescreen.items, request.homescreen.color);
             sFooterNavigationItems = createNavigationItems(request.toolbar.items, request.homescreen.color);

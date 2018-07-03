@@ -415,7 +415,6 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
             mDropdownButton.setImageDrawable(new IconicsDrawable(mMainService, FontAwesome.Icon.faw_angle_down).color
                     (primaryColor)
                     .sizeDp(16));
-            UIUtils.setColors(mMainService, mReachSpinner);
         }
 
         public void setNewsItem(final int position, final NewsItem newsItem, final NewsItemIndex ni) {

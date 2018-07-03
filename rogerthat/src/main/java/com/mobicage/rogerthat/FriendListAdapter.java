@@ -42,7 +42,6 @@ import com.mobicage.rogerthat.plugins.friends.PhoneContacts;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.T;
-import com.mobicage.rogerthat.util.ui.UIUtils;
 
 // Adapter lives on UI thread
 // It can be temporarily out of date with respect to the
@@ -96,7 +95,7 @@ class FriendListAdapter extends CursorAdapter implements SectionIndexer {
             view = convertView;
         }
 
-        LinearLayout actions = (LinearLayout) view.findViewById(R.id.actions);
+        LinearLayout actions = view.findViewById(R.id.actions);
         if (actions != null)
             actions.setVisibility(View.GONE);
 
@@ -113,9 +112,9 @@ class FriendListAdapter extends CursorAdapter implements SectionIndexer {
         if (friend.existenceStatus != Friend.ACTIVE && friend.existenceStatus != Friend.INVITE_PENDING) {
             L.d("Friend at index " + position + " with email " + friend.email + " has existence status "
                 + friend.existenceStatus);
-            ImageView image = (ImageView) view.findViewById(R.id.friend_avatar);
+            ImageView image = view.findViewById(R.id.friend_avatar);
             image.setImageBitmap(mFriendsPlugin.getMissingFriendAvatarBitmap());
-            TextView name = (TextView) view.findViewById(R.id.friend_name);
+            TextView name = view.findViewById(R.id.friend_name);
             name.setText("");
             return view;
         }
@@ -130,14 +129,13 @@ class FriendListAdapter extends CursorAdapter implements SectionIndexer {
 
     private void setFriendOnView(final View view, final Friend friend) {
         T.UI();
-        final ProgressBar spinner = (ProgressBar) view.findViewById(R.id.friend_spinner);
-        UIUtils.setColors(mContext, spinner);
+        final ProgressBar spinner = view.findViewById(R.id.friend_spinner);
         spinner.setVisibility(friend.existenceStatus == Friend.INVITE_PENDING ? View.VISIBLE : View.GONE);
         view.findViewById(R.id.friend_existence_layout).setVisibility(spinner.getVisibility());
 
-        final ImageView image = (ImageView) view.findViewById(R.id.friend_avatar);
-        final TextView name = (TextView) view.findViewById(R.id.friend_name);
-        final TextView subtitle = (TextView) view.findViewById(R.id.friend_subtitle);
+        final ImageView image = view.findViewById(R.id.friend_avatar);
+        final TextView name = view.findViewById(R.id.friend_name);
+        final TextView subtitle = view.findViewById(R.id.friend_subtitle);
 
         Resources resources = view.getResources();
         if (friend instanceof Contact) {

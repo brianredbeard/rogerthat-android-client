@@ -24,10 +24,7 @@ import android.view.LayoutInflater;
 import android.widget.Checkable;
 import android.widget.CheckedTextView;
 
-import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.util.system.SafeViewOnClickListener;
-import com.mobicage.rogerthat.util.ui.UIUtils;
-import com.mobicage.rpc.config.LookAndFeelConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,15 +45,10 @@ public abstract class AbstractSelectWidget extends Widget {
     public void initializeWidget() {
         List<String> defaults = getDefaultValues();
 
-        int primaryColor = LookAndFeelConstants.getPrimaryColor(mActivity);
         LayoutInflater layoutInflater = LayoutInflater.from(getContext());
         int textViewResourceId = getTextViewResourceId();
         for (Map<String, String> choice : (List<Map<String, String>>) mWidgetMap.get("choices")) {
             CheckedTextView ctv = (CheckedTextView) layoutInflater.inflate(textViewResourceId, null);
-
-            if (mColorScheme != BrandingMgr.ColorScheme.DARK) {
-                UIUtils.setColors(primaryColor, ctv);
-            }
             ctv.setChecked(defaults.contains(choice.get("value")));
             ctv.setText(choice.get("label"));
             ctv.setTextColor(mTextColor);

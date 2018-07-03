@@ -5,11 +5,12 @@
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:textAllCaps">false</item>
         <!--   your app branding color for the app bar -->
-        <item name="colorPrimary">@color/mc_background_color_dark</item>
+        <item name="colorPrimary">@color/mc_primary_color</item>
         <!-- darker variant for the status bar and contextual app bars -->
-        <item name="colorPrimaryDark">@color/mc_background_color_dark</item>
+        <item name="colorPrimaryDark">@color/mc_primary_color_dark</item>
+        
         <!-- theme UI controls like checkboxes and text fields -->
-        <item name="colorAccent">@color/mc_background_color_dark</item>
+        <item name="colorAccent">@color/mc_primary_color</item>
 
         <!-- Changes color of the separator in the navigation view -->
         <item name="android:listDivider">@drawable/divider_gradient</item>

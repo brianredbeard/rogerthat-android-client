@@ -51,7 +51,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -467,7 +466,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         mActivityName = null;
         setContentView(getLayoutInflater().inflate(R.layout.navigation_view, null));
 
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        mToolbar = findViewById(R.id.toolbar);
 
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -480,7 +479,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
             }
         });
 
-        LinearLayout item = (LinearLayout) findViewById(R.id.linear_layout);
+        LinearLayout item = findViewById(R.id.linear_layout);
         View child = getLayoutInflater().inflate(layoutResID, null);
 
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
@@ -503,7 +502,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
             openNavigationView();
         }
         setHeaderImage();
-        ListView menuItemListview = (ListView) findViewById(R.id.navigation_items_listview);
+        ListView menuItemListview = findViewById(R.id.navigation_items_listview);
         menuItemListview.setAdapter(mNavigationListViewAdapter);
         menuItemListview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -520,11 +519,10 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         } else {
             setNavigationBarBurgerVisible(false, true);
         }
-        UIUtils.setColorsRecursive(this, (ViewGroup) child);
     }
 
     private void showNavigationToolbar() {
-        LinearLayout navigationFooter = (LinearLayout) findViewById(R.id.nav_view_footer);
+        LinearLayout navigationFooter = findViewById(R.id.nav_view_footer);
         if (navigationFooter == null) {
             return;
         }
@@ -541,7 +539,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
             for (final NavigationItem ni : navigationFooterItems) {
                 View footerItem = li.inflate(R.layout.navigation_footer_item, navigationFooter, false);
                 footerItem.setTag(ni.actionWithType());
-                ImageButton imageButton = (ImageButton) footerItem.findViewById(R.id.image);
+                ImageButton imageButton = footerItem.findViewById(R.id.image);
                 imageButton.setOnClickListener(new SafeViewOnClickListener() {
                     @Override
                     public void safeOnClick(View v) {
@@ -577,23 +575,11 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         ActivityUtils.goToActivity(ServiceBoundActivity.this, ni, true, extras);
     }
 
-    @Override
-    public void setContentView(View view) {
-        super.setContentView(view);
-        UIUtils.setColorsRecursive(this, (ViewGroup) view);
-    }
-
-    @Override
-    public void setContentView(View view, ViewGroup.LayoutParams params) {
-        super.setContentView(view, params);
-        UIUtils.setColorsRecursive(this, (ViewGroup) view);
-    }
-
     private void setHeaderImage() {
         String kind = LookAndFeelConstants.getAssetKindOfHeaderImage();
 
         Bitmap background = SystemPlugin.getAppAsset(this, kind);
-        ImageView headerImage = (ImageView) findViewById(R.id.nav_header);
+        ImageView headerImage = findViewById(R.id.nav_header);
         if (headerImage == null) {
             return;
         }
@@ -698,7 +684,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         if (TextUtils.isEmptyOrWhitespace(mActivityName))
             return;
 
-        LinearLayout navigationFooter = (LinearLayout) findViewById(R.id.nav_view_footer);
+        LinearLayout navigationFooter = findViewById(R.id.nav_view_footer);
         if (navigationFooter == null)
             return;
 
@@ -733,7 +719,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer != null && drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -809,7 +795,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
         mNavigationListViewAdapter.notifyDataSetChanged();
 
         if (mBadgePositionsNavigationFooter.containsKey(key)) {
-            LinearLayout navigationFooter = (LinearLayout) findViewById(R.id.nav_view_footer);
+            LinearLayout navigationFooter = findViewById(R.id.nav_view_footer);
             if (navigationFooter == null)
                 return;
 
@@ -817,7 +803,7 @@ public abstract class ServiceBoundActivity extends AppCompatActivity implements 
             if (navigationFooter.getChildCount() <= index)
                 return;
 
-            TextView badge = (TextView) navigationFooter.getChildAt(index).findViewById(R.id.badge);
+            TextView badge = navigationFooter.getChildAt(index).findViewById(R.id.badge);
             if (count > 0) {
                 badge.setText(count > 9 ? "9+" : String.valueOf(count));
                 badge.setTextColor(LookAndFeelConstants.getPrimaryColor(this));

@@ -19,19 +19,15 @@
 package com.mobicage.rogerthat.plugins.messaging.widgets;
 
 import android.content.Context;
-import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
-import android.view.View;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.mobicage.api.messaging.Rpc;
 import com.mobicage.rogerth.at.R;
-import com.mobicage.rogerthat.plugins.messaging.BrandingMgr;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.util.logging.L;
-import com.mobicage.rogerthat.util.ui.UIUtils;
 import com.mobicage.rpc.ResponseHandler;
 import com.mobicage.to.messaging.forms.FloatWidgetResultTO;
 import com.mobicage.to.messaging.forms.SubmitSingleSliderFormRequestTO;
@@ -75,7 +71,7 @@ public class SingleSliderWidget extends Widget implements SeekBar.OnSeekBarChang
 
         double value = (Double) mWidgetMap.get("value");
 
-        mTextView = (TextView) findViewById(R.id.slider_text);
+        mTextView = findViewById(R.id.slider_text);
         mTextView.setTextColor(mTextColor);
         try {
             mTextView.setText(String.format(mFormat, value));
@@ -85,12 +81,7 @@ public class SingleSliderWidget extends Widget implements SeekBar.OnSeekBarChang
             mTextView.setText(String.format(mFormat, value));
         }
 
-        mSeekBar = (SeekBar) findViewById(R.id.seek_bar);
-        if (mColorScheme == BrandingMgr.ColorScheme.DARK) {
-            UIUtils.setColors(ContextCompat.getColor(mActivity, R.color.mc_white), mSeekBar);
-        } else {
-            UIUtils.setColors(mActivity, mSeekBar);
-        }
+        mSeekBar = findViewById(R.id.seek_bar);
         mSeekBar.setOnSeekBarChangeListener(this);
         mSeekBar.setMax(toProgress(mMax));
         mSeekBar.setProgress(toProgress(value));

@@ -24,7 +24,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -34,20 +33,13 @@ import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Point;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
-import android.os.Build;
 import android.provider.MediaStore.Video.Thumbnails;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.TextInputLayout;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.graphics.drawable.DrawableCompat;
-import android.support.v4.widget.CompoundButtonCompat;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -58,17 +50,9 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CheckedTextView;
-import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -88,7 +72,6 @@ import com.mobicage.rogerthat.util.system.T;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.LookAndFeelConstants;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -264,10 +247,10 @@ public class UIUtils {
 
         LayoutInflater inflater = activity.getLayoutInflater();
         final View checkboxLayout = inflater.inflate(R.layout.hint, null);
-        final TextView message = (TextView) checkboxLayout.findViewById(R.id.message);
-        final CheckBox checkBox = (CheckBox) checkboxLayout.findViewById(R.id.checkBox);
+        final TextView message = checkboxLayout.findViewById(R.id.message);
+        final CheckBox checkBox = checkboxLayout.findViewById(R.id.checkBox);
         if (hintIcon != null) {
-            final ImageView icon = (ImageView) checkboxLayout.findViewById(R.id.icon);
+            final ImageView icon = checkboxLayout.findViewById(R.id.icon);
             icon.setImageDrawable(new IconicsDrawable(activity, hintIcon).color(Color.DKGRAY).sizeDp(30));
             icon.setVisibility(View.VISIBLE);
         }
@@ -673,151 +656,9 @@ public class UIUtils {
         dialog.setProgressPercentFormat(null);
         dialog.setOnCancelListener(onCancelListener);
         dialog.setProgressStyle(progressStyle);
-        dialog.setOnShowListener(new ProgressDialog.OnShowListener() {
-            @Override
-            public void onShow(DialogInterface dialog) {
-                ProgressDialog progressDialog = (ProgressDialog) dialog;
-                ProgressBar progressBar = (ProgressBar) progressDialog.findViewById(android.R.id.progress);
-                UIUtils.setColors(context, progressBar);
-            }
-        });
         if (show) {
             dialog.show();
         }
         return dialog;
-    }
-
-    private static void colorEditText(EditText view, String fieldNameRes, String fieldNameDrawable, int color,
-                                      boolean isArray) {
-        try {
-            // Get the cursor resource id
-            final Field field = TextView.class.getDeclaredField(fieldNameRes);
-            field.setAccessible(true);
-            int drawableCursorResId = field.getInt(view);
-
-            // Get the editor
-            final Field editor = TextView.class.getDeclaredField("mEditor");
-            editor.setAccessible(true);
-            Object cursorEditor = editor.get(view);
-
-            // Get the drawable and set a color filter
-            Drawable drawable = ContextCompat.getDrawable(view.getContext(), drawableCursorResId);
-            drawable.setColorFilter(color, PorterDuff.Mode.SRC_IN);
-
-            // Set the drawables
-            final Field drawableField = cursorEditor.getClass().getDeclaredField(fieldNameDrawable);
-            drawableField.setAccessible(true);
-            if (isArray) {
-                Drawable[] drawables = {drawable, drawable};
-                drawableField.set(cursorEditor, drawables);
-            } else {
-                drawableField.set(cursorEditor, drawable);
-            }
-        } catch (IllegalAccessException e) {
-            L.bug(e);
-        } catch (NoSuchFieldException e) {
-            L.e("NoSuchFieldException for " + fieldNameRes, e);
-        }
-    }
-
-    /**
-     * Use reflection to change cursor color since there is no build-in method to set this
-     *
-     * @param view  EditText to set the color on
-     * @param color AARRGGBB
-     */
-    private static void setCursorColor(EditText view, int color) {
-        UIUtils.colorEditText(view, "mCursorDrawableRes", "mCursorDrawable", color, true);
-        UIUtils.colorEditText(view, "mTextSelectHandleLeftRes", "mSelectHandleLeft", color, false);
-        UIUtils.colorEditText(view, "mTextSelectHandleRightRes", "mSelectHandleRight", color, false);
-        UIUtils.colorEditText(view, "mTextSelectHandleRes", "mSelectHandleCenter", color, false);
-    }
-
-    private static void colorTextInputLayout(TextInputLayout textInputLayout, int color) {
-        try {
-            ColorStateList colorStateList = new ColorStateList(new int[][]{{0}}, new int[]{color});
-            Field fDefaultTextColor = TextInputLayout.class.getDeclaredField("mDefaultTextColor");
-            fDefaultTextColor.setAccessible(true);
-            fDefaultTextColor.set(textInputLayout, colorStateList);
-
-            Field fFocusedTextColor = TextInputLayout.class.getDeclaredField("mFocusedTextColor");
-            fFocusedTextColor.setAccessible(true);
-            fFocusedTextColor.set(textInputLayout, colorStateList);
-        } catch (IllegalAccessException e) {
-            L.bug(e);
-        } catch (NoSuchFieldException e) {
-            L.bug(e);
-        }
-    }
-
-    public static void setColors(Context context, View... views) {
-        int primaryColor = LookAndFeelConstants.getPrimaryColor(context);
-        setColors(primaryColor, views);
-    }
-
-    public static void setColors(int color, View... views) {
-        if (Build.VERSION.SDK_INT >= 27) {
-            return;
-        }
-        for (View view : views) {
-            if (view instanceof CheckBox) {
-                CheckBox checkbox = (CheckBox) view;
-                CompoundButtonCompat.setButtonTintList(checkbox, ColorStateList.valueOf(color));
-            } else if (view instanceof FloatingActionButton) {
-                //noinspection RedundantCast
-                ((FloatingActionButton) view).setBackgroundTintList(ColorStateList.valueOf(color));
-            } else if (view instanceof Button || view instanceof ImageButton) {
-                Drawable background = view.getBackground();
-                if (background != null) {
-                    background.setColorFilter(color, PorterDuff.Mode.SRC_IN);
-                }
-            } else if (view instanceof TextInputLayout) {
-                UIUtils.colorTextInputLayout((TextInputLayout) view, color);
-                // TODO: EditText's who are a child of TextInputLayout their line isn't colored correctly
-            } else if (view instanceof EditText) {
-                EditText editText = (EditText) view;
-                editText.setHighlightColor(color); // When selecting text
-                editText.setHintTextColor(color); // Text for the  hint message
-                // Line under the textfield
-                Drawable background = editText.getBackground();
-                if (background != null) {
-                    DrawableCompat.setTint(background, color);
-                    editText.setBackground(background);
-                }
-                UIUtils.setCursorColor(editText, color);
-            } else if (view instanceof CheckedTextView) {
-                CheckedTextView ctv = (CheckedTextView) view;
-                Drawable d = ctv.getCheckMarkDrawable();
-                d.setColorFilter(color, PorterDuff.Mode.SRC_IN);
-            } else if (view instanceof TextView) {
-                ((TextView) view).setLinkTextColor(color);
-            } else if (view instanceof SeekBar) {
-                SeekBar sb = (SeekBar) view;
-                Drawable progress = sb.getProgressDrawable();
-                if (progress != null) {
-                    progress.setColorFilter(color, PorterDuff.Mode.SRC_IN);
-                }
-                Drawable thumb = sb.getThumb();
-                if (thumb != null) {
-                    thumb.setColorFilter(color, PorterDuff.Mode.SRC_IN);
-                }
-            } else if (view instanceof ProgressBar) {
-                ((ProgressBar) view).getIndeterminateDrawable().setColorFilter(color, PorterDuff.Mode.SRC_IN);
-            } else {
-                L.d("Not coloring view: " + view.toString());
-            }
-        }
-    }
-
-    public static void setColorsRecursive(Context context, ViewGroup viewGroup) {
-        for (int i = 0; i < viewGroup.getChildCount(); i++) {
-            final View view = viewGroup.getChildAt(i);
-            if (!(view instanceof FrameLayout) && !(view instanceof LinearLayout) && !(view instanceof
-                    RelativeLayout)) {
-                UIUtils.setColors(context, view);
-            } else if (view instanceof ViewGroup) {
-                UIUtils.setColorsRecursive(context, (ViewGroup) view);
-            }
-        }
     }
 }
