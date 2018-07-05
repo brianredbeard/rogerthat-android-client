@@ -116,7 +116,6 @@ public class MainActivity extends ServiceBoundActivity implements PinLockMgr.NoP
         super.onCreate(savedInstanceState);
         T.UI();
         setContentViewWithoutNavigationBar(R.layout.blank);
-        //noinspection PointlessBooleanExpression
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && BuildConfig.DEBUG) {
             WebView.setWebContentsDebuggingEnabled(true);
         }

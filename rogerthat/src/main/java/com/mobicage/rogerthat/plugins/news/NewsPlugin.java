@@ -437,9 +437,14 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
     public void setNewsItemRead(final long id) {
         mMainService.runOnBIZZHandler(new SafeRunnable() {
             @Override
-            protected void safeRun() throws Exception {
+            protected void safeRun() {
                 if (mStore.setNewsItemRead(id)) {
-                    mNewsChannel.readNews(id);
+                    mMainService.runOnNewsHandler(new SafeRunnable() {
+                        @Override
+                        protected void safeRun() {
+                            mNewsChannel.readNews(id);
+                        }
+                    });
                     saveNewsStatistics(new long[]{id}, NewsPlugin.STATISTIC_REACH);
                 } else {
                     setNewsItemSortPriority(id, SORT_PRIORITY_READ);
@@ -466,12 +471,17 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
             protected void safeRun() throws Exception {
                 mStore.setNewsItemRogered(id);
                 mStore.addUser(id, myEmail);
-                mNewsChannel.rogerNews(id);
                 saveNewsStatistics(new long[]{id}, NewsPlugin.STATISTIC_ROGERED);
 
                 Intent intent = new Intent(NewsListAdapter.NEWS_ITEM_ROGER_UPDATE_INTENT);
                 intent.putExtra("id", id);
                 mMainService.sendBroadcast(intent);
+            }
+        });
+        mMainService.runOnNewsHandler(new SafeRunnable() {
+            @Override
+            protected void safeRun() {
+                mNewsChannel.rogerNews(id);
             }
         });
     }
@@ -492,7 +502,6 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
         mMainService.runOnBIZZHandler(new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
-                T.BIZZ();
                 ResponseHandler<SaveNewsStatisticsResponseTO> responseHandler = new ResponseHandler<>();
                 SaveNewsStatisticsRequestTO request = new SaveNewsStatisticsRequestTO();
                 request.news_ids = newsIds;
@@ -592,21 +601,9 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
         if (TestUtils.isRunningTest()) {
             return;
         }
-        List<Long> statsToRequest = new ArrayList<>();
-        List<Long> itemsToRequest = new ArrayList<>();
-
-        statsToRequest.add(ni.id);
-
-        if (ni.isPartial) {
-            itemsToRequest.add(ni.id);
-        }
-        mNewsChannel.statsNews(statsToRequest);
-
-        long[] ids = new long[itemsToRequest.size()];
-        for (int i = 0; i < itemsToRequest.size(); i++) {
-            ids[i] = itemsToRequest.get(i);
-        }
-        getNewsItems(ids);
+        List newsItems = new ArrayList();
+        newsItems.add(ni);
+        loadNewsItems(newsItems);
     }
 
     private void loadNewsItems(List<NewsItem> newsItems) {
@@ -614,8 +611,8 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
         if (TestUtils.isRunningTest()) {
             return;
         }
-        List<Long> statsToRequest = new ArrayList<>();
-        List<Long> itemsToRequest = new ArrayList<>();
+        final List<Long> statsToRequest = new ArrayList<>();
+        final List<Long> itemsToRequest = new ArrayList<>();
 
         for (NewsItem ni : newsItems) {
             statsToRequest.add(ni.id);
@@ -624,7 +621,12 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
                 itemsToRequest.add(ni.id);
             }
         }
-        mNewsChannel.statsNews(statsToRequest);
+        mMainService.runOnNewsHandler(new SafeRunnable() {
+            @Override
+            protected void safeRun() {
+                mNewsChannel.statsNews(statsToRequest);
+            }
+        });
 
         long[] ids = new long[itemsToRequest.size()];
         for (int i = 0; i < itemsToRequest.size(); i++) {
@@ -638,8 +640,8 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
         if (TestUtils.isRunningTest()) {
             return;
         }
-        List<Long> statsToRequest = new ArrayList<>();
-        List<Long> itemsToRequest = new ArrayList<>();
+        final List<Long> statsToRequest = new ArrayList<>();
+        final List<Long> itemsToRequest = new ArrayList<>();
 
         for (NewsItemIndex ni : newsItems) {
             statsToRequest.add(ni.id);
@@ -648,7 +650,12 @@ public class NewsPlugin implements MobicagePlugin, NewsChannelCallbackHandler {
                 itemsToRequest.add(ni.id);
             }
         }
-        mNewsChannel.statsNews(statsToRequest);
+        mMainService.runOnNewsHandler(new SafeRunnable() {
+            @Override
+            protected void safeRun() {
+                mNewsChannel.statsNews(statsToRequest);
+            }
+        });
 
         long[] ids = new long[itemsToRequest.size()];
         for (int i = 0; i < itemsToRequest.size(); i++) {
